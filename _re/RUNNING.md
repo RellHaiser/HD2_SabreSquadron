@@ -78,10 +78,11 @@ The early files (`app.cpp` above all) were ported before the later rigour: expec
 
 Movement speed, climbing and ladders; supply boxes opening and emptying; the firing range's targets falling; sound in fights; grenades, time-delay and impact (No.36, No.69); full screen; the Bren, Sten, Springfield and Fairbairn-Sykes dagger; taking items from a dead enemy.
 
+Africa1, played to its end, through the finishing screen and the soldiers' stat increases: the sky (with `backdrop_visible.patch`); a Panzerfaust destroying the Panzer III; dynamite on the fuel tanks; both fixed MG 42s; the SAS Jeep, FlaK truck with its 20 mm cannon, and BMW R75; bullet stains on both sides; a locked door opened with a key; picking up the mission's documents.
+
 ## Not tested
 
-- **The rest of the game:** explosives, the other weapons, vehicles, squad orders and the command map not reported yet; no mission reported played to its end.
-- **The player's shots hitting anyone:** the user watched 13e's tests: the scripted shots went too high (the script only turned, it never aimed down), and the kills were the squad's. Sound in those fights was right, by the user's ear.
+- **The rest of the game:** the other missions and weapons, squad orders and the command map not reported yet. Multiplayer has never been run (its null `g_netReplication` was found by reading, not by a game).
 - **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.
