@@ -352,6 +352,10 @@ public:
     void Update(int timeDelta);                     // 0x0048f2d0
     bool SaveGame(C_chunk &chunk);                  // 0x0048fc50
     bool LoadGame(C_chunk &chunk);                  // 0x0048fdd0
+    void ShowSubtitles(bool on);                    // 0x0048ee50
+    void SetSubtitle(int text);                     // 0x0048f080
+    // The subtitle of dubbing `dubbing`, shown `length` ms (-1: no sample).
+    void ShowDubbing(int dubbing, int length);      // 0x0048f180
 };
 
 C_game *GetGame();                                  // 0x006987d0

@@ -9067,6 +9067,22 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 155 errors in 42/370 (was 194). ret_audit --src: 52.
   - Stats: 10,387 of 12,306 functions by hand or absorbed (89.4 % by size).
 
+  PART 11 PLAN (2026-11-06): the triage's order (_re/TRIAGE.md, tools/triage.py): 175 KB of the 403 KB left is dead (the 2D collision sweeps
+    among it), 216 KB live. 11a C_ScriptModule's saves, state and messages; 11b speech slots and BuildPathPoints; 11c C_Controls and the render
+    callback. The owner's decisions: copy protection replaced with a pass-through, crash reporting ported (both still to do).
+
+  PART 11a DONE (2026-11-06): C_ScriptModule's saved games, a joining client's state, its messages (script/script_module_save.cpp).
+  - SaveGame 0x00424970, LoadGame 0x004257b0, OnMessage 0x00424590, HandleClientMessage 0x0042b650, WriteState 0x0042aff0, ReadState 0x0042b330. Their frames are
+    aligned: checked against the assembly (Ghidra removes the block that stops an animation not running; the remembered frames' quaternion is x y z s, the
+    rotation chunk's s x y z; a model's stage saved is the first 7 of 8). Its std::vector and map helpers absorbed (31, 0x00429700..0x0042c000).
+  - I3D_scene::GetWeather slot 0x120, C_QuickMessages::ShowSubtitles / SetSubtitle named (still in tier 1).
+  - Fix: at a failed chunk read LoadGame stops; the original goes on with the last chunk's id.
+  - Harness: new _re/harness/script_module (build.bat: 196 checks: frames with logging tables, saves parsed byte by byte, loads from built files). Runner: _re/harness/mutrun.py
+    (bounded output, any harness). Mutations: mutate_11a.py 415: 342 killed, 39 not building, 34 survived (debug output, buffer sizes, frees, read defaults).
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 134 errors in 40/369 (was 155). ret_audit --src: 52.
+  - Stats: 10,425 of 12,306 functions by hand or absorbed (89.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

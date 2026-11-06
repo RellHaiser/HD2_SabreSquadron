@@ -17,6 +17,8 @@
 #include "script/script.h"
 #include "script/script_compiler.h"
 
+int g_scriptMessageTypeBits = 9;                                 // 0x00838874
+std::vector<S_PendingSound *> g_pendingSounds;                   // 0x008693d0
 C_ScriptModule g_scriptModule(MODULE_SCRIPT, "Script");          // 0x00868b18, constructed by 0x00428f60
 
 namespace {
@@ -31,16 +33,6 @@ enum : uint16_t {
     CHUNK_SCRIPT = 0x44C,
     CHUNK_FAKE_CUTSCENE = 0x47E,
 };
-
-// Bits per script message type (enough for 275 types).
-int g_scriptMessageTypeBits = 9;                                 // 0x00838874
-
-// Sounds whose start was deferred to the next tick: {start position, frame}.
-struct S_PendingSound {
-    int start;
-    I3D_sound *sound;
-};
-std::vector<S_PendingSound *> g_pendingSounds;                   // 0x008693d0
 
 // Frames of other models linked into a model being reloaded (StopMission).
 struct S_Relink {

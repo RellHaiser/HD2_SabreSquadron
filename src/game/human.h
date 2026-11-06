@@ -992,6 +992,13 @@ private:
     int m_unknown2b8 = 0;                               // +0x2B8
     int m_unknown2bc = 0;                               // +0x2BC
     C_SpeechSet *m_speechSet = nullptr;                 // +0x2C0
+
+public:
+    // (The speech slots keep these two frames updated; nothing sets them.)
+    I3D_frame *GetSpeechFrameA() const { return reinterpret_cast<I3D_frame *>(m_unknown2bc); }
+    I3D_frame *GetSpeechFrameB() const { return reinterpret_cast<I3D_frame *>(m_unknown2b8); }
+
+private:
     C_HumanAIMemory *m_aiMemory = nullptr;              // +0x2C4
     C_FormationShape *m_formation = nullptr;            // +0x2C8 formation this human leads
     C_Human *m_leader = nullptr;                        // +0x2CC

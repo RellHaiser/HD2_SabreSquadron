@@ -206,4 +206,14 @@ void AttachSpeechSlot(int slot, I3D_frame *frame);      // 0x0071e860
 void PlaySpeechSlot(int slot, int dubbing, float nearRange, float farRange, bool showSubtitle,
                     bool isActivePlayer);               // 0x0071ec30 __fastcall
 
+// The debug move-trajectory lines (DrawDebugLine; only a debug build drew them).
+struct S_DebugVertex {                                  // 0x18 bytes
+    float x, y, z;
+    uint32_t color;
+    float unused[2];
+};
+extern S_DebugVertex g_debugVertices[];
+extern S_DebugVertex *g_debugNext;                      // 0x00844230
+extern int g_debugLineCount;                            // 0x0097b9a8
+
 // Model / animation / sound caches: see game/resource_cache.h.

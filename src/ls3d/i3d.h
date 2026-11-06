@@ -1055,6 +1055,8 @@ public:
     // Velocity used for the Doppler effect (m/s).
     I3DMETHOD(void, SetVelocity)(const S_vector &velocity) = 0;   // 0xB0
 
+    // (PlaySpeechSlot sets it to 0x80 on a sample just opened; meaning not identified.)
+    void SetUnknown128(uint32_t value) { Field<uint32_t>(0x128) = value; }
     S_vector4 GetVelocityInline() const { return Field<S_vector4>(0x1A0); }
     float GetVolumeInline() const { return Field<float>(0x16C); }
     // The playback rate SetFrequency set (inferred: the submarine compares it with the one it sets).
@@ -1361,8 +1363,8 @@ public:
     I3D_SLOT(118);
     // Weather simulation parameter (E_WeatherParam); floats are passed as their bits.
     I3DMETHOD(void, SetWeather)(int param, uint32_t value) = 0;   // 0x11C
+    I3DMETHOD(uint32_t, GetWeather)(int param) = 0;           // 0x120
 
-    I3D_SLOT(120);
     I3D_SLOT(124);
     // Called for the frames scene2.bin's chunk 0xB820 names (meaning not identified).
     I3DMETHOD(void, Unknown128)(I3D_frame *frame) = 0;        // 0x128

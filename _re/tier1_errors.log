@@ -1,49 +1,7 @@
 f_00414790.cpp:105:35: cannot convert 'float (*)[4]' to 'float*' in return
     return (_this->m_worldMatrix).m + 3;
-f_00423610.cpp:74:34: wrong type argument to bit-complement
-    ~C_ScriptModule__C_ScriptModule(_this);
-f_00423610.cpp:1046:35: too few arguments to function
-    (*pIVar8->vtable->SetOn)();
-f_00423610.cpp:1065:37: too few arguments to function
-    (*pIVar8->vtable->SetOn)();
-f_00423610.cpp:1066:38: too few arguments to function
-    (*pIVar8->vtable->Update)();
-f_00423610.cpp:1088:51: too few arguments to function
-    (*pIVar8->vtable[1].SetHierarchyAlpha)();
-f_00423610.cpp:1089:39: too few arguments to function
-    (*pIVar8->vtable[1].SetOn)();
-f_00423610.cpp:1090:40: too few arguments to function
-    (*pIVar8->vtable[1].LinkTo)();
-f_00423610.cpp:1092:39: too few arguments to function
-    (*pIVar8->vtable->SetOn)();
-f_00423610.cpp:1114:38: too few arguments to function
-    (*pIVar8->vtable->Update)();
-f_00423610.cpp:1136:38: too few arguments to function
-    (*pIVar8->vtable->Update)();
-f_00423610.cpp:1160:40: too few arguments to function
-    (*pIVar8->vtable->LinkTo)();
-f_00423610.cpp:1162:38: too few arguments to function
-    (*pIVar8->vtable->Update)();
-f_00423610.cpp:1167:50: too few arguments to function
-    (*pIStack_c->vtable[1].SetCallback)();
-f_00423610.cpp:1278:51: too few arguments to function
-    (*pIStack_c->vtable[1].GetChild)();
-f_00423610.cpp:1279:42: too few arguments to function
-    (*pIVar8->vtable->Tick)();
-f_00423610.cpp:1297:75: base operand of '->' is not a pointer
-    CStack_10.rep = (C_str_rep *)(**(code **)(DAT_008aed60->refCount + 4))();
-f_00423610.cpp:1594:42: too few arguments to function
-    (*pIStack_c->vtable[1].SetCallback)();
-f_00423610.cpp:1596:36: too few arguments to function
-    (*pIVar8->vtable[1].GetChild)();
-f_00423610.cpp:1597:30: too few arguments to function
-    (*pIVar8->vtable->Tick)();
-f_00423610.cpp:1599:32: too few arguments to function
-    (*pIVar8->vtable->Update)();
 f_00428f50.cpp:33:3: 'C_ScriptModule__C_ScriptModule___C_ScriptModule' was not declared in this scope; did you mean 'C_ScriptModule__dtor_C_ScriptModule'?
     C_ScriptModule__C_ScriptModule___C_ScriptModule((C_ScriptModule *)&g_scriptModule);
-f_0042afc0.cpp:149:42: 'SUB14' was not declared in this scope; did you mean 'SUB104'?
-    (*self->vtable->SetWeather)(self,0,SUB14(uVar2 != 0,0));
 f_00433580.cpp:8:3: 'C_SoundModule__C_SoundModule___C_SoundModule' was not declared in this scope; did you mean 'C_SoundModule__dtor_C_SoundModule'?
     C_SoundModule__C_SoundModule___C_SoundModule((C_SoundModule *)&g_soundModule);
 f_00459690.cpp:122:11: '_pIVar15' was not declared in this scope; did you mean 'pIVar15'?
