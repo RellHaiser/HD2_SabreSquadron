@@ -391,7 +391,7 @@ uint32_t LimitFrameTime(uint32_t minMs, uint32_t maxMs)
     if (elapsedMs < minMs) {
         // Sleep the rest of the minimum frame time on a one-shot multimedia timer.
         timeSetEvent(minMs - elapsedMs, 0, reinterpret_cast<LPTIMECALLBACK>(g_frameTimerEvent), 0,
-                     TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
+                     TIME_ONESHOT | TIME_CALLBACK_EVENT_PULSE);
         WaitForSingleObject(g_frameTimerEvent, 100);
         g_lastFrameMicros = static_cast<uint32_t>(MicrosecondsNow());
         return minMs;

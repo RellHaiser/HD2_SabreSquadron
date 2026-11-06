@@ -59,6 +59,7 @@ With `devel`'s DLL the sky is a flat dark green with either exe, where the origi
 | Part 13d: `C_KeyBindings::Load` kept the file's `changed` flag, usually false; the original sets it on every record. So a saved profile's keys were never bound, `GetValues` returned -1, `HandleInput` was never called: no Esc, no control of the soldier. It worked in 13c only because no profile existed yet | Esc stopped skipping the videos after a profile was made |
 | Part 13d: the in-game menu's model names: `main_ingame`, `player_screen`, `player_screen_2`; the files are `main ingame`, `player screen`, `player screen 2`. The model not loaded, Esc in a mission opened the options | the wrong menu; all 35 model names of the menus then checked against `MODELS` |
 | Part 13d: the client area was 1590x1190 where the original has 1600x1200: the linker's newer subsystem version. `/SUBSYSTEM:WINDOWS,5.01`, as near as the linker allows to the original's | comparing pictures with the original |
+| After 13d: the frame limiter's `timeSetEvent` used `TIME_CALLBACK_EVENT_SET` where the original has `TIME_CALLBACK_EVENT_PULSE` (0x20). On the manual-reset event, SET left it signalled for ever, so the wait never waited, yet each frame still reported 10 ms: game speed was frame rate / 100. Measured over 5 s: 16-19 % fast in the mission's cutscene, about 23 times in the menus. After: game time 96 % of real, about 96 frames a second. The original's own ratio was not measured | the user: movement and climbing much too fast |
 | The version text has three numbers (`%d.%02d.%d`), the port passed two: `1.12.1286592330`. The third is the original's 0x009820f4, which nothing writes: `1.12.0` | looking at the menu |
 
 The early files (`app.cpp` above all) were ported before the later rigour: expect more of this kind there. `InitSound`, `InitRenderer` and `ApplyRenderSettings` were compared with the assembly and agree. Most of the rest of `app.cpp` has not been.
@@ -68,6 +69,6 @@ The early files (`app.cpp` above all) were ported before the later rigour: expec
 - **Full screen.** Every run used `-window`, because full screen changes the display mode. The flags are now right, but it has not been seen.
 - **The rest of the game:** only the campaign's first mission, its start. No weapons were fired, no enemies met, no vehicles driven, no mission finished. Saving and loading not tried (the Training mission greys them out).
 - **Sound in play.** It starts (see `log.txt`), but nobody has listened.
-- **How it plays.** Screenshots show it moves; speed, animation and AI are not compared with the original.
+- **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
 - The title bar is empty and there is no icon: the port has no resources yet. The string resource could not be read from the file on disk (the packed exe's), and the title is not worth guessing.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.
