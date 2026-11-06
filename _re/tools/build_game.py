@@ -11,6 +11,7 @@ import argparse
 import glob
 import os
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -26,6 +27,66 @@ COMMON = ["/nologo", "/c", "/std:c++17", "/EHsc", "/W3", "/permissive-", "/Zc:__
 RELEASE = ["/O2", "/Oy-", "/MT", "/GS-"]
 CHECKED = ["/Od", "/Oy-", "/MTd", "/RTC1", "/D_ITERATOR_DEBUG_LEVEL=0"]        # (The checked iterators change sizes, which the layout assertions see.)
 LINK = ["/nologo", "/SUBSYSTEM:WINDOWS,5.01", "/MACHINE:X86", "/DEBUG:FULL", "/INCREMENTAL:NO", "/DYNAMICBASE:NO", "/NXCOMPAT:NO", "/LARGEADDRESSAWARE:NO", "/SAFESEH:NO"]
+
+
+# The exe's title (string 3, SetWindowTitle) and icon. The icon is the game's: taken from the installed copy at build time, never kept in the repository.
+ICON_SOURCE = r"H:\HD2_Unmodified\HD2_SabreSquadron.exe"
+TITLE = "HIDDEN & DANGEROUS II"
+
+
+def extract_icon(exe, out):
+    """Icon 1 of the (packed) original, whose .rsrc still holds the icon and its group, as an .ico. False if there is none to read."""
+    if not os.path.exists(exe):
+        return False
+    d = open(exe, "rb").read()
+    pe = struct.unpack_from("<I", d, 0x3c)[0]
+    count = struct.unpack_from("<H", d, pe + 6)[0]
+    size = struct.unpack_from("<H", d, pe + 20)[0]
+    va = raw = None
+    for i in range(count):
+        sec = pe + 24 + size + 40 * i
+        if d[sec:sec + 8].rstrip(b"\0") == b".rsrc":
+            va, _, raw = struct.unpack_from("<III", d, sec + 12)
+    if va is None:
+        return False
+
+    def entries(off):
+        named, ids = struct.unpack_from("<HH", d, raw + off + 12)
+        return [struct.unpack_from("<II", d, raw + off + 16 + 8 * i) for i in range(named + ids)]
+
+    def leaf(kind):
+        for typ, t in entries(0):
+            if typ == kind:
+                for _, b in entries(t & 0x7fffffff):
+                    for _, l in entries(b & 0x7fffffff):
+                        rva, n = struct.unpack_from("<II", d, raw + l)
+                        return d[raw + rva - va:raw + rva - va + n]
+        return None
+
+    image, group = leaf(3), leaf(14)
+    if not image or not group or len(group) != 20:
+        return False
+    # (One image: the group's 14-byte entry ends with its id; the file's ends with its offset.)
+    with open(out, "wb") as fh:
+        fh.write(group[:6] + group[6:18] + struct.pack("<I", 22) + image)
+    return True
+
+
+def build_resources(out):
+    """The .res, or None without the game's icon (the exe then has no title or icon, and still works)."""
+    ico = os.path.join(out, "hd2.ico")
+    if not extract_icon(ICON_SOURCE, ico):
+        print("no icon from", ICON_SOURCE, ": the exe has no resources")
+        return None
+    rc = os.path.join(out, "hd2.rc")
+    with open(rc, "w") as fh:
+        fh.write('1 ICON "%s"\nSTRINGTABLE\nBEGIN\n    3 "%s"\nEND\n' % (ico.replace("\\", "\\\\"), TITLE))
+    res = os.path.join(out, "hd2.res")
+    r = run_bat(os.path.join(out, "rc.bat"), ['rc /nologo /fo "%s" "%s"' % (res, rc)])
+    if r.returncode:
+        print("rc failed:", (r.stdout + r.stderr)[-300:])
+        return None
+    return res
 
 
 def run_bat(path, lines):
@@ -70,8 +131,11 @@ def main():
             os.remove(stale_obj)
     exe = os.path.join(out, "HD2_Port.exe")
     rsp = os.path.join(out, "link.rsp")
+    res = build_resources(out)
     with open(rsp, "w") as fh:
         fh.write("\n".join('"%s"' % o for o in sorted(known)) + "\n")
+        if res:
+            fh.write('"%s"\n' % res)
         fh.write("\n".join('"%s"' % l if "\\" in l else l for l in LIBS) + "\n")
     r = run_bat(os.path.join(out, "link.bat"), ['link %s /STACK:%s /OUT:"%s" /MAP:"%s" @"%s"' % (" ".join(LINK), args.stack, exe, exe[:-4] + ".map", rsp)])
     for l in (r.stdout + r.stderr).splitlines():

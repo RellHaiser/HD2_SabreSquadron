@@ -2,6 +2,21 @@
 
 Regenerate: `python _re/tools/triage.py`, then `python _re/tools/triage_clusters.py`. One row per function: `_re/triage.json`.
 
+## Status, 2026-11-06, after part 13e: no live game logic is left to port
+
+The tables below are the state of 2026-11-05, kept for the record. `python _re/tools/triage.py` now gives 844 live functions (63 KB) and 390 dead (183 KB). All 844 were read, the 83 of 150 bytes or more by their decompile and the 761 smaller by one line each, and none is game logic the port lacks:
+
+- MSVC6 `std::` internals (`vector` insert and tidy, `map` trees, `deque`, the `atexit` guards), replaced by the port's `std::`.
+- Static constructors of empty containers and identity quaternions, the port's own globals.
+- Small operators and frame accessors, inline in the port's headers. Save and load chunk helpers, inline in their callers. `RadixSortPairs`' four passes, `S_Checkpoint::GetPos`, `NegateVector` and the like.
+- `C_MeleeTrackerAI`'s own save and load (0x005d25b0, 0x005d28b0): a vtable never installed alone; the two variants override them.
+
+This reading found one real miss only by a run, before it: 0x0067cb60, a virtual `BuildPage`, among these "virtual" rows and ported in 13e. The rest of that group was read with that in mind.
+
+Dead by this analysis and not ported: `ReportCrash` (0x00731ee0: a dialog, resource 115, that sent crash text to a fixed server), the 2D collision family, the others below. The other resources (bitmap 102, dialogs 103 to 113) have no reader in live code.
+
+Not part of this count: `HD2DS.exe`, `ServerLauncher.exe`, `setup.exe`, `LS3DRF.dll`, which are other programs.
+
 ## The numbers
 
 | Group | Functions | Bytes | Meaning |

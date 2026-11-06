@@ -14,6 +14,8 @@ x87 floats (`/arch:IA32`), symbols, a map; objects in `%TEMP%\hd2_game` or `%TEM
 - Default: `/O2 /Oy- /MT`, the build to play.
 - `--checked`: `/Od /MTd /RTC1`. A call with the wrong arguments stops at `_RTC_CheckEsp`, stack overruns at `_RTC_CheckStackVars`, and the debug heap fills memory. Use this first when something is wrong: it found the first and third bugs below immediately. Keep the exe's own PDB next to it (`HD2_PortChk.exe`, `HD2_PortChk.pdb`).
 
+The title (string 3 of the original's table) and the icon go in at link time; the icon is read from `H:\HD2_Unmodified` and never kept in the repository. Without that folder the exe builds with neither.
+
 The original's settings copied: base 0x400000, 1 MB stack, no DEP, not relocatable.
 
 ## Run
@@ -78,5 +80,4 @@ The early files (`app.cpp` above all) were ported before the later rigour: expec
 - **The player's shots hitting anyone:** the user watched 13e's tests: the scripted shots went too high (the script only turned, it never aimed down), and the kills were the squad's. Sound in those fights was right, by the user's ear.
 - **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
-- The title bar is empty and there is no icon: the port has no resources yet. The string resource could not be read from the file on disk (the packed exe's), and the title is not worth guessing.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.
