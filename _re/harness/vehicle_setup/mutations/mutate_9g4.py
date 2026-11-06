@@ -158,7 +158,7 @@ MUTATIONS = [
     (V, 'V 259 num', '        time > static_cast<uint32_t>(m_voices[m_nextVoice].time * 100)) {\n', '        time > static_cast<uint32_t>(m_voices[m_nextVoice].time * 101)) {\n'),
     (V, 'V 260 del', '        ISndGetDriver()->SetVolume(g_gameProfile.GetDetailSettings()->soundVolume * 0.01f);\n', '\n'),
     (V, 'V 260 num', '        ISndGetDriver()->SetVolume(g_gameProfile.GetDetailSettings()->soundVolume * 0.01f);\n', '        ISndGetDriver()->SetVolume(g_gameProfile.GetDetailSettings()->soundVolume * 0.015f);\n'),
-    (V, 'V 261 del', '        m_voicePlayer->SetSound(m_voices[m_nextVoice].sound);\n', '\n'),
+    (V, 'V 261 del', '        m_voicePlayer->SetSound(m_voices[m_nextVoice].sound, 0);\n', '\n'),
     (V, 'V 262 del', '        m_voicePlayer->SetVolume(1.0f);\n', '\n'),
     (V, 'V 262 num', '        m_voicePlayer->SetVolume(1.0f);\n', '        m_voicePlayer->SetVolume(1.5f);\n'),
     (V, 'V 263 del', '        m_voicePlayer->Play(0, 0);\n', '\n'),

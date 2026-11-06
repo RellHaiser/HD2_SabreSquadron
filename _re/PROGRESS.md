@@ -9182,6 +9182,10 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Harness: script_module/build_quick_messages.bat (77 checks, a real C_chunk over files in memory, a fake box and IGraph). Mutations: mutate_13b.py 203: 167 killed, 16 not building, 20 survived (initial values overwritten by a read, frees, boundaries of a 999-byte text, Ascends at the end of a read).
   - globals.cpp and the app.cpp additions have no tests: each is a few lines read from the assembly. Nothing has been run.
   - Stats: 10,776 of 12,306 functions by hand or absorbed (93.4 % by size).
+  PART 13c DONE (2026-11-06): the first launch. The port starts, plays the videos, reaches a fully drawn main menu; the mouse and the confirmation box work; END exits with its normal code 1, without an exception in the checked build. No mission loaded. Details and how to run: _re/RUNNING.md.
+  - Tools: _re/tools/build_game.py (x87, symbols; --checked: /Od /MTd /RTC1), debugrun.cpp (debugger with a symbolized log), shot.ps1, send_keys.ps1 (both only while the game has the focus), vtable_audit.py. Run folder H:\HD2_PortRun, with the original DLLs. New switch -window.
+  - Fixes: three engine slots declared with the wrong arguments (IGraph::InitInput, ISND_source::SetSound, CreateJointOverride + Add); the main loop's missing GetGame() test and a pending command it dropped; NetFirewallAvailable's stack overrun; the layout of S_IGraphInit and all of InitGraphics' flags; the version text's third number.
+  - Not tested: full screen (every run used -window), any mission, the other menus. None of the fixes has a harness test: they were seen in the run or read from the assembly. The early files, app.cpp above all, deserve more comparing.
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

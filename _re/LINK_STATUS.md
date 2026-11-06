@@ -1,6 +1,6 @@
 # Trial link of the hand port (Part 13a, 2026-11-06)
 
-**Since part 13b the executable links: 0 unresolved symbols, not run yet. What follows is the state at 13a.**
+**Since part 13b the executable links, and since 13c it runs to the main menu: see `_re/RUNNING.md`. What follows is the state at 13a.**
 
 Regenerate: `python _re/tools/build_check.py`, then `python _re/tools/link_check.py`. It writes `_re/link_unresolved.txt`: symbol, decorated name, the objects that want it. Delete `dog*.obj` or any other stale object from `%TEMP%\hd2_build_check` first: build_check does not remove objects whose source is gone (four `dog*` ones added 15 false symbols).
 

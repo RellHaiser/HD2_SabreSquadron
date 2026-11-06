@@ -5,6 +5,6 @@
 
 class C_Door : public C_Actor {
 public:
-    int GetUnknown224() const { return m_state; }
+    int GetMotion() const { return m_state; }
     int m_state = 0;
 };

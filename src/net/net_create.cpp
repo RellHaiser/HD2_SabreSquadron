@@ -15,8 +15,9 @@ HRESULT NetCreateInstance(const GUID &clsid, DWORD context, const GUID &iid, voi
 #endif
 bool NetFirewallAvailable()                             // (inline in ConfigureFirewall / FirewallBlocks)
 {
-    OSVERSIONINFOA version = {};
-    version.dwOSVersionInfoSize = sizeof(OSVERSIONINFOA) + 0x08;   // (OSVERSIONINFOEXA's 0x9C first)
+    OSVERSIONINFOEXA buffer = {};                       // (Fix of the port: it was the smaller struct, and the system wrote past it.)
+    OSVERSIONINFOA &version = reinterpret_cast<OSVERSIONINFOA &>(buffer);
+    version.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);        // (0x9C first)
     if (!GetVersionExA(&version)) {
         version.dwOSVersionInfoSize = sizeof(OSVERSIONINFOA);
         if (!GetVersionExA(&version))

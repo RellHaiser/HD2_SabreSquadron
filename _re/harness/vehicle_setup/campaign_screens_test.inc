@@ -1027,7 +1027,7 @@ void CampaignScreensTest(I3D_scene *)
         streamVt[0x3C / 4] = reinterpret_cast<void *>(&MrFake<0x3C, float>);
         streamVt[0x50 / 4] = reinterpret_cast<void *>(&MrFake<0x50, bool>);
         sourceVt[0x00 / 4] = reinterpret_cast<void *>(&MrFake<0x00>);
-        sourceVt[0x04 / 4] = reinterpret_cast<void *>(&MrFake<0x04, void *>);
+        sourceVt[0x04 / 4] = reinterpret_cast<void *>(&MrFake<0x04, void *, int>);
         sourceVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08>);
         sourceVt[0x0C / 4] = reinterpret_cast<void *>(&MrFake<0x0C, int, int>);
         sourceVt[0x20 / 4] = reinterpret_cast<void *>(&MrFake<0x20, float>);
@@ -1365,7 +1365,7 @@ void CampaignScreensTest(I3D_scene *)
                   v.m_box->NumRuns() == 0 && v.m_nextVoice == 0;
             // 0.6 s: the voice (the driver's volume the options').
             update(600, 16);
-            ok &= MsLogIs({"sound update 16", "ust 2c", "ust 38", "snd 14 0.5", "usrc 4 us1", "usrc 20 1", "usrc c 0 0"}, g_gfLog) &&
+            ok &= MsLogIs({"sound update 16", "ust 2c", "ust 38", "snd 14 0.5", "usrc 4 us1 0", "usrc 20 1", "usrc c 0 0"}, g_gfLog) &&
                   v.m_nextVoice == 1;
             update(700, 16);
             ok &= g_gfLog.size() == 3;
@@ -1414,7 +1414,7 @@ void CampaignScreensTest(I3D_scene *)
                   v.m_state == GAME_STATE_RUNNING;
             // Waiting: the stream no more polled, the subtitles left; the voices still played.
             update(3100, 16);
-            ok &= MsLogIs({"sound update 16", "snd 14 0.5", "usrc 4 us1", "usrc 20 1", "usrc c 0 0"}, g_gfLog) &&
+            ok &= MsLogIs({"sound update 16", "snd 14 0.5", "usrc 4 us1 0", "usrc 20 1", "usrc c 0 0"}, g_gfLog) &&
                   v.m_box->NumRuns() == 1;
             // No box: nothing waited for.
             v.m_ending = false;

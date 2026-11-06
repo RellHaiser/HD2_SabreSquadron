@@ -13,19 +13,28 @@
 struct S_IGraphInit {
     HINSTANCE instance;          // +0x00
     int adapter;                 // +0x04
-    RECT windowRect;             // +0x08 window position and size
-    RECT clientRect;             // +0x18
-    uint32_t flags;              // +0x28 IG_INIT_* below
-    uint32_t reserved[3];        // +0x2C
+    int x, y;                    // +0x08 the window's position
+    int width, height;           // +0x10 client size, or the full screen's resolution
+    int childX, childY;          // +0x18 the child window (IG_INIT_CHILD_WINDOW)
+    int childWidth, childHeight; // +0x20
+    uint8_t bitDepth;            // +0x28 full screen: 16 or 32
+    uint8_t refreshRate;         // +0x29 full screen (0: default)
+    uint16_t reserved2A;
+    uint32_t flags;              // +0x2C IG_INIT_* below
+    HMENU menu;                  // +0x30
+    void (__cdecl *errorCallback)(uint32_t code, int severity, const char *text, uint32_t context);   // +0x34
 };
+static_assert(sizeof(S_IGraphInit) == 0x38, "S_IGraphInit layout");
 
 enum : uint32_t {
     IG_INIT_FULLSCREEN = 0x00000002,
     IG_INIT_TRIPLE_BUFFER = 0x00000004,  // together with fullscreen
-    IG_INIT_16BIT = 0x00000010,
-    IG_INIT_32BIT = 0x00000020,
-    IG_INIT_DEFAULT = 0x00000080,
+    IG_INIT_HW_TNL = 0x00000010,         // hardware transform and lighting when present
+    IG_INIT_WAIT_INACTIVE = 0x00000020,  // sleeps in ProcessWinMessages while the window is inactive
+    IG_INIT_CHILD_WINDOW = 0x00000080,   // renders into a child window of the main one
     IG_INIT_VSYNC = 0x00000100,
+    IG_INIT_FSAA2 = 0x00001000,
+    IG_INIT_FSAA4 = 0x00002000,
 };
 
 struct S_IGraphViewport {
@@ -112,7 +121,7 @@ public:
     // colour (0x18 bytes, the command map's lines; meaning inferred).
     I3DMETHOD(void, DrawPrimitives)(int kind, int count, const void *vertices, int transformed) = 0;   // 0x88
     I3D_SLOT(8C);
-    I3DMETHOD(void, InitInput)() = 0;                                    // 0x90
+    I3DMETHOD(void, InitInput)(uint32_t flags) = 0;                       // 0x90 (the game passes 0)
     I3D_SLOT(94);
     I3D_SLOT(98);
     I3DMETHOD(void, ReadKeyboard)() = 0;                                 // 0x9C
@@ -203,7 +212,7 @@ public:
 class ISND_source {
 public:
     I3DMETHOD(uint32_t, Release)() = 0;                                  // 0x00
-    I3DMETHOD(void, SetSound)(ISND_sound *sound) = 0;                    // 0x04
+    I3DMETHOD(HRESULT, SetSound)(ISND_sound *sound, uint32_t flags) = 0;  // 0x04
     I3DMETHOD(void, Stop)() = 0;                                         // 0x08
     I3DMETHOD(void, Play)(int unknown, int unknown2) = 0;                // 0x0C
     I3D_SLOT(10);

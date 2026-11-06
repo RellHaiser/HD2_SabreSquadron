@@ -931,7 +931,7 @@ public:
 class I3D_joint_override_set {
 public:
     I3DMETHOD(uint32_t, Release)() = 0;                       // 0x00
-    I3DMETHOD(void, Add)(I3D_joint_override *item) = 0;       // 0x04
+    I3DMETHOD(void, Add)(I3D_joint_override *item, const char *jointName) = 0;   // 0x04
     I3DMETHOD(void, Remove)(I3D_joint_override *item) = 0;    // 0x08
     int NumItems() const { return *reinterpret_cast<const int *>(reinterpret_cast<const uint8_t *>(this) + 0x10); }
     I3D_joint_override *GetItem(int index) const
@@ -1507,7 +1507,7 @@ public:
     I3DMETHOD(I3D_animation_set *, CreateAnimationSet)() = 0;              // 0x70
     // A joint override for the joint named `jointName` / an empty set of them (the meleeTracker's
     // head look; inferred from that use).
-    I3DMETHOD(I3D_joint_override *, CreateJointOverride)(const char *jointName) = 0;   // 0x74
+    I3DMETHOD(I3D_joint_override *, CreateJointOverride)() = 0;   // 0x74
     I3DMETHOD(I3D_joint_override_set *, CreateJointOverrideSet)() = 0;     // 0x78
     I3D_SLOT(7C);
     I3D_SLOT(80);

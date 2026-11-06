@@ -258,7 +258,7 @@ void C_VideoState::Update(int timeDelta)
     if (m_voicePlayer && m_nextVoice < m_voices.size() &&
         time > static_cast<uint32_t>(m_voices[m_nextVoice].time * 100)) {
         ISndGetDriver()->SetVolume(g_gameProfile.GetDetailSettings()->soundVolume * 0.01f);
-        m_voicePlayer->SetSound(m_voices[m_nextVoice].sound);
+        m_voicePlayer->SetSound(m_voices[m_nextVoice].sound, 0);
         m_voicePlayer->SetVolume(1.0f);
         m_voicePlayer->Play(0, 0);
         ++m_nextVoice;
