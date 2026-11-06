@@ -17,6 +17,7 @@
 #include "game/module.h"
 #include "game/pending.h"
 #include "game/profile.h"
+#include "game/copy_protection.h"
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "ls3d/rw_data.h"
@@ -24,7 +25,7 @@
 
 // Note: the original interleaves calls into the copy-protection layer and shuffled
 // indirection tables with this code. They have no effect on the game logic and are
-// not reproduced.
+// not reproduced (game/copy_protection.h).
 
 S_LS3DSetup g_setup = {                            // 0x008aedf8, defaults from 0x006db380
     0x0C, 0, 1024, 768, 32, 0,
@@ -100,6 +101,7 @@ bool ReadSetupFromRegistry(S_LS3DSetup &setup)
 // Creates the window and Direct3D device from the setup.  0x006db440
 bool InitGraphics()
 {
+    InitProtectionTables();
     S_IGraphInit init = {};
     init.instance = g_instance;
     init.adapter = g_setup.adapter;

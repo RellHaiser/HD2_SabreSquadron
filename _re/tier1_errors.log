@@ -214,14 +214,6 @@ f_006e7280.cpp:70:23: void value not ignored as it ought to be
     pcVar1 = (code *)swi(4);
 f_006e8030.cpp:407:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)*DAT_008ca4c8)(DAT_008ca4c8);
-f_006ea240.cpp:121:44: request for member '_0_4_' in '"BAADBAADBAADBAAD"', which is of non-class type 'const char [17]'
-    *(uint32_t *)digest = "BAADBAADBAADBAAD"._0_4_;
-f_006ea240.cpp:122:55: request for member '_4_4_' in '"BAADBAADBAADBAAD"', which is of non-class type 'const char [17]'
-    *(uint32_t *)((int)digest + 4) = "BAADBAADBAADBAAD"._4_4_;
-f_006ea240.cpp:123:55: request for member '_8_4_' in '"BAADBAADBAADBAAD"', which is of non-class type 'const char [17]'
-    *(uint32_t *)((int)digest + 8) = "BAADBAADBAADBAAD"._8_4_;
-f_006ea240.cpp:124:57: request for member '_12_4_' in '"BAADBAADBAADBAAD"', which is of non-class type 'const char [17]'
-    *(uint32_t *)((int)digest + 0xc) = "BAADBAADBAADBAAD"._12_4_;
 f_006eaea0.cpp:179:17: assignment of read-only location '* pCVar5'
     *pCVar5 = '\0';
 f_006eaea0.cpp:197:17: assignment of read-only location '* pCVar5'

@@ -9108,6 +9108,15 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 131 errors in 38/369. ret_audit --src: 52.
   - Stats: 10,480 of 12,306 functions by hand or absorbed (90.3 % by size).
 
+  PART 11d DONE (2026-11-06): the copy protection as a pass-through (the owner's decision), and a frame's game data (game/copy_protection.h, .cpp).
+  - The tests of the protection's tables (0x008ca840, 0x008caf40; 64 + 78 references) were already left out as each part was ported, always on the genuine copy's path. InitProtectionTables 0x006ea270 only fills those tables, so nothing but its srand is kept.
+  - Its seed comes from the protection's own routine (CALL [0x00a59000], into the .dogui section, obfuscated), so the port takes GetTickCount instead. This changes nothing that lasts: RunGame seeds again from the time after InitGraphics.
+  - Replaced, not ported: GetExecutableMd5 0x006ea340 and its MD5 (0x006ea490..0x006ea630). The digest goes into chunk 0x3EA of a saved game; nothing reads it. The port writes back what it last loaded (interface.cpp).
+  - Ported: SetFrameData 0x006e9ea0, FreeFrameData 0x006e9ef0, FreeAllFrameData 0x006e9f20 and its callback 0x006e9f40.
+  - Harness: script_module/build_protection.bat (11 checks). Mutations: mutate_11d.py 9: 5 killed, 2 not building, 2 survived (the srand; the delete of the block). No shared header changed: vehicle builds not rerun.
+  - Build: MSVC clean. Tier 1: 127 errors in 37/369. ret_audit --src: 52.
+  - Stats: 10,490 of 12,306 functions by hand or absorbed (90.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

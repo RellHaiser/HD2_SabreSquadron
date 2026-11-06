@@ -10764,3 +10764,15 @@
 006c9520
 006c9560
 # hand-ported (continued)
+006ea270
+006e9ea0
+006e9ef0
+006e9f20
+006e9f40
+006ea340
+# absorbed helpers 006e9e00-006eaec5
+006ea490
+006ea4c0
+006ea590
+006ea630
+# hand-ported (continued)
