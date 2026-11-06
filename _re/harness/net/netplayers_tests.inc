@@ -684,11 +684,11 @@ void TestSessionAndQueues()
     kept->refCount = 5;
     object->m_outgoing.push_back(kept);
     object->m_received.push_back(new T_Msg);
-    net.m_replication = &replication;
+    g_netReplication = &replication;
     net.ResetReplication(true);
     CHECK(net.m_received.empty() && object->m_outgoing.empty() && object->m_received.empty() &&
           g_netPool.m_buffers.items.size() == buffers);
-    net.m_replication = nullptr;
+    g_netReplication = nullptr;
     // The connection: lost when the transport heard nothing for over 600 ms.
     net.m_joinStatus = NET_JOIN_JOINING;
     net.m_transport->m_lastReceive = static_cast<int>(GetPerfTimeMs());
@@ -718,7 +718,7 @@ void TestLevelQuantization()
     // The first quantisation set up (steps 0.01, 0.0013, 0.01; 100) and handed to the replication (reading and
     // writing), the table's entry 0 too; the replication enabled.
     C_NetReplication replication;
-    net.m_replication = &replication;
+    g_netReplication = &replication;
     replication.m_enabled = false;
     net.SetLevelBounds(min, size);
     S_NetQuantization expected;
@@ -729,7 +729,7 @@ void TestLevelQuantization()
           SameQuantization(g_netQuantizations.m_entries[0], expected) && expected.bits[1] == 12);
     CHECK(replication.m_read[0] == &net.m_quantizations[0] && replication.m_write[0] == &net.m_quantizations[0] &&
           replication.m_enabled);
-    net.m_replication = nullptr;
+    g_netReplication = nullptr;
     // The table: ten at first (the defaults in 0 .. 3); doubled once when too small.
     C_NetQuantizationTable table;
     S_NetQuantization angle;

@@ -188,7 +188,7 @@ int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
     IDirectPlay8Address *address = nullptr;
     if (DirectPlayMissing())
         return -1;
-    GetIGraph()->SetFlags(m_graphFlags & ~0x20u);
+    GetIGraph()->SetFlags(g_graphFlags & ~0x20u);
     HRESULT hr = NetCreateInstance(CLSID_NetDirectPlay8Server, CLSCTX_INPROC_SERVER, IID_NetDirectPlay8Server,
                                    reinterpret_cast<void **>(&m_server));
     if (hr < 0) {
@@ -414,7 +414,7 @@ int C_NetGame::Connect(S_ServerEntry *server)
 {
     if (DirectPlayMissing())
         return -1;
-    GetIGraph()->SetFlags(m_graphFlags & ~0x20u);
+    GetIGraph()->SetFlags(g_graphFlags & ~0x20u);
     std::memcpy(m_serverEntry, server, sizeof(S_ServerEntry));
     if (g_gameProfile.m_mpSettings->unknown174 == 1) {
         // GameSpy's listing: the CD key checked with the server first.
@@ -620,8 +620,8 @@ long __stdcall C_NetGame::HandleClientMessage(C_NetGame *net, void *, uint32_t t
 void C_NetGame::MakeReplication()
 {
     DeleteReplication();
-    m_replication = new C_NetReplication;
-    m_replication->SetFactories(MakeObjectStateReader, MakeObjectFactory);
+    g_netReplication = new C_NetReplication;
+    g_netReplication->SetFactories(MakeObjectStateReader, MakeObjectFactory);
     // The positions (3 km from -1 km, 1 cm), the deltas (0.6 from -0.3; 5 mm, 7 mm up), the rates (15 from -7.5,
     // 0.1).
     S_NetQuantization *value = &m_quantizations[0];
@@ -630,20 +630,20 @@ void C_NetGame::MakeReplication()
     value->Setup({3000.0f, 3000.0f, 3000.0f, 0.0f}, {-1000.0f, -1000.0f, -1000.0f, 0.0f}, {0.01f, 0.01f, 0.01f, 0.0f}, 100);
     delta->Setup({0.6f, 0.6f, 0.6f, 0.0f}, {-0.3f, -0.3f, -0.3f, 0.0f}, {0.005f, 0.007f, 0.005f, 0.0f}, 100);
     rate->Setup({15.0f, 15.0f, 15.0f, 0.0f}, {-7.5f, -7.5f, -7.5f, 0.0f}, {0.1f, 0.1f, 0.1f, 0.0f}, 100);
-    m_replication->SetReadQuantizations(value, delta, rate);
-    m_replication->SetWriteQuantizations(value, delta, rate);
-    m_replication->SetField2(0x3B);
-    m_replication->GetLocalObject().SetPropertyField2(0x3B);
-    m_replication->GetLocalObject().SetId(g_localPlayerSlot);
-    m_replication->SetLag(0.035f);
+    g_netReplication->SetReadQuantizations(value, delta, rate);
+    g_netReplication->SetWriteQuantizations(value, delta, rate);
+    g_netReplication->SetField2(0x3B);
+    g_netReplication->GetLocalObject().SetPropertyField2(0x3B);
+    g_netReplication->GetLocalObject().SetId(g_localPlayerSlot);
+    g_netReplication->SetLag(0.035f);
     g_netServerSide = (g_gameRole & GAME_ROLE_SERVER) != 0;
 }
 
 void C_NetGame::DeleteReplication()
 {
-    if (m_replication) {
-        delete m_replication;
-        m_replication = nullptr;
+    if (g_netReplication) {
+        delete g_netReplication;
+        g_netReplication = nullptr;
     }
 }
 
@@ -775,8 +775,8 @@ void C_NetGame::TakeBandwidth(int *figures)
         m_transport->Unlock();
         m_playersLock.Leave();
     }
-    if (m_replication)
-        m_replication->TakeByteCounts(&result[5], &result[6]);
+    if (g_netReplication)
+        g_netReplication->TakeByteCounts(&result[5], &result[6]);
     m_transport->m_socket.TakeCounters(&result[4], &result[3]);
     std::memcpy(figures, result, sizeof result);
 }

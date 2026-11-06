@@ -325,7 +325,7 @@
                             std::count(g_itLog.begin(), g_itLog.end(), "fadein chute 0 1") == 1);
         // (In a network game under the scene's top.)
         g_gameRole = GAME_ROLE_SERVER;
-        g_netSceneTop = 60.0f;
+        g_scanMax[1] = 60.0f;
         box->m_state = C_SupplyBox::SUPPLY_HIDDEN;
         box->m_stateTime = 5;
         reset();
@@ -333,7 +333,7 @@
         PR(r.boxStates, std::count(g_itLog.begin(), g_itLog.end(),
                                    "setpos crate " + ItV(S_vector(box->m_dropPos.x, (60.0f - 0.1f) + box->m_dropPos.y,
                                                                   box->m_dropPos.z))) == 1);
-        g_netSceneTop = 1000.0f;
+        g_scanMax[1] = 1000.0f;
         box->m_state = C_SupplyBox::SUPPLY_HIDDEN;
         box->m_stateTime = 5;
         reset();
@@ -901,12 +901,12 @@
         PR(r.boxStates, box->m_health == 6000 && box->GetCharges() == box->m_capacity && box->m_anim == 5 && partsOn &&
                             SaSameQuat(crate->m_rot, SaNormalized(box->m_dropRot)) && logIs("drop", {"setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "setpos crate 3 87 -4", "update crate", "sector crate 3 87 -4", "on chute 1", "setpos chute 3 87 -4", "setdir chute 0 0 1 0", "update chute", "fadein chute 0 1", "on dummy 1", "setpos dummy 3 90 -4", "update dummy", "sector dummy 3 90 -4", "link chute letibedna 1", "link crate letibedna 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "fadein crate 1000 1", "setanim dummy #cratefly 0 1 2"}));
         g_gameRole = GAME_ROLE_SERVER;
-        g_netSceneTop = 85.0f;
+        g_scanMax[1] = 85.0f;
         box->m_state = C::SUPPLY_HIDDEN;
         reset();
         box->SetState(C::SUPPLY_FALLING);
         PR(r.boxStates, std::count(g_itLog.begin(), g_itLog.end(), "setpos crate " + ItV(S_vector(3.0f, (85.0f - 0.1f) + 2.0f, -4.0f))) == 1);
-        g_netSceneTop = 1000.0f;
+        g_scanMax[1] = 1000.0f;
         g_gameRole = GAME_ROLE_LOCAL;
         // Falling without a touch: the cratedummy's animation 1.5 times faster, the crate's, the move.
         box->m_flags = C::SUPPLY_SHOWN;

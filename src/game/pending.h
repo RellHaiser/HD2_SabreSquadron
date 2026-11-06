@@ -71,7 +71,6 @@ int ReadConsoleToken(const char **cursor, char *out, int *value, char *keywords)
 
 // The highest y of the scene's frames' bounds (the top of the box C_NetGame::Command gathers at
 // 0x0072d9c0 for the network game; the supply box's drop height stays under it).
-extern float g_netSceneTop;                         // 0x0097ca44
 // Adds a line to the debug line buffer (at most 15000; `color2` 0: one colour).
 void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2);   // 0x0071fad0
 
@@ -209,12 +208,10 @@ struct S_NetSessionDesc {                               // 0x168 bytes
 static_assert(sizeof(S_NetSessionDesc) == 0x168, "S_NetSessionDesc");
 // Lowest corner of the level's frames (grown by the net game's level scan, 0x0072d9c0); bodies
 // that fall 5 m below it die.
-extern float g_levelMinY;                           // 0x0097ca34
 // Network slot of the local player.
 extern int g_localPlayerSlot;                       // 0x00982104
 // The session's server name (inferred from the info screen's "<text 0x930> %s"; written through
 // a structure not identified).
-extern char g_serverName[];                         // 0x00981e70
 
 // Multiplayer game types (S_MultiplayerSettings::gameType).
 enum E_MpGameType : int {

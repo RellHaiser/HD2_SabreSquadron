@@ -43,11 +43,10 @@ bool SendsTo(const C_NetGame &net, size_t slot)
            (slot == 0 || (role & GAME_ROLE_SERVER));
 }
 
-// The level scan's bounds (Command 3).
+}  // namespace
+
 float g_scanMin[3];                                  // 0x0097ca30
 float g_scanMax[3];                                  // 0x0097ca40
-
-}  // namespace
 
 // ---- the lock --------------------------------------------------------------------------------------------------------
 
@@ -188,10 +187,10 @@ void C_NetGame::Init()
     m_joinStatus = 0;
     m_reporting = false;
     m_keySocket = static_cast<uintptr_t>(-1);
-    m_replication = nullptr;
-    m_maxPing = 0;
-    m_unknown5068 = 50;
-    m_maxInactivity = 300000;
+    g_netReplication = nullptr;
+    g_netMaxPing = 0;
+    g_netMaxFreq = 50;
+    g_netMaxInactivity = 300000;
     m_voiceServer = nullptr;
     m_voiceClient = nullptr;
     m_unknown8 = false;
@@ -232,7 +231,7 @@ void C_NetGame::Close(bool now)
         return;
     }
     ConfigureFirewall(0, false);
-    GetIGraph()->SetFlags(m_graphFlags);
+    GetIGraph()->SetFlags(g_graphFlags);
     Process(1000, false);
     m_closePending = false;
     m_unknown448 = 0;
@@ -268,8 +267,8 @@ void C_NetGame::Close(bool now)
     m_reporting = false;
     m_joinStatus = 0;
     g_gameRole = GAME_ROLE_LOCAL;
-    if (m_replication)
-        m_replication->DeleteObjects();
+    if (g_netReplication)
+        g_netReplication->DeleteObjects();
     m_transport->DeleteConnections();
     m_serverLink = nullptr;
     m_transport->Stop();
@@ -435,11 +434,11 @@ void C_NetGame::ReceiveMessages(int, bool beforeUpdate)
                 if (!DispatchNetMessage(&msg, !beforeUpdate))
                     break;
             }
-        } else if (GetGame() && m_replication && queued.data && queued.size) {
+        } else if (GetGame() && g_netReplication && queued.data && queued.size) {
             // The replication's data (the kind's bit 1: from a client).
             C_NetMessage msg;
             msg.Attach(queued.data, static_cast<uint32_t>(queued.size) * 8);
-            m_replication->Read(&msg, 1, (queued.flags >> 1) & 1);
+            g_netReplication->Read(&msg, 1, (queued.flags >> 1) & 1);
         }
         g_netPool.FreeBuffer(queued.data, queued.size);
     }
@@ -485,17 +484,17 @@ void C_NetGame::Process(int timeDelta, bool replicate)
     m_direct.ResetPosition();
     if ((g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL)
         return;
-    if (replicate && m_replication && m_replication->HasObjects()) {
+    if (replicate && g_netReplication && g_netReplication->HasObjects()) {
         // The replication's data (written for player 0) to each player: the server's (0x20), then the clients'
         // messages (0x22) when there were any.
         m_replicationMessage.ResetPosition();
-        m_replication->Write(&m_replicationMessage, 0, false);
+        g_netReplication->Write(&m_replicationMessage, 0, false);
         for (size_t i = 0; i < m_players.size(); ++i) {
             if (SendsTo(*this, i))
                 SendToPlayers(static_cast<int>(i), m_replicationMessage.Data(), m_replicationMessage.ByteSize(), 0x20);
         }
         m_replicationMessage.ResetPosition();
-        if (m_replication->Write(&m_replicationMessage, 0, true)) {
+        if (g_netReplication->Write(&m_replicationMessage, 0, true)) {
             for (size_t i = 0; i < m_players.size(); ++i) {
                 if (SendsTo(*this, i))
                     SendToPlayers(static_cast<int>(i), m_replicationMessage.Data(), m_replicationMessage.ByteSize(),
@@ -527,8 +526,8 @@ void C_NetGame::UpdateLags(int)
                 if (!player.human || !player.name[0])
                     continue;
                 C_NetObject *object = static_cast<int>(i) == g_localPlayerSlot
-                                          ? &m_replication->GetLocalObject()
-                                          : m_replication->FindObject(static_cast<int>(i), false);
+                                          ? &g_netReplication->GetLocalObject()
+                                          : g_netReplication->FindObject(static_cast<int>(i), false);
                 if (object)
                     object->SetLag(static_cast<float>(static_cast<int>(m_serverLink->m_roundTrip >> 1) + 5 +
                                                       player.stats[4]) * 0.001f);
@@ -548,15 +547,15 @@ void C_NetGame::UpdateLags(int)
                 continue;
             if (player.link)
                 player.link->SetResendTime(static_cast<int>(link->m_roundTrip) + 200);
-            C_NetObject *object = m_replication->FindObject(static_cast<int>(i), false);
+            C_NetObject *object = g_netReplication->FindObject(static_cast<int>(i), false);
             if (!object)
                 continue;
             object->SetLag(static_cast<float>(static_cast<int>(link->m_roundTrip >> 1) + 5) * 0.001f);
-            if (m_maxPing != 0 && m_maxPing < static_cast<int>(link->m_roundTrip))
+            if (g_netMaxPing != 0 && g_netMaxPing < static_cast<int>(link->m_roundTrip))
                 ++player.highPings;
             if (player.highPings > 2)
                 KickPlayer(static_cast<int>(i), 2);
-            if (m_maxInactivity != 0 && m_maxInactivity <= static_cast<int>(now - player.activityTime) && player.human &&
+            if (g_netMaxInactivity != 0 && g_netMaxInactivity <= static_cast<int>(now - player.activityTime) && player.human &&
                 !player.human->GetController()->IsSpectating()) {
                 player.activityTime = now;
                 KickPlayer(static_cast<int>(i), 3);
@@ -739,8 +738,8 @@ void C_NetGame::ResetPlayerStats()
         std::memset(player.stats, 0, sizeof player.stats);
     }
     m_playersLock.Leave();
-    if (m_replication)
-        m_replication->DeleteObjects();
+    if (g_netReplication)
+        g_netReplication->DeleteObjects();
     for (int team = 0; team < 3; ++team) {
         std::memset(m_teamStats[team], 0, sizeof m_teamStats[team]);
         m_teamScores[team] = 0.0f;

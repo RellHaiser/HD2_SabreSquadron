@@ -342,6 +342,8 @@ public:
     float GetTeamScore(int team) const { return m_teamScores[team]; }
     // Rounds won per team (+0x458, three ints; 0x0097d4c8).
     int *GetTeamWins() { return m_teamWins; }
+    // The name of the server joined or hosted (S_ServerEntry::name, +0x4E00; 0x00981e70).
+    const char *GetServerName() const { return reinterpret_cast<const char *>(m_serverEntry); }
     // Every player's round stats and the teams' scores cleared.
     void ResetScores();                             // 0x0072ebb0
     void SendScores();                              // 0x007301d0
@@ -489,7 +491,7 @@ public:
     bool m_unknown8 = false;                        // +0x008
     class C_NetVoice *m_voiceClient = nullptr;      // +0x00C
     class C_NetVoice *m_voiceServer = nullptr;      // +0x010
-    C_NetReplication *m_replication = nullptr;      // +0x014
+    // (+0x014 is the replication: g_netReplication, 0x0097d084, which the game's actors read directly.)
     S_NetQuantization m_quantizations[3];           // +0x020 position, rate, delta (SetLevelBounds: the first)
     C_NetMessage m_replicationMessage;              // +0x1A0
     std::vector<S_NetPlayerState> m_players;        // +0x1E0
@@ -518,7 +520,7 @@ public:
     uintptr_t m_keySocket = static_cast<uintptr_t>(-1);   // +0x4D3C the CD keys' socket
     S_KeyQuery m_keyClient;                         // +0x4D40 the client's own check
     bool m_reporting = false;                       // +0x4DF8 the server reports to GameSpy (AnswerQueries)
-    uint32_t m_graphFlags = 0;                      // +0x4DFC IGraph's flags, put back by Close
+    // (+0x4DFC is IGraph's flags after init, put back by Close: g_graphFlags, 0x00981e6c.)
     alignas(4) uint8_t m_serverEntry[0xA0] = {};   // +0x4E00 S_ServerEntry: the server joined (or hosted)
     float m_levelMin[4] = {};                       // +0x4EA0 (Command 3; w: unset)
     float m_levelSize[4] = {};                      // +0x4EB0
@@ -547,9 +549,7 @@ public:
     int m_sendTime = 0;                             // +0x5058
     int m_unknown505C = 0;
     bool m_unknown5060 = false;                     // +0x5060
-    int m_maxPing = 0;                              // +0x5064 the server's limit (0: none)
-    int m_unknown5068 = 50;                         // +0x5068
-    int m_maxInactivity = 300000;                   // +0x506C ms
+    // (+0x5064, +0x5068, +0x506C are the limits: g_netMaxPing, g_netMaxFreq, g_netMaxInactivity, 0x009820d4 on.)
     bool m_closePending = false;                    // +0x5070
 };
 // C_NetGame::Command() commands.
@@ -562,6 +562,9 @@ enum : int {
     NET_CONNECTION_LOST = 9,
 };
 extern C_NetGame g_netGame;                         // 0x0097d070
+// The level scan's bounds (Command 3). Y: the level's bottom and top.
+extern float g_scanMin[3];                          // 0x0097ca30
+extern float g_scanMax[3];                          // 0x0097ca40
 // C_NetGame::GetJoinStatus(): the client's joining (0 and 2: still on its way).
 enum : int {
     NET_JOIN_CONNECTED = 1, NET_JOIN_JOINING = 2, NET_JOIN_FULL = 3, NET_JOIN_BAD_PASSWORD = 4, NET_JOIN_BAD_CD_KEY = 5,

@@ -445,7 +445,7 @@ void TestHost()
     S_NetSessionDesc desc = {};
     net.m_unknown448 = 5;
     net.m_unknown8 = true;
-    net.m_graphFlags = 0x25;
+    g_graphFlags = 0x25;
     std::strcpy(desc.name, "Srv");
     std::memcpy(desc.serviceProvider, &CLSID_NetDP8SP_TCPIP, 16);
     std::strcpy(desc.password, "pw");
@@ -472,9 +472,9 @@ void TestHost()
         CHECK(ntohs(bound.sin_port) == TestPort(71));
     }
     // GameSpy's listing: the reporting; the replication made; the transport on the port + 1.
-    CHECK(Logged("gcd init 0 750") && net.m_reporting && net.m_replication != nullptr && net.m_transport->m_running);
-    CHECK(net.m_replication->GetLocalObject().GetId() == 0 && net.m_replication->m_lag == 0.035f &&
-          net.m_replication->m_field2 == 0x3B && g_netServerSide);
+    CHECK(Logged("gcd init 0 750") && net.m_reporting && g_netReplication != nullptr && net.m_transport->m_running);
+    CHECK(g_netReplication->GetLocalObject().GetId() == 0 && g_netReplication->m_lag == 0.035f &&
+          g_netReplication->m_field2 == 0x3B && g_netServerSide);
     std::snprintf(line, sizeof line, "%d", TestPort(71));
     CHECK(net.m_transport->m_socket.m_socket != INVALID_SOCKET);
     // The replication's quantisations: positions, deltas, rates.
@@ -483,9 +483,9 @@ void TestHost()
     delta.Setup({0.6f, 0.6f, 0.6f, 0}, {-0.3f, -0.3f, -0.3f, 0}, {0.005f, 0.007f, 0.005f, 0}, 100);
     rate.Setup({15, 15, 15, 0}, {-7.5f, -7.5f, -7.5f, 0}, {0.1f, 0.1f, 0.1f, 0}, 100);
     CHECK(SameQuantization(net.m_quantizations[0], value) && SameQuantization(net.m_quantizations[2], delta) &&
-          SameQuantization(net.m_quantizations[1], rate) && net.m_replication->m_read[0] == &net.m_quantizations[0] &&
-          net.m_replication->m_read[1] == &net.m_quantizations[2] && net.m_replication->m_read[2] == &net.m_quantizations[1] &&
-          net.m_replication->m_write[1] == &net.m_quantizations[2]);
+          SameQuantization(net.m_quantizations[1], rate) && g_netReplication->m_read[0] == &net.m_quantizations[0] &&
+          g_netReplication->m_read[1] == &net.m_quantizations[2] && g_netReplication->m_read[2] == &net.m_quantizations[1] &&
+          g_netReplication->m_write[1] == &net.m_quantizations[2]);
     // Its factories by the object's id: below 32 the controllers'; a human's too; a car's; others none.
     alignas(16) static unsigned char car[0x400], mine[0x400], human[0x400];
     reinterpret_cast<C_Actor *>(car)->m_type = ACTOR_CAR;
@@ -497,15 +497,15 @@ void TestHost()
     g_actors[5] = reinterpret_cast<C_Actor *>(car);
     g_actors[31] = reinterpret_cast<C_Actor *>(car);
     g_actors[32] = reinterpret_cast<C_Actor *>(car);
-    auto factory = net.m_replication->m_makeFactory;
-    auto reader = net.m_replication->m_makeStateReader;
+    auto factory = g_netReplication->m_makeFactory;
+    auto reader = g_netReplication->m_makeStateReader;
     CHECK(factory(5) == NetCreateMessage && factory(40) == MakeSeatWeaponMessage && factory(41) == nullptr &&
           factory(42) == NetCreateMessage && factory(43) == NetCreateMessage && reader(5) == NetReadControlBits &&
           reader(40) == CarNetReadState && reader(41) == nullptr && reader(42) == NetReadControlBits &&
           reader(99) == NetReadControlBits && factory(31) == NetCreateMessage &&
           factory(32) == MakeSeatWeaponMessage && reader(31) == NetReadControlBits && reader(32) == CarNetReadState);
     net.DeleteReplication();
-    CHECK(net.m_replication == nullptr);
+    CHECK(g_netReplication == nullptr);
     net.DeleteReplication();
     g_actors.clear();
     net.Close(true);
@@ -708,7 +708,7 @@ void TestConnect()
     net.m_unknown8 = true;
     net.m_joinTime = 9;
     net.m_joinStatus = 0;
-    net.m_graphFlags = 0x21;
+    g_graphFlags = 0x21;
     g_log.clear();
     g_addresses = 0;
     CHECK(net.Connect(&server) == 0 && server.port == 31567 && Logged("firewall 31567 1") && Logged("graph flags 1") &&
@@ -770,7 +770,7 @@ void TestConnect()
     g_options.voiceChat = true;
     net.OnConnected();
     g_options.voiceChat = false;
-    CHECK(net.m_joinStatus == NET_JOIN_CONNECTED && net.m_replication != nullptr && net.m_voiceClient == nullptr);
+    CHECK(net.m_joinStatus == NET_JOIN_CONNECTED && g_netReplication != nullptr && net.m_voiceClient == nullptr);
     g_testMp.unknown174 = 0;
     g_gameProfile.m_player = nullptr;
     net.Close(true);
@@ -1146,7 +1146,7 @@ void TestBandwidth()
     C_NetReplication replication;
     replication.m_bitsWritten = 80;
     replication.m_bitsRead = 17;
-    net.m_replication = &replication;
+    g_netReplication = &replication;
     g_gameRole = GAME_ROLE_CLIENT;
     int figures[7];
     net.TakeBandwidth(figures);
@@ -1158,7 +1158,7 @@ void TestBandwidth()
     net.TakeBandwidth(figures);
     CHECK(figures[1] == 50 && figures[2] == 6 && sent0 + 0 == sent0 && received0 + 0 == received0 && figures[5] == 0);
     net.m_serverLink = nullptr;
-    net.m_replication = nullptr;
+    g_netReplication = nullptr;
     net.TakeBandwidth(figures);
     CHECK(figures[0] == 0 && figures[1] == 0 && figures[5] == 0 && figures[6] == 0);
     // The server: the last connected player's (its link's ping, else DirectPlay's); one player: -1.

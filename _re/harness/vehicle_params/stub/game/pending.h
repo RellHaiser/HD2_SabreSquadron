@@ -119,7 +119,7 @@ public:
 C_GEffectsModule *GetGEffects();
 #endif
 // (The supply box, part 7f: the scene's top, the debug lines.)
-extern float g_netSceneTop;
+extern float g_scanMax[3];
 void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2);
 // (The item actor's ReleaseItem.)
 void FreeFrameData(I3D_frame *frame);

@@ -51,8 +51,8 @@ constexpr uint32_t VOICE_CHAT = 0xB04000;
 constexpr uint32_t VOICE_VALUE = 0xB06000;
 // The key bindings' groups' lists: KEYS_PAGE | group << 12, groups 4 .. 8.
 constexpr int FIRST_KEY_GROUP = 4, KEY_GROUP_END = 9;
-// IGraph's info flags: the gamma can be set (inferred).
-constexpr uint32_t IGRAPH_GAMMA = 2;
+// IGraph's info flags: the same as S_IGraphInit's (GetInfo is the engine's GetInitData).
+constexpr uint32_t IGRAPH_FULLSCREEN = IG_INIT_FULLSCREEN;
 
 // The screen's description: its controls' types, the texts and their styles.
 constexpr int CONTROL_GROUP = 5, CONTROL_TEXT = 0x13, CONTROL_BUTTON = 0x14;
@@ -193,7 +193,8 @@ bool C_OptionsHandler::HandleMessage(S_ControlMessage *message)
 void C_OptionsHandler::Fill()
 {
     const auto *options = g_gameProfile.GetDetailSettings();
-    const bool gamma = (GetIGraph()->GetInfo()->flags & IGRAPH_GAMMA) != 0;
+    // (Only full screen has a gamma ramp.)
+    const bool gamma = (GetIGraph()->GetInfo()->flags & IGRAPH_FULLSCREEN) != 0;
     Post(Id(GAMMA), gamma ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE);
     Post(Id(GAMMA), CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(static_cast<int>(options->gamma)));
     Post(Id(SOUND_VOLUME), CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(static_cast<int>(options->soundVolume)));

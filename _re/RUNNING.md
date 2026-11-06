@@ -72,6 +72,7 @@ With `devel`'s DLL the sky is a flat dark green with either exe, where the origi
 | The version text has three numbers (`%d.%02d.%d`), the port passed two: `1.12.1286592330`. The third is the original's 0x009820f4, which nothing writes: `1.12.0` | looking at the menu |
 
 The early files (`app.cpp` above all) were ported before the later rigour: expect more of this kind there. `InitSound`, `InitRenderer` and `ApplyRenderSettings` were compared with the assembly and agree. Most of the rest of `app.cpp` has not been.
+| After 13e (the user: the gamma slider is grey): one variable of the original ported as two. `C_NetGame` is a global at 0x0097d070, so its fields also appear as absolute addresses, and those got names of their own: `g_graphFlags` is +0x4DFC, `g_netReplication` +0x14, `g_serverName` +0x4E00, `g_netMaxPing`/`Freq`/`Inactivity` +0x5064 on. `g_levelMinY` and `g_netSceneTop` are `g_scanMin[1]` and `g_scanMax[1]`. Each half was set on one side and read on the other. | `m_graphFlags` stayed 0, and `Close`, on showing the main menu, cleared all of IGraph's flags, the full screen one too, which the slider tests. `g_netReplication` was never set: a null pointer in any multiplayer game. `g_levelMinY` stayed 0: a human below y = -5 was killed. The server's name on the info screen was empty, and the console's limits never reached the ping and inactivity checks. |
 
 ## Tested by the user, playing (2026-11-06)
 

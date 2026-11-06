@@ -756,7 +756,7 @@ void C_HumanMovement::UpdateAnimation(int time)
         else if (!m_unknown760)
             DamageByMaterial(m_damageMaterial, time);
         const S_vector pos = m_owner->GetPosition();
-        if (pos.y < g_levelMinY - 5.0f)
+        if (pos.y < g_scanMin[1] - 5.0f)
             m_owner->Hit(HIT_ENVIRONMENT, 1000.0f, S_vector(0.0f, 0.0f, 0.0f), S_vector(0.0f, 0.0f, 0.0f), nullptr, 0);
     }
 

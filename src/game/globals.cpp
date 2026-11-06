@@ -21,12 +21,9 @@
 // All of these start as zero in the original (its .bss).
 bool g_scriptModuleRestarting;                          // 0x008693e0
 char g_netDefaultSessionText[16];                       // 0x00867a90 (the original's shared empty string)
-char g_serverName[0x100];                               // 0x00981e70 (nothing writes it; size not known)
 C_FrameListener **g_frameListenersBegin;                // 0x008aeb4c (nothing adds any)
 C_FrameListener **g_frameListenersEnd;                  // 0x008aeb50
 I3D_scene *g_carScene;                                  // 0x0089c1d0
-float g_levelMinY;                                      // 0x0097ca34
-float g_netSceneTop;                                    // 0x0097ca44
 int g_localPlayerSlot;                                  // 0x00982104
 int g_netPlayerCount;                                   // 0x00982df0 (set by C_NetQuantizationTable::Set: its members)
 S_NetPlayer *g_netPlayerTable;                          // 0x00982dec

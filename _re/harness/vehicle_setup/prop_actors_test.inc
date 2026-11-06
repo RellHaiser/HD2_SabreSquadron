@@ -20,7 +20,7 @@ void C_GEffectsModule::FadeOutHierarchy(I3D_frame *model, int time, bool unknown
 {
     ItLog("fadeout %s %d %d", ItName(model).c_str(), time, unknown);
 }
-float g_netSceneTop = 1000.0f;
+float g_scanMax[3] = {0.0f, 1000.0f, 0.0f};
 struct S_PrLine {
     S_vector from, to;
     uint32_t color, color2;

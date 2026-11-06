@@ -253,8 +253,8 @@ void C_SupplyBox::InitBox()                             // 0x005f9a60
 void C_SupplyBox::StartDrop()                           // 0x005f9f00
 {
     float height = DROP_HEIGHT;
-    if (!IsLocalGame() && !(DROP_HEIGHT < g_netSceneTop))
-        height = g_netSceneTop - DROP_UNDER_TOP;
+    if (!IsLocalGame() && !(DROP_HEIGHT < g_scanMax[1]))
+        height = g_scanMax[1] - DROP_UNDER_TOP;
     m_health = HEALTH;
     m_charges = m_capacity;
     m_frame->SetPos(S_vector(m_dropPos.x, height + m_dropPos.y, m_dropPos.z));

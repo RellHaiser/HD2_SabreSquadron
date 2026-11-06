@@ -387,16 +387,16 @@ void C_NetGame::ReadScores(C_BitStream *stream)
 
 void C_NetGame::SetLevelBounds(const float *min, const float *size)
 {
-    if (!m_replication)
+    if (!g_netReplication)
         return;
     S_NetQuantization *quantization = &m_quantizations[0];
     const S_vector4 step = {0.01f, 0.0013f, 0.01f, 0.0f};   // (w: unset in the original)
     quantization->Setup(*reinterpret_cast<const S_vector4 *>(size), *reinterpret_cast<const S_vector4 *>(min), step,
                         100);
-    m_replication->SetReadQuantizations(quantization, nullptr, nullptr);
-    m_replication->SetWriteQuantizations(quantization, nullptr, nullptr);
+    g_netReplication->SetReadQuantizations(quantization, nullptr, nullptr);
+    g_netReplication->SetWriteQuantizations(quantization, nullptr, nullptr);
     g_netQuantizations.Set(0, size, min, &step.x);
-    m_replication->Enable();
+    g_netReplication->Enable();
 }
 
 C_NetQuantizationTable::C_NetQuantizationTable() : m_entries(10)
@@ -706,7 +706,7 @@ void C_NetGame::FlipSessionParity()
 void C_NetGame::ResetReplication(bool all)
 {
     if (all) {
-        for (C_NetObject *object : m_replication->GetObjects()) {
+        for (C_NetObject *object : g_netReplication->GetObjects()) {
             object->ClearMessages(true, false, true);
             object->ClearMessages(true, true, true);
         }
