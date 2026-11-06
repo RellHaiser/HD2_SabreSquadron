@@ -81,10 +81,12 @@ Movement speed, climbing and ladders; supply boxes opening and emptying; the fir
 
 Africa1, played to its end, through the finishing screen and the soldiers' stat increases: the sky (with `backdrop_visible.patch`); a Panzerfaust destroying the Panzer III; dynamite on the fuel tanks; both fixed MG 42s; the SAS Jeep, FlaK truck with its 20 mm cannon, and BMW R75; bullet stains on both sides; a locked door opened with a key; picking up the mission's documents.
 
+Multiplayer, as a client: an RpR internet deathmatch server (joined, spawned, moved; the server was empty), and the user's LAN cooperative server on Co_Sicily2 (defusing all the bridge's dynamite, a clam mine on a Panzer III). Once an item would not move from backpack to pouches (a clam mine): by the user, the original exe sometimes does this in multiplayer too, with any item.
+
 ## Not tested
 
 - **The rest of the game:** the other missions and weapons, squad orders and the command map not reported yet.
-- **Multiplayer:** the user sees internet servers through the RpR clan's master list. The port joins the original's dedicated server on this machine (`HD2DS_SabreSquadron.exe -cmd -exec` a file with `domain internet`, `port 11001`, `style deathmatch`, `mapname Africa1`, `server`; the client: `-window -cmd domain internet port 11001 join <address>`) as far as Player Setup, as the original exe does. Spawning, playing in a session, the server browser's join and hosting with the port not run.
+- **Multiplayer:** a session with another player; hosting with the port, listen or dedicated. To join a local server of the original's: `HD2DS_SabreSquadron.exe -cmd -exec` a file with `domain internet`, `port 11001`, `style deathmatch`, `mapname Africa1`, `server`; the client: `-window -cmd domain internet port 11001 join <address>`.
 - **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.
