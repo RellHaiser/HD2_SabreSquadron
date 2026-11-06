@@ -9191,6 +9191,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Fixes: collision file header; the net tables' two globals (13b's 'nothing writes it' was wrong); C_Actor::GetSector's recursion (13b's); C_KeyBindings::Load's changed flag; the in-game menu's model names; the subsystem version.
   - Not tested: full screen, the rest of the game, weapons, enemies, vehicles, saving, sound by ear. With the devel DLL the sky is flat dark green, also under the original exe: for the LS3DF port.
   - After 13d (reported by the user): the game ran too fast: the frame limiter's timer event was SET, not PULSE, so its wait never waited and each frame counted as 10 ms. See _re/RUNNING.md.
+  - After 13d (reported by the user): the supply boxes did not open: their animations' names lacked the '#' of the files and the original's strings. New: tools/name_audit.py.
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

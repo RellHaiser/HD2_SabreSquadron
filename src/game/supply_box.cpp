@@ -43,7 +43,7 @@ constexpr float DROP_HEIGHT = 85.0f;                    // m
 constexpr float DROP_UNDER_TOP = 0.1f;                  // m under the scene's top
 constexpr float DUMMY_OVER_CRATE = 3.0f;                // m: the cratedummy over the crate
 constexpr float FALL_SPEED = 0.005f;                    // m a ms
-constexpr float FALL_ANIMATION_RATE = 1.5f;             // "cratefly" plays this much faster
+constexpr float FALL_ANIMATION_RATE = 1.5f;             // "#cratefly" plays this much faster
 constexpr float FALL_GAP = 0.01f;                       // m kept over the ground
 constexpr double BOX_RADIUS_SCALE = 1.2;                // (a double in the original)
 constexpr int BLEND_TIME = 350;                         // ms
@@ -68,7 +68,7 @@ enum : int {
     ANIM_DESTROYED = 4,                                 // (none: no file)
     ANIM_RESET = 5,
 };
-const char *const ANIM_FILES[6] = {"cratefly", "crateopen", "crateclosed", "cratedrop", nullptr, nullptr};
+const char *const ANIM_FILES[6] = {"#cratefly", "#crateopen", "#crateclosed", "#cratedrop", nullptr, nullptr};
 
 // The sounds (chapter 1).
 enum : int {

@@ -42,6 +42,7 @@ With `devel`'s DLL the sky is a flat dark green with either exe, where the origi
 - `_re/tools/debugrun.cpp`: a small debugger (build it with MSVC x86, see its head). Logs DLLs, exceptions with registers and a symbolized stack, the exit code. `--timeout N` logs all threads and kills the game after N seconds.
 - `_re/tools/to_menu.ps1`: Esc until the main menu shows.
 - `_re/tools/shot.ps1`, `send_keys.ps1`: a picture of the game's client area, keys by scan code (0x01 is Esc), mouse by relative moves (the game adds up DirectInput's deltas, so `click:x:y` goes to the corner first; 1:1 at 1600x1200). Both refuse to act unless the game's window has the focus.
+- `_re/tools/name_audit.py`: names in the source against the game's files.
 - `_re/tools/vtable_audit.py`: the game's engine interfaces (`src/ls3d`) against the LS3DF port's headers, slot by slot: bytes of arguments, floats, a float result. **Run it after touching `src/ls3d`.**
 
 ## Bugs the first run found
@@ -60,6 +61,7 @@ With `devel`'s DLL the sky is a flat dark green with either exe, where the origi
 | Part 13d: the in-game menu's model names: `main_ingame`, `player_screen`, `player_screen_2`; the files are `main ingame`, `player screen`, `player screen 2`. The model not loaded, Esc in a mission opened the options | the wrong menu; all 35 model names of the menus then checked against `MODELS` |
 | Part 13d: the client area was 1590x1190 where the original has 1600x1200: the linker's newer subsystem version. `/SUBSYSTEM:WINDOWS,5.01`, as near as the linker allows to the original's | comparing pictures with the original |
 | After 13d: the frame limiter's `timeSetEvent` used `TIME_CALLBACK_EVENT_SET` where the original has `TIME_CALLBACK_EVENT_PULSE` (0x20). On the manual-reset event, SET left it signalled for ever, so the wait never waited, yet each frame still reported 10 ms: game speed was frame rate / 100. Measured over 5 s: 16-19 % fast in the mission's cutscene, about 23 times in the menus. After: game time 96 % of real, about 96 frames a second. The original's own ratio was not measured | the user: movement and climbing much too fast |
+| After 13d: the supply boxes' animations were named `cratefly`, `crateopen`, `crateclosed`, `cratedrop`; the files and the original's strings have a `#` in front. Every load failed, so the boxes never opened. The harness had copied the same wrong names | the user: no open model at the firing range; then `tools/name_audit.py`, and a trace of every failed `Get` in Training: only the shadows' expected `s` + name probes were left |
 | The version text has three numbers (`%d.%02d.%d`), the port passed two: `1.12.1286592330`. The third is the original's 0x009820f4, which nothing writes: `1.12.0` | looking at the menu |
 
 The early files (`app.cpp` above all) were ported before the later rigour: expect more of this kind there. `InitSound`, `InitRenderer` and `ApplyRenderSettings` were compared with the assembly and agree. Most of the rest of `app.cpp` has not been.
