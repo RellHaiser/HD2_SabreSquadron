@@ -9151,6 +9151,25 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 90 errors in 34/367. ret_audit --src: 52. All vehicle and script_module harnesses build and pass; factory checkers clean.
   - Stats: 10,634 of 12,306 functions by hand or absorbed (91.5 % by size).
 
+  PART 12a, 12b DONE (2026-11-06; one commit: they share a tier 1 regeneration and human.h): the humans keeping out of each other's way, and the formations.
+  12a (game/human_crowd.h, .cpp; 0x005636d0..0x0056edc0): C_HumanCrowd, the pass the game runs each tick (HumanPass_Tick) in single player and co-op.
+  - Humans alone (nobody near, no car within 7 m) just step toward their waypoint. The others go through 8 small steps: move along the route, pushed by those near (out of their circle, or to the side of one about to be met, or of a lying one's or a standing car's ellipse), their targets kept apart too, held on the walking network, a push nearly straight back turned aside. The waypoint follows a target that was pushed.
+  - A route that changed is planned again (Replan): waypoints stood on are dropped, then a tree of ways round whoever blocks the straight line, up to 200 nodes, depth 10; the way ending nearest the waypoint, the cheapest of those, goes in front of the route. C_HumanAIMemory now has its fields named; save and load (chunk 100).
+  - Kept: the rider test compares the human's vehicle with the car at the HUMAN's index (so a rider is pushed from its own car); AddSideWay's test of the avoided list reads the free slot past the end, stale from the last plan, so a goal may not get the blocker added; a move from a car's very middle or from behind its centre finds no block; FindBlocker's t1, t2 left over from the last blocker choose the kind.
+  - Fixed: that rider test no longer reads past the cars. Reset zero-initializes more than the original did.
+  - Still in tier 1, dead: 0x00563870, 0x005638c0, 0x005695c0, 0x0056adb0, 0x0056e2c0, 0x0056e810, 0x0056ec30.
+  12b (game/team.h, game/formation.cpp, game/formation_tables.inc; 0x005942d0..0x0059bb60): C_FormationShape with its data, S_FormationSlot.
+  - Six slots from a table by type (11 x 6, generated from the original's static initializers), scaled and turned by the shape's matrix. Mode 1 follows the leader: slots placed about its way, cut short round corners by the walking points, kept 1.2 m apart, fitted to the network; a script's formation does not plan along the way. Mode 2 lines up at a door: two beside it, one behind, and each goes through when the one before is in place and stopped. A leader in a car or submarine boards them: nearest entry, seats in order. Save and load.
+  - AddMember, RemoveMember, SetLeader return bool, as they do.
+  - Kept: a submarine with no seat left and a place gives up; once the leader is in the emptied slot RemoveMember's closing-up stops shifting; distance is measured from the first slot as it was before its own turn in the loop.
+  - Fixed: RemoveMember reading past the last slot; a door point with no door linked read through null; loading slots into a shape with none.
+  - Still in tier 1, dead: 0x00594210, 0x00595420, 0x005976d0, 0x00597b50, 0x0059ab30, 0x0059aef0.
+  - Harness: script_module/build_crowd.bat (685 checks), build_formation.bat (865 checks). The tick is also checked against its steps called one by one, in four scenes. Exact numbers worked by hand; the chunks of a saved shape read back by a small independent parser.
+  - Mutations: mutate_12a.py 1051: 757 killed, 107 not building, 187 survived (about 95 boundaries; heights, which stay zero in these scenes; a normalization GetLocalDir already did; resets of what is overwritten; search depths and tolerances; FindPointNear's strip with radii of different sizes partly). mutate_12b.py 688: 546 killed, 62 not building, 80 survived (mostly boundaries, past-the-end loop bounds that cannot be seen, redundant matrix writes, initial values). The first version of the 12a tests killed only 398 of those: the solver and the planner were tested by signs, not numbers.
+  - Not exact: sums are in source order, not checked against the x87 order instruction by instruction, so positions may differ in the last bits from the original.
+  - Nothing here has been run in the game: real humans, real meshes and real networks of checkpoints have not been through it; every network here is a few hand-made circles, and the speeds table is made up in the harness.
+  - Build: MSVC clean. Tier 1: 74 errors in 29/367 (was 90 in 34). ret_audit --src: 52. Stats: 10,729 of 12,306 functions by hand or absorbed (93.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

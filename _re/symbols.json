@@ -16533,15 +16533,93 @@
   "name": "S_AIAlertState::LoadGame",
   "proto": "bool __thiscall LoadGame(S_AIAlertState *this, C_chunk *chunk)"
  },
+ "00563f90": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Constructor"
+ },
+ "005640a0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Destructor"
+ },
  "005641b0": {
-  "module": "human",
-  "name": "C_HumanAIMemory::SaveGame",
-  "proto": "bool __thiscall SaveGame(C_HumanAIMemory *this, C_chunk *chunk)"
+  "module": "human_crowd",
+  "name": "HumanAIMemory_SaveGame"
  },
  "005643e0": {
-  "module": "human",
-  "name": "C_HumanAIMemory::LoadGame",
-  "proto": "bool __thiscall LoadGame(C_HumanAIMemory *this, C_chunk *chunk)"
+  "module": "human_crowd",
+  "name": "HumanAIMemory_LoadGame"
+ },
+ "005647c0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Tick"
+ },
+ "00564ef0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_StepAlone"
+ },
+ "005653c0": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_AdvanceWaypoint"
+ },
+ "00565540": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_AddPush"
+ },
+ "005656e0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Prepare"
+ },
+ "00565f30": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_MoveOneStep"
+ },
+ "00566130": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_PushFromHuman"
+ },
+ "00566e50": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_PushTargetFromHuman"
+ },
+ "00567ab0": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_PushOntoNetwork"
+ },
+ "00567ba0": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_HoldOnNetwork"
+ },
+ "00567c80": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_TurnPushAside"
+ },
+ "00567df0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_KeepInsideStrip"
+ },
+ "00568190": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_KeepOnNetwork"
+ },
+ "00568580": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_PushFromCar"
+ },
+ "00568dc0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_PushTargetFromCar"
+ },
+ "00569530": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_UpdateStuckTimer"
+ },
+ "00569890": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_FindPointNear"
+ },
+ "0056a0f0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Replan"
  },
  "0056a8b0": {
   "module": "zz_idioms",
@@ -16550,6 +16628,18 @@
  "0056a8d0": {
   "module": "zz_idioms",
   "name": "empty_function_56a8d0"
+ },
+ "0056a8e0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_ExpandNode"
+ },
+ "0056be90": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_IsPointBlocked"
+ },
+ "0056c230": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_FindBlocker"
  },
  "0056ec20": {
   "module": "zz_idioms",
@@ -18270,6 +18360,46 @@
   "name": "C_RemoteController::OnBodyFlags",
   "proto": "void __thiscall OnBodyFlags(C_RemoteController *this, uint flags)"
  },
+ "005942d0": {
+  "module": "formation",
+  "name": "FormationShape_SaveGame"
+ },
+ "00594560": {
+  "module": "formation",
+  "name": "FormationShape_LoadGame"
+ },
+ "005949c0": {
+  "module": "formation",
+  "name": "FormationShape_Constructor"
+ },
+ "00594a50": {
+  "module": "formation",
+  "name": "FormationShape_SetDoorPoint"
+ },
+ "00594a70": {
+  "module": "formation",
+  "name": "FormationShape_Destructor"
+ },
+ "00594a80": {
+  "module": "formation",
+  "name": "FormationSlot_Write"
+ },
+ "00594dd0": {
+  "module": "formation",
+  "name": "FormationSlot_Read"
+ },
+ "00595370": {
+  "module": "formation",
+  "name": "FormationSlot_Constructor"
+ },
+ "00595710": {
+  "module": "formation",
+  "name": "FormationShape_OnLeaderDied"
+ },
+ "005957d0": {
+  "module": "formation",
+  "name": "FormationShape_BoardVehicle"
+ },
  "005973d0": {
   "module": "zz_idioms",
   "name": "identity_5973d0"
@@ -18278,13 +18408,33 @@
   "module": "script",
   "name": "C_FormationShape::SetType"
  },
+ "00597760": {
+  "module": "formation",
+  "name": "FormationShape_SetDir"
+ },
  "005977f0": {
   "module": "script",
   "name": "C_FormationShape::SetScale"
  },
+ "005978e0": {
+  "module": "formation",
+  "name": "FormationShape_ApplyMatrix"
+ },
  "00597b40": {
   "module": "zz_idioms",
   "name": "get_field_78_597b40"
+ },
+ "00597c50": {
+  "module": "formation",
+  "name": "FormationShape_SetLeader"
+ },
+ "00597f80": {
+  "module": "formation",
+  "name": "FormationShape_AddMember"
+ },
+ "005981c0": {
+  "module": "formation",
+  "name": "FormationShape_RemoveMember"
  },
  "00598290": {
   "module": "squad",
@@ -18311,15 +18461,43 @@
   "name": "C_FormationShape::GetSlotSeat",
   "proto": "int __thiscall GetSlotSeat(void *this, C_Human *member, int *vehicleId)"
  },
+ "00598550": {
+  "module": "formation",
+  "name": "FormationShape_KeepApart"
+ },
+ "00598810": {
+  "module": "formation",
+  "name": "FormationShape_PushAside"
+ },
  "00599040": {
   "module": "squad",
   "name": "C_FormationShape::SetSlotTarget",
   "proto": "void __thiscall SetSlotTarget(void *this, C_Human *member, S_vector4 *pos)"
  },
+ "005990c0": {
+  "module": "formation",
+  "name": "FormationShape_FollowLeader"
+ },
+ "0059a2e0": {
+  "module": "formation",
+  "name": "FormationShape_LineUpAtDoor"
+ },
  "0059af30": {
   "module": "squad",
   "name": "C_FormationShape::PlanSlot",
   "proto": "void __thiscall PlanSlot(void *this, int slot)"
+ },
+ "0059b7b0": {
+  "module": "formation",
+  "name": "FormationShape_FitOnNetwork"
+ },
+ "0059ba70": {
+  "module": "formation",
+  "name": "FormationShape_Tick"
+ },
+ "0059bb60": {
+  "module": "formation",
+  "name": "FormationShape_MoveSlots"
  },
  "0059be60": {
   "module": "human",

@@ -46,44 +46,12 @@ f_00561710.cpp:522:43: no matching function for call to 'gh_bitcast<tier1::S_AIW
     local_c8 = gh_bitcast<S_AIWaypoint*>()
 f_00561710.cpp:974:28: call of overloaded 'S_matrix__SetDir3(tier1::S_matrix*, tier1::S_vector*)' is ambiguous
     S_matrix__SetDir3((S_matrix *)local_e0,(S_vector *)(local_e0 + 0x20));
-f_0056a8c0.cpp:240:76: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'}
-    FUN_00569890(pCVar2->m_checkpoints,gh_bitcast<float*>(*pfVar7) + 4,gh_bitcast<float*>(*pfVar7),5,0)
-f_0056a8c0.cpp:1026:72: expected primary-expression before ')' token
-    local_314 = gh_bitcast<float*>((local_220.x * local_220.x +)
-f_0056a8c0.cpp:1034:53: no matching function for call to 'gh_bitcast<tier1::C_Checkpoints*>()'
-    local_30c = gh_bitcast<C_Checkpoints*>()
-f_0056a8c0.cpp:1111:90: expected primary-expression before ')' token
-    local_2ec = gh_bitcast<float*>(((local_2c0.x * *(float *)(pCVar2->_pad_0084 + 0x1c) +)
-f_0056a8c0.cpp:1127:43: no matching function for call to 'gh_bitcast<tier1::C_Checkpoints*>()'
-    local_30c = gh_bitcast<C_Checkpoints*>()
-f_0056a8c0.cpp:1147:47: no matching function for call to 'gh_bitcast<tier1::C_Checkpoints*>()'
-    (local_30c = gh_bitcast<C_Checkpoints*>()
-f_0056a8c0.cpp:1337:66: expected primary-expression before ')' token
-    local_314 = gh_bitcast<float*>((local_2d0 * local_2d0 +)
-f_0056a8c0.cpp:1353:70: expected primary-expression before ')' token
-    local_2d4 = gh_bitcast<float*>((local_290 * local_290 +)
 f_0057a340.cpp:35:5: '_local_30' was not declared in this scope; did you mean 'local_30'?
     _local_30 = CONCAT31(uStack_2f,pSVar4->radius);
 f_0057a340.cpp:76:84: cannot convert 'tier1::S_AIWaypoint**' to 'uint32_t*' {aka 'unsigned int*'}
     uninitialized_copy4_563950((uint32_t*)(ppSVar6),(uint32_t*)(ppSVar6),ppSVar6 + 1);
-f_005941d0.cpp:804:19: call of overloaded 'S_matrix__SetDir(tier1::S_matrix*, tier1::S_vector*&)' is ambiguous
+f_005941d0.cpp:84:19: call of overloaded 'S_matrix__SetDir(tier1::S_matrix*, tier1::S_vector*&)' is ambiguous
     S_matrix__SetDir(&local_50,in_stack_00000008);
-f_005957a0.cpp:290:41: no matching function for call to 'gh_bitcast<uint32_t*>()'
-    puVar7 = gh_bitcast<uint32_t*>()
-f_005971d0.cpp:359:19: no matching function for call to 'S_matrix__SetDir(void*&, tier1::S_vector*)'
-    S_matrix__SetDir(_this,(S_vector *)((int)_this + 0x40));
-f_005971d0.cpp:383:19: no matching function for call to 'S_matrix__SetDir(void*&, tier1::S_vector*)'
-    S_matrix__SetDir(_this,(S_vector *)((int)_this + 0x40));
-f_00597c20.cpp:120:23: call of overloaded 'S_matrix__SetDir(tier1::S_matrix*, tier1::S_vector*)' is ambiguous
-    S_matrix__SetDir(&local_50,&local_60);
-f_00598520.cpp:519:44: invalid types 'float[int]' for array subscript
-    *pfVar15 = (*(float *)&pIVar14->vtable)[0];
-f_00598520.cpp:523:19: call of overloaded 'S_matrix__SetDir(tier1::S_matrix*, tier1::S_vector*)' is ambiguous
-    S_matrix__SetDir(&SStack_c0,&local_200);
-f_00598520.cpp:1044:45: no matching function for call to 'gh_bitcast<tier1::S_Checkpoint*>()'
-    local_d4 = gh_bitcast<S_Checkpoint*>()
-f_00598520.cpp:1114:45: no matching function for call to 'gh_bitcast<tier1::S_Checkpoint*>()'
-    local_d4 = gh_bitcast<S_Checkpoint*>()
 f_005ac500.cpp:46:53: request for member '_0_4_' in '"\012Controls - "', which is of non-class type 'const char [13]'
     *(uint32_t *)(pcVar9 - 1) = "\nControls - "._0_4_;
 f_005ac500.cpp:47:53: request for member '_4_4_' in '"\012Controls - "', which is of non-class type 'const char [13]'

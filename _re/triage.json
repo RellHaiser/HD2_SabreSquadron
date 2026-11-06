@@ -485,7 +485,7 @@
 ],
 "data_refs": 0,
 "live_callers": 13,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -641,7 +641,7 @@
 ],
 "data_refs": 0,
 "live_callers": 15,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -3171,7 +3171,7 @@
 ],
 "data_refs": 0,
 "live_callers": 5,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -3191,7 +3191,7 @@
 ],
 "data_refs": 0,
 "live_callers": 5,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -3209,7 +3209,7 @@
 ],
 "data_refs": 0,
 "live_callers": 2,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -6108,7 +6108,7 @@
 ],
 "data_refs": 0,
 "live_callers": 2,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -6416,7 +6416,7 @@
 ],
 "data_refs": 0,
 "live_callers": 4,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -7210,7 +7210,7 @@
 ],
 "data_refs": 0,
 "live_callers": 11,
-"todo_callers": 3,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -7580,7 +7580,7 @@
 ],
 "data_refs": 0,
 "live_callers": 2,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -7692,7 +7692,7 @@
 ],
 "data_refs": 0,
 "live_callers": 22,
-"todo_callers": 1,
+"todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -8577,26 +8577,6 @@
 "in_vtables": []
 },
 {
-"address": "005636d0",
-"name": "FUN_005636d0",
-"size": 406,
-"how": "virtual",
-"byte_refs": 6,
-"byte_ref_owners": [
-"00561c70",
-"005774a0",
-"0057aaf0",
-"0057b2e0",
-"0057b740"
-],
-"data_refs": 0,
-"live_callers": 4,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "00563870",
 "name": "FUN_00563870",
 "size": 48,
@@ -8625,47 +8605,6 @@
 "live_callers": 0,
 "todo_callers": 0,
 "loose_refs": 1,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005638e0",
-"name": "FUN_005638e0",
-"size": 36,
-"how": "virtual",
-"byte_refs": 8,
-"byte_ref_owners": [
-"00561c70",
-"005774a0",
-"0057aaf0",
-"0057b2e0",
-"0057b740"
-],
-"data_refs": 0,
-"live_callers": 4,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00563920",
-"name": "FUN_00563920",
-"size": 45,
-"how": "virtual",
-"byte_refs": 13,
-"byte_ref_owners": [
-"005638e0",
-"0056a0f0",
-"0056f630",
-"0057aaf0",
-"0057b2e0",
-"0057da40"
-],
-"data_refs": 0,
-"live_callers": 8,
-"todo_callers": 2,
-"loose_refs": 0,
 "strings": [],
 "in_vtables": []
 },
@@ -8727,382 +8666,6 @@
 ]
 },
 {
-"address": "00563f60",
-"name": "FUN_00563f60",
-"size": 10,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00563f50"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00563f70",
-"name": "FUN_00563f70",
-"size": 12,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00563f50"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00563f80",
-"name": "FUN_00563f80",
-"size": 10,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00563f70"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00563f90",
-"name": "FUN_00563f90",
-"size": 266,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00563f60"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005640a0",
-"name": "FUN_005640a0",
-"size": 267,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00563f80"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005641b0",
-"name": "SaveGame",
-"size": 548,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0059d5d0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005643e0",
-"name": "LoadGame",
-"size": 934,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0059ddf0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005647c0",
-"name": "FUN_005647c0",
-"size": 1836,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00476080"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00564ef0",
-"name": "FUN_00564ef0",
-"size": 1230,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005653c0",
-"name": "FUN_005653c0",
-"size": 381,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"00564ef0",
-"00565f30"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 2,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00565540",
-"name": "FUN_00565540",
-"size": 413,
-"how": "virtual",
-"byte_refs": 7,
-"byte_ref_owners": [
-"00566130",
-"00567ab0",
-"00568580"
-],
-"data_refs": 0,
-"live_callers": 3,
-"todo_callers": 3,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005656e0",
-"name": "FUN_005656e0",
-"size": 2122,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00565f30",
-"name": "FUN_00565f30",
-"size": 505,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00566130",
-"name": "FUN_00566130",
-"size": 3355,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00566e50",
-"name": "FUN_00566e50",
-"size": 3159,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00567ab0",
-"name": "FUN_00567ab0",
-"size": 232,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00567ba0",
-"name": "FUN_00567ba0",
-"size": 217,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00567c80",
-"name": "FUN_00567c80",
-"size": 353,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00567df0",
-"name": "FUN_00567df0",
-"size": 928,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00568190"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00568190",
-"name": "FUN_00568190",
-"size": 1006,
-"how": "virtual",
-"byte_refs": 12,
-"byte_ref_owners": [
-"00566e50",
-"00567ab0",
-"00567ba0",
-"00568dc0",
-"0056adb0",
-"0056c230"
-],
-"data_refs": 0,
-"live_callers": 5,
-"todo_callers": 5,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00568580",
-"name": "FUN_00568580",
-"size": 2106,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00568dc0",
-"name": "FUN_00568dc0",
-"size": 1895,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00569530",
-"name": "FUN_00569530",
-"size": 141,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "005695c0",
 "name": "FUN_005695c0",
 "size": 707,
@@ -9117,75 +8680,6 @@
 "in_vtables": []
 },
 {
-"address": "00569890",
-"name": "FUN_00569890",
-"size": 2131,
-"how": "virtual",
-"byte_refs": 5,
-"byte_ref_owners": [
-"005656e0",
-"0056a8e0",
-"0056adb0",
-"0056c230"
-],
-"data_refs": 0,
-"live_callers": 3,
-"todo_callers": 3,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056a0f0",
-"name": "FUN_0056a0f0",
-"size": 1489,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005656e0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056a6d0",
-"name": "FUN_0056a6d0",
-"size": 451,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"0056a0f0",
-"0056a6d0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 2,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056a8e0",
-"name": "FUN_0056a8e0",
-"size": 1228,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"0056a0f0",
-"0056a8e0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 2,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "0056adb0",
 "name": "FUN_0056adb0",
 "size": 4317,
@@ -9195,54 +8689,6 @@
 "data_refs": 0,
 "live_callers": 0,
 "todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056be90",
-"name": "FUN_0056be90",
-"size": 921,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0056a0f0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056c230",
-"name": "FUN_0056c230",
-"size": 7264,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0056a8e0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056de90",
-"name": "FUN_0056de90",
-"size": 1061,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"0056c230"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -9278,70 +8724,6 @@
 "in_vtables": []
 },
 {
-"address": "0056e830",
-"name": "FUN_0056e830",
-"size": 406,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056e9d0",
-"name": "FUN_0056e9d0",
-"size": 43,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056ea00",
-"name": "FUN_0056ea00",
-"size": 459,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056ebd0",
-"name": "FUN_0056ebd0",
-"size": 71,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005647c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "0056ec30",
 "name": "FUN_0056ec30",
 "size": 19,
@@ -9353,104 +8735,6 @@
 "data_refs": 0,
 "live_callers": 0,
 "todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056ec50",
-"name": "FUN_0056ec50",
-"size": 43,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"005695c0",
-"00569890"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056eca0",
-"name": "FUN_0056eca0",
-"size": 65,
-"how": "virtual",
-"byte_refs": 3,
-"byte_ref_owners": [
-"0056ea00"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056ecf0",
-"name": "FUN_0056ecf0",
-"size": 63,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0056ea00"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056ed50",
-"name": "FUN_0056ed50",
-"size": 53,
-"how": "called",
-"byte_refs": 2,
-"byte_ref_owners": [
-"00563f90",
-"005640a0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 2,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056ed90",
-"name": "FUN_0056ed90",
-"size": 21,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0056ea00"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0056edc0",
-"name": "FUN_0056edc0",
-"size": 27,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"0056ea00"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
 "loose_refs": 0,
 "strings": [],
 "in_vtables": []
@@ -10790,159 +10074,6 @@
 "in_vtables": []
 },
 {
-"address": "005942d0",
-"name": "FUN_005942d0",
-"size": 656,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"00460410",
-"0059d5d0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00594560",
-"name": "FUN_00594560",
-"size": 1091,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"004605c0",
-"0059ddf0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005949c0",
-"name": "FUN_005949c0",
-"size": 133,
-"how": "called",
-"byte_refs": 4,
-"byte_ref_owners": [
-"004608a0",
-"00597b50",
-"0059ddf0",
-"005a91a0"
-],
-"data_refs": 0,
-"live_callers": 3,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00594a50",
-"name": "FUN_00594a50",
-"size": 25,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00597c50"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00594a70",
-"name": "FUN_00594a70",
-"size": 8,
-"how": "called",
-"byte_refs": 4,
-"byte_ref_owners": [
-"00460980",
-"00597b50",
-"005a9120",
-"loose"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 0,
-"loose_refs": 1,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00594a80",
-"name": "FUN_00594a80",
-"size": 839,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005942d0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00594dd0",
-"name": "FUN_00594dd0",
-"size": 1437,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00594560"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00595370",
-"name": "FUN_00595370",
-"size": 74,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00597420"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005953c0",
-"name": "FUN_005953c0",
-"size": 82,
-"how": "called",
-"byte_refs": 4,
-"byte_ref_owners": [
-"00597420",
-"loose"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 2,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "00595420",
 "name": "FUN_00595420",
 "size": 745,
@@ -10953,22 +10084,6 @@
 ],
 "data_refs": 0,
 "live_callers": 0,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00595710",
-"name": "FUN_00595710",
-"size": 113,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005a0220"
-],
-"data_refs": 0,
-"live_callers": 1,
 "todo_callers": 0,
 "loose_refs": 0,
 "strings": [],
@@ -10992,23 +10107,6 @@
 222
 ]
 ]
-},
-{
-"address": "005957d0",
-"name": "FUN_005957d0",
-"size": 2339,
-"how": "virtual",
-"byte_refs": 4,
-"byte_ref_owners": [
-"005957d0",
-"0059ba70"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 2,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
 },
 {
 "address": "00596120",
@@ -11049,22 +10147,6 @@
 ]
 },
 {
-"address": "00596160",
-"name": "FUN_00596160",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00596150"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "005962d0",
 "name": "thunk_FUN_005962e0",
 "size": 5,
@@ -11082,22 +10164,6 @@
 225
 ]
 ]
-},
-{
-"address": "005962e0",
-"name": "FUN_005962e0",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005962d0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
 },
 {
 "address": "00596450",
@@ -11119,22 +10185,6 @@
 ]
 },
 {
-"address": "00596460",
-"name": "FUN_00596460",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00596450"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "005965d0",
 "name": "thunk_FUN_005965e0",
 "size": 5,
@@ -11152,22 +10202,6 @@
 227
 ]
 ]
-},
-{
-"address": "005965e0",
-"name": "FUN_005965e0",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005965d0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
 },
 {
 "address": "00596750",
@@ -11189,22 +10223,6 @@
 ]
 },
 {
-"address": "00596760",
-"name": "FUN_00596760",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00596750"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "005968d0",
 "name": "thunk_FUN_005968e0",
 "size": 5,
@@ -11222,22 +10240,6 @@
 229
 ]
 ]
-},
-{
-"address": "005968e0",
-"name": "FUN_005968e0",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005968d0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
 },
 {
 "address": "00596a50",
@@ -11259,22 +10261,6 @@
 ]
 },
 {
-"address": "00596a60",
-"name": "FUN_00596a60",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00596a50"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "00596bd0",
 "name": "thunk_FUN_00596be0",
 "size": 5,
@@ -11292,22 +10278,6 @@
 231
 ]
 ]
-},
-{
-"address": "00596be0",
-"name": "FUN_00596be0",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00596bd0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
 },
 {
 "address": "00596d50",
@@ -11329,22 +10299,6 @@
 ]
 },
 {
-"address": "00596d60",
-"name": "FUN_00596d60",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00596d50"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "00596ed0",
 "name": "thunk_FUN_00596ee0",
 "size": 5,
@@ -11362,22 +10316,6 @@
 233
 ]
 ]
-},
-{
-"address": "00596ee0",
-"name": "FUN_00596ee0",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00596ed0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
 },
 {
 "address": "00597050",
@@ -11399,22 +10337,6 @@
 ]
 },
 {
-"address": "00597060",
-"name": "FUN_00597060",
-"size": 361,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00597050"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "005971d0",
 "name": "thunk_FUN_005971e0",
 "size": 5,
@@ -11434,59 +10356,6 @@
 ]
 },
 {
-"address": "005971e0",
-"name": "FUN_005971e0",
-"size": 486,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005971d0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005973e0",
-"name": "FUN_005973e0",
-"size": 64,
-"how": "called",
-"byte_refs": 2,
-"byte_ref_owners": [
-"005971e0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 2,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00597420",
-"name": "C_FormationShape::SetType",
-"size": 674,
-"how": "called",
-"byte_refs": 16,
-"byte_ref_owners": [
-"00416e10",
-"00456020",
-"004608a0",
-"00594210",
-"00594a70",
-"00597880"
-],
-"data_refs": 0,
-"live_callers": 6,
-"todo_callers": 2,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "005976d0",
 "name": "FUN_005976d0",
 "size": 8,
@@ -11499,78 +10368,6 @@
 "live_callers": 0,
 "todo_callers": 0,
 "loose_refs": 1,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00597760",
-"name": "FUN_00597760",
-"size": 133,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00597880"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005977f0",
-"name": "C_FormationShape::SetScale",
-"size": 133,
-"how": "called",
-"byte_refs": 8,
-"byte_ref_owners": [
-"00416e10",
-"00456020",
-"00597880",
-"00597b50",
-"005a91a0"
-],
-"data_refs": 0,
-"live_callers": 4,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00597880",
-"name": "FUN_00597880",
-"size": 96,
-"how": "called",
-"byte_refs": 2,
-"byte_ref_owners": [
-"00594210",
-"005949c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005978e0",
-"name": "FUN_005978e0",
-"size": 558,
-"how": "called",
-"byte_refs": 4,
-"byte_ref_owners": [
-"00597420",
-"00597760",
-"005977f0",
-"00597c50"
-],
-"data_refs": 0,
-"live_callers": 4,
-"todo_callers": 4,
-"loose_refs": 0,
 "strings": [],
 "in_vtables": []
 },
@@ -11610,146 +10407,6 @@
 ]
 },
 {
-"address": "00597c50",
-"name": "FUN_00597c50",
-"size": 808,
-"how": "called",
-"byte_refs": 3,
-"byte_ref_owners": [
-"004608a0",
-"005981c0",
-"005a91a0"
-],
-"data_refs": 0,
-"live_callers": 3,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00597f80",
-"name": "FUN_00597f80",
-"size": 572,
-"how": "called",
-"byte_refs": 5,
-"byte_ref_owners": [
-"004603c0",
-"00597c50",
-"005a91a0"
-],
-"data_refs": 0,
-"live_callers": 3,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005981c0",
-"name": "FUN_005981c0",
-"size": 199,
-"how": "called",
-"byte_refs": 2,
-"byte_ref_owners": [
-"00460850",
-"005a91a0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00598290",
-"name": "FindSlot",
-"size": 63,
-"how": "called",
-"byte_refs": 13,
-"byte_ref_owners": [
-"0052dc10",
-"00530ff0",
-"00597c50",
-"00597f80",
-"005981c0",
-"005982d0"
-],
-"data_refs": 0,
-"live_callers": 11,
-"todo_callers": 9,
-"loose_refs": 2,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005982d0",
-"name": "InvalidateSlot",
-"size": 69,
-"how": "called",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005357e0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00598320",
-"name": "GetSlotTarget",
-"size": 157,
-"how": "virtual",
-"byte_refs": 3,
-"byte_ref_owners": [
-"005325c0",
-"00536120",
-"0058d970"
-],
-"data_refs": 0,
-"live_callers": 3,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005983c0",
-"name": "GetSlotDir",
-"size": 100,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00536120"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00598460",
-"name": "GetSlotSeat",
-"size": 101,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"00536120"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
 "address": "00598520",
 "name": "FUN_00598520",
 "size": 37,
@@ -11767,88 +10424,6 @@
 237
 ]
 ]
-},
-{
-"address": "00598550",
-"name": "FUN_00598550",
-"size": 696,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"005990c0",
-"0059a2e0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 2,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00598810",
-"name": "FUN_00598810",
-"size": 2092,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"005990c0"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "00599040",
-"name": "SetSlotTarget",
-"size": 121,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"0052dc10",
-"00530ff0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "005990c0",
-"name": "FUN_005990c0",
-"size": 4637,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0059ba70"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0059a2e0",
-"name": "FUN_0059a2e0",
-"size": 2128,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0059ba70"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
 },
 {
 "address": "0059ab30",
@@ -11898,75 +10473,6 @@
 238
 ]
 ]
-},
-{
-"address": "0059af30",
-"name": "PlanSlot",
-"size": 1880,
-"how": "virtual",
-"byte_refs": 3,
-"byte_ref_owners": [
-"0052dc10",
-"00530ff0",
-"005990c0"
-],
-"data_refs": 0,
-"live_callers": 3,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0059b7b0",
-"name": "FUN_0059b7b0",
-"size": 693,
-"how": "called",
-"byte_refs": 5,
-"byte_ref_owners": [
-"005957d0",
-"00597c50",
-"00598550"
-],
-"data_refs": 0,
-"live_callers": 3,
-"todo_callers": 3,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0059ba70",
-"name": "FUN_0059ba70",
-"size": 199,
-"how": "virtual",
-"byte_refs": 2,
-"byte_ref_owners": [
-"00460a10",
-"0059ffd0"
-],
-"data_refs": 0,
-"live_callers": 2,
-"todo_callers": 0,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
-},
-{
-"address": "0059bb60",
-"name": "FUN_0059bb60",
-"size": 533,
-"how": "virtual",
-"byte_refs": 1,
-"byte_ref_owners": [
-"0059ba70"
-],
-"data_refs": 0,
-"live_callers": 1,
-"todo_callers": 1,
-"loose_refs": 0,
-"strings": [],
-"in_vtables": []
 },
 {
 "address": "0059bd80",
