@@ -43630,6 +43630,10 @@
   "name": "C_HumanEquipment::LoadGame",
   "proto": "bool __thiscall LoadGame(C_HumanEquipment *this, C_chunk *chunk)"
  },
+ "00796830": {
+  "module": "human_stains",
+  "name": "C_StainManager_Dtor"
+ },
  "00796890": {
   "module": "game",
   "name": "C_StainManager::Init",
@@ -43644,6 +43648,58 @@
   "module": "game",
   "name": "C_StainManager::Done",
   "proto": "void __fastcall Done(C_StainManager * manager)"
+ },
+ "00796d00": {
+  "module": "human_stains",
+  "name": "StainManager_AcquireMesh"
+ },
+ "00796ff0": {
+  "module": "human_stains",
+  "name": "StainManager_ReleaseMesh"
+ },
+ "007970f0": {
+  "module": "human_stains",
+  "name": "StainManager_AcquireTextures"
+ },
+ "007971b0": {
+  "module": "human_stains",
+  "name": "StainManager_ReleaseTextures"
+ },
+ "007971e0": {
+  "module": "human_stains",
+  "name": "StainMesh_Ctor"
+ },
+ "00797480": {
+  "module": "human_stains",
+  "name": "StainMesh_Build"
+ },
+ "00797790": {
+  "module": "human_stains",
+  "name": "StainGroup_FindExtremes"
+ },
+ "00797a80": {
+  "module": "human_stains",
+  "name": "StainMesh_NearestByWalks"
+ },
+ "00797be0": {
+  "module": "human_stains",
+  "name": "StainMesh_NearestFromExtremes"
+ },
+ "00797eb0": {
+  "module": "human_stains",
+  "name": "StainGroup_FindVertex"
+ },
+ "00797f00": {
+  "module": "human_stains",
+  "name": "StainGroup_AddEdge"
+ },
+ "007982a0": {
+  "module": "human_stains",
+  "name": "StainGroup_WalkToNearest"
+ },
+ "00798470": {
+  "module": "human_stains",
+  "name": "StainGroup_SearchNearest"
  },
  "00798660": {
   "module": "weapon_pose",
@@ -43675,15 +43731,43 @@
   "name": "C_HumanStains::SkipSaved",
   "proto": "void __cdecl SkipSaved(C_chunk * chunk)"
  },
+ "007992a0": {
+  "module": "human_stains",
+  "name": "HumanStains_PrepareBuffers"
+ },
+ "007994e0": {
+  "module": "human_stains",
+  "name": "HumanStains_TakeTextures"
+ },
+ "007995d0": {
+  "module": "human_stains",
+  "name": "HumanStains_GiveBackTextures"
+ },
+ "007996d0": {
+  "module": "human_stains",
+  "name": "HumanStains_ReturnTextures"
+ },
  "007997b0": {
   "module": "weapon_pose",
   "name": "C_HumanStains::SetVisible",
   "proto": "void __thiscall SetVisible(C_HumanStains *this, bool on)"
  },
+ "007999a0": {
+  "module": "human_stains",
+  "name": "HumanStains_SetPaint"
+ },
  "00799bc0": {
   "module": "weapon_pose",
   "name": "C_HumanStains::AddHit",
   "proto": "void __thiscall AddHit(C_HumanStains *this, S_vector * pos, S_vector * dir, uint flags)"
+ },
+ "0079a010": {
+  "module": "human_stains",
+  "name": "HumanStains_PaintHit"
+ },
+ "0079a880": {
+  "module": "human_stains",
+  "name": "HumanStains_PaintSplat"
  },
  "0079aa70": {
   "module": "zz_idioms",

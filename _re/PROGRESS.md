@@ -9138,6 +9138,19 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 90 errors in 34/367. ret_audit --src: 52.
   - Stats: 10,575 of 12,306 functions by hand or absorbed (91.0 % by size).
 
+  PART 11g DONE (2026-11-06): the blood stains on a body (game/human_stains.h, .cpp; game/stain_images.inc).
+  - C_StainManager (the textures, and which eight bodies have real ones lent) and C_HumanStains. Each of the body's seven face groups has an ARGB 4444 picture in memory. A hit picks the groups by the zone bits and the side it came from, finds the nearest vertex along the mesh's edges (random walks on the head, searches from four extremes elsewhere), follows two edges as the texture's axes to a UV, and blends one of 11 splats there.
+  - The same pictures carry the head's overlay (above 0.1 kg on the first item) and the camouflage paints of role-1 soldiers in the missions of g_missionVariant 1 and 2, by turns.
+  - The pictures (11 x 16 x 16, 9 x 64 x 64) are compiled into the original's data, not in the game's files: game/stain_images.inc is generated from it (0x0084fff8..0x00863690, 290 KB of source).
+  - Kept: another pitch in PaintHit leaves the texture locked and paints nothing; a body's second group of a side hit usually lands off its picture.
+  - Fixed: the walk's visited marks were uninitialized memory; an empty face group divided by zero or read the first of no vertices; a human without containers crashed Bind.
+  - Left out: the debug skeleton 0x0079b0a0, 0x0079bbc0 behind the flag nothing sets (see 11c). Still in tier 1, dead: 0x00797680, 0x00797b70.
+  - The material slots 0x2C, 0x30, 0x34, the level's 0x38, 0x3C and the visual's 0xBC, 0xC4 are called by offset (not named in the headers: their meaning is inferred).
+  - Harness: script_module/build_stains.bat (884 checks, a fake mesh of seven quads, against the real images). Mutations: mutate_11g.py 649: 416 killed, 96 not building, 137 survived (frees, boundaries, degenerate normalization, ties).
+  - Nothing here has met a real body mesh: the mesh walking is only tested on quads.
+  - Build: MSVC clean. Tier 1: 90 errors in 34/367. ret_audit --src: 52. All vehicle and script_module harnesses build and pass; factory checkers clean.
+  - Stats: 10,634 of 12,306 functions by hand or absorbed (91.5 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
