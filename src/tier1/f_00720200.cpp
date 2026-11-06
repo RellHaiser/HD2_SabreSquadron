@@ -51,12 +51,8 @@ uint32_t FUN_007210a0(int *param_1, ...)
 }
 
 
-// 0x007210c0  (tier1 fallback: translated text kept below, needs hand porting)
+// 0x007210c0
 int FUN_007210c0(uint32_t *param_1,uint8_t *param_2, ...)
-{
-  return {};
-}
-#if 0
 {
   uint8_t stack0x0000000c[64];
   int size;
@@ -70,5 +66,3 @@ int FUN_007210c0(uint32_t *param_1,uint8_t *param_2, ...)
 
 
 } // namespace tier1
-
-#endif

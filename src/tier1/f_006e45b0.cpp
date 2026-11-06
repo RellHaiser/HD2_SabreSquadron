@@ -44,7 +44,7 @@ uint32_t FUN_006e45f0(...)
 
 
 // 0x006e4610
-uint32_t FUN_006e4610(...)
+uint32_t LoadMapFiles_Dead(...)
 {
   HANDLE hFindFile;
   int iVar1;

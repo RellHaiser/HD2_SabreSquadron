@@ -170,42 +170,6 @@ f_006e1cb0.cpp:614:37: cannot convert 'uint8_t (*)[64]' {aka 'unsigned char (*)[
     pcVar7 = &stack0x0000101c + uVar8;
 f_006e1cb0.cpp:706:30: incompatible types in assignment of 'int' to 'uint8_t [64]' {aka 'unsigned char [64]'}
     (&stack0x0000000e)[~uVar6] = 0x5f;
-f_006e2db0.cpp:54:92: no matching function for call to 'tier1::va_list::va_list(uint8_t (*)[64])'
-    iVar2 = wvsprintfA((LPSTR)(&stack0x00000000),in_stack_00004004,(va_list)(&stack0x00004008));
-f_006e2db0.cpp:64:20: 'register0x00000010' was not declared in this scope
-    pcVar6 = (char *)register0x00000010;
-f_006e2db0.cpp:153:37: too many arguments to function
-    hObject = (uint8_t *)(*pFVar2)(8,local_8);
-f_006e2db0.cpp:156:27: too many arguments to function
-    iVar4 = (*local_4)(hObject,&param_12);
-f_006e2db0.cpp:236:30: too many arguments to function
-    iVar4 = (*param_10)(hObject,&param_12);
-f_006e2db0.cpp:356:18: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar4 = (*DAT_008bf110)(puVar8,0,ptr_00,ptr,piVar7[3],piVar7[4]);
-f_006e2db0.cpp:369:12: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (*DAT_008bf110)(puVar8,0,ptr_00,ptr,piVar7[3],piVar7[4]);
-f_006e2db0.cpp:485:8: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (*DAT_008bf114)();
-f_006e2db0.cpp:489:8: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (*DAT_008bf10c)();
-f_006e2db0.cpp:493:8: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (*DAT_008bf0ec)();
-f_006e2db0.cpp:498:8: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (*DAT_008bf0f0)(pvVar3);
-f_006e2db0.cpp:504:6: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (*DAT_008bf0e4)(&DAT_008af0c0);
-f_006e2db0.cpp:507:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    uVar4 = (*DAT_008bf0c0)(param_1);
-f_006e2db0.cpp:792:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar2 = (*DAT_008bf118)();
-f_006e2db0.cpp:801:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar2 = (*DAT_008bf0f8)();
-f_006e2db0.cpp:809:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar3 = (*DAT_008bf108)();
-f_006e2db0.cpp:845:16: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar2 = (*DAT_008bf120)();
-f_006e2db0.cpp:848:10: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (*DAT_008bf124)();
 f_006e7280.cpp:49:11: 'LocalDescriptorTableRegister' was not declared in this scope
     uVar1 = LocalDescriptorTableRegister();
 f_006e7280.cpp:52:23: void value not ignored as it ought to be
@@ -226,8 +190,6 @@ f_006f9e30.cpp:1936:48: no matching function for call to 'gh_bitcast<uint32_t*>(
     local_260 = gh_bitcast<uint32_t*>()
 f_00702bb0.cpp:550:38: no matching function for call to 'gh_bitcast<tier1::S_vector4*>()'
     local_84 = gh_bitcast<S_vector4*>()
-f_00720200.cpp:60:77: no matching function for call to 'tier1::va_list::va_list(uint8_t (*)[64])'
-    size = _vsnprintf(local_3e8,999,(char *)param_2,(va_list)(&stack0x0000000c));
 f_0072e190.cpp:93:25: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
     uVar2 = htons(0x3a9a);
 f_0072e190.cpp:95:41: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')

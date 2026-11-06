@@ -432,8 +432,6 @@ bool LoadMaterialTables();                          // 0x0071fd80
 class IGraph;
 #include <windows.h>
 extern uint32_t g_graphFlags;                       // 0x00981e6c IGraph info flags after init
-extern void (*g_fatalErrorHandler)();               // 0x008bf0e4
-void OnFatalError();                                // 0x006e1ad0
 LRESULT CALLBACK GameWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void InitControls(C_Controls &controls);            // 0x006c7340
 void BindControls(C_Controls &controls, IGraph *graph, C_FrameListener **listeners, unsigned count);  // 0x006c7010

@@ -18,6 +18,7 @@
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/copy_protection.h"
+#include "game/crash_report.h"
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "ls3d/rw_data.h"

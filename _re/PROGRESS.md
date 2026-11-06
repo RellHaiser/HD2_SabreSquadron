@@ -9117,6 +9117,16 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 127 errors in 37/369. ret_audit --src: 52.
   - Stats: 10,490 of 12,306 functions by hand or absorbed (90.4 % by size).
 
+  PART 11e DONE (2026-11-06): crash reporting (game/crash_report.h, .cpp), the original's C_ExceptionHandler and OnFatalError 0x006e1ad0.
+  - An unhandled exception filter installed before WinMain (0x006e2db0: a static object here too). It loads dbghelp.dll and writes into a 64 KB buffer the machine, the exception, the registers and the call stack (symbols, lines, local variables when a .pdb is found beside the module), hands it to g_fatalErrorHandler, then calls the previous filter. OnFatalError appends it to <exe>.RPT beside the executable and passes it to dbgPrintf2.
+  - Left out (the owner may want to know): the second copy to \\Intra\HD2_graf\CRASH_REPORTS, the developer's own network share.
+  - Fixed: OnFatalError's new char[10000] overflowed on a report up to 64 KB, inside the crash handler; the .RPT name was cut at the first '.' of the whole path; SymGetLineFromAddr was called unchecked; reading a bad local variable faulted inside the filter.
+  - Kept: the BuildID stays the original's "Aug 18 2004 16:38:15". Local variables' values are read as ESP + address - 8, so with today's .pdb files they are mostly wrong (seen in the MSVC run): names right, values not to be trusted.
+  - Not reproduced: the module list as a vector (0x006e2e80, 0x006e40c0..0x006e4560): walked directly. Still in tier 1, dead: 0x006e4610 LoadMapFiles_Dead and its loader 0x006e1d80.
+  - Harness: script_module/build_crash.bat (57 checks, MinGW; really faults in child processes), build_crash_msvc.bat (62 checks; a real .pdb: symbols, lines and locals in the report). Mutations: mutate_11e.py 197: 69 killed, 49 not building, 79 survived (mostly the frame fields StackWalk fills itself and the symbol paths MinGW has no .pdb for, which the MSVC run covers by hand).
+  - Build: MSVC clean. Tier 1: 108 errors in 35/368. ret_audit --src: 52. Vehicle and other harnesses build; factory checkers clean. pending.h: two lines moved to crash_report.h.
+  - Stats: 10,512 of 12,306 functions by hand or absorbed (90.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

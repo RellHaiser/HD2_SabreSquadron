@@ -398,7 +398,6 @@ typedef code _func_C_CameraModule_vtbl__SetFov2;
 struct action { uint8_t _unknown[1]; };
 struct u_long { uint8_t _unknown[1]; };
 struct u_short { uint8_t _unknown[1]; };
-struct va_list { uint8_t _unknown[1]; };
 
 #pragma pack(push, 1)
 struct C_str_rep { int refCount; unsigned int length; char chars[1]; };

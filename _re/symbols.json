@@ -37433,6 +37433,10 @@
   "module": "zz_idioms",
   "name": "construct_copy4_6e1a90"
  },
+ "006e1ad0": {
+  "module": "crash_report",
+  "name": "OnFatalError"
+ },
  "006e2ab0": {
   "module": "zz_idioms",
   "name": "vector_tidy_6e2ab0"
@@ -37444,6 +37448,94 @@
  "006e2d00": {
   "module": "zz_idioms",
   "name": "construct_copy4_6e2d00"
+ },
+ "006e2db0": {
+  "module": "crash_report",
+  "name": "InitExceptionHandler"
+ },
+ "006e2dc0": {
+  "module": "crash_report",
+  "name": "ConstructExceptionHandler"
+ },
+ "006e2dd0": {
+  "module": "crash_report",
+  "name": "RegisterExceptionHandlerDtor"
+ },
+ "006e2de0": {
+  "module": "crash_report",
+  "name": "DestroyExceptionHandler"
+ },
+ "006e2df0": {
+  "module": "crash_report",
+  "name": "ReportLine"
+ },
+ "006e2e80": {
+  "module": "crash_report",
+  "name": "ListProcessModules"
+ },
+ "006e3140": {
+  "module": "crash_report",
+  "name": "S_ModuleInfo_Dtor"
+ },
+ "006e31b0": {
+  "module": "crash_report",
+  "name": "LoadSymbolFiles"
+ },
+ "006e33d0": {
+  "module": "crash_report",
+  "name": "C_ExceptionHandler_Ctor"
+ },
+ "006e33f0": {
+  "module": "crash_report",
+  "name": "C_ExceptionHandler_Dtor"
+ },
+ "006e3400": {
+  "module": "crash_report",
+  "name": "ReportUnhandledException"
+ },
+ "006e3700": {
+  "module": "crash_report",
+  "name": "ReportException"
+ },
+ "006e3940": {
+  "module": "crash_report",
+  "name": "ExceptionName"
+ },
+ "006e3bc0": {
+  "module": "crash_report",
+  "name": "GetModuleOfAddress"
+ },
+ "006e3c00": {
+  "module": "crash_report",
+  "name": "GetLogicalAddress"
+ },
+ "006e3cf0": {
+  "module": "crash_report",
+  "name": "ReportLocalVariable"
+ },
+ "006e3d30": {
+  "module": "crash_report",
+  "name": "ReportCallStack"
+ },
+ "006e4060": {
+  "module": "crash_report",
+  "name": "ModuleInfoVector_Dtor"
+ },
+ "006e40c0": {
+  "module": "crash_report",
+  "name": "ModuleInfoVector_Insert"
+ },
+ "006e4410": {
+  "module": "crash_report",
+  "name": "S_ModuleInfo_CopyConstruct"
+ },
+ "006e4560": {
+  "module": "crash_report",
+  "name": "S_ModuleInfo_DeletingDtor"
+ },
+ "006e4610": {
+  "module": "crash_report",
+  "name": "LoadMapFiles_Dead"
  },
  "006e4a10": {
   "module": "zz_idioms",
