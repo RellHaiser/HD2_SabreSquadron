@@ -364,4 +364,6 @@ void FaceTargetZone(S_vector4 *dir, const S_vector4 &pos, int team);   // 0x0069
 void ShowGameMenuMessage(int textId);                // 0x0069e9b0
 // The session moves on to its next map (the settings' next; the game's pending state GAME_STATE_NEXT_MAP).
 void LoadNextMap();                                 // 0x0069bca0
+// The session switches to map `name` (null: the next one), told to the players.
+void ChangeMap(const char *name);                   // 0x0069bcc0
 extern C_game *g_game;                              // 0x008ae8f4

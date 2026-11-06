@@ -10393,8 +10393,6 @@
 0072c120
 # hand-ported (continued)
 00731af0
-00731e10
-00731ee0
 00732000
 00732050
 00732080
@@ -10422,4 +10420,26 @@
 00732dc0
 00732dd0
 00732de0
+# hand-ported (continued)
+007426a0
+007426e0
+00742850
+007440d0
+007442e0
+00744360
+00744390
+007443a0
+007443d0
+00744490
+00744540
+007445d0
+00744750
+0069f520
+# absorbed helpers 007426c0-00744350: the processor's deleting destructor and empty slots, the console state's type and destructors (inline in the port; part 10e-i)
+007426c0
+00744210
+00744220
+00744320
+00744330
+00744350
 # hand-ported (continued)

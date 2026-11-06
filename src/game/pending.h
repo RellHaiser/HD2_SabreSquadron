@@ -37,11 +37,25 @@ public:
     explicit C_ConsoleState(const char *command);   // 0x007442e0
     // "HD2 console", "Type 'help' for keywords list"; the console shows the messages.
     void ShowBanner();                              // 0x007443a0
-    bool IsShown() const;                           // byte +0x210
+    bool IsShown() const { return m_shown; }        // byte +0x210
+    bool Start(void *arg) override;                 // 0x00744360
+    bool Stop() override { return true; }           // 0x00744390
+    // The console's commands, the first command (failed: the game ends), hosting or joining asked for.
+    void Update(int timeDelta) override;            // 0x007443d0
+    int GetTypeId() const override { return GAME_STATE_TYPE_CONSOLE; }   // 0x00744320
+
+private:
+    void StartHosting();                            // 0x00744490
+    void StartJoining();                            // 0x00744540
+
+    char m_command[0x200] = {};                     // +0x0C
+    int m_mode = 0;                                 // +0x20C
+    bool m_shown = false;                           // +0x210
 };
-// The next word of a console command line (quotes allowed); 0 when one was read, 3 at the
-// end. `*cursor` moves past it.
-int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown2);   // 0x007445d0
+// The next word of a console command line (quotes allowed; spaces, tabs, '>' and a '-' before a letter or digit
+// skipped; `*cursor` moves past it): 3 at the end; 2 a keyword of `keywords` (any case; null: none looked for; its id
+// in *value), 1 a number (in *value), 0 another word.
+int ReadConsoleToken(const char **cursor, char *out, int *value, char *keywords);   // 0x007445d0
 
 // ---- the objects of the GEffects module (part 8d) --------------------------
 #include "game/decorators.h"
@@ -332,7 +346,14 @@ int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2);   // 0x
 // The console commands of a dedicated server (the singleton at 0x0098c0fc).
 class C_CommandProcessor {
 public:
+    C_CommandProcessor();                           // 0x007426a0 (the settings' set-up made)
+    ~C_CommandProcessor();                          // 0x007426e0
+    // A line of keywords and their values (net/net_console_commands.cpp). False: a word that is no keyword.
     bool Execute(const char *command);              // 0x00742850
+
+private:
+    // A file of commands, a line each ("exec").
+    void ExecuteFile(const char *name);             // 0x007440d0
 };
 C_CommandProcessor *GetCommandProcessor();          // 0x0069f520
 
@@ -367,9 +388,6 @@ void FreeResourceCaches();                          // tail of 0x006dc770 (model
 int ShowMessage(const char *text, const char *title, unsigned int flags);   // 0x006ed2a0
 // Reads the CD key stored by the installer; null if missing.
 const char *GetCDKey();                             // 0x00732000 (net/net_console.cpp)
-// The crash report: asks the player (dialog 0x73, `text` shown) and sends `text` to the developers (TCP
-// 194.213.63.62:15002). Not called in this build.
-void ReportCrash(const char *text);                 // 0x00731ee0
 bool ValidateCDKey(const char *key);                // 0x007350a0
 
 // ---- frames / models -------------------------------------------------------------

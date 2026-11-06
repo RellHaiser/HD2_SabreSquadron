@@ -3,9 +3,9 @@
 Run with the net harness (_re/harness/net: build_firewall.bat, firewall_test.exe; the scratchpad's mutnetf.py).
 Generated (deletions, comparison, number, bool and negation flips; the lines unique in the file).
 
-Result (2026-11-05): 56 mutations: 16 killed, 11 not building, 29 survived: ReportCrash and its dialog procedure are NOT
-exercised (never called in this build; a modal dialog and a connection to a real server), so everything there
-survives; GetCDKey's RegCloseKey and its -1 sentinel are not observable from the harness.
+Result (2026-11-05): 56 mutations: 16 killed, 11 not building, 29 survived: ReportCrash and its dialog procedure were
+not exercised (never called; part 10e-i put them back in tier 1 as dead code, so those patterns no longer match);
+GetCDKey's RegCloseKey and its -1 sentinel are not observable from the harness.
 """
 import os
 

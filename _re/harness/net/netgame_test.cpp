@@ -165,8 +165,8 @@ char *C_Console::PopCommand()
     g_consoleCommands.erase(g_consoleCommands.begin());
     return command;
 }
-C_CommandProcessor g_processor;
-C_CommandProcessor *GetCommandProcessor() { return &g_processor; }
+alignas(16) static unsigned char g_processorStorage[sizeof(C_CommandProcessor)];
+C_CommandProcessor *GetCommandProcessor() { return reinterpret_cast<C_CommandProcessor *>(g_processorStorage); }
 bool C_CommandProcessor::Execute(const char *command)
 {
     Log("execute %s", command);

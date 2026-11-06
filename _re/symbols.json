@@ -40072,10 +40072,25 @@
   "name": "C_NetVoice::StopServer",
   "proto": "long __fastcall StopServer(void * voice)"
  },
+ "007426a0": {
+  "module": "net_console_commands",
+  "name": "C_CommandProcessor::C_CommandProcessor",
+  "proto": "void * __thiscall C_CommandProcessor(void *this)"
+ },
+ "007426e0": {
+  "module": "net_console_commands",
+  "name": "C_CommandProcessor::~C_CommandProcessor",
+  "proto": "void __thiscall ~C_CommandProcessor(void *this)"
+ },
  "00742850": {
   "module": "game",
   "name": "C_CommandProcessor::Execute",
   "proto": "bool __thiscall Execute(C_CommandProcessor *this, char * command)"
+ },
+ "007440d0": {
+  "module": "net_console_commands",
+  "name": "C_CommandProcessor::ExecuteFile",
+  "proto": "void __thiscall ExecuteFile(void *this, char * name)"
  },
  "00744210": {
   "module": "zz_idioms",
@@ -40090,15 +40105,45 @@
   "name": "C_ConsoleState::C_ConsoleState",
   "proto": "C_ConsoleState * __thiscall C_ConsoleState(C_ConsoleState *this, char * command)"
  },
+ "00744360": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::Start",
+  "proto": "bool __thiscall Start(void *this, void * arg)"
+ },
+ "00744390": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::Stop",
+  "proto": "bool __thiscall Stop(void *this)"
+ },
  "007443a0": {
   "module": "game_app",
   "name": "C_ConsoleState::ShowBanner",
   "proto": "void __thiscall ShowBanner(C_ConsoleState *this)"
  },
+ "007443d0": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::Update",
+  "proto": "void __thiscall Update(void *this, int timeDelta)"
+ },
+ "00744490": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::StartHosting",
+  "proto": "void __fastcall StartHosting(void * state)"
+ },
+ "00744540": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::StartJoining",
+  "proto": "void __fastcall StartJoining(void * state)"
+ },
  "007445d0": {
   "module": "game_app",
   "name": "ReadConsoleToken",
   "proto": "int __fastcall ReadConsoleToken(char * * cursor, char * out, int * unknown, char * unknown2)"
+ },
+ "00744750": {
+  "module": "net_console_commands",
+  "name": "SkipConsoleSeparators",
+  "proto": "void __fastcall SkipConsoleSeparators(char * * cursor)"
  },
  "007447a0": {
   "module": "console",

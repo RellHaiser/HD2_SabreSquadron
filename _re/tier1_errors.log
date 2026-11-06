@@ -146,8 +146,6 @@ f_00633450.cpp:63:76: invalid 'static_cast' from type 'unsigned char*' to type '
     uVar8 = FUN_00636b80(2,0x14);
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00698790.cpp:21:19: base operand of '->' is not a pointer
-    (*DAT_0098c0fc->vtable->empty_function_744210)(_this);
 f_006c6d40.cpp:646:32: wrong type argument to unary minus
     piVar1 = gh_bitcast<int*>(-gh_bitcast)<float>(piVar1);
 f_006c6d40.cpp:646:44: expected primary-expression before 'float'
@@ -322,6 +320,10 @@ f_00721f30.cpp:96:11: invalid type argument of unary '*' (have 'uint32_t' {aka '
     if (*DAT_0097b9f0 < '0') break;
 f_00721f30.cpp:97:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     } while (*DAT_0097b9f0 < ':');
+f_0072e190.cpp:93:25: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
+    uVar2 = htons(0x3a9a);
+f_0072e190.cpp:95:41: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
+    sStack_10.sa_data[1] = (char)(uVar2 >> 8);
 f_00732e40.cpp:225:48: cannot convert 'uint8_t*' {aka 'unsigned char*'} to 'int (__attribute__((cdecl)) *)(const void*, const void*)'
     qsort((void *)param_1[5],*param_1,param_1[2],param_2);
 f_00733700.cpp:376:23: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
@@ -414,12 +416,6 @@ f_00733700.cpp:5882:26: cannot convert 'tier1::u_short' to 'u_short' {aka 'short
     while (uVar1 = ntohs((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)
 f_00733700.cpp:63:35: invalid 'static_cast' from type 'tier1::u_short' to type 'uint64_t' {aka 'long long unsigned int'}
     pcVar9 = pcVar8;
-f_00742670.cpp:117:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (**(code **)*DAT_0098c0fc)();
-f_00742670.cpp:1104:27: base operand of '->' is not a pointer
-    (*DAT_0098c100->vtable->Create)();
-f_007442a0.cpp:100:36: void value not ignored as it ought to be
-    uVar2 = (*self->vtable->SetFlags)(self,uVar1 & 0xffffffdf);
 f_007888c0.cpp:253:19: base operand of '->' is not a pointer
     (*DAT_0098a6d0->vtable[1].SetHierarchyAlpha)(DAT_0098a6d0,alpha);
 f_007888c0.cpp:400:59: base operand of '->' is not a pointer

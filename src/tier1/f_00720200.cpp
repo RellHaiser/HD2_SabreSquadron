@@ -348,7 +348,7 @@ uint32_t FUN_00720500(uint8_t *param_1, ...)
             DAT_0098c0fc = 0;
           }
           else {
-            DAT_0098c0fc = (C_CommandProcessor *)C_CommandProcessor__FUN_007426a0(local_40c);
+            DAT_0098c0fc = C_CommandProcessor__C_CommandProcessor(local_40c);
           }
           local_4 = 0xffffffff;
           (*DAT_0098c0fc->vtable->empty_function_744210)();

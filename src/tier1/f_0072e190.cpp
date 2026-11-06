@@ -2,6 +2,121 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
+// 0x00731e10
+int CrashReportProc(void *dialog,uint32_t message,uint32_t wParam,int lParam, ...)
+{
+  C_str *pCVar1;
+  char *lpString;
+  if (message == 0x10) {
+    EndDialog(dialog,1);
+  }
+  else {
+    if (message == 0x110) {
+      pCVar1 = C_GameTexts__Get(&DAT_008c1368,(C_str *)&message,0x578);
+      if (pCVar1->rep == 0) {
+        lpString = (char *)&DAT_00867a90;
+      }
+      else {
+        lpString = pCVar1->rep->chars;
+      }
+      SetDlgItemTextA(dialog,0x3fc,lpString);
+      if ((message != 0) && (*(int *)message = *(int *)message - 1, *(int *)message == 0)) {
+        tier1_operator_delete((void *)message);
+      }
+      SetDlgItemTextA(dialog,0x3fa,(LPCSTR)lParam);
+      return 1;
+    }
+    if (message == 0x111) {
+      if ((wParam & 0xffff) == 1) {
+        EndDialog(dialog,0);
+        return 0;
+      }
+      if ((wParam & 0xffff) == 2) {
+        EndDialog(dialog,1);
+        return 0;
+      }
+    }
+  }
+  return 0;
+}
+
+
+// 0x00731ee0  (tier1 fallback: translated text kept below, needs hand porting)
+uint32_t ReportCrash(char *text, ...)
+{
+  return {};
+}
+#if 0
+{
+  char cVar1;
+  u_short uVar2;
+  IGraph *pIVar3;
+  HWND pHVar4;
+  HMODULE hInstance;
+  INT_PTR IVar5;
+  SOCKET s;
+  uint32_t uVar6;
+  char *pcVar7;
+  LPCSTR lpTemplateName;
+  code *lpDialogFunc;
+  int iVar8;
+  sockaddr sStack_10;
+  pIVar3 = GetIGraph();
+  if (pIVar3 != 0) {
+    pIVar3 = GetIGraph();
+    (*pIVar3->vtable->UnknownDC)(pIVar3,0);
+    pIVar3 = GetIGraph();
+    iVar8 = 0;
+    pHVar4 = (*pIVar3->vtable->GetHWND)(pIVar3);
+    ShowWindow(pHVar4,iVar8);
+  }
+  lpDialogFunc = CrashReportProc;
+  pHVar4 = (HWND)0x0;
+  lpTemplateName = &DAT_00000073;
+  pcVar7 = text;
+  hInstance = GetModuleHandleA((LPCSTR)0x0);
+  IVar5 = DialogBoxParamA(hInstance,lpTemplateName,pHVar4,lpDialogFunc,(LPARAM)pcVar7);
+  if (IVar5 == 0) {
+    FUN_00737cb0();
+    s = socket(2,1,6);
+    sStack_10.sa_family = 2;
+    sStack_10.sa_data[0] = '\0';
+    sStack_10.sa_data[1] = '\0';
+    sStack_10.sa_data[6] = '\0';
+    sStack_10.sa_data[7] = '\0';
+    sStack_10.sa_data[8] = '\0';
+    sStack_10.sa_data[9] = '\0';
+    sStack_10.sa_data[2] = -0x3e;
+    sStack_10.sa_data[3] = -0x2b;
+    sStack_10.sa_data[4] = '?';
+    sStack_10.sa_data[5] = '>';
+    sStack_10.sa_data[10] = '\0';
+    sStack_10.sa_data[0xb] = '\0';
+    sStack_10.sa_data[0xc] = '\0';
+    sStack_10.sa_data[0xd] = '\0';
+    uVar2 = htons(0x3a9a);
+    sStack_10.sa_data[0] = gh_bitcast<char>(uVar2);
+    sStack_10.sa_data[1] = (char)(uVar2 >> 8);
+    iVar8 = connect(s,(const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)((const sockaddr*)(&sStack_10))))))))))))))),0x10);
+    if (iVar8 != -1) {
+      uVar6 = 0xffffffff;
+      pcVar7 = text;
+      do {
+        if (uVar6 == 0) break;
+        uVar6--;
+        cVar1 = *pcVar7;
+        pcVar7++;
+      } while (cVar1 != '\0');
+      send(s,text,~uVar6,0);
+      closesocket(s);
+      WSACleanup();
+    }
+  }
+  return 0;
+}
+
+
+#endif
 // 0x007329b0
 uint32_t vector_tidy_7329b0(int param_1, ...)
 {

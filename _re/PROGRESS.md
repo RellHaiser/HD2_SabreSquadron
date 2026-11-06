@@ -9010,6 +9010,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 215 errors in 46/373 (was 239). ret_audit --src: 52.
   - Stats: 10,151 of 12,306 functions by hand or absorbed (88.4 % by size).
 
+  PART 10e-i DONE (2026-11-05): the console commands (net/net_console_commands.cpp).
+  - The keyword table (g_votableCommands 0x00846088: 66 entries of 0x204 bytes, the id at +0x200, entry 14 empty with
+    id 0, the end -1), ReadConsoleToken 0x007445d0 (the spaces, tabs, '>' and a '-' before a letter or digit
+    skipped, so numbers cannot be negative; quotes; a keyword (any case), a number, a word, the end), and
+    C_CommandProcessor::Execute 0x00742850: a line of keywords with their values (a word that is no keyword: text
+    0x582, false; a value a command does not read stays on the line and fails as the next keyword, as in the
+    original): the rules (0 .. 0x15, limited, told by message 0x12; no number: the last value shown), mapname,
+    removemap, style, domain, sessionname, help, exec (ExecuteFile 0x007440d0: Fix: long lines cut), server, dedicated,
+    join, vote, voteyes, listplayers, kickplayer, nextmap (ChangeMap public), restart, port, password, quit, voicechat,
+    listmaps, adminpass, adminlogin, svcmd, maxping, maxfreq, asay, maxinactivity, listobjectives. Fixes: a map name
+    not used as a format, the commands' texts terminated, the chat line cut to its size, a rule without a number
+    shows 0 rather than an uninitialised value.
+  - C_ConsoleState (0x007442e0 .. 0x00744540: Start, Stop, the banner, Update: the typed commands, the first command
+    (failed: the game ends), hosting or joining), GetCommandProcessor 0x0069f520.
+  - Dead code: ReportCrash 0x00731ee0 and its dialog 0x00731e10 (no references, no pointers in the data; part 10d-vii
+    had ported them) are back in tier 1: dialog 0x73, the text sent over TCP to 194.213.63.62:15002.
+  - Harness: net/build_console.bat (console_test.cpp; 210 checks). Mutations: mutations/mutate_10e1.py (runner
+    mutnete.py): 331: 270 killed, 39 not building, 22 survived. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 213 errors in 44/371 (was 215). ret_audit --src: 52.
+  - Stats: 10,169 of 12,306 functions by hand or absorbed (88.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

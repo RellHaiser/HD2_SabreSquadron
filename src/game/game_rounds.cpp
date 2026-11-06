@@ -89,6 +89,8 @@ void AwardTeamPoints(int points, int team)          // 0x0069bbd0
     g_netGame.UnlockPlayers();
 }
 
+}  // namespace
+
 // Switches the session to map `name` (null: the next one).
 void ChangeMap(const char *name)                    // 0x0069bcc0
 {
@@ -102,8 +104,6 @@ void ChangeMap(const char *name)                    // 0x0069bcc0
     TeamWins(2) = 0;
     GetGameApp()->m_state->SetPendingState(GAME_STATE_NEXT_MAP);
 }
-
-}  // namespace
 
 void LoadNextMap()                                  // 0x0069bca0
 {
