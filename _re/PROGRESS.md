@@ -9170,6 +9170,8 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Nothing here has been run in the game: real humans, real meshes and real networks of checkpoints have not been through it; every network here is a few hand-made circles, and the speeds table is made up in the harness.
   - Build: MSVC clean. Tier 1: 74 errors in 29/367 (was 90 in 34). ret_audit --src: 52. Stats: 10,729 of 12,306 functions by hand or absorbed (93.2 % by size).
 
+  PART 13a DONE (2026-11-06): the trial link. _re/tools/link_check.py, _re/LINK_STATUS.md, _re/link_unresolved.txt. The hand port alone: 52 unresolved symbols, no duplicates, no exe yet. Tier 1 cannot link with it (other compiler, types, namespace) and is not needed for a build. Aim of the first run (owner): single player.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
