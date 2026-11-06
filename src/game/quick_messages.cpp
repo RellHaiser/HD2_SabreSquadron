@@ -279,5 +279,5 @@ const char *C_QuickMessages::GetText(int id) const
             return dialog.lines.empty() ? "NO TEXT WITH THIS ID !!!" : dialog.lines[0].text.c_str();
         }
     }
-    return "";                                          // (Fix: the original's is a pointer nothing sets, null.)
+    return nullptr;                                     // (The word 0x0089bc54, which nothing sets: SayQuickMessage says nothing.)
 }

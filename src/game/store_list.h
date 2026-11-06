@@ -69,6 +69,10 @@ public:
     void BuildEquipmentDescription(S_ScreenDesc *desc, I3D_frame *model);   // 0x0067c570
     C_ItemStock *GetStock() const { return m_stock; }
 
+protected:
+    // A page: the base's, or the equipment screen's (its highlight, entries with their descriptions, stepped downward, the first page left shown).
+    bool BuildPageOf(S_ControlDesc *parent, I3D_frame *model, const C_str &name, int group, bool equipment);
+
 private:
     // The descriptions' body: the scroll bar's and the highlight's frames, the tabs inactive or not.
     void Describe(S_ScreenDesc *desc, I3D_frame *model, const char *scrollBar, const char *highlight, bool inactive);
@@ -86,4 +90,10 @@ private:
     I3D_frame *m_highlight = nullptr;                   // +0x2C
     uint32_t m_screenIndex = 0;                         // +0x30
     int m_controlIndex = 0;                             // +0x34
+};
+
+// The equipment screen's list: only its pages differ.
+class C_EquipmentStoreList : public C_StoreList {
+public:
+    bool BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group) override;   // 0x00 0x0067cb60
 };

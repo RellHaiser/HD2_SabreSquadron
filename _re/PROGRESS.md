@@ -9192,6 +9192,10 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Not tested: full screen, the rest of the game, weapons, enemies, vehicles, saving, sound by ear. With the devel DLL the sky is flat dark green, also under the original exe: for the LS3DF port.
   - After 13d (reported by the user): the game ran too fast: the frame limiter's timer event was SET, not PULSE, so its wait never waited and each frame counted as 10 ms. See _re/RUNNING.md.
   - After 13d (reported by the user): the supply boxes did not open: their animations' names lacked the '#' of the files and the original's strings. New: tools/name_audit.py.
+  PART 13e DONE (2026-11-06): combat in Operation Snowball, checked build: weapons, reload, enemies closing in and killing, death, save and load in a fight (position, health, ammo and counts back), saves read by the original exe too. Details: _re/RUNNING.md.
+  - Fixes: the weapon's link in OP_CSC_DuplicateHuman (a cycle); C_EquipmentStoreList (0x0067cb60, unported, only a vtable reaches it); GetText's null; 33 names with '_' for ' '. LS3DF: _re/ls3df_patches/joint_uninit.patch, in the scratch build of devel only.
+  - New: tools/literal_audit.py. Test: the equipment page in store_list_test.inc, mutation-checked. The others have only this run.
+  - Not done: the triage cannot see unported functions reached only through a vtable: others like 0x0067cb60 may be left.
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

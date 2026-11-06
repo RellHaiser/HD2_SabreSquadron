@@ -1090,7 +1090,7 @@ void EquipmentScreenTest(I3D_scene *scene)
                                              "estm 48 text_info00 1", "este 34 vi_template", "esti 38 este 1", "estc 38 este 1",
                                              "estc 34 ammo", "esti on 0", "estc on 0"};
             for (int page = 0; page < 6; ++page)
-                for (const char *line : {"create 6", "estm 48 P_visualstore 20", "estm 48 selitem08 1", "estm 48 selitem08 1",
+                for (const char *line : {"create 6", "estm 48 P_visualstore 20", "estm 48 itemselector 1", "estm 48 itemselector 1",
                                          "estm 48 vi_template 1"})
                     want.push_back(line);
             for (const char *line : {"estm 48 itemselector 1", "esthl 38 null 1", "items loaded"})

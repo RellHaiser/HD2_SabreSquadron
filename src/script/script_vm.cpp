@@ -1208,13 +1208,13 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         copy->Update();
         FrameVar(cmd.Arg(1)) = copy;                       // keeps the creation reference
 
-        // Move the weapon from the holster joint into the right hand.
+        // The weapon at the right hand's place, on its holster joint.
         I3D_frame *holster = copy->FindChildFrame("hw1", 0xFFFF);
         I3D_frame *hand = copy->FindChildFrame("rw", 0xFFFF);
         if (holster) {
             if (holster->NumChildren() > 0) {
                 if (I3D_frame *weapon = holster->GetChild(0)) {
-                    weapon->LinkTo(hand, 4);
+                    weapon->LinkTo(holster, 4);       // (Re-linked where it is, to the holster joint: "rw" is below it.)
                     weapon->SetPosInline(hand->GetPos() * hand->GetParent()->GetLocalMatrix());
                     weapon->SetWorldDir(S_vector(1.0f, 0, 0), 0.0f);
                     weapon->Update();

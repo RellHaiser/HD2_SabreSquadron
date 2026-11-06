@@ -569,7 +569,7 @@ bool C_GameMenu::BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model)
     };
 
     // The soldier types (inactive until filled).
-    S_ControlDesc *types = desc->AddControl(CONTROL_COMBO, "soldier_type");
+    S_ControlDesc *types = desc->AddControl(CONTROL_COMBO, "soldier type");
     addCallback(types, CONTROL_NOTIFY_0E, &C_EquipmentMenuBase::CallItemNotify60);
     addCallback(types, CONTROL_NOTIFY_0B, &C_GameMenu::OnSoldierType);
     AddDescMessage(types, 0, CONTROL_MSG_SET_HEADER_TEXT_ID, LIST_STYLE, TEXT_SOLDIER_TYPES);
@@ -578,10 +578,10 @@ bool C_GameMenu::BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model)
     m_soldierTypes = static_cast<int>(types->id);
     UpdateSoldierTypes();
     // The presets' save and rename (the combo box's header edited; both inactive).
-    S_ControlDesc *control = text(CONTROL_BUTTON, "bsave_preset", TEXT_STYLE, 0x9E3);
+    S_ControlDesc *control = text(CONTROL_BUTTON, "bsave preset", TEXT_STYLE, 0x9E3);
     addCallback(control, CONTROL_NOTIFY_CLICK, &C_GameMenu::OnSavePreset);
     AddDescMessage(control, 0, CONTROL_MSG_DEACTIVATE, 0);
-    control = text(CONTROL_BUTTON, "brename_preset", TEXT_STYLE, 0x9E4);
+    control = text(CONTROL_BUTTON, "brename preset", TEXT_STYLE, 0x9E4);
     AddDescMessage(control, static_cast<uint32_t>(m_soldierTypes) | 2, CLICK | CONTROL_MSG_EDIT, 0);
     AddDescMessage(control, 0, CONTROL_MSG_DEACTIVATE, 0);
     if (g_gameProfile.IsCooperativeGame()) {
@@ -589,10 +589,10 @@ bool C_GameMenu::BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model)
         text(CONTROL_TEXT, "text_equipment", TEXT_STYLE, 0x9E7);
     } else {
         // The warmup's text (shown in the occupation games) and the time's.
-        control = text(CONTROL_TEXT, "text_warm_up", TIME_STYLE, 0x9E5);
+        control = text(CONTROL_TEXT, "text_warm up", TIME_STYLE, 0x9E5);
         if (g_mpSettings->gameType != MP_GAME_OCCUPATION)
             AddDescMessage(control, 0, CONTROL_MSG_HIDE, 0);
-        text(CONTROL_TEXT, "text_etimated_time", TIME_STYLE, 0x9E6);
+        text(CONTROL_TEXT, "text_etimated time", TIME_STYLE, 0x9E6);
     }
     control = text(CONTROL_BUTTON, "baccept", BUTTON_STYLE, 0x9C9);
     AddDescMessage(control, 0, CLICK | GAME_MENU_MSG_APPLY_SOLDIER, 0);
@@ -607,18 +607,18 @@ bool C_GameMenu::BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model)
         text(CONTROL_TEXT, "text_equipment", TEXT_STYLE, 0x9E7);
     }
     text(CONTROL_TEXT, "text_chat", TEXT_STYLE, 0x9E8);
-    text(CONTROL_TEXT, "text_selected_soldier_stats", TEXT_STYLE, 0x9E9);
+    text(CONTROL_TEXT, "text_selected soldier stats", TEXT_STYLE, 0x9E9);
     text(CONTROL_TEXT, "text_draft", TEXT_STYLE, 0x9EA);
-    control = text(CONTROL_BUTTON, "bgame_info", BUTTON_STYLE, 0x9CC);
+    control = text(CONTROL_BUTTON, "bgame info", BUTTON_STYLE, 0x9CC);
     addCallback(control, CONTROL_NOTIFY_CLICK, &C_GameMenu::OnGameInfo);
     if (g_gameProfile.IsCooperativeGame()) {
-        text(CONTROL_TEXT, "text_player_status", TEXT_STYLE, 0x4F4C);
+        text(CONTROL_TEXT, "text_player status", TEXT_STYLE, 0x4F4C);
         if (I3D_frame *popup = LoadModel("DESCRIPTION", "description")) {
             m_popup = new C_DescriptionScreen(m_scene, popup);
             m_popup->Build(nullptr);
         }
-    } else if (model->FindChildFrame("text_weapons_info", FRAME_MASK_VISUAL)) {
-        control = text(CONTROL_LABEL, "text_weapons_info", TEXT_STYLE, 0x7D2);
+    } else if (model->FindChildFrame("text_weapons info", FRAME_MASK_VISUAL)) {
+        control = text(CONTROL_LABEL, "text_weapons info", TEXT_STYLE, 0x7D2);
         m_weaponsInfo = static_cast<int>(control->id);
     }
     if (I3D_frame *view = model->FindChildFrame("3Dview", FRAME_MASK_VISUAL))

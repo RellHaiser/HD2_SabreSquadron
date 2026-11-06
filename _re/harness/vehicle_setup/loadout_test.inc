@@ -120,7 +120,7 @@ void LoadoutTest(I3D_scene *)
         const uint32_t flags[] = {LOADOUT_AXIS, LOADOUT_ALLIED, LOADOUT_DEATHMATCH, LOADOUT_USER};
         for (int i = 0; i < 24 && ok; ++i) {
             const S_LoadoutPreset *p = l.m_userPresets[static_cast<size_t>(i)];
-            const std::string name = i < 18 ? CmText("%s_user_preset%d", games[i / 6], i % 6 + 1) : CmText("User_preset%d", i % 6 + 1);
+            const std::string name = i < 18 ? CmText("%s user preset%d", games[i / 6], i % 6 + 1) : CmText("User preset%d", i % 6 + 1);
             ok &= name == p->name && p->flags == flags[i / 6] && p->textId == (i < 18 ? 0x1982 + i : -1);
         }
         // A long name: 29 characters kept.
@@ -129,7 +129,7 @@ void LoadoutTest(I3D_scene *)
         l.m_userPresets.erase(l.m_userPresets.begin() + 1, l.m_userPresets.end());
         // (Again on a list of one: the 24 named are that one and 23 new.)
         l.CreateUserPresets();
-        ok &= l.GetUserPresetCount() == 25 && std::string(l.m_userPresets[0]->name) == "Axis_user_preset1" &&
+        ok &= l.GetUserPresetCount() == 25 && std::string(l.m_userPresets[0]->name) == "Axis user preset1" &&
               l.m_userPresets[0]->name[0x1D] == 0 && l.m_userPresets[0]->name[0x1E] == 'x' &&
               l.m_userPresets[24]->name[0] == 0 && l.m_userPresets[24]->flags == 0;
         WM(r.lpDefaults, ok);
@@ -146,10 +146,10 @@ void LoadoutTest(I3D_scene *)
         ok &= l.GetPreset(0, 0x12)->head == 1 && l.GetPreset(1, 0x12)->head == 3 && !l.GetPreset(2, 0x12) &&
               l.GetPreset(0, 0x22)->head == 2 && l.GetPreset(1, 0x22)->head == 3 && l.GetPreset(2, 0)->head == 3 &&
               !l.GetPreset(3, 0) && !l.GetPreset(0, 0x80);
-        ok &= std::string(l.GetUserPreset(0, LOADOUT_ALLIED)->name) == "Allied_user_preset1" &&
-              std::string(l.GetUserPreset(5, LOADOUT_ALLIED)->name) == "Allied_user_preset6" && !l.GetUserPreset(6, LOADOUT_ALLIED) &&
-              std::string(l.GetUserPreset(0, LOADOUT_USER)->name) == "User_preset1" &&
-              std::string(l.GetUserPreset(18, 0)->name) == "User_preset1";
+        ok &= std::string(l.GetUserPreset(0, LOADOUT_ALLIED)->name) == "Allied user preset1" &&
+              std::string(l.GetUserPreset(5, LOADOUT_ALLIED)->name) == "Allied user preset6" && !l.GetUserPreset(6, LOADOUT_ALLIED) &&
+              std::string(l.GetUserPreset(0, LOADOUT_USER)->name) == "User preset1" &&
+              std::string(l.GetUserPreset(18, 0)->name) == "User preset1";
         WM(r.lpGet, ok);
     }
 
@@ -229,7 +229,7 @@ void LoadoutTest(I3D_scene *)
         const int want8[] = {0, 1, 6, 7, 12, 13, 18, 19};
         for (int i = 0; i < 8; ++i)
             ok &= l.m_userPresets[static_cast<size_t>(want8[i])]->head == 100 + i;
-        ok &= l.m_userPresets[2]->head == -1 && std::string(l.m_userPresets[2]->name) == "Axis_user_preset3";
+        ok &= l.m_userPresets[2]->head == -1 && std::string(l.m_userPresets[2]->name) == "Axis user preset3";
         userFile(30, 0);
         C_LoadoutPresets m;
         ok &= m.Load() && m.GetUserPresetCount() == 24 && m.m_userPresets[23]->head == 123 && m.m_userPresets[23]->textId == -1 &&

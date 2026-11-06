@@ -394,6 +394,35 @@ void StoreListTest(I3D_scene *)
         _aligned_free(reinterpret_cast<void *>(top.children[4]->messages[3].value2));
         g_gfItemDefs.erase(0);
         g_gfItemDefs.erase(46);
+        // (Part 13e.) The equipment screen's pages: its highlight, stepped downward, the first page left shown, entries with their descriptions.
+        {
+            g_msChildren.erase({model, "selitem08"});
+            g_msChildren[{model, "itemselector"}] = hl;
+            S_MrObj *dummy5 = MsFrame("pdummy5"), *hlCopy5 = MsFrame("hlcopy5"), *c42e = MsFrame("c42e");
+            *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(c42e) + 0x1E0) = mesh;
+            g_mrMade[FRAME_DUMMY] = {dummy5};
+            g_mrClones = {As<I3D_frame>(hlCopy5), As<I3D_frame>(c42e)};
+            C_EquipmentStoreList e;
+            make(e);
+            e.m_menu = &menu;
+            e.m_entries.clear();
+            S_ControlDesc etop(5, "store", 0x08300000);
+            etop.AddChild(1, "tabs");
+            C_StoreList *const base = &e;
+            ok &= base->BuildPage(&etop, As<I3D_frame>(model), C_str("page1"), 1);
+            S_ControlDesc *const epage = etop.children[1];
+            const auto has = [epage](uint32_t id) {
+                for (const S_ControlMessage &m : epage->messages)
+                    if (m.id == id)
+                        return true;
+                return false;
+            };
+            ok &= has(CONTROL_MSG_SET_DOWN_STEP) && !has(CONTROL_MSG_SET_ACROSS_STEP) && !has(CONTROL_MSG_HIDE) && e.m_shownPage == epage->id &&
+                  epage->children.size() == 1 && epage->children[0]->type == 0x1C;
+            _aligned_free(reinterpret_cast<void *>(epage->messages[3].value2));
+            g_msChildren.erase({model, "itemselector"});
+            g_msChildren[{model, "selitem08"}] = hl;
+        }
         WM(r.slBuild, ok);
 
         // --- without a frame (the anchor, the highlight, the template) or a dummy: false, nothing made ---

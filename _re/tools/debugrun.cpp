@@ -73,12 +73,26 @@ static void DumpStack(HANDLE thread, const CONTEXT &original, int limit)
     frame.AddrFrame.Mode = AddrModeFlat;
     frame.AddrStack.Offset = context.Esp;
     frame.AddrStack.Mode = AddrModeFlat;
-    for (int i = 0; i < limit; ++i) {
+    // The first `limit`, and of a deeper stack (a recursion's) its last `limit`: who started it.
+    std::map<int, DWORD64> tail;
+    int depth = 0;
+    for (; depth < 200000; ++depth) {
         if (!StackWalk64(IMAGE_FILE_MACHINE_I386, g_process, thread, &frame, &context, nullptr, SymFunctionTableAccess64, SymGetModuleBase64, nullptr))
             break;
         if (!frame.AddrPC.Offset)
             break;
-        Log("  #%02d %s\n", i, Describe(frame.AddrPC.Offset).c_str());
+        if (depth < limit) {
+            Log("  #%02d %s\n", depth, Describe(frame.AddrPC.Offset).c_str());
+        } else {
+            tail[depth] = frame.AddrPC.Offset;
+            if (static_cast<int>(tail.size()) > limit)
+                tail.erase(tail.begin());
+        }
+    }
+    if (!tail.empty()) {
+        Log("  ... %d frames in all ...\n", depth);
+        for (const auto &entry : tail)
+            Log("  #%02d %s\n", entry.first, Describe(entry.second).c_str());
     }
 }
 

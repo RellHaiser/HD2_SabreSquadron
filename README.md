@@ -11,7 +11,7 @@ of the game and its data.
 
 Work in progress (2026-11-01). Of the game's 12,293 functions, 8,254 (74.6 % of the code by size)
 are ported by hand. Generated code (tier 1, below) covers the rest. The sources are
-compile-checked file by file. The hand port runs: from the main menu into the campaign's first mission, where the soldier walks (2026-11-06; see `_re/RUNNING.md`). It needs the `devel` branch's LS3DF.dll; the rest of the game is untested.
+compile-checked file by file. The hand port runs: from the main menu through the campaign's first missions, with combat, saving and loading (2026-11-06; see `_re/RUNNING.md`). It needs the `devel` branch's LS3DF.dll with a patch in `_re/ls3df_patches`; most of the game is still untested.
 
 Ported so far, among others: the app core and module framework, the console, configuration and
 data files (`C_chunk`), the mission script language (compiler, expressions, interpreter), the

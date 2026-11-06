@@ -408,9 +408,9 @@ void TestGetText()
     q.Init("x");
     CHECK(std::strcmp(q.GetText(90000001), "chat one") == 0);
     // Below the quick ids: not looked for.
-    CHECK(q.GetText(100)[0] == 0);
-    CHECK(q.GetText(89999999)[0] == 0);
-    CHECK(q.GetText(90000002)[0] == 0);
+    CHECK(q.GetText(100) == nullptr);
+    CHECK(q.GetText(89999999) == nullptr);
+    CHECK(q.GetText(90000002) == nullptr);
     q.m_dialogs[2]->lines.clear();
     CHECK(std::strcmp(q.GetText(90000001), "NO TEXT WITH THIS ID !!!") == 0);
     // Exactly the first quick id.

@@ -180,7 +180,7 @@ private:
 
     uint8_t m_unknown1C4[0xC] = {};                     // +0x1C4 (not set by the original)
     C_EquipmentPanel m_panel;                           // +0x1D0
-    C_StoreList m_storeList;                            // +0x274
+    C_EquipmentStoreList m_storeList;                   // +0x274 (vtable 0x00815e8c, set at 0x006c1d00)
     C_MissionItems m_missionItems;                      // +0x2AC
     C_LoadoutPresets m_presets;                         // +0x558
     // The selection screen's selector (BuildScreens' "selector") and the squad list's.
