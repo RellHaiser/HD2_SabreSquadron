@@ -243,60 +243,6 @@ uint32_t LoadStringResource(HINSTANCE param_1,UINT param_2,LPSTR param_3,int par
 }
 
 
-// 0x006ed860
-uint8_t * FUN_006ed860(int param_1, ...)
-{
-  uint8_t *puVar1;
-  puVar1 = 0;
-  if (param_1 == 0) {
-    puVar1 = (uint8_t *)0x80000001;
-  }
-  else if (param_1 == 1) {
-    return &DAT_80000002;
-  }
-  return puVar1;
-}
-
-
-// 0x006ed880
-uint32_t FUN_006ed880(HKEY param_1,int param_2, ...)
-{
-  HKEY hKey;
-  LSTATUS LVar1;
-  DWORD ulOptions;
-  REGSAM samDesired;
-  HKEY *phkResult;
-  HKEY local_4;
-  phkResult = &local_4;
-  samDesired = 0x20019;
-  ulOptions = 0;
-  local_4 = param_1;
-  hKey = (HKEY)FUN_006ed860(param_2);
-  LVar1 = RegOpenKeyExA(hKey,(LPCSTR)param_1,ulOptions,samDesired,phkResult);
-  if (LVar1 != 0) {
-    return 0xffffffff;
-  }
-  return local_4;
-}
-
-
-// 0x006ed8b0
-uint32_t FUN_006ed8b0(HKEY param_1, ...)
-{
-  RegCloseKey(param_1);
-  return 0;
-}
-
-
-// 0x006ed8c0
-uint32_t FUN_006ed8c0(HKEY param_1,LPCSTR param_2,LPBYTE param_3,uint32_t param_4, ...)
-{
-  LSTATUS LVar1;
-  LVar1 = RegQueryValueExA(param_1,param_2,(LPDWORD)0x0,(LPDWORD)&param_3,param_3,&param_4);
-  return ~-(uint32_t)(LVar1 != 0) & param_4;
-}
-
-
 // 0x006edf00
 uint32_t FUN_006edf00(void *param_1, ...)
 {

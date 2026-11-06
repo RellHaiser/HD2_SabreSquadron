@@ -10392,3 +10392,34 @@
 0072bfe0
 0072c120
 # hand-ported (continued)
+00731af0
+00731e10
+00731ee0
+00732000
+00732050
+00732080
+007320c0
+00732120
+00732470
+00732550
+00732730
+007328d0
+00732da0
+# absorbed helpers 006ed860-00732de0: the CD key's registry calls, the empty hooks, the status vector's helpers, g_gameRole's initialiser (part 10d-vii)
+006ed860
+006ed880
+006ed8b0
+006ed8c0
+00731fd0
+00731fe0
+00731ff0
+00732c30
+00732c70
+00732ca0
+00732cf0
+00732d50
+00732db0
+00732dc0
+00732dd0
+00732de0
+# hand-ported (continued)

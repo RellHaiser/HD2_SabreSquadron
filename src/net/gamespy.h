@@ -51,6 +51,8 @@ using ServerBrowserCallback = void (*)(S_ServerBrowser *browser, int reason, S_S
 // A CD key checked (`authenticated`; else `message` says why: "C..." the key is in use).
 using GcdAuthCallback = void (*)(int gameId, int localId, int authenticated, char *message, void *instance);
 
+// Winsock 1.1 started (the SDK's; the crash report uses it too).
+void SocketStartUp();                                                               // 0x00737cb0
 void qr2_register_key(int key, const char *name);                                   // 0x00739750
 // The reporting started (`record` null: the SDK's own) on `basePort`; < 0 failed.
 int qr2_init(void *record, const char *ip, int basePort, const char *gameName, const char *secretKey, int isPublic,

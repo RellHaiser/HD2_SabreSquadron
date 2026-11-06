@@ -39130,6 +39130,16 @@
   "name": "C_NetGame::PrintLoadProgress",
   "proto": "void __thiscall PrintLoadProgress(C_NetGame *this, int percent)"
  },
+ "00731e10": {
+  "module": "net_console",
+  "name": "CrashReportProc",
+  "proto": "int __stdcall CrashReportProc(void * dialog, uint message, uint wParam, int lParam)"
+ },
+ "00731ee0": {
+  "module": "net_console",
+  "name": "ReportCrash",
+  "proto": "void __stdcall ReportCrash(char * text)"
+ },
  "00731fd0": {
   "module": "zz_idioms",
   "name": "empty_function_731fd0"
@@ -39145,6 +39155,36 @@
  "00732000": {
   "module": "app",
   "name": "GetCDKey"
+ },
+ "00732050": {
+  "module": "net_console",
+  "name": "FirewallClickChild",
+  "proto": "int __stdcall FirewallClickChild(void * window, int param)"
+ },
+ "00732080": {
+  "module": "net_console",
+  "name": "FirewallFindSmallWindow",
+  "proto": "int __stdcall FirewallFindSmallWindow(void * window, int param)"
+ },
+ "007320c0": {
+  "module": "net_console",
+  "name": "FirewallWatchDialogs",
+  "proto": "uint __stdcall FirewallWatchDialogs(void * thread)"
+ },
+ "00732120": {
+  "module": "net_console",
+  "name": "FirewallRemovePortMapping",
+  "proto": "int __fastcall FirewallRemovePortMapping(void * manager, uchar protocol, int port)"
+ },
+ "00732470": {
+  "module": "net_console",
+  "name": "FirewallAddPortMapping",
+  "proto": "int __fastcall FirewallAddPortMapping(void * config, short port)"
+ },
+ "00732550": {
+  "module": "net_console",
+  "name": "FirewallMapConnections",
+  "proto": "int __fastcall FirewallMapConnections(void * manager, short port, bool * blocked)"
  },
  "00732730": {
   "module": "net_session",
@@ -39163,6 +39203,11 @@
  "00732c10": {
   "module": "zz_idioms",
   "name": "empty_function_732c10"
+ },
+ "00732da0": {
+  "module": "net_console",
+  "name": "InitGameRole",
+  "proto": "void __cdecl InitGameRole(void)"
  },
  "00732e30": {
   "module": "net_search",

@@ -1,0 +1,11 @@
+# Part 10d-vii: the firewall, the loading progress, the CD key, the crash report (net/net_firewall.cpp,
+# net/net_console.cpp).
+00731e10 CrashReportProc | int __stdcall CrashReportProc(void * dialog, uint message, uint wParam, int lParam)
+00731ee0 ReportCrash | void __stdcall ReportCrash(char * text)
+00732050 FirewallClickChild | int __stdcall FirewallClickChild(void * window, int param)
+00732080 FirewallFindSmallWindow | int __stdcall FirewallFindSmallWindow(void * window, int param)
+007320c0 FirewallWatchDialogs | uint __stdcall FirewallWatchDialogs(void * thread)
+00732120 FirewallRemovePortMapping | int __fastcall FirewallRemovePortMapping(void * manager, uchar protocol, int port)
+00732470 FirewallAddPortMapping | int __fastcall FirewallAddPortMapping(void * config, short port)
+00732550 FirewallMapConnections | int __fastcall FirewallMapConnections(void * manager, short port, bool * blocked)
+00732da0 InitGameRole | void __cdecl InitGameRole(void)

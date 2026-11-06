@@ -263,6 +263,8 @@ extern const GUID g_netVoiceCodecs[8];                  // 0x008190f8.. (by the 
 
 // CoCreateInstance for the network game (the harness supplies its own fakes).
 HRESULT NetCreateInstance(const GUID &clsid, DWORD context, const GUID &iid, void **object);
+// Windows XP's firewall can be there (NT 5.x; the original's test: major 5 or minor 1; the harness fakes it too).
+bool NetFirewallAvailable();
 
 // The flag CancelAsyncOperation takes to cancel every operation.
 enum : DWORD {

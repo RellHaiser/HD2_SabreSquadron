@@ -8988,6 +8988,28 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 239 errors in 47/374 (was 250). ret_audit --src: 52.
   - Stats: 10,122 of 12,306 functions by hand or absorbed (88.3 % by size).
 
+  PART 10d-vii DONE (2026-11-05): Windows XP's firewall, the loading progress, the CD key, the crash report
+  (net/net_firewall.cpp, net/net_console.cpp).
+  - The firewall (Internet Connection Firewall through HNetCfg's NetSharingManager, netcon.h): ConfigureFirewall
+    0x00732730 (XP's: NT with major 5 or minor 1, NetFirewallAvailable in net_create.cpp now; only on a change:
+    opening announces itself (not on a client), a thread clicks OK on the thread's small windows while it runs,
+    every firewalled connection (characteristics & 0x500) that is no shared access host (media 8 / 9) with sharing
+    or the firewall on gets UDP mappings "HD2 port <n>" for port .. port + 3 (target "*", ICSTT_IPADDRESS), enabled;
+    closing deletes the first such connection's UDP mappings of the stored port .. + 3 (compared sign-extended:
+    ports past 32767 stay, as in the original)), FirewallBlocks 0x007328d0 (each connection's firewall in turn,
+    the last decides; Ghidra lost the result: always false in the decompile). The manager made through
+    NetCreateInstance.
+  - PrintLoadProgress 0x00731af0 (a dedicated server's console: the map's line at 0, a dot each 4 %, the end at
+    100), GetCDKey 0x00732000 (HKLM ...\Hidden & Dangerous 2 "key"; the registry helpers 0x006ed860.. absorbed),
+    ReportCrash 0x00731ee0 / its dialog 0x00731e10 (not called: dialog 0x73, the text sent over TCP to
+    194.213.63.62:15002 after SocketStartUp, GameSpy's 0x00737cb0), g_gameRole defined (7 at start, 0x00732da0).
+  - C_Console a friend of C_NetGame (MoveInputLineToHistory).
+  - Harness: net/build_firewall.bat (firewall_test.cpp: the NetSharingManager's objects faked from netcon.h with
+    reference counts, every one released; the dialog watcher against real windows; 42 checks). Mutations: mutations/mutate_10d7.py and mutate_10d7c.py
+    (runner mutnetf.py): 230: 132 killed, 53 not building, 45 survived (the crash report not exercised). Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 215 errors in 46/373 (was 239). ret_audit --src: 52.
+  - Stats: 10,151 of 12,306 functions by hand or absorbed (88.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

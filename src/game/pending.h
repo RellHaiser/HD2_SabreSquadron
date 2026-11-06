@@ -366,7 +366,10 @@ void FreeResourceCaches();                          // tail of 0x006dc770 (model
 // Shows a message box; returns the pressed button.
 int ShowMessage(const char *text, const char *title, unsigned int flags);   // 0x006ed2a0
 // Reads the CD key stored by the installer; null if missing.
-const char *GetCDKey();                             // 0x00732000
+const char *GetCDKey();                             // 0x00732000 (net/net_console.cpp)
+// The crash report: asks the player (dialog 0x73, `text` shown) and sends `text` to the developers (TCP
+// 194.213.63.62:15002). Not called in this build.
+void ReportCrash(const char *text);                 // 0x00731ee0
 bool ValidateCDKey(const char *key);                // 0x007350a0
 
 // ---- frames / models -------------------------------------------------------------
