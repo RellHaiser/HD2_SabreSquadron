@@ -264,5 +264,3 @@ f_007888c0.cpp:400:59: base operand of '->' is not a pointer
     piStack_4ac = (int *)(**(code **)(DAT_008aedd8->refCount + 0x74))
 f_007888c0.cpp:605:26: invalid operands of types 'int' and 'tier1::C_str_rep*' to binary 'operator-'
     pCVar18 = -8 - local_4b8.rep;
-f_0079b060.cpp:732:95: expected primary-expression before ')' token
-    (local_250 = gh_bitcast<float*>((local_1d0.x * local_1c0 + local_1d0.z * local_1b8 +)

@@ -10705,3 +10705,32 @@
 0042afb0
 0042bf90
 # hand-ported (continued)
+0071e1e0
+0071e230
+0071e2c0
+0071e300
+0071e680
+0071e830
+0071e860
+0071ea20
+0071ebc0
+0071ec30
+0071f090
+0071f0c0
+0071f100
+0071f1d0
+0071fa10
+0071fad0
+0071fd80
+007ce930
+# absorbed helpers 0071e180-0071fed0: the static lists of morph fades and of debug lines (part 11b)
+0071e180
+0071e190
+0071e1b0
+0071e1c0
+0071fe80
+0071fe90
+0071fea0
+0071feb0
+0071fed0
+# hand-ported (continued)

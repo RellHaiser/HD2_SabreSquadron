@@ -9083,6 +9083,18 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 134 errors in 40/369 (was 155). ret_audit --src: 52.
   - Stats: 10,425 of 12,306 functions by hand or absorbed (89.8 % by size).
 
+  PART 11b DONE (2026-11-06): the speech slots and an order's path points (game/speech_slots.cpp, game/path_points.cpp).
+  - The 16 slots: attach, play (the lip-sync file, the sample, the subtitle), the update (the mouth from the lip-sync frame, 20 ms each, a fade in at 0.008 per ms, closing
+    over 200 ms), pause, stop, free. Checked against the x87 assembly (the decompile of the update loses the float registers). LoadMaterialTables, DrawDebugLine beside them.
+  - BuildPathPoints 0x007ce930: the walking network's points the line would cut past, each at its radius on the line's side, then a cubic through them by forward differences, ten
+    steps a stretch. The w of the points between are stale locals in the original; 0 here.
+  - Left out: the list of morph fades at the front of the table (0x008cb8d4; no code adds to it; its loop in the update). States 4 and 5 kept; nothing sets them. Static helpers of
+    the two lists absorbed.
+  - Harness: script_module/build_speech.bat (131 checks; weights kept per morph, expected poses and curves written apart). Mutations: mutate_11b.py 343: 277 killed, 20 not
+    building, 46 survived; mutate_11b2.py 74: 59, 9, 6. Survivors listed in each.
+  - No header the vehicle harnesses read changed since 11a: its build results stand. Build: MSVC clean. Tier 1: 133 errors in 39/369. ret_audit --src: 52.
+  - Stats: 10452 of 12,306 functions by hand or absorbed (90.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

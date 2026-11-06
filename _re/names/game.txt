@@ -140,3 +140,4 @@
 007319e0 C_NetGame::ResetReplication | void __thiscall ResetReplication(C_NetGame *this, bool all)
 00731ac0 C_NetGame::GetConnectionState | int __fastcall GetConnectionState(C_NetGame * net)
 00725270 OtherTeam | int __fastcall OtherTeam(int team)
+0071fad0 DrawDebugLine | void __fastcall DrawDebugLine(float * from, float * to, uint color, uint color2)

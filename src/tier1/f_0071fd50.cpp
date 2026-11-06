@@ -14,36 +14,4 @@ uint32_t FUN_0071fd50(...)
 }
 
 
-// 0x0071fd80
-bool LoadMaterialTables(...)
-{
-  int iVar1;
-  uint32_t uVar2;
-  iVar1 = dtaOpen("tables\\hdmaterials.def",0);
-  if (iVar1 < 0) {
-    return false;
-  }
-  uVar2 = dtaSeek(iVar1,0,2);
-  dtaSeek(iVar1,0,0);
-  g_materials = tier1_operator_new(uVar2);
-  dtaRead(iVar1,g_materials,uVar2);
-  dtaClose(iVar1);
-  g_materialCount = uVar2 >> 8;
-  iVar1 = dtaOpen("tables\\effects_car.def",0);
-  if (iVar1 < 0) {
-    return false;
-  }
-  if (g_carEffects != 0) {
-    tier1_operator_delete(g_carEffects);
-  }
-  uVar2 = dtaSeek(iVar1,0,2);
-  dtaSeek(iVar1,0,0);
-  g_carEffects = tier1_operator_new(uVar2);
-  dtaRead(iVar1,g_carEffects,uVar2);
-  dtaClose(iVar1);
-  g_carEffectCount = uVar2 / 0xf0;
-  return true;
-}
-
-
 } // namespace tier1

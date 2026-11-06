@@ -38298,6 +38298,11 @@
   "name": "PauseSpeechSlots",
   "proto": "void __fastcall PauseSpeechSlots(bool paused)"
  },
+ "0071fad0": {
+  "module": "game",
+  "name": "DrawDebugLine",
+  "proto": "void __fastcall DrawDebugLine(float * from, float * to, uint color, uint color2)"
+ },
  "0071fd80": {
   "module": "game",
   "name": "LoadMaterialTables",
