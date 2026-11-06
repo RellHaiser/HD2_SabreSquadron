@@ -38307,9 +38307,44 @@
   "module": "zz_idioms",
   "name": "identity_71fec0"
  },
+ "00720d10": {
+  "module": "net_console_vars",
+  "name": "ShowConsoleVariable",
+  "proto": "int __fastcall ShowConsoleVariable(int index)"
+ },
+ "00720e50": {
+  "module": "net_console_vars",
+  "name": "SetConsoleVariable",
+  "proto": "int __fastcall SetConsoleVariable(int index, int value)"
+ },
  "00721f40": {
   "module": "zz_idioms",
   "name": "empty_function_721f40"
+ },
+ "00721f50": {
+  "module": "net_console_vars",
+  "name": "ConsoleRangeStart",
+  "proto": "void __fastcall ConsoleRangeStart(char * range)"
+ },
+ "00721f60": {
+  "module": "net_console_vars",
+  "name": "ConsoleValueInRange",
+  "proto": "bool __fastcall ConsoleValueInRange(int number, char * range, bool * in)"
+ },
+ "00722010": {
+  "module": "net_console_vars",
+  "name": "ConsoleRangeRead",
+  "proto": "void __fastcall ConsoleRangeRead(int * token)"
+ },
+ "00722190": {
+  "module": "net_console_vars",
+  "name": "ConsoleRangeTerm",
+  "proto": "bool __fastcall ConsoleRangeTerm(int number, bool * in)"
+ },
+ "00722250": {
+  "module": "net_console_vars",
+  "name": "ConsoleRangePrimary",
+  "proto": "bool __fastcall ConsoleRangePrimary(int number, bool * in)"
  },
  "00722510": {
   "module": "net_session",

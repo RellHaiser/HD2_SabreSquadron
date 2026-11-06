@@ -18,9 +18,13 @@
 #include "game/game_app.h"
 #include "game/game_state.h"
 #include "game/game_texts.h"
+#include "game/human.h"
+#include "game/item_defs.h"
+#include "game/items_module.h"
 #include "game/mp_game_setup.h"
 #include "game/pending.h"
 #include "game/profile.h"
+#include "game/team.h"
 #include "ls3d/igraph.h"
 #include "net/net_game.h"
 #undef private
@@ -85,6 +89,10 @@ void C_GameApp::SendGameMessage(int type, int to, intptr_t a, int b, bool reliab
 }
 void C_GameApp::PostCommand(int command, intptr_t a, intptr_t b, bool flush)
 {
+    if (command == 4) {
+        Log("post 4 %d %d %d", static_cast<int>(a), static_cast<int>(b), flush);
+        return;
+    }
     Log("post %d '%s' %d %d", command, reinterpret_cast<const char *>(a), static_cast<int>(b), flush);
     operator delete(reinterpret_cast<void *>(a));
 }
@@ -188,6 +196,58 @@ HWND __stdcall FakeGetHWND(void *) { return g_window; }
 void *g_graphVtable[128];
 void *g_graphObject = g_graphVtable;
 extern "C" IGraph *GetIGraph() { return reinterpret_cast<IGraph *>(&g_graphObject); }
+// The game's commands (part 10e-ii): their effects logged.
+bool C_Controls::SetMouseScale(int x, int y, int z)
+{
+    Log("mouse %d %d %d", x, y, z);
+    return true;
+}
+bool C_NetGame::SendChat(const char *text, bool team)
+{
+    Log("chat %s %d", text, team);
+    return true;
+}
+C_Human *g_activePlayer;
+C_Human *C_Team::GetActivePlayer() const { return g_activePlayer; }
+void C_Team::HealMembers() { Log("heal"); }
+int g_difficulty;
+int C_GameProfile::GetDifficulty() const { return g_difficulty; }
+C_Item *C_ItemsModule::GiveItem(int typeId, int, C_Actor *actor, int)
+{
+    Log("give %d %d", typeId, actor == g_activePlayer);
+    return nullptr;
+}
+C_ItemDef *g_defs[300];
+C_ItemDef *GetItemDef(int typeId) { return typeId < 300 ? g_defs[typeId] : nullptr; }
+void C_game::Print(const char *format, ...)
+{
+    char line[256];
+    va_list args;
+    va_start(args, format);
+    std::vsnprintf(line, sizeof line, format, args);
+    va_end(args);
+    Log("game print %s", line);
+}
+void __attribute__((thiscall)) FakeHit(C_Human *self, int type, float amount, const S_vector *pos, const S_vector *dir,
+                                       C_Actor *attacker, int flags)
+{
+    Log("hit %d %.1f %.2f %.2f %d %d", type, amount, pos->x + pos->y + pos->z, dir->x + dir->y + dir->z,
+        attacker != nullptr, flags);
+}
+// A definition's GetBehaviour and GetAmmoItemId (g++'s vtable: one more destructor slot).
+int __attribute__((thiscall)) FakeBehaviour(int *self) { return self[1]; }
+int __attribute__((thiscall)) FakeAmmo(int *self) { return self[2]; }
+int *MakeDef(int behaviour, int ammo)
+{
+    static void *vtable[16];
+    vtable[0x10 / 4 + 1] = reinterpret_cast<void *>(&FakeBehaviour);
+    vtable[0x18 / 4 + 1] = reinterpret_cast<void *>(&FakeAmmo);
+    auto *def = new int[3];
+    def[0] = reinterpret_cast<intptr_t>(vtable);
+    def[1] = behaviour;
+    def[2] = ammo;
+    return def;
+}
 // The console state's state.
 struct T_State : C_GameState {
     void SetPendingState(int state) override { Log("pending %d", state); }
@@ -608,6 +668,166 @@ void TestObjectives()
     CHECK(Run("listobjectives") && All() == "print OK - T11|print    - T22|");
 }
 
+// 1 in, 0 out, -1 not a range.
+int Range(int number, const char *range)
+{
+    bool in = false;
+    return ConsoleValueInRange(number, range, &in) ? in : -1;
+}
+
+void TestRanges()
+{
+    CHECK(Range(5, "*") == 1 && Range(-5, " * ") == 1);
+    CHECK(Range(1, "0,1") == 1 && Range(0, "0,1") == 1 && Range(2, "0,1") == 0 && Range(-1, "0,1") == 0);
+    CHECK(Range(12, " 12 ") == 1 && Range(123, "123") == 1 && Range(13, "12") == 0 && Range(9, "9") == 1 && Range(0, "0") == 1);
+    CHECK(Range(-12, "-12") == 1 && Range(12, "-12") == 0);
+    CHECK(Range(3, "1:5") == 1 && Range(1, "1:5") == 1 && Range(5, "1:5") == 1 && Range(0, "1:5") == 0 && Range(6, "1:5") == 0);
+    CHECK(Range(3, "1:") == -1 && Range(3, "1:*") == -1 && Range(3, "") == -1 && Range(3, "x") == -1 && Range(3, ",") == -1);
+    CHECK(Range(3, "<4") == 1 && Range(4, "<4") == 0 && Range(4, "<=4") == 1 && Range(5, "<=4") == 0);
+    CHECK(Range(5, ">4") == 1 && Range(4, ">4") == 0 && Range(4, ">=4") == 1 && Range(3, ">=4") == 0);
+    CHECK(Range(9, "%3") == 1 && Range(10, "%3") == 0);
+    CHECK(Range(3, "!3") == 0 && Range(4, "!3") == 1 && Range(3, "!!3") == 1);
+    CHECK(Range(5, ">3&<7") == 1 && Range(2, ">3&<7") == 0 && Range(8, ">3&<7") == 0 && Range(5, "!5&<7") == 0);
+    CHECK(Range(3, "!5&<7") == 1 && Range(8, "!5&<7") == 0 && Range(3, ">1&<7&!3") == 0 && Range(4, ">1&<7&!3") == 1);
+    CHECK(Range(5, ">3&") == -1 && Range(5, "!") == -1);
+    CHECK(Range(7, "1,2,7") == 1 && Range(2, "1,2,x") == 1 && Range(9, "1,2,x") == -1 && Range(9, "1 2") == -1);
+    CHECK(Range(1, "1:2,5") == 1 && Range(5, "1:2,5") == 1 && Range(4, "1:2,5") == 0);
+    CHECK(Range(4, "*,x") == 1);
+}
+
+int Line(const char *line)
+{
+    g_log.clear();
+    return ExecuteConsoleLine(line);
+}
+
+C_Human *HitHuman(int netId)
+{
+    static void *vtable[128];
+    alignas(16) static unsigned char storage[sizeof(C_Human)];
+    for (void *&slot : vtable)
+        slot = reinterpret_cast<void *>(&FakeHit);
+    *reinterpret_cast<void ***>(storage) = vtable;
+    auto *human = reinterpret_cast<C_Human *>(storage);
+    human->m_netId = netId;
+    return human;
+}
+
+void TestGameLines()
+{
+    Reset(GAME_ROLE_LOCAL);
+    g_difficulty = 1;
+    g_activePlayer = nullptr;
+    // Chat: ".text", "x,text", say, sayteam (spaces trimmed; quotes dropped; cut to 100).
+    CHECK(Line(".hello ") == 0 && All() == "chat hello 0|");
+    CHECK(Line("x,hello") == 0 && All() == "chat ,hello 1|");
+    CHECK(Line("say  \"a b\"  ") == 0 && All() == "chat a b 0|");
+    CHECK(Line("sayteam a \"b") == 0 && All() == "chat a \"b 1|");
+    CHECK(Line("say \"") == 0 && All() == "chat  0|");
+    std::string longer = "say ";
+    longer.append(300, 'z');
+    CHECK(Line(longer.c_str()) == 0 && g_log[0].size() == std::strlen("chat ") + 100 + std::strlen(" 0"));
+    // The sensitivity (a number).
+    CHECK(Line("sensitivity 7") == 0 && All() == "mouse 7 7 1|");
+    CHECK(Line("sensitivity x") == 4 && g_log.empty());
+    CHECK(Line("sensitivity") == 4 && g_log.empty());
+    // Not one of them: the command processor's (the line rebuilt), not too long.
+    CHECK(Line("maxping   71") == 0 && g_netMaxPing == 71);
+    CHECK(Line("Say x") == 0 && All() == "print T582|");
+    CHECK(Line("") == 0 && All() == "print T582|");
+    longer = "maxping 72";
+    longer.append(489, ' ');
+    CHECK(Line(longer.c_str()) == 0 && g_netMaxPing == 72);
+    longer.append(1, ' ');
+    g_netMaxPing = 0;
+    CHECK(Line(longer.c_str()) == 0 && g_netMaxPing == 0);
+    // The variables (0, 1): set, shown; another value refused; read back; others -1.
+    CHECK(GetCheatValue(CHEAT_SNIPER) == 0 && GetCheatValue(CHEAT_HYDROSHOCK) == 0 && GetCheatValue(CONSOLE_NO_GI) == 0);
+    CHECK(GetCheatValue(CONSOLE_HEAL) == -1 && GetCheatValue(CONSOLE_SAY) == -1);
+    CHECK(Line("sniper 1") == 0 && GetCheatValue(CHEAT_SNIPER) == 1 && g_log.empty());
+    CHECK(Line("sniper 2") == 5 && GetCheatValue(CHEAT_SNIPER) == 1);
+    CHECK(Line("sniper") == 0 && All() == "game print sniper = 1|");
+    CHECK(Line("sniper 0") == 0 && GetCheatValue(CHEAT_SNIPER) == 0);
+    CHECK(Line("no_gi 1") == 0 && GetCheatValue(CONSOLE_NO_GI) == 1 && GetCheatValue(CHEAT_HYDROSHOCK) == 0);
+    CHECK(Line("hydroshock 1") == 0 && GetCheatValue(CHEAT_HYDROSHOCK) == 1);
+    CHECK(Line("no_gi 0") == 0 && Line("hydroshock 0") == 0);
+    // The cheats: a local game below the top difficulty.
+    g_itemsModule.m_infiniteAmmo = false;
+    CHECK(Line("happyammo 1") == 0 && g_itemsModule.m_infiniteAmmo);
+    CHECK(Line("happyammo 0") == 0 && !g_itemsModule.m_infiniteAmmo);
+    CHECK(Line("heal 1") == 0 && All() == "heal|");
+    CHECK(Line("anorexy 1") == 0 && g_log.empty());
+    g_difficulty = 4;
+    CHECK(Line("happyammo 1") == 0 && !g_itemsModule.m_infiniteAmmo);
+    CHECK(Line("heal 1") == 0 && g_log.empty());
+    g_difficulty = 1;
+    g_gameRole = GAME_ROLE_SERVER;
+    CHECK(Line("happyammo 1") == 0 && !g_itemsModule.m_infiniteAmmo);
+    CHECK(Line("heal 1") == 0 && g_log.empty());
+    CHECK(Line("giveitem MP40") == 0 && g_log.empty());
+    g_gameRole = GAME_ROLE_LOCAL;
+    // Kill: the local game's player hit; a session's: asked of the server when it is the local slot.
+    CHECK(Line("kill") == 0 && g_log.empty());
+    g_activePlayer = HitHuman(2);
+    CHECK(Line("kill") == 0 && All() == "hit 6 -1.0 0.00 0.00 0 0|");
+    g_gameRole = GAME_ROLE_CLIENT;
+    CHECK(Line("kill") == 0 && g_log.size() == 1 && g_log[0].compare(0, 7, "post 4 ") == 0);
+    g_activePlayer->m_netId = 3;
+    CHECK(Line("kill") == 0 && g_log.empty());
+    g_activePlayer->m_netId = -1;
+    g_localPlayerSlot = -1;
+    CHECK(Line("kill") == 0 && g_log.empty());
+    g_localPlayerSlot = 2;
+    g_gameRole = GAME_ROLE_LOCAL;
+    // Items: by name (any case); a weapon with 6 of its ammo, thrown things 6 in all, others 1.
+    int *mp40 = MakeDef(1, 77);
+    int *grenade = MakeDef(ITEM_BEHAVIOUR_THROWN, -1);
+    int *charge = MakeDef(ITEM_BEHAVIOUR_STICKY_CHARGE, -1);
+    int *medikit = MakeDef(3, -1);
+    g_defs[18] = reinterpret_cast<C_ItemDef *>(mp40);
+    g_defs[60] = reinterpret_cast<C_ItemDef *>(grenade);
+    g_defs[67] = reinterpret_cast<C_ItemDef *>(charge);
+    g_defs[54] = reinterpret_cast<C_ItemDef *>(medikit);
+    g_defs[231] = reinterpret_cast<C_ItemDef *>(medikit);
+    CHECK(Line("giveitem mp40") == 0 && All() == "give 18 1|give 77 1|give 77 1|give 77 1|give 77 1|give 77 1|give 77 1|");
+    CHECK(Line("giveitem GRENADE36") == 0 && All() == "give 60 1|give 60 1|give 60 1|give 60 1|give 60 1|give 60 1|");
+    CHECK(Line("giveitem explosivesbag") == 0 && g_log.size() == 6);
+    CHECK(Line("giveitem MEDIKIT") == 0 && All() == "give 54 1|");
+    CHECK(Line("giveitem AQUALUNG") == 0 && All() == "give 231 1|");
+    CHECK(Line("giveitem PARABELLUM") == 0 && g_log.empty());            // (no definition)
+    CHECK(Line("giveitem nonsense") == 0 && g_log.empty());
+    // Every name's type; an ammo of type 0 counts; a thrown item's ammo -1.
+    const struct {
+        int id;
+        const char *name;
+    } items[] = {{0, "PARABELLUM"}, {1, "ENFIELD"}, {2, "COLT"}, {3, "TAISHO"}, {5, "TOKAREV"}, {4, "K98"}, {6, "LEE"},
+                 {7, "DELISLE"}, {8, "MOSIN"}, {10, "GARAND"}, {11, "CARBINE"}, {12, "ARISAKA"}, {14, "SPRINGFIELD"},
+                 {13, "K98OPT"}, {15, "SPRINGFIELDOPT"}, {16, "ARISAKAOPT"}, {17, "LEEOPT"}, {18, "MP40"}, {19, "ZB26"},
+                 {20, "THOMPSON"}, {21, "STENGUN"}, {22, "STENGUNSIL"}, {23, "SHOTGUN"}, {24, "SPAGIN"}, {25, "PPS"},
+                 {26, "MP44"}, {28, "BAR"}, {29, "BRENGUN"}, {31, "DEGTYAREV"}, {38, "PANZERFAUST"}, {39, "BAZOOKA"},
+                 {53, "MEDIKITBIG"}, {54, "MEDIKIT"}, {99, "BINOCULARS"}, {229, "CAMERA"}, {56, "KNIFEGER"},
+                 {57, "KNIFESAS"}, {59, "WIRECUTTER"}, {60, "GRENADE36"}, {62, "GRENADE69"}, {61, "GRENADEGER"},
+                 {63, "GRENADEJAP"}, {66, "CLUMMYBOMB"}, {67, "EXPLOSIVESBAG"}, {68, "DYNAMITE"}, {70, "MINE"},
+                 {71, "TANKMINE"}, {251, "MAGNETICMINE"}, {95, "BACKPACKRUS"}, {97, "BACKPACKGER"}, {101, "BACKPACKGB1"},
+                 {222, "BACKPACKGB2"}, {228, "BACKPACKGB3"}, {231, "AQUALUNG"}};
+    for (const auto &item : items) {
+        g_defs[item.id] = reinterpret_cast<C_ItemDef *>(medikit);
+        char line[64], expected[32];
+        std::snprintf(line, sizeof line, "giveitem %s", item.name);
+        std::snprintf(expected, sizeof expected, "give %d 1|", item.id);
+        CHECK(Line(line) == 0 && All() == expected);
+        g_defs[item.id] = nullptr;
+    }
+    int *ammoZero = MakeDef(1, 0);
+    g_defs[10] = reinterpret_cast<C_ItemDef *>(ammoZero);
+    CHECK(Line("giveitem GARAND") == 0 && g_log.size() == 7 && g_log[1] == "give 0 1");
+    g_defs[10] = nullptr;
+    // One-letter lines: not ".x" nor "x,".
+    CHECK(Line(",") == 0 && All() == "print T582|");
+    CHECK(Line("say \"\"") == 0 && All() == "chat  0|");
+    g_activePlayer = nullptr;
+}
+
 void TestConsoleState()
 {
     Reset(GAME_ROLE_LOCAL);
@@ -684,6 +904,8 @@ int main()
     TestPlayers();
     TestVoiceAdmin();
     TestObjectives();
+    TestRanges();
+    TestGameLines();
     TestConsoleState();
     DestroyWindow(g_window);
     std::printf("console: %d checks, %d failures\n", checks, failures);

@@ -9031,6 +9031,21 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 213 errors in 44/371 (was 215). ret_audit --src: 52.
   - Stats: 10,169 of 12,306 functions by hand or absorbed (88.6 % by size).
 
+  PART 10e-ii DONE (2026-11-05): the game's console commands (net/net_console_vars.cpp).
+  - ExecuteConsoleLine 0x00720500 (".text" says, "x,text" says to the team, a word of the table, else the command
+    processor's line), ExecuteConsoleCommand 0x00720710 (sensitivity, say, sayteam, kill, the cheats of a local game below
+    difficulty 4: happyammo, heal, giveitem (54 names: a weapon with 6 of its ammo, thrown things and charges 6 in
+    all), anorexy (nothing), the variables hydroshock, sniper, no_gi), results 0 / 2 / 4 / 5, GetCheatValue 0x00720f50,
+    the variables' range language (0x00721f50 .. 0x00722250: terms by ',', '!', '&', '*', n, n:m, <n, <=n, >n, >=n, %n).
+    Fix: chat text terminated. The argument trimmed on a copy (the original writes into the line). The table's
+    std::map (0x0097b9cc) kept as one; its tree code and static set-up absorbed; a text variable (0x00720ea0): none
+    in the table, dropped.
+  - Dead code, left in tier 1: 0x00720fd0 (the variables saved to a file) with 0x007210a0 / 0x007210c0.
+  - Harness: net/build_console.bat (327 checks now). Mutations: mutations/mutate_10e2.py (runner mutnete.py): 202: 158 killed, 19 not building, 25 survived.
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 194 errors in 42/370 (was 213). ret_audit --src: 52.
+  - Stats: 10,207 of 12,306 functions by hand or absorbed (88.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

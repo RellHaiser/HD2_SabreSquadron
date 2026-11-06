@@ -287,11 +287,14 @@ enum : int {
 };
 // Value of console command `index`, -1 if it takes none.
 int GetCheatValue(int index);                       // 0x00720f50
-// A console line ("command arguments"; the chat line without "Say"), and command `command` of the
-// table with its argument text (the chat: CONSOLE_SAY / CONSOLE_SAY_TEAM); results not
-// identified.
+// A console line ("command arguments"; the chat line without "Say"; net/net_console_vars.cpp), and command `command`
+// of the table with its argument text (the chat: CONSOLE_SAY / CONSOLE_SAY_TEAM): 0 done, 2 no such command, 4 not a
+// number, 5 out of the variable's range.
 int ExecuteConsoleLine(const char *line);           // 0x00720500 (__fastcall)
 int ExecuteConsoleCommand(int command, const char *args);   // 0x00720710 (__fastcall)
+// Whether `number` is in `range` ("0,1"; terms by ',': '*', n, n:m, <n, <=n, >n, >=n, %n, with '!' and '&'); false: not
+// a range.
+bool ConsoleValueInRange(int number, const char *range, bool *in);   // 0x00721f60 (__fastcall)
 
 // A pair of tables the game checks against each other (copy protection, inferred).
 extern const uint32_t g_protectionTableA[];         // 0x008ca840

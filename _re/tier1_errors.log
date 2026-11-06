@@ -280,46 +280,8 @@ f_006f9e30.cpp:1936:48: no matching function for call to 'gh_bitcast<uint32_t*>(
     local_260 = gh_bitcast<uint32_t*>()
 f_00702bb0.cpp:550:38: no matching function for call to 'gh_bitcast<tier1::S_vector4*>()'
     local_84 = gh_bitcast<S_vector4*>()
-f_007200b0.cpp:41:20: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    local_c = (int *)*DAT_0097b9d0;
-f_007200b0.cpp:52:33: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    piVar2 = (int *)DAT_0097b9d0[1];
-f_007200b0.cpp:53:28: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    if ((int *)DAT_0097b9d0[1] != DAT_0097b9e4) {
-f_007200b0.cpp:62:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    DAT_0097b9d0[1] = (int)DAT_0097b9e4;
-f_007200b0.cpp:64:5: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    *DAT_0097b9d0 = (int)DAT_0097b9d0;
-f_007200b0.cpp:65:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    DAT_0097b9d0[2] = (int)DAT_0097b9d0;
-f_00720200.cpp:176:20: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    local_c = (int *)*DAT_0097b9d0;
-f_00720200.cpp:188:31: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    piVar2 = (int *)DAT_0097b9d0[1];
-f_00720200.cpp:189:26: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    if ((int *)DAT_0097b9d0[1] != DAT_0097b9e4) {
-f_00720200.cpp:198:15: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    DAT_0097b9d0[1] = (int)DAT_0097b9e4;
-f_00720200.cpp:200:3: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    *DAT_0097b9d0 = (int)DAT_0097b9d0;
-f_00720200.cpp:201:15: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    DAT_0097b9d0[2] = (int)DAT_0097b9d0;
-f_00720200.cpp:345:25: base operand of '->' is not a pointer
-    (*DAT_0098c0fc->vtable->empty_function_744210)();
-f_00720200.cpp:809:77: no matching function for call to 'tier1::va_list::va_list(uint8_t (*)[64])'
+f_00720200.cpp:60:77: no matching function for call to 'tier1::va_list::va_list(uint8_t (*)[64])'
     size = _vsnprintf(local_3e8,999,(char *)param_2,(va_list)(&stack0x0000000c));
-f_00720200.cpp:833:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    DAT_0097b9e4[2] = 0;
-f_00721f30.cpp:72:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    for (; (*DAT_0097b9f0 == ' ' || (*DAT_0097b9f0 == '\t')); DAT_0097b9f0 = DAT_0097b9f0 + 1) {
-f_00721f30.cpp:72:36: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    for (; (*DAT_0097b9f0 == ' ' || (*DAT_0097b9f0 == '\t')); DAT_0097b9f0 = DAT_0097b9f0 + 1) {
-f_00721f30.cpp:74:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    cVar2 = *DAT_0097b9f0;
-f_00721f30.cpp:96:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    if (*DAT_0097b9f0 < '0') break;
-f_00721f30.cpp:97:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    } while (*DAT_0097b9f0 < ':');
 f_0072e190.cpp:93:25: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
     uVar2 = htons(0x3a9a);
 f_0072e190.cpp:95:41: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
