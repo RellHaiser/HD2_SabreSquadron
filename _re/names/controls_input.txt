@@ -1,0 +1,9 @@
+# Part 11c: the controls (game/input_controls.cpp).
+006c6d70 C_Controls::C_Controls
+006c6e00 C_Controls::~C_Controls
+006c6eb0 C_Controls::Shutdown
+006c6fe0 C_Controls::SetMouseScale
+006c7790 C_Controls::Bind
+006c77d0 C_Controls::SetBinding
+006c87f0 C_Controls::PollPress
+006c90c0 WideToAnsi

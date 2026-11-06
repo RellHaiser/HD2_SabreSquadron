@@ -124,13 +124,15 @@ public:
     I3DMETHOD(void, FlushChars)() = 0;                                   // 0xAC
     // A key (DirectInput code) is held.
     I3DMETHOD(bool, IsKeyDown)(int key) = 0;                             // 0xB0
-    I3D_SLOT(B4);
-    I3D_SLOT(B8);
+    // The keys (DirectInput codes) whose held state GetWatchedKeyBits reports, as its bits.
+    I3DMETHOD(void, SetWatchedKeys)(const char *keys, int count) = 0;    // 0xB4
+    I3DMETHOD(uint64_t, GetWatchedKeyBits)() = 0;                        // 0xB8
     // Either shift / control / alt key held (the LS3DF port's names).
     I3DMETHOD(bool, IsShiftDown)() = 0;                                  // 0xBC
     I3DMETHOD(bool, IsCtrlDown)() = 0;                                   // 0xC0
     I3DMETHOD(bool, IsAltDown)() = 0;                                    // 0xC4
-    I3D_SLOT(C8);
+    // The modifier keys held (0x20 / 0x40 shift, 0x80 / 0x100 control, 0x200 / 0x400 alt: left / right; the argument 0).
+    I3DMETHOD(uint32_t, GetModifiers)(int unknown) = 0;                  // 0xC8
     // The character of a key (DirectInput code; the signals panel's digits; the second argument
     // 0, not identified).
     I3DMETHOD(uint32_t, KeyToChar)(int key, int unknown) = 0;           // 0xCC

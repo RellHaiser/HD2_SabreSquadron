@@ -36435,6 +36435,22 @@
   "module": "zz_idioms",
   "name": "vector_tidy_6c52e0"
  },
+ "006c6d70": {
+  "module": "controls_input",
+  "name": "C_Controls::C_Controls"
+ },
+ "006c6e00": {
+  "module": "controls_input",
+  "name": "C_Controls::~C_Controls"
+ },
+ "006c6eb0": {
+  "module": "controls_input",
+  "name": "C_Controls::Shutdown"
+ },
+ "006c6fe0": {
+  "module": "controls_input",
+  "name": "C_Controls::SetMouseScale"
+ },
  "006c7010": {
   "module": "app",
   "name": "BindControls"
@@ -36460,9 +36476,25 @@
   "name": "C_Controls::GetValue",
   "proto": "float __thiscall GetValue(void * this, int action, bool pressed)"
  },
+ "006c7790": {
+  "module": "controls_input",
+  "name": "C_Controls::Bind"
+ },
+ "006c77d0": {
+  "module": "controls_input",
+  "name": "C_Controls::SetBinding"
+ },
  "006c7bc0": {
   "module": "app",
   "name": "C_Controls::Update"
+ },
+ "006c87f0": {
+  "module": "controls_input",
+  "name": "C_Controls::PollPress"
+ },
+ "006c90c0": {
+  "module": "controls_input",
+  "name": "WideToAnsi"
  },
  "006c9150": {
   "module": "zz_idioms",

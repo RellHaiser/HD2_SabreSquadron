@@ -104,10 +104,6 @@ f_00633450.cpp:63:76: invalid 'static_cast' from type 'unsigned char*' to type '
     uVar8 = FUN_00636b80(2,0x14);
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_006c6d40.cpp:646:32: wrong type argument to unary minus
-    piVar1 = gh_bitcast<int*>(-gh_bitcast)<float>(piVar1);
-f_006c6d40.cpp:646:44: expected primary-expression before 'float'
-    piVar1 = gh_bitcast<int*>(-gh_bitcast)<float>(piVar1);
 f_006cc250.cpp:252:37: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
     (&stack0x00000168)[iVar7] = iVar8 - 6 + CONCAT22(in_stack_0000007c,in_stack_0000007a);
 f_006cc250.cpp:267:43: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}

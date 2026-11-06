@@ -371,17 +371,6 @@ uint32_t FUN_006c52a0(void *_this,uint8_t *param_1, ...)
 }
 
 
-// 0x006c52c0
-uint32_t FUN_006c52c0(void *_this,uint8_t *param_1, ...)
-{
-  *(uint8_t *)_this = *param_1;
-  *(uint32_t *)((int)_this + 4) = 0;
-  *(uint32_t *)((int)_this + 8) = 0;
-  *(uint32_t *)((int)_this + 0xc) = 0;
-  return 0;
-}
-
-
 // 0x006c52e0
 uint32_t vector_tidy_6c52e0(int param_1, ...)
 {
@@ -389,17 +378,6 @@ uint32_t vector_tidy_6c52e0(int param_1, ...)
   *(uint32_t *)(param_1 + 4) = 0;
   *(uint32_t *)(param_1 + 8) = 0;
   *(uint32_t *)(param_1 + 0xc) = 0;
-  return 0;
-}
-
-
-// 0x006c5300
-uint32_t FUN_006c5300(void *_this,uint8_t *param_1, ...)
-{
-  *(uint8_t *)_this = *param_1;
-  *(uint32_t *)((int)_this + 4) = 0;
-  *(uint32_t *)((int)_this + 8) = 0;
-  *(uint32_t *)((int)_this + 0xc) = 0;
   return 0;
 }
 
@@ -412,165 +390,11 @@ uint32_t FUN_006c5320(void *_this,uint32_t *param_1, ...)
 }
 
 
-// 0x006c5330
-uint32_t FUN_006c5330(void *_this,uint32_t *param_1,int *param_2,int *param_3, ...)
-{
-  int *piVar1;
-  int *piVar2;
-  int *piVar3;
-  piVar2 = param_3;
-  if (((*(int *)((int)_this + 0xc) != 0) &&
-      (piVar1 = *(int **)((int)_this + 4), param_2 == (int *)*piVar1)) && (param_3 == piVar1)) {
-    piVar2 = (int *)piVar1[1];
-    if ((int *)piVar1[1] != DAT_0089bbb8) {
-      do {
-        FUN_006c5d80((int *)piVar2[2]);
-        piVar1 = (int *)*piVar2;
-        FUN_0048b690((int)(piVar2 + 3));
-        tier1_operator_delete(piVar2);
-        piVar2 = piVar1;
-      } while (piVar1 != DAT_0089bbb8);
-    }
-    *(int **)(*(int *)((int)_this + 4) + 4) = DAT_0089bbb8;
-    *(uint32_t *)((int)_this + 0xc) = 0;
-    *(uint32_t *)*(uint32_t *)((int)_this + 4) = *(uint32_t *)((int)_this + 4);
-    *(int *)(*(int *)((int)_this + 4) + 8) = *(int *)((int)_this + 4);
-    *param_1 = **(uint32_t **)((int)_this + 4);
-    return 0;
-  }
-  do {
-    if (param_2 == piVar2) {
-      *param_1 = param_2;
-      return 0;
-    }
-    if ((int *)param_2[2] == DAT_0089bbb8) {
-      piVar1 = (int *)param_2[1];
-      piVar3 = param_2;
-      if (param_2 == (int *)piVar1[2]) {
-        do {
-          piVar3 = piVar1;
-          piVar1 = (int *)piVar3[1];
-        } while (piVar3 == (int *)piVar1[2]);
-      }
-      if ((int *)piVar3[2] != piVar1) goto LAB_006c53e1;
-    }
-    else {
-      piVar1 = (int *)FUN_006c6b80((int *)param_2[2]);
-LAB_006c53e1:
-      piVar3 = piVar1;
-    }
-    FUN_006c5940(_this,(uint32_t*)(&param_3),param_2);
-    param_2 = piVar3;
-  } while( true );
-  return 0;
-}
-
-
 // 0x006c54b0
 uint32_t FUN_006c54b0(void *_this,uint32_t *param_1, ...)
 {
   *param_1 = **(uint32_t **)((int)_this + 4);
   return 0;
-}
-
-
-// 0x006c54c0
-uint32_t FUN_006c54c0(void *_this,uint32_t *param_1,int *param_2,int *param_3, ...)
-{
-  int *piVar1;
-  int *piVar2;
-  int *piVar3;
-  piVar2 = param_3;
-  if (((*(int *)((int)_this + 0xc) != 0) &&
-      (piVar1 = *(int **)((int)_this + 4), param_2 == (int *)*piVar1)) && (param_3 == piVar1)) {
-    piVar2 = (int *)piVar1[1];
-    if ((int *)piVar1[1] != _DAT_00867a94) {
-      do {
-        FUN_006c6210((int *)piVar2[2]);
-        piVar1 = (int *)*piVar2;
-        FUN_004097e0((int)(piVar2 + 3));
-        tier1_operator_delete(piVar2);
-        piVar2 = piVar1;
-      } while (piVar1 != _DAT_00867a94);
-    }
-    *(int **)(*(int *)((int)_this + 4) + 4) = _DAT_00867a94;
-    *(uint32_t *)((int)_this + 0xc) = 0;
-    *(uint32_t *)*(uint32_t *)((int)_this + 4) = *(uint32_t *)((int)_this + 4);
-    *(int *)(*(int *)((int)_this + 4) + 8) = *(int *)((int)_this + 4);
-    *param_1 = **(uint32_t **)((int)_this + 4);
-    return 0;
-  }
-  do {
-    if (param_2 == piVar2) {
-      *param_1 = param_2;
-      return 0;
-    }
-    if ((int *)param_2[2] == _DAT_00867a94) {
-      piVar1 = (int *)param_2[1];
-      piVar3 = param_2;
-      if (param_2 == (int *)piVar1[2]) {
-        do {
-          piVar3 = piVar1;
-          piVar1 = (int *)piVar3[1];
-        } while (piVar3 == (int *)piVar1[2]);
-      }
-      if ((int *)piVar3[2] != piVar1) goto LAB_006c5571;
-    }
-    else {
-      piVar1 = (int *)FUN_006c6ba0((int *)param_2[2]);
-LAB_006c5571:
-      piVar3 = piVar1;
-    }
-    FUN_006c5dd0(_this,(uint32_t*)(&param_3),param_2);
-    param_2 = piVar3;
-  } while( true );
-  return 0;
-}
-
-
-// 0x006c55a0
-int * FUN_006c55a0(int param_1,int *param_2,int param_3, ...)
-{
-  short *psVar1;
-  int iVar2;
-  uint32_t *puVar3;
-  int *piVar4;
-  int iVar5;
-  int *piVar6;
-  int iVar7;
-  int *piVar8;
-  iVar2 = *(int *)(param_1 + 8);
-  piVar6 = param_2;
-  if (param_3 != iVar2) {
-    iVar7 = param_3 - (int)param_2;
-    do {
-      if (*(int *)(iVar7 + (int)piVar6) != 0) {
-        psVar1 = (short *)(*(int *)(iVar7 + (int)piVar6) + 0xe4);
-        *psVar1 = *psVar1 + 1;
-      }
-      puVar3 = (uint32_t *)*piVar6;
-      if (puVar3 != 0) {
-        (**(code **)*puVar3)(puVar3);
-      }
-      *piVar6 = *(int *)(iVar7 + (int)piVar6);
-      piVar4 = *(int **)(iVar7 + 4 + (int)piVar6);
-      if (piVar4 != 0) {
-        *piVar4 = *piVar4 + 1;
-      }
-      piVar4 = (int *)piVar6[1];
-      if ((piVar4 != 0) && (iVar5 = *piVar4, *piVar4 = iVar5 - 1, iVar5 - 1 == 0)) {
-        tier1_operator_delete(piVar4);
-      }
-      piVar6[1] = *(int *)(iVar7 + 4 + (int)piVar6);
-      piVar6 += 2;
-    } while (iVar7 + (int)piVar6 != iVar2);
-  }
-  piVar4 = *(int **)(param_1 + 8);
-  for (piVar8 = piVar6; piVar8 != piVar4; piVar8 = piVar8 + 2) {
-    S_CacheEntry_Model___S_CacheEntry_Model(piVar8);
-  }
-  *(int **)(param_1 + 8) = piVar6;
-  return param_2;
 }
 
 
@@ -1873,26 +1697,6 @@ uint32_t FUN_006c6b30(int *param_1, ...)
       tier1_operator_delete(param_1);
       param_1 = piVar1;
     } while (piVar1 != DAT_00867b00);
-  }
-  return 0;
-}
-
-
-// 0x006c6b80
-uint32_t FUN_006c6b80(uint32_t *param_1, ...)
-{
-  uint32_t *puVar1;
-  for (puVar1 = (uint32_t *)*param_1; puVar1 != DAT_0089bbb8; puVar1 = (uint32_t *)*puVar1) {
-  }
-  return 0;
-}
-
-
-// 0x006c6ba0
-uint32_t FUN_006c6ba0(uint32_t *param_1, ...)
-{
-  uint32_t *puVar1;
-  for (puVar1 = (uint32_t *)*param_1; puVar1 != _DAT_00867a94; puVar1 = (uint32_t *)*puVar1) {
   }
   return 0;
 }

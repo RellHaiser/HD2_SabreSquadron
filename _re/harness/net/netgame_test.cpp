@@ -333,7 +333,7 @@ void ServerBrowserUpdate(S_ServerBrowser *browser, int async, int disconnectOnCo
         list += " " + std::to_string(fields[i]);
     Log("sb update %d %d %d%s %d", browser == g_browser, async, disconnectOnComplete, list.c_str(), filter != nullptr);
 }
-void ServerBrowserThink(S_ServerBrowser *browser) { Log("sb think %d", browser == g_browser); }
+int ServerBrowserThink(S_ServerBrowser *browser) { Log("sb think %d", browser == g_browser); return 0; }
 void ServerBrowserClear(S_ServerBrowser *browser) { Log("sb clear %d", browser == g_browser); }
 const char *SBServerGetStringValue(S_SbServer *server, const char *key, const char *fallback)
 {

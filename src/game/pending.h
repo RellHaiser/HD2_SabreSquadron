@@ -76,15 +76,58 @@ extern float g_netSceneTop;                         // 0x0097ca44
 void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2);   // 0x0071fad0
 
 // ---- input/controls (0x008aeb58) ----------------------------------------------
+class IGraph;
+// A joystick (IJoy.dll's IJoy; ../IJOY): the MSVC table's order. Registered for a per-frame refresh too.
+struct S_JoyState {                                 // IJoyState, 0x44 bytes
+    float axis[8];
+    float pov[4];
+    bool povCentered[4];
+    uint32_t buttons[4];
+};
+class C_FrameListener {
+public:
+    virtual ~C_FrameListener() {}
+    virtual int AddRef() = 0;                       // 0x04
+    virtual int Release() = 0;                      // 0x08
+    virtual float GetDeadZone(int axis) = 0;        // 0x0C
+    virtual bool SetDeadZone(int axis, float value) = 0;   // 0x10
+    virtual float GetDeviceDeadZone(int axis) = 0;  // 0x14
+    virtual bool SetDeviceDeadZone(int axis, float value) = 0;   // 0x18
+    virtual float GetSaturation(int axis) = 0;      // 0x1C
+    virtual bool SetSaturation(int axis, float value) = 0;   // 0x20
+    virtual float GetDeviceSaturation(int axis) = 0;   // 0x24
+    virtual bool SetDeviceSaturation(int axis, float value) = 0;   // 0x28
+    virtual uint32_t GetAxisMode(int axis) = 0;     // 0x2C
+    virtual bool SetAxisMode(int axis, uint32_t mode) = 0;   // 0x30
+    virtual float GetAxis(int axis) = 0;            // 0x34
+    virtual bool IsButtonDown(int button) = 0;      // 0x38
+    virtual bool IsButtonPressed(int button) = 0;   // 0x3C
+    virtual uint32_t GetButtons(int group) = 0;     // 0x40
+    virtual uint32_t GetButtonsPressed(int group) = 0;   // 0x44
+    virtual bool GetPov(float *radians, int pov) = 0;   // 0x48
+    virtual bool GetPovChanged(float *radians, int pov) = 0;   // 0x4C
+    virtual bool GetState(S_JoyState *state) = 0;   // 0x50
+    virtual bool GetStatePressed(S_JoyState *state) = 0;   // 0x54
+    virtual bool OnFrame(uint32_t flags) = 0;       // 0x58 IJoy::Update
+};
+
+struct S_ControlsJoy {                              // 0x8C bytes
+    C_FrameListener *joy;
+    S_JoyState state;                               // +0x04
+    S_JoyState pressed;                             // +0x48
+};
+
 class C_Controls {
 public:
+    C_Controls();                                   // 0x006c6d70
+    ~C_Controls();                                  // 0x006c6e00
     void Update(bool processAll);                   // 0x006c7bc0
     // The frame's values per action: held (+0xCC) or pressed in this frame (+0xDC); their
     // count, -1 when there are none.
     int GetValues(float **values, bool pressed);    // 0x006c7600
     // One action's value (held, or pressed in this frame); 0 out of range.
     float GetValue(int action, bool pressed);       // 0x006c76a0
-    // Binds `action` to a device's key (C_KeyBindings; `unknown` is always 0).
+    // Binds `action` to a device's key (C_KeyBindings; `unknown`: the joystick's index, always 0).
     void Bind(int action, int16_t device, uint16_t key, int unknown, int direction);   // 0x006c7790
     // The mouse's divisors (+0xA8 x, +0xAC y, +0xB0 the third; floats).
     bool SetMouseScale(int x, int y, int z);        // 0x006c6fe0
@@ -95,25 +138,45 @@ public:
     // Zeroes the frame's values of the bindings on the same device key as `action`'s.
     void ClearAction(int action, float *held, float *pressed);   // 0x006c73f0
     // The input pressed now, for a key binding (its record at +0x14, reset first; none: null; the
-    // devices' state re-read when `reread`; `unknown` 0x9A from the hot key control).
+    // devices' state re-read when `reread`; `filter` what not to report: 0x9A from the hot key control).
     struct S_Press {
         int direction;                              // +0x00 axes: 1 + / 2 -
         uint16_t device;                            // +0x04 E_BindingDevice
         uint16_t key;                               // +0x06 (keyboard 1: Escape)
-        int unknown08;
+        int unknown08;                              // +0x08 the joystick's index
     };
-    const S_Press *PollPress(int unknown, bool reread);   // 0x006c87f0
+    const S_Press *PollPress(int filter, bool reread);   // 0x006c87f0
+
+private:
+    friend void InitControls(C_Controls &controls);
+    friend void BindControls(C_Controls &controls, IGraph *graph, C_FrameListener **listeners, unsigned count);
+    bool Attach(IGraph *graph, C_FrameListener **joys, unsigned count);   // 0x006c7010
+    void ClearDeviceKeys();
+    void Shutdown();
+    bool SetBinding(const S_Press *binding, int action);
+
+    IGraph *m_graph = nullptr;                      // +0x00
+    std::vector<S_ControlsJoy> m_joys;              // +0x04 (first at +0x08)
+    S_Press m_press = {};                           // +0x14
+    char m_keys[0x40] = {};                         // +0x20 the keys the engine watches
+    char m_keyCounts[0x40] = {};                    // +0x60 bindings on each
+    char m_mouseCounts[8] = {};                     // +0xA0 bindings on each mouse button
+    float m_scale[3] = {};                          // +0xA8
+    bool m_invertMouse = false;                     // +0xB4
+    std::vector<S_Press> m_bindings;                // +0xB8 by action
+    std::vector<float> m_held;                      // +0xC8
+    std::vector<float> m_pressed;                   // +0xD8
+    uint64_t m_keyArmed = 0;                        // +0xE8 keys whose press has still to be told
+    uint32_t m_mouseArmed = 0;                      // +0xF0
 };
 extern C_Controls g_controls;                       // 0x008aeb58
 
 // Wide text to the ANSI code page, at most `maxLength` chars (and a terminator).
 void WideToAnsi(char *out, const wchar_t *text, int maxLength);   // 0x006c90c0 (__fastcall)
+// The frame's debug statistics on the screen (0x00844044 on).
+void RenderDebugStats();                            // 0x006e8860
 
 // Objects registered for a per-frame refresh before the controls update.
-class C_FrameListener {
-public:
-    virtual void OnFrame(bool active);              // vtable +0x58
-};
 extern C_FrameListener **g_frameListenersBegin;     // 0x008aeb4c (std::vector data)
 extern C_FrameListener **g_frameListenersEnd;       // 0x008aeb50
 

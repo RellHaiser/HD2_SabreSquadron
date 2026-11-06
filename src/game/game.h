@@ -156,6 +156,7 @@ public:
     // --- HUD --------------------------------------------------------------------------
     C_Checkpoints *GetCheckpoints() const { return m_checkpoints; }
     C_Interface *GetInterface() const { return m_interface; }
+    int GetEndDelay() const { return m_endDelay; }
     // Weapon / inventory part of the HUD.
     C_FirstPersonView *GetFirstPersonView() const { return m_firstPersonView; }
     // Quick chat messages of the interface (+0x60).
@@ -356,6 +357,7 @@ public:
     void SetSubtitle(int text);                     // 0x0048f080
     // The subtitle of dubbing `dubbing`, shown `length` ms (-1: no sample).
     void ShowDubbing(int dubbing, int length);      // 0x0048f180
+    void Render();                                  // 0x0048f390
 };
 
 C_game *GetGame();                                  // 0x006987d0

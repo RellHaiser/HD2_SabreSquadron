@@ -9095,6 +9095,19 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - No header the vehicle harnesses read changed since 11a: its build results stand. Build: MSVC clean. Tier 1: 133 errors in 39/369. ret_audit --src: 52.
   - Stats: 10452 of 12,306 functions by hand or absorbed (90.1 % by size).
 
+  PART 11c DONE (2026-11-06): the controls and the scene's render callback (game/input_controls.cpp; C_Controls is still declared in game/pending.h).
+  - Update 0x006c7bc0 (each binding's held and pressed value: 64 watched keys, 5 mouse buttons and 3 axes, joystick axes, buttons and hats), PollPress 0x006c87f0 (the input for a new
+    binding), Bind / SetBinding, ClearKey, ClearAction, GameRenderCallback 0x006c95b0. The joysticks are IJoy.dll's (the table's order in C_FrameListener; ../IJOY).
+  - Kept: the original never sets the mouse buttons' armed bits (+0xF0): a press in the very first frames is not told as pressed until a frame without it.
+  - Left out: the debug drawing 0x0079bbc0 behind the flag 0x0098af98, which nothing sets. IGraph slots named: SetWatchedKeys 0xB4, GetWatchedKeyBits 0xB8, GetModifiers 0xC8.
+    Still in tier 1 and declared: RenderDebugStats 0x006e8860, C_QuickMessages::Render 0x0048f390.
+  - Fixed along the way: the net harnesses' stub of ServerBrowserThink, broken by 10f's change of its return type (the vehicle builds do not compile them; they were not rerun then).
+  - Not fixed, older: _re/harness/checkpoints does not build since part 7f (2026-10-28; its C_Door stub has no GetMotion).
+  - Harness: script_module/build_controls.bat (269 checks). Mutations: mutate_11c.py 386: 316 killed, 28 not building, 42 survived (return values Bind ignores, frees at the end, exact
+    boundaries). All vehicle builds and net, profile, mp_setup, vehicle_params, car_tables, net_quantization harnesses build. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 131 errors in 38/369. ret_audit --src: 52.
+  - Stats: 10,480 of 12,306 functions by hand or absorbed (90.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
