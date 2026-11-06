@@ -73,6 +73,7 @@ Every LS3DF branch so far draws no sky: `I3D_driver::Render` tests `backdropSect
 
 The early files (`app.cpp` above all) were ported before the later rigour: expect more of this kind there. `InitSound`, `InitRenderer` and `ApplyRenderSettings` were compared with the assembly and agree. Most of the rest of `app.cpp` has not been.
 | After 13e (the user: the gamma slider is grey): one variable of the original ported as two. `C_NetGame` is a global at 0x0097d070, so its fields also appear as absolute addresses, and those got names of their own: `g_graphFlags` is +0x4DFC, `g_netReplication` +0x14, `g_serverName` +0x4E00, `g_netMaxPing`/`Freq`/`Inactivity` +0x5064 on. `g_levelMinY` and `g_netSceneTop` are `g_scanMin[1]` and `g_scanMax[1]`. Each half was set on one side and read on the other. | `m_graphFlags` stayed 0, and `Close`, on showing the main menu, cleared all of IGraph's flags, the full screen one too, which the slider tests. `g_netReplication` was never set: a null pointer in any multiplayer game. `g_levelMinY` stayed 0: a human below y = -5 was killed. The server's name on the info screen was empty, and the console's limits never reached the ping and inactivity checks. |
+| After 13e (the user: joining a server stays at "Connecting"): the same kind of split. `C_NetGame`'s transport is a pointer in the port and by value in the original (+0x33C), so `+0x414` is the transport's own `m_callback` (+0xD8), which the port kept as a second field. `Init` set that one, the transport's stayed null, and every datagram was dropped. | The server's first message, which ends "Connecting", never reached the game, as a client. A server hosted by the port would have lost its clients' messages the same way (not run). |
 
 ## Tested by the user, playing (2026-11-06)
 
@@ -82,7 +83,8 @@ Africa1, played to its end, through the finishing screen and the soldiers' stat 
 
 ## Not tested
 
-- **The rest of the game:** the other missions and weapons, squad orders and the command map not reported yet. Multiplayer has never been run (its null `g_netReplication` was found by reading, not by a game).
+- **The rest of the game:** the other missions and weapons, squad orders and the command map not reported yet.
+- **Multiplayer:** the user sees internet servers through the RpR clan's master list. The port joins the original's dedicated server on this machine (`HD2DS_SabreSquadron.exe -cmd -exec` a file with `domain internet`, `port 11001`, `style deathmatch`, `mapname Africa1`, `server`; the client: `-window -cmd domain internet port 11001 join <address>`) as far as Player Setup, as the original exe does. Spawning, playing in a session, the server browser's join and hosting with the port not run.
 - **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.

@@ -194,7 +194,7 @@ void C_NetGame::Init()
     m_voiceServer = nullptr;
     m_voiceClient = nullptr;
     m_unknown8 = false;
-    m_packetCallback = TransportCallback;
+    m_transport->m_callback = TransportCallback;
     // 32 player slots.
     for (int i = 0; i < 32; ++i)
         m_players.push_back(S_NetPlayerState());

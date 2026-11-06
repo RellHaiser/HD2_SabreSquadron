@@ -503,7 +503,7 @@ public:
     C_NetConnection *m_serverLink = nullptr;        // +0x334 a client's connection to the server
     int m_unknown338 = 0;
     C_NetTransport *m_transport = nullptr;          // +0x33C (by value in the original: made by the constructor)
-    NetPacketCallback m_packetCallback = nullptr;   // +0x414 (TransportCallback)
+    // (+0x414 is the transport's m_callback, its +0xD8: TransportCallback, set by Init.)
     C_NetLock m_playersLock;                        // +0x418
     C_NetLock m_queueLock;                          // +0x430
     int m_unknown448 = 0;

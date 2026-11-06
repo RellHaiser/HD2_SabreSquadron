@@ -86,7 +86,7 @@ void TestNetGameConstruction()
     CHECK(g_gameRole == GAME_ROLE_LOCAL && net->m_sendPeriod == 50 && net->m_sendTime == 0 && net->m_unknown5060 &&
           net->m_locksMade && net->m_joinStatus == 0 && net->m_keySocket == static_cast<uintptr_t>(-1) &&
           g_netMaxPing == 0 && g_netMaxFreq == 50 && g_netMaxInactivity == 300000 &&
-          net->m_packetCallback == TransportCallback && g_netReplication == nullptr);
+          net->m_transport->m_callback == TransportCallback && g_netReplication == nullptr);
     CHECK(net->m_players.size() == 32 && net->m_players[5].team == 2 && net->m_players[5].pendingTeam == 2 &&
           net->m_players[5].keyQuery == -1 && net->m_players[5].unknownB8 == 50 && !net->m_players[5].name[0] &&
           net->m_players[5].human == nullptr && net->m_players[5].stats[3] == 0);
