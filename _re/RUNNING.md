@@ -73,10 +73,13 @@ With `devel`'s DLL the sky is a flat dark green with either exe, where the origi
 
 The early files (`app.cpp` above all) were ported before the later rigour: expect more of this kind there. `InitSound`, `InitRenderer` and `ApplyRenderSettings` were compared with the assembly and agree. Most of the rest of `app.cpp` has not been.
 
+## Tested by the user, playing (2026-11-06)
+
+Movement speed, climbing and ladders; supply boxes opening and emptying; the firing range's targets falling; sound in fights; grenades, time-delay and impact (No.36, No.69); full screen; the Bren, Sten, Springfield and Fairbairn-Sykes dagger; taking items from a dead enemy.
+
 ## Not tested
 
-- **Full screen.** Every run used `-window`, because full screen changes the display mode. The flags are now right, but it has not been seen.
-- **The rest of the game:** Training and the start of Snowball only. Only the De Lisle was fired; no grenades, explosives or vehicles; squad orders and the command map not tried; no mission played to its end (Training was skipped through the menu).
+- **The rest of the game:** explosives, the other weapons, vehicles, squad orders and the command map not reported yet; no mission reported played to its end.
 - **The player's shots hitting anyone:** the user watched 13e's tests: the scripted shots went too high (the script only turned, it never aimed down), and the kills were the squad's. Sound in those fights was right, by the user's ear.
 - **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
