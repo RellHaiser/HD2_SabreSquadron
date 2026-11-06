@@ -1,0 +1,24 @@
+# Part 11f: an explosion's wave, the timed events, the periodic links (game/explosion_wave.cpp, game/periodic_links.cpp).
+006ddb50 ExplosionVictim_Save
+006ddd70 ExplosionVictim_Load
+006de110 ExplosionWave_Hit
+006de2b0 ExplosionWave_Dtor
+006de330 ExplosionVictim_DeletingDtor
+006de370 ExplosionWave_DefaultCtor
+006de390 ExplosionWave_Ctor
+006de930 ExplosionWave_IsHumanExposed
+006deb50 ExplosionWave_Step
+006dee10 ExplosionWave_Save
+006df0b0 ExplosionWave_Load
+006df510 ExplosionVictim_Dtor
+006dfd20 ExplosionWaveVector_Insert
+006e0080 PeriodicLinks_Add
+006e0220 PeriodicLinks_Remove
+006e03a0 PeriodicLinks_SetRate
+006e0480 PeriodicLinks_Ctor
+006e06b0 PeriodicLinks_Dtor
+006e0750 PeriodicLinks_Update
+006e0b30 PeriodicLinks_Tick
+006e0b90 PeriodicLinks_Clear
+006e0c60 PeriodicLinks_Save
+006e0f40 PeriodicLinks_Load

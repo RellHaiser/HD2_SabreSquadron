@@ -394,7 +394,6 @@ struct T_test2_Release { uint8_t _unknown[1]; };
 struct T_test2_SetPos { uint8_t _unknown[1]; };
 struct TryBlockMapEntry { uint8_t _unknown[1]; };
 struct UnwindMapEntry { uint8_t _unknown[1]; };
-typedef code _func_C_CameraModule_vtbl__SetFov2;
 struct action { uint8_t _unknown[1]; };
 struct u_long { uint8_t _unknown[1]; };
 struct u_short { uint8_t _unknown[1]; };

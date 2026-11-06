@@ -37312,10 +37312,58 @@
   "name": "WinMain",
   "proto": "int __stdcall WinMain(void *instance, void *prevInstance, char *cmdLine, int showCmd)"
  },
+ "006ddb50": {
+  "module": "explosions_links",
+  "name": "ExplosionVictim_Save"
+ },
+ "006ddd70": {
+  "module": "explosions_links",
+  "name": "ExplosionVictim_Load"
+ },
  "006de0d0": {
   "module": "animation_actor",
   "name": "GetFrameOrModelActor",
   "proto": "C_Actor * __fastcall GetFrameOrModelActor(I3D_frame * frame)"
+ },
+ "006de110": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Hit"
+ },
+ "006de2b0": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Dtor"
+ },
+ "006de330": {
+  "module": "explosions_links",
+  "name": "ExplosionVictim_DeletingDtor"
+ },
+ "006de370": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_DefaultCtor"
+ },
+ "006de390": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Ctor"
+ },
+ "006de930": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_IsHumanExposed"
+ },
+ "006deb50": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Step"
+ },
+ "006dee10": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Save"
+ },
+ "006df0b0": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Load"
+ },
+ "006df510": {
+  "module": "explosions_links",
+  "name": "ExplosionVictim_Dtor"
  },
  "006df540": {
   "module": "script",
@@ -37349,6 +37397,10 @@
   "module": "zz_idioms",
   "name": "empty_function_6dfd10"
  },
+ "006dfd20": {
+  "module": "explosions_links",
+  "name": "ExplosionWaveVector_Insert"
+ },
  "006dff30": {
   "module": "zz_idioms",
   "name": "uninitialized_copy4_6dff30"
@@ -37364,6 +37416,46 @@
  "006dffb0": {
   "module": "zz_idioms",
   "name": "construct_copy4_6dffb0"
+ },
+ "006e0080": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Add"
+ },
+ "006e0220": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Remove"
+ },
+ "006e03a0": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_SetRate"
+ },
+ "006e0480": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Ctor"
+ },
+ "006e06b0": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Dtor"
+ },
+ "006e0750": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Update"
+ },
+ "006e0b30": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Tick"
+ },
+ "006e0b90": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Clear"
+ },
+ "006e0c60": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Save"
+ },
+ "006e0f40": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Load"
  },
  "006e1320": {
   "module": "zz_idioms",

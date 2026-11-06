@@ -9127,6 +9127,17 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 108 errors in 35/368. ret_audit --src: 52. Vehicle and other harnesses build; factory checkers clean. pending.h: two lines moved to crash_report.h.
   - Stats: 10,512 of 12,306 functions by hand or absorbed (90.6 % by size).
 
+  PART 11f DONE (2026-11-06): an explosion's wave, the timed events and the periodic links (game/explosion_wave.h, .cpp; game/periodic_links.cpp).
+  - S_Explosion::Execute 0x006df540 collects the frames in range, each at its squared distance to its box, and the wave (C_ExplosionWave, the only kind of timed event) grows 0.2 per ms each tick, hitting what it reaches: a human if one of six joints has a line of sight (or, with the flag, stands in the explosion's sector), others if their own line is free. Each actor once; less effect after the 11th hit in a step.
+  - Kept quirks: the distances are squared, and the wave's radius and range are compared with them; a victim beyond the range becomes the range, so it takes nothing; the list's last element is never compared when inserting, so two victims come in the reverse of the volumes' order; without a source a hit counts as HIT_SCRIPT_KILL; of a wave saved with victims left, only the last two survive a load (the head walks off).
+  - Periodic links 0x006e0080..: every pair of registered actors sits in one of ten buckets looked at every 100 * 2^n ms, by when they could meet. OnProximity's flags are bucket numbers, in effect "not near the first bucket": near is told on coming into bucket 0 or into reach, gone on the reverse.
+  - Fixed: a frame gone from the scene on loading a victim; a joint model missing; a hole among the links' entries when adding a vehicle or saving (it goes as actor -1; the original crashes) and an entry without its actor on loading; the victims the load drops are freed, not leaked.
+  - Left in tier 1: nothing of it. OnFatalError 0x006e1ad0 at the end of this range is part 11e's. Ghidra: functions created at 0x006e1ad0 and 0x006e3cf0.
+  - Harness: script_module/build_explosion.bat (311 checks, including the save format chunk by chunk). Mutations: mutate_11fa.py 232: 153 killed, 36 not building, 43 survived; mutate_11fb.py 238: 162 killed, 39 not building, 37 survived (frees, boundaries, values only a hole can show).
+  - No shared header changed: vehicle builds not rerun for this part (they ran for 11e).
+  - Build: MSVC clean. Tier 1: 90 errors in 34/367. ret_audit --src: 52.
+  - Stats: 10,575 of 12,306 functions by hand or absorbed (91.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

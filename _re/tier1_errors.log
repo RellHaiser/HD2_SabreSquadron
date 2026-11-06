@@ -118,42 +118,6 @@ f_006d5690.cpp:8:3: 'C_AnimationCache__C_AnimationCache___C_AnimationCache' was 
     C_AnimationCache__C_AnimationCache___C_AnimationCache((C_AnimationCache *)&g_animationCache);
 f_006db370.cpp:10:3: 'ram0x008aedfa' was not declared in this scope
     ram0x008aedfa = 0x400;
-f_006ddaf0.cpp:328:24: 'SUB14' was not declared in this scope; did you mean 'SUB104'?
-    (SUB14(*(C_Actor **)((int)_this + 0x1c) == 0,0) * 2 + 2,param_2,
-f_006ddaf0.cpp:595:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[4] = 0.0;
-f_006ddaf0.cpp:596:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[6] = 0.0;
-f_006ddaf0.cpp:599:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[4] = fVar5;
-f_006ddaf0.cpp:602:39: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    pIVar6 = (I3D_frame *)uStack_134[4];
-f_006ddaf0.cpp:623:37: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    if (*(short *)((int)uStack_134[4] + 0xf8) == 6) {
-f_006ddaf0.cpp:657:39: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    pIVar6 = (I3D_frame *)uStack_134[4];
-f_006ddaf0.cpp:658:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[5] = fVar5;
-f_006ddaf0.cpp:665:7: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    *uStack_134 = fStack_108;
-f_006ddaf0.cpp:666:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[1] = fStack_104;
-f_006ddaf0.cpp:667:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[2] = fStack_100;
-f_006ddaf0.cpp:668:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[3] = fStack_fc;
-f_006ddaf0.cpp:669:21: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    if (uStack_134[5] < 0.0) {
-f_006ddaf0.cpp:670:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[5] = 0.0;
-f_006ddaf0.cpp:672:40: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    if (pSStack_130[2].x < uStack_134[5]) {
-f_006ddaf0.cpp:673:38: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    pSStack_130[2].x = uStack_134[5];
-f_006ddaf0.cpp:683:25: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    if (uStack_134[5] < *(float *)((int)fVar7 + 0x14)) {
-f_006ddaf0.cpp:684:23: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_134[6] = fVar7;
 f_006e1cb0.cpp:169:31: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     C_str__Assign(_this,_this + 2);
 f_006e1cb0.cpp:195:34: incompatible types in assignment of 'int' to 'uint8_t [64]' {aka 'unsigned char [64]'}
