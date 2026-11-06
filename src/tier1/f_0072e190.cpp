@@ -77,7 +77,7 @@ uint32_t ReportCrash(char *text, ...)
   hInstance = GetModuleHandleA((LPCSTR)0x0);
   IVar5 = DialogBoxParamA(hInstance,lpTemplateName,pHVar4,lpDialogFunc,(LPARAM)pcVar7);
   if (IVar5 == 0) {
-    FUN_00737cb0();
+    SocketStartUp();
     s = socket(2,1,6);
     sStack_10.sa_family = 2;
     sStack_10.sa_data[0] = '\0';
@@ -109,7 +109,7 @@ uint32_t ReportCrash(char *text, ...)
       } while (cVar1 != '\0');
       send(s,text,~uVar6,0);
       closesocket(s);
-      WSACleanup();
+      GS_SocketShutDown();
     }
   }
   return 0;

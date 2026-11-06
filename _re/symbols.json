@@ -39249,9 +39249,69 @@
   "name": "S_KeyQuery::Clear",
   "proto": "void __fastcall Clear(void * query)"
  },
+ "00732e70": {
+  "module": "net_gamespy",
+  "name": "ArrayNew"
+ },
+ "00732ed0": {
+  "module": "net_gamespy",
+  "name": "ArrayFree"
+ },
+ "00732f00": {
+  "module": "net_gamespy",
+  "name": "GS_FreeElement"
+ },
  "00732f80": {
-  "module": "zz_idioms",
-  "name": "get_first_field_732f80"
+  "module": "net_gamespy",
+  "name": "ArrayLength"
+ },
+ "00732f90": {
+  "module": "net_gamespy",
+  "name": "ArrayNth"
+ },
+ "00732fa0": {
+  "module": "net_gamespy",
+  "name": "ArrayAppend"
+ },
+ "00732fb0": {
+  "module": "net_gamespy",
+  "name": "ArrayInsertAt"
+ },
+ "00733010": {
+  "module": "net_gamespy",
+  "name": "GS_Grow"
+ },
+ "00733040": {
+  "module": "net_gamespy",
+  "name": "GS_SetElement"
+ },
+ "007330b0": {
+  "module": "net_gamespy",
+  "name": "ArrayRemoveAt"
+ },
+ "007330f0": {
+  "module": "net_gamespy",
+  "name": "ArrayDeleteAt"
+ },
+ "00733110": {
+  "module": "net_gamespy",
+  "name": "ArrayReplaceAt"
+ },
+ "00733160": {
+  "module": "net_gamespy",
+  "name": "ArraySearch"
+ },
+ "007332d0": {
+  "module": "net_gamespy",
+  "name": "ArrayClear"
+ },
+ "007332f0": {
+  "module": "net_gamespy",
+  "name": "GS_LinearSearch"
+ },
+ "00733350": {
+  "module": "net_gamespy",
+  "name": "GS_BinarySearch"
  },
  "00733af0": {
   "module": "net_search",
@@ -39276,9 +39336,161 @@
   "module": "net_search",
   "name": "gcd_think"
  },
+ "007342a0": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessPacket"
+ },
+ "00734530": {
+  "module": "net_gamespy",
+  "name": "GS_AddProduct"
+ },
+ "007345b0": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessAuthAnswer"
+ },
+ "007346a0": {
+  "module": "net_gamespy",
+  "name": "GS_FindClient"
+ },
+ "00734750": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessCount"
+ },
+ "00734830": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessIsOn"
+ },
+ "00734970": {
+  "module": "net_gamespy",
+  "name": "GS_SendDisconnect"
+ },
+ "00734a40": {
+  "module": "net_gamespy",
+  "name": "GS_SendAuthRequest"
+ },
+ "00734bc0": {
+  "module": "net_gamespy",
+  "name": "GS_ResendRequest"
+ },
+ "00734c00": {
+  "module": "net_gamespy",
+  "name": "GS_ValueForKey"
+ },
+ "00734d10": {
+  "module": "net_gamespy",
+  "name": "GS_XorKey"
+ },
+ "00734e40": {
+  "module": "net_gamespy",
+  "name": "GS_FindProduct"
+ },
+ "00734e70": {
+  "module": "net_gamespy",
+  "name": "GS_ListAdd"
+ },
+ "00734e90": {
+  "module": "net_gamespy",
+  "name": "GS_ListRemove"
+ },
  "007350a0": {
-  "module": "app",
+  "module": "net_gamespy",
   "name": "ValidateCDKey"
+ },
+ "00736dd0": {
+  "module": "net_gamespy",
+  "name": "TableNew2"
+ },
+ "00736e40": {
+  "module": "net_gamespy",
+  "name": "TableFree"
+ },
+ "00736eb0": {
+  "module": "net_gamespy",
+  "name": "TableEnter"
+ },
+ "00736f00": {
+  "module": "net_gamespy",
+  "name": "TableRemove"
+ },
+ "00736f50": {
+  "module": "net_gamespy",
+  "name": "TableLookup"
+ },
+ "007370c0": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Init"
+ },
+ "007370f0": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Update"
+ },
+ "00737190": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Final"
+ },
+ "00737200": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Transform"
+ },
+ "00737b40": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Encode"
+ },
+ "00737b80": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Decode"
+ },
+ "00737bd0": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Copy"
+ },
+ "00737bf0": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Set"
+ },
+ "00737c20": {
+  "module": "net_gamespy",
+  "name": "GS_Md5ToHex"
+ },
+ "00737c50": {
+  "module": "net_gamespy",
+  "name": "MD5Digest"
+ },
+ "00737c90": {
+  "module": "net_gamespy",
+  "name": "current_time"
+ },
+ "00737ca0": {
+  "module": "net_gamespy",
+  "name": "msleep"
+ },
+ "00737cb0": {
+  "module": "net_gamespy",
+  "name": "SocketStartUp"
+ },
+ "00737cd0": {
+  "module": "net_gamespy",
+  "name": "GS_SocketShutDown"
+ },
+ "00737ce0": {
+  "module": "net_gamespy",
+  "name": "goastrdup"
+ },
+ "00737e60": {
+  "module": "net_gamespy",
+  "name": "CanReceiveOnSocket"
+ },
+ "00737f20": {
+  "module": "net_gamespy",
+  "name": "GS_GetLocalHost"
+ },
+ "00738260": {
+  "module": "net_gamespy",
+  "name": "GS_InitWithSocket"
+ },
+ "00738400": {
+  "module": "net_gamespy",
+  "name": "GS_InitSocket"
  },
  "00738500": {
   "module": "net_search",
@@ -39288,6 +39500,14 @@
   "module": "net_search",
   "name": "qr2_think",
   "proto": "void __fastcall qr2_think(void * record)"
+ },
+ "00738670": {
+  "module": "net_gamespy",
+  "name": "GS_SendHeartbeatsIfDue"
+ },
+ "00738760": {
+  "module": "net_gamespy",
+  "name": "qr2_shutdown"
  },
  "007387d0": {
   "module": "net_search",
@@ -39304,10 +39524,190 @@
   "name": "qr2_buffer_add",
   "proto": "void __fastcall qr2_buffer_add(void * buffer, char * value)"
  },
+ "00738890": {
+  "module": "net_gamespy",
+  "name": "GS_FindLocalIps"
+ },
+ "007388d0": {
+  "module": "net_gamespy",
+  "name": "GS_GetSockAddr"
+ },
+ "00738950": {
+  "module": "net_gamespy",
+  "name": "GS_HandlePacket"
+ },
+ "00738be0": {
+  "module": "net_gamespy",
+  "name": "GS_BeginReply"
+ },
+ "00738c00": {
+  "module": "net_gamespy",
+  "name": "GS_HandleChallenge"
+ },
+ "00738c90": {
+  "module": "net_gamespy",
+  "name": "GS_Base64"
+ },
+ "00738d50": {
+  "module": "net_gamespy",
+  "name": "GS_Base64Digit"
+ },
+ "00738d80": {
+  "module": "net_gamespy",
+  "name": "GS_Encrypt"
+ },
+ "00738ee0": {
+  "module": "net_gamespy",
+  "name": "GS_SwapBytes"
+ },
+ "00738ef0": {
+  "module": "net_gamespy",
+  "name": "GS_HandleQuery"
+ },
+ "00738fd0": {
+  "module": "net_gamespy",
+  "name": "GS_BuildReply"
+ },
+ "00739020": {
+  "module": "net_gamespy",
+  "name": "GS_BuildKeyTypeReply"
+ },
+ "00739260": {
+  "module": "net_gamespy",
+  "name": "GS_BuildOldReply"
+ },
+ "007392b0": {
+  "module": "net_gamespy",
+  "name": "GS_BuildOldKeys"
+ },
+ "00739480": {
+  "module": "net_gamespy",
+  "name": "GS_HandleClientMessage"
+ },
+ "00739520": {
+  "module": "net_gamespy",
+  "name": "GS_MessageKeySeen"
+ },
+ "00739570": {
+  "module": "net_gamespy",
+  "name": "GS_SendKeepAlive"
+ },
+ "007395d0": {
+  "module": "net_gamespy",
+  "name": "GS_SendHeartbeat"
+ },
  "00739750": {
   "module": "net_search",
   "name": "qr2_register_key",
   "proto": "void __fastcall qr2_register_key(int key, char * name)"
+ },
+ "00739770": {
+  "module": "net_gamespy",
+  "name": "GS_CipherInitNoKey"
+ },
+ "007397b0": {
+  "module": "net_gamespy",
+  "name": "GS_CipherInit"
+ },
+ "00739870": {
+  "module": "net_gamespy",
+  "name": "GS_CipherShuffle"
+ },
+ "00739a50": {
+  "module": "net_gamespy",
+  "name": "GS_CipherDecryptByte"
+ },
+ "00739b60": {
+  "module": "net_gamespy",
+  "name": "GS_CipherDecrypt"
+ },
+ "00739bd0": {
+  "module": "net_gamespy",
+  "name": "GS_EngineInit"
+ },
+ "00739c20": {
+  "module": "net_gamespy",
+  "name": "GS_QueryListInit"
+ },
+ "00739c30": {
+  "module": "net_gamespy",
+  "name": "GS_EngineSetPublicIp"
+ },
+ "00739c40": {
+  "module": "net_gamespy",
+  "name": "GS_EngineClear"
+ },
+ "00739c90": {
+  "module": "net_gamespy",
+  "name": "GS_QueueQuery"
+ },
+ "00739ce0": {
+  "module": "net_gamespy",
+  "name": "GS_AddLast"
+ },
+ "00739d10": {
+  "module": "net_gamespy",
+  "name": "GS_AddFirst"
+ },
+ "00739d30": {
+  "module": "net_gamespy",
+  "name": "GS_SendQuery"
+ },
+ "00739ea0": {
+  "module": "net_gamespy",
+  "name": "GS_EngineThink"
+ },
+ "00739ee0": {
+  "module": "net_gamespy",
+  "name": "GS_ReceiveReplies"
+ },
+ "00739fa0": {
+  "module": "net_gamespy",
+  "name": "GS_HandleReply"
+ },
+ "0073a070": {
+  "module": "net_gamespy",
+  "name": "GS_RemoveServer"
+ },
+ "0073a0c0": {
+  "module": "net_gamespy",
+  "name": "GS_HandleOldReply"
+ },
+ "0073a130": {
+  "module": "net_gamespy",
+  "name": "GS_TimeOutQueries"
+ },
+ "0073a190": {
+  "module": "net_gamespy",
+  "name": "GS_RemoveFirst"
+ },
+ "0073a1b0": {
+  "module": "net_gamespy",
+  "name": "GS_SendPending"
+ },
+ "0073a1f0": {
+  "module": "net_gamespy",
+  "name": "GS_EngineAddKey"
+ },
+ "0073a210": {
+  "module": "net_gamespy",
+  "name": "GS_EngineRemove"
+ },
+ "0073a240": {
+  "module": "net_gamespy",
+  "name": "GS_SharedStrings"
+ },
+ "0073a310": {
+  "module": "net_gamespy",
+  "name": "GS_FreeServer"
+ },
+ "0073a330": {
+  "module": "net_gamespy",
+  "name": "GS_SetValue"
+ },
+ "0073a370": {
+  "module": "net_gamespy",
+  "name": "GS_SetIntValue"
  },
  "0073a3f0": {
   "module": "net_search",
@@ -39325,25 +39725,89 @@
   "proto": "uint __fastcall SBServerGetPublicInetAddress(void * server)"
  },
  "0073a6c0": {
-  "module": "zz_idioms",
-  "name": "get_field_4_73a6c0"
+  "module": "net_gamespy",
+  "name": "SBServerGetPublicPort"
+ },
+ "0073a720": {
+  "module": "net_gamespy",
+  "name": "SBServerSetNext"
  },
  "0073a730": {
-  "module": "zz_idioms",
-  "name": "get_field_20_73a730"
+  "module": "net_gamespy",
+  "name": "SBServerGetNext"
+ },
+ "0073a740": {
+  "module": "net_gamespy",
+  "name": "GS_ParseOldReply"
+ },
+ "0073a7a0": {
+  "module": "net_gamespy",
+  "name": "GS_IsValueKey"
+ },
+ "0073a810": {
+  "module": "net_gamespy",
+  "name": "GS_NextToken"
+ },
+ "0073a860": {
+  "module": "net_gamespy",
+  "name": "GS_ParseFullReply"
+ },
+ "0073a9d0": {
+  "module": "net_gamespy",
+  "name": "GS_HashString"
  },
  "0073aa10": {
   "module": "net_search",
   "name": "SBServerGetPing",
   "proto": "uint __fastcall SBServerGetPing(void * server)"
  },
+ "0073aa20": {
+  "module": "net_gamespy",
+  "name": "GS_NewServer"
+ },
+ "0073aaa0": {
+  "module": "net_gamespy",
+  "name": "GS_FreeKeyValue"
+ },
+ "0073aaf0": {
+  "module": "net_gamespy",
+  "name": "SBServerSetFlags"
+ },
+ "0073ab10": {
+  "module": "net_gamespy",
+  "name": "SBServerSetPrivateAddress"
+ },
+ "0073ab20": {
+  "module": "net_gamespy",
+  "name": "SBServerSetIcmpIp"
+ },
+ "0073ab30": {
+  "module": "net_gamespy",
+  "name": "SBServerSetState"
+ },
  "0073ab40": {
-  "module": "zz_idioms",
-  "name": "get_field_14_73ab40"
+  "module": "net_gamespy",
+  "name": "SBServerGetState"
+ },
+ "0073ab60": {
+  "module": "net_gamespy",
+  "name": "SBServerIsNull"
  },
  "0073ab70": {
   "module": "net_search",
   "name": "ServerBrowserNew"
+ },
+ "0073abf0": {
+  "module": "net_gamespy",
+  "name": "GS_OnListEvent"
+ },
+ "0073ad50": {
+  "module": "net_gamespy",
+  "name": "GS_OnQueryEvent"
+ },
+ "0073adf0": {
+  "module": "net_gamespy",
+  "name": "ServerBrowserUpdateWithOptions"
  },
  "0073af00": {
   "module": "net_search",
@@ -39354,10 +39818,170 @@
   "name": "ServerBrowserThink",
   "proto": "void __fastcall ServerBrowserThink(void * browser)"
  },
+ "0073b260": {
+  "module": "net_gamespy",
+  "name": "ServerBrowserDisconnectAndClear"
+ },
  "0073b280": {
   "module": "net_search",
   "name": "ServerBrowserClear",
   "proto": "void __fastcall ServerBrowserClear(void * browser)"
+ },
+ "0073b3b0": {
+  "module": "net_gamespy",
+  "name": "GS_StringSize"
+ },
+ "0073b3d0": {
+  "module": "net_gamespy",
+  "name": "GS_ListInit"
+ },
+ "0073b4a0": {
+  "module": "net_gamespy",
+  "name": "GS_ListConnectAndQuery"
+ },
+ "0073b6d0": {
+  "module": "net_gamespy",
+  "name": "GS_ConnectToMaster"
+ },
+ "0073b7e0": {
+  "module": "net_gamespy",
+  "name": "GS_HashGameName"
+ },
+ "0073b820": {
+  "module": "net_gamespy",
+  "name": "GS_WriteString"
+ },
+ "0073b870": {
+  "module": "net_gamespy",
+  "name": "GS_WriteByte"
+ },
+ "0073b890": {
+  "module": "net_gamespy",
+  "name": "GS_WriteInt"
+ },
+ "0073b8b0": {
+  "module": "net_gamespy",
+  "name": "GS_WriteBytes"
+ },
+ "0073b8f0": {
+  "module": "net_gamespy",
+  "name": "GS_MakeChallenge"
+ },
+ "0073bac0": {
+  "module": "net_gamespy",
+  "name": "GS_ListDisconnect"
+ },
+ "0073bb20": {
+  "module": "net_gamespy",
+  "name": "GS_ReleasePopularValues"
+ },
+ "0073bb60": {
+  "module": "net_gamespy",
+  "name": "GS_ReleaseKeyList"
+ },
+ "0073bcd0": {
+  "module": "net_gamespy",
+  "name": "GS_ListError"
+ },
+ "0073bdf0": {
+  "module": "net_gamespy",
+  "name": "GS_ReadLanReplies"
+ },
+ "0073bed0": {
+  "module": "net_gamespy",
+  "name": "GS_ListThink"
+ },
+ "0073bf00": {
+  "module": "net_gamespy",
+  "name": "GS_ReadFromMaster"
+ },
+ "0073bfb0": {
+  "module": "net_gamespy",
+  "name": "GS_ParseMainList"
+ },
+ "0073c2e0": {
+  "module": "net_gamespy",
+  "name": "GS_SetUpCipher"
+ },
+ "0073c370": {
+  "module": "net_gamespy",
+  "name": "GS_ParseListServer"
+ },
+ "0073c480": {
+  "module": "net_gamespy",
+  "name": "GS_ServerHeaderSize"
+ },
+ "0073c4b0": {
+  "module": "net_gamespy",
+  "name": "GS_HasFullKeys"
+ },
+ "0073c4f0": {
+  "module": "net_gamespy",
+  "name": "GS_HasFixedFields"
+ },
+ "0073c580": {
+  "module": "net_gamespy",
+  "name": "GS_ReadAddress"
+ },
+ "0073c5d0": {
+  "module": "net_gamespy",
+  "name": "GS_ParseServer"
+ },
+ "0073c7a0": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessMessages"
+ },
+ "0073c8a0": {
+  "module": "net_gamespy",
+  "name": "GS_ReadKeyListMessage"
+ },
+ "0073c970": {
+  "module": "net_gamespy",
+  "name": "GS_ReadRemoveMessage"
+ },
+ "0073c9b0": {
+  "module": "net_gamespy",
+  "name": "GS_ReadServerMessage"
+ },
+ "0073ccc0": {
+  "module": "net_gamespy",
+  "name": "GS_AddToList"
+ },
+ "0073cd30": {
+  "module": "net_gamespy",
+  "name": "GS_FindServer"
+ },
+ "0073cd90": {
+  "module": "net_gamespy",
+  "name": "GS_RemoveFromList"
+ },
+ "0073cdd0": {
+  "module": "net_gamespy",
+  "name": "GS_AddToDeadList"
+ },
+ "0073ce00": {
+  "module": "net_gamespy",
+  "name": "GS_ListServerAt"
+ },
+ "0073ce10": {
+  "module": "net_gamespy",
+  "name": "GS_FreeDeadList"
+ },
+ "0073ce50": {
+  "module": "net_gamespy",
+  "name": "GS_ClearList"
+ },
+ "0073ce90": {
+  "module": "net_gamespy",
+  "name": "GS_ListInitServers"
+ },
+ "0073cec0": {
+  "module": "net_gamespy",
+  "name": "GS_AddSharedString"
+ },
+ "0073cf20": {
+  "module": "net_gamespy",
+  "name": "GS_ReleaseSharedString"
  },
  "0073cf60": {
   "module": "net_players",

@@ -78,7 +78,7 @@ S_ServerBrowser *ServerBrowserNew(const char *queryForGame, const char *queryFro
 // The servers asked for (`fields` the keys of each).
 void ServerBrowserUpdate(S_ServerBrowser *browser, int async, int disconnectOnComplete, const uint8_t *fields,
                          int fieldCount, const char *filter);                       // 0x0073af00
-void ServerBrowserThink(S_ServerBrowser *browser);                                   // 0x0073b240
+int ServerBrowserThink(S_ServerBrowser *browser);                                    // 0x0073b240
 void ServerBrowserClear(S_ServerBrowser *browser);                                   // 0x0073b280
 const char *SBServerGetStringValue(S_SbServer *server, const char *key, const char *fallback);   // 0x0073a3f0
 int SBServerGetIntValue(S_SbServer *server, const char *key, int fallback);         // 0x0073a420

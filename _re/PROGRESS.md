@@ -9046,6 +9046,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 194 errors in 42/370 (was 213). ret_audit --src: 52.
   - Stats: 10,207 of 12,306 functions by hand or absorbed (88.8 % by size).
 
+  PART 10f DONE (2026-11-05): the GameSpy SDK, kept in the port (net/gamespy_util.cpp, gamespy_gcd.cpp, gamespy_qr2.cpp, gamespy_browser.cpp).
+  - i: darray, hashtable, MD5 (RFC 1321), the CD key client (gcd_*: its validation server on UDP 29910, ';' packets through qr2's socket),
+    ValidateCDKey. ii: query and reporting (qr2_*: queries, the challenge's cipher and base 64, echo, adderror, client messages, the old
+    "\\status\\" form, heartbeats and keep-alives). iii: the server browser (ServerBrowser*, SBServer*: the master's list over TCP 28910 with
+    its cipher, parsed as it arrives; the messages after it; the query engine over UDP; the shared counted strings).
+  - Plain C++ here; __fastcall in the exe. The master servers no longer exist: the code is exercised only against loopback fakes.
+  - Fixes: a master's message below its 3-byte header is an error (the original stayed on it for ever). The gcd command parser's missing
+    second backslash. Left out: the browser's "trigger" address (only the dead ServerBrowserAuxUpdateServer sets it; uninitialised in the original).
+  - The original's quirks kept: a query's time-out marks the server's flags, not its state (+0x15, not +0x14); the check of a record with both
+    fixed and full keys reads the wrong part; a master's error message stays in the buffer, is read as a message and disconnects.
+  - Dead code, left in tier 1: the stats SDK and the unused rest of 0x00732e70 .. 0x0073d060 (82 functions): among them ServerBrowserFree 0x0073add0,
+    ServerBrowserLANUpdate 0x0073af50 (the LAN reader 0x0073bdf0 is ported, its starter is not), 0x0073b100, 0x0073b990, 0x0073bc60, the cipher's encrypting half
+    0x00739910 / 0x00739b90 (the test's fake master is written from it).
+  - Not run: a public qr2 start and the real master names (they need DNS and GameSpy's servers).
+  - Harness: net/build_gamespy.bat (708 checks; gamespy_qr2_tests.inc, gamespy_browser_tests.inc, gamespy_browser_strict.inc).
+    Mutations (runner net/mutgs.py: bounded output, after an unbounded one ran the machine out of memory): mutate_10f1.py 220: 152 killed, 31 not building, 37 survived;
+    mutate_10f1u.py 202: 154, 22, 26; mutate_10f2.py 400: 304, 47, 49; mutate_10f3.py 926: 709, 67, 145 (5 no longer matching). Survivors listed in each file.
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 155 errors in 42/370 (was 194). ret_audit --src: 52.
+  - Stats: 10,387 of 12,306 functions by hand or absorbed (89.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
