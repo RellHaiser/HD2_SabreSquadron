@@ -10374,3 +10374,21 @@
 0072bcc0
 0072bd20
 # hand-ported (continued)
+00727bd0
+00728820
+# absorbed helpers 00727300-0072c120: the players' std::vector (insert, assign, erase, copies, sizes) and S_NetPlayerState's operator= (part 10d-vi)
+00727300
+00727630
+0072b900
+0072b930
+0072b970
+0072b9a0
+0072bba0
+0072bbe0
+0072bbf0
+0072bd50
+0072bd90
+0072beb0
+0072bfe0
+0072c120
+# hand-ported (continued)

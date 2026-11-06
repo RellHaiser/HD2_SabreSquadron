@@ -89,13 +89,6 @@ void AwardTeamPoints(int points, int team)          // 0x0069bbd0
     g_netGame.UnlockPlayers();
 }
 
-// The session moves on to its next map.
-void LoadNextMap()                                  // 0x0069bca0
-{
-    g_mpSettings->SelectMap(nullptr);
-    GetGameApp()->m_state->SetPendingState(GAME_STATE_NEXT_MAP);
-}
-
 // Switches the session to map `name` (null: the next one).
 void ChangeMap(const char *name)                    // 0x0069bcc0
 {
@@ -111,6 +104,12 @@ void ChangeMap(const char *name)                    // 0x0069bcc0
 }
 
 }  // namespace
+
+void LoadNextMap()                                  // 0x0069bca0
+{
+    g_mpSettings->SelectMap(nullptr);
+    GetGameApp()->m_state->SetPendingState(GAME_STATE_NEXT_MAP);
+}
 
 // A human or a car within 2 m above `pos` (spawning there would collide).
 bool IsSpawnBlocked(const S_vector4 &pos)           // 0x0069d970

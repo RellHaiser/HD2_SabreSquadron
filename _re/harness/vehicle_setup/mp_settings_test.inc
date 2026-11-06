@@ -25,7 +25,7 @@ void MpSettingsTest(I3D_scene *)
         bool ok = true;
         s->sessionType = 2;
         s->password = "pw";
-        s->unknown21C = "x";
+        s->adminPassword = "x";
         s->unknown178 = 5;
         s->unknown174 = 1;
         s->dedicated = true;
@@ -46,7 +46,7 @@ void MpSettingsTest(I3D_scene *)
         g_deleteHook = &MmDeleteHook;
         s->Reset();
         g_deleteHook = nullptr;
-        ok &= s->sessionType == 0 && s->password.IsEmpty() && std::strcmp(s->unknown21C.c_str(), "\x01\x02\x03") == 0 &&
+        ok &= s->sessionType == 0 && s->password.IsEmpty() && std::strcmp(s->adminPassword.c_str(), "\x01\x02\x03") == 0 &&
               s->unknown178 == 0 && s->unknown174 == 0 && !s->dedicated && entry->ping == 9999 && entry->gameType == 4 &&
               s->sessionName[0] == 0 && s->sessionName[0x167] == 0 && s->gameType == 0 && s->port == 11001 &&
               s->currentMap == 0 && s->maps.empty() && g_mmDeleted.size() == 2;

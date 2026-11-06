@@ -31,6 +31,7 @@ extern int g_pickedSoldierX;                            // 0x008410ac (30 at fir
 extern bool g_soldierStatsShown;                        // 0x008ae638
 
 class C_GameMenu : public C_EquipmentMenuBase {
+    friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
 public:
     // The presets loaded (the original's presets constructor); single player: the missions' items
     // set up.

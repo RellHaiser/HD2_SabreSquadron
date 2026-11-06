@@ -126,6 +126,8 @@ struct S_SquadSoldier : S_SoldierState {
 
     // (+0x8C: the load, S_SoldierState's.)
 };
+// S_SquadSoldier::SplitStacks for any soldier state (the network's: a joining or respawning player's).
+void SplitSoldierStacks(S_SoldierState &state);
 
 // A soldier's records outside the soldier structures (__fastcall helpers of the original).
 void ClearSoldierItems(S_SquadSoldier *soldier);        // 0x006a2a90

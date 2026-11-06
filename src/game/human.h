@@ -419,6 +419,7 @@ struct S_BodyCommand {
 };
 
 class alignas(16) C_Human : public C_Actor {            // "Human", vtable 0x008111e0, 0x2D0 bytes
+    friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
 public:
     C_Human();                                          // 0x0059bf00
     ~C_Human() override;                                // 0x0059e3e0 (0x0059c4b0)

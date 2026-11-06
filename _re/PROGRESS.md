@@ -8959,6 +8959,35 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 250 errors in 48/374 (was 257). ret_audit --src: 52.
   - Stats: 10,106 of 12,306 functions by hand or absorbed (87.9 % by size).
 
+  PART 10d-vi DONE (2026-11-05): the game commands (net/net_commands.cpp).
+  - The server's (C_GameApp::HandleServerCommand 0x00727bd0): 0 a player joined (its soldier read and split, its
+    stats from the profile's skills: a VIP's strength gains its uniform's weight and 1 (Fix: an unknown uniform
+    none; the original read null); a local game none), 1 a respawn asked for (the state and stats handed to the
+    game; the store's stats by the player's rank), 2 the places asked for (message 5 to it), 3 chat (its sender
+    active; message 4), 4 a suicide, 5 a team (2: the smaller; the automatic balance against the map's +0x58 /
+    +0x5C; message 0xE), 6 a player's +0x80 text, 7 the admin login (S_MultiplayerSettings +0x21C adminPassword,
+    was unknown21C; message 0x13), 8 an admin's console command, 9 the joining player's temporary actors count
+    (message 0x15: the whole game when they agree), 10 / 11 the votes.
+  - The client's (C_GameApp::HandleClientCommand 0x00728820): 0 the session joined (the game made, the players on
+    the loading screen with their ranks' names, started: a slot and command 9; failed: the main menu), 1 the end,
+    2 / 9 a player left / joined, 3 a respawn, 4 chat (shown when the local player may see it: its team's, both
+    alive or both dead; UTF-8 hidden without the unicode font ("XXX", "????????"); "<TEAM> "; the admin's), 5 the
+    places (read past: the original's drawing is empty), 6 the map (LoadNextMap, now public), 7 the restart, 8 the
+    scores, 10 an objective, 11 / 13 the warmup / the round, 12 the teams (the local soldier moved: items cleared and
+    the in-game menu opened, or the menu's team; Fix: no soldier), 14 a team, 15 the respawn screen, 16 the respawn
+    wave (C_game::SetRespawnWaveTime; a dead player in a uniform respawns, else the menu on apply; Fix: no
+    soldier), 17 a kick, 18 the rules (a server's into a scratch copy), 19 the admin login's answer, 20 the
+    temporary actors, 21 the whole game (ReadFullState: the players' humans made; refused: back to the lobby), 22 /
+    23 the votes.
+  - Fix (10d-v): the players' places (message 5) send zeros for a player without a human (the original read null).
+  - SplitSoldierStacks (S_SquadSoldier::SplitStacks for any state); C_GameApp a friend of C_game, C_GameMenu,
+    C_Human and C_SpawnPoint (their private members the commands use).
+  - Harness: net/build_commands.bat (-DNET_COMMANDS_TEST; netcommands_tests.inc: the game, the menus, the humans,
+    the store faked; game/game_state.cpp linked; 139 checks); the messages' 220. Mutations: mutations/mutate_10d6.py
+    (runner mutnetc.py): 391: 319 killed, 38 not building, 34 survived. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 239 errors in 47/374 (was 250). ret_audit --src: 52.
+  - Stats: 10,122 of 12,306 functions by hand or absorbed (88.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

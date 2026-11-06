@@ -1179,6 +1179,16 @@ void TestMessagesEdges()
     const float sq = (0.0f + 0.0f) + 1e-4f * 1e-4f;
     CHECK(tiny.Float() == (sq >= 1e-8f ? 1e-4f * (1.0f / std::sqrt(sq)) : 1.0f));
 
+    // A player without a human: zeros (Fix, part 10d-vi).
+    net.m_players.assign(2, Player(5, "a"));
+    net.m_players[0].human = MessageHuman(1, S_vector(4, 5, 6), S_vector(0, 0, 1));
+    GetGameApp()->SendGameMessage(5, 0, 0, 0, false);
+    T_Reader none = Flush(0, 0, 0, 0);
+    CHECK(none.Game(5) && none.Int() == 2);
+    for (int i = 0; i < 6; ++i)
+        CHECK(none.Bits(32) == 0);
+    CHECK(none.Float() == 4 && none.Float() == 5 && none.Float() == 6);
+
     // The first player gone (slot 0).
     net.m_players.assign(2, Player(5, "a"));
     net.m_players[1].connection = 6;

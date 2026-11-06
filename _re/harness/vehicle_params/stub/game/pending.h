@@ -66,7 +66,7 @@ struct S_MultiplayerSettings {
         thirdPersonView, spawnProtection, inverseDamage, coopDifficulty, coopLives, allowCrosshair, teamLives;
     std::vector<C_MpMap *> maps;
     // (The session's settings, part 9i-ii.)
-    C_str unknown21C;
+    C_str adminPassword;
     int fallingDamage, unknown25C, unknown260, autoRestart, spawnOnStart, currentMap;
     class C_MpGameSetup *setup;
     void Reset();

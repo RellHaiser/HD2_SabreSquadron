@@ -15,21 +15,26 @@
 #define protected public
 #define private public
 #include "game/actors_module.h"
+#include "game/campaign.h"
 #include "game/console.h"
 #include "game/controls.h"
 #include "game/game.h"
 #include "game/game_app.h"
+#include "game/game_menu.h"
 #include "game/game_texts.h"
 #include "game/human.h"
 #include "game/human_controller.h"
 #include "game/item_defs.h"
 #include "game/items.h"
+#include "game/loader_screen.h"
 #include "game/main_menu.h"
 #include "game/module.h"
 #include "game/mp_game_setup.h"
 #include "game/pending.h"
 #include "game/perf_timer.h"
 #include "game/profile.h"
+#include "game/spawn_point.h"
+#include "game/team.h"
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "net/dplay8.h"
@@ -110,6 +115,8 @@ void C_GameApp::PostCommand(int command, intptr_t a, intptr_t b, bool flush)
     Log("post %d %d %d %d", command, static_cast<int>(a), static_cast<int>(b), flush);
 }
 #endif
+#ifndef NET_COMMANDS_TEST
+// (The commands' build links the real ones: net_commands.cpp.)
 void C_GameApp::HandleServerCommand(int id, C_BitStream *stream)
 {
     Log("server command %d %u", id, stream->ReadBits(8));
@@ -118,6 +125,7 @@ void C_GameApp::HandleClientCommand(int id, C_BitStream *stream)
 {
     Log("client command %d %u", id, stream->ReadBits(8));
 }
+#endif
 
 alignas(16) static unsigned char g_gameStorage[sizeof(C_game)];
 C_game *g_game;
@@ -492,11 +500,16 @@ struct T_Client : IDirectPlay8Client {
 #ifdef NET_MESSAGES_TEST
 #include "netmessages_tests.inc"
 #endif
+#ifdef NET_COMMANDS_TEST
+#include "netcommands_tests.inc"
+#endif
 
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
-#if defined(NET_MESSAGES_TEST)
+#if defined(NET_COMMANDS_TEST)
+    RunNetCommandsTests();
+#elif defined(NET_MESSAGES_TEST)
     RunNetMessagesTests();
 #elif defined(NET_SESSION_TEST)
     RunNetSessionTests();

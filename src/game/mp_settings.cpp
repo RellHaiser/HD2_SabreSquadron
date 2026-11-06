@@ -16,7 +16,7 @@ namespace {
 
 // The session's defaults: port 11001, the rules'.
 constexpr int DEFAULT_PORT = 11001;
-const char *const DEFAULT_UNKNOWN21C = "\x01\x02\x03";
+const char *const DEFAULT_ADMIN_PASSWORD = "\x01\x02\x03";
 // The game types the set-up knows (E_MpGameType 0 .. 3).
 constexpr int GAME_TYPES = 4;
 
@@ -117,7 +117,7 @@ void S_MultiplayerSettings::Reset()
 {
     sessionType = SESSION_NONE;
     password = "";
-    unknown21C = DEFAULT_UNKNOWN21C;
+    adminPassword = DEFAULT_ADMIN_PASSWORD;
     unknown178 = 0;
     unknown174 = 0;
     dedicated = false;

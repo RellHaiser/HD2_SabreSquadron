@@ -5,6 +5,9 @@ alignas(16) unsigned char g_gameProfile[0x4000];
 alignas(16) unsigned char g_actorsModule[0x400];
 // The temporary actors (WriteState faked; the messages' build).
 alignas(16) unsigned char g_temporaryActors[0x400];
+// The loading screen and the team manager (the commands' build: AddPlayer faked; the player team's vtable set).
+alignas(16) unsigned char g_loaderScreen[0x1000];
+alignas(16) unsigned char g_teamManager[0x1000];
 // The game's version (1.2).
 int g_versionMajor = 1;
 int g_versionMinor = 2;

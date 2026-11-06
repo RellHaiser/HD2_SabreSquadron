@@ -322,28 +322,6 @@ f_00721f30.cpp:96:11: invalid type argument of unary '*' (have 'uint32_t' {aka '
     if (*DAT_0097b9f0 < '0') break;
 f_00721f30.cpp:97:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     } while (*DAT_0097b9f0 < ':');
-f_007277b0.cpp:437:21: base operand of '->' is not a pointer
-    (*DAT_0098c0fc->vtable->empty_function_744210)();
-f_007277b0.cpp:56:59: invalid use of incomplete type 'struct tier1::PieceType<7>'
-    DWORD DVar13;
-f_007277b0.cpp:56:64: expected '>' before '*' token
-    DWORD DVar13;
-f_007277b0.cpp:56:64: expected '(' before '*' token
-    DWORD DVar13;
-f_007277b0.cpp:56:65: expected primary-expression before '>' token
-    DWORD DVar13;
-f_007277b0.cpp:1315:25: incompatible types in assignment of 'tier1::uchar*' {aka 'unsigned char*'} to 'unsigned char [4]'
-    local_2b8._pad_0000 = (uchar  [4])&PTR_008159f8;
-f_007277b0.cpp:1320:25: incompatible types in assignment of 'tier1::uchar*' {aka 'unsigned char*'} to 'unsigned char [4]'
-    local_2b8._pad_0000 = (uchar  [4])&PTR_008159f8;
-f_007277b0.cpp:1330:32: ISO C++ forbids casting to an array type 'tier1::uchar [4]' {aka 'unsigned char [4]'}
-    if (local_2b8._pad_021c != (uchar  [4])0x0) {
-f_007277b0.cpp:63:76: invalid 'static_cast' from type 'tier1::C_game*' to type 'uint64_t' {aka 'long long unsigned int'}
-    C_str_rep *local_1ac;
-f_007277b0.cpp:63:76: invalid 'static_cast' from type 'tier1::C_MenuState*' to type 'uint64_t' {aka 'long long unsigned int'}
-    C_str_rep *local_1ac;
-f_007277b0.cpp:63:76: invalid 'static_cast' from type 'unsigned int*' to type 'uint64_t' {aka 'long long unsigned int'}
-    C_str_rep *local_1ac;
 f_0072e190.cpp:43:21: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
 f_0072e190.cpp:60:23: base operand of '->' is not a pointer

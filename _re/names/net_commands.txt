@@ -1,0 +1,3 @@
+# Part 10d-vi: the game commands (net/net_commands.cpp).
+00727bd0 C_GameApp::HandleServerCommand | void __thiscall HandleServerCommand(void *this, int id, void * stream)
+00728820 C_GameApp::HandleClientCommand | void __thiscall HandleClientCommand(void *this, int id, void * stream)

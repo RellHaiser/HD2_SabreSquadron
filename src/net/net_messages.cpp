@@ -129,6 +129,12 @@ void WriteFloat(C_BitStream *stream, float value)
 // A human's place and facing (its frame's world position, its z axis).
 void WritePlace(C_BitStream *stream, const C_Human *human, bool zFirst)
 {
+    if (!human) {
+        // Fix: a player without a human (spectating, joining) sends zeros (the original read null).
+        for (int i = 0; i < 6; ++i)
+            WriteFloat(stream, 0.0f);
+        return;
+    }
     const S_matrix &m = human->GetFrame()->GetMatrix();
     WriteFloat(stream, m(3).x);
     WriteFloat(stream, m(3).y);

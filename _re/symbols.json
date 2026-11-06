@@ -38657,6 +38657,16 @@
   "name": "NetReadSoldierState",
   "proto": "void __fastcall NetReadSoldierState(void * msg, void * state, bool itemsOnly)"
  },
+ "00727bd0": {
+  "module": "net_commands",
+  "name": "C_GameApp::HandleServerCommand",
+  "proto": "void __thiscall HandleServerCommand(void *this, int id, void * stream)"
+ },
+ "00728820": {
+  "module": "net_commands",
+  "name": "C_GameApp::HandleClientCommand",
+  "proto": "void __thiscall HandleClientCommand(void *this, int id, void * stream)"
+ },
  "0072a480": {
   "module": "game_app",
   "name": "C_GameApp::SendGameMessage",

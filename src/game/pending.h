@@ -165,7 +165,7 @@ struct S_MultiplayerSettings {
     int unknown178;                                 // +0x178
     uint8_t unknown17C[0x9C];
     C_str password;                                 // +0x218
-    C_str unknown21C;                               // +0x21C ("\1\2\3" after Reset)
+    C_str adminPassword;                            // +0x21C the admin login's (game command 7; "\1\2\3" after Reset)
     int port;                                       // +0x220
     int gameType;                                   // +0x224 E_MpGameType
     int maxClients;                                 // +0x228

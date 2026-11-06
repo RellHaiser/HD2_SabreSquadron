@@ -113,6 +113,8 @@ public:
     C_GameState *m_state = nullptr;                 // +0x14
 
 private:
+    // Game command 0x15 (the whole game; part of HandleClientCommand 0x00728820).
+    void ReadFullState(C_BitStream *stream);
     // `-cmd <command>` / `-c <script>` on the command line: the console state.
     bool StartFromCommandLine();                    // 0x006c0e10
     // The console of the command line, else the first logo.

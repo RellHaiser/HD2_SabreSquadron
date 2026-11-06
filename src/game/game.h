@@ -83,6 +83,7 @@ enum E_GameMessage : int {
 class C_QuickMessages;
 
 class C_game : public C_GameState {                 // vtable 0x008159ac, 0xEC bytes
+    friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
 public:
     C_game();                                       // 0x006987e0
     ~C_game() override;                             // 0x00698b00 (0x00698ae0 deleting)
@@ -221,6 +222,8 @@ public:
     int GetRoundTimeLeft() const;                   // 0x0069b150
     int GetRoundTime() const { return m_roundTime; }
     int GetRespawnTimeLeft() const;                 // 0x0069b180
+    // (A client at the server's respawn wave, game message 16: the round time's milliseconds.)
+    void SetRespawnWaveTime(int ms) { m_respawnWaveTime = ms; }
     // Client side of the server's messages.
     void OnRoundOver(int winner);                   // 0x00699860
     void OnRespawnScreen(bool cancel);              // 0x006998f0
@@ -359,4 +362,6 @@ bool IsSpawnBlocked(const S_vector4 &pos);           // 0x0069d970
 void FaceTargetZone(S_vector4 *dir, const S_vector4 &pos, int team);   // 0x0069e370
 // Shows text `textId` in the in-game menu when it is open.
 void ShowGameMenuMessage(int textId);                // 0x0069e9b0
+// The session moves on to its next map (the settings' next; the game's pending state GAME_STATE_NEXT_MAP).
+void LoadNextMap();                                 // 0x0069bca0
 extern C_game *g_game;                              // 0x008ae8f4

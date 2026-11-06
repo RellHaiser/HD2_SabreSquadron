@@ -3075,7 +3075,7 @@ void MainMenuTest(I3D_scene *scene)
         session->sessionType = 0;
         g_gfLog.clear();
         m.SetUpHostedSession();
-        ok &= session->unknown21C.c_str()[0] == 1 && session->sessionType == 2 &&
+        ok &= session->adminPassword.c_str()[0] == 1 && session->sessionType == 2 &&
               std::string(session->sessionName) == "Server" && std::string(session->sessionName + 100) == "Player" &&
               session->gameType == 3 && session->unknown174 == 1 && session->dedicated && session->coopDifficulty == 101 &&
               session->coopLives == 103 && session->teamLives == 102 && session->maxClients == 101 &&
