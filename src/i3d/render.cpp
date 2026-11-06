@@ -873,8 +873,9 @@ I3D_RESULT I3D_driver::Render(I3D_scene *scene, bool keepScene)
     TraverseSectors(scene);
     OccludeSectors(scene);
     if (!g_inRenderCallback && g_driverStates[DRVSTATE_DRAW_VISUALS]) {
-        // The backdrop, around the camera: back to front by the distance from it.
-        if (scene->backdropSector->sectorFlags & SCTF_VISIBLE) {
+        // The backdrop, around the camera: back to front by the distance from it. (Drawn when the
+        // primary sector, the outdoors, is visible: the backdrop's own flag is never set.)
+        if (scene->primarySector->sectorFlags & SCTF_VISIBLE) {
             g_viewProjection = &cam->backdropViewProjection;
             scene->SetScreenProjection(*g_viewProjection);
             g_pGfx->SetTransform(D3DTS_VIEW, reinterpret_cast<const D3DMATRIX *>(&cam->viewRotation));
