@@ -37,7 +37,7 @@ The run folder is `H:\HD2_PortRun`, a copy of `H:\HD2_Unmodified` with `HD2_Port
 
 The fog is the rain: `I3D_scene::SetWeather` converted its float parameters 5 and 7 from ints, so a width of 0.06 became about 5e8 and every drop a quad across the screen. Fixed in `LS3DF_Github` commit `586f479` (2026-10-26, `devel`), not in the `../LS3DF` folder or `origin/main`. **The fix is not in any of your branches yet: `_re/ls3df_patches/joint_uninit.patch` must be applied too (loading a saved game crashes without it).** `I3D_joint::Uninit` read its own `mesh` again after the line above it had cleared it (the slot's joint is usually itself); the original keeps the mesh in a register. **`build_game.py` links against `../LS3DF`'s import library; at run time use `devel`'s DLL**: export it (`git -C LS3DF_Github archive devel`) to a scratch folder, `python build.py dll`, copy the DLL and PDB to the run folder. Also kept there: `LS3DF_original.dll`, `LS3DF_ported.dll` (`../LS3DF`'s).
 
-With `devel`'s DLL the sky is a flat dark green with either exe, where the original DLL shows clouds. That is the DLL's, not the game's: a difference for the LS3DF port. Not looked into.
+Every LS3DF branch so far draws no sky: `I3D_driver::Render` tests `backdropSector`'s visible flag, which is cleared every frame and never set; the original (0x1005fce2) tests `primarySector`'s (+0x1F8). The screen's clear colour shows instead: flat green, navy or grey by mission. `_re/ls3df_patches/backdrop_visible.patch` is the fix. It is in the run folder's DLL, and in the LS3DF repositories only once applied there.
 
 ## Tools
 
