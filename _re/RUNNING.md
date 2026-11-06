@@ -75,8 +75,8 @@ The early files (`app.cpp` above all) were ported before the later rigour: expec
 
 - **Full screen.** Every run used `-window`, because full screen changes the display mode. The flags are now right, but it has not been seen.
 - **The rest of the game:** Training and the start of Snowball only. Only the De Lisle was fired; no grenades, explosives or vehicles; squad orders and the command map not tried; no mission played to its end (Training was skipped through the menu).
+- **The player's shots hitting anyone:** the user watched 13e's tests: the scripted shots went too high (the script only turned, it never aimed down), and the kills were the squad's. Sound in those fights was right, by the user's ear.
 - **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
-- **Sound in play.** It starts (see `log.txt`), but nobody has listened.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
 - The title bar is empty and there is no icon: the port has no resources yet. The string resource could not be read from the file on disk (the packed exe's), and the title is not worth guessing.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.
