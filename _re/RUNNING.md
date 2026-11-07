@@ -83,6 +83,8 @@ Africa1, played to its end, through the finishing screen and the soldiers' stat 
 
 Multiplayer, as a client: an RpR internet deathmatch server (joined, spawned, moved; the server was empty), and the user's LAN cooperative server on Co_Sicily2 (defusing all the bridge's dynamite, a clam mine on a Panzer III). Once an item would not move from backpack to pouches (a clam mine): by the user, the original exe sometimes does this in multiplayer too, with any item.
 
+On the user's LAN server, as a client: occupation on Normandy3; objectives on Czech3, spawned as Axis, with the VIP role and its defined uniform assigned.
+
 ## Not tested
 
 - **The rest of the game:** the other missions and weapons, squad orders and the command map not reported yet.
