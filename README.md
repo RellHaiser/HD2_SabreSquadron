@@ -9,39 +9,94 @@ of the game and its data.
 
 ## Status
 
-Work in progress (2026-11-01). Of the game's 12,293 functions, 8,254 (74.6 % of the code by size)
-are ported by hand. Generated code (tier 1, below) covers the rest. The sources are
-compile-checked file by file. The hand port runs: from the main menu through the campaign's first missions, with combat, saving and loading (2026-11-06; see `_re/RUNNING.md`). It needs the `devel` branch's LS3DF.dll with a patch in `_re/ls3df_patches`; most of the game is still untested.
+**Runnable (2026-11-06).** The port builds into `HD2_Port.exe`, a drop-in replacement for the original
+executable, entirely from the hand-ported sources. It has been played from the main menu to the end of
+missions, in single player and as a multiplayer client. In play, its combat against the AI has so far
+seemed identical to the original's.
 
-Ported so far, among others: the app core and module framework, the console, configuration and
-data files (`C_chunk`), the mission script language (compiler, expressions, interpreter), the
-campaign and profiles, humans (movement, animation, combat, items, AI, squads, enemies), the
-interface and HUD, vehicles (setup, driving, damage, seats, the car actor, network and saved game),
-seat weapons, shots, collision, the rigid body, debris, items lying in the world, destructible
-scene objects, clocks, switches, photo places, breakable fences, radios, document places, mines,
-timed explosions, spawn points, explosive places, pikes, flocks of birds, ladders, multiplayer
-zones, submarines, trains, static weapons, bikes, schools of fish, doors, supply boxes,
-barrels, air attacks, the Junkers 88, vertex animations, lightmap groups, texture shifting and the AI's
-line of sight, and the graphic effects (screen fades, fading models, the thunderstorm, rain, the
-underwater view, shadows, uniforms, shattered glass). In progress: the mission and world modules
-(decorations, the camera, mission loading).
+No live game logic is known to be left unported: 10,777 of the executable's functions are ported, and what
+remains is compiler library code, small helpers the port keeps inline, or code the original cannot reach.
+That rests on a sweep of the remaining functions, not on a proof (see `_re/TRIAGE.md`).
+
+Tested by playing:
+
+- **Single player:** every mission loads. Africa1, Africa2 and Africa6 played to the end, with the
+  end-of-mission screen and stat increases. Part of the Tutorial's training, Africa5 and Operation Snowball.
+- **Gameplay:** infantry weapons, grenades, launchers, explosives, fixed machine guns, vehicles and their
+  weapons, the aqualung and submarines, squad orders, the tactical map, stealth and disguise, the
+  inventory, saving and loading in a mission.
+- **Multiplayer, as a client:** an internet server and a LAN server, in deathmatch, cooperative, occupation
+  and objectives.
+- **Other:** full screen and windowed, sound, the video settings' gamma slider.
+
+Not tested yet:
+
+- A multiplayer session with another human player, and hosting with the port (listen or dedicated).
+- The other missions past loading, the few squad orders that need particular gear, and a side-by-side
+  measurement against the original of how the fights balance.
+
+`_re/RUNNING.md` keeps the details: the bugs found by running, the tools and what was exercised.
+
+## Running
+
+You need an installed copy of the game, *Hidden & Dangerous 2: Sabre Squadron* version 1.12, and a build of
+[LS3DF](https://github.com/RellHaiser/LS3DF), the engine port. Work in a copy of the game's folder.
+
+1. Build `LS3DF.dll` from LS3DF's `main` branch and put it in the folder. **The game's original
+   `LS3DF.dll` does not work with the port**: it writes 16 bytes through 12-byte results, which a modern
+   compiler's stack layout does not survive, so it crashes loading a mission. An older LS3DF build lacks
+   the fixes for rain, loading a saved game and the sky.
+2. Build the port (below) and put `HD2_Port.exe` in the folder, with `HD2_Port.pdb` if you want crash
+   reports with names.
+3. Run `HD2_Port.exe`. It uses the folder's `rw_data.dll`, `IJoy.dll`, Bink and Vorbis libraries, and the
+   installed game's settings and data as they are.
+
+- `-window` runs in a window whatever the game's setup says. This is the port's own switch.
+- Do not use `-c`: it is the console mode, and hides the window. The game looks for ` -c` and `-cmd` with a
+  plain text search, so avoid them in folder names too.
+- A crash writes `HD2_Port.RPT` next to the executable, with the call stack. The next crash overwrites it.
+
+## Building
+
+Needs Visual Studio with the C++ x86 tools, and Python. From the repository root:
+
+```bash
+python _re/tools/build_game.py
+```
+
+The executable and its symbols land in `%TEMP%\hd2_game`; add `--copy DIR` to copy them to the game's
+folder. Only changed sources are compiled, so use `--all` after a header change. A full build takes about a
+minute.
+
+- The default build, `/O2 /MT` with x87 floats (`/arch:IA32`), is the one to play: the game's math depends
+  on the x87 floats.
+- `--checked` builds `/Od /MTd /RTC1` in `%TEMP%\hd2_game_checked`. It stops at wrong call conventions and
+  stack overruns, and is the first thing to try when something goes wrong.
+- The window title and the icon are added at link time, the icon read from an installed copy of the game
+  (`ICON_SOURCE` in `build_game.py`, a path on the author's machine). Without it the executable builds with
+  neither, and works.
+
+`python _re/tools/build_check.py` and `python _re/tools/link_check.py` are the quick checks: every source
+compiled with diagnostics, then the link.
 
 ## Approach
 
-- **Hand ports (`src/`, except `src/tier1`).** Each subsystem is rewritten from the decompilation
-  and the assembly into C++ that follows the original's naming style: `C_Class`, `S_Struct`,
-  PascalCase methods, `m_` members. Declarations carry the original address as a
-  `// 0x00XXXXXX` comment.
-- **Tier 1 (`src/tier1`).** A generated, mechanical translation of every function not yet ported
-  by hand, so that the whole program is present while the hand port proceeds. It is regenerated as
-  ports land, and compiles with a 32-bit g++ (`-fpermissive`).
-- **Behaviour.** The original's behaviour is kept, including its oddities (commented
-  `Quirk kept`). Plain crash and memory bugs are fixed (commented `Fix:`). Copy protection is
-  dropped.
-- **Validation.** Ported code is checked against the original's assembly and, for engine-heavy
-  parts, run in test harnesses against stub engines and the game's own data (vehicle models,
-  scripts, tables), with mutation testing of the tests. The reverse-engineering workspace, tools
-  and harnesses are kept outside this repository.
+- **Hand ports (`src/`, except `src/tier1`).** Each subsystem is rewritten from the decompilation and the
+  assembly into C++ that follows the original's naming style: `C_Class`, `S_Struct`, PascalCase methods,
+  `m_` members. Declarations carry the original address as a `// 0x00XXXXXX` comment.
+- **Tier 1 (`src/tier1`).** A generated, mechanical translation of the whole program, which kept every
+  function present while the hand port proceeded. It is not part of the executable, and is kept for
+  reference.
+- **Behaviour.** The original's behaviour is kept, including its oddities (commented `Quirk kept`). Plain
+  crash and memory bugs are fixed (commented `Fix:`). Copy protection is dropped.
+- **Validation.** Ported code is checked against the original's assembly and, for engine-heavy parts, run in
+  test harnesses against stub engines and the game's own data (vehicle models, scripts, tables), with
+  mutation testing of the tests. Since it became runnable, the port has also been tested by playing it,
+  comparing with the original where something looks wrong.
+
+Related ports, each a drop-in for the game's own DLL: [LS3DF](https://github.com/RellHaiser/LS3DF) (the
+engine), [rw_data](https://github.com/RellHaiser/rw_data) (the archives), [IJOY](https://github.com/RellHaiser/IJOY)
+(joystick input). The port needs LS3DF; the other two are optional.
 
 ## Layout
 
@@ -50,22 +105,12 @@ underwater view, shadows, uniforms, shattered glass). In progress: the mission a
 | `src/common` | Strings (`C_str`), chunked data files (`C_chunk`), configuration files, file wrappers |
 | `src/ls3d` | The LS3D engine interfaces the game uses: math, `I3D_*` (scene, frames, visuals), `IGraph`, `rw_data` |
 | `src/game` | The game: app core and modules, actors (humans, vehicles, items, ...), AI, physics, interface, sound |
-| `src/net` | The network bit stream and messages |
+| `src/net` | Multiplayer: the network game, transport, replication, console commands, GameSpy, the firewall |
 | `src/script` | The mission script language |
-| `src/tier1` | Generated code (see above) |
+| `src/tier1` | Generated code (see above), not built into the executable |
+| `_re` | The reverse-engineering workspace: build and analysis tools, test harnesses, notes (`RUNNING.md`, `TRIAGE.md`, `PROGRESS.md`), patches for LS3DF |
+| `tools` | Model and animation (`.4ds`, `.5ds`) tools and statistics |
 | `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md) |
-
-## Building
-
-The hand-ported sources target MSVC, x86, C++17 (Visual Studio 2026). Each file compiles on its
-own with, from the repository root:
-
-```
-cl /nologo /c /std:c++17 /EHsc /W3 /permissive- /Zc:__cplusplus /D_CRT_SECURE_NO_WARNINGS /DWIN32_LEAN_AND_MEAN /DNOMINMAX /I src src\game\item_actor.cpp
-```
-
-Use an x86 developer prompt (`vcvars32.bat`). `src/tier1` is built with a 32-bit MinGW g++
-(`-std=gnu++17 -m32 -fpermissive`) instead.
 
 ## Legal
 

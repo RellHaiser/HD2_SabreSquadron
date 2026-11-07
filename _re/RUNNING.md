@@ -95,6 +95,6 @@ Every single player mission loads without a crash. The aqualung and submarines o
 
 - **The rest of the game:** the other missions past loading, and the weapons not used yet.
 - **Multiplayer:** a session with another player; hosting with the port, listen or dedicated. To join a local server of the original's: `HD2DS_SabreSquadron.exe -cmd -exec` a file with `domain internet`, `port 11001`, `style deathmatch`, `mapname Africa1`, `server`; the client: `-window -cmd domain internet port 11001 join <address>`.
-- **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
+- **The fight's balance:** the user's impression from playing is that combat against the AI is identical to the original's; not measured side by side. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.
