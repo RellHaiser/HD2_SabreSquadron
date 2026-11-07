@@ -3,7 +3,8 @@
 Unlike build_check.py (default SSE2, only diagnostics) this is the build that is run. Objects and outputs are in %TEMP%\\hd2_game[_checked]
 (G: is synced; see the Google Drive build locks). Only sources newer than their object, or all after a header change (--all), are compiled.
 
-Usage: python build_game.py [--checked] [--all] [--link-only] [--copy DIR]
+Usage: python build_game.py [--checked] [--all] [--link-only] [--no-laa] [--copy DIR]
+    --no-laa    links without large address awareness (2 GB, as the original).
     --checked   /Od /MTd /RTC1: slower, finds more (a call with the wrong arguments shows as a stack check, memory is filled, the heap is checked).
     --copy DIR  copies the exe and the PDB to DIR when the link worked.
 """
@@ -26,7 +27,19 @@ COMMON = ["/nologo", "/c", "/std:c++17", "/EHsc", "/W3", "/permissive-", "/Zc:__
           "/arch:IA32", "/Z7", "/MP", '/I"%s"' % SRC]
 RELEASE = ["/O2", "/Oy-", "/MT", "/GS-"]
 CHECKED = ["/Od", "/Oy-", "/MTd", "/RTC1", "/D_ITERATOR_DEBUG_LEVEL=0"]        # (The checked iterators change sizes, which the layout assertions see.)
-LINK = ["/nologo", "/SUBSYSTEM:WINDOWS,5.01", "/MACHINE:X86", "/DEBUG:FULL", "/INCREMENTAL:NO", "/DYNAMICBASE:NO", "/NXCOMPAT:NO", "/LARGEADDRESSAWARE:NO", "/SAFESEH:NO"]
+LINK = ["/nologo", "/SUBSYSTEM:WINDOWS,5.01", "/MACHINE:X86", "/DEBUG:FULL", "/INCREMENTAL:NO", "/DYNAMICBASE:NO", "/NXCOMPAT:NO", "/SAFESEH:NO"]
+# Large address aware (up to 4 GB on 64-bit Windows; the original is not): the same flag as the community LAA patchers set on the exe.
+# --no-laa links without it, the original's 2 GB, to tell a crash from it apart.
+LAA = "/LARGEADDRESSAWARE"
+NO_LAA = "/LARGEADDRESSAWARE:NO"
+
+
+def is_large_address_aware(exe):
+    """IMAGE_FILE_LARGE_ADDRESS_AWARE (0x20) in the PE file header's Characteristics."""
+    with open(exe, "rb") as fh:
+        data = fh.read(4096)
+    pe = struct.unpack_from("<I", data, 0x3C)[0]
+    return bool(struct.unpack_from("<H", data, pe + 4 + 18)[0] & 0x20)
 
 
 # The exe's title (string 3, SetWindowTitle) and icon. The icon is the game's: taken from the installed copy at build time, never kept in the repository.
@@ -104,6 +117,7 @@ def main():
     ap.add_argument("--link-only", action="store_true")
     ap.add_argument("--copy")
     ap.add_argument("--stack", default="0x100000")
+    ap.add_argument("--no-laa", action="store_true")
     args = ap.parse_args()
 
     out = os.path.join(tempfile.gettempdir(), "hd2_game_checked" if args.checked else "hd2_game")
@@ -137,13 +151,14 @@ def main():
         if res:
             fh.write('"%s"\n' % res)
         fh.write("\n".join('"%s"' % l if "\\" in l else l for l in LIBS) + "\n")
-    r = run_bat(os.path.join(out, "link.bat"), ['link %s /STACK:%s /OUT:"%s" /MAP:"%s" @"%s"' % (" ".join(LINK), args.stack, exe, exe[:-4] + ".map", rsp)])
+    r = run_bat(os.path.join(out, "link.bat"), ['link %s %s /STACK:%s /OUT:"%s" /MAP:"%s" @"%s"' % (" ".join(LINK), NO_LAA if args.no_laa else LAA, args.stack, exe, exe[:-4] + ".map", rsp)])
     for l in (r.stdout + r.stderr).splitlines():
         if "LNK" in l and "LNK4099" not in l:
             print(l[:220])
     print("link return code", r.returncode, exe)
     if r.returncode:
         return 1
+    print("large address aware:", "yes" if is_large_address_aware(exe) else "no")
     if args.copy:
         shutil.copy2(exe, args.copy)
         shutil.copy2(exe[:-4] + ".pdb", args.copy)

@@ -13,6 +13,7 @@ x87 floats (`/arch:IA32`), symbols, a map; objects in `%TEMP%\hd2_game` or `%TEM
 
 - Default: `/O2 /Oy- /MT`, the build to play.
 - `--checked`: `/Od /MTd /RTC1`. A call with the wrong arguments stops at `_RTC_CheckEsp`, stack overruns at `_RTC_CheckStackVars`, and the debug heap fills memory. Use this first when something is wrong: it found the first and third bugs below immediately. Keep the exe's own PDB next to it (`HD2_PortChk.exe`, `HD2_PortChk.pdb`).
+- Both are large address aware (since 2026-11-07; the original is not): up to 4 GB on 64-bit Windows, as the community LAA patchers give the original. `--no-laa` links without it (2 GB), to rule it out for a crash. The script prints the flag it finds in the linked exe.
 
 The title (string 3 of the original's table) and the icon go in at link time; the icon is read from `H:\HD2_Unmodified` and never kept in the repository. Without that folder the exe builds with neither.
 
