@@ -26,14 +26,16 @@ Tested by playing:
   weapons, the aqualung and submarines, squad orders, the tactical map, stealth and disguise, the
   inventory, saving and loading in a mission.
 - **Multiplayer, as a client:** an internet server and a LAN server, in deathmatch, cooperative, occupation
-  and objectives.
+  and objectives; a cooperative game with other people on the original's dedicated server.
 - **Other:** full screen and windowed, sound, the video settings' gamma slider.
 
 Not tested yet:
 
-- A multiplayer session with another human player, and hosting with the port (listen or dedicated).
+- Hosting with the port (listen or dedicated).
 - The other missions past loading, the few squad orders that need particular gear, and a side-by-side
   measurement against the original of how the fights balance.
+
+Known problem: one crash while healing a teammate in a cooperative game, not explained yet.
 
 `_re/RUNNING.md` keeps the details: the bugs found by running, the tools and what was exercised.
 

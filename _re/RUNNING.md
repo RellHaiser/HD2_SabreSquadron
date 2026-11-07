@@ -76,6 +76,8 @@ The early files (`app.cpp` above all) were ported before the later rigour: expec
 | After 13e (the user: joining a server stays at "Connecting"): the same kind of split. `C_NetGame`'s transport is a pointer in the port and by value in the original (+0x33C), so `+0x414` is the transport's own `m_callback` (+0xD8), which the port kept as a second field. `Init` set that one, the transport's stayed null, and every datagram was dropped. | The server's first message, which ends "Connecting", never reached the game, as a client. A server hosted by the port would have lost its clients' messages the same way (not run). |
 | After 13e (the user: the tactical map crashed on a double right-click): `S_HumanOrder`'s path was made with `std::malloc` and freed with `std::free` in `squad_order.cpp`, while `BuildPathPoints` makes the same array with `_aligned_malloc`, as the original does throughout (0x0058c8e0). | `free` of an aligned block: the second click hits the new order's marker, deletes the order, and the heap fails in `ReleaseHumanOrder` (the user's `HD2_Port.RPT`). |
 | Also then, found by the checked build: `IScene::UnmapScreenPoint` writes four floats each, into the port's three-float `S_vector`s. | `_RTC_CheckStackVars` in `C_CommandPanel::PickTarget` on opening the map; in the release build, two floats written over neighbouring locals. |
+| After 13e (the user, cooperative with other people: magazines now and then invisible, the Sten's, the MP 40's): `SetWeaponView(def->GetFpvModel(), def->GetFpvMagazine(), ...)`. MSVC evaluates the arguments right to left, so the magazine pointer was read before `GetFpvModel` first loaded it (seen in the old file's `/FAs` listing; the original calls `GetFpvModel` first, 0x00492548). | The first time a weapon type is drawn, its first-person model has no magazine, until the next draw. |
+| Also then: a teammate's rank in a network game (their crosshair name, the inventory, the member panel) kept the rank of an earlier match. `GetProfileUnknown24` (0x005a8380) returns `stats[NET_STAT_RANK]` in a network game; the port took that copy for unused and read the profile. | The local profile's rank instead of the round's. |
 
 ## Tested by the user, playing (2026-11-06)
 
@@ -91,10 +93,15 @@ Africa5, part of it: the stealth and disguise meter; saving and loading in a mis
 
 Every single player mission loads without a crash. The aqualung and submarines on Norway and Normandy1. Africa2 and Africa6 played to their ends.
 
+Cooperative with other people, on the original's dedicated server, two of them on the port. Open from that session:
+
+- **A crash while healing a teammate**, on the other player's port client, partway through the heal; other heals of human players worked. Not explained: reading the heal's code paths found nothing, and the crash report (`HD2_Port.RPT` on that computer) has not been seen.
+- **Dropped enemy weapons floating above the ground**, seen by the other player. A client puts a rested item where the server's placement message says, and a body started without speed stays at rest (`C_ItemActor::OnPlacement`, `ResetBody`, `C_RigidBody::Start`, matching the original's assembly), so the position looks like the server's. Not compared with the original client on the same server.
+
 ## Not tested
 
 - **The rest of the game:** the other missions past loading, and the weapons not used yet.
-- **Multiplayer:** a session with another player; hosting with the port, listen or dedicated. To join a local server of the original's: `HD2DS_SabreSquadron.exe -cmd -exec` a file with `domain internet`, `port 11001`, `style deathmatch`, `mapname Africa1`, `server`; the client: `-window -cmd domain internet port 11001 join <address>`.
+- **Multiplayer:** hosting with the port, listen or dedicated. To join a local server of the original's: `HD2DS_SabreSquadron.exe -cmd -exec` a file with `domain internet`, `port 11001`, `style deathmatch`, `mapname Africa1`, `server`; the client: `-window -cmd domain internet port 11001 join <address>`.
 - **The fight's balance:** the user's impression from playing is that combat against the AI is identical to the original's; not measured side by side. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.
