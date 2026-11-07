@@ -27,8 +27,11 @@ extern int g_gameMenuMessages;                          // 0x008ae628
 // The soldiers panel's last profile picked in each list (the first 30 profiles; the next 30).
 extern int g_pickedSoldierA;                            // 0x008ae634
 extern int g_pickedSoldierX;                            // 0x008410ac (30 at first)
+// The stats toggle's state (OnStatsToggle's).
+extern bool g_soldierStatsShown;                        // 0x008ae638
 
 class C_GameMenu : public C_EquipmentMenuBase {
+    friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
 public:
     // The presets loaded (the original's presets constructor); single player: the missions' items
     // set up.
@@ -78,7 +81,10 @@ public:
     // its face, the store refreshed), the drag's start (an item of a type the control has: one of it; from the store
     // the store's when it has one, a large weapon not with another; the places it may go shown, its
     // visual's copy over it), its move (the copy by the cursor's move), its drop (the copy deleted,
-    // the places hidden; DropItem on the control under the cursor); the hover (not ported yet).
+    // the places hidden; DropItem on the control under the cursor); the hover (no control: false):
+    // the item's information on the popup (sent; the info screen shown: hidden instead, false), else
+    // the weapons' information label (posted; none: nothing): left: hidden; entered: cleared, its
+    // name, weight, a weapon's ammo, muzzle speed and a rifle scope's zoom (C_ItemInfo's lines), shown.
     bool OnItemNotify13(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x5C 0x00681ee0
     bool OnItemNotify60(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x60 0x00686e10
     bool OnItemNotify0A(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x64 0x00682020
@@ -198,6 +204,12 @@ private:
     // defaults): the bars (a hundredth each; health full) and their values' texts (shooting,
     // endurance, stealth, first aid, lockpick in per cent, strength in kg, health as it is).
     static void ShowSoldierStats(int profile);          // 0x006863c0 (__stdcall)
+    // A chat line received ("<name>: <text>" added to the chat console; the first argument unused).
+    static void AddChatLine(int, const char *name, const char *text);   // 0x006828b0 (__stdcall)
+    // The skills panel and the store swapped (the stats shown: the skills panel; the 7th control's
+    // text "CONTINUE", else "SHOW SOLDIER STATS"); true. (No control calls it: an older screen's.)
+    static bool OnStatsToggle(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x006861d0 (__thiscall)
     // The squad's team set (2: nothing): the message box closed; the team change posted and now
     // the first soldier's: the escape posted; the same team: nothing more. Not co-op: its side's mark
     // checked, the other's not (another team: nothing more). No team before: the store's list on,

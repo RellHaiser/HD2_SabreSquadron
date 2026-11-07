@@ -1094,7 +1094,6 @@
 00702ba0 construct_copy4_702ba0
 0071fec0 identity_71fec0
 00721f40 empty_function_721f40
-007244c0 get_field_5044_7244c0
 00725080 empty_function_725080
 007272a0 vector_tidy_7272a0
 007272e0 vector_tidy_7272e0
@@ -1107,10 +1106,8 @@
 007329b0 vector_tidy_7329b0
 00732c10 empty_function_732c10
 00732f80 get_first_field_732f80
-0073a6a0 get_first_field_73a6a0
 0073a6c0 get_field_4_73a6c0
 0073a730 get_field_20_73a730
-0073aa10 get_field_1c_73aa10
 0073ab40 get_field_14_73ab40
 0073eeb0 vector_tidy_73eeb0
 0073ef70 empty_function_73ef70

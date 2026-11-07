@@ -1,0 +1,9 @@
+# Part 10d-v: the network game's messages (net/net_messages.cpp).
+00726470 C_NetGame::HandleServerMessage | long __stdcall HandleServerMessage(void * net, void * context, uint type, void * message)
+007277f0 NetReadSoldierItem | void __fastcall NetReadSoldierItem(void * stream, void * item)
+00727820 NetWriteSoldierItem | void __fastcall NetWriteSoldierItem(void * stream, void * item)
+00727850 NetWriteSoldierState | void __fastcall NetWriteSoldierState(void * msg, void * state, bool itemsOnly)
+00727a30 NetReadSoldierState | void __fastcall NetReadSoldierState(void * msg, void * state, bool itemsOnly)
+0072c190 C_NetGame::BeginCommand | void * __thiscall BeginCommand(void *this, int id)
+0072c1b0 C_NetGame::BeginReply | void * __thiscall BeginReply(void *this, int to, int id)
+0072c1d0 C_NetGame::BeginGameMessage | void * __thiscall BeginGameMessage(void *this, int to, int id, bool reliable)

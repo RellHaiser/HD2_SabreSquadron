@@ -1,0 +1,24 @@
+# Part 11e: crash reporting (game/crash_report.cpp).
+006e1ad0 OnFatalError
+006e2db0 InitExceptionHandler
+006e2dc0 ConstructExceptionHandler
+006e2dd0 RegisterExceptionHandlerDtor
+006e2de0 DestroyExceptionHandler
+006e2df0 ReportLine
+006e2e80 ListProcessModules
+006e3140 S_ModuleInfo_Dtor
+006e31b0 LoadSymbolFiles
+006e33d0 C_ExceptionHandler_Ctor
+006e33f0 C_ExceptionHandler_Dtor
+006e3400 ReportUnhandledException
+006e3700 ReportException
+006e3940 ExceptionName
+006e3bc0 GetModuleOfAddress
+006e3c00 GetLogicalAddress
+006e3cf0 ReportLocalVariable
+006e3d30 ReportCallStack
+006e4060 ModuleInfoVector_Dtor
+006e40c0 ModuleInfoVector_Insert
+006e4410 S_ModuleInfo_CopyConstruct
+006e4560 S_ModuleInfo_DeletingDtor
+006e4610 LoadMapFiles_Dead

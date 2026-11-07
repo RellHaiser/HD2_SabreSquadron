@@ -7,9 +7,7 @@
 // re-linked, rotations in progress, animated models, sound frames, cutscene
 // duplicates. And it runs cutscenes (letterboxed camera, scripts' OnCutscene).
 //
-// Not hand-ported yet (mechanical translation in src/tier1): SaveGame 0x00424970,
-// LoadGame 0x004257b0, OnMessage (client message dispatch 0x00424590 /
-// 0x0042b650), WriteState / ReadState (state transfer 0x0042aff0 / 0x0042b330).
+// script_module_save.cpp: its saved games, a joining client's state, the clients' messages.
 #pragma once
 
 #include <cstdint>
@@ -25,6 +23,7 @@ class C_Script;
 class I3D_camera;
 class I3D_frame;
 class I3D_model;
+class I3D_sound;
 
 // What C_ScriptModule::RememberFrame() records about a frame.
 enum : uint32_t {
@@ -102,11 +101,11 @@ public:
     void StartMission(bool server) override;                   // 0x004270d0
     void StopMission(bool server) override;                    // 0x00427b80
     void RestartMission(bool server) override;                 // 0x00424900
-    bool OnMessage(C_BitStream *msg) override;                       // 0x00424590 (tier 1)
-    bool SaveGame(C_chunk &chunk) override;                    // 0x00424970 (tier 1)
-    bool LoadGame(C_chunk &chunk) override;                    // 0x004257b0 (tier 1)
-    void WriteState(C_BitStream *msg) override;                       // 0x0042aff0 (tier 1)
-    void ReadState(C_BitStream *msg) override;                        // 0x0042b330 (tier 1)
+    bool OnMessage(C_BitStream *msg) override;                 // 0x00424590
+    bool SaveGame(C_chunk &chunk) override;                    // 0x00424970
+    bool LoadGame(C_chunk &chunk) override;                    // 0x004257b0
+    void WriteState(C_BitStream *msg) override;                // 0x0042aff0
+    void ReadState(C_BitStream *msg) override;                 // 0x0042b330
 
     // Runs `scriptName` on `frame`. With an empty name, or when the frame already
     // has a script, the existing script is removed instead (OnExit runs).
@@ -151,6 +150,12 @@ private:
     void RestoreSaveGameValues();                                  // 0x00428ca0
     void RestoreAnimatedModel(I3D_model *model);
     void SetLetterboxViewport();
+    bool LoadRotation(C_chunk &chunk);                             // (from LoadGame)
+    void LoadRememberedFrames(C_chunk &chunk);
+    bool LoadScript(C_chunk &chunk);
+    // (0x0042b650, __fastcall: type and message in registers, no module.)
+    void HandleClientMessage(int type, C_BitStream *msg);
+    void HandleFrameSetOn(C_BitStream *msg);
 
     int m_inputDelay = 0;                                          // +0x0C ms until player input returns
     bool m_started = false;                                        // +0x10
@@ -175,3 +180,12 @@ private:
 };
 
 extern C_ScriptModule g_scriptModule;                              // 0x00868b18
+
+// Bits of a script message's type (enough for 275 types).
+extern int g_scriptMessageTypeBits;                                // 0x00838874
+// Sounds whose start was deferred to the next tick: {start position, frame}.
+struct S_PendingSound {
+    int start;
+    I3D_sound *sound;
+};
+extern std::vector<S_PendingSound *> g_pendingSounds;              // 0x008693d0

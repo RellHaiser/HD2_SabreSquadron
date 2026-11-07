@@ -253,8 +253,10 @@ void WalkCells(const S_CollisionMesh &mesh, const S_CollisionRay &ray, int x0, i
         return static_cast<int>(((line - fromMain) * invDirMain * dirCross + fromCross - minCross) * invCellCross +
                                 bias);
     };
-    for (int n = 0; n < main1 - main0; ++n) {
-        const int i = backward ? main1 - 1 - n : main0 + n;
+    // (Compares the indices, as the original: an infinite ray's far end converts to INT_MIN, and
+    // main1 - main0 would overflow into two billion columns. A step along the ground shorter
+    // than 1e-4 makes MoveSpheresStepping's wall probe infinite, in the original too.)
+    for (int i = backward ? main1 - 1 : main0; backward ? i >= main0 : i < main1; backward ? --i : ++i) {
         const int c0 = std::max(crossCell(lowerEdgeFirst ? lines[i] : lines[i + 1], 0.0f), cross0);
         const int c1 = std::min(crossCell(lowerEdgeFirst ? lines[i + 1] : lines[i], 1.0f), cross1);
         for (int c = c0; c < c1; ++c) {

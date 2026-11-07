@@ -125,6 +125,42 @@ private:
     bool m_shown = false;                               // +0x89
 };
 
+// The squad screen's medal popup (its model "DESCRIPTION"; vtable 0x00815918, made inline by
+// C_SquadMenu::BuildScreens): a medal's frame, name and description in a box that follows the cursor
+// once it has stayed still for half a second (its button up), as C_DescriptionScreen's.
+class C_MedalDescriptionScreen : public C_Screen {      // 0x98 bytes
+public:
+    C_MedalDescriptionScreen(I3D_scene *scene, I3D_frame *frame) : C_Screen(scene, frame) {}
+    // The texts deleted.
+    ~C_MedalDescriptionScreen() override;               // 0x00691920 (0x00691900)
+
+    // The texts'.
+    void Refresh() override;                            // +0x18 0x0066a2a0
+    // Shown and the cursor still: the box on at the cursor (C_DescriptionScreen::Tick's), both texts
+    // refreshed; else the box off.
+    void Tick(int time) override;                       // +0x1C 0x0066a100
+    // CONTROL_MSG_SHOW / HIDE: shown / hidden (the box with it); MEDAL_POPUP_MSG_SHOW: the medal `value`
+    // (its frame value2, in the "new_medal" place; the one before unlinked, the texts cleared), its name
+    // and description (g_rosterTexts' 0x2774 + 2 * value, + 1; style 3). True; the others ignored.
+    bool HandleMessage(S_ControlMessage *message) override;   // +0x6C 0x00669e90
+    // The box shown.
+    bool HasPopup() const override { return m_boxShown; }     // +0x88 0x006918f0
+    // The model's "description01" box off at (0.5, -0.375, -0.5), its "text01" and "text02" made (titles,
+    // the screen's id | 2) and the "new_medal" place (a dummy) kept; "description" off. True. (The
+    // description is not read.)
+    bool Build(const S_ScreenDesc *desc) override;      // +0x8C 0x00669c00
+
+private:
+    C_TitleControl *m_name = nullptr;                   // +0x84 "text01"
+    C_TitleControl *m_description = nullptr;            // +0x88 "text02"
+    I3D_frame *m_place = nullptr;                       // +0x8C "new_medal"
+    I3D_frame *m_medal = nullptr;                       // +0x90 the medal's frame shown
+    bool m_boxShown = false;                            // +0x94
+    bool m_shown = false;                               // +0x95
+};
+// The medal popup's message: the medal (value) and its frame (value2) shown.
+constexpr uint32_t MEDAL_POPUP_MSG_SHOW = 0x1000033;
+
 // The screens' notification on every tick (value: the time).
 constexpr uint32_t CONTROL_NOTIFY_SCREEN_TICK = 0x4014000;
 

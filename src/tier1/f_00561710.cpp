@@ -1234,79 +1234,6 @@ int vector_size_e4_5636b0(int param_1, ...)
 }
 
 
-// 0x005636d0
-uint32_t * FUN_005636d0(void *_this,uint32_t *param_1,uint32_t *param_2, ...)
-{
-  int iVar1;
-  int iVar2;
-  uint32_t *puVar3;
-  uint32_t uVar4;
-  uint32_t *puVar5;
-  int iVar6;
-  uint32_t *puVar7;
-  puVar5 = *(uint32_t **)((int)_this + 8);
-  iVar1 = *(int *)((int)_this + 4);
-  iVar6 = (int)param_1 - iVar1 >> 2;
-  if (*(int *)((int)_this + 0xc) - (int)puVar5 >> 2 != 0) {
-    if ((int)puVar5 - (int)param_1 >> 2 == 0) {
-      uninitialized_copy4_563950(param_1,puVar5,param_1 + 1);
-      uninitialized_fill_n4_563980
-                (*(uint32_t **)((int)_this + 8),
-                 1 - ((int)*(uint32_t **)((int)_this + 8) - (int)param_1 >> 2),param_2);
-      puVar5 = *(uint32_t **)((int)_this + 8);
-      for (; param_1 != puVar5; param_1 = param_1 + 1) {
-        *param_1 = *param_2;
-      }
-    }
-    else {
-      uninitialized_copy4_563950(puVar5 - 1,puVar5,puVar5);
-      puVar5 = *(uint32_t **)((int)_this + 8);
-      puVar7 = puVar5;
-      while (param_1 != puVar7 - 1) {
-        puVar5--;
-        *puVar5 = puVar7[-2];
-        puVar7--;
-      }
-      puVar5 = param_1 + 1;
-      for (; param_1 != puVar5; param_1 = param_1 + 1) {
-        *param_1 = *param_2;
-      }
-    }
-    *(int *)((int)_this + 8) = *(int *)((int)_this + 8) + 4;
-    return (uint32_t *)(*(int *)((int)_this + 4) + iVar6 * 4);
-  }
-  if ((iVar1 == 0) || (uVar4 = (int)puVar5 - iVar1 >> 2, uVar4 < 2)) {
-    uVar4 = 1;
-  }
-  if (iVar1 == 0) {
-    iVar1 = 0;
-  }
-  else {
-    iVar1 = (int)puVar5 - iVar1 >> 2;
-  }
-  iVar1 += uVar4;
-  iVar2 = iVar1;
-  if (iVar1 < 0) {
-    iVar2 = 0;
-  }
-  puVar3 = tier1_operator_new(iVar2 * 4);
-  puVar7 = puVar3;
-  for (puVar5 = *(uint32_t **)((int)_this + 4); puVar5 != param_1; puVar5 = puVar5 + 1) {
-    construct_copy4_5639b0(puVar7,puVar5);
-    puVar7++;
-  }
-  construct_copy4_5639b0(puVar7,param_2);
-  uninitialized_copy4_563950(param_1,*(uint32_t **)((int)_this + 8),puVar7 + 1);
-  empty_function_563910();
-  tier1_operator_delete(*(void **)((int)_this + 4));
-  *(uint32_t **)((int)_this + 0xc) = puVar3 + iVar1;
-  iVar1 = vector_size_e4_5636b0((int)_this);
-  *(uint32_t **)((int)_this + 8) = puVar3 + iVar1 + 1;
-  *(uint32_t **)((int)_this + 4) = puVar3;
-  return puVar3 + iVar6;
-}
-
-
 // 0x00563870
 uint32_t FUN_00563870(void *_this,int param_1, ...)
 {
@@ -1349,43 +1276,9 @@ uint32_t FUN_005638c0(uint32_t *param_1, ...)
 }
 
 
-// 0x005638e0
-uint32_t FUN_005638e0(void *_this,int param_1, ...)
-{
-  int *piVar1;
-  if (param_1 != 0) {
-    piVar1 = FUN_00563920((int)_this);
-    *piVar1 = param_1;
-    piVar1[1] = *(int *)((int)_this + 4);
-    *(int **)((int)_this + 4) = piVar1;
-    *(int *)((int)_this + 0x10) = *(int *)((int)_this + 0x10) + 1;
-  }
-  return 0;
-}
-
-
 // 0x00563910
 uint32_t empty_function_563910(...)
 {
-  return 0;
-}
-
-
-// 0x00563920
-uint32_t * FUN_00563920(int param_1, ...)
-{
-  uint32_t *puVar1;
-  puVar1 = *(uint32_t **)(param_1 + 8);
-  if (puVar1 != 0) {
-    *(uint32_t *)(param_1 + 8) = puVar1[1];
-    return puVar1;
-  }
-  puVar1 = tier1_operator_new(8);
-  if (puVar1 != 0) {
-    *puVar1 = 0;
-    puVar1[1] = 0;
-    return puVar1;
-  }
   return 0;
 }
 

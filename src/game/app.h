@@ -14,12 +14,12 @@ struct S_LS3DSetup {
     uint32_t width;               // +0x02
     uint32_t height;              // +0x06
     uint32_t bitsPerPixel;        // +0x0A
-    uint32_t unknown0E;           // +0x0E
-    uint8_t textureFormat;        // +0x12 2 = 16-bit, 4 = 32-bit textures
+    uint32_t refreshRate;         // +0x0E
+    uint8_t antialiasing;         // +0x12 2 or 4 samples
     uint8_t unknown13;            // +0x13
     uint8_t unknown14;            // +0x14
     uint8_t fullscreen;           // +0x15
-    uint8_t unknown16;            // +0x16 adds IG_INIT_16BIT
+    uint8_t hardwareTnl;          // +0x16
     uint8_t vsync;                // +0x17 (fullscreen only)
     uint8_t renderState15;        // +0x18 -> I3D state 0x15
     uint8_t tripleBuffer;         // +0x19 (fullscreen only)
@@ -28,7 +28,7 @@ struct S_LS3DSetup {
     uint8_t renderState11;        // +0x1C -> I3D state 0x11
     uint8_t soundDisabled;        // +0x1D
     uint8_t soundFlag10;          // +0x1E
-    uint8_t forceInit32;          // +0x1F adds IG_INIT_32BIT
+    uint8_t waitInactive;         // +0x1F
     uint8_t soundFlag20;          // +0x20
     uint8_t soundQuality;         // +0x21 0..3, 4 = default
     uint8_t unknown22;            // +0x22

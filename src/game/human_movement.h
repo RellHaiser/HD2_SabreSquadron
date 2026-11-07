@@ -1168,6 +1168,8 @@ public:
     void SetModelVisible(bool on);
     void Interact(C_Actor *target, uint32_t interaction, int arg) { m_idle.Interact(target, interaction, arg); }
     void PlayAnimation(const char *name, int a, int b, int c) { m_animPlayer.PlayAnimation(name, a, b, c); }
+    I3D_frame *GetShadowFrame() const { return m_shadow; }
+    void RemoveShadow() { m_visual.RemoveShadow(); }
     I3D_sector *GetSector() const { return m_visual.m_sector; }
     C_Human *GetOwner() const { return m_owner; }
     // Length (ms) of an animation of the owner's group table; -1 without one.

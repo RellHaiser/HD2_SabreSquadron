@@ -89,12 +89,7 @@ void AwardTeamPoints(int points, int team)          // 0x0069bbd0
     g_netGame.UnlockPlayers();
 }
 
-// The session moves on to its next map.
-void LoadNextMap()                                  // 0x0069bca0
-{
-    g_mpSettings->SelectMap(nullptr);
-    GetGameApp()->m_state->SetPendingState(GAME_STATE_NEXT_MAP);
-}
+}  // namespace
 
 // Switches the session to map `name` (null: the next one).
 void ChangeMap(const char *name)                    // 0x0069bcc0
@@ -110,7 +105,11 @@ void ChangeMap(const char *name)                    // 0x0069bcc0
     GetGameApp()->m_state->SetPendingState(GAME_STATE_NEXT_MAP);
 }
 
-}  // namespace
+void LoadNextMap()                                  // 0x0069bca0
+{
+    g_mpSettings->SelectMap(nullptr);
+    GetGameApp()->m_state->SetPendingState(GAME_STATE_NEXT_MAP);
+}
 
 // A human or a car within 2 m above `pos` (spawning there would collide).
 bool IsSpawnBlocked(const S_vector4 &pos)           // 0x0069d970
@@ -372,7 +371,7 @@ void C_game::Update(int timeDelta)                  // 0x0069b500
                 m_interface->ShowMessage(-1);
             }
         }
-        g_netGame.UpdateWatchmeleeTracker(timeDelta);
+        g_netGame.UpdateVote(timeDelta);
         if (m_respawnRequest != 0) {
             // The command goes out once the respawn screen picked a zone.
             const std::vector<S_SquadSoldier *> &squad = g_missionSquad->states;

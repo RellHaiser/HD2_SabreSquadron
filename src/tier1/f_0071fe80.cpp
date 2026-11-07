@@ -2,53 +2,10 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x0071fe80
-uint32_t FUN_0071fe80(...)
-{
-  FUN_0071fe90();
-  FUN_0071fea0();
-  return 0;
-}
-
-
-// 0x0071fe90
-uint32_t FUN_0071fe90(...)
-{
-  identity_71fec0(&DAT_0097b9bc);
-  return 0;
-}
-
-
-// 0x0071fea0
-uint32_t FUN_0071fea0(...)
-{
-  atexit(FUN_0071feb0);
-  return 0;
-}
-
-
-// 0x0071feb0
-uint32_t FUN_0071feb0(...)
-{
-  FUN_0071fed0(&DAT_0097b9bc);
-  return 0;
-}
-
-
 // 0x0071fec0
 uint32_t identity_71fec0(uint32_t param_1, ...)
 {
   return param_1;
-}
-
-
-// 0x0071fed0
-uint32_t FUN_0071fed0(uint32_t *param_1, ...)
-{
-  if ((void *)*param_1 != 0) {
-    tier1_operator_delete((void *)*param_1);
-  }
-  return 0;
 }
 
 

@@ -103,6 +103,7 @@ private:
     bool CheckCollision(float time);                    // 0x005e1090
     // A spot for the occupant of `seat` 1.35 m to its side (`otherSide`: the left) on the ground
     // below, facing the seat; false when the way there is blocked.
+    friend class C_FormationShape;                      // game/formation.cpp
     bool FindExit(int seat, S_vector4 *pos, S_vector4 *dir, bool otherSide);   // 0x005e0530
     // `actor` out beside its seat (else beside the other one): placed, facing the seat.
     bool PutOutside(C_Actor *actor);                    // 0x005e0b30

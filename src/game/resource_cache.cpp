@@ -230,6 +230,16 @@ void C_ResourceCache<T>::Clear()
 }
 
 template <class T>
+void C_ResourceCache<T>::Forget()
+{
+    m_entries.clear();
+    m_byName.clear();
+    if (m_spare)
+        m_spare->Release();
+    m_spare = nullptr;
+}
+
+template <class T>
 void C_ResourceCache<T>::AddDir(const char *dir)
 {
     RemoveDir(dir);

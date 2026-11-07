@@ -45,47 +45,4 @@ uint32_t thunk_FUN_00596a60(...)
 }
 
 
-// 0x00596a60
-uint32_t FUN_00596a60(...)
-{
-  _DAT_008abe20 = 0;
-  _DAT_008abe24 = 0;
-  _DAT_008abe28 = 0;
-  _DAT_008abe30 = 0x3f800000;
-  _DAT_008abe34 = 0;
-  _DAT_008abe38 = 0;
-  _DAT_008abe40 = 0;
-  _DAT_008abe44 = 0;
-  _DAT_008abe48 = 0xbf800000;
-  _DAT_008abe50 = 0x3f800000;
-  _DAT_008abe54 = 0;
-  _DAT_008abe58 = 0xbf800000;
-  _DAT_008abe60 = 0;
-  _DAT_008abe64 = 0;
-  _DAT_008abe68 = 0xc0000000;
-  _DAT_008abe70 = 0x3f800000;
-  _DAT_008abe74 = 0;
-  _DAT_008abe78 = 0xc0000000;
-  _DAT_008abe80 = 0;
-  _DAT_008abe84 = 0;
-  _DAT_008abe88 = 0x3f800000;
-  _DAT_008abe90 = 0;
-  _DAT_008abe94 = 0;
-  _DAT_008abe98 = 0x3f800000;
-  _DAT_008abea0 = 0;
-  _DAT_008abea4 = 0;
-  _DAT_008abea8 = 0x3f800000;
-  _DAT_008abeb0 = 0;
-  _DAT_008abeb4 = 0;
-  _DAT_008abeb8 = 0x3f800000;
-  DAT_008abec0 = 0;
-  DAT_008abec4 = 0;
-  DAT_008abec8 = 0x3f800000;
-  DAT_008abed0 = 0;
-  DAT_008abed4 = 0;
-  DAT_008abed8 = 0x3f800000;
-  return 0;
-}
-
-
 } // namespace tier1

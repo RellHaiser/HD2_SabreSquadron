@@ -22,63 +22,14 @@
 // destructors. The roles of the campaign screens are inferred from where the shipped
 // campaigns put them.
 
-// The video player of a campaign video node (type 7, vtable 0x00815bfc, 0x7C bytes): Start
-// takes the C_CampaignVideo.
-class C_VideoState : public C_GameState {
-public:
-    C_VideoState();                                 // 0x006c3330 (also inline)
-};
-// The logos, the intro, the game's movies and the menu's (type 10, vtable 0x00815bc8,
-// 0x84 bytes).
-class C_MovieState : public C_VideoState {
-public:
-    C_MovieState();                                 // (inline)
-    // Plays `fileName`; `sequence` says what follows it (C_GameApp: 0 back to the state it
-    // was opened over, 1 .. 3 the next logo / the intro, 4 the main menu, 5 the first logo,
-    // 6 the application ends). Returns false.
-    bool Play(const char *fileName, int sequence);  // 0x0066ede0
-    int GetSequence() const;                        // +0x7C
-    C_GameState *GetReturnState() const;            // +0x80
-    void SetReturnState(C_GameState *state);
-};
-// The main menu (type 2, vtable 0x00815e30, 0x240 bytes; also the network session's menus).
-class C_MainMenu : public C_GameState {
-public:
-    C_MainMenu();                                   // (inline)
-    // The movie the menu asks for (empty: the credits).
-    const C_str &GetMovie() const;                  // C_str +0x1E8
-};
-// The squad screen (campaign screen kinds 1 and 2; type 3, vtable 0x00815d50, 0x2B0 bytes).
-class C_SquadMenu : public C_GameState {
-public:
-    C_SquadMenu();                                  // (inline)
-};
-// The equipment screen (kinds 3 and 4; type 4, vtable 0x00815db0, 0x590 bytes).
-class C_EquipmentMenu : public C_GameState {
-public:
-    C_EquipmentMenu();                              // (inline; base 0x006c1810)
-};
-// The screen after a mission (kind 5; type 5, vtable 0x00815cf0, 0x290 bytes).
-class C_DebriefingMenu : public C_GameState {
-public:
-    C_DebriefingMenu();                             // (inline)
-};
-// The screen at the end of an operation (kind 6; type 14, vtable 0x00815c90, 0x1B0 bytes).
-class C_OperationEndMenu : public C_GameState {
-public:
-    C_OperationEndMenu();                           // (inline)
-};
-// Campaign screen kind 0 (none in the shipped campaigns; type 9, vtable 0x00815c30, 0x1B0
-// bytes).
-class C_Kind0Menu : public C_GameState {
-public:
-    C_Kind0Menu();                                  // (inline)
-};
-// Joining / hosting a network session (type 8, vtable 0x00815e98, 0x1D0 bytes).
-class C_SessionMenu : public C_GameState {
-public:
-    C_SessionMenu();                                // (inline)
-};
+// The video player C_VideoState / C_MovieState: game/video_state.h.
+// The main menu (type 2): game/main_menu.h.
+#include "game/main_menu.h"
+// The equipment screen (kinds 3 and 4): game/equipment_screen.h. The debriefing (kind 5):
+// game/debriefing.h.
+// The squad screen (kinds 1 and 2): game/squad_menu.h.
+// Campaign screen kind 0 (none in the shipped campaigns; type 9): game/hero_stats_menu.h.
+#include "game/hero_stats_menu.h"
 // The console (type 12, vtable 0x008165a8, 0x214 bytes): the command line's "-cmd" / "-c".
 class C_ConsoleState : public C_GameState {
 public:
@@ -86,11 +37,25 @@ public:
     explicit C_ConsoleState(const char *command);   // 0x007442e0
     // "HD2 console", "Type 'help' for keywords list"; the console shows the messages.
     void ShowBanner();                              // 0x007443a0
-    bool IsShown() const;                           // byte +0x210
+    bool IsShown() const { return m_shown; }        // byte +0x210
+    bool Start(void *arg) override;                 // 0x00744360
+    bool Stop() override { return true; }           // 0x00744390
+    // The console's commands, the first command (failed: the game ends), hosting or joining asked for.
+    void Update(int timeDelta) override;            // 0x007443d0
+    int GetTypeId() const override { return GAME_STATE_TYPE_CONSOLE; }   // 0x00744320
+
+private:
+    void StartHosting();                            // 0x00744490
+    void StartJoining();                            // 0x00744540
+
+    char m_command[0x200] = {};                     // +0x0C
+    int m_mode = 0;                                 // +0x20C
+    bool m_shown = false;                           // +0x210
 };
-// The next word of a console command line (quotes allowed); 0 when one was read, 3 at the
-// end. `*cursor` moves past it.
-int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown2);   // 0x007445d0
+// The next word of a console command line (quotes allowed; spaces, tabs, '>' and a '-' before a letter or digit
+// skipped; `*cursor` moves past it): 3 at the end; 2 a keyword of `keywords` (any case; null: none looked for; its id
+// in *value), 1 a number (in *value), 0 another word.
+int ReadConsoleToken(const char **cursor, char *out, int *value, char *keywords);   // 0x007445d0
 
 // ---- the objects of the GEffects module (part 8d) --------------------------
 #include "game/decorators.h"
@@ -106,20 +71,62 @@ int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown
 
 // The highest y of the scene's frames' bounds (the top of the box C_NetGame::Command gathers at
 // 0x0072d9c0 for the network game; the supply box's drop height stays under it).
-extern float g_netSceneTop;                         // 0x0097ca44
 // Adds a line to the debug line buffer (at most 15000; `color2` 0: one colour).
 void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2);   // 0x0071fad0
 
 // ---- input/controls (0x008aeb58) ----------------------------------------------
+class IGraph;
+// A joystick (IJoy.dll's IJoy; ../IJOY): the MSVC table's order. Registered for a per-frame refresh too.
+struct S_JoyState {                                 // IJoyState, 0x44 bytes
+    float axis[8];
+    float pov[4];
+    bool povCentered[4];
+    uint32_t buttons[4];
+};
+class C_FrameListener {
+public:
+    virtual ~C_FrameListener() {}
+    virtual int AddRef() = 0;                       // 0x04
+    virtual int Release() = 0;                      // 0x08
+    virtual float GetDeadZone(int axis) = 0;        // 0x0C
+    virtual bool SetDeadZone(int axis, float value) = 0;   // 0x10
+    virtual float GetDeviceDeadZone(int axis) = 0;  // 0x14
+    virtual bool SetDeviceDeadZone(int axis, float value) = 0;   // 0x18
+    virtual float GetSaturation(int axis) = 0;      // 0x1C
+    virtual bool SetSaturation(int axis, float value) = 0;   // 0x20
+    virtual float GetDeviceSaturation(int axis) = 0;   // 0x24
+    virtual bool SetDeviceSaturation(int axis, float value) = 0;   // 0x28
+    virtual uint32_t GetAxisMode(int axis) = 0;     // 0x2C
+    virtual bool SetAxisMode(int axis, uint32_t mode) = 0;   // 0x30
+    virtual float GetAxis(int axis) = 0;            // 0x34
+    virtual bool IsButtonDown(int button) = 0;      // 0x38
+    virtual bool IsButtonPressed(int button) = 0;   // 0x3C
+    virtual uint32_t GetButtons(int group) = 0;     // 0x40
+    virtual uint32_t GetButtonsPressed(int group) = 0;   // 0x44
+    virtual bool GetPov(float *radians, int pov) = 0;   // 0x48
+    virtual bool GetPovChanged(float *radians, int pov) = 0;   // 0x4C
+    virtual bool GetState(S_JoyState *state) = 0;   // 0x50
+    virtual bool GetStatePressed(S_JoyState *state) = 0;   // 0x54
+    virtual bool OnFrame(uint32_t flags) = 0;       // 0x58 IJoy::Update
+};
+
+struct S_ControlsJoy {                              // 0x8C bytes
+    C_FrameListener *joy;
+    S_JoyState state;                               // +0x04
+    S_JoyState pressed;                             // +0x48
+};
+
 class C_Controls {
 public:
+    C_Controls();                                   // 0x006c6d70
+    ~C_Controls();                                  // 0x006c6e00
     void Update(bool processAll);                   // 0x006c7bc0
     // The frame's values per action: held (+0xCC) or pressed in this frame (+0xDC); their
     // count, -1 when there are none.
     int GetValues(float **values, bool pressed);    // 0x006c7600
     // One action's value (held, or pressed in this frame); 0 out of range.
     float GetValue(int action, bool pressed);       // 0x006c76a0
-    // Binds `action` to a device's key (C_KeyBindings; `unknown` is always 0).
+    // Binds `action` to a device's key (C_KeyBindings; `unknown`: the joystick's index, always 0).
     void Bind(int action, int16_t device, uint16_t key, int unknown, int direction);   // 0x006c7790
     // The mouse's divisors (+0xA8 x, +0xAC y, +0xB0 the third; floats).
     bool SetMouseScale(int x, int y, int z);        // 0x006c6fe0
@@ -130,25 +137,45 @@ public:
     // Zeroes the frame's values of the bindings on the same device key as `action`'s.
     void ClearAction(int action, float *held, float *pressed);   // 0x006c73f0
     // The input pressed now, for a key binding (its record at +0x14, reset first; none: null; the
-    // devices' state re-read when `reread`; `unknown` 0x9A from the hot key control).
+    // devices' state re-read when `reread`; `filter` what not to report: 0x9A from the hot key control).
     struct S_Press {
         int direction;                              // +0x00 axes: 1 + / 2 -
         uint16_t device;                            // +0x04 E_BindingDevice
         uint16_t key;                               // +0x06 (keyboard 1: Escape)
-        int unknown08;
+        int unknown08;                              // +0x08 the joystick's index
     };
-    const S_Press *PollPress(int unknown, bool reread);   // 0x006c87f0
+    const S_Press *PollPress(int filter, bool reread);   // 0x006c87f0
+
+private:
+    friend void InitControls(C_Controls &controls);
+    friend void BindControls(C_Controls &controls, IGraph *graph, C_FrameListener **listeners, unsigned count);
+    bool Attach(IGraph *graph, C_FrameListener **joys, unsigned count);   // 0x006c7010
+    void ClearDeviceKeys();
+    void Shutdown();
+    bool SetBinding(const S_Press *binding, int action);
+
+    IGraph *m_graph = nullptr;                      // +0x00
+    std::vector<S_ControlsJoy> m_joys;              // +0x04 (first at +0x08)
+    S_Press m_press = {};                           // +0x14
+    char m_keys[0x40] = {};                         // +0x20 the keys the engine watches
+    char m_keyCounts[0x40] = {};                    // +0x60 bindings on each
+    char m_mouseCounts[8] = {};                     // +0xA0 bindings on each mouse button
+    float m_scale[3] = {};                          // +0xA8
+    bool m_invertMouse = false;                     // +0xB4
+    std::vector<S_Press> m_bindings;                // +0xB8 by action
+    std::vector<float> m_held;                      // +0xC8
+    std::vector<float> m_pressed;                   // +0xD8
+    uint64_t m_keyArmed = 0;                        // +0xE8 keys whose press has still to be told
+    uint32_t m_mouseArmed = 0;                      // +0xF0
 };
 extern C_Controls g_controls;                       // 0x008aeb58
 
 // Wide text to the ANSI code page, at most `maxLength` chars (and a terminator).
 void WideToAnsi(char *out, const wchar_t *text, int maxLength);   // 0x006c90c0 (__fastcall)
+// The frame's debug statistics on the screen (0x00844044 on).
+void RenderDebugStats();                            // 0x006e8860
 
 // Objects registered for a per-frame refresh before the controls update.
-class C_FrameListener {
-public:
-    virtual void OnFrame(bool active);              // vtable +0x58
-};
 extern C_FrameListener **g_frameListenersBegin;     // 0x008aeb4c (std::vector data)
 extern C_FrameListener **g_frameListenersEnd;       // 0x008aeb50
 
@@ -163,133 +190,28 @@ enum E_NetDelivery {
     NET_DELIVERY_UNRELIABLE = 1,
     NET_DELIVERY_3 = 3,
 };
-// Server-side state per player (0xC4 bytes; GetPlayerStates()).
-struct S_NetPlayerState {
-    int connection;                                 // +0x00 the network connection's id (0: none)
-    int unknown04;
-    char name[0x34];                                // +0x08 (size inferred) empty: a free slot
-    class C_Human *human;                           // +0x3C cleared when the human is destroyed
-    // (+0x0C the round's score, +0x14 the soldier class (SetPlayerClass), +0x20 the total.)
-    int stats[9];                                   // +0x40
-    int team;                                       // +0x64 E_HumanTeam
-    int pendingTeam;                                // +0x68 the team the player switches to
-    uint8_t unknown6C[0x36];
-    bool left;                                      // +0xA2 the player left (C_game::OnPlayerLeft);
-                                                    //       cleared when the actor is removed
-    uint8_t unknownA3[5];
-    // The server: timeGetTime() of the player's last controls or request (the player
-    // controller stamps it).
-    uint32_t activityTime;                          // +0xA8
-    uint8_t unknownAC[4];
-    int livesUsed;                                  // +0xB0 co-op respawns (-1 before the first spawn)
-    uint8_t unknownB4[0x10];
+struct S_ServerEntry;
 
-    bool IsConnected() const { return name[0] != 0; }
-    // No human, or its (player / remote) controller watches.
-    bool IsSpectating() const;                      // 0x00725e90
+// The network game (C_NetGame, g_netGame, S_NetPlayerState, NET_COMMAND_* / NET_JOIN_*): net/net_game.h.
+#include "net/net_game.h"
+// The session a server makes (C_NetGame::Host; S_MultiplayerSettings::sessionName's 0x168 bytes, the
+// DirectPlay fields set by the caller).
+struct S_NetSessionDesc {                               // 0x168 bytes
+    char name[200];                                     // +0x00
+    uint32_t serviceProvider[4];                        // +0xC8 DirectPlay's (TCP/IP's)
+    uint8_t unknownD8[0x52];
+    char password[0x32];                                // +0x12A the session's (C_NetGame +0x501C)
+    int16_t unknown15C;                                 // +0x15C (100)
+    int16_t unknown15E;                                 // +0x15E (2000)
+    uint8_t unknown160[8];
 };
-class C_NetGame {
-public:
-    C_BitStream *CreateMessage(int channel, int delivery);      // 0x0072c280
-    C_BitStream *CreateMessageEx(int channel, int delivery);    // 0x0072c2a0 (other message kind)
-    // Player states, locked for the caller until UnlockPlayers(). (The original
-    // returns the vector that holds them.)
-    S_NetPlayerState *LockPlayers();                // 0x0072f040
-    void UnlockPlayers();                           // 0x0072f100
-    void SendMessage(C_BitStream *msg);            // 0x0072c360
-    void Init();                                    // 0x0072e570
-    void Shutdown();                                // 0x0072e830
-    // A dedicated server's loading progress (`percent` 0..100) on its console.
-    void PrintLoadProgress(int percent);            // 0x00731af0
-    void ReceiveMessages(int timeDelta, bool beforeUpdate);   // 0x0072c780
-    void SendMessages(int timeDelta);               // 0x0072d240
-    // Name of the player in `slot` (+0x08 of its state), null if there is none.
-    const char *GetPlayerName(int slot);            // 0x0072efa0
-    // A client: the state of `slot` (the table grown to it) gets the connection and the name.
-    void SetPlayer(int slot, int connection, const char *name);   // 0x0072ed10
-    // Teams of the players (E_HumanTeam; 2 for unknown slots).
-    int GetPlayerTeam(int slot, bool pending);      // 0x00730900
-    void SetPlayerTeam(int slot, int team, bool pending);   // 0x00730510
-    int GetLocalTeam();                             // 0x00730880
-    // Score keeping of a kill (`killer` -1: none).
-    void OnPlayerKilled(int victim, int killer);    // 0x0072f230
-    // Number of player slots (the states LockPlayers() returns).
-    int GetPlayerCount() const;
-    C_Human *GetPlayerHuman(int slot);              // 0x0072eff0 (null: none)
-    C_Human *GetLocalHuman();                       // 0x00730830
-    // The player in `slot` watches (no human: true).
-    bool IsPlayerSpectating(int slot);              // 0x007308a0
-    // Some player of `team` has a living human that is not spectating.
-    bool IsTeamAlive(int team);                     // 0x007305e0
-    // Connected players with a human, by team.
-    void CountTeamPlayers(int *axis, int *allies);  // 0x00730230
-    // Players by team (`pending`: their next team; `inGame`: only those with a human).
-    void CountTeams(int *axis, int *allies, bool pending, bool inGame);   // 0x00730320
-    // The players' pending teams become their teams.
-    void ApplyPendingTeams();                       // 0x007304a0
-    // Moves players between the teams towards the sizes the mission asks for.
-    void BalanceTeams(int axis, int allied);        // 0x007306a0
-    // Highest round score of the players in the game.
-    int GetBestScore();                             // 0x0072f110
-    void AddScore(int slot, int points);            // 0x0072f1a0
-    // The stats of the player in `slot` (S_NetPlayerState::stats; not locked).
-    int *GetPlayerStats(int slot);                  // 0x0072f890
-    // The local player's stats (the slot g_netLocalSlot 0x00982104's).
-    int *GetLocalPlayerStats();                     // 0x0072f8b0
-    // Sets the soldier class of the player in `slot` (stats[5]) and prints its change (texts
-    // 0x22C4 / 0x22C5 about the local player, 0x22C6 / 0x22C7 about the others, by whether it
-    // went down).
-    void SetPlayerClass(int soldierClass, int slot);   // 0x0072fe90
-    // Server: the team's score (+0x44C, float per team).
-    void AddTeamScore(int team, float points);      // 0x00730a20
-    float GetTeamScore(int team) const;
-    // Rounds won per team (+0x458, three ints; 0x0097d4c8).
-    int *GetTeamWins();
-    void ResetScores();                             // 0x0072ebb0
-    void SendScores();                              // 0x007301d0
-    // Flips bit 0 of the players' +0xAC (and of the copy their connection holds) each round
-    // (meaning not identified).
-    void FlipSessionParity();                       // 0x00730e10
-    // Every player's human and statistics, the teams' scores and wins.
-    void ResetPlayerStats();                        // 0x0072ec60
-    void ResetReplication(bool all);                // 0x007319e0
-    // Sends and receives for `timeDelta` ms now (1000: everything pending).
-    void Process(int timeDelta, bool unknown);      // 0x0072c9a0
-    // Ends the session (`now` false: at the next frame).
-    void Close(bool now);                           // 0x0072e8b0
-    // Administration commands (NET_COMMAND_*; `unknown` is passed as 0).
-    bool Command(int command, const char *arg, int unknown);   // 0x0072d680
-    // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).
-    int GetConnectionState();                       // 0x00731ac0
-    // Server: the keep-alive check of the member at +0x4D0 (message 0x17 after 15 s).
-    void UpdateWatchmeleeTracker(int timeDelta);             // 0x0072e0a0
-    // The voice chat value the player options give ((int)(option * 0.01)) to the voice
-    // object at +0x0C (meaning not identified).
-    void SetVoiceValue(int value);                  // 0x0072edf0
-    // The voice chat transmits to the local player's team ("Set Transmition team").
-    void UpdateVoiceTeam();                         // 0x00724940
-    // A chat line (its first 99 characters; `team`: to the local player's team) posted to the app
-    // (command 3) to send. True.
-    bool SendChat(const char *text, bool team);     // 0x0072ee60
-};
-// C_NetGame::Command() commands.
-enum : int {
-    NET_COMMAND_KICK_NAME = 0,
-    NET_COMMAND_KICK_SLOT = 1,
-    NET_COMMAND_SCAN_LEVEL = 3,                     // the level's bounds (g_levelMinY)
-};
-enum : int {
-    NET_CONNECTION_LOST = 9,
-};
-extern C_NetGame g_netGame;                         // 0x0097d070
+static_assert(sizeof(S_NetSessionDesc) == 0x168, "S_NetSessionDesc");
 // Lowest corner of the level's frames (grown by the net game's level scan, 0x0072d9c0); bodies
 // that fall 5 m below it die.
-extern float g_levelMinY;                           // 0x0097ca34
 // Network slot of the local player.
 extern int g_localPlayerSlot;                       // 0x00982104
 // The session's server name (inferred from the info screen's "<text 0x930> %s"; written through
 // a structure not identified).
-extern char g_serverName[];                         // 0x00981e70
 
 // Multiplayer game types (S_MultiplayerSettings::gameType).
 enum E_MpGameType : int {
@@ -298,42 +220,17 @@ enum E_MpGameType : int {
     MP_GAME_OBJECTIVES = 2,                         // attackers and defenders
     MP_GAME_COOPERATIVE = 3,
 };
-// A map of the session's list (the settings' +0x280 vector).
-// A map list entry's OBJECTIVE (0x18 bytes; parser 0x006189f0) and ITEM (0x0C bytes).
-struct S_MpMapObjective {
-    int axisText;                                   // axis_text
-    int alliedText;                                 // allied_text
-    int points;                                     // value
-    int type;                                       // type="VIP": 1, else -1
-    int team;                                       // side: AXIS 0, ALLIED (or none) 1
-    int vipUniform;                                 // vip_uniform_id
-};
-struct S_MpMapItem {
-    int itemId;
-    int count;
-    int ammo;
-};
-// A map of the multiplayer map list (GAMEDATA\mpmaplist.txt; packed: the strings at +0x01 /
-// +0x05).
-class C_MpMap {
-public:
-    const char *GetName() const;                    // C_str +0x01
-    const char *GetDirectory() const;               // C_str +0x05 (the mission's directory)
-    // The six ints at +0x0C .. +0x20: AIRCRAFTATACK axis / allied, BALANCED axis / allied,
-    // two not identified.
-    int GetValue(int index) const;
-    const std::vector<S_MpMapObjective> &GetObjectives() const;   // +0x24
-    const std::vector<S_MpMapItem> &GetItems() const;              // +0x34
-    // The allowed presets (C_str +0x44).
-    const char *GetPresets() const;
-};
+// A map of the session's list (the settings' +0x280 vector), its objectives and items: game/mp_game_setup.h.
+#include "game/mp_game_setup.h"
+// S_MultiplayerSettings::sessionType (the session menu's console: 2 creates the server, 1 connects).
+enum : int { SESSION_NONE = 0, SESSION_JOINING = 1, SESSION_HOSTING = 2 };
 // Settings of the network game session (the object 0x008aea30 points to; the names are those
 // of the server's config file, 0x006ad200).
 struct S_MultiplayerSettings {
     S_MultiplayerSettings();                        // (inline in C_GameProfile's constructor)
     virtual ~S_MultiplayerSettings();               // 0x006b50a0 (0x006b50c0)
 
-    int sessionType;                                // +0x004 0 none, 1 hosting, 2 joining
+    int sessionType;                                // +0x004 SESSION_*: 0 none, 1 joining, 2 hosting
     char sessionName[0x168];                        // +0x008
     bool dedicated;                                 // +0x170 the host plays no part: the scene is not drawn
                                                     //        and the console takes commands
@@ -342,7 +239,7 @@ struct S_MultiplayerSettings {
     int unknown178;                                 // +0x178
     uint8_t unknown17C[0x9C];
     C_str password;                                 // +0x218
-    uint8_t unknown21C[4];
+    C_str adminPassword;                            // +0x21C the admin login's (game command 7; "\1\2\3" after Reset)
     int port;                                       // +0x220
     int gameType;                                   // +0x224 E_MpGameType
     int maxClients;                                 // +0x228
@@ -358,7 +255,8 @@ struct S_MultiplayerSettings {
     int spawnProtection;                            // +0x250 s
     int inverseDamage;                              // +0x254 share of a team hit the shooter takes
     int fallingDamage;                              // +0x258 falls hurt (C_HumanLocomotion::ApplyFallDamage)
-    uint8_t unknown25C[8];
+    int unknown25C;                                 // +0x25C (S_MpGameRules' +0x34)
+    int unknown260;                                 // +0x260
     int allowVehicles;                              // +0x264
     int autoRestart;                                // +0x268
     int coopDifficulty;                             // +0x26C
@@ -366,6 +264,39 @@ struct S_MultiplayerSettings {
     int allowCrosshair;                             // +0x274
     int spawnOnStart;                               // +0x278 co-op: everyone spawns at zone 0
     int teamLives;                                  // +0x27C the co-op lives are shared
+    std::vector<C_MpMap *> maps;                    // +0x280 the session's maps (owned; the main menu's copies)
+    int currentMap;                                 // +0x290
+    C_MpGameSetup *setup;                           // +0x294 the maps and rules the session takes (MakeSetup)
+
+    // The defaults (no session, no password, +0x21C "\1\2\3", no listing, not dedicated, the server entry reset,
+    // no name, game type 0, port 11001, the rules' defaults, the first map current), the maps deleted (part 9i-ii).
+    void Reset();                                   // 0x006ad600 (__fastcall)
+    // The rules (+0x228 .. +0x27F) from / to S_MpGameRules (its 22 values in order; the original copies them).
+    void SetRules(const S_MpGameRules &rules);
+    void GetRules(S_MpGameRules &rules);
+    // The set-up's rules of the session's game type taken.
+    void ApplySetupRules();                         // 0x006acc10 (__fastcall)
+    // A set-up made (its map list read) / deleted.
+    void MakeSetup();                               // 0x006acc50 (__fastcall)
+    void DeleteSetup();                             // 0x006acd30 (__fastcall)
+    // Map `name` (any case) removed and deleted; not the current one; none: false.
+    bool RemoveMap(const char *name);               // 0x006acd60
+    // The set-up's map `name` (any case; the last of it) of the session's game type copied to the maps; the set-up
+    // not read, another game type, none of the name: false.
+    bool AddMap(const char *name);                  // 0x006ace20
+    // The maps deleted (the last first), none current, the set-up deleted.
+    void Clear();                                   // 0x006ad560 (__fastcall)
+    // Sent to the clients (part 9i-iii): the listing and the game type (8 bits), the rules (16 each), the net
+    // limits (16; the inactivity in seconds); read back so (the rules and limits signed).
+    void WriteRules(class C_BitStream *stream);     // 0x006ad990
+    void ReadRules(class C_BitStream *stream);      // 0x006ada30
+    // The current map sent; read: the maps replaced by the one read, current.
+    void WriteCurrentMap(class C_BitStream *stream);   // 0x006ad840
+    void ReadCurrentMap(class C_BitStream *stream); // 0x006ad860
+    // The session described for the dedicated server (part 9i-iv; null: mpdesc.txt): its name, the game type, the
+    // maps, the domain, dedicated, the port (not a dedicated LAN server's), the password, the rules (the first 13
+    // by their config keywords, the others), the net limits, the game's voice codec (none: no line), "server".
+    void WriteDescription(const char *fileName);    // 0x006ad200
 
     // The selected map (+0x290 into the vector at +0x280).
     C_MpMap *GetCurrentMap();                       // 0x006ad830
@@ -373,123 +304,31 @@ struct S_MultiplayerSettings {
     bool SelectMap(const char *name);               // 0x006ad780
 };
 
-// Replication of actors to the clients (the object 0x0097d084 points to).
-class C_NetTrack {                                  // value interpolated on the clients
-public:
-    virtual void SetValue(const struct S_vector4 &value);   // vtable +0x1C
-    virtual void SetTarget(const struct S_vector4 &value);  // vtable +0x20
-    virtual void SetRate(const S_vector &rate);     // vtable +0x24
-    // The value the copies replay (the player's and the remote controllers; not identified
-    // how it differs from GetValue).
-    virtual const struct S_vector4 &GetCurrent();   // vtable +0x28
-    virtual const struct S_vector4 &GetValue();     // vtable +0x2C
-    // The rate SetRate gave (the velocity the copies replay).
-    virtual const struct S_vector4 &GetRate();      // vtable +0x34
-};
-// A direction sent with a replicated position (C_NetProperty +0xC0).
-class C_NetDirTrack {
-public:
-    // The value the copies replay (the car: its rotation's axis; the controllers: the view).
-    virtual const struct S_vector4 &GetValue();     // vtable +0x28
-    // (The car's replay waits for one set; inferred: the value last received.)
-    virtual const struct S_vector4 &GetTarget();    // vtable +0x2C
-    // A value and an angle (the car: its rotation's axis and angle; the others pass 0).
-    virtual void SetValue(const struct S_vector4 &dir, float angle);   // vtable +0x50
-    virtual float GetAngle();                       // vtable +0x58 (the replayed angle)
-};
-class C_NetProperty {
-public:
-    C_NetTrack &GetTrack();                         // this + 0x30
-    C_NetDirTrack &GetDirTrack();                   // this + 0xC0
-    // Sets 6-bit field `field` of the word at +0x20 to `value` and hands the word to both tracks
-    // (their vtable +0x14; the car's StartMission sets field 2 to 0x3B; not identified).
-    void SetField(int field, int value);            // 0x0073e110
-    // The whole word (+0x20), likewise handed to both tracks.
-    uint32_t GetFlags() const;
-    void SetFlags(uint32_t flags);                  // 0x0073e0e0
-};
-// A message of a replicated object (vtable 0x00810630, 0x30 bytes), queued on the object for
-// the other machines (C_NetObject::QueueMessage; its slots are not identified).
-class C_NetObjectMessage {
-public:
-    explicit C_NetObjectMessage(int type);          // 0x0073fb40
-    virtual ~C_NetObjectMessage();                  // vtable +0x10 (scalar deleting)
-    // The message's data after its type (vtable +0x20 / +0x24; pure in the base).
-    virtual void Write(C_BitStream *stream) = 0;
-    virtual void Read(C_BitStream *stream) = 0;
-    int GetType() const { return type; }
-    int type;                                       // +0x1C
-    int sender;                                     // +0x20 C_NetObject::QueueMessage's
-    int unknown24;                                  // +0x24 the receiver deletes it below 1 (not identified)
-    bool fromClient = false;                        // +0x2C (the AI sets it on clients)
-};
-// The owner's state handlers of a net object (the controllers').
-using NetStateHandler = void (__fastcall *)(void *context, C_BitStream *stream);
-// Makes the object's message whose type `stream` holds (`write`: writes the number of types
-// instead; returns null).
-using NetMessageFactory = C_NetObjectMessage *(__fastcall *)(void *context, C_BitStream *stream, bool write);
-struct S_NetQuantization;                           // net/bitstream.h
-class C_NetObject {
-public:
-    // Two sets of three quantisations (vtable +0x00: +0x04..+0x0C; +0x04: +0x10..+0x18), each
-    // also handed to every property (their vtable +0x00 / +0x04; the car's StartMission passes
-    // null and its two quantisations, the smaller first, to both; not identified further).
-    void SetQuantizations0(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c);   // 0x0073ecf0
-    void SetQuantizations1(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c);   // 0x0073eca0
-    C_NetProperty *GetProperty(int index);          // 0x0073e690
-    // The replication of `seconds` (vtable +0x08).
-    void Update(float seconds);
-    // The next message received for the object (null: none; `unknown` 0).
-    C_NetObjectMessage *PopMessage(int unknown);    // 0x0073e9d0
-    // Queues `msg` for sending (reliable: the queue at +0x70, else +0x68); `sender` goes to
-    // the message's +0x20.
-    void QueueMessage(C_NetObjectMessage *msg, int sender, bool reliable);   // 0x0073e970
-    // Counts `seconds` up to a second, then clears +0x50 (not identified).
-    void Tick(float seconds);                       // 0x0073eaf0
-    // The handlers that read / write the owner's state (+0x54 / +0x58, context +0x5C) and the
-    // one at +0x64 (context +0x60).
-    void SetStateHandlers(NetStateHandler read, NetStateHandler write, void *context);
-    // The factory of the object's messages (+0x64, context +0x60).
-    void SetMessageFactory(NetMessageFactory factory, void *context);
-    // +0x38: 7 normally, 0 while frozen (inferred: what is sent).
-    void SetSendMask(int mask);
-    void SetUnknown3C(int value);                   // +0x3C
-    int GetUnknown3C() const;                       // (the car's state handler applies a state while it is set)
-    void SetUnknown40(bool value);                  // +0x40
-};
-class C_NetReplication {
-public:
-    C_NetObject *FindObject(int id, bool create);   // 0x0073f9c0
-    void RemoveObject(C_NetObject *object);         // 0x0073f900
-    int GetLocalId() const;                         // +0xDC (the sender of the messages)
-    // The server's player controller sets them at Attach (+0xC4 = 0, +0xC8 = 1; not identified).
-    void SetUnknownC4(int value);
-    void SetUnknownC8(int value);
-    // The object at +0x30, its vtable +0x08 (the local player's tick in network games).
-    void Tick30(float seconds);
-};
-extern C_NetReplication *g_netReplication;          // 0x0097d084
+// The net module's limits the session sends: the update rate, the ping, the inactivity (ms; mpdesc.txt's
+// maxfreq / maxping / maxinactivity).
+extern int g_netMaxFreq;                            // 0x009820d8
+extern int g_netMaxPing;                            // 0x009820d4
+extern int g_netMaxInactivity;                      // 0x009820dc
+// The replication of actors to the clients (C_NetProperty, C_NetObject, C_NetObjectMessage, C_NetReplication,
+// g_netReplication): net/net_object.h.
+#include "net/net_object.h"
 
-// Soldier states in network messages (S_SoldierState, game/human.h).
+// Soldier states in network messages (S_SoldierState, game/soldier.h; net/net_messages.cpp): the name, team (1 bit),
+// profile (8; -1 sent as 0xFF and stored so), spawn zone (10; -1: 0x3FF, stored so), spectating, vip, health (10),
+// the items (uid 16, type 16, present 8; the belt's and backpack's counted in 8 bits), the load (256 bits);
+// `itemsOnly`: the items. Reading appends to the lists.
 class C_NetMessage;
 struct S_SoldierState;
-void NetWriteSoldierState(C_NetMessage *msg, const S_SoldierState &state, bool unknown);   // 0x00727850
-void NetReadSoldierState(C_NetMessage *msg, S_SoldierState &state, bool unknown);          // 0x00727a30
+void NetWriteSoldierState(C_NetMessage *msg, S_SoldierState &state, bool itemsOnly);   // 0x00727850 (__fastcall)
+void NetReadSoldierState(C_NetMessage *msg, S_SoldierState &state, bool itemsOnly);    // 0x00727a30 (__fastcall)
 
 // ---- text / localisation -----------------------------------------------------------
 // The game profile (g_gameProfile): see game/profile.h.
 
 // The player's options (C_PlayerOptions, the detail switches): game/profile.h.
 
-// The game's texts (all_txt).
-class C_GameTexts {
-public:
-    // Text `id`; "__undefined index <id> in all_txt __" if there is none.
-    C_str Get(int id) const;                        // 0x006e5380
-    // Adds the texts of a text file.
-    void Load(const char *fileName);                // 0x006e50c0
-};
-extern C_GameTexts g_texts;                         // 0x008c1368
+// The game's texts (all_txt, g_texts): game/game_texts.h.
+#include "game/game_texts.h"
 
 // The console's commands (the table at 0x00844530, 0x18 bytes each: name, kind, value kind,
 // enabled, ..., value).
@@ -508,28 +347,18 @@ enum : int {
 };
 // Value of console command `index`, -1 if it takes none.
 int GetCheatValue(int index);                       // 0x00720f50
-// A console line ("command arguments"; the chat line without "Say"), and command `command` of the
-// table with its argument text (the chat: CONSOLE_SAY / CONSOLE_SAY_TEAM); results not
-// identified.
+// A console line ("command arguments"; the chat line without "Say"; net/net_console_vars.cpp), and command `command`
+// of the table with its argument text (the chat: CONSOLE_SAY / CONSOLE_SAY_TEAM): 0 done, 2 no such command, 4 not a
+// number, 5 out of the variable's range.
 int ExecuteConsoleLine(const char *line);           // 0x00720500 (__fastcall)
 int ExecuteConsoleCommand(int command, const char *args);   // 0x00720710 (__fastcall)
+// Whether `number` is in `range` ("0,1"; terms by ',': '*', n, n:m, <n, <=n, >n, >=n, %n, with '!' and '&'); false: not
+// a range.
+bool ConsoleValueInRange(int number, const char *range, bool *in);   // 0x00721f60 (__fastcall)
 
-// A pair of tables the game checks against each other (copy protection, inferred).
-extern const uint32_t g_protectionTableA[];         // 0x008ca840
-extern const uint32_t g_protectionTableB[];         // 0x008caf40
-extern uint16_t g_protectionIndexA;                 // 0x008cac84
-extern uint16_t g_protectionIndexB;                 // 0x008cb384
-inline bool CopyProtectionIntact()
-{
-    return g_protectionTableA[g_protectionIndexA] == g_protectionTableB[g_protectionIndexB];
-}
-// The pair the aqualung checks (C_HumanMovement::UpdateBreath).
-extern uint16_t g_protectionIndexBreathA;           // 0x008cac8e
-extern uint16_t g_protectionIndexBreathB;           // 0x008cb38e
-inline bool CopyProtectionIntactBreath()
-{
-    return g_protectionTableA[g_protectionIndexBreathA] == g_protectionTableB[g_protectionIndexBreathB];
-}
+// The original's tests of its copy protection (game/copy_protection.h): always the genuine copy's way.
+inline bool CopyProtectionIntact() { return true; }
+inline bool CopyProtectionIntactBreath() { return true; }
 
 // (C_Ladder and the accessors the human movement code uses on it: game/ladder.h.)
 
@@ -545,6 +374,8 @@ class I3D_scene;
 
 // The text id of a network game type (-1 .. 3; others: "unknown"; the menus' code).
 int GetGameTypeTextId(int gameType);                // 0x006acb80
+// The voice chat codec's text (0 .. 7: 0xB40 + n; another: 0xB48 "UNKNOWN CODEC").
+int GetVoiceCodecTextId(int codec);                 // 0x006acb60
 
 // The loading screen (C_LoaderScreen, g_loaderScreen): game/loader_screen.h.
 #include "game/loader_screen.h"
@@ -565,9 +396,17 @@ int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2);   // 0x
 // The console commands of a dedicated server (the singleton at 0x0098c0fc).
 class C_CommandProcessor {
 public:
+    C_CommandProcessor();                           // 0x007426a0 (the settings' set-up made)
+    ~C_CommandProcessor();                          // 0x007426e0
+    // A line of keywords and their values (net/net_console_commands.cpp). False: a word that is no keyword.
     bool Execute(const char *command);              // 0x00742850
+
+private:
+    // A file of commands, a line each ("exec").
+    void ExecuteFile(const char *name);             // 0x007440d0
 };
 C_CommandProcessor *GetCommandProcessor();          // 0x0069f520
+void ClearCommandProcessor();                       // (the singleton forgotten)
 
 // The game's scene as the vehicles use it (0x0089c1d0; copied by the mission loader 0x006d4270).
 extern I3D_scene *g_carScene;
@@ -578,8 +417,6 @@ bool LoadMaterialTables();                          // 0x0071fd80
 class IGraph;
 #include <windows.h>
 extern uint32_t g_graphFlags;                       // 0x00981e6c IGraph info flags after init
-extern void (*g_fatalErrorHandler)();               // 0x008bf0e4
-void OnFatalError();                                // 0x006e1ad0
 LRESULT CALLBACK GameWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void InitControls(C_Controls &controls);            // 0x006c7340
 void BindControls(C_Controls &controls, IGraph *graph, C_FrameListener **listeners, unsigned count);  // 0x006c7010
@@ -599,7 +436,7 @@ void FreeResourceCaches();                          // tail of 0x006dc770 (model
 // Shows a message box; returns the pressed button.
 int ShowMessage(const char *text, const char *title, unsigned int flags);   // 0x006ed2a0
 // Reads the CD key stored by the installer; null if missing.
-const char *GetCDKey();                             // 0x00732000
+const char *GetCDKey();                             // 0x00732000 (net/net_console.cpp)
 bool ValidateCDKey(const char *key);                // 0x007350a0
 
 // ---- frames / models -------------------------------------------------------------

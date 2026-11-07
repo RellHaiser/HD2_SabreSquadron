@@ -1113,7 +1113,7 @@ C_BitStream *CreateActorMessageEx(int id, bool reliable)
 
 void SendActorMessage(C_BitStream *msg)
 {
-    g_netGame.SendMessage(msg);
+    g_netGame.SendNetMessage(msg);
 }
 
 C_BitStream *CreateTempActorMessage(int id, bool reliable)
@@ -1141,5 +1141,5 @@ C_BitStream *CreateTempActorMessage2(int id, bool reliable)
 
 void SendTempActorMessage(C_BitStream *msg)
 {
-    g_netGame.SendMessage(msg);
+    g_netGame.SendNetMessage(msg);
 }

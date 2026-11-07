@@ -74,6 +74,13 @@ void StoreListTest(I3D_scene *scene);
 void LoadoutTest(I3D_scene *scene);
 void GameMenuTest(I3D_scene *scene);
 void OptionsTest(I3D_scene *scene);
+void EquipmentScreenTest(I3D_scene *scene);
+void CampaignScreensTest(I3D_scene *scene);
+void MainMenuTest(I3D_scene *scene);
+void HeroStatsTest(I3D_scene *scene);
+void MpSettingsTest(I3D_scene *scene);
+void ReplicationTest();
+void DescriptionTest();
 
 namespace {
 
@@ -1044,6 +1051,13 @@ void ControlsTest()
     LoadoutTest(scene);
     GameMenuTest(scene);
     OptionsTest(scene);
+    EquipmentScreenTest(scene);
+    CampaignScreensTest(scene);
+    MainMenuTest(scene);
+    HeroStatsTest(scene);
+    MpSettingsTest(scene);
+    ReplicationTest();
+    DescriptionTest();
 #endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
@@ -1082,4 +1096,9 @@ void ControlsTest()
 #include "loadout_test.inc"
 #include "game_menu_test.inc"
 #include "options_test.inc"
+#include "equipment_screen_test.inc"
+#include "campaign_screens_test.inc"
+#include "main_menu_test.inc"
+#include "hero_stats_test.inc"
+#include "mp_settings_test.inc"
 #endif

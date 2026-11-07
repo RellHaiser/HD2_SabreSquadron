@@ -149,8 +149,6 @@ class C_Interface;
 // The player's profile, diary and debriefing: see game/profile.h.
 
 void SetObjectiveStatus(int objective, int status);    // 0x006b6830
-// True while the network player with this id is connected.
-bool IsNetPlayerConnected(int netId);                   // 0x00730970
 // Enables a multiplayer spawn zone for a side (0 axis, 1 allied, 2 neutral).
 bool EnableSpawnZone(const char *zoneName, int side);   // 0x0069f320
 
@@ -207,5 +205,15 @@ void AttachSpeechSlot(int slot, I3D_frame *frame);      // 0x0071e860
 // `showSubtitle` also passes the dubbing to the quick messages (0x0048f180, with the sample's length).
 void PlaySpeechSlot(int slot, int dubbing, float nearRange, float farRange, bool showSubtitle,
                     bool isActivePlayer);               // 0x0071ec30 __fastcall
+
+// The debug move-trajectory lines (DrawDebugLine; only a debug build drew them).
+struct S_DebugVertex {                                  // 0x18 bytes
+    float x, y, z;
+    uint32_t color;
+    float unused[2];
+};
+extern S_DebugVertex g_debugVertices[];
+extern S_DebugVertex *g_debugNext;                      // 0x00844230
+extern int g_debugLineCount;                            // 0x0097b9a8
 
 // Model / animation / sound caches: see game/resource_cache.h.

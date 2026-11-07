@@ -11,40 +11,40 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "AI & controllers",
   "state": "ported",
-  "functions": 1231,
-  "bytes": 421645,
+  "functions": 1350,
+  "bytes": 479506,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "AI & controllers",
   "state": "pending",
-  "functions": 296,
-  "bytes": 91728,
+  "functions": 236,
+  "bytes": 46592,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Actors & objects",
   "state": "verified",
-  "functions": 1144,
-  "bytes": 289782,
+  "functions": 1150,
+  "bytes": 289894,
   "evidence": "vehicle_setup harness builds for debris, item, animation, simple, objective, world, moving, seat and prop actors; mutation-tested"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Actors & objects",
   "state": "ported",
-  "functions": 576,
-  "bytes": 137419,
+  "functions": 584,
+  "bytes": 140150,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Actors & objects",
   "state": "pending",
-  "functions": 97,
-  "bytes": 14753,
+  "functions": 87,
+  "bytes": 11952,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -59,72 +59,72 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "ported",
-  "functions": 523,
-  "bytes": 129406,
+  "functions": 771,
+  "bytes": 197948,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "pending",
-  "functions": 522,
-  "bytes": 134962,
+  "functions": 229,
+  "bytes": 26298,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "C runtime & library",
   "state": "excluded",
-  "functions": 843,
-  "bytes": 87381,
+  "functions": 844,
+  "bytes": 87395,
   "evidence": "MSVC runtime and libraries outside the game's code range, and exception-unwind funclets"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Humans",
   "state": "ported",
-  "functions": 1131,
-  "bytes": 581381,
+  "functions": 1235,
+  "bytes": 648223,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Humans",
   "state": "pending",
-  "functions": 134,
-  "bytes": 30769,
+  "functions": 62,
+  "bytes": 13270,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Interface & HUD",
   "state": "ported",
-  "functions": 692,
-  "bytes": 209013,
+  "functions": 699,
+  "bytes": 212118,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Interface & HUD",
   "state": "pending",
-  "functions": 52,
-  "bytes": 11348,
+  "functions": 45,
+  "bytes": 8198,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "ported",
-  "functions": 817,
-  "bytes": 208500,
+  "functions": 1310,
+  "bytes": 400967,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "pending",
-  "functions": 651,
-  "bytes": 231311,
+  "functions": 101,
+  "bytes": 19242,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -155,16 +155,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Network",
   "state": "ported",
-  "functions": 24,
-  "bytes": 2096,
+  "functions": 783,
+  "bytes": 108108,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Network",
   "state": "pending",
-  "functions": 781,
-  "bytes": 112319,
+  "functions": 141,
+  "bytes": 7698,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -179,56 +179,56 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Physics & collision",
   "state": "ported",
-  "functions": 258,
-  "bytes": 155152,
+  "functions": 282,
+  "bytes": 164062,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Physics & collision",
   "state": "pending",
-  "functions": 105,
-  "bytes": 100042,
+  "functions": 78,
+  "bytes": 90394,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Profile & campaign",
   "state": "verified",
-  "functions": 407,
-  "bytes": 115862,
+  "functions": 436,
+  "bytes": 117226,
   "evidence": "profile harness round trips (HumanStore.def, profile.sav, Options.bin, game.cfg, key bindings); Gamedata .gdt re-saved byte-identical"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Profile & campaign",
   "state": "pending",
-  "functions": 78,
-  "bytes": 7103,
+  "functions": 52,
+  "bytes": 5348,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "STL & compiler idioms",
   "state": "excluded",
-  "functions": 427,
-  "bytes": 8255,
+  "functions": 301,
+  "bytes": 6263,
   "evidence": "MSVC 6 STL instantiations and empty functions (stl_idioms.py); the port uses the standard library"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Scripting",
   "state": "ported",
-  "functions": 218,
-  "bytes": 91385,
+  "functions": 243,
+  "bytes": 105910,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Scripting",
   "state": "pending",
-  "functions": 85,
-  "bytes": 19863,
+  "functions": 77,
+  "bytes": 6562,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -251,24 +251,24 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Vehicles",
   "state": "verified",
-  "functions": 440,
-  "bytes": 326501,
+  "functions": 450,
+  "bytes": 327051,
   "evidence": "vehicle_params harness (205 shipped car blocks re-pack byte-identical), vehicle_setup harness on the 37 shipped car models, car_tables harness; mutation-tested"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Vehicles",
   "state": "pending",
-  "functions": 70,
-  "bytes": 5053,
+  "functions": 54,
+  "bytes": 4563,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Weapons & items",
   "state": "ported",
-  "functions": 546,
-  "bytes": 124616,
+  "functions": 549,
+  "bytes": 124851,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {

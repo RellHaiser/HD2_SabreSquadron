@@ -447,6 +447,7 @@ bool C_KeyBindings::Load(C_chunk &chunk)            // 0x006a8bb0
                 // was added again and again.
                 if (!chunk.Read(&binding, sizeof(binding)))
                     break;
+                binding.changed = true;                 // (All to be applied: what the file says, usually false, is not kept.)
                 m_bindings.push_back(binding);
             }
             chunk.Ascend();

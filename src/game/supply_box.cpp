@@ -43,7 +43,7 @@ constexpr float DROP_HEIGHT = 85.0f;                    // m
 constexpr float DROP_UNDER_TOP = 0.1f;                  // m under the scene's top
 constexpr float DUMMY_OVER_CRATE = 3.0f;                // m: the cratedummy over the crate
 constexpr float FALL_SPEED = 0.005f;                    // m a ms
-constexpr float FALL_ANIMATION_RATE = 1.5f;             // "cratefly" plays this much faster
+constexpr float FALL_ANIMATION_RATE = 1.5f;             // "#cratefly" plays this much faster
 constexpr float FALL_GAP = 0.01f;                       // m kept over the ground
 constexpr double BOX_RADIUS_SCALE = 1.2;                // (a double in the original)
 constexpr int BLEND_TIME = 350;                         // ms
@@ -68,7 +68,7 @@ enum : int {
     ANIM_DESTROYED = 4,                                 // (none: no file)
     ANIM_RESET = 5,
 };
-const char *const ANIM_FILES[6] = {"cratefly", "crateopen", "crateclosed", "cratedrop", nullptr, nullptr};
+const char *const ANIM_FILES[6] = {"#cratefly", "#crateopen", "#crateclosed", "#cratedrop", nullptr, nullptr};
 
 // The sounds (chapter 1).
 enum : int {
@@ -253,8 +253,8 @@ void C_SupplyBox::InitBox()                             // 0x005f9a60
 void C_SupplyBox::StartDrop()                           // 0x005f9f00
 {
     float height = DROP_HEIGHT;
-    if (!IsLocalGame() && !(DROP_HEIGHT < g_netSceneTop))
-        height = g_netSceneTop - DROP_UNDER_TOP;
+    if (!IsLocalGame() && !(DROP_HEIGHT < g_scanMax[1]))
+        height = g_scanMax[1] - DROP_UNDER_TOP;
     m_health = HEALTH;
     m_charges = m_capacity;
     m_frame->SetPos(S_vector(m_dropPos.x, height + m_dropPos.y, m_dropPos.z));

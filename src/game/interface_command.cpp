@@ -1332,7 +1332,11 @@ void C_CommandPanel::CursorRay(S_vector &origin, S_vector &dir) const
     int x;
     int y;
     m_cursor->GetScreenPos(&x, &y);
-    m_gameScene->UnmapScreenPoint(x, y, origin, dir);
+    S_vector4 origin4;
+    S_vector4 dir4;
+    m_gameScene->UnmapScreenPoint(x, y, origin4, dir4);
+    origin = S_vector(origin4.x, origin4.y, origin4.z);
+    dir = S_vector(dir4.x, dir4.y, dir4.z);
 }
 
 void C_CommandPanel::PickTarget(int /*timeDelta*/)
@@ -1477,9 +1481,11 @@ void C_CommandPanel::OnLeftDrag(float * /*held*/, float * /*pressed*/)
     const float height = static_cast<float>(GetIGraph()->ScrnY());
     const int x = static_cast<int>(cursor.x * width) - offsetX;
     const int y = static_cast<int>(static_cast<float>(cursor.y * -1.3333333333333333) * height) - offsetY;
-    S_vector origin;
-    S_vector dir;
-    m_gameScene->UnmapScreenPoint(x, y, origin, dir);
+    S_vector4 origin4;
+    S_vector4 dir4;
+    m_gameScene->UnmapScreenPoint(x, y, origin4, dir4);
+    const S_vector origin(origin4.x, origin4.y, origin4.z);
+    const S_vector dir(dir4.x, dir4.y, dir4.z);
     S_vector hitPos;
     S_vector normal;
     if (!CollisionRayTest(origin, dir * RAY_LENGTH, &hitPos, &normal, 0xFFFFFFFFu, 0))

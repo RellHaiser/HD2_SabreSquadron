@@ -186,7 +186,6 @@
 00499770 C_InfoScreen::AddMissionName | void __thiscall AddMissionName(C_InfoScreen *this)
 004997b0 C_InfoScreen::AddRoundTime | void __thiscall AddRoundTime(C_InfoScreen *this)
 004998c0 C_InfoScreen::AddLimits | void __thiscall AddLimits(C_InfoScreen *this)
-00725e90 S_NetPlayerState::IsSpectating | bool __thiscall IsSpectating(S_NetPlayerState *this)
 00499af0 InsertPlayerPtr | S_NetPlayerState ** __thiscall InsertPlayerPtr(void *this, S_NetPlayerState ** where, S_NetPlayerState ** value)
 00499cd0 InsertPlayerPtrs | void __thiscall InsertPlayerPtrs(void *this, S_NetPlayerState ** where, uint count, S_NetPlayerState ** value)
 00499f40 SortPlayers | void __fastcall SortPlayers(S_NetPlayerState ** first, S_NetPlayerState ** last, void * less, int unused)
@@ -213,8 +212,8 @@
 0063df30 ReleaseFontManager | void __cdecl ReleaseFontManager(void)
 0063df60 C_FontManager::Release | void __thiscall Release(void *this)
 0063df80 C_FontManager::FindFont | void * __thiscall FindFont(void *this, int id)
-006e5380 C_TextDatabase::GetText | C_str * __thiscall GetText(void *this, C_str * out, int textId)
-006e5330 C_TextDatabase::Find | int __thiscall Find(void *this, int textId)
+006e5380 C_GameTexts::Get | C_str * __thiscall Get(void *this, C_str * out, int id)
+006e5330 C_GameTexts::Find | int __thiscall Find(void *this, int id)
 
 # --- the interface's other panels (later parts of the HUD port; named for the core's calls)
 0049fef0 C_InventoryScreen::C_InventoryScreen | C_InventoryScreen * __thiscall C_InventoryScreen(C_InventoryScreen *this)

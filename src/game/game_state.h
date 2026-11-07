@@ -16,8 +16,8 @@ enum E_GameStateValue : int {
     GAME_STATE_QUIT = 4,                            // the game ends (fatal load errors, the console closed)
     GAME_STATE_STARTING = 5,                        // C_game: the mission fades in
     GAME_STATE_ENDING = 6,                          // C_game: the mission fades out
-    GAME_STATE_JOIN_SESSION = 7,                    // the session menu, joining
-    GAME_STATE_HOST_SESSION = 8,                    // the session menu, hosting
+    GAME_STATE_HOST_SESSION = 7,                    // the session menu, hosting (session type 2)
+    GAME_STATE_JOIN_SESSION = 8,                    // the session menu, joining (session type 1)
     GAME_STATE_NEXT_MAP = 9,                        // multiplayer: load the session's next map
     GAME_STATE_MAIN_MENU = 10,
     GAME_STATE_LOBBY = 11,                          // multiplayer: back to the session menu
@@ -45,7 +45,7 @@ enum : int {
     GAME_STATE_TYPE_DEBRIEFING_MENU = 5,            // C_DebriefingMenu
     GAME_STATE_TYPE_CAMPAIGN_VIDEO = 7,             // C_VideoState
     GAME_STATE_TYPE_SESSION_MENU = 8,               // C_SessionMenu
-    GAME_STATE_TYPE_KIND0_MENU = 9,                 // C_Kind0Menu
+    GAME_STATE_TYPE_HERO_STATS_MENU = 9,            // C_HeroStatsMenu
     GAME_STATE_TYPE_VIDEO = 10,                     // C_MovieState (0x00815bc8)
     GAME_STATE_TYPE_GAME_MENU = 11,                 // the in-game menu (0x00815750; wraps the game)
     GAME_STATE_TYPE_CONSOLE = 12,                   // C_ConsoleState

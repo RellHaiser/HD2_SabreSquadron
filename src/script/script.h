@@ -109,6 +109,7 @@ public:
 
     // --- state -------------------------------------------------------------------
     I3D_frame *GetFrame() const { return m_frame; }
+    const char *GetFileName() const { return m_fileName; }
     bool IsFinished() const { return m_finished; }
     bool IsInCutsceneHandler() const { return m_inCutsceneHandler; }
     // Clears and returns the "HUD hidden by this script's camera" flags (EndCutscene).

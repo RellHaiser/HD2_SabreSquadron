@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 #include <deque>
 #include <vector>
 
@@ -79,62 +80,86 @@ S_RememberedSound *AllocRememberedSound(int chapter, const S_vector4 &pos, C_Act
 void FreeRememberedSound(S_RememberedSound *sound);     // inline (free list 0x008ab1a0, 0x005aac60)
 
 // What the AI of a human remembers (0x110 bytes; the AI code uses it, the human keeps it).
-struct C_HumanAIMemory {
+struct C_HumanAIMemory {                                // 0x110 bytes (game/human_crowd.cpp)
     explicit C_HumanAIMemory(C_Human *owner) { Reset(owner); }   // 0x0059e340
-    // (Inline in the original wherever the human restarts.)
     void Reset(C_Human *owner)
     {
         this->owner = owner;
-        unknownE0 = 0;
-        unknownF0 = 0;
-        unknownEC = 0;
-        unknownE4 = 0;
-        unknown104 = true;
-        unknown100 = -1;
-        unknown20[0] = unknown20[1] = unknown20[2] = 0;
-        unknown40[0] = unknown40[1] = unknown40[2] = 0;
-        unknown00[0] = unknown00[1] = unknown00[2] = 0.0f;
-        unknown10 = false;
+        route = nullptr;
+        nearPoint = nullptr;
+        targetPoint = nullptr;
+        waypoint = 0;
+        routeChanged = true;
+        plannedFrom = -1;
+        pos = {};
+        push = {};
+        step[0] = step[1] = step[2] = 0.0f;
+        stepping = false;
         unknown109 = false;
-        unknown10A = false;
-        unknown106 = true;
-        unknown105 = true;
-        unknown80 = INVALID;
-        unknown70 = INVALID;
+        flags = 0;
+        // (Not in the original: read from one the pass has not prepared yet, it has what memory held.)
+        velocity = {};
+        target = {};
+        axisX = axisY = axisZ = boxCenter = {};
+        halfSize[0] = halfSize[1] = halfSize[2] = 0.0f;
+        solved = false;
+        givesWay = false;
+        speed = 0.0f;
+        currentPoint = nullptr;
+        stuckTimer = 0;
+        bestDistance = 0.0f;
+        walking = true;
+        notPlayer = true;
+        routeStart = {INVALID_FLOAT(), 0.0f, 0.0f, 0.0f};
+        lastGoal = {INVALID_FLOAT(), 0.0f, 0.0f, 0.0f};
     }
     bool SaveGame(C_chunk &chunk);                      // 0x005641b0
     bool LoadGame(C_chunk &chunk);                      // 0x005643e0
 
-    static constexpr uint32_t INVALID = 0x7FC00000;     // a quiet NaN marks "not set"
+    static float INVALID_FLOAT()                        // a quiet NaN marks "not set"
+    {
+        const uint32_t bits = 0x7FC00000;
+        float value;
+        std::memcpy(&value, &bits, 4);
+        return value;
+    }
 
-    // +0x00 a step aside from the others in the way (the AI walks along it while it is
-    // longer than 0.1 m; inferred).
-    float unknown00[3];
+    // +0x00 what came out: the velocity the AI walks along while it is longer than 0.1 m.
+    float step[3];
     uint8_t unknown0C[4];
-    bool unknown10;                                     // +0x10
+    bool stepping;                                      // +0x10
     uint8_t unknown11[0x0F];
-    uint32_t unknown20[3];                              // +0x20
-    uint8_t unknown2C[0x14];
-    uint32_t unknown40[3];                              // +0x40
-    uint8_t unknown4C[0x24];
-    uint32_t unknown70;                                 // +0x70 float bits
-    uint8_t unknown74[0x0C];
-    uint32_t unknown80;                                 // +0x80 float bits
-    uint8_t unknown84[0x5C];
-    int unknownE0;                                      // +0xE0
-    uint16_t unknownE4;                                 // +0xE4
+    S_vector4 pos;                                      // +0x20 where it would be
+    S_vector4 velocity;                                 // +0x30
+    S_vector4 push;                                     // +0x40 this small step's
+    S_vector4 start;                                    // +0x50
+    S_vector4 target;                                   // +0x60 the waypoint it goes for
+    S_vector4 lastGoal;                                 // +0x70
+    S_vector4 routeStart;                               // +0x80
+    S_vector4 axisX;                                    // +0x90 lying: the box
+    S_vector4 axisY;                                    // +0xA0
+    S_vector4 axisZ;                                    // +0xB0
+    S_vector4 boxCenter;                                // +0xC0
+    float halfSize[3];                                  // +0xD0
+    float speed;                                        // +0xDC
+    std::vector<struct S_AIWaypoint *> *route;          // +0xE0
+    uint16_t waypoint;                                  // +0xE4
     uint8_t unknownE6[2];
     C_Human *owner;                                     // +0xE8
-    int unknownEC;                                      // +0xEC
-    int unknownF0;                                      // +0xF0
-    uint8_t unknownF4[0x0C];
-    int unknown100;                                     // +0x100
-    bool unknown104;                                    // +0x104
-    bool unknown105;                                    // +0x105
-    bool unknown106;                                    // +0x106
-    uint8_t unknown107[2];
+    const struct S_Checkpoint *targetPoint;             // +0xEC
+    const struct S_Checkpoint *nearPoint;               // +0xF0
+    const struct S_Checkpoint *currentPoint;            // +0xF4
+    int16_t stuckTimer;                                 // +0xF8 ms
+    uint8_t unknownFA[2];
+    float bestDistance;                                 // +0xFC squared, to the waypoint
+    int plannedFrom;                                    // +0x100
+    bool routeChanged;                                  // +0x104
+    bool notPlayer;                                     // +0x105 the controller's not type 1
+    bool walking;                                       // +0x106 goes where the pushes say
+    bool solved;                                        // +0x107 takes part in the steps
+    bool givesWay;                                      // +0x108 others go round it
     bool unknown109;                                    // +0x109
-    bool unknown10A;                                    // +0x10A
+    uint8_t flags;                                      // +0x10A 1 dead, 2 unconscious, 4 suspended, 8 an order, 0x10 in a vehicle, 0x20 climbing
     uint8_t unknown10B[5];
 };
 
@@ -419,6 +444,9 @@ struct S_BodyCommand {
 };
 
 class alignas(16) C_Human : public C_Actor {            // "Human", vtable 0x008111e0, 0x2D0 bytes
+    friend class C_HumanCrowd;                          // game/human_crowd.cpp
+    friend class C_FormationShape;                      // game/formation.cpp
+    friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
 public:
     C_Human();                                          // 0x0059bf00
     ~C_Human() override;                                // 0x0059e3e0 (0x0059c4b0)
@@ -991,6 +1019,13 @@ private:
     int m_unknown2b8 = 0;                               // +0x2B8
     int m_unknown2bc = 0;                               // +0x2BC
     C_SpeechSet *m_speechSet = nullptr;                 // +0x2C0
+
+public:
+    // (The speech slots keep these two frames updated; nothing sets them.)
+    I3D_frame *GetSpeechFrameA() const { return reinterpret_cast<I3D_frame *>(m_unknown2bc); }
+    I3D_frame *GetSpeechFrameB() const { return reinterpret_cast<I3D_frame *>(m_unknown2b8); }
+
+private:
     C_HumanAIMemory *m_aiMemory = nullptr;              // +0x2C4
     C_FormationShape *m_formation = nullptr;            // +0x2C8 formation this human leads
     C_Human *m_leader = nullptr;                        // +0x2CC

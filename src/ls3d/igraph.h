@@ -13,19 +13,28 @@
 struct S_IGraphInit {
     HINSTANCE instance;          // +0x00
     int adapter;                 // +0x04
-    RECT windowRect;             // +0x08 window position and size
-    RECT clientRect;             // +0x18
-    uint32_t flags;              // +0x28 IG_INIT_* below
-    uint32_t reserved[3];        // +0x2C
+    int x, y;                    // +0x08 the window's position
+    int width, height;           // +0x10 client size, or the full screen's resolution
+    int childX, childY;          // +0x18 the child window (IG_INIT_CHILD_WINDOW)
+    int childWidth, childHeight; // +0x20
+    uint8_t bitDepth;            // +0x28 full screen: 16 or 32
+    uint8_t refreshRate;         // +0x29 full screen (0: default)
+    uint16_t reserved2A;
+    uint32_t flags;              // +0x2C IG_INIT_* below
+    HMENU menu;                  // +0x30
+    void (__cdecl *errorCallback)(uint32_t code, int severity, const char *text, uint32_t context);   // +0x34
 };
+static_assert(sizeof(S_IGraphInit) == 0x38, "S_IGraphInit layout");
 
 enum : uint32_t {
     IG_INIT_FULLSCREEN = 0x00000002,
     IG_INIT_TRIPLE_BUFFER = 0x00000004,  // together with fullscreen
-    IG_INIT_16BIT = 0x00000010,
-    IG_INIT_32BIT = 0x00000020,
-    IG_INIT_DEFAULT = 0x00000080,
+    IG_INIT_HW_TNL = 0x00000010,         // hardware transform and lighting when present
+    IG_INIT_WAIT_INACTIVE = 0x00000020,  // sleeps in ProcessWinMessages while the window is inactive
+    IG_INIT_CHILD_WINDOW = 0x00000080,   // renders into a child window of the main one
     IG_INIT_VSYNC = 0x00000100,
+    IG_INIT_FSAA2 = 0x00001000,
+    IG_INIT_FSAA4 = 0x00002000,
 };
 
 struct S_IGraphViewport {
@@ -112,7 +121,7 @@ public:
     // colour (0x18 bytes, the command map's lines; meaning inferred).
     I3DMETHOD(void, DrawPrimitives)(int kind, int count, const void *vertices, int transformed) = 0;   // 0x88
     I3D_SLOT(8C);                                             // LS3DF: DrawIndexedPrimitive
-    I3DMETHOD(void, InitInput)() = 0;                                    // 0x90
+    I3DMETHOD(void, InitInput)(uint32_t flags) = 0;                       // 0x90 (the game passes 0)
     I3D_SLOT(94);                                             // LS3DF: IsKeyboardInit
     I3D_SLOT(98);                                             // LS3DF: CloseKeyboard
     I3DMETHOD(void, ReadKeyboard)() = 0;                                 // 0x9C
@@ -124,13 +133,15 @@ public:
     I3DMETHOD(void, FlushChars)() = 0;                                   // 0xAC
     // A key (DirectInput code) is held.
     I3DMETHOD(bool, IsKeyDown)(int key) = 0;                             // 0xB0
-    I3D_SLOT(B4);                                             // LS3DF: SetKeyMap
-    I3D_SLOT(B8);                                             // LS3DF: GetMappedKeys
+    // The keys (DirectInput codes) whose held state GetWatchedKeyBits reports, as its bits.
+    I3DMETHOD(void, SetWatchedKeys)(const char *keys, int count) = 0;    // 0xB4
+    I3DMETHOD(uint64_t, GetWatchedKeyBits)() = 0;                        // 0xB8
     // Either shift / control / alt key held (the LS3DF port's names).
     I3DMETHOD(bool, IsShiftDown)() = 0;                                  // 0xBC
     I3DMETHOD(bool, IsCtrlDown)() = 0;                                   // 0xC0
     I3DMETHOD(bool, IsAltDown)() = 0;                                    // 0xC4
-    I3D_SLOT(C8);                                             // LS3DF: GetShiftKeys
+    // The modifier keys held (0x20 / 0x40 shift, 0x80 / 0x100 control, 0x200 / 0x400 alt: left / right; the argument 0).
+    I3DMETHOD(uint32_t, GetModifiers)(int unknown) = 0;                  // 0xC8
     // The character of a key (DirectInput code; the signals panel's digits; the second argument
     // 0, not identified).
     I3DMETHOD(uint32_t, KeyToChar)(int key, int unknown) = 0;           // 0xCC
@@ -181,6 +192,34 @@ public:
     I3DMETHOD(bool, IsInitialized)() = 0;                                // 0x0C
     I3D_SLOT(10);                                             // LS3DF: SetPrimaryFormat
     I3DMETHOD(void, SetVolume)(float volume) = 0;                        // 0x14 master volume
+    I3D_SLOT(18);
+    I3D_SLOT(1C);
+    // A sound buffer (the video player's voices; null: none).
+    I3DMETHOD(class ISND_sound *, CreateSound)() = 0;                    // 0x20
+    I3D_SLOT(24);
+    // A player of sound buffers (the video player's voices).
+    I3DMETHOD(class ISND_source *, CreateSource)() = 0;                  // 0x28
+};
+
+// A sound buffer of the sound driver (ISND_driver::CreateSound; names inferred from the video player).
+class ISND_sound {
+public:
+    I3DMETHOD(uint32_t, Release)() = 0;                                  // 0x00
+    // A sound file loaded (0 on success).
+    I3DMETHOD(HRESULT, Open)(const char *fileName, uint32_t flags) = 0;  // 0x04
+};
+// A player of the sound driver's buffers (ISND_driver::CreateSource; names inferred).
+class ISND_source {
+public:
+    I3DMETHOD(uint32_t, Release)() = 0;                                  // 0x00
+    I3DMETHOD(HRESULT, SetSound)(ISND_sound *sound, uint32_t flags) = 0;  // 0x04
+    I3DMETHOD(void, Stop)() = 0;                                         // 0x08
+    I3DMETHOD(void, Play)(int unknown, int unknown2) = 0;                // 0x0C
+    I3D_SLOT(10);
+    I3D_SLOT(14);
+    I3D_SLOT(18);
+    I3D_SLOT(1C);
+    I3DMETHOD(void, SetVolume)(float volume) = 0;                        // 0x20
 };
 
 // A rectangle of the screen in pixels (LS3DF's IShow).

@@ -300,12 +300,12 @@ void C_PlayerController::Attach(C_Human *human, C_HumanController *previous)
         m_netObject->SetMessageFactory(NetCreateMessage, this);
         m_netObject->SetStateHandlers(NetReadControlBits, NetWriteControlBits, this);
         m_netObject->SetSendMask(7);
-        m_netObject->SetUnknown40(false);
+        m_netObject->SetForwarding(false);
         if (!IsServer()) {
-            m_netObject->SetUnknown3C(0);
+            m_netObject->SetLive(0);
         } else {
-            g_netReplication->SetUnknownC4(0);
-            g_netReplication->SetUnknownC8(1);
+            g_netReplication->SetWriteEpoch(0);
+            g_netReplication->SetReadEpoch(1);
         }
         m_netObject->GetProperty(1)->GetTrack().SetValue(m_human->GetPosition4());
     }

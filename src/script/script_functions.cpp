@@ -234,7 +234,7 @@ int C_Script::CallFunction(int function, const int * /*argTypes*/, const int *ar
             if (!player)
                 continue;
             // A dead player that is still connected is not in range.
-            if (player->IsDead() && IsNetPlayerConnected(player->GetNetId()))
+            if (player->IsDead() && CanPlayerRespawn(player->GetNetId()))
                 return 0;
             if (!player->IsInPlay() || player->GetTeam(false) != static_cast<int>(allied) || player->IsDead() || player->IsSpectating())
                 continue;
@@ -254,7 +254,7 @@ int C_Script::CallFunction(int function, const int * /*argTypes*/, const int *ar
             if (!player)
                 continue;
             if (player->IsDead()) {
-                if (IsNetPlayerConnected(player->GetNetId()))
+                if (CanPlayerRespawn(player->GetNetId()))
                     return 0;
                 continue;
             }

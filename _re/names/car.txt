@@ -127,8 +127,6 @@
 004d0610 CarNetReadState | void __fastcall CarNetReadState(C_Car *car, C_BitStream *stream)
 004d08c0 CarNetWriteState | void __fastcall CarNetWriteState(C_Car *car, C_BitStream *stream)
 0073e110 C_NetProperty::SetField | void __thiscall SetField(void *this, int field, int value)
-0073ecf0 C_NetObject::SetQuantizations0 | void __thiscall SetQuantizations0(void *this, S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)
-0073eca0 C_NetObject::SetQuantizations1 | void __thiscall SetQuantizations1(void *this, S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)
 0073dbb0 S_NetQuantization::Setup | void __fastcall Setup(S_NetQuantization *q, S_vector4 *span, S_vector4 *from, S_vector4 *step, int unknown)
 # Part 2f-i: the network side (car_net.cpp) and what it calls.
 004db310 C_Car::SendFuel | void __thiscall SendFuel(C_Car *this)
@@ -142,7 +140,6 @@
 004e1f70 S_CarParts::StartPartEffect | void __thiscall StartPartEffect(S_CarParts *this, int part)
 004e1f40 S_CarParts::SendPartEffect | void __thiscall SendPartEffect(S_CarParts *this, int part)
 0073e0e0 C_NetProperty::SetFlags | void __thiscall SetFlags(void *this, uint flags)
-0073e9d0 C_NetObject::PopMessage | void * __thiscall PopMessage(void *this, int unknown)
 
 # Part 2f-ii: the saved game (car_save.cpp), a joining client's state (car_net.cpp) and what they call.
 004e0f70 S_CarParts::SaveGame | bool __thiscall SaveGame(S_CarParts *this, C_chunk *chunk)

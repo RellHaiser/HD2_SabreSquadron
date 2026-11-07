@@ -18,10 +18,30 @@ public:
     uint32_t ReadBits(int bitCount);                         // 0x0073d3d0
     void WriteString(const char *text);                      // 0x0073d440
     void ReadString(char *buffer, int bufferSize);           // 0x0073d470
+    // (Part 10c.) `count` bytes copied at the byte the bit position falls in (the net packets' data, inline in their
+    // Write / Read; the position is byte-aligned there), the position moved past them. Writing reserves the room.
+    void WriteRawBytes(const void *bytes, uint32_t count);
+    void ReadRawBytes(void *bytes, uint32_t count);
 
     // False once more bits were consumed/produced than the buffer holds.
     bool IsValid() const { return BitPosition() <= m_capacityBits; }   // (the base Reserve)
     uint32_t BitPosition() const { return m_wordIndex * 32 + m_bitIndex; }
+    void SetBitPosition(uint32_t bits)
+    {
+        m_wordIndex = bits >> 5;
+        m_bitIndex = bits & 31;
+    }
+    // (Part 10c-iii.) Back to the start (the transport's send stream, reused for each datagram).
+    void ResetPosition() { m_wordIndex = 0; m_bitIndex = 0; }
+    // (Part 10d.) Over `data` of `capacityBits` (not owned; C_NetGame reads its queued datagrams so).
+    void Attach(void *data, uint32_t capacityBits)
+    {
+        m_data = static_cast<uint32_t *>(data);
+        m_capacityBits = capacityBits;
+    }
+    uint32_t CapacityBits() const { return m_capacityBits; }
+    // The bytes written so far (the bits rounded up).
+    int ByteSize() const { return static_cast<int>((BitPosition() + 7) >> 3); }
     const uint32_t *Data() const { return m_data; }
 
 protected:
@@ -52,6 +72,11 @@ struct alignas(16) S_NetQuantization {
     // Component i from `from` over `span` in steps of `step`: bits[i] = floor(log2(span / step)) +
     // 1, scale[i] = that many bits' mask / span. (Fastcall: this, span; RET 0xC.)
     void Setup(const S_vector4 &span, const S_vector4 &from, const S_vector4 &step, int unknown);   // 0x0073dbb0
+    // (Part 10a.) Whether the three components of `v` lie in the ranges [offset, offset + range40]
+    // (__thiscall); whether each is smaller in magnitude than its step (all three: a change too
+    // small to send).
+    bool Contains(const float *v) const;                     // 0x0073dd30
+    bool WithinSteps(const float *v) const;                  // 0x0073dda0
 
     float deadZone[4];                                       // +0x00 the step: smaller magnitudes are sent / read back as 0
     float min[4];                                            // +0x10 (y: the lowest y sent)
@@ -81,8 +106,18 @@ public:
     void ReadDirection(struct S_vector &dir, int playerIndex);          // 0x0073db70
     // Up to three floats, each quantised to the ranges and bit counts the player
     // entry holds (bit i of `mask` selects component i).
-    void WriteQuantized(const float *values, const S_NetPlayer *player, uint8_t mask);   // 0x0073d810
-    void ReadQuantized(float *values, const S_NetPlayer *player, uint32_t mask);         // 0x0073d900
+    // Returns whether any of the three components (whatever the mask) exceeds its step. The
+    // `player` entries start with their quantisation; the net tracks pass one directly.
+    bool WriteQuantized(const float *values, const S_NetQuantization *q, uint8_t mask);  // 0x0073d810
+    void ReadQuantized(float *values, const S_NetQuantization *q, uint32_t mask);        // 0x0073d900
+    bool WriteQuantized(const float *values, const S_NetPlayer *player, uint8_t mask)
+    {
+        return WriteQuantized(values, reinterpret_cast<const S_NetQuantization *>(player), mask);
+    }
+    void ReadQuantized(float *values, const S_NetPlayer *player, uint32_t mask)
+    {
+        ReadQuantized(values, reinterpret_cast<const S_NetQuantization *>(player), mask);
+    }
     // A position quantised with the sender's settings (mask 7).
     void WritePosition(const struct S_vector &pos);
     void ReadPosition(struct S_vector &pos);
@@ -93,8 +128,14 @@ public:
     void WriteAxisAngle(const struct S_vector &axis, float angle, int playerIndex);   // 0x0073d9e0
     void ReadAxisAngle(struct S_vector &axis, float &angle, int playerIndex);         // 0x0073da30
 
+    // (Part 10d: C_NetGame's message streams.)
+    bool m_unreliable = false;                               // +0x18
+    int m_pending = 0;                                       // +0x1C begun, not sent
+    int m_channel = 0;                                       // +0x20
+    int m_target = 0;                                        // +0x24 a player's DirectPlay id (0: all)
+    uint32_t m_type = 0;                                     // +0x28 the message's type
+
 private:
-    uint8_t m_unknown18[0x14];
     S_NetPlayer *m_sender = nullptr;                         // +0x2C
     S_NetPlayer *m_recipient = nullptr;                      // +0x30
     int m_senderIndex = 0;                                   // +0x34

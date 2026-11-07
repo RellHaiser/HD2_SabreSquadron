@@ -373,8 +373,9 @@ S_NetPlayer *C_NetMessage::GetSender(int playerIndex) const
     g_senderAsks.push_back(playerIndex);
     return reinterpret_cast<S_NetPlayer *>(&g_senderPlayer);
 }
-void C_NetMessage::WriteQuantized(const float *values, const S_NetPlayer *player, uint8_t mask)
+bool C_NetMessage::WriteQuantized(const float *values, const S_NetQuantization *q, uint8_t mask)
 {
+    const auto *player = reinterpret_cast<const S_NetPlayer *>(q);
     auto *s = reinterpret_cast<S_FakeStream *>(this);
     for (int i = 0; i < 3; ++i) {
         if (mask & (1u << i)) {
@@ -384,9 +385,11 @@ void C_NetMessage::WriteQuantized(const float *values, const S_NetPlayer *player
         }
     }
     g_quantized.emplace_back(player, mask);
+    return false;
 }
-void C_NetMessage::ReadQuantized(float *values, const S_NetPlayer *player, uint32_t mask)
+void C_NetMessage::ReadQuantized(float *values, const S_NetQuantization *q, uint32_t mask)
 {
+    const auto *player = reinterpret_cast<const S_NetPlayer *>(q);
     for (int i = 0; i < 3; ++i) {
         if (!(mask & (1u << i)))
             continue;

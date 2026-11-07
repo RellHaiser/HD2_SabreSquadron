@@ -7655,6 +7655,1549 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xxiii: the hover (OnItemHover 0x00680ea0), the remaining helpers (0x006828b0,
     0x006861d0, 0x00680e00), the store list's description (0x0067aa70).
 
+  PART 9e-xxiii DONE (2026-11-03): the in-game menu's hover, chat lines and stats toggle
+  (game/game_menu.cpp), the store list's description (game/store_list.cpp). Part 9e is done.
+  - OnItemHover 0x00680ea0: no control: false; the popup's (sent to it, target 0; the info screen
+    shown: hidden, false) else the weapons' information label's (posted; none: nothing): left:
+    hidden; entered: cleared, the item's name, weight, a weapon's (behaviours 2-5, 12) ammo rounds,
+    muzzle speed (projectile weapons, firearms) and a rifle scope's zoom (reticle modes 0-3; tan(40
+    degrees) / tan(fov / 2)) as C_ItemInfo::ShowStats' lines (styles 0x10 / 0x11), shown.
+  - AddChatLine 0x006828b0 (__stdcall, C_NetGame's chat received): "<name>: <text>" added to the
+    chat console (0x0CC00000, style 0x26). OnStatsToggle 0x006861d0 (no control registers it: an
+    older screen's): g_soldierStatsShown 0x008ae638 flipped, the skills panel and the store swapped,
+    the 7th control's text "CONTINUE" / "SHOW SOLDIER STATS".
+  - C_StoreList::BuildDescription 0x0067aa70: the group "P_visualstore", its tabs (OnTab, the groups'
+    texts, none for group 4; inactive), its scroll bar (the first page), 500 more empty entries, a
+    page per group (1-3, 5-7), the highlight unlinked at the origin (quirk kept: not checked). (The
+    equipment screen's own copy 0x0067c570 goes with its menu, part 9f.)
+  - Absorbed (only ported callers): 0x00680e00, 0x00685130, 0x006861a0, 0x00686b90, 0x00686bd0.
+    0x0067efb0, 0x0067f1f0, 0x0067f400, 0x00688130 stay (the equipment screen's callers).
+  - Harness: game_menu_test.inc's gmHover, gmChatLine, gmItems (the real description now);
+    store_list_test.inc's slDesc. All factory checks in both orders.
+  - Mutations: mutations/mutate_9e23.py, mutate_9e23b.py (82 of 82 and 45 of 45 killed after the tests added for 3 survivors; none equivalent).
+  - Build: MSVC clean. Tier 1: 394 errors in 71 files, 168 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+3); 4 functions in ported.txt, 5 absorbed. Stats: 8,905 of 12,306 functions, 79.9 % of the bytes.
+  - Next, part 9f: the equipment menu (C_EquipmentMenu; its store list's description 0x0067c570).
+
+  PART 9f PLAN (2026-11-03): the campaign's equipment screen C_EquipmentMenu (vtable 0x00815db0, 0x590
+  bytes, src/game/equipment_screen.h/.cpp, new; screen kinds 3 and 4): 0x00673080..0x0067a3f0 and its
+  store's description 0x0067c570, about 35 KB (C_EquipmentMenuBase's own code was ported with 9e). The
+  layout: the base's to +0x1C4, +0x1D0 the equipment panel, +0x274 the store list, +0x2AC the missions'
+  items, +0x558 the presets, +0x578 / +0x57C the selection screen's and the squad list's selectors,
+  +0x580 the squad soldier shown, +0x584 the one picked. Two screens: 1 "Items selection" (the squad's
+  list, the panel, the store, the stats, the soldier types, automatic equipping), 2 "SELECTION SCREEN"
+  (the soldier to play in the first campaign's missions 2 and 15). Sub-parts: 9f-i the class, start /
+  stop and the item slots; 9f-ii the messages and the checks before the mission (the required items,
+  the weight, the weapons); 9f-iii the screens' descriptions; 9f-iv the automatic equipping and the
+  soldier type picked (0x00677920..0x0067a3f0, OnItemNotify60). 0x0067cb60 is the main menu's (9h).
+
+  PART 9f-i DONE (2026-11-03): the class, its construction, starting and stopping, the item slots, the
+  stats and the pickers (game/equipment_screen.cpp; C_EquipmentMenu out of pending.h).
+  - Construction (inline in C_GameApp::StartStep): the presets loaded, the missions' items set up;
+    GetTypeId 0x006c1e20 (4); the destructor 0x006c1e50 the members'. S_CampaignItem::unknownC is
+    `ammunition` (OnStart adds the item's rounds instead).
+  - OnStart 0x006739d0: a campaign screen of the equipment kind (3): the profile's first stock reset,
+    the screen's items added. OnStop 0x00673b80: the popup, the panel's soldier, the store's pages.
+    SetupStore 0x00675c00 (kind 3 the first stock, 4 the second; a single mission the first and
+    TakeSquadItems 0x00673730: every soldier's items taken, as the in-game menu's soldier's).
+  - The item slots: OnItemNotify13 0x006731d0 (no large weapon check; from the panel the cursor's
+    input notified: leave, 05), 0A 0x00673450 (no store checks), 08 0x006735f0, 09 0x00673690 with
+    DropItem 0x006771e0 (from the panel: moved onto another place, then back to the store when the
+    cursor is right of the middle), OnItemHover 0x00673080 (the popup's text the item's name; not the
+    store's items).
+  - The new slots 0x74 OnStatsToggle 0x006755f0 (the stats panel or the panel; g_equipmentStatsShown
+    0x008ae61a; ShowSoldierStats 0x00674d60: the profile's name, the bars and values from its float
+    stats; no profile: blank) and 0x78 OnSelectionPicked 0x006773a0; OnSoldierPicked 0x00677490 (the
+    squad list's pictures); thunks 0x00677880 / 0x00677890.
+  - Dropped: the copy protection in OnStart (the window handle's bookkeeping) and OnStop (a random
+    difficulty 4 from the fourth mission).
+  - Harness: equipment_screen_test.inc in the factory build (check_equipmentscreen.py,
+    "equipmentscreen:", 13 checks; the stub profile's second stock). All factory checks in both orders.
+  - Mutations: mutations/mutate_9f1.py (289 cases, 275 build; all caught but 4 equivalent).
+  - Build: MSVC clean. Tier 1: 383 errors in 71 files, 164 stubs. ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (new, 17); 19 functions in ported.txt, 4 absorbed (the inline
+    constructors 0x006c1d80 / 0x006c1d00 / 0x006c1db0, the squad's vector insert 0x00677630).
+    Stats: 8,928 of 12,306 functions by hand (80.1 % by size).
+  - Next, 9f-ii: the messages (OnMessage 0x006740d0) and the checks before the mission.
+
+  PART 9f-ii DONE (2026-11-03): the equipment screen's messages and the checks before the mission
+  (game/equipment_screen.cpp).
+  - OnMessage 0x006740d0: escape (the selection screen closed, else "ARE YOU SURE?" back to the
+    campaign's previous screen); 0x200000B continue (the first campaign's missions 2 and 15 with more
+    than one soldier: the selection screen; else all deployed); 0x200006A the selection's accept (the
+    pick deployed alone; a negative pick ignored: fixed); 0x20000C1 the checks (the required items,
+    "Some soldier is overloaded", "Some of your soldiers are unarmed" asked); 0x20000C6 done
+    (S_SoldierState +0x0A `autoEquip` cleared, the next step, the profile's second stock reset).
+  - HasRequiredItems 0x00678dc0 (the mission record's `required` items, S_MissionItems' `pairs`
+    renamed; a uniform or the diving gear capped at the squad's size in the record), CountCarried
+    0x00679360 (an axis item with one carrier, g_requiredCarrier 0x00840d5c), IsSquadWithinWeight
+    0x00674060, IsSquadArmed 0x006746f0; C_MissionItems::GetMissionRecord 0x0067e620 (a negative
+    index none: fixed).
+  - Dropped: the copy protection 0x00673e40 (a cracked copy's belt and backpack items stripped; from
+    the twelfth mission back to the previous screen).
+  - Harness: equipment_screen_test.inc's esMessage, esChecks, esCarried, esRequired (17 checks; the
+    weight fill fake per soldier). All factory checks in both orders.
+  - Mutations: mutations/mutate_9f2.py (127 cases, 113 build; all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 383 errors in 71 files, 164 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (+9); 6 functions in ported.txt, the protection's 1 dropped.
+    Stats: 8,935 of 12,306 functions by hand (80.2 % by size).
+  - Next, 9f-iii: the screens' descriptions (BuildScreens 0x00675c80 and its builders, the store's
+    0x0067c570).
+
+  PART 9f-iii DONE (2026-11-03): the equipment screen's screens' descriptions (game/equipment_screen.cpp).
+  - BuildScreens 0x00675c80: "Items selection" (EnsureSquad 0x00673ca0: four soldiers of the first
+    profiles in a new squad, LoadRoster 0x00673c30 tables\HumanStore.def when empty; the builders; the
+    soldiers to equip equipped, AutoEquip of part 9f-iv) and "SELECTION SCREEN"; the first opened, the
+    stats, the popup "DESCRIPTION".
+  - BuildEquipmentPanel 0x00674860 (the in-game menu's, the same asm), BuildSquadList 0x006766b0 (the
+    dead soldiers out of the squad; a picture per soldier 0.106 apart, OnSoldierPicked), BuildStore
+    0x00677010 (C_StoreList::BuildEquipmentDescription 0x0067c570: the description's body shared with
+    the in-game menu's, Describe; "scroll01", "itemselector", the tabs active), BuildStatsPanel
+    0x006764a0 (hidden; texts 0xA6E..), BuildItemsScreen 0x006758f0 (the stats toggle, the soldier
+    types, "RECOMMENDED SELECTION" / "AUTOMATIC REPLENISHMENT" the automatic equipping, "CONTINUE",
+    "BACK", the description label m_weaponsInfo), BuildSelectionScreen 0x00676230.
+  - Harness: equipment_screen_test.inc's 8 more checks (the descriptions dumped with their targets, the
+    frames' logs; the stub roster's Load). All factory checks in both orders.
+  - Mutations: mutations/mutate_9f3.py (289 cases, 261 build; all caught but 5 equivalent).
+  - Build: MSVC clean. Tier 1: 377 errors in 70 files, 161 stubs. ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (+11); 10 functions in ported.txt. Stats: 8,945 of 12,306 functions by hand (80.4 % by size).
+  - Next, 9f-iv: the soldier type picked (OnItemNotify60 0x00678fe0, the preset matched with the axis
+    filter), then 9f-v the automatic equipping (AutoEquip 0x00678000).
+
+  PART 9f-iv DONE (2026-11-03): the equipment screen's soldier type picked (game/equipment_screen.cpp).
+  - OnItemNotify60 0x00678fe0 (the soldier types' combo box): the header: the shown soldier's items the
+    mission does not need back (false); a campaign preset (flags 5) of the line - 1: those back, its
+    match's items put on him (not the uniform; a hands' weapon unlike the preset's, in its behaviour,
+    paired ids or a scope's reticle, not taken nor its ammunition: "Item is not in the list of
+    available items"); the panel refreshed, the store updated.
+  - PutStoreItem 0x00677920 / DropStoreItem 0x006779f0 (the in-game menu's AddPresetItem, with the
+    store's fill), ReturnUnrequired 0x00679790 (required items' surplus by CountCarried of the shown
+    soldier: quirk kept; no record: all back, fixed), S_MissionItems::GetRequiredCount 0x0067e410,
+    FindSubstitute 0x00679b50 / MatchPreset 0x00679e80 (the in-game menu's scores, an axis-only
+    filter).
+  - Harness: equipment_screen_test.inc's esPut, esReturn, esTypePicked and the in-game menu's
+    substitute and match tests again (esSubstitute, esMatch; with exact ties for 160 and 111, 31
+    backpack types). The stub profile's squad slots. All factory checks in both orders.
+  - Mutations: mutations/mutate_9f4.py (263 cases, 228 build; all caught but 17 equivalent).
+  - Build: MSVC clean. Tier 1: 374 errors in 69 files, 160 stubs. ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (+7); 7 functions in ported.txt. Stats: 8,952 of 12,306 functions by hand (80.5 % by size).
+  - Next, 9f-v: the automatic equipping (AutoEquip 0x00678000, 0x006785b0, 0x00677aa0, 0x00679670,
+    0x0067a3f0).
+
+  PART 9f-v DONE (2026-11-03): the equipment screen's automatic equipping (game/equipment_screen.cpp).
+  Part 9f is done.
+  - AutoEquip 0x00678000 (the menu's call, all none: the soldiers to equip only; the button
+    "RECOMMENDED SELECTION" / "AUTOMATIC REPLENISHMENT", CallAutoEquip): no record, false; the required
+    items given out; each soldier (the last first) his kit's slot; unarmed: his unrequired items back,
+    the slot's head gear, its preset's items (the button's: matched for his uniform's side), filled for
+    the soldiers to equip; no more to equip; the button's: stocked up, then twice more (a pistol on the
+    belt: its ammunition too).
+  - DistributeRequired 0x006785b0 (the essentials' list "<n>x <name>, ", given out round the squad one at
+    a time, filled; the wear, head gear, multiplayer pick-ups and the small weapons from the first
+    soldier; the failing tries counted from the last success: quirk kept, across items; then the
+    uniforms of the slot or its preset), CountOwn 0x00679670 (__stdcall), Replenish 0x00677aa0 (a
+    backpack, the weapons' ammunition 6 / 13 / 22, a pistol's a sixth, medkits by first aid * 0.02 *
+    round among the first 255 types, grenades 1 / 4 / 9 among the first 100, item 9, a head gear not
+    with uniform 0x79; an axis uniform: the axis' items), AssignSlots 0x0067a3f0 (the kits' weights and
+    rifles; the best shot a scoped rifle's, the second a rifle's, the others by 60 less their spare
+    strength, a rifle's 30 less; quirk kept: a later kit meeting the best's or second's condition
+    overrides).
+  - C_LoadoutPresets::GetPresets (the raw list the slots index).
+  - Harness: equipment_screen_test.inc's esCountOwn, esAssign (1500 random squads against a
+    transcription of the original's), esReplenish, esDistribute, esAutoEquip (the logs exact, who the
+    puts went to: the panel test's put fake records it). All factory checks in both orders.
+  - Mutations: mutations/mutate_9f5.py (305 cases, 256 build; all caught but 25 equivalent).
+  - Build: MSVC clean. Tier 1: 374 errors in 69 files, 160 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (+4); 5 functions in ported.txt, 3 absorbed (0x0067a950,
+    0x0067a980, 0x0067a9b0). Stats: 8,960 of 12,306 functions by hand (80.7 % by size).
+  - Left in the range: 0x006755d0 (the profile's name, the squad menu's callers: part 9g), 0x00672700
+    (unreferenced), the CRT's static initializers.
+  - Next, part 9g: the campaign's screens (the squad menu, the debriefing and the diary, the
+    operation's end, the session menu, the movies).
+
+  PART 9g PLAN (2026-11-03): the campaign's screens (0x00688130..0x00697090), by class:
+  9g-i the operation's end C_OperationEndMenu (vtable 0x00815c90); 9g-ii the network session's menu
+  C_SessionMenu (0x00815e98); 9g-iii the game's texts C_GameTexts (0x006e4f80..0x006e5b00, outside the
+  range: the video player embeds one); 9g-iv the video player C_VideoState / C_MovieState (0x00815bfc /
+  0x00815bc8; the subtitles, the credits, the voices); then the debriefing and the diary (0x00815cf0,
+  0x0068c520..0x00690be0) and the squad menu (0x00815d50, 0x00690be0..0x00697090), split when started.
+
+  PART 9g-i DONE (2026-11-03): the operation's end (game/operation_end.h/.cpp, new; out of pending.h).
+  - C_OperationEndMenu: the table 0x00841670 (S_OperationEnd: the model "f_s_arctic" .., the colour, the
+    title's style, "CAMPAIGN COMPLETED", the operation's history 17750 ..; ten rows per campaign, the
+    first row the default), GetOperationEnd 0x0068c000, BuildScreens 0x0068c0d0 ("Campaign_debrief"; no
+    model: false; the screen kept whatever its build), DescribeScreen 0x0068c3e0 (title, textbar "Press
+    space to continue ...", text01), OnInput 0x0068c070 (Escape or Space: cleared, flipped, ended), the
+    empty slots; GetTypeId 0x006c2160 and the destructors 0x006c2170 / 0x006c2190.
+  - Harness: campaign_screens_test.inc (new; "campaignscreens:", check_campaignscreens.py): oeTable,
+    oeDescribe, oeBuild, oeInput, oeSlots. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g1.py (94 cases, 88 build; all caught but 2 equivalent).
+
+  PART 9g-ii DONE (2026-11-03): the network session's menu (game/session_menu.h/.cpp, new; out of
+  pending.h).
+  - C_SessionMenu: OnStart 0x0068a680 (the console's text style), OnStop 0x0068a720, BuildScreens
+    0x0068a750 ("MP Connect console" on "confirm", "PASSWORD"), DescribeConsole 0x0068ac80 (the box at
+    (0.5, -0.375, -0.5), its tick and hidden callbacks, "Exit Game" quitting), DescribePassword 0x0068b010,
+    OnMessage 0x0068aa00 (Escape on the console: the game quit; on the password: the kept messages
+    dropped; 0x2000069: GAME_STATE_NEXT_MAP), OnConsoleTick 0x0068b1c0 (the console's steps: the squad
+    emptied, the roster again; hosting: "Creating server ...", C_NetGame::Host 0x00722b60 with the
+    session's name and DirectPlay's fields (and a second argument, true: ret_audit); joining: Connect 0x007240f0, GetJoinStatus 0x007244c0 polled
+    (connected, full, the password wrong: the password screen after 500 ms, the CD key, the version);
+    the waits), OnPasswordNotify 0x0068bce0 (the password kept, g_sessionPasswordSet 0x008ae5c2).
+  - Fixed names: the session type 2 hosts, 1 joins (the console's texts); GAME_STATE_HOST_SESSION is 7,
+    GAME_STATE_JOIN_SESSION 8 (swapped before), SESSION_* constants. Fix: OK without an input read none.
+  - Harness: the stub pending.h's settings and net game; smStart, smMessage, smConsole, smPassword,
+    smBuild, smTick, smJoin, smNotify. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g2.py (292 cases, 281 build; all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 367 errors in 67 files, 156 stubs (after 9g-iii). ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (new); 9g-i 12 and 9g-ii 14 in ported.txt. Stats: 9,002 of 12,306 functions by hand (81.0 % by size; after 9g-iii).
+
+  PART 9g-iii DONE (2026-11-03): the game's texts (game/game_texts.h/.cpp, new; C_GameTexts and g_texts
+  0x008c1368 out of pending.h).
+  - C_GameTexts (the table of S_GameText {text, id, a flag}, sorted by id): Clear 0x006e5050, Load
+    0x006e50c0 (dtaOpen, the whole file; the UTF-8 mark skipped; UTF-16's FF FE refused with "Trying add
+    file <..>; Unicode format detected, not supporting now." then "..; FAILED"), Find 0x006e5330 (the last
+    of the id), Get 0x006e5380 ("__undefined index <id> in all_txt __"), Has 0x006e53e0, Add 0x006e5430
+    (-1 and ids already there refused; the original's append-and-shift is upper_bound), Parse 0x006e56f0 /
+    ParseLine 0x006e5610 (sscanf's %d, the text between the first and the last quote); the vector's
+    helpers absorbed. C_str's append copy 0x00688130 absorbed (C_str::operator+=).
+  - Fixes: the file closed whatever its handle (the original closed handle 0 only); the marks' bytes not
+    read past a one- or two-byte file.
+  - Harness: game_texts_test.cpp (new; build_texts.bat, check_gametexts.py: the archives' calls faked
+    over files in memory): gtAdd (2000 random ids against a map), gtFind, gtGet, gtParse, gtLoad, gtBom,
+    gtClear. The vehicle stub pending.h takes the real header. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g3.py (89 cases, 86 build; all caught).
+  - Build: MSVC clean. Tier 1: 367 errors in 67 files, 156 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+14; hud.txt's C_TextDatabase::Find / GetText renamed); 16
+    functions in ported.txt. Stats: 9,002 of 12,306 functions by hand (81.0 % by size).
+
+  PART 9g-iv DONE (2026-11-03): the video player (game/video_state.h/.cpp, new; C_VideoState and
+  C_MovieState out of pending.h).
+  - C_VideoState: Start 0x00688330 (the credits: the music saved, track 37, their box and script, no
+    stream; a movie: the voices' player, the stream GameMovie\.. (0x400), "Outro2" over the main menu
+    its music saved, else faded to 5 % for a briefing, 1.1 %; opened: FitVideo 0x00688da0, "D_Outro"
+    scrolled, else the subtitles' box when there are some; the volume 110 % of the options', played),
+    Stop 0x00688750, HandleInput 0x00688ea0 (Escape; Space once the end is reached), Update 0x00688f00
+    (the stream's end: a briefing waits with "Press space to continue ...", D_Outro fades out over 1 s and
+    ends after 1.2 s, others end; the credits' 3 s after their last line; the subtitles by tenths of a
+    second, the last of a time shown; the voices), Render 0x00689240, OpenStream 0x006892e0,
+    MakeSubtitleBox 0x00688920, MakeCreditsBox 0x00688ab0 (14 styles, the table 0x008412c8), LoadScript
+    0x006893e0 (text\<language>\subtitles\<movie>.txt into its own C_GameTexts), ParseSubtitles
+    0x00689c60 ("S<time>file" voices from Sounds\ or sounds_DATADISK\, "<start,end>text" with the
+    options' subtitles), ParseCredits 0x00689630 (the tags TI NA SM (three columns) EL ES, the Czech
+    TICZ NACZ SMCZ, SPEED). C_MovieState: Play 0x0066ede0 (a node of its own), Stop, HandleInput, Update
+    (ended: GAME_STATE_MOVIE_FINISHED), GetTypeId; the destructors and the constructor 0x006c3330.
+  - ISND_driver's CreateSound 0x20 / CreateSource 0x28, ISND_sound and ISND_source (names inferred).
+  - Fixes: the credits' styles start at -1 (the original's at 0: the first movie's stop released style
+    0); a voice's missing buffer skipped (the original released it); the credits' lines are not formats.
+    Dropped: the copy protection, the start time 0x008ae67c (read nowhere).
+  - Quirks kept: Start resets no state of a previous movie of the same state (the end reached, the next
+    voice, the scroll, the fade).
+  - Harness: campaign_screens_test.inc's vsCredits, vsMovie, vsFit, vsUpdate, vsScroll, vsRender, vsInput,
+    vsMovieState (the stream, the voices' objects, IGraph's slots faked and logged; campaign.cpp's video
+    node and game_texts.cpp's loading faked). All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g4.py (431 cases, 391 build; all caught but 22 equivalent).
+  - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+13); 37 functions in ported.txt (the STL helpers absorbed).
+    Stats: 9,039 of 12,306 functions by hand (81.2 % by size).
+
+  PART 9g-v DONE (2026-11-03): the debriefing's start, messages and results (game/debriefing.h/.cpp,
+  new; C_DebriefingMenu out of pending.h).
+  - C_DebriefingMenu (vtable 0x00815cf0): OnStart 0x0068cfe0 (the campaign's diary entry kept, the
+    results applied for kind 5; a single mission's entry dropped), OnMessage 0x0068d0f0 (Escape: the
+    diary closed, else the campaign's "Do you want to save the game?" / "Overwrite current saved game?"
+    (the mission played before), a single mission's "ARE YOU SURE?"; 0x2000034 continue and 0x20000C8
+    save and quit: the results kept, the progress, the game saved; 0x2000075 the mission again from the
+    save before it; 0x200007C a single mission again), BuildScreens 0x0068d5e0 ("debriefing", the
+    campaign's "DIARY"), IsCampaign 0x0068c5d0.
+  - The results: ApplyResults 0x0068ce60 (a dead soldier's items back, the experience and the missions
+    counted, the promotion due by g_rankExperience 0x008423c8), AwardMedal 0x0068cbf0 (the first
+    campaign's operations' medals 9, 11, 10, 3; the experience's 8 (one living holder), 7, 2, 0, 1; the
+    missions' 5 and 4 by the rank), FindMedal8 0x0068cb80, StoreProgress 0x0068c5f0 (the promotions and
+    medals given, the progress into the profiles capped at 100, the dead off the squad, the living's
+    average to the roster's first 30 by a random 60 .. 140 %; the factor rounded as the FPU's float).
+  - Dropped: the copy protection (OnStart's, ApplyResults' two checks: the promotions and medals given,
+    the progress kept).
+  - Harness: campaign_screens_test.inc's dbMedal, dbResults, dbStore (the original's arithmetic
+    transcribed with the same random numbers), dbStart, dbMessage (a real message box's questions),
+    dbBuild (the screens' builders faked). All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g5.py (262 cases, 233 build; all caught but 15 equivalent).
+  - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+10); 12 functions in ported.txt. Stats: 9,051 of 12,306 functions by hand (81.4 % by size).
+
+  PART 9g-vi DONE (2026-11-03): the debriefing's diary and screen (game/debriefing_screens.cpp, new).
+  - DescribeDiary 0x0068d8b0 (an aligned frame, from the asm: the pages' frames text_02 / text_01 under
+    a "multi_page" frame, "DIARY", the multi page text's two areas, the page buttons and their callback,
+    "BACK"; the diary's texts: ids under 1000 and 16010 .. 16019 as headings (style 4), the others after
+    a blank line (style 5); the refresh), OnDiaryPage 0x0068e160 (two pages back, on as far as there are
+    pages, from the start without a control, the page break's left page for the first showing; the
+    buttons (in)active), DescribeDebriefing 0x0068edc0 ("death" off, "MISSION DEBRIEFING" / "CAMPAIGN
+    DEBRIEFING", the statuses, the soldiers' scroll bar (the squad's size, its callback), "SAVE AND
+    CONTINUE" (a won campaign mission), "RETRY" (the restart / a single mission's replay; none in kind
+    6), "SHOW DIARY" (the campaign's: its page and screen), "EXIT TO MAIN MENU"), IsMissionWon 0x0068f8f0
+    (kind 6; a tutorial; the required objectives neither open nor critically failed, someone alive).
+  - C_DebriefingMenu +0x1B0 is the diary's page (m_diaryPage). Dropped: the copy protection 0x0068f670
+    (from the sixteenth mission a cracked copy could not save and go on).
+  - Harness: dbDiary, dbDiaryPage, dbWon, dbScreen (the soldiers' panel and scroll, part 9g-vii, faked).
+    All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g6.py (159 cases, 142 build; all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+5); 5 functions in ported.txt. Stats: 9,056 of 12,306 functions by hand (81.5 % by size).
+
+  PART 9g-vii DONE (2026-11-03): the debriefing's soldiers' panel and the mission's result
+  (game/debriefing_screens.cpp).
+  - DescribeSoldiers 0x0068e3e0 ("panel_soldier00": the picture, the name, the titles 0xACD / 0xAD2 /
+    0xAD3 / 0xAD4, the skills' 7 bars hlcpctcr00 .. 06 (their names 0xA6E + the skill, 50 % / 70 %, the
+    suffixes " %", " Kg"); the model's frames: the medals' pairs DSO_a / DSO_b .. BURMA_STAR_b, their
+    places medal01 .. medal12, new_medal, the ranks' badges rank_private .. rank_major, soldier_rank,
+    death), ListObjectives 0x0068f080 (the completed under "Tasks: " ("="), the others but the inactive
+    under "Recommendation:" ("!"); won: a tutorial or someone alive, not the objectives),
+    ShowMissionResult 0x0068f6c0 (the list, "ACCOMPLISHED" / "FAILED", the music 1 or 2 faded in; its
+    arguments unread).
+  - The medals' ids are the frames' order (0 DSO, 1 DCM, 2 MILIT_MEDAL, 3 GSM_AFRICA, 4 GSM, 5 WAR_MEDAL,
+    6 DEFENCE_MEDAL, 7 MILITARY_CROSS, 8 VICTORIA_CROSS (one living holder), 9 GERM_FRANCE_STAR, 10
+    AFRICA_STAR, 11 BURMA_STAR): S_SoldierProfile +0x28 holds them, +0x24 is the rank (0 private ..
+    7 major). C_DebriefingMenu +0x1B8 .. +0x283 the frames.
+  - Dropped: the copy protection ("FAILED" for a cracked copy).
+  - Harness: dbPanel, dbObjectives, dbResult (the panel's tree; the bars' suffixes printed as texts).
+    All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g7.py (113 cases, 103 build; all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+3); 3 functions in ported.txt. Stats: 9,059 of 12,306 functions by hand (81.6 % by size).
+
+  PART 9g-viii DONE (2026-11-03): the debriefing's soldier shown (game/debriefing_screens.cpp).
+  - ShowSoldier 0x0068f9f0 (past the squad: nothing; C_DebriefingMenu +0x1B4 the one shown; the death
+    frame, the face, the custom name or the full one, the rank's name or "Promoted to " the new one,
+    "Killed in action" / "No new information", the shipped game's own "Debug Experience :: %d" line),
+    ShowSkills 0x006905d0 (7 bars: shooting, stat 1, stat 0 (its maximum the stat and the gain),
+    endurance, stealth, first aid, lockpick; the mission's gain as the upgrade; no soldier: hidden),
+    SetBar 0x00690430, ShowRank 0x006907b0 (an aligned frame: the badge of the rank, or of a higher
+    promotion, in its place), ShowMedals 0x00690020 (an aligned frame, from the asm: the held medals'
+    second frames in the places in turn, the new one's first frame, its name and description from
+    g_rosterTexts 0x008ae900, the medals' texts), OnSoldierScroll 0x0068ff70 (the scroll bar's value).
+  - Harness: dbShow, dbSkills, dbRank, dbMedals, dbScroll (logging frames for the badges, medals and
+    places). All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g8.py (140 cases, 133 build; all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 357 errors in 65 files, 152 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+6); 6 functions in ported.txt. Stats: 9,065 of 12,306 functions by hand (81.7 % by size).
+  - The debriefing (0x0068c520..0x00690be0) is done. Next: the squad menu (0x00690be0..0x00697090).
+
+  PART 9g-ix DONE (2026-11-04): the squad screen's class, slots and squad (game/squad_menu.h/.cpp).
+  - C_SquadMenu (vtable 0x00815d50, 0x2B0 bytes; kinds 1 and 2; out of pending.h): +0x1B0 the slot
+    picked, +0x1B4 the roster soldier picked, +0x1B8 the roster's (else a slot's), the slots S_SquadSlot
+    (+0x1C8 x4, 0x14 bytes: locked, the roster soldier, the picture's, name's and rank's ids).
+  - OnStart 0x00690be0 (tables\HumanStore.def when the roster is empty; a campaign's kind 2 screen: the
+    operation's soldiers of g_operationMedalSoldiers 0x00841cb8 given the Defence Medal (6), the squad's
+    items back), OnStop 0x00693a50 (the description popup deleted), OnMessage 0x00691310 (Escape: the
+    selection screen closed, else "ARE YOU SURE?" back; 0x200006A: the selected slot's soldier swapped
+    into the first, the squad kept, the next step; 0x2000072: SelectFreeSoldier), IsOneSoldier
+    0x00690ba0 (lone wolf; the first campaign's missions 2 and 15 on their own), IsInSlots 0x006956a0,
+    FirstFreeSpeechSet 0x00695dc0, SyncSquad 0x00695e20 (those of no slot freed, the slots' given one (a
+    freed one, else new; autoEquip on kind 1), ordered as the slots, the freed deleted, speech sets),
+    SelectFreeSoldier 0x00694dd0 (the first free from the index, at most the 30th, else the last before
+    it: its roster control 0x4101000 | (index + 1) << 4 on the top screen), the slot's SetSoldier
+    0x00690ef0, ShowTexts 0x006910d0, HasControl 0x00690ec0; GetProfileName 0x006755d0.
+  - Dropped: the copy protection in OnStop. Fixed: SelectFreeSoldier with no screen shown (the original
+    looked the control up from null).
+  - Harness: sqSlot, sqOneSoldier, sqStart, sqSlots, sqSync, sqMessage, sqSelect (C_HumanStore::Get's
+    fake bounds-checked like the real one; the roster's load can fail). All 14 factory checkers in both
+    orders.
+  - Mutations: mutations/mutate_9g9.py (196: all killed but 15, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 356 errors in 65 files, 151 stubs. ret_audit --src: 54 (+2: SyncSquad and OnSoldierControl are callbacks with four stack arguments; SyncSquad fixed here, OnSoldierControl's signature in 9g-x).
+  - Ghidra: names/campaign_screens.txt (+13); 12 functions in ported.txt. Stats: 9,077 of 12,306 functions by hand (81.8 % by size).
+
+  PART 9g-x DONE (2026-11-04): the squad screen's screens and its medal popup (game/squad_menu.cpp,
+  game/screen.h/.cpp).
+  - BuildScreens 0x00691570 ("team members selection"; the first operation but the lone wolf's: "SELECTION
+    SCREEN"; the dead taken off first, the squad screen opened, the slots filled, the first free soldier
+    selected, the medal popup on "DESCRIPTION"), RemoveDeadSoldiers 0x00694810 (a campaign's: their items
+    back), FillSlots 0x00695b90 (the squad's soldiers into the slots in turn, their roster controls hidden,
+    locked but a kind 1 screen's not deployed), DescribeSquadScreen 0x00691fa0 (the later parts' builders,
+    the tick and hidden callbacks, the name's edit box "bnamexx", "bselected soldier info", the stats'
+    title), DescribeSelectionScreen 0x00691b30 (the slots' pictures photo03 .. 06, yes: continue, cancel;
+    C_SquadMenu +0x1C4 the selector), OnSelectionPicked 0x00691cc0, OnSelectionShown 0x00691db0.
+  - C_MedalDescriptionScreen (vtable 0x00815918, 0x98 bytes; C_DescriptionScreen's twin): Build 0x00669c00
+    ("description01" the box, "text01" / "text02", the "new_medal" place), HandleMessage 0x00669e90 (show,
+    hide, MEDAL_POPUP_MSG_SHOW 0x1000033: the medal's frame placed, its name and description from
+    0x2774 + 2 * medal), Tick 0x0066a100, Refresh 0x0066a2a0, HasPopup 0x006918f0, the destructor 0x00691920.
+  - OnSoldierControl (0x00694bc0) declared a callback (four stack arguments; ported in 9g-xii).
+  - Harness: sqDead, sqFill, sqSelection, sqShown, sqSquadScreen, sqBuild; screens: msNew, msBuild, msTick,
+    msMessages. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g10.py (202: all killed but 6: 3 equivalent, 3 on BuildScreens' first selection killed in 9g-xi; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 354 errors in 64 files, 149 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+7), names/screen.txt (+7); 14 functions in ported.txt. Stats: 9,091 of 12,306 functions by hand (81.9 % by size).
+
+  PART 9g-xi DONE (2026-11-04): the squad screen's roster and medals (game/squad_menu.cpp).
+  - DescribeRoster 0x00692100 (from the asm, an aligned frame: the templates photo03 .. 07 off; one
+    soldier: table19 .. 21 and member01 .. 03 half opaque; the list's frame "GB_Soldiers" under "panel01"
+    with the dead's template (photo03, the "death" frame on it); C_SquadMenu +0x1C0 the roster's selector;
+    the group "Panel01": the hiding list (its scroll bar 0x4102000, 5 shown, across by 0.0876, the
+    template's origin) of the roster's first 30 (the dead's or the living's template copied: index, face,
+    OnSoldierControl; the living's drag and drop callbacks), the scroll bar (the list's id)),
+    DescribeMedals 0x00692c40 (from the asm: "medals_panel" under the model, the medals' frames DSO_a / DSO_b
+    .. under it (+0x218), their pictures with OnMedalHover, their places medal01 .. 12 (+0x278)),
+    OnMedalHover 0x00690d50 (entered: the popup shown, a "Medal" copy of the first frame sent with
+    MEDAL_POPUP_MSG_SHOW; left: hidden).
+  - Harness: sqRoster, sqMedals, sqBuildSelect (BuildScreens with the roster's list built: the picture
+    copies with a mesh level, so 9g-x's first selection is observed; mutate_9g10's V 360 killed). All 14
+    factory checkers in both orders.
+  - Mutations: mutations/mutate_9g11.py (130: all killed but 1, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 351 errors in 64 files, 147 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+3); 3 functions in ported.txt. Stats: 9,094 of 12,306 functions by hand (82.0 % by size).
+
+  PART 9g-xii DONE (2026-11-04): the squad screen's stats, panel, places, buttons and a soldier picked
+  (game/squad_menu.cpp).
+  - DescribeStats 0x00693320 ("Panel02": the skills' rows, bars hlcpct00 .. 06), DescribePanel 0x006934f0
+    ("Panel03", hidden), DescribeSelected 0x00693560 (from the asm: the slots' frames under "P_SelectedSol",
+    the pictures' own meshes; the slots' controls' ids), DescribeButtons 0x00693880 (assign / detach,
+    accept, auto assign: the first operation's opens the selection screen, else SyncSquad and the next
+    step; back; the titles), OnSoldierInfo 0x00694930 (the stats or the other panel; g_squadInfoShown
+    0x008ae692), OnSoldierControl 0x00694bc0 (the index selected, ShowStats, "Assign" / "Detach", the
+    selector), PlaceRosterSelector 0x00695d30 (a callback too: four stack arguments).
+  - Harness: sqStats, sqSelected, sqButtons, sqInfo, sqControl; the earlier selection tests now see the
+    real OnSoldierControl (ShowStats faked). All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g12.py (198: all killed but 2, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 345 errors in 64 files, 145 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+8); 7 functions in ported.txt. Stats: 9,101 of 12,306 functions by hand (82.1 % by size).
+
+  PART 9g-xiii DONE (2026-11-04): a soldier assigned or detached (game/squad_menu.cpp).
+  - OnAssign 0x00694f30 (the assign / detach button's, the drop's: one soldier: the first slot only; a
+    slot's soldier detached, the slots after moved up, the next selected; a roster soldier into the first
+    empty slot, or replacing the fourth's unless he stays; his roster picture hidden / shown with the
+    hiding list's HIDE_ITEM / ITEM_COUNTED; the next free roster soldier selected; a quirk kept: the one
+    soldier mode shows the fourth slot's picture).
+  - S_SquadSlot +0x00 renamed `removable` (was `locked`: the drags and OnAssign move only a slot whose
+    byte is set; FillSlots clears it for a kind 1 screen's deployed soldiers).
+  - Harness: sqAssign. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g13.py (80: all killed but 4, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 344 errors in 64 files, 144 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+1); 1 function in ported.txt. Stats: 9,102 of 12,306 functions by hand (82.2 % by size).
+
+  PART 9g-xiv DONE (2026-11-04): a soldier's picture dragged and dropped (game/squad_menu.cpp).
+  - OnDragStart 0x00693ae0 (CONTROL_NOTIFY_0A: another's picture picked first; a staying slot's soldier
+    not dragged; the screen's half (x 0.5) sets assign / remove; the copy C_SquadMenu +0x1BC above the
+    picture, in the primary sector; the picture hidden), OnDragMove 0x00693e50 (08: by the cursor's move,
+    its depth the move's, as the equipment screen's), OnDrop 0x00693f00 (09, from the asm: on the slots'
+    half a roster soldier replaces a removable slot's soldier, a slot's soldier swaps places with the
+    hovered slot (C_Cursor +0x34) and its new picture is clicked; else OnAssign, or the picture shown
+    again), OnSoldierNotify13 0x006945c0 (13: OnAssign, unless a staying slot's soldier on the slots'
+    half).
+  - Harness: sqDragStart, sqDragMove, sqDrop, sqNotify13. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g14.py (134: all killed but 12, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 343 errors in 64 files, 143 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+4); 4 functions in ported.txt. Stats: 9,106 of 12,306 functions by hand (82.3 % by size).
+
+  PART 9g-xv DONE (2026-11-04): the squad screen's automatic selection (game/squad_menu.cpp).
+  - OnAutoSelect 0x00695740 (was "OnAccept": the button showing "AUTOMATIC SELECTION", 0xA5E, on the frame
+    "baccept and continue"; "bauto assign" shows "CONTINUE" 0xA5D: the model's names are swapped with the
+    texts. One soldier: a living free one of the first 30 at random. Else each slot from the first empty one
+    on (the slots after refilled): one of the five best living free ones at random, the first and third by
+    stat 4, the second by stat 7, the fourth by (stat 1 - stat 4 * 0.1f) * 10 (float, truncated); then the
+    first free roster soldier selected), KeepBest 0x006956d0 (the best five kept).
+  - The texts renamed after TEXTY.txt: "ADD" / "REMOVE" 0xA61 / 0xA62, "TEAM MEMBER SELECTION" 0xA5B (kind 2)
+    and "REPLENISH TEAM" 0xA5C (kind 1).
+  - Harness: sqKeepBest, sqAutoSelect (the picks predicted from srand over permuted stats). All 14 factory
+    checkers in both orders.
+  - Mutations: mutations/mutate_9g15.py (68: all killed but 3, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 342 errors in 64 files, 142 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+2); 2 functions in ported.txt. Stats: 9,108 of 12,306 functions by hand (82.3 % by size).
+
+  PART 9g-xvi DONE (2026-11-04): the squad screen's stats, medals and name; its tick and hiding
+  (game/squad_menu.cpp).
+  - ShowStats 0x00696140 (the stats' rows: bars and "%3.0f %%" / "%3.0f Kg" / "%3.0f" values, health's bar
+    full; the biography's text S_SoldierProfile +0x44; the name's box active with GetProfileName; nobody:
+    all emptied, the box inactive), ShowMedals 0x00696a30 (from the asm: up to six held: their first
+    frames in places 7 .. 12; more: the oldest as ribbons (second frames) in places 1 .., the last six's
+    first frames in 7 .. 12; a fix: without medal frames, nothing), OnNameEdited 0x00696c90 (the box's
+    text the soldier's own name, his slots' texts, the stats), OnScreenTick 0x00696d60 ("CONTINUE"
+    active only with the first slot taken), OnScreenHidden 0x00696ef0 (SaveCustomNames).
+  - The squad screen (0x00690ba0 .. 0x00696f00) is done; only CRT static initializers remain in 9g's range.
+  - Harness: sqShowStats, sqShowMedals, sqNameEdited, sqTickHide; the earlier tests now read ShowStats' own
+    biography message (the tests' profiles carry 0x7000 + their index) instead of a fake's log. The 9g-xii
+    case of ShowStats clearing the selection is gone: the real ShowStats keeps it, so OnSoldierControl's
+    second check can no longer be observed. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g16.py (117: all killed but 3, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 341 errors in 63 files, 141 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+5); 5 functions in ported.txt. Stats: 9,113 of 12,306 functions by hand (82.4 % by size).
+  - Part 9g is done (9g-i .. 9g-xvi).
+
+  PART 9h-i DONE (2026-11-04): the multiplayer game's set-up (game/mp_game_setup.h/.cpp, new; C_MpMap out of
+  pending.h). 9h (the main menu, 0x00611200..0x0063c740: about 350 functions not ported) is split by area as it
+  goes: the set-up and its file first, then the menu's class, its screens one by one.
+  - C_MpGameSetup (0x364 bytes; the main menu's multiplayer settings +0x30, the dedicated server's 0x006acc50):
+    the map list's maps by game type (deathmatch, teamplay, hd2multiplayer, cooperative: E_MpGameType's
+    order), five rotations of them, each type's rules (S_MpGameRules: S_MultiplayerSettings +0x228..+0x27C),
+    the server's name, password and port. LoadMapList 0x006189f0 (from the asm: Ghidra lost the containers'
+    calls; mpmaplist.txt, else GameData\mpmaplist.txt: GAMESTYLE, MAP (name and dir, else " UNKNOWN " for both;
+    mode FRONTLINE, desc), OBJECTIVE, AIRCRAFTATACK, BALANCED, ALLOWEDITEMS (version 0.1: its ITEMs,
+    0x006186e0; below 1e-8: the ids in the text, spaces at the end repeating the last), ALLOWEDPRESETS,
+    ZONEGRAPH; any other element ends the list, so does an ITEM of another version's ALLOWEDITEMS, met by the
+    list's walk; then the defaults: the rules, "H&D 2 SERVER" (0x7E9), port 11001), Clear 0x00617b80,
+    FindMap 0x00617cc0 (case ignored, the last first), Load 0x00618130 / Save 0x00617df0 (chunk 0x44D: the
+    rotations 0x1B6 (index 0x1B5, the lists 0x1A4 / 0x1A6 / 0x1A8 / 0x1B2 of names 0x4D2, found in the list:
+    S_MpRotation::Load 0x00617610 / Save 0x006172f0), the options 0x1B7, the rules 0x1B8 (older: 0x1AA /
+    0x1AE / 0x1B0 / 0x1B4, the rules' first 13 / 14 / 17 ints, 0x1AD), 0x1AB, 0x1AC, 0x1AF), the inline
+    constructors 0x00626740 / 0x006268e0, the destructors 0x006267f0 / 0x00626930; C_MpMap (0x48 bytes:
+    its strings unaligned at +0x01 / +0x05): AddObjective 0x006acbd0, the destructor 0x0061b470.
+  - Fixes: OBJECTIVE / AIRCRAFTATACK / BALANCED / ALLOWEDITEMS / ALLOWEDPRESETS before any MAP do nothing (the
+    original writes through a null map), a GAMESTYLE without a type ends the list (the original compares
+    null), a rotation index out of 0 .. 4 skips the rotation (the original writes out of bounds).
+  - Harness (_re/harness/mp_setup, new; 32-bit MinGW, stdio rw_data): 32 checks. Every MPSetings.sav on H:
+    (14 profiles) loaded and saved again with its install's mpmaplist.txt (the loose file, read before the
+    archives'): chunk 0x44D byte-identical (three name maps their list lacks: added to it, as the original
+    drops them too); six lists read and compared with check_dump.py's own reading (maps, objectives, items,
+    presets, the default rules); crafted cases (make_edge.py): the older chunks, the options, rotations
+    (twice, out of range, a list not known, a broken one ending the load), the elements that end the list,
+    no list, GameData\, another root, the list read again. Sabre Squadron's own list taken from its archives
+    with the ported rw_data.dll (scratchpad dtaextract.cpp).
+  - Mutations: mutations/mutate_9h1.py with the harness's own runner (mutate.py: only the mutated file rebuilt,
+    the checks in parallel): 266: 220 killed, 19 not building, 27 equivalent.
+  - Build: MSVC clean. Tier 1: 341 errors in 63 files, 141 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (new, +15); 15 functions and 4 vector helpers in ported.txt. Stats: 9,132 of 12,306 functions by hand (82.6 % by size).
+
+  PART 9h-ii DONE (2026-11-04): the main menu's multiplayer settings and the server browser's filter
+  (game/mp_game_setup.h/.cpp).
+  - C_MpMenuSettings (vtable 0x00813ac0, 0x3A8 bytes; the main menu's +0x1E4, made in its OnStart): the
+    browser's two server lists (+0x08, owned; +0x18; the kind shown +0x04: 1 or 2, SetListKind 0x0061b090,
+    GetList 0x0061b100), CountServers 0x0061b040 (the first list's servers and players), ClearServers
+    0x0061b0b0, IsInFirstList 0x0061b000 / IsInSecondList 0x0061afc0 (the menu's 0x00636400 deletes the
+    servers its thread found that are in neither: Ghidra had dropped that delete), the set-up (+0x30), the
+    filter (+0x394). Reset 0x0061a730 (the map list read again, nothing filtered), Load / Save 0x0061a750 /
+    0x0061a7c0 (the player's name) of PlayersProfiles\<player>\MPSetings.sav (sic): LoadFile 0x0061a830
+    (0x44D the set-up, 0x4B0 the filter; no file: Reset), SaveFile 0x0061abe0 (0x4E6 { 0x44D, 0x4B0 }); the
+    destructor 0x006269b0 (0x0061af70: the first list's servers deleted, the set-up cleared).
+  - S_ServerFilter (0x12 bytes; the browser's first list only, from the tier-1 filter 0x00633450's code):
+    the maximum ping, the game type (-1 any), unreachable (a ping above 9998), dedicated only, empty, full,
+    with a password, another version, a changed flag, two bytes (0x4B2) not identified. Reset 0x00616c50,
+    Load 0x00616f10 (an inner 0x4B0: version 0x514 = 0x42, then 0x4B3, the older 0x4B1 (no version flag),
+    0x4B2), Save 0x00616c80, the inline constructor 0x00626710.
+  - Harness (_re/harness/mp_setup; stubs of game/profile.h and game/controls.h): 54 checks. The 14 profiles'
+    whole MPSetings.sav loaded through the player's name and saved byte-identical; crafted filters (0x4B3
+    then the older 0x4B1, another version, no version, another inner chunk, the set-up after the filter),
+    each also saved and read back, then a player without a file (the defaults); the lists.
+  - Mutations: mutations/mutate_9h2.py: 142: 119 killed, 9 not building, 14 equivalent.
+  - Build: MSVC clean. Tier 1: 341 errors in 63 files, 141 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (+18; LoadFile / SaveFile take the name by value); 18 functions in ported.txt.
+    Stats: 9,150 of 12,306 functions by hand (82.8 % by size).
+
+  PART 9h-iii DONE (2026-11-04): the main menu's class, start, stop, update, messages and building
+  (game/main_menu.h/.cpp, new; C_MainMenu out of pending.h).
+  - C_MainMenu (vtable 0x00815e30, 0x240 bytes): +0x1B0 the lock of the servers the browser's thread finds
+    (+0x1D4), +0x1D0 the options handler, +0x1E4 C_MpMenuSettings, +0x1E8 the movie, +0x1EC the saved game
+    picked, +0x213 the profile picked (unaligned), the others named when their screens are ported. Its 14
+    screens (the ids' top bits): 1 MAIN MENU, 2 CHANGE PROFIL, 3 SINGLEPLAYER, 4 CONFIRM (the quit question),
+    5 / 7 SINGLE MISSION 2 (the missions; the saved games), 6 OPTIONS, 8 multiplayer menu (the browser),
+    9 create server, 10 PASSWORD, 11 Server Filters, 12 Game info, 13 MP Connect console, 14 ADD SERVER.
+  - OnStart 0x006264c0 (the lock, the settings, the options handler, the date on 0x4300000; dropped: the
+    copy protection's value), OnStop 0x00626ad0 (the found servers dropped, the settings and the handler
+    deleted, the game info's 12 styles released 0x0062f740, the lock), OnUpdate 0x00626b30, OnMessage
+    0x00626ca0 (the profile, network, missions, options and connection handlers in turn; Escape by the top
+    screen: the profile picked made current (SelectProfile 0x00622af0, a button's callback too), the
+    password / add-server popups closed, the quit question's own ids, else back; 0x200003A the movie;
+    0x2000075 the saved game loaded), BuildScreens 0x006271e0 (each screen described by its kind's function,
+    the quit question's model at (0.5, -0.375, -0.5)), DrainFoundServers 0x00636400 (Ghidra had dropped its
+    delete of the servers in neither list), the destructor 0x006c19a0 / 0x006c1980, GetTypeId 0x006c1970.
+  - Ghidra: 0x00621240, 0x00632390, 0x00638e00 were empty 1-byte functions over code never disassembled:
+    deleted and created again (654 and 455 bytes; 0x00638e00 a switch whose table Ghidra does not follow).
+    The index rebuilt; 69 decompiles still calling C_TextDatabase::GetText (C_GameTexts::Get) re-exported.
+  - Harness: main_menu_test.inc (new; check_mainmenu.py): mmStart, mmStop, mmUpdate, mmDrain (the deletes seen
+    through a hook in factory_test.inc's operator delete), mmMessage, mmEscape, mmSelect, mmBuild; the screens'
+    handlers and describers faked. All 15 factory checkers in both orders. mission_loader.cpp's local
+    SOUND_LOOP renamed (pending.h now reaches sound_module.h's).
+  - Mutations: mutations/mutate_9h3.py: 100: 90 killed, 10 equivalent.
+  - Build: MSVC clean. Tier 1: 338 errors in 61 files, 139 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (+24: the class's, the describers' and handlers' to come, g_gameInfoStyles);
+    11 functions in ported.txt (absorb not run: it would take the unported handlers whose only callers are
+    ported). Stats: 9,161 of 12,306 functions by hand (82.8 % by size).
+
+  PART 9h-iv DONE (2026-11-04): the main menu's screens' description and the main screen shown
+  (game/main_menu.cpp).
+  - Describe 0x00623e30 (8 KB, from the decompile checked against the asm's calls: 53 controls, 104 messages;
+    the decompile hid 0x00625ea0's forbidden-characters message and 0x00625ed0's frames): the main screen
+    (texts, resume, profile, single player, LAN / Internet games, cinematics (screen 7: so 7 is the
+    cinematics, not saved games), options, credits, exit), the profile screen (the name's box: no
+    ./\*?|<>:" characters, 17 at most but in Japanese; the profiles' list, the four difficulties,
+    create / rename / delete, back), the single-player screen (the side switch's frames ss1 .. ss6, ss8,
+    ss7; the modes' nine buttons, each called on the cursor's entering and the click), the quit question
+    (yes posts the kept quit, no drops it, ok hidden); the ten other screens empty.
+  - OnMainShown 0x006276a0 (from the asm where Ghidra garbled the last save's lines): the saved game picked
+    cleared, the network game closed, the profile's name picked; none: "none", no save, resume off, "create
+    a profile", the modes off; else the name (posted twice, as the original), the last save's mode, mission
+    and date (none: "no save", resume off), "change profile", the modes on.
+  - Harness: mmDescribe (the whole description as the original's, English and Japanese), mmMainShown; the
+    build test with the real description (15 screens, their callbacks). The screens' other callbacks faked.
+  - Mutations: mutations/mutate_9h4.py: 170: 159 killed, 11 not building, none surviving.
+  - Build: MSVC clean. Tier 1: 338 errors in 61 files, 139 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (+7 callbacks; 0x00614140 is DescribeCinematicsScreen). Stats: 9,163 of
+    12,306 functions by hand (83.1 % by size).
+
+  PART 9h-v DONE (2026-11-04): the main menu's profile screen but its buttons (game/main_menu.cpp).
+  - DescribeProfileScreen 0x00621210 (ScanProfiles: each profile a line of the list's description,
+    AddProfileLine 0x00621110; PostProfileLine 0x00620fb0 posts them for 9h-vi), RefreshProfile 0x00622ed0
+    (no profile: no name, no difficulty white, rename / delete off; else the name, its line selected, its
+    difficulty's button white, rename / delete on), OnProfileShown 0x006237e0, OnProfileList 0x00623b40
+    (a click: the line's profile made current; a double click (13) on the current one: back), OnDifficulty
+    0x00622b50 (only while picking a new profile's difficulty, m_step 3 (+0x1C8, the browser's too): the
+    difficulty 1 .. 4 set, its button white, the profile saved), OnProfileMessage 0x00621240 (Escape taken
+    while picking; CONTROL_MSG_REMOVE_SELECTED: the profile deleted, DeleteProfile 0x006aef40 (declared, not
+    ported), its line removed, the next picked; 0x20000C3: the name's box edited).
+  - Harness: pfDescribe, pfRefresh, pfShown, pfList, pfDifficulty, pfMessage (main_menu_test.inc; the scan,
+    the delete, the difficulty and the profile's save faked). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h5.py: 125: all killed but 5 not building and 2 equivalent.
+  - Build: MSVC clean. Tier 1: 331 errors in 61 files, 136 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (+4); 8 functions in ported.txt. Stats: 9,171 of 12,306 functions by hand
+    (83.3 % by size).
+
+  PART 9h-vi DONE (2026-11-04): the main menu's profile screen's buttons (game/main_menu.cpp).
+  - OnProfileButton 0x006214d0 (5.6 KB; the decompile checked against the asm's posts and calls): delete asks
+    (0x7D4; yes posts CONTROL_MSG_REMOVE_SELECTED, 9h-v's); rename / create put the name box in edit (step 2 /
+    1; create empties it, no difficulty white), the rest off; the box's Escape: the screen as it was (the step
+    kept, as the original); its Return: the name typed (its trailing ASCII spaces cut; fix: at most 99
+    characters, the original copies it into 100 bytes whole and the box has no limit in Japanese): creating:
+    CreateProfile (-1 / -2: questions 0x251C / 0x251D, 0x20000C3 back to the box), made: current, saved, the
+    list read again, its difficulty to pick (step 3); renaming: nothing typed: as it was; Rename (-1 / -2:
+    0x2526 / 0x2527), renamed: the list read again, the last profile kept, step 0.
+  - Harness: pfButtons (the delete question's answers through the message box), pfEscape, pfCreate, pfRename
+    (the profile code faked: CreateProfile, Rename, SetLastProfile). The fakes log bytes above 0x7F as <hex>:
+    the mutation runner reads the output as UTF-8 (a raw 0xE9 crashed it).
+  - Mutations: mutations/mutate_9h6.py: 131: all killed but 3 not building and 10 equivalent.
+  - Build: MSVC clean. Tier 1: 328 errors in 60 files, 135 stubs. ret_audit --src: 52.
+  - Stats: 9,172 of 12,306 functions by hand (83.4 % by size).
+
+  PART 9h-vii DONE (2026-11-04): the main menu's single-player screen (game/main_menu.cpp).
+  - OnSingleplayerShown 0x0063b7f0 (the saved game picked cleared, the single missions' buttons on),
+    OnSingleplayerButton 0x0063b9a0 (the description emptied; the cursor over a mode: its side's frame
+    (0 .. 7), the heading 0x8A2, a blank, its text (0x8A3 campaign, 0x8A4 lone wolf, 0x8A5 carnage, 0x8A6 /
+    0x8A7 the single missions); over back: no side; a click: no side, no network session, back, or the mode:
+    the first / second campaign (current index) in play mode 1 / 2 / 3 started (0x6001033), or the single
+    missions (0x6001074) normal (mode 0) or carnage (3)). 0x0063c2a0 is std::deque's map allocation
+    (inlined PostControlMessage): in ported.txt.
+  - Harness: spShown, spHover, spClick. All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h7.py: 68: all killed but 2 not building and 1 equivalent (a comment).
+  - Build: MSVC clean. Tier 1: 327 errors in 60 files, 134 stubs. ret_audit --src: 52.
+  - Stats: 9,175 of 12,306 functions by hand (83.5 % by size).
+
+  PART 9h-viii DONE (2026-11-04): the main menu's missions screen (game/main_menu.cpp; planned as 9h-viii and
+  9h-ix, done as one: the code shares its constants and tests).
+  - DescribeMissionsScreen 0x006392b0 ("video" off, "screen_shot" its own mesh, the groups GB_Campaign and
+    GB_SingleMission, the templates blong / bshort; fix: missing templates return false, the original uses
+    them unchecked), DescribeCampaignList 0x00639b40 (operations "Campaign%02d" and missions "Mission%02d"
+    through both campaigns), DescribeSingleList 0x0063a1a0 ("SMMission%02d", the first campaign's first mission
+    left out), OnMissionPick 0x0063b310 (the description from the mission's text id 0x1194 on, up to six
+    lines after it, carnage's note), ShowSaveSlot 0x0063b0f0 (the play mode's save slot; "load the last save"
+    on only for its own mission).
+  - OnMissionsMessage 0x00638e00: start a mission (a single mission set up in its campaign; else the save before
+    it loaded, except for each campaign's first mission; advanced; state 2), the single-mission flag / play
+    mode (0x2000031 / 0x2000070), start the campaign (0x2000033: played before, its missions; else the roster
+    loaded when empty, MENU_MSG_NEXT), the single missions (0x2000074), the secret key (Ctrl+Alt+Shift+N on the
+    single missions: every mission shown, m_progress 100, or back to the best progress). OPEN_POPUP (0x2000002)
+    is taken too (jump table checked). ShowCampaignMissions 0x0063a670 (operations' lines and their missions up
+    to the one after the progress), ShowSingleMissions 0x0063ab60, OnOperationPick 0x0063af20 (a callback no
+    line registers). Fields named: m_singleMissions +0x1F8, m_progress +0x20C, m_operationPicked +0x210.
+  - Harness: mpLists, mpDescribe, mpSaveSlot, mpPick, mxCampaign, mxSingle, mxMessages, mxSecret, mxStart,
+    mxOperation; the fake OnMissionsMessage dropped. All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h8.py: 315: 277 killed, 32 not building, 6 equivalent (the unreachable null-group check, values never read, a boundary the enclosing if excludes)
+  - Build: MSVC clean. Tier 1: 319 errors in 59 files, 132 stubs. ret_audit --src: 52.
+  - Stats: 9,184 of 12,306 functions by hand (83.7 % by size).
+
+  PART 9h-ix DONE (2026-11-04): the main menu's cinematics screen (game/main_menu.cpp).
+  - DescribeCinematicsScreen 0x00614140 (an AND ESP,-16 frame: the decompile garbles its locals; the template,
+    group and CloneFrame arguments read from the asm): "video" / "text00" off, "screen_shot" its own mesh, the
+    group GB_Cinematics, blong / bshort off (fix: missing templates return false, the original uses them
+    unchecked); hidden / shown callbacks; title 0x83D, picture, the movie control (type 0x22), play "bexit01"
+    (0x8D8, off), back, the scroll bar, the movies' list (AddMissionList now takes the scroll bar's id): a line
+    "Anim%02d" per movie with its text (style 0xC), the label 0x9F, the version, "Load Last save" and load
+    hidden.
+  - OnCinematicsHidden 0x00615660 (the movie closed, m_movie emptied), OnCinematicsShown 0x00615820 (the seen
+    movies' lines only), OnMoviePlay 0x00615450 (GAME_STATE_PLAY_AVI), OnMoviePick 0x00615470 (m_movie the
+    file; play on; the movie closed and the file played).
+  - Harness: ciDescribe, ciShown, ciPick (a C_MovieList stub in stub/game/profile.h); the build test's
+    cinematics screen real (its group mmgci). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h9.py: 96: 83 killed, 10 not building, 3 equivalent (the unreachable
+    null-group check, a text id Get always sets).
+  - Build: MSVC clean. Tier 1: 319 errors in 59 files, 132 stubs. ret_audit --src: 52.
+  - Stats: 9,189 of 12,306 functions by hand (83.9 % by size).
+
+  PART 9h-x DONE (2026-11-04): the main menu's password screen (game/main_menu.cpp).
+  - DescribePasswordScreen 0x00637890: the model placed as the quit question's (0.5, -0.375, -0.5); the
+    question 0x7D3, the box "binput" (forbidden " \t>-\"", 0x7D2 in style 0xE; Return / Escape), "byes*" /
+    "bno*" (0x7D1 / 0x7D0), "binput01" / "binput02" hidden; every callback is OnPasswordInput 0x00637a40,
+    which jumps on m_step: 7 (the browser asking a server's password) OnServerPassword 0x00637c10, else
+    OnParentalLockCode 0x00637fd0.
+  - OnServerPassword: Return / yes with a password: g_mpSettings->password, g_sessionPasswordSet, the
+    connection's state 0 (m_connectState +0x1F4, named), the popup replaced by the connect screen (13);
+    Escape / no: the kept messages dropped (1), the popup closed. m_step back to 0, except yes with no password
+    (checked in the asm). OnParentalLockCode: Return / yes: the lock cleared with the code (when set) or set,
+    the options' check box 0x18A03000 (SET_CHECKED_QUIET) as the lock is, the kept messages posted, closed;
+    Escape / no: the check box, the kept messages dropped (0 by Escape, 1 by no), closed. Fix (both): yes with
+    no box finds no text (the original uses FindControl's result unchecked).
+  - Harness: pwDescribe, pwServer, pwLock (a C_GameConfig parental lock in the stub); the build test's
+    password screen real (its model placed). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h10.py: 89: 84 killed, 5 not building.
+  - Build: MSVC clean. Tier 1: 317 errors in 58 files, 131 stubs. ret_audit --src: 52.
+  - Stats: 9,193 of 12,306 functions by hand (83.9 % by size).
+
+  PART 9h-xi DONE (2026-11-04): the main menu's filters screen (game/main_menu.cpp).
+  - DescribeFiltersScreen 0x00638660 (RET 8: the model unused): shown OnFiltersShown; "scan style" (a spin
+    control: GetGameTypeTextId -1 .. 3), "bshort00" (titled edit box 0x9FB, range 0 .. 9999, digits only), six
+    highlight check boxes ("responding only" 0xA00, "dedicated only", "that are not empty", "that are not full",
+    "without password" 0xA04, "current version" 0xA13; the names have spaces, Ghidra's labels show '_'),
+    "baccept" (back, OnFiltersAccept), "bback", the title 0x9F7, the version, two labels.
+  - OnFiltersShown 0x00638aa0: the controls from m_mpSettings->m_filter (game type + 1 selected; the ping as
+    SET_NUMBER value2, none (not above 0) shown as 9999; the six flags SET_CHECKED). OnFiltersAccept 0x00638910:
+    each value differing kept and the filter marked changed; m_mpSettings->Save(); the browser's server list
+    (0x20900000) cleared through the menu's HandleMessage; m_step 6.
+  - The menu's helpers: SendToControl 0x0062c5b0 (a copy to the control found), GetControlValue 0x0062c5d0
+    (check boxes / highlight check boxes / check groups / spin controls: GET_CHECKED's value; titled edit
+    boxes: GET_NUMBER's value2 (checked in the asm); titled combo boxes: GET_TEXT's value; else -1).
+    C_Control::GetType() added (m_type, +0x54).
+  - Tier 1: the helpers' callers' decompiles (0x0062d030, 0x0062d490, 0x0066da30) re-exported: the stale
+    C_MainMenu::FUN_0062c5d0 became C_MainMenu::C_MainMenu::GetControlValue (+20 errors) until then.
+  - Harness: flDescribe, flShown, flAccept, flHelpers; the build test's filters screen real (the old check for
+    "scan" now matches the exact log line, not "scan style"). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h11.py: 81: 70 killed, 11 not building.
+  - Build: MSVC clean. Tier 1: 312 errors in 57 files, 130 stubs. ret_audit --src: 52.
+  - Stats: 9,198 of 12,306 functions by hand (84.0 % by size).
+
+  PART 9h-xii DONE (2026-11-04): the main menu's game info screen (game/main_menu.cpp).
+  - DescribeGameInfoScreen 0x0062f4b0 (RET 8, the model unused): the twelve styles of the table at 0x0083fad8
+    made into g_gameInfoStyles (released by OnStop); shown and "brefresh status": OnGameInfoRefresh, the
+    screen's tick (CONTROL_NOTIFY_SCREEN_TICK): OnGameInfoTick; "LB_Players", "text_01", "bjoin game" (posts
+    0x600109B and 0x600102A: the browser's OnNetworkMessage, later), "breturn", the texts, the players' header
+    ("text_": player 0xA0A, kills 0xA21, points 0xA22), "allied" / "axis" faced front.
+  - OnGameInfoRefresh 0x006319a0 (m_server +0x21C, named: the browser's server picked; none: false): the boxes
+    emptied, "Reading Data from server ...", the axis' score hidden in a cooperative game (type 3), the status
+    asked for: C_NetGame::QueryServerStatus 0x007240d0 (declared; a thread's callback). OnGameInfoStatus
+    0x00631c60 (__fastcall, the status in ECX): kept in g_gameInfoStatus 0x008acab8 under m_foundLock while
+    the main menu runs and no password was asked. OnGameInfoTick 0x00631c20: a status kept shown, dropped.
+    ShowGameInfo 0x0062fa30 (__stdcall, 8 KB of posts): only on the game info screen with a server picked;
+    the players (the last first: "!" team 0, "=" team 1 / 2 in another style; name, kills, points), the
+    scores, the server's lines (name: 0x7E9 when the font cannot show it, the address a.b.c.d (0x0062f9f0),
+    ping, players "%d / %d", dedicated / internet / password yes-no), the rules (cooperative: difficulty
+    0x5014 + n, team lives, lives), the map and the limits and flags (labels from TEXTY / TEXTY_DD).
+  - S_ServerStatus / S_StatusPlayer (pending.h; the players an MSVC 6 vector's three pointers), S_ServerEntry's
+    address +0x68, port +0x6C, internet +0x81 (its map shrinks to 0x35).
+  - Harness: giDescribe (each style checked against the table, exactly twelve made), giRefresh, giShow,
+    giStatus; the build test's game info screen real, its styles given back between its two builds (else
+    the 90-style list fills over the missions and TextBoxTest crashes). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h12.py: 175: 160 killed, 11 not building, 4 equivalent here (the lock, one
+    thread).
+  - Build: MSVC clean. Tier 1: 310 errors in 56 files, 128 stubs. ret_audit --src: 52.
+  - Stats: 9,204 of 12,306 functions by hand (84.2 % by size).
+
+  PART 9h-xiii DONE (2026-11-04): the main menu's create server screen's description (game/main_menu.cpp).
+  - DescribeCreateServerScreen 0x00628610: not startable (m_startable +0x212, named); shown / hidden callbacks;
+    "bhostname" (the setup's server name; OnHostNameChanged on notification 0x0B), "style" (the game types;
+    OnServerStyleChanged), the maps panel, the options panel (their results unchecked: a panel not described
+    leaves the controls after it their places), "voice chat" (GetVoiceCodecTextId 0x006acb60, declared:
+    0xB40 + n), "bstart" (off; 0x6001029, OnNetworkMessage's start), "bback", seven texts, "maplist preset"
+    (a combo box: header 500, IN ORDER and CUSTOM 1 .. 4; OnMapPresetPicked on 0x400E000), two labels.
+  - DescribeMapsPanel 0x00628f80 and DescribeOptionsPanel 0x0062a060 (AND ESP,-16 frames: ported from the asm with
+    the new _re/tools/slots.py, a stack-slot annotator). The maps panel: MP_MAPS_PANEL and its groups
+    (gr_mp_deathmatch / zonegame / hiddenmaps / coopmaps / sel_list), bmap_A / bmap_B and two scroll bars moved
+    under it; DescribeMapList 0x00629bc0 (a hiding list named as its group, a line "MPMap%02d" per map of
+    C_MpGameSetup::maps[type]: its name, its index, the four map line callbacks) per game type,
+    DescribePickedMapList 0x00629740 (a pool list of 50 lines; RET 0x10: a second argument unused, the original
+    passes the cooperative maps). The options panel: "internet server" / "dedicated server" (their SET_CHECKED
+    a byte 0 over a slot's garbage: the check box reads the low byte), "scroll01", "gr_setings" (rows: copies of
+    yes_no_tmpl, bshort00, binput, combo_tmpl): cooperative difficulty, players, team lives, lives (-1 ..
+    99), point / round limits, round count, preparation / respawn / spawn protection times, inverse damage
+    ("Self Damage"), the yes / no rules, the password (forbidden " \t>-\""), the port (1024 .. 65530).
+  - The create server screen's callbacks (shown 0x0062c2a0, hidden 0x0062c290, host 0x0062ca80, style 0x0062cd50,
+    options 0x0062d490, preset 0x0062c970, the map lines' double click 0x0062ca10, drag 0x0062e870 / 0x0062e9f0 /
+    0x0062eb60) are declared for later sub-parts (faked in the harness).
+  - Harness: csDescribe (every tree, the origins, the frames made / moved / copied, each frame missing alone);
+    the build test's create server screen real (seven more dummies). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h13.py: 251: 226 killed, 23 not building, 2 equivalent (unreachable null
+    checks).
+  - Build: MSVC clean. Tier 1: 308 errors in 56 files, 127 stubs. ret_audit --src: 52.
+  - Stats: 9,209 of 12,306 functions by hand (84.6 % by size).
+
+  PART 9h-xiv DONE (2026-11-04): the create server screen's callbacks: shown, hidden, the host, the preset, start
+  (game/main_menu.cpp, game/mp_game_setup.cpp).
+  - OnCreateServerShown 0x0062c2a0 (the settings loaded; the host's name, the game type, internet (the session's
+    listing kind == 1), dedicated, the password and the port (SET_NUMBER: the text / value2), the voice codec,
+    the rotation), OnCreateServerHidden 0x0062c290 (saved), OnHostNameChanged 0x0062ca80 (notification 0x0B:
+    the box's text the server's name, none: the name shown again), OnMapPresetPicked 0x0062c970 (GET_TEXT's
+    value: the rotation set up), ShowPickedMaps 0x0062c780 (the current group's maps into the picked pool list;
+    the menu's hint fields (m_unknown00, m_on) hold a map line's drag: the dragged one current; nothing dragged:
+    the posts wrapped in CONTROL_MSG_NOTIFY leave / 0x05), RefreshStartButton 0x0062cbf0 (m_startable: maps and a
+    name).
+  - C_MpGameSetup: GetCurrentGroup 0x00617d50 (the rotation's group of the game type, another type: the last),
+    SetGameType 0x00619720, SelectRotation 0x00619af0 (0 .. 4; the first, "in order", every map of the list).
+    Fields named: gameType +0x18, voiceCodec +0x10, dedicated +0x15, rotation +0x6C. The stub's
+    S_MultiplayerSettings gains unknown174 (the listing kind). The mp_setup harness: 54 of 54.
+  - Harness: csSetup, csShown (through a saved MPSetings.sav: Load's own), csStart, csPicked, csHost.
+    All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h14.py (both files): 63: 51 killed, 11 not building, 1 equivalent (a Clear
+    whose lists are replaced right after).
+  - Build: MSVC clean. Tier 1: 308 errors in 56 files, 127 stubs. ret_audit --src: 52.
+  - Stats: 9,218 of 12,306 functions by hand (84.7 % by size).
+
+  PART 9h-xv DONE (2026-11-04): the create server screen's callbacks: the game type, the options
+  (game/main_menu.cpp, game/mp_game_setup.cpp).
+  - OnServerStyleChanged 0x0062cd50 (GET_SELECTED's value; -1: nothing): the game type set up, the picked maps,
+    start, ShowMapList 0x0062ce10 (its list shown, the scroll bar on it, refreshed; the others hidden),
+    ShowServerOptions 0x0062d950 (every row from the current rules: the difficulty's index is the rule - 1;
+    inverse damage on with friendly fire, the respawn time with respawning; then the game type's rows:
+    deathmatch / team play / hidden maps 2 .. 32 players, the point limit (not hidden maps), respawning
+    (hidden maps only), friendly fire and team balance (not deathmatch), the round limit; cooperative 2 .. 6,
+    respawning forced on and its box off, team balance forced off, its difficulty, lives, team lives on, the
+    point and round limits off).
+  - OnServerOptionChanged 0x0062d490 (none: false): the screen's own boxes (by their places 4 / 5 / 8): internet
+    (C_MpGameSetup::internet +0x14, named), dedicated, the voice codec, without the dependent rows; a row (its
+    id's low 4 bits off): its rule (the difficulty + 1), the password (GetEditText 0x0062c6d0: a titled edit
+    box's text, else empty) or the port; then inverse damage / the respawn time on by friendly fire /
+    respawning (also for an unknown row; checked in the asm). C_MpGameSetup::GetCurrentRules 0x00617dc0.
+  - Harness: csRules, csMapList, csOptions (every game type), csStyle, csOption (every row, the rows under the
+    options list as FindControl needs). All 15 factory checkers in both orders; the mp_setup harness 54 of 54.
+  - Mutations: mutations/mutate_9h15.py (both files): 91: 84 killed, 7 not building.
+  - Build: MSVC clean. Tier 1: 301 errors in 55 files, 126 stubs. ret_audit --src: 52.
+  - Stats: 9,224 of 12,306 functions by hand (84.9 % by size).
+
+  PART 9h-xvi DONE (2026-11-04): the create server screen's map lines: double click, drag and drop
+  (game/main_menu.cpp, game/mp_game_setup.cpp).
+  - OnMapLineDoubleClick 0x0062ca10 (notification 0x13, a parent: a picked line's map taken off the rotation, a
+    list's added). OnMapLineDragStart 0x0062e870 (AND ESP,-16; from the asm): a copy of the line's highlight frame
+    (CreateVisual of its visual type, Duplicate, facing (0, 1, 0), 0.1 in front, under the scene's primary
+    sector); the menu's hint holds the drag (m_unknown00 the index, m_unknown04 from a game type's list,
+    m_frame the copy, the map's name in style 0xD, m_on). OnMapLineDragMove 0x0062e9f0 (the copy with the cursor;
+    its depth is the move's: the asm stores 0 over z; a picked map over another picked line moved there).
+    OnMapLineDrop 0x0062eb60 (the copy released; a picked map over the lists' area taken off; a list's over the
+    picked area added last, then moved to the line under the cursor; the hint reset). The areas (x 0.08 .. 0.26
+    / 0.28 .. 0.46, y -0.68 .. -0.3) compare as doubles (FCOMP double): 0.28f and -0.3f are inside, 0.08f not.
+  - C_MpGameSetup: GetCurrentMaps 0x00617da0, RemoveMap 0x00619730, AddMap 0x00619930 (both RET 8: a second
+    argument the callers push as 0, unused), MoveMap 0x00619780. C_Control::GetParent() added.
+  - Harness: csMoves, csDouble, csDragStart, csDragMove, csDrop (the fake cursor's position, move and hovered
+    id; GmCreateVisual for the copy). All 15 factory checkers in both orders; mp_setup 54 of 54.
+  - Mutations: mutations/mutate_9h16.py (both files): 97: 77 killed, 17 not building, 3 equivalent (two bounds
+    no float reaches exactly; a null store Reset repeats).
+  - Build: MSVC clean. Tier 1: 301 errors in 55 files, 126 stubs. ret_audit --src: 52.
+  - Stats: 9,232 of 12,306 functions by hand (84.9 % by size).
+
+  PART 9h-xvii DONE (2026-11-04): the hosted session set up from the create server screen (game/main_menu.cpp).
+  - SetUpHostedSession 0x0062d030 (OnNetworkMessage's start server, a later sub-part): g_mpSettings Reset
+    (S_MultiplayerSettings::Reset 0x006ad600, declared: the defaults, its maps deleted), hosting; the session's
+    name block (0x168 bytes: the server's name in the first 100, the player's in the next 260; fix: cut to their
+    fields, the original copies them unbounded); the game type, internet (unknown174), dedicated, the cooperative
+    rules (another type: difficulty 3, unlimited lives, no team lives), the rules, the password, the port, the
+    voice codec (unknown178) from the screen's controls; copies of the rotation's maps (C_MpMap's copy
+    constructor now defaulted: 0x0062d030 inline and its vectors' 0x0062f020 / 0x0062f360 / 0x0062ed20).
+    S_MultiplayerSettings gains maps (+0x280) and currentMap (+0x290).
+  - Harness: hsSession (every field from the controls, the maps copied, another type's defaults, long names cut).
+    All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h17.py: 45: 43 killed, 2 not building.
+  - Build: MSVC clean. Tier 1: 301 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,235 of 12,306 functions by hand (85.0 % by size).
+
+  PART 9h-xviii DONE (2026-11-04): the main menu's connect screen (game/main_menu.cpp).
+  - DescribeConnectScreen 0x00632150: the model placed as the quit question's; the screen's tick OnConnectTick,
+    hidden OnConnectHidden 0x00632270 (the console cleared, no wait); "text", "byes*" / "bno*" hidden, "bok" (0x7D8;
+    it posts Escape); g_connectStyle 0x0083fdd0 made (the style table at 0x0083fdd4; never released).
+  - OnConnectTick 0x00632560 (two jump tables, read from the asm; the session menu's console's twin): another
+    screen's or hidden: false; waiting (m_connectWait +0x1FC, named); m_connectState: 0 start (the squad
+    cleared, the roster reloaded, the console cleared; hosting: wait 1500, the dedicated server's host (7) or the
+    server's (3); joining: connect (1); else an error, failed), 1 connect (the settings' server), 2 joining
+    (connected: done; 0 / 2 / others: still; full, bad password (no password step here, unlike the session
+    menu), bad CD key, 6 (0x22E9), bad version, 8 (0x1CD4): their lines, failed: wait 2500, 6), 3 host
+    (C_NetGame::Host with the session's name block and the menu's +0x1F0), 7 the dedicated server
+    (C_NetGame::HostDedicated 0x00722a80, declared), 4 hosted (0x2000069 to the network handler), 8 (the menu
+    quits), 5 / 6 nothing.
+  - OnConnectMessage 0x00632390: Escape (MENU_MSG_ESCAPE is 0x200000A) with the connect screen on top: the popup
+    closed, 0x2000028 posted, start refreshed; taken.
+  - Harness: cnDescribe, cnHidden, cnTick (every state and join status), cnMessage; the fake OnConnectMessage
+    dropped (the chain and Escape tests now see the real one: Escape on the connect screen cancels); the build
+    test's connect screen real (its model placed; its style given back). All 15 factory checkers in both
+    orders.
+  - Mutations: mutations/mutate_9h18.py: 109: 100 killed, 6 not building, 3 equivalent.
+  - Build: MSVC clean. Tier 1: 301 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,239 of 12,306 functions by hand (85.1 % by size).
+
+  PART 9h-xix DONE (2026-11-04): the main menu's browser: its description, list and sorting (game/main_menu.cpp).
+  - DescribeBrowserScreen 0x00634050: tick OnBrowserTick, shown OnBrowserShown 0x006356d0 (no single mission); the title,
+    the sort arrows ("barrows", a toggle button) and the five headers (OnServerSort), DescribeServerList, "REFRESH LIST"
+    (OnRestoreList), "UPDATE LIST" (OnRefreshList), the address popup (off), filters, join (off), create a server, the
+    game info (off), back (the list emptied), the version, the logos, the online line, the favourites' two buttons.
+  - DescribeServerList 0x00634580 (aligned frame, from the asm): GB_ServerList made, "sever00" moved in and copied
+    ("Server1" .. "Server11"); the scroll bar and the list (type 0x18): picked OnServerPicked 0x006360c0 (m_server,
+    pinged with C_NetGame::PingServer 0x00724070 (declared) and the empty IgnoreServer 0x00635980 (made a function in
+    Ghidra), join / game info on, the favourite button with Internet games), 13 OnServerJoin 0x00636280, changed
+    OnServerCountChanged 0x006364b0 ("%d/%d ----- %d %s", text 0x22AE).
+  - OnServerSort 0x00636640: the arrows: the direction toggled (0xC0); a header: its key, its own key: the arrows
+    flipped (which sorts).
+  - Harness: bwDescribe, bwList, bwShown, bwSort, bwPicked, bwJoin, bwCount (a screen forwarding to its controls);
+    the build test's browser real (its group frame). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h19.py: 151: 139 killed, 12 not building (corrected in 9h-xxii: 1 had
+    survived, killed by a new check).
+  - Build: MSVC clean. Tier 1: 303 errors in 55 files (+2: OnNetworkMessage's copy calls the ported callbacks; part
+    9h-xxi ports it). ret_audit --src: 52.
+  - Stats: 9,246 of 12,306 functions by hand (85.2 % by size).
+
+  PART 9h-xx DONE (2026-11-04): the main menu's browser: its searches, the servers found, the favourites
+  (game/main_menu.cpp, game/mp_game_setup.cpp).
+  - OnBrowserTick 0x00635ba0 (states in m_step: 4 pinging the list, 9 pinging with the unreachable hidden, 5 searching
+    the LAN, 6 the list shown again): 6: emptied, every line again, idle; 9: the servers answering listed once
+    (S_ServerEntry::listed +0x98: the entry is 0x9C bytes); 4 / 5: ListFoundServers 0x00635710; 15 s without an
+    answer (m_searchTime +0x200) stops the search, sorted every second (m_sortTime +0x204), the network polled every
+    10 ms (g_netPollTime 0x0083fe08, C_NetGame::PollSearch 0x00723610 declared).
+  - AddServerLine 0x00635f10 (the found list filtered by S_ServerFilter), AddFoundServer 0x00635990, OnServerFound
+    0x00635b70 (the net thread's callback), ListFoundServers (LAN: one server an address).
+  - OnRestoreList 0x00634f90 ("REFRESH LIST" / "STOP": the list's servers reset (C_MpMenuSettings::ResetServers
+    0x00619ca0, S_ServerEntry::Reset 0x007252c0 from the net module), MAIN_MSG_PING_LIST 0x2000098), OnRefreshList
+    0x00635360 ("UPDATE LIST" / "STOP": the LAN searched, MAIN_MSG_SEARCH_LAN 0x2000027), OnFavoriteToggle 0x00634950
+    (copied to / removed from the favourites), OnFavorites 0x00634b30 (the two lists switched).
+  - Harness: bxLine, bxFound, bxList, bxTick, bxRestore, bxRefresh, bxFavorite, bxFavorites. All 15 factory checkers
+    in both orders; mp_setup 54 of 54.
+  - Mutations: mutations/mutate_9h20.py: 217: 194 killed, 16 not building, 7 equivalent (corrected in
+    9h-xxii: 16 had survived; 9 killed by new checks).
+  - Build: MSVC clean. Tier 1: 295 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,257 of 12,306 functions by hand (85.3 % by size).
+
+  PART 9h-xxi DONE (2026-11-04): the main menu's network handler and the join's password (game/main_menu.cpp).
+  - OnNetworkMessage 0x00633490 (its jump table read from the binary): LAN games (settings read, the LAN searched, the
+    browser's title / buttons, opened), Internet games (C_MpMenuSettings::LoadServerList 0x0061a0f0, declared; the
+    list shown again), the server started (GAME_STATE_NEXT_MAP), 0x200009B (Internet: SaveServerList 0x00619d00,
+    declared), the create server screen's start (startable: saved, SetUpHostedSession, C_NetGame::FirewallBlocks
+    0x007328d0 declared: the XP firewall question 0x22EA, its answers set m_openFirewall +0x1F0, renamed), the
+    connection started (0x20000C9: the connect popup), joining (the server copied into the session; a password:
+    AskJoinPassword 0x00637a60; else g_sessionPasswordSet), the LAN searched / the list pinged
+    (C_NetGame::SearchServers 0x00724040, PingServers 0x00724090 declared), the searches stopped (none: the network
+    closed), Escape on the browser.
+  - Harness: nmLan, nmInternet, nmLeave, nmStart, nmJoin, nmSearch, nmEscape; the fake handler dropped (the chain and
+    Escape tests adjusted: Escape on the browser now goes back). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h21.py: 108: 99 killed, 3 not building, 6 equivalent (corrected in 9h-xxii:
+    11 had survived; 5 killed by new checks).
+  - Build: MSVC clean. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,259 of 12,306 functions by hand (85.4 % by size).
+
+  PART 9h-xxii DONE (2026-11-04): the server list's file (game/mp_game_setup.cpp).
+  - C_MpMenuSettings::LoadServerList 0x0061a0f0 / SaveServerList 0x00619d00: PlayersProfiles\ServerList.bin (one
+    for all players): root 0x28A, the Internet's list 0x291 and the favourites 0x295, each a count 0x28D and servers
+    0x296; loading deletes both lists first; 0x294 (and 0x28F in the first list) skipped, another chunk ends its list.
+  - S_ServerEntry::Save 0x007253f0 / Load 0x00725660 (the net module's): chunk 2000, the name and map with their
+    lengths (read 0x32 at most), the fields (+0x84 and +0x94 now ints: the entry is all saved).
+  - Harness: slFile, slOdd (written / read back, every field; odd files built with C_chunk).
+  - Mutation counts of 9h-xix .. xxi corrected (a grep counted "0 of 1 models fail []" as killed); new checks killed
+    1 + 9 + 5 of their survivors, the rest equivalent (see each mutate file).
+  - Mutations: mutations/mutate_9h22.py: 99: 80 killed, 7 not building, 12 equivalent.
+  - Build: MSVC clean. mp_setup 54 of 54. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,263 of 12,306 functions by hand (85.5 % by size).
+
+  PART 9h-xxiii DONE (2026-11-04): the main menu's add server popup (game/main_menu.cpp); part 9h complete.
+  - DescribeAddServerScreen 0x006370c0 (aligned frame, from the asm): the model placed as the quit question's;
+    "ENTER THE IP ADDRESS", the address box (255.255.255.255, 15 characters), the port box (11001, digits only),
+    yes / no (OnAddServerButton), "binput" hidden.
+  - OnAddServerButton 0x00637510: yes with both boxes filled: a server (sscanf "%d.%d.%d.%d", the first number the
+    lowest byte, the last unmasked; atoi port; game type 4, Internet, " ??? ", this version) added to the list shown
+    and its line; yes / no close the popup, idle; another control: false.
+  - The build test's descriptions are all real now (no MM_DESCRIBE fakes left).
+  - 9h's leftovers, left to tier 1: 0x00620670 (a CD key comparison callback: no references in code or data, dead);
+    0x00631cb0 / 0x00631ce0 / 0x00631ff0 / 0x00632060 (std::vector<S_StatusPlayer> size / insert / erase and
+    S_StatusPlayer's copy: called only by the net module, 0x0072xxxx .. 0x0074xxxx).
+  - Harness: asDescribe, asButton. All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h23.py: 58: 47 killed, 6 not building, 5 equivalent.
+  - Build: MSVC clean. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,265 of 12,306 functions by hand (85.6 % by size).
+
+  PART 9i-i DONE (2026-11-05): the hero stats menu (game/hero_stats_menu.*, new).
+  - Campaign screen kind 0 (none in the shipped campaigns; type 9): C_Kind0Menu renamed C_HeroStatsMenu (vtable
+    0x00815c30, a C_MenuState of no fields of its own; GAME_STATE_TYPE_HERO_STATS_MENU).
+  - BuildScreens 0x00697480: "HERO STATS" (heros_screen) and three "CONFIRM" screens; OnMessage 0x00697090: Escape (on
+    the quit question: no; else the question, MENU_MSG_PREVIOUS kept back), accept 0x200006A (the roster loaded when
+    empty; the 18 skill rows' numbers, GetSkillValue 0x00696fb0, into the first soldier's stats: rows 1, 2, 5, 6, 7,
+    10, 11, 14, 15; MENU_MSG_NEXT).
+  - DescribeHeroScreen 0x006978d0, DescribeSpecialization 0x006979e0 and DescribeSkills 0x00697d20 (aligned frames, from
+    the asm): the groups GRSkillSpec / GRSkills made under the model (AddModelFrame), "skill01" copied per skill
+    (AddSkillRow 0x00698230: Health .. German, 0.02 apart; their bases 80, 75, ...); DescribeQuitQuestion 0x006977e0.
+    GetSkillValue's null top screen fixed (-1).
+  - Harness: hero_stats_test.inc / check_herostats.py (new; the factory build links hero_stats_menu.cpp): hsType,
+    hsValue, hsEscape, hsAccept, hsQuit, hsHero, hsSpec, hsSkills, hsRow, hsBuild. All 16 factory checkers in both
+    orders.
+  - Mutations: mutations/mutate_9i1.py: 161: 146 killed, 12 not building, 3 equivalent.
+  - Build: MSVC clean. Tier 1: 288 errors in 54 files. ret_audit --src: 52.
+  - Stats: 9,276 of 12,306 functions by hand (85.7 % by size).
+
+  PART 9i-ii DONE (2026-11-05): the multiplayer session's settings (game/mp_settings.cpp, game/mp_text_ids.cpp, new).
+  - S_MultiplayerSettings (g_mpSettings): Reset 0x006ad600 (the defaults: port 11001, the rules' defaults, +0x21C a
+    C_str "\1\2\3", the server entry reset), SetRules / GetRules (the 22 rules by name in S_MpGameRules' order; the
+    harness's stub struct orders them differently), ApplySetupRules 0x006acc10, MakeSetup 0x006acc50 / DeleteSetup
+    0x006acd30 (+0x294 C_MpGameSetup *setup, new), RemoveMap 0x006acd60, AddMap 0x006ace20, Clear 0x006ad560,
+    SelectMap 0x006ad780 (no maps: fixed, the original divided by zero), GetCurrentMap 0x006ad830.
+  - GetVoiceCodecTextId 0x006acb60 / GetGameTypeTextId 0x006acb80 (stdcall; their tables 0x008429d4: 0xB40 ..,
+    0xB4A ..): mp_text_ids.cpp, not linked in the harness (its builds fake both); checked by a scratch program
+    against the binary's tables.
+  - Harness: mp_settings_test.inc / check_mpsettings.py (new; the factory build links mp_settings.cpp; the main
+    menu's Reset fake dropped): msReset, msRules, msSetup, msApply, msRemove, msAdd, msClear, msSelect. All 17
+    factory checkers in both orders; mp_setup 54 of 54.
+  - Mutations: mutations/mutate_9i2.py: 140: 122 killed, 9 not building, 9 equivalent.
+  - Build: MSVC clean. Tier 1: 288 errors in 54 files. ret_audit --src: 52.
+  - Stats: 9,287 of 12,306 functions by hand (85.8 % by size).
+
+  PART 9i-iii DONE (2026-11-05): the session and its map sent to the clients (game/mp_settings.cpp,
+  game/mp_game_setup.cpp).
+  - S_MultiplayerSettings: WriteRules 0x006ad990 / ReadRules 0x006ada30 (the listing and the game type 8 bits, the 22
+    rules 16 bits each, then the net module's limits g_netMaxFreq 0x009820d8, g_netMaxPing 0x009820d4,
+    g_netMaxInactivity 0x009820dc (ms; sent in s): new globals, named in Ghidra), WriteCurrentMap 0x006ad840,
+    ReadCurrentMap 0x006ad860 (the maps replaced by the one read, current).
+  - C_MpMap::Write 0x006adad0 / Read 0x006adc40 (the strings, five bytes read back unsigned, the description, the
+    presets, the objectives and items with 8-bit counts), S_MpMapObjective::Write / Read 0x006ade20 / 0x006ade80,
+    S_MpMapItem::Write / Read 0x006adee0 / 0x006adf20. Their vectors' helpers 0x006adf60 .. 0x006ae590 are
+    std::vector's.
+  - Harness: ReplicationTest in mp_settings_test.inc / check_replication.py (new; the fake streams' strings defined
+    for the factory build): rpWriteRules, rpReadRules, rpWriteMap, rpReadMap, rpCurrentMap. All 18 factory checkers in
+    both orders; the mp_setup build links src/net/bitstream.cpp now (54 of 54).
+  - Mutations: mutations/mutate_9i3.py: 89: 82 killed, 7 not building.
+  - Build: MSVC clean. Tier 1: 291 errors in 54 files (+3 in the net module's f_007277b0, a local of Ghidra's
+    S_MultiplayerSettings layout). ret_audit --src: 52.
+  - Stats: 9,297 of 12,306 functions by hand (85.8 % by size).
+
+  PART 9i-iv DONE (2026-11-05): the session's description file (game/mp_settings.cpp).
+  - S_MultiplayerSettings::WriteDescription 0x006ad200 (C_NetGame::HostDedicated's; null: mpdesc.txt): the session's
+    name, the game type, the maps, the domain, dedicated, the port (not a dedicated LAN server's), the password, the
+    first 13 rules by the server config's keywords (the net module's 0x204-byte keyword table at 0x00846088; the game
+    types at 0x008492ec, the domains at 0x00849d00, the codecs 1 .. 7 at 0x0084d36c: copied as strings), the net
+    limits, the rest of the rules, the game's voice codec, "server". Fixes: the codec's keyword entry was passed by
+    value to %s (any codec crashed the original); a file not opened, out-of-range indexes (the neighbouring
+    keywords were read): nothing / empty.
+  - Harness: DescriptionTest in mp_settings_test.inc / check_description.py (new): dsWrite (a real file in the run's
+    directory, read back). All 19 factory checkers in both orders.
+  - Mutations: mutations/mutate_9i4.py: 45: 37 killed, 3 not building, 5 equivalent.
+  - Build: MSVC clean. Tier 1: 291 errors in 54 files. ret_audit --src: 52.
+  - Stats: 9,298 of 12,306 functions by hand (85.8 % by size).
+
+  PART 9i-v DONE (2026-11-05): the profile deletion, part 9's static initialisers; part 9i complete.
+  - DeleteProfile 0x006aef40 (game/player_profile.cpp; no name: every profile's contents), ForgetProfileName
+    0x006af0f0; DeleteDirectoryTree 0x006e9170 and the wrappers GetCurrentDir 0x006edc80, RemoveDir 0x006edca0,
+    DeleteFileAt 0x006edcb0, SetAttributes 0x006edcc0 (common/os_files.cpp; read-only files and directories made
+    normal and tried again). Fix: a directory not entered deletes nothing (the original went on in the working
+    directory, which for an unknown profile name was PlayersProfiles). These five were not in Ghidra's index.
+  - Profile harness: mode "delete" (real directories in the game directory, cleaned up after; read-only ones, a file
+    held open). Mutations: mutations/mutate_9i5.py (run by a scratchpad script against the profile harness; the
+    "." / ".." skip not mutated: a mutant recursing into ".." deletes outside the scratch tree): 42: 35 killed,
+    3 not building, 4 equivalent.
+  - Part 9's compiler-generated static initialisers (each file's guarded header static's atexit and its iostream
+    Init / _Winit objects, 281 of them in 0x00611200 .. 0x006b0000) and the map vectors' std::vector internals
+    (0x006adf60 .. 0x006ae590) recorded in ported.txt's absorbed sections (82 tier 1 files of nothing else gone).
+  - Left in tier 1: GetCommandProcessor 0x0069f520 (its class C_CommandProcessor, vtable 0x0081659c, is the dedicated
+    server's console module 0x007426a0 ..; ported with it); unreferenced: 0x0069f620 / 0x0069f840 / 0x0069f8a0 /
+    0x0069f900 (an orphan state's start, stop, input and render: no vtable holds them), S_SquadSoldier's SaveToFile
+    0x006a4350 / LoadFromFile 0x006a4650, 0x006acff0 (AddMap's twin).
+  - Build: MSVC clean. Tier 1: 291 errors in 54 of 405 files. ret_audit --src: 52.
+  - Stats: 9,586 of 12,306 functions by hand or absorbed (86.0 % by size).
+
+  PART 10 PLAN (2026-11-05): the network module (0x00720000..0x0074a200, ~146 KB left). The game's own
+  replication runs over DirectPlay8 (C_NetGame, 0x5080 bytes); the server browser's master-server code is the
+  GameSpy SDK. Bottom-up:
+  10a the replicated values' tracks (0x0073fbe0..0x00741530, 6 KB): the track base (vtable 0x00816490: a value
+    interpolated towards the one received, its rate, the quantised delta sent per player), the position track
+    (0x008164e0) and the direction track (0x00816530: yaw / pitch angles, the turn sign);
+  10b the replicated objects (0x0073dd30..0x0073fbe0 and 0x00741530..0x00741700, 9 KB): their base (vtable
+    0x00816438, the two quantisation triples), C_NetProperty (0x0081641c, 0x580 bytes: a position and a direction
+    track, the last values sent to each of 32 players), C_NetObject (0x00816448: its properties, message queues and
+    state handlers), C_NetReplication (0x0081646c: the objects, the local one, the view-cone filter 0x00816594),
+    C_NetObjectMessage (0x00810630), S_PerfTimer;
+  10c the transport under C_NetGame (0x00745300..0x0074a200, 16 KB: Winsock and threads, the classes of vtables
+    0x008165f0 .. 0x008166dc; split when started);
+  10d.. C_NetGame (0x00720000..0x00733000, 69 KB: the DirectPlay8 interfaces declared by hand (the MSVC SDK has no
+    dplay8.h), init / host / connect, the session queries, the messages, the players / teams / scores, the
+    commands, the voice (0x00816598), the firewall and the CD key; split by subject when started);
+  10x the dedicated server's console: C_CommandProcessor (0x007426a0..0x007442e0: Execute 6 KB) and C_ConsoleState
+    (0x007442e0..0x00745300).
+  The GameSpy SDK (0x00733000..0x0073d260, 29 KB: the master-server list, the query / report protocol) is
+  ported like the rest (the user asked to keep it, 2026-11-05), though its master servers are gone.
+
+  PART 10a DONE (2026-11-05): the replicated values' tracks (net/net_track.*, new).
+  - C_NetQuantized (vtable 0x00816438): the base of the net values, objects and messages: the read and write
+    quantisation triples (value, delta, rate; SetReadQuantizations 0x004c1360 / SetWriteQuantizations 0x004c1390 store
+    the non-null ones), Update, Refresh.
+  - C_NetTrack (vtable 0x00816490, 0x90 bytes): current / target / net value / rate / rate sent / step, the speed, the
+    lag, the flags (NET_TRACK_*: the components, keep current 0x1000, delta 0x2000, derive the rate 0x4000, send the
+    rate 0x8000, extrapolate 0x10000, move the target 0x20000), the snap distance; Reset 0x0073fe50, Update 0x00740580,
+    Write 0x0073fee0 (per player: nothing, a delta or the value; the server forwards the net value), Read 0x007401e0,
+    the setters / getters 0x0073fc10..0x0073fd90. C_NetPositionTrack (0x008164e0). C_NetDirTrack (0x00816530, 0xC0
+    bytes): yaw / pitch / angle, the direction vector, the turn sign (2 bits after the value), fixed quantisations
+    (g_netAngle*Quantization 0x00982f10 / e90 / e10), SetDirection 0x007409f0, Update 0x00741010 (the short way round;
+    beyond 0.785 rad the yaw moves at the rate's x, as the original), EndRead 0x00740b70 (the rate, at most 8).
+  - g_netUpdatePeriod 0x00982f90 (0.1), g_netServerSide 0x00982f94. S_NetQuantization::Contains 0x0073dd30 /
+    WithinSteps 0x0073dda0; C_NetMessage::WriteQuantized now returns its result (any component above its step), as
+    the tracks use it, and takes a quantisation directly (the player overloads kept).
+  - pending.h's track declarations replaced; the call sites renamed by slot: the direction track's SetValue(dir,
+    angle) is SetDirection, its GetValue (slot +0x28) GetCurrent; human.cpp's SetTarget (+0x20) is SetNetValue,
+    human_controller's GetValue (+0x2C) GetTarget.
+  - Harness: _re/harness/net (new, MinGW: net_test.cpp, build.bat). Mutations: mutations/mutate_10a.py (the
+    scratchpad's mutnet.py builds the harness in parallel trees): 312: 236 killed, 16 not building, 60 equivalent.
+  - Build: MSVC clean. Tier 1: 291 errors in 54 of 405 files. ret_audit --src: 52.
+  - Stats: 9,629 of 12,306 functions by hand or absorbed (86.2 % by size).
+
+  PART 10b DONE (2026-11-05): the replicated objects (net/net_object.*, new).
+  - C_NetObjectMessage (vtable 0x00810630): the sent mask (+0x20, set by QueueMessage; MarkSent 0x004c13c0,
+    SentToAll 0x0073fb80), the reference count (+0x24, was unknown24), the age (Update 0x004c13f0, Expired 0x0073fb90).
+  - C_NetProperty (0x0081641c, 0x580 bytes): a position and a direction track sharing the flags word (6-bit fields;
+    field 0 the components 7, field 1 3), the last values written to each of 32 players; Write / Read / Update,
+    SetFlags / SetField / SetLag, the quantisations (all stored, the direction track keeps its own).
+  - C_NetObject (0x00816448, 0x80 bytes): its properties (property 1 made with it; AddProperty 0x0073e460), the
+    received and outgoing message lists (QueueMessage 0x0073e970, PopMessage 0x0073e9d0, ClearMessages 0x0073ea30),
+    the send mask (NET_SEND_PROPERTIES / MESSAGES / STATE), the live flag (+0x3C, was unknown3C: SetLive), forwarding
+    (+0x40, was unknown40: SetForwarding), the players written to this second, the state handlers and the message
+    factory; Write 0x0073e6d0 (properties as deltas after the first write each second; each message once per player
+    of its side, off the queue and deleted when sent to all and held by no queue), Read 0x0073e890 (the server
+    forwards the messages, marked as sent to the players given), Update 0x0073eb20 (a property's target stops after
+    0.4 s without data). Fix: ClearMessages does not loop for ever on a message still held (the original does not
+    move on unless it deletes).
+  - C_NetReplication (0x0081646c, 0xE8 bytes; g_netReplication): the objects (9-bit ids, 0x1FF ends), the local
+    player's object (+0x30), the view cone filter (C_NetViewCone 0x00816594: within cos 0.737 of the viewer's
+    direction), the 1-bit write / read epochs (were SetUnknownC4 / C8), the bits counters, the factory makers
+    (+0xE0 / +0xE4) InitObject 0x0073f880 gives each object; Read 0x0073f320 drops the data of objects not live or of
+    the other epoch into a scratch object (its messages leak, as in the original); the local object's messages are
+    dropped. Tick30 is GetLocalObject().Update.
+  - S_PerfTimer 0x0073ee20..0x0073ee90 (game/perf_timer.cpp, ported in 2c) recorded as ported; the objects' static
+    initialisers and std::list / vector internals absorbed. A few accessors stay out of line (the vehicle harness
+    fakes them: GetTrack, GetFlags, SetSendMask, SetLive, GetLocalId, ...).
+  - Harnesses: net (net_object_test.inc: messages, properties, objects, queues, writes / reads / forwarding,
+    silence, the view cone, the replication's epochs, scratch and local objects, ownership with delete tracking);
+    the vehicle harness's fakes derive from the real C_NetObject now; mp_setup builds again (its stub's
+    S_ServerEntry and the net player table; its test data is not on this machine). All factory checkers and the
+    11 other vehicle builds' baselines clean.
+  - Mutations: mutations/mutate_10b.py: 342: 292 killed, 27 not building, 23 equivalent.
+  - Build: MSVC clean. Tier 1: 288 errors in 53 of 398 files. ret_audit --src: 52.
+  - Stats: 9,717 of 12,306 functions by hand or absorbed (86.4 % by size).
+
+  PART 10c PLAN (2026-11-05): the transport is the game's own UDP protocol (not DirectPlay; that is for the voice and
+  the session enumeration, part 10d on): 10c-i the packets, pools, channels and transport messages; 10c-ii the socket
+  (0x00747910..0x00748e80: Winsock, a send thread, fragmentation into 500-byte pieces with a 24-bit checksum and an
+  XOR key, reassembly with std::sort) and the connections and their manager (0x00746180..0x00747400: a
+  connection's three channels, its ping every 2 s, the receive thread, the lookup by id / address).
+  PART 10c-i DONE (2026-11-05): the transport's packets, pools, channels and messages (net/net_channel.*, new).
+  - C_NetRefCounted (0x00816678), C_NetPacket (0x0081665c, 0x20 bytes: the channel / late flags, the size, the kind,
+    the 23-bit sequence number, the last bit, the data; Write / Read copy the data byte for byte: C_BitStream::
+    WriteRawBytes / ReadRawBytes, new, the original's inline copy), C_NetPool (g_netPool 0x00983150: 1000-byte
+    buffers, bigger ones malloc'ed, and packets, 16 made at a time, locked).
+  - C_NetChannel (0x008165f0: numbers, the outgoing and incoming lists, a packet up to 9 older than the newest
+    marked late), C_NetReliableChannel (0x00816614: held until acknowledged, sent again after 200 ms doubling to 5 s,
+    7 a call; the 23-bit acknowledgement of the in-order run; repeats dropped), C_NetOrderedChannel (0x00816638:
+    hands them on in order); UnwrapSequence 0x00745520 (23-bit numbers widened around a reference).
+  - The transport messages: C_NetHeader (0x00816688: type, connection id), C_NetPacketList (type 1), C_NetPing
+    (type 2: the echo gives the round trip), C_NetEmptyMessage.
+  - Harness: net (net_channel_test.inc). Mutations: mutations/mutate_10c1.py: 232: 186 killed, 22 not building,
+    24 equivalent. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 288 errors in 53 of 389 files. ret_audit --src: 52.
+  - Stats: 9,805 of 12,306 functions by hand or absorbed (86.5 % by size).
+
+  PART 10c-ii DONE (2026-11-05): the transport's socket, connections and manager (net/net_socket.*,
+  net/net_transport.*, new); part 10c complete.
+  - C_NetSocket (0x94 bytes): Winsock UDP (Open / Close; a send thread fed by QueueSend), datagrams sealed (Seal /
+    Unseal: a 24-bit checksum of the dwords after a 3-byte header, the dwords XORed with key 0x1742BDCD plus the size
+    x 0x800), messages of 500 bytes or more sent as fragments (index, message number, the last mark) queued one per
+    millisecond (FlushDelayed, g_netLastFragmentTime 0x00983100) and reassembled (sorted with the MSVC6 std::sort,
+    common/msvc_sort.h; expired after 20 s), the bytes counters, the local address. Fix: the send thread's events
+    made before the thread (the original made them after starting it).
+  - C_NetConnection (0x00816684, 0x50 bytes): the three channels, Send / Receive, pings every 2 s (the round trip),
+    Flush (resends, gathers the packets with the acknowledgements into g_netSendStream 0x009830e8), HandleDatagram
+    (packets to the game's callback, fastcall (connection, data, size, kind, flags); a late plain packet dropped;
+    pings echoed), packets of another session dropped. The packet's +0x18 is that session bit (was "last").
+  - C_NetTransport (0xDC bytes, C_NetGame +0x33C): the connections (by id / address), the socket, the receive
+    thread (Tick: pings, a flush every 500 ms; ReceiveAll), Start / Stop.
+  - Harness: net (net_socket_test.inc, net_transport_test.inc: real loopback exchanges, fragments, pings, sessions,
+    the threads). Mutations: mutations/mutate_10c2.py (socket): 247: 181 killed, 22 not building, 44 equivalent;
+    mutate_10c3.py (connections): 225: 151 killed, 21 not building, 53 equivalent (locks and thread plumbing mostly).
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 278 errors in 51 of 383 files. ret_audit --src: 52.
+  - Stats: 9,889 of 12,306 functions by hand or absorbed (86.7 % by size).
+
+  PART 10d PLAN (2026-11-05): C_NetGame (g_netGame 0x0097d070, 0x5080 bytes; 0x00722b60..0x00733000, 59 KB left), by
+  band: 10d-i the object, its messages and pump (0x0072c280..0x0072f230: CreateMessage / SendMessage (C_NetMessage's
+  +0x18..+0x28: unreliable, pending, channel, target, type), the received / outgoing queues (+0x1F0 / +0x1FC, locked
+  by +0x430), ReceiveMessages, Process, SendMessages, Command, the watchdog +0x4D0, the constructor 0x0072e1d0 /
+  destructor, Init / Shutdown / Close, the player table's basics); 10d-ii the players, teams and scores
+  (0x0072f230..0x00731af0); 10d-iii hosting, connecting, the LAN search and pings (0x00722b60..0x00726470); 10d-iv
+  and -v the game messages (0x00726470..0x0072c280: the join handshake 0x00726470, the received commands 0x00727bd0 /
+  0x00728820, SendGameMessage, PostCommand); 10d-vi the rest (0x00731af0..0x00733000: load progress, connection state,
+  the firewall, the CD key). Then 10e the dedicated server's configuration and console (0x00720000..0x00722b60,
+  C_CommandProcessor::Execute, C_ConsoleState) and 10f the GameSpy SDK (ported, not stubbed).
+
+  PART 10d-i DONE (2026-11-05): C_NetGame's object, message streams, frame, votes, closing and player basics
+  (net/net_game.*, net/dplay8.h, new; S_NetPlayerState and C_NetGame moved out of game/pending.h).
+  - The object (g_netGame 0x0097d070): the constructor / destructor, Init (the defaults, 32 player slots), Shutdown,
+    Close (now or at the next frame: GameSpy reporting stopped, the voice objects, the LAN search's socket, the query
+    thread's handle, DirectPlay's server and client cancelled / closed / released, the transport stopped, the queues
+    given back to g_netPool). DirectPlay 8 declared by hand (net/dplay8.h: the SDK no longer has dplay8.h). The locks
+    (+0x418 players, +0x430 queues) kept as opaque CRITICAL_SECTION storage (C_NetLock) so net_game.h stays free of
+    windows.h (its SendMessage / DispatchMessage macros); C_NetGame::SendMessage is SendNetMessage in the port.
+  - The streams: BeginMessage / CreateMessage(Ex) (the three channels' streams, the server's unreliable one, the
+    direct one; the type in 5 bits), SendNetMessage, the received / outgoing queues (TransportCallback 0x0072c730),
+    DispatchNetMessage (0x14 a game command to the app's HandleServerCommand 0x00727bd0 / HandleClientCommand
+    0x00728820; the modules' DispatchMessage / CallUnknown28 only with a mission loaded), ReceiveMessages, the
+    replication's data (kind bit 0x20).
+  - The frame: Process (every m_sendPeriod ms, the join timing out after 30 s, the streams ended and sent to every
+    connected player, the replication written), UpdateLags (every 3 s: the resend times and the objects' lags from the
+    round trips; the server drops links silent for 5 s and kicks for high pings (three over m_maxPing) and
+    inactivity; its unused time argument kept: RET 4), SendJoinData, SendMessages (the dedicated server's console
+    commands; the bandwidth history every 100 ms, averaged every sixth).
+  - Command (kick by name / slot, the level scan: ScanFrameBounds, SetLevelBounds, BitsForRange), the votes
+    (S_NetVote: Start / Begin / Vote / CountYes / End, UpdateVote (was UpdateWatchdog / UpdateWatchmeleeTracker),
+    PrintVoteResult, PostVote), the player table's basics (FindPlayer(ByName), names, humans, LockPlayers, scores:
+    ResetScores, ResetPlayerStats, GetBestScore, AddScore; SetPlayer, SetVoiceValue, SendChat).
+  - Harness: net/build_game.bat (netgame_test.exe: the game app, game, modules, console, profile, IGraph, DirectPlay
+    faked; perf_fake.cpp: a clock the tests move on). Mutations: mutations/mutate_10d1.py: 634: 469 killed, 45 not building, 120 equivalent or unobserved (locks, the constructor's resets the member initialisers repeat, one-past-the-end bounds, the replication's write positions).
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 278 errors in 51 of 376 files. ret_audit --src: 52.
+  - Stats: 9,961 of 12,306 functions by hand or absorbed (87.1 % by size).
+
+  PART 10d-ii DONE (2026-11-05): C_NetGame's players, teams and scores (net/net_players.cpp, new). The plan's band
+  0x00730f00..0x007319e0 (the LAN query server: the +0x55C table of 100 0xB8-byte entries, the port + 2 socket, the
+  0xA0-XORed checksummed packets, the random names) moves to 10d-iii with the LAN search.
+  - The kills (OnPlayerKilled: deaths, kills, the scores, the teams' sums; objectives: a team point; a team kill 10
+    off, the third kicks; co-op: a non-player's killer scores, 10 off for allies and neutrals by the actor's role;
+    Fix: the co-op killer's slot checked with <, the original's <= let one past the end through), the ranks
+    (SendPlayerScore: 0..7 by the score thresholds 10..80 at 0x0084507c, sent by the player's controller;
+    SetPlayerRank, was SetPlayerClass: the change printed, texts 0x22C4..0x22C7; S_NetPlayerState::GetRankName
+    0x00725ed0, a deathmatch by the uniform's side; Fix: it returns a C_str), the kicks (KickPlayer: game message 0x11
+    and the reason's text; KickPlayerByName), IsPlayerAdmin (+0xA1), CanPlayerRespawn (was IsNetPlayerConnected: the
+    co-op lives or the respawn rule).
+  - The scores' message: WriteScores / ReadScores (the players' stats, S_NetStats::Write / Read 0x00749ed0 /
+    0x00749f40 in 46 bits; the pings from DirectPlay's GetConnectionInfo; the round's times; the co-op lives, -1 sent
+    as 0x7E as the original; the teams' stats, scores and wins). The stats are S_NetStats (9 ints, converting to
+    int *).
+  - The teams: CountTeams / CountTeamPlayers / CountPlayers, ApplyPendingTeams, Get / SetPlayerTeam, GetLocalTeam,
+    TeamsBalanced (within 1.5 of the share), BalanceTeams (its first argument unused; team 0 against the second's
+    percentage), IsTeamAlive, AddTeamScore, PrintTeams (C_game::PrintColored 0x0069c2a0: empty), GetLocalHuman,
+    IsPlayerSpectating, S_NetPlayerState::IsSpectating.
+  - FillServerStatus (S_ServerStatus's players now a std::vector; its +0x3C / +0x54 named), FlipSessionParity
+    (S_NetPlayerState +0xAC: session), ResetReplication, GetConnectionState, SetLevelBounds (the replication's first
+    quantisation; the net library's table g_netQuantizations 0x00982de8, C_NetQuantizationTable).
+  - Harness: net/netplayers_tests.inc (with build_game.bat; 257 checks with 10d-i's). Mutations:
+    mutations/mutate_10d2.py: 480: 359 killed, 50 not building, 71 equivalent or unobserved (locks, array sizes, one-past-the-end bounds, arguments the fakes ignore). Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 278 errors in 51 of 375 files. ret_audit --src: 52.
+  - Stats: 10,008 of 12,306 functions by hand or absorbed (87.3 % by size).
+
+  PART 10d-iii DONE (2026-11-05): the LAN search, the GameSpy reporting and the CD-key checks
+  (net/net_search.cpp, net/gamespy.h, new). The plan's 10d-iii is split: the DirectPlay side (Host, Connect, the
+  address objects, EnumHosts and the pings, the voice, TakeBandwidth, the status serialisation 0x00726010..
+  0x007263c0) is 10d-iv; the game messages (0x00726470..0x0072c280) 10d-v and -vi; 0x00731af0..0x00733000 10d-vii.
+  - The LAN search: StartSearch (GameSpy's browser for the settings' listing 1, else DirectPlay's EnumHosts, whose
+    second argument is the original's scratch slot), StartLanSearch (ServerBrowserNew "hd2" / "sK8pQ9", the twelve
+    keys, the role 0x12), PollSearch, SearchServers, OnBrowserCallback / AddBrowserServer (an S_ServerEntry for
+    C_MainMenu::OnServerFound, now public; Fix: the names copied within their fields).
+  - The reporting: StartReporting (qr2 on the port + 3, gcd 0x2EE, the key socket), AnswerQueries (qr2_think,
+    gcd_think locked, the key checks), the qr2 callbacks ReportServerKey / PlayerKey / TeamKey / KeyList / Count
+    and the empty ReportError 0x00723cf0 (made a function in Ghidra). The SDK's entry points are declared in
+    net/gamespy.h under their GameSpy names (port in 10f) and named in Ghidra.
+  - The CD keys (S_KeyQuery, 0xB8: the server's hundred at +0x55C, the client's at +0x4D40; KEY_*): the key socket
+    on the port + 2 (OpenKeyServer), the packets XORed with 0xA0 and checksummed (Receive / SendKeyPacket),
+    ProcessKeyQueries ("c:<name>" challenged with RandomName(8) 0x0097d048, "r:<response>:<name>" to
+    gcd_authenticate_user, the verdicts m / e / u every 200 ms, 15 s expiries; Fix: the names within their room),
+    OnKeyChecked (g_netGame's checks, as the original's absolute address), StartKeyQuery / RunKeyQuery (the join
+    status 5 bad, 6 in use (NET_JOIN_KEY_IN_USE), 8 timed out), DropKeyQuery, FindFreeNameNumber ("%s%i").
+    C_NetGame's +0x4E4 is m_serverBrowser, +0x4EC / +0x4F0 the search's and status's callbacks, +0x4D3C m_keySocket,
+    +0x4DF8 m_reporting.
+  - Harness: net/netsearch_tests.inc (with build_game.bat: GameSpy faked; a loopback key exchange with the server on
+    a thread; ports by the process id; 319 checks with 10d-i/-ii's). Mutations: mutations/mutate_10d3.py: 371: 280 killed, 40 not building, 51 equivalent or unobserved (locks, buffer sizes, millisecond boundaries, one-past-the-end bounds).
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 268 errors in 51 of 375 files. ret_audit --src: 52.
+  - Stats: 10,032 of 12,306 functions by hand or absorbed (87.4 % by size).
+
+  PART 10d-iv DONE (2026-11-05): the DirectPlay session and the voice chat (net/net_session.cpp, net/net_voice.cpp,
+  net/net_com.cpp: the GUIDs, net/net_create.cpp: NetCreateInstance, CoCreateInstance's stand-in the harness fakes;
+  net/dplay8.h: IDirectPlay8Address, DirectPlay Voice's client / server / test, the DPN structures and messages).
+  - Hosting (Host: DirectPlay's server, the service provider's first device, the address and its port, the
+    application description, the caps 2 s / for ever / 4 s, "Creating H&D2 Server v%d.%02d", the role, the firewall
+    (ConfigureFirewall 0x00732730, was "StopReporting"), the password (S_NetSessionDesc +0x12A; +0xC8 is the service
+    provider, was "application"), the host's player 0, a dedicated server hidden, the voice, the reporting, the
+    replication, the transport on the port + 1; each failure's text in m_lastError / m_lastErrorText (+0x504C /
+    +0x5050); Fix: the providers' buffer freed on failure), HostDedicated (XDServer_%5d.txt, hd2ds_sabresquadron.exe).
+  - The client: CreateClient, CreateAddresses (TCP/IP; the host's hostname and port, 31567 without GameSpy),
+    EnumHosts (its second argument the 4-byte request the servers read: 0 search / ping, 1 status, 2 a list's ping;
+    m_enumHandle +0x503C), PingServer(s), QueryServerStatus, Connect (the CD key first with GameSpy's listing, the
+    server's link, the player's name, the join request S_JoinRequest; Fix: its name within its room), OnConnected,
+    the client's DirectPlay messages (HandleClientMessage: connected / refused, a host's answer read into its
+    S_ServerEntry (two layouts: from 1.21 the version first) or into m_status +0x4F4 for a status query, data queued,
+    sends freed, the end), the handlers' stdcall wrappers (the server's HandleServerMessage 0x00726470: 10d-v).
+  - MakeReplication (the positions / deltas / rates quantised, field 2 0x3B, the local id, lag 0.035) with the
+    factories by actor (MakeObjectFactory / MakeObjectStateReader 0x0072d590 / 0x0072d5c0, made functions in Ghidra).
+    Fix (10b): the replication's factories take the object's id (the original passes it in ECX).
+  - The voice chat: C_NetVoice (DirectPlay Voice: StartServer, CheckAudio, StartClient, SetClientConfig, Stop),
+    StartVoiceServer (the codec by the settings +0x178, seven GUIDs), StartVoiceClient, MakeVoiceBuffer (a player's
+    3D buffer, S_NetPlayerState +0xB4), UpdateVoiceTeam (Fix: 16 targets at most), VisitPlayers (empty).
+  - TakeBandwidth (DirectPlay's bytes since the last time, the transport socket's, the replication's), the text
+    conversions (ANSI / UTF-8 <-> wide), GetHostAddress, S_ServerStatus (moved to net_game.h) Write / Read with
+    S_StatusPlayer's and the rules'.
+  - Harness: net/build_session.bat (netgame_test.cpp with -DNET_SESSION_TEST; netsession_tests.inc, COM faked; 128
+    checks). Mutations: mutations/mutate_10d4.py and mutate_10d4v.py (runner mutnets.py): 684 + 106: 548 + 62 killed, 55 + 27 not building, 81 + 17 equivalent or unobserved (locks, buffer sizes, COM's initialisation and releases the fakes do not watch, leaks, the dedicated server's process). Factory checkers
+    clean.
+  - Build: MSVC clean. Tier 1: 257 errors in 48 of 374 files. ret_audit --src: 52.
+  - Stats: 10,088 of 12,306 functions by hand or absorbed (87.7 % by size).
+
+  PART 10d-v DONE (2026-11-05): the network game's messages (net/net_messages.cpp).
+  - The server's DirectPlay messages (HandleServerMessage 0x00726470): a player created (its slot, from the
+    connection's context: the id, the name from GetClientInfo (UTF-8 with the unicode font or CJK characters, else
+    ANSI; made unique, the slot's own old name counting), the activity time, not admin, the stats cleared, its link
+    added to the transport; the errors "DPserver->GetClientInfo failed (1)" / "(2)"; the server's own player
+    appended on a playing server), destroyed (its link removed from g_netGame's transport, its key check dropped;
+    told: game message 2), the hosts' queries (a mission past 99 ms: the request, map, version, rules, players,
+    password, port, voice; a status query: the status), a connection asked for (the version, the room, the
+    password; the first free slot reset or one appended (32 at most); the address; GameSpy's listing: a good CD-key
+    check of that address and name kept (KEY_KEPT), in use: refused 6, none: 5; the reply's byte the slot with the
+    transport's session bit at 0x80), aborted, data (queued as the slot's | 0x80), a returned buffer
+    (DPN_MSGID_RETURN_BUFFER 0xFFFF0013, was SEND_COMPLETE; DPNMSG_RETURN_BUFFER), the server's info.
+  - The game messages: BeginGameMessage 0x0072c1d0 (type 0x14, the id in 32 bits; BeginCommand / BeginReply
+    0x0072c190 / 0x0072c1b0), C_GameApp::SendGameMessage 0x0072a480 (unreliable: queued under the command lock;
+    reliable: the queue sent, each after a 1000 ms Process: 0 the join data (a deathmatch's teams by the uniform's
+    side), 2 a player left, 3 a spawn (the block freed; Fix: the soldier state's destructor run), 4 a chat line, 5
+    the players' places (the last first), 6 / 0x12 the map / rules, 7 / 0x14 the temporary actors, 8 the scores,
+    9 a player joined, 0xC the teams, 0x15 the whole game for a joining player (its join stage 2), the small
+    ones), C_GameApp::PostCommand 0x0072b590 (the commands: the player's soldier (Fix: an empty squad sends an
+    empty state; the original reads null), chat, texts, the actors from 32 counted, ...).
+  - A soldier's state in a message (NetWriteSoldierState / NetReadSoldierState 0x00727850 / 0x00727a30, the items
+    0x00727820 / 0x007277f0): the state is not const (-1 profile / spawn zone stored as 0xFF / 0x3FF).
+    S_SoldierState is 0xAC bytes: the load (S_SoldierLoad, moved to game/soldier.h) at +0x8C, was
+    S_SquadSoldier's. S_NetPlayerState +0x04 address, +0x70 keyQuery.
+  - The vehicle harness's stubs caught up with 10d-iv (S_NetSessionDesc serviceProvider / password, S_ServerStatus
+    players as a vector; the factory checker had run a stale exe) and with the load's move.
+  - Harness: net/build_messages.bat (netgame_test.cpp with -DNET_SESSION_TEST -DNET_MESSAGES_TEST; the real
+    SendGameMessage / PostCommand linked; netmessages_tests.inc, 212 checks). Mutations: mutations/mutate_10d5.py
+    (runner mutnetm.py): 586: 477 killed, 49 not building, 60 survived. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 250 errors in 48/374 (was 257). ret_audit --src: 52.
+  - Stats: 10,106 of 12,306 functions by hand or absorbed (87.9 % by size).
+
+  PART 10d-vi DONE (2026-11-05): the game commands (net/net_commands.cpp).
+  - The server's (C_GameApp::HandleServerCommand 0x00727bd0): 0 a player joined (its soldier read and split, its
+    stats from the profile's skills: a VIP's strength gains its uniform's weight and 1 (Fix: an unknown uniform
+    none; the original read null); a local game none), 1 a respawn asked for (the state and stats handed to the
+    game; the store's stats by the player's rank), 2 the places asked for (message 5 to it), 3 chat (its sender
+    active; message 4), 4 a suicide, 5 a team (2: the smaller; the automatic balance against the map's +0x58 /
+    +0x5C; message 0xE), 6 a player's +0x80 text, 7 the admin login (S_MultiplayerSettings +0x21C adminPassword,
+    was unknown21C; message 0x13), 8 an admin's console command, 9 the joining player's temporary actors count
+    (message 0x15: the whole game when they agree), 10 / 11 the votes.
+  - The client's (C_GameApp::HandleClientCommand 0x00728820): 0 the session joined (the game made, the players on
+    the loading screen with their ranks' names, started: a slot and command 9; failed: the main menu), 1 the end,
+    2 / 9 a player left / joined, 3 a respawn, 4 chat (shown when the local player may see it: its team's, both
+    alive or both dead; UTF-8 hidden without the unicode font ("XXX", "????????"); "<TEAM> "; the admin's), 5 the
+    places (read past: the original's drawing is empty), 6 the map (LoadNextMap, now public), 7 the restart, 8 the
+    scores, 10 an objective, 11 / 13 the warmup / the round, 12 the teams (the local soldier moved: items cleared and
+    the in-game menu opened, or the menu's team; Fix: no soldier), 14 a team, 15 the respawn screen, 16 the respawn
+    wave (C_game::SetRespawnWaveTime; a dead player in a uniform respawns, else the menu on apply; Fix: no
+    soldier), 17 a kick, 18 the rules (a server's into a scratch copy), 19 the admin login's answer, 20 the
+    temporary actors, 21 the whole game (ReadFullState: the players' humans made; refused: back to the lobby), 22 /
+    23 the votes.
+  - Fix (10d-v): the players' places (message 5) send zeros for a player without a human (the original read null).
+  - SplitSoldierStacks (S_SquadSoldier::SplitStacks for any state); C_GameApp a friend of C_game, C_GameMenu,
+    C_Human and C_SpawnPoint (their private members the commands use).
+  - Harness: net/build_commands.bat (-DNET_COMMANDS_TEST; netcommands_tests.inc: the game, the menus, the humans,
+    the store faked; game/game_state.cpp linked; 139 checks); the messages' 220. Mutations: mutations/mutate_10d6.py
+    (runner mutnetc.py): 391: 319 killed, 38 not building, 34 survived. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 239 errors in 47/374 (was 250). ret_audit --src: 52.
+  - Stats: 10,122 of 12,306 functions by hand or absorbed (88.3 % by size).
+
+  PART 10d-vii DONE (2026-11-05): Windows XP's firewall, the loading progress, the CD key, the crash report
+  (net/net_firewall.cpp, net/net_console.cpp).
+  - The firewall (Internet Connection Firewall through HNetCfg's NetSharingManager, netcon.h): ConfigureFirewall
+    0x00732730 (XP's: NT with major 5 or minor 1, NetFirewallAvailable in net_create.cpp now; only on a change:
+    opening announces itself (not on a client), a thread clicks OK on the thread's small windows while it runs,
+    every firewalled connection (characteristics & 0x500) that is no shared access host (media 8 / 9) with sharing
+    or the firewall on gets UDP mappings "HD2 port <n>" for port .. port + 3 (target "*", ICSTT_IPADDRESS), enabled;
+    closing deletes the first such connection's UDP mappings of the stored port .. + 3 (compared sign-extended:
+    ports past 32767 stay, as in the original)), FirewallBlocks 0x007328d0 (each connection's firewall in turn,
+    the last decides; Ghidra lost the result: always false in the decompile). The manager made through
+    NetCreateInstance.
+  - PrintLoadProgress 0x00731af0 (a dedicated server's console: the map's line at 0, a dot each 4 %, the end at
+    100), GetCDKey 0x00732000 (HKLM ...\Hidden & Dangerous 2 "key"; the registry helpers 0x006ed860.. absorbed),
+    ReportCrash 0x00731ee0 / its dialog 0x00731e10 (not called: dialog 0x73, the text sent over TCP to
+    194.213.63.62:15002 after SocketStartUp, GameSpy's 0x00737cb0), g_gameRole defined (7 at start, 0x00732da0).
+  - C_Console a friend of C_NetGame (MoveInputLineToHistory).
+  - Harness: net/build_firewall.bat (firewall_test.cpp: the NetSharingManager's objects faked from netcon.h with
+    reference counts, every one released; the dialog watcher against real windows; 42 checks). Mutations: mutations/mutate_10d7.py and mutate_10d7c.py
+    (runner mutnetf.py): 230: 132 killed, 53 not building, 45 survived (the crash report not exercised). Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 215 errors in 46/373 (was 239). ret_audit --src: 52.
+  - Stats: 10,151 of 12,306 functions by hand or absorbed (88.4 % by size).
+
+  PART 10e-i DONE (2026-11-05): the console commands (net/net_console_commands.cpp).
+  - The keyword table (g_votableCommands 0x00846088: 66 entries of 0x204 bytes, the id at +0x200, entry 14 empty with
+    id 0, the end -1), ReadConsoleToken 0x007445d0 (the spaces, tabs, '>' and a '-' before a letter or digit
+    skipped, so numbers cannot be negative; quotes; a keyword (any case), a number, a word, the end), and
+    C_CommandProcessor::Execute 0x00742850: a line of keywords with their values (a word that is no keyword: text
+    0x582, false; a value a command does not read stays on the line and fails as the next keyword, as in the
+    original): the rules (0 .. 0x15, limited, told by message 0x12; no number: the last value shown), mapname,
+    removemap, style, domain, sessionname, help, exec (ExecuteFile 0x007440d0: Fix: long lines cut), server, dedicated,
+    join, vote, voteyes, listplayers, kickplayer, nextmap (ChangeMap public), restart, port, password, quit, voicechat,
+    listmaps, adminpass, adminlogin, svcmd, maxping, maxfreq, asay, maxinactivity, listobjectives. Fixes: a map name
+    not used as a format, the commands' texts terminated, the chat line cut to its size, a rule without a number
+    shows 0 rather than an uninitialised value.
+  - C_ConsoleState (0x007442e0 .. 0x00744540: Start, Stop, the banner, Update: the typed commands, the first command
+    (failed: the game ends), hosting or joining), GetCommandProcessor 0x0069f520.
+  - Dead code: ReportCrash 0x00731ee0 and its dialog 0x00731e10 (no references, no pointers in the data; part 10d-vii
+    had ported them) are back in tier 1: dialog 0x73, the text sent over TCP to 194.213.63.62:15002.
+  - Harness: net/build_console.bat (console_test.cpp; 210 checks). Mutations: mutations/mutate_10e1.py (runner
+    mutnete.py): 331: 270 killed, 39 not building, 22 survived. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 213 errors in 44/371 (was 215). ret_audit --src: 52.
+  - Stats: 10,169 of 12,306 functions by hand or absorbed (88.6 % by size).
+
+  PART 10e-ii DONE (2026-11-05): the game's console commands (net/net_console_vars.cpp).
+  - ExecuteConsoleLine 0x00720500 (".text" says, "x,text" says to the team, a word of the table, else the command
+    processor's line), ExecuteConsoleCommand 0x00720710 (sensitivity, say, sayteam, kill, the cheats of a local game below
+    difficulty 4: happyammo, heal, giveitem (54 names: a weapon with 6 of its ammo, thrown things and charges 6 in
+    all), anorexy (nothing), the variables hydroshock, sniper, no_gi), results 0 / 2 / 4 / 5, GetCheatValue 0x00720f50,
+    the variables' range language (0x00721f50 .. 0x00722250: terms by ',', '!', '&', '*', n, n:m, <n, <=n, >n, >=n, %n).
+    Fix: chat text terminated. The argument trimmed on a copy (the original writes into the line). The table's
+    std::map (0x0097b9cc) kept as one; its tree code and static set-up absorbed; a text variable (0x00720ea0): none
+    in the table, dropped.
+  - Dead code, left in tier 1: 0x00720fd0 (the variables saved to a file) with 0x007210a0 / 0x007210c0.
+  - Harness: net/build_console.bat (327 checks now). Mutations: mutations/mutate_10e2.py (runner mutnete.py): 202: 158 killed, 19 not building, 25 survived.
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 194 errors in 42/370 (was 213). ret_audit --src: 52.
+  - Stats: 10,207 of 12,306 functions by hand or absorbed (88.8 % by size).
+
+  PART 10f DONE (2026-11-05): the GameSpy SDK, kept in the port (net/gamespy_util.cpp, gamespy_gcd.cpp, gamespy_qr2.cpp, gamespy_browser.cpp).
+  - i: darray, hashtable, MD5 (RFC 1321), the CD key client (gcd_*: its validation server on UDP 29910, ';' packets through qr2's socket),
+    ValidateCDKey. ii: query and reporting (qr2_*: queries, the challenge's cipher and base 64, echo, adderror, client messages, the old
+    "\\status\\" form, heartbeats and keep-alives). iii: the server browser (ServerBrowser*, SBServer*: the master's list over TCP 28910 with
+    its cipher, parsed as it arrives; the messages after it; the query engine over UDP; the shared counted strings).
+  - Plain C++ here; __fastcall in the exe. The master servers no longer exist: the code is exercised only against loopback fakes.
+  - Fixes: a master's message below its 3-byte header is an error (the original stayed on it for ever). The gcd command parser's missing
+    second backslash. Left out: the browser's "trigger" address (only the dead ServerBrowserAuxUpdateServer sets it; uninitialised in the original).
+  - The original's quirks kept: a query's time-out marks the server's flags, not its state (+0x15, not +0x14); the check of a record with both
+    fixed and full keys reads the wrong part; a master's error message stays in the buffer, is read as a message and disconnects.
+  - Dead code, left in tier 1: the stats SDK and the unused rest of 0x00732e70 .. 0x0073d060 (82 functions): among them ServerBrowserFree 0x0073add0,
+    ServerBrowserLANUpdate 0x0073af50 (the LAN reader 0x0073bdf0 is ported, its starter is not), 0x0073b100, 0x0073b990, 0x0073bc60, the cipher's encrypting half
+    0x00739910 / 0x00739b90 (the test's fake master is written from it).
+  - Not run: a public qr2 start and the real master names (they need DNS and GameSpy's servers).
+  - Harness: net/build_gamespy.bat (708 checks; gamespy_qr2_tests.inc, gamespy_browser_tests.inc, gamespy_browser_strict.inc).
+    Mutations (runner net/mutgs.py: bounded output, after an unbounded one ran the machine out of memory): mutate_10f1.py 220: 152 killed, 31 not building, 37 survived;
+    mutate_10f1u.py 202: 154, 22, 26; mutate_10f2.py 400: 304, 47, 49; mutate_10f3.py 926: 709, 67, 145 (5 no longer matching). Survivors listed in each file.
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 155 errors in 42/370 (was 194). ret_audit --src: 52.
+  - Stats: 10,387 of 12,306 functions by hand or absorbed (89.4 % by size).
+
+  PART 11 PLAN (2026-11-06): the triage's order (_re/TRIAGE.md, tools/triage.py): 175 KB of the 403 KB left is dead (the 2D collision sweeps
+    among it), 216 KB live. 11a C_ScriptModule's saves, state and messages; 11b speech slots and BuildPathPoints; 11c C_Controls and the render
+    callback. The owner's decisions: copy protection replaced with a pass-through, crash reporting ported (both still to do).
+
+  PART 11a DONE (2026-11-06): C_ScriptModule's saved games, a joining client's state, its messages (script/script_module_save.cpp).
+  - SaveGame 0x00424970, LoadGame 0x004257b0, OnMessage 0x00424590, HandleClientMessage 0x0042b650, WriteState 0x0042aff0, ReadState 0x0042b330. Their frames are
+    aligned: checked against the assembly (Ghidra removes the block that stops an animation not running; the remembered frames' quaternion is x y z s, the
+    rotation chunk's s x y z; a model's stage saved is the first 7 of 8). Its std::vector and map helpers absorbed (31, 0x00429700..0x0042c000).
+  - I3D_scene::GetWeather slot 0x120, C_QuickMessages::ShowSubtitles / SetSubtitle named (still in tier 1).
+  - Fix: at a failed chunk read LoadGame stops; the original goes on with the last chunk's id.
+  - Harness: new _re/harness/script_module (build.bat: 196 checks: frames with logging tables, saves parsed byte by byte, loads from built files). Runner: _re/harness/mutrun.py
+    (bounded output, any harness). Mutations: mutate_11a.py 415: 342 killed, 39 not building, 34 survived (debug output, buffer sizes, frees, read defaults).
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 134 errors in 40/369 (was 155). ret_audit --src: 52.
+  - Stats: 10,425 of 12,306 functions by hand or absorbed (89.8 % by size).
+
+  PART 11b DONE (2026-11-06): the speech slots and an order's path points (game/speech_slots.cpp, game/path_points.cpp).
+  - The 16 slots: attach, play (the lip-sync file, the sample, the subtitle), the update (the mouth from the lip-sync frame, 20 ms each, a fade in at 0.008 per ms, closing
+    over 200 ms), pause, stop, free. Checked against the x87 assembly (the decompile of the update loses the float registers). LoadMaterialTables, DrawDebugLine beside them.
+  - BuildPathPoints 0x007ce930: the walking network's points the line would cut past, each at its radius on the line's side, then a cubic through them by forward differences, ten
+    steps a stretch. The w of the points between are stale locals in the original; 0 here.
+  - Left out: the list of morph fades at the front of the table (0x008cb8d4; no code adds to it; its loop in the update). States 4 and 5 kept; nothing sets them. Static helpers of
+    the two lists absorbed.
+  - Harness: script_module/build_speech.bat (131 checks; weights kept per morph, expected poses and curves written apart). Mutations: mutate_11b.py 343: 277 killed, 20 not
+    building, 46 survived; mutate_11b2.py 74: 59, 9, 6. Survivors listed in each.
+  - No header the vehicle harnesses read changed since 11a: its build results stand. Build: MSVC clean. Tier 1: 133 errors in 39/369. ret_audit --src: 52.
+  - Stats: 10452 of 12,306 functions by hand or absorbed (90.1 % by size).
+
+  PART 11c DONE (2026-11-06): the controls and the scene's render callback (game/input_controls.cpp; C_Controls is still declared in game/pending.h).
+  - Update 0x006c7bc0 (each binding's held and pressed value: 64 watched keys, 5 mouse buttons and 3 axes, joystick axes, buttons and hats), PollPress 0x006c87f0 (the input for a new
+    binding), Bind / SetBinding, ClearKey, ClearAction, GameRenderCallback 0x006c95b0. The joysticks are IJoy.dll's (the table's order in C_FrameListener; ../IJOY).
+  - Kept: the original never sets the mouse buttons' armed bits (+0xF0): a press in the very first frames is not told as pressed until a frame without it.
+  - Left out: the debug drawing 0x0079bbc0 behind the flag 0x0098af98, which nothing sets. IGraph slots named: SetWatchedKeys 0xB4, GetWatchedKeyBits 0xB8, GetModifiers 0xC8.
+    Still in tier 1 and declared: RenderDebugStats 0x006e8860, C_QuickMessages::Render 0x0048f390.
+  - Fixed along the way: the net harnesses' stub of ServerBrowserThink, broken by 10f's change of its return type (the vehicle builds do not compile them; they were not rerun then).
+  - Not fixed, older: _re/harness/checkpoints does not build since part 7f (2026-10-28; its C_Door stub has no GetMotion).
+  - Harness: script_module/build_controls.bat (269 checks). Mutations: mutate_11c.py 386: 316 killed, 28 not building, 42 survived (return values Bind ignores, frees at the end, exact
+    boundaries). All vehicle builds and net, profile, mp_setup, vehicle_params, car_tables, net_quantization harnesses build. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 131 errors in 38/369. ret_audit --src: 52.
+  - Stats: 10,480 of 12,306 functions by hand or absorbed (90.3 % by size).
+
+  PART 11d DONE (2026-11-06): the copy protection as a pass-through (the owner's decision), and a frame's game data (game/copy_protection.h, .cpp).
+  - The tests of the protection's tables (0x008ca840, 0x008caf40; 64 + 78 references) were already left out as each part was ported, always on the genuine copy's path. InitProtectionTables 0x006ea270 only fills those tables, so nothing but its srand is kept.
+  - Its seed comes from the protection's own routine (CALL [0x00a59000], into the .dogui section, obfuscated), so the port takes GetTickCount instead. This changes nothing that lasts: RunGame seeds again from the time after InitGraphics.
+  - Replaced, not ported: GetExecutableMd5 0x006ea340 and its MD5 (0x006ea490..0x006ea630). The digest goes into chunk 0x3EA of a saved game; nothing reads it. The port writes back what it last loaded (interface.cpp).
+  - Ported: SetFrameData 0x006e9ea0, FreeFrameData 0x006e9ef0, FreeAllFrameData 0x006e9f20 and its callback 0x006e9f40.
+  - Harness: script_module/build_protection.bat (11 checks). Mutations: mutate_11d.py 9: 5 killed, 2 not building, 2 survived (the srand; the delete of the block). No shared header changed: vehicle builds not rerun.
+  - Build: MSVC clean. Tier 1: 127 errors in 37/369. ret_audit --src: 52.
+  - Stats: 10,490 of 12,306 functions by hand or absorbed (90.4 % by size).
+
+  PART 11e DONE (2026-11-06): crash reporting (game/crash_report.h, .cpp), the original's C_ExceptionHandler and OnFatalError 0x006e1ad0.
+  - An unhandled exception filter installed before WinMain (0x006e2db0: a static object here too). It loads dbghelp.dll and writes into a 64 KB buffer the machine, the exception, the registers and the call stack (symbols, lines, local variables when a .pdb is found beside the module), hands it to g_fatalErrorHandler, then calls the previous filter. OnFatalError appends it to <exe>.RPT beside the executable and passes it to dbgPrintf2.
+  - Left out (the owner may want to know): the second copy to \\Intra\HD2_graf\CRASH_REPORTS, the developer's own network share.
+  - Fixed: OnFatalError's new char[10000] overflowed on a report up to 64 KB, inside the crash handler; the .RPT name was cut at the first '.' of the whole path; SymGetLineFromAddr was called unchecked; reading a bad local variable faulted inside the filter.
+  - Kept: the BuildID stays the original's "Aug 18 2004 16:38:15". Local variables' values are read as ESP + address - 8, so with today's .pdb files they are mostly wrong (seen in the MSVC run): names right, values not to be trusted.
+  - Not reproduced: the module list as a vector (0x006e2e80, 0x006e40c0..0x006e4560): walked directly. Still in tier 1, dead: 0x006e4610 LoadMapFiles_Dead and its loader 0x006e1d80.
+  - Harness: script_module/build_crash.bat (57 checks, MinGW; really faults in child processes), build_crash_msvc.bat (62 checks; a real .pdb: symbols, lines and locals in the report). Mutations: mutate_11e.py 197: 69 killed, 49 not building, 79 survived (mostly the frame fields StackWalk fills itself and the symbol paths MinGW has no .pdb for, which the MSVC run covers by hand).
+  - Build: MSVC clean. Tier 1: 108 errors in 35/368. ret_audit --src: 52. Vehicle and other harnesses build; factory checkers clean. pending.h: two lines moved to crash_report.h.
+  - Stats: 10,512 of 12,306 functions by hand or absorbed (90.6 % by size).
+
+  PART 11f DONE (2026-11-06): an explosion's wave, the timed events and the periodic links (game/explosion_wave.h, .cpp; game/periodic_links.cpp).
+  - S_Explosion::Execute 0x006df540 collects the frames in range, each at its squared distance to its box, and the wave (C_ExplosionWave, the only kind of timed event) grows 0.2 per ms each tick, hitting what it reaches: a human if one of six joints has a line of sight (or, with the flag, stands in the explosion's sector), others if their own line is free. Each actor once; less effect after the 11th hit in a step.
+  - Kept quirks: the distances are squared, and the wave's radius and range are compared with them; a victim beyond the range becomes the range, so it takes nothing; the list's last element is never compared when inserting, so two victims come in the reverse of the volumes' order; without a source a hit counts as HIT_SCRIPT_KILL; of a wave saved with victims left, only the last two survive a load (the head walks off).
+  - Periodic links 0x006e0080..: every pair of registered actors sits in one of ten buckets looked at every 100 * 2^n ms, by when they could meet. OnProximity's flags are bucket numbers, in effect "not near the first bucket": near is told on coming into bucket 0 or into reach, gone on the reverse.
+  - Fixed: a frame gone from the scene on loading a victim; a joint model missing; a hole among the links' entries when adding a vehicle or saving (it goes as actor -1; the original crashes) and an entry without its actor on loading; the victims the load drops are freed, not leaked.
+  - Left in tier 1: nothing of it. OnFatalError 0x006e1ad0 at the end of this range is part 11e's. Ghidra: functions created at 0x006e1ad0 and 0x006e3cf0.
+  - Harness: script_module/build_explosion.bat (311 checks, including the save format chunk by chunk). Mutations: mutate_11fa.py 232: 153 killed, 36 not building, 43 survived; mutate_11fb.py 238: 162 killed, 39 not building, 37 survived (frees, boundaries, values only a hole can show).
+  - No shared header changed: vehicle builds not rerun for this part (they ran for 11e).
+  - Build: MSVC clean. Tier 1: 90 errors in 34/367. ret_audit --src: 52.
+  - Stats: 10,575 of 12,306 functions by hand or absorbed (91.0 % by size).
+
+  PART 11g DONE (2026-11-06): the blood stains on a body (game/human_stains.h, .cpp; game/stain_images.inc).
+  - C_StainManager (the textures, and which eight bodies have real ones lent) and C_HumanStains. Each of the body's seven face groups has an ARGB 4444 picture in memory. A hit picks the groups by the zone bits and the side it came from, finds the nearest vertex along the mesh's edges (random walks on the head, searches from four extremes elsewhere), follows two edges as the texture's axes to a UV, and blends one of 11 splats there.
+  - The same pictures carry the head's overlay (above 0.1 kg on the first item) and the camouflage paints of role-1 soldiers in the missions of g_missionVariant 1 and 2, by turns.
+  - The pictures (11 x 16 x 16, 9 x 64 x 64) are compiled into the original's data, not in the game's files: game/stain_images.inc is generated from it (0x0084fff8..0x00863690, 290 KB of source).
+  - Kept: another pitch in PaintHit leaves the texture locked and paints nothing; a body's second group of a side hit usually lands off its picture.
+  - Fixed: the walk's visited marks were uninitialized memory; an empty face group divided by zero or read the first of no vertices; a human without containers crashed Bind.
+  - Left out: the debug skeleton 0x0079b0a0, 0x0079bbc0 behind the flag nothing sets (see 11c). Still in tier 1, dead: 0x00797680, 0x00797b70.
+  - The material slots 0x2C, 0x30, 0x34, the level's 0x38, 0x3C and the visual's 0xBC, 0xC4 are called by offset (not named in the headers: their meaning is inferred).
+  - Harness: script_module/build_stains.bat (884 checks, a fake mesh of seven quads, against the real images). Mutations: mutate_11g.py 649: 416 killed, 96 not building, 137 survived (frees, boundaries, degenerate normalization, ties).
+  - Nothing here has met a real body mesh: the mesh walking is only tested on quads.
+  - Build: MSVC clean. Tier 1: 90 errors in 34/367. ret_audit --src: 52. All vehicle and script_module harnesses build and pass; factory checkers clean.
+  - Stats: 10,634 of 12,306 functions by hand or absorbed (91.5 % by size).
+
+  PART 12a, 12b DONE (2026-11-06; one commit: they share a tier 1 regeneration and human.h): the humans keeping out of each other's way, and the formations.
+  12a (game/human_crowd.h, .cpp; 0x005636d0..0x0056edc0): C_HumanCrowd, the pass the game runs each tick (HumanPass_Tick) in single player and co-op.
+  - Humans alone (nobody near, no car within 7 m) just step toward their waypoint. The others go through 8 small steps: move along the route, pushed by those near (out of their circle, or to the side of one about to be met, or of a lying one's or a standing car's ellipse), their targets kept apart too, held on the walking network, a push nearly straight back turned aside. The waypoint follows a target that was pushed.
+  - A route that changed is planned again (Replan): waypoints stood on are dropped, then a tree of ways round whoever blocks the straight line, up to 200 nodes, depth 10; the way ending nearest the waypoint, the cheapest of those, goes in front of the route. C_HumanAIMemory now has its fields named; save and load (chunk 100).
+  - Kept: the rider test compares the human's vehicle with the car at the HUMAN's index (so a rider is pushed from its own car); AddSideWay's test of the avoided list reads the free slot past the end, stale from the last plan, so a goal may not get the blocker added; a move from a car's very middle or from behind its centre finds no block; FindBlocker's t1, t2 left over from the last blocker choose the kind.
+  - Fixed: that rider test no longer reads past the cars. Reset zero-initializes more than the original did.
+  - Still in tier 1, dead: 0x00563870, 0x005638c0, 0x005695c0, 0x0056adb0, 0x0056e2c0, 0x0056e810, 0x0056ec30.
+  12b (game/team.h, game/formation.cpp, game/formation_tables.inc; 0x005942d0..0x0059bb60): C_FormationShape with its data, S_FormationSlot.
+  - Six slots from a table by type (11 x 6, generated from the original's static initializers), scaled and turned by the shape's matrix. Mode 1 follows the leader: slots placed about its way, cut short round corners by the walking points, kept 1.2 m apart, fitted to the network; a script's formation does not plan along the way. Mode 2 lines up at a door: two beside it, one behind, and each goes through when the one before is in place and stopped. A leader in a car or submarine boards them: nearest entry, seats in order. Save and load.
+  - AddMember, RemoveMember, SetLeader return bool, as they do.
+  - Kept: a submarine with no seat left and a place gives up; once the leader is in the emptied slot RemoveMember's closing-up stops shifting; distance is measured from the first slot as it was before its own turn in the loop.
+  - Fixed: RemoveMember reading past the last slot; a door point with no door linked read through null; loading slots into a shape with none.
+  - Still in tier 1, dead: 0x00594210, 0x00595420, 0x005976d0, 0x00597b50, 0x0059ab30, 0x0059aef0.
+  - Harness: script_module/build_crowd.bat (685 checks), build_formation.bat (865 checks). The tick is also checked against its steps called one by one, in four scenes. Exact numbers worked by hand; the chunks of a saved shape read back by a small independent parser.
+  - Mutations: mutate_12a.py 1051: 757 killed, 107 not building, 187 survived (about 95 boundaries; heights, which stay zero in these scenes; a normalization GetLocalDir already did; resets of what is overwritten; search depths and tolerances; FindPointNear's strip with radii of different sizes partly). mutate_12b.py 688: 546 killed, 62 not building, 80 survived (mostly boundaries, past-the-end loop bounds that cannot be seen, redundant matrix writes, initial values). The first version of the 12a tests killed only 398 of those: the solver and the planner were tested by signs, not numbers.
+  - Not exact: sums are in source order, not checked against the x87 order instruction by instruction, so positions may differ in the last bits from the original.
+  - Nothing here has been run in the game: real humans, real meshes and real networks of checkpoints have not been through it; every network here is a few hand-made circles, and the speeds table is made up in the harness.
+  - Build: MSVC clean. Tier 1: 74 errors in 29/367 (was 90 in 34). ret_audit --src: 52. Stats: 10,729 of 12,306 functions by hand or absorbed (93.2 % by size).
+
+  PART 13a DONE (2026-11-06): the trial link. _re/tools/link_check.py, _re/LINK_STATUS.md, _re/link_unresolved.txt. The hand port alone: 52 unresolved symbols, no duplicates, no exe yet. Tier 1 cannot link with it (other compiler, types, namespace) and is not needed for a build. Aim of the first run (owner): single player.
+
+  PART 13b DONE (2026-11-06): the executable links. 0 unresolved symbols, 4.4 MB, not run. Imports of LS3DF.dll and rw_data.dll are by ordinal, and the ports' ordinals and names were compared equal to the original DLLs' (60 and 26).
+  - game/quick_messages.cpp: C_QuickMessages, the dialogue subtitles from Text\Dialogs.bin and Dialogs_DD.bin; both must be there or no subtitles at all. Kept: loading a save clears the dialogue it just read, so a saved subtitle does not come back; an unknown chunk in the files is read into rather than skipped. Fixed: texts terminated; GetText of an unknown id returned null.
+  - game/globals.cpp: the globals nobody defined, and RandomFloat, ShowMessage, GetConsole, ReadUnicodeInput, ShowGameMenuMessage, MeleeTrackerBarkTurn, the debug font. app.cpp: GameWindowProc, RunExitSequence, FreeResourceCaches. Others: S_MultiplayerSettings ctor and dtor, C_Actor::GetSector (null for what is no human, a fix), C_ResourceCache::Forget.
+  - Linking found: a Windows macro renamed ModuleManager::DispatchMessage where windows.h was seen; g_missionVariant was in an anonymous namespace; six functions were listed as ported with no body.
+  - Protection: the two last tests are now plain true (pending.h), the tables are gone.
+  - Things to watch in the first run. g_defaultFormationScale: no code or data writes it in the original (byte scan of .text), so followers' formations have a zero scale: all places at the leader, kept 1.2 m apart. The joystick: IJoy.dll's only import has no caller in the decompile, and the list 0x008aeb4c is never added to, so the port does not import IJoy at all. The debug statistics list has no adds, so only its font is kept. The byte 0x0086933c has no writer: the low subtitle row is never used.
+  - Not done: tier 1 was not regenerated for this part (it is no longer in any build; see _re/LINK_STATUS.md), so it still holds these functions.
+  - Harness: script_module/build_quick_messages.bat (77 checks, a real C_chunk over files in memory, a fake box and IGraph). Mutations: mutate_13b.py 203: 167 killed, 16 not building, 20 survived (initial values overwritten by a read, frees, boundaries of a 999-byte text, Ascends at the end of a read).
+  - globals.cpp and the app.cpp additions have no tests: each is a few lines read from the assembly. Nothing has been run.
+  - Stats: 10,776 of 12,306 functions by hand or absorbed (93.4 % by size).
+  PART 13c DONE (2026-11-06): the first launch. The port starts, plays the videos, reaches a fully drawn main menu; the mouse and the confirmation box work; END exits with its normal code 1, without an exception in the checked build. No mission loaded. Details and how to run: _re/RUNNING.md.
+  - Tools: _re/tools/build_game.py (x87, symbols; --checked: /Od /MTd /RTC1), debugrun.cpp (debugger with a symbolized log), shot.ps1, send_keys.ps1 (both only while the game has the focus), vtable_audit.py. Run folder H:\HD2_PortRun, with the original DLLs. New switch -window.
+  - Fixes: three engine slots declared with the wrong arguments (IGraph::InitInput, ISND_source::SetSound, CreateJointOverride + Add); the main loop's missing GetGame() test and a pending command it dropped; NetFirewallAvailable's stack overrun; the layout of S_IGraphInit and all of InitGraphics' flags; the version text's third number.
+  - Not tested: full screen (every run used -window), any mission, the other menus. None of the fixes has a harness test: they were seen in the run or read from the assembly. The early files, app.cpp above all, deserve more comparing.
+  PART 13d DONE (2026-11-06): the first mission. Profile made, campaign started, Training loaded, cutscene and subtitles, the soldier walks and turns, the in-game menu, back to the main menu. Checked and release builds, no exception. Details: _re/RUNNING.md.
+  - Needs LS3DF_Github's devel DLL: the original DLL crashes under a modern compiler's stack (16 bytes written through a 12-byte S_vector), and ../LS3DF lacks the rain fix (586f479), which the user pointed to.
+  - Fixes: collision file header; the net tables' two globals (13b's 'nothing writes it' was wrong); C_Actor::GetSector's recursion (13b's); C_KeyBindings::Load's changed flag; the in-game menu's model names; the subsystem version.
+  - Not tested: full screen, the rest of the game, weapons, enemies, vehicles, saving, sound by ear. With the devel DLL the sky is flat dark green, also under the original exe: for the LS3DF port.
+  - After 13d (reported by the user): the game ran too fast: the frame limiter's timer event was SET, not PULSE, so its wait never waited and each frame counted as 10 ms. See _re/RUNNING.md.
+  - After 13d (reported by the user): the supply boxes did not open: their animations' names lacked the '#' of the files and the original's strings. New: tools/name_audit.py.
+  PART 13e DONE (2026-11-06): combat in Operation Snowball, checked build: weapons, reload, enemies closing in and killing, death, save and load in a fight (position, health, ammo and counts back), saves read by the original exe too. Details: _re/RUNNING.md.
+  - Fixes: the weapon's link in OP_CSC_DuplicateHuman (a cycle); C_EquipmentStoreList (0x0067cb60, unported, only a vtable reaches it); GetText's null; 33 names with '_' for ' '. LS3DF: _re/ls3df_patches/joint_uninit.patch, in the scratch build of devel only.
+  - New: tools/literal_audit.py. Test: the equipment page in store_list_test.inc, mutation-checked. The others have only this run.
+  - The triage does list such functions, as "virtual": 0x0067cb60 was among them, unread. All live rows have now been read: see _re/TRIAGE.md.
+  After 13e: what was left to port: no live game logic. The exe's title and icon added at link time (build_game.py).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

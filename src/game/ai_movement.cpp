@@ -1316,7 +1316,7 @@ void C_AIController::FollowRoute(int /*timeDelta*/)
     ReleaseWaypoint(m_waypoint);
     m_waypoint = m_waypoints[0];
     m_waypoints.erase(m_waypoints.begin());
-    m_human->m_aiMemory->unknown104 = true;
+    m_human->m_aiMemory->routeChanged = true;
     if (m_waypoints.empty()) {
         EndMove(MOVE_RESULT_ENDED);
         return;
@@ -1346,14 +1346,14 @@ void C_AIController::WalkToWaypoint()
     const C_HumanAIMemory *memory = m_human->m_aiMemory;
     const S_vector4 pos = WorldPos4(frame);
     int turned;
-    if (!memory->unknown10) {
+    if (!memory->stepping) {
         turned = TurnTowards(pos, m_waypoints[0]->pos);
     } else {
         // Stepping aside instead.
-        const S_vector4 aside = {memory->unknown00[0] + pos.x, memory->unknown00[1] + pos.y,
-                                 memory->unknown00[2] + pos.z, 0.0f};
+        const S_vector4 aside = {memory->step[0] + pos.x, memory->step[1] + pos.y,
+                                 memory->step[2] + pos.z, 0.0f};
         turned = TurnTowards(pos, aside);
-        m_walkSpeed = S_vector(memory->unknown00[0], memory->unknown00[1], memory->unknown00[2]).Magnitude();
+        m_walkSpeed = S_vector(memory->step[0], memory->step[1], memory->step[2]).Magnitude();
     }
 
     bool crawlingSideways = false;
@@ -1548,7 +1548,7 @@ void C_AIController::UpdateAvoidance()
 
 bool C_AIController::HasAvoidance()
 {
-    const float *step = m_human->m_aiMemory->unknown00;
+    const float *step = m_human->m_aiMemory->step;
     return step[2] * step[2] + step[1] * step[1] + step[0] * step[0] > 0.01f;
 }
 
@@ -1561,7 +1561,7 @@ bool C_AIController::CanAvoid()
 void C_AIController::WalkAvoiding()
 {
     m_axes[AXIS_12] = 0.0f;
-    const float *step = m_human->m_aiMemory->unknown00;
+    const float *step = m_human->m_aiMemory->step;
     m_walkSpeed = S_vector(step[0], step[1], step[2]).Magnitude();
     S_vector dir(step[0], 0.0f, step[2]);
     dir.Normalize();

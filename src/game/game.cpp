@@ -550,6 +550,11 @@ void C_game::Print(const char *, ...)               // 0x0069c2b0
     // Empty in the release build.
 }
 
+void C_game::PrintColored(const S_vector &, const char *, ...)   // 0x0069c2a0
+{
+    // Empty in the release build.
+}
+
 void C_game::PrintMessage(const S_vector &color, const char *format, ...)   // 0x0069c240
 {
     char line[512];

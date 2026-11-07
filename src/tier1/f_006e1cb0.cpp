@@ -122,7 +122,7 @@ int * FUN_006e1d80(...)
     tier1_operator_delete(pCVar2);
   }
   pCVar6->rep = pCVar13;
-  puVar4 = FUN_00688130(pCVar6,(uint32_t*)(&local_8),(int *)_this);
+  puVar4 = C_str__Append_688130(pCVar6,(uint32_t*)(&local_8),(int *)_this);
   piVar3 = (int *)*puVar4;
   if (piVar3 != 0) {
     *piVar3 = *piVar3 + 1;

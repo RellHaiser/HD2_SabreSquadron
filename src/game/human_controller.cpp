@@ -1164,7 +1164,7 @@ bool C_HumanController::ExecuteCommand(const S_HumanCommand &command)
         if (m_netObject && g_localPlayerSlot != m_human->GetNetId() && !IsServer()) {
             // (Fix: the original does not check the property, unlike LeaveVehicle.)
             if (C_NetProperty *property = m_netObject->GetProperty(1)) {
-                const S_vector4 pos = property->GetTrack().GetValue();
+                const S_vector4 pos = property->GetTrack().GetTarget();
                 m_human->GetMovement()->m_visual.SetPosition(pos);
             }
         }

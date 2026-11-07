@@ -18,3 +18,4 @@
 0067b070 C_StoreList::BuildPage | bool __thiscall BuildPage(void *this, void * parent, void * model, void * name, int group)
 # Not ported yet (named for the later parts).
 0067aa70 C_StoreList::BuildDescription | void __thiscall BuildDescription(void *this, void * desc, void * model)
+0067cb60 C_EquipmentStoreList::BuildPage

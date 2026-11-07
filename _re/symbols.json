@@ -8400,20 +8400,48 @@
   "module": "zz_idioms",
   "name": "vector_tidy_48ee30"
  },
+ "0048ee50": {
+  "module": "quick_messages",
+  "name": "QuickMessages_ShowSubtitles"
+ },
  "0048ef40": {
   "module": "game",
   "name": "C_QuickMessages::Done",
   "proto": "void __fastcall Done(C_QuickMessages * messages)"
+ },
+ "0048efc0": {
+  "module": "quick_messages",
+  "name": "QuickDialog_Free"
+ },
+ "0048f080": {
+  "module": "quick_messages",
+  "name": "QuickMessages_SetSubtitle"
+ },
+ "0048f180": {
+  "module": "quick_messages",
+  "name": "QuickMessages_ShowDubbing"
  },
  "0048f2d0": {
   "module": "game",
   "name": "C_QuickMessages::Update",
   "proto": "void __thiscall Update(C_QuickMessages *this, int timeDelta)"
  },
+ "0048f390": {
+  "module": "quick_messages",
+  "name": "QuickMessages_Render"
+ },
  "0048f400": {
   "module": "game",
   "name": "C_QuickMessages::Reset",
   "proto": "void __fastcall Reset(C_QuickMessages * messages)"
+ },
+ "0048f420": {
+  "module": "quick_messages",
+  "name": "QuickMessages_LoadDialog"
+ },
+ "0048f7d0": {
+  "module": "quick_messages",
+  "name": "QuickMessages_LoadDialogs"
  },
  "0048fbc0": {
   "module": "profile",
@@ -8429,6 +8457,14 @@
   "module": "game",
   "name": "C_QuickMessages::LoadGame",
   "proto": "bool __thiscall LoadGame(C_QuickMessages *this, C_chunk * chunk)"
+ },
+ "00490040": {
+  "module": "quick_messages",
+  "name": "QuickMessages_RestoreDialog"
+ },
+ "004900e0": {
+  "module": "quick_messages",
+  "name": "QuickMessages_GetText"
  },
  "00490340": {
   "module": "zz_idioms",
@@ -11187,9 +11223,35 @@
   "name": "SeatWeaponSendMessage",
   "proto": "bool __fastcall SeatWeaponSendMessage(int kind, S_vector4 *pos, S_vector4 *dir, int barrel, int seat, C_Car *car)"
  },
+ "004c1360": {
+  "module": "net_replication",
+  "name": "C_NetQuantized::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "004c1390": {
+  "module": "net_replication",
+  "name": "C_NetQuantized::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "004c13c0": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::MarkSent",
+  "proto": "bool __thiscall MarkSent(void *this, int player)"
+ },
+ "004c13f0": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
  "004c1400": {
-  "module": "zz_idioms",
-  "name": "empty_function_4c1400"
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "004c1450": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
  },
  "004c14b0": {
   "module": "seat_weapon",
@@ -16507,15 +16569,93 @@
   "name": "S_AIAlertState::LoadGame",
   "proto": "bool __thiscall LoadGame(S_AIAlertState *this, C_chunk *chunk)"
  },
+ "00563f90": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Constructor"
+ },
+ "005640a0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Destructor"
+ },
  "005641b0": {
-  "module": "human",
-  "name": "C_HumanAIMemory::SaveGame",
-  "proto": "bool __thiscall SaveGame(C_HumanAIMemory *this, C_chunk *chunk)"
+  "module": "human_crowd",
+  "name": "HumanAIMemory_SaveGame"
  },
  "005643e0": {
-  "module": "human",
-  "name": "C_HumanAIMemory::LoadGame",
-  "proto": "bool __thiscall LoadGame(C_HumanAIMemory *this, C_chunk *chunk)"
+  "module": "human_crowd",
+  "name": "HumanAIMemory_LoadGame"
+ },
+ "005647c0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Tick"
+ },
+ "00564ef0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_StepAlone"
+ },
+ "005653c0": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_AdvanceWaypoint"
+ },
+ "00565540": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_AddPush"
+ },
+ "005656e0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Prepare"
+ },
+ "00565f30": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_MoveOneStep"
+ },
+ "00566130": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_PushFromHuman"
+ },
+ "00566e50": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_PushTargetFromHuman"
+ },
+ "00567ab0": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_PushOntoNetwork"
+ },
+ "00567ba0": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_HoldOnNetwork"
+ },
+ "00567c80": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_TurnPushAside"
+ },
+ "00567df0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_KeepInsideStrip"
+ },
+ "00568190": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_KeepOnNetwork"
+ },
+ "00568580": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_PushFromCar"
+ },
+ "00568dc0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_PushTargetFromCar"
+ },
+ "00569530": {
+  "module": "human_crowd",
+  "name": "HumanAIMemory_UpdateStuckTimer"
+ },
+ "00569890": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_FindPointNear"
+ },
+ "0056a0f0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_Replan"
  },
  "0056a8b0": {
   "module": "zz_idioms",
@@ -16524,6 +16664,18 @@
  "0056a8d0": {
   "module": "zz_idioms",
   "name": "empty_function_56a8d0"
+ },
+ "0056a8e0": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_ExpandNode"
+ },
+ "0056be90": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_IsPointBlocked"
+ },
+ "0056c230": {
+  "module": "human_crowd",
+  "name": "HumanCrowd_FindBlocker"
  },
  "0056ec20": {
   "module": "zz_idioms",
@@ -18244,6 +18396,46 @@
   "name": "C_RemoteController::OnBodyFlags",
   "proto": "void __thiscall OnBodyFlags(C_RemoteController *this, uint flags)"
  },
+ "005942d0": {
+  "module": "formation",
+  "name": "FormationShape_SaveGame"
+ },
+ "00594560": {
+  "module": "formation",
+  "name": "FormationShape_LoadGame"
+ },
+ "005949c0": {
+  "module": "formation",
+  "name": "FormationShape_Constructor"
+ },
+ "00594a50": {
+  "module": "formation",
+  "name": "FormationShape_SetDoorPoint"
+ },
+ "00594a70": {
+  "module": "formation",
+  "name": "FormationShape_Destructor"
+ },
+ "00594a80": {
+  "module": "formation",
+  "name": "FormationSlot_Write"
+ },
+ "00594dd0": {
+  "module": "formation",
+  "name": "FormationSlot_Read"
+ },
+ "00595370": {
+  "module": "formation",
+  "name": "FormationSlot_Constructor"
+ },
+ "00595710": {
+  "module": "formation",
+  "name": "FormationShape_OnLeaderDied"
+ },
+ "005957d0": {
+  "module": "formation",
+  "name": "FormationShape_BoardVehicle"
+ },
  "005973d0": {
   "module": "zz_idioms",
   "name": "identity_5973d0"
@@ -18252,13 +18444,33 @@
   "module": "script",
   "name": "C_FormationShape::SetType"
  },
+ "00597760": {
+  "module": "formation",
+  "name": "FormationShape_SetDir"
+ },
  "005977f0": {
   "module": "script",
   "name": "C_FormationShape::SetScale"
  },
+ "005978e0": {
+  "module": "formation",
+  "name": "FormationShape_ApplyMatrix"
+ },
  "00597b40": {
   "module": "zz_idioms",
   "name": "get_field_78_597b40"
+ },
+ "00597c50": {
+  "module": "formation",
+  "name": "FormationShape_SetLeader"
+ },
+ "00597f80": {
+  "module": "formation",
+  "name": "FormationShape_AddMember"
+ },
+ "005981c0": {
+  "module": "formation",
+  "name": "FormationShape_RemoveMember"
  },
  "00598290": {
   "module": "squad",
@@ -18285,15 +18497,43 @@
   "name": "C_FormationShape::GetSlotSeat",
   "proto": "int __thiscall GetSlotSeat(void *this, C_Human *member, int *vehicleId)"
  },
+ "00598550": {
+  "module": "formation",
+  "name": "FormationShape_KeepApart"
+ },
+ "00598810": {
+  "module": "formation",
+  "name": "FormationShape_PushAside"
+ },
  "00599040": {
   "module": "squad",
   "name": "C_FormationShape::SetSlotTarget",
   "proto": "void __thiscall SetSlotTarget(void *this, C_Human *member, S_vector4 *pos)"
  },
+ "005990c0": {
+  "module": "formation",
+  "name": "FormationShape_FollowLeader"
+ },
+ "0059a2e0": {
+  "module": "formation",
+  "name": "FormationShape_LineUpAtDoor"
+ },
  "0059af30": {
   "module": "squad",
   "name": "C_FormationShape::PlanSlot",
   "proto": "void __thiscall PlanSlot(void *this, int slot)"
+ },
+ "0059b7b0": {
+  "module": "formation",
+  "name": "FormationShape_FitOnNetwork"
+ },
+ "0059ba70": {
+  "module": "formation",
+  "name": "FormationShape_Tick"
+ },
+ "0059bb60": {
+  "module": "formation",
+  "name": "FormationShape_MoveSlots"
  },
  "0059be60": {
   "module": "human",
@@ -27240,6 +27480,11 @@
   "module": "simple_actors",
   "name": "StaticInit_614090"
  },
+ "00614140": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeCinematicsScreen",
+  "proto": "bool __thiscall DescribeCinematicsScreen(C_MainMenu *this, void * desc, void * model)"
+ },
  "00614e80": {
   "module": "control",
   "name": "AddDescMessage1",
@@ -27275,6 +27520,26 @@
   "name": "S_ScreenDesc::AddControl",
   "proto": "void * __thiscall AddControl(S_ScreenDesc *this, int type, char * name)"
  },
+ "00615450": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMoviePlay",
+  "proto": "bool __thiscall OnMoviePlay(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00615470": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMoviePick",
+  "proto": "bool __thiscall OnMoviePick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00615660": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnCinematicsHidden",
+  "proto": "bool __thiscall OnCinematicsHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00615820": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnCinematicsShown",
+  "proto": "bool __thiscall OnCinematicsShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00615a30": {
   "module": "zz_idioms",
   "name": "vector_tidy_615a30"
@@ -27304,9 +27569,180 @@
   "module": "zz_idioms",
   "name": "construct_copy4_616b00"
  },
+ "00616c50": {
+  "module": "main_menu",
+  "name": "S_ServerFilter::Reset",
+  "proto": "void __fastcall Reset(void * filter)"
+ },
+ "00616c80": {
+  "module": "main_menu",
+  "name": "S_ServerFilter::Save",
+  "proto": "bool __thiscall Save(void *this, void * chunk)"
+ },
+ "00616f10": {
+  "module": "main_menu",
+  "name": "S_ServerFilter::Load",
+  "proto": "bool __thiscall Load(void *this, void * chunk)"
+ },
+ "006172f0": {
+  "module": "main_menu",
+  "name": "S_MpRotation::Save",
+  "proto": "void __thiscall Save(void *this, void * chunk)"
+ },
+ "00617610": {
+  "module": "main_menu",
+  "name": "S_MpRotation::Load",
+  "proto": "void __thiscall Load(void *this, void * chunk, void * setup)"
+ },
+ "00617b00": {
+  "module": "main_menu",
+  "name": "S_MpRotation::Clear",
+  "proto": "void __fastcall Clear(void * rotation)"
+ },
+ "00617b80": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::Clear",
+  "proto": "void __fastcall Clear(void * setup)"
+ },
+ "00617cc0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::FindMap",
+  "proto": "void * __thiscall FindMap(void *this, int type, void * name)"
+ },
+ "00617d50": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::GetCurrentGroup",
+  "proto": "void * __fastcall GetCurrentGroup(void *this)"
+ },
+ "00617da0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::GetCurrentMaps",
+  "proto": "void * __fastcall GetCurrentMaps(void *this)"
+ },
+ "00617dc0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::GetCurrentRules",
+  "proto": "void * __fastcall GetCurrentRules(void *this)"
+ },
+ "00617df0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::Save",
+  "proto": "void __thiscall Save(void *this, void * chunk)"
+ },
+ "00618130": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::Load",
+  "proto": "void __thiscall Load(void *this, void * chunk)"
+ },
+ "006186e0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::LoadItems",
+  "proto": "void __stdcall LoadItems(void * node, void * map)"
+ },
+ "006189f0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::LoadMapList",
+  "proto": "void __fastcall LoadMapList(void * setup)"
+ },
  "00619720": {
-  "module": "zz_idioms",
-  "name": "set_field_18_619720"
+  "module": "main_menu",
+  "name": "C_MpGameSetup::SetGameType",
+  "proto": "void __thiscall SetGameType(void *this, int type)"
+ },
+ "00619730": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::RemoveMap",
+  "proto": "void __thiscall RemoveMap(void *this, int index, int unused)"
+ },
+ "00619780": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::MoveMap",
+  "proto": "void __thiscall MoveMap(void *this, int from, int to)"
+ },
+ "00619930": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::AddMap",
+  "proto": "void __thiscall AddMap(void *this, int index, int unused)"
+ },
+ "00619af0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::SelectRotation",
+  "proto": "void __thiscall SelectRotation(void *this, int index)"
+ },
+ "00619ca0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::ResetServers",
+  "proto": "void __fastcall ResetServers(void *this)"
+ },
+ "00619d00": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::SaveServerList",
+  "proto": "void __fastcall SaveServerList(void *this)"
+ },
+ "0061a0f0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::LoadServerList",
+  "proto": "void __fastcall LoadServerList(void *this)"
+ },
+ "0061a730": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::Reset",
+  "proto": "void __fastcall Reset(void * settings)"
+ },
+ "0061a750": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::Load",
+  "proto": "void __fastcall Load(void * settings)"
+ },
+ "0061a7c0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::Save",
+  "proto": "void __fastcall Save(void * settings)"
+ },
+ "0061a830": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::LoadFile",
+  "proto": "void __thiscall LoadFile(void *this, void * player)"
+ },
+ "0061abe0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::SaveFile",
+  "proto": "void __thiscall SaveFile(void *this, void * player)"
+ },
+ "0061af70": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::ClearAll",
+  "proto": "void __fastcall ClearAll(void * settings)"
+ },
+ "0061afc0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::IsInSecondList",
+  "proto": "bool __thiscall IsInSecondList(void *this, void * server)"
+ },
+ "0061b000": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::IsInFirstList",
+  "proto": "bool __thiscall IsInFirstList(void *this, void * server)"
+ },
+ "0061b040": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::CountServers",
+  "proto": "void __fastcall CountServers(void * settings)"
+ },
+ "0061b090": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::SetListKind",
+  "proto": "void __thiscall SetListKind(void *this, int kind)"
+ },
+ "0061b0b0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::ClearServers",
+  "proto": "void __fastcall ClearServers(void * settings)"
+ },
+ "0061b100": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::GetList",
+  "proto": "void * __thiscall GetList(void *this, int kind)"
  },
  "0061b120": {
   "module": "zz_idioms",
@@ -27335,6 +27771,11 @@
  "0061b450": {
   "module": "xml_node",
   "name": "XmlAttrs_Ctor"
+ },
+ "0061b470": {
+  "module": "main_menu",
+  "name": "C_MpMap::~C_MpMap",
+  "proto": "void __fastcall ~C_MpMap(void * map)"
  },
  "0061b4f0": {
   "module": "zz_idioms",
@@ -27484,6 +27925,61 @@
   "name": "C_OptionsHandler::RefreshKeyGroups",
   "proto": "bool __fastcall RefreshKeyGroups(void * handler)"
  },
+ "00620fb0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::PostProfileLine",
+  "proto": "void __fastcall PostProfileLine(char * name, int context)"
+ },
+ "00621110": {
+  "module": "main_menu",
+  "name": "C_MainMenu::AddProfileLine",
+  "proto": "void __fastcall AddProfileLine(char * name, int context)"
+ },
+ "00621210": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeProfileScreen",
+  "proto": "bool __thiscall DescribeProfileScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00621240": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnProfileMessage",
+  "proto": "bool __thiscall OnProfileMessage(C_MainMenu *this, void * message)"
+ },
+ "006214d0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnProfileButton",
+  "proto": "bool __thiscall OnProfileButton(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00622af0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::SelectProfile",
+  "proto": "bool __thiscall SelectProfile(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00622b50": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnDifficulty",
+  "proto": "bool __thiscall OnDifficulty(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00622ed0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::RefreshProfile",
+  "proto": "void __fastcall RefreshProfile(C_MainMenu *this)"
+ },
+ "006237e0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnProfileShown",
+  "proto": "bool __thiscall OnProfileShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00623b40": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnProfileList",
+  "proto": "bool __thiscall OnProfileList(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00623e30": {
+  "module": "main_menu",
+  "name": "C_MainMenu::Describe",
+  "proto": "void * __thiscall Describe(C_MainMenu *this)"
+ },
  "00625f60": {
   "module": "screen",
   "name": "AddScreenMessage",
@@ -27519,9 +28015,74 @@
   "name": "S_MenuDesc::~S_MenuDesc",
   "proto": "void __thiscall ~S_MenuDesc(S_MenuDesc *this)"
  },
+ "006264c0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MainMenu *this, void * arg)"
+ },
+ "00626710": {
+  "module": "main_menu",
+  "name": "S_ServerFilter::S_ServerFilter",
+  "proto": "void * __fastcall S_ServerFilter(void * filter)"
+ },
+ "00626740": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::C_MpGameSetup",
+  "proto": "void * __fastcall C_MpGameSetup(void * setup)"
+ },
+ "006267f0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::~C_MpGameSetup",
+  "proto": "void __fastcall ~C_MpGameSetup(void * setup)"
+ },
  "006268c0": {
   "module": "zz_idioms",
   "name": "vector_tidy_6268c0"
+ },
+ "006268e0": {
+  "module": "main_menu",
+  "name": "S_MpRotation::S_MpRotation",
+  "proto": "void * __fastcall S_MpRotation(void * rotation)"
+ },
+ "00626930": {
+  "module": "main_menu",
+  "name": "S_MpRotation::~S_MpRotation",
+  "proto": "void __fastcall ~S_MpRotation(void * rotation)"
+ },
+ "00626990": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "006269b0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::~C_MpMenuSettings",
+  "proto": "void __thiscall ~C_MpMenuSettings(void *this)"
+ },
+ "00626ad0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MainMenu *this)"
+ },
+ "00626b30": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnUpdate",
+  "proto": "void __thiscall OnUpdate(C_MainMenu *this, int timeDelta)"
+ },
+ "00626ca0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MainMenu *this, void * message)"
+ },
+ "006271e0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MainMenu *this)"
+ },
+ "006276a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMainShown",
+  "proto": "bool __thiscall OnMainShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "00627fd0": {
   "module": "zz_idioms",
@@ -27571,13 +28132,383 @@
   "module": "zz_idioms",
   "name": "construct_copy4_628550"
  },
+ "00628610": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeCreateServerScreen",
+  "proto": "bool __thiscall DescribeCreateServerScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00628f80": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeMapsPanel",
+  "proto": "bool __thiscall DescribeMapsPanel(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00629740": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribePickedMapList",
+  "proto": "void __thiscall DescribePickedMapList(C_MainMenu *this, void * panel, void * maps, void * group, void * lineTemplate)"
+ },
+ "00629bc0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeMapList",
+  "proto": "void __thiscall DescribeMapList(C_MainMenu *this, void * panel, void * maps, void * group, void * lineTemplate)"
+ },
+ "0062a060": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeOptionsPanel",
+  "proto": "bool __thiscall DescribeOptionsPanel(C_MainMenu *this, void * desc, void * model)"
+ },
+ "0062c290": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnCreateServerHidden",
+  "proto": "bool __thiscall OnCreateServerHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062c2a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnCreateServerShown",
+  "proto": "bool __thiscall OnCreateServerShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062c5b0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::SendToControl",
+  "proto": "void __thiscall SendToControl(C_MainMenu *this, uint id, void * message)"
+ },
+ "0062c5d0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::GetControlValue",
+  "proto": "int __thiscall GetControlValue(C_MainMenu *this, uint id)"
+ },
+ "0062c6d0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::GetEditText",
+  "proto": "void * __thiscall GetEditText(C_MainMenu *this, void * result, uint id)"
+ },
+ "0062c780": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowPickedMaps",
+  "proto": "void __fastcall ShowPickedMaps(C_MainMenu *this)"
+ },
+ "0062c970": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapPresetPicked",
+  "proto": "bool __thiscall OnMapPresetPicked(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062ca10": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapLineDoubleClick",
+  "proto": "bool __thiscall OnMapLineDoubleClick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062ca80": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnHostNameChanged",
+  "proto": "bool __thiscall OnHostNameChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062cbf0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::RefreshStartButton",
+  "proto": "void __fastcall RefreshStartButton(C_MainMenu *this)"
+ },
+ "0062cd50": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerStyleChanged",
+  "proto": "bool __thiscall OnServerStyleChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062ce10": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowMapList",
+  "proto": "void __thiscall ShowMapList(C_MainMenu *this, int type)"
+ },
+ "0062d030": {
+  "module": "main_menu",
+  "name": "C_MainMenu::SetUpHostedSession",
+  "proto": "void __thiscall SetUpHostedSession(C_MainMenu *this)"
+ },
+ "0062d490": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerOptionChanged",
+  "proto": "bool __thiscall OnServerOptionChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062d950": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowServerOptions",
+  "proto": "void __thiscall ShowServerOptions(C_MainMenu *this, int type)"
+ },
+ "0062e870": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapLineDragStart",
+  "proto": "bool __thiscall OnMapLineDragStart(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062e9f0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapLineDragMove",
+  "proto": "bool __thiscall OnMapLineDragMove(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062eb60": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapLineDrop",
+  "proto": "bool __thiscall OnMapLineDrop(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062f4b0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeGameInfoScreen",
+  "proto": "bool __thiscall DescribeGameInfoScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "0062f740": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ReleaseGameInfoStyles",
+  "proto": "void __cdecl ReleaseGameInfoStyles(void)"
+ },
+ "0062f9f0": {
+  "module": "main_menu",
+  "name": "FormatAddress",
+  "proto": "void * __fastcall FormatAddress(void * result, uint address)"
+ },
+ "0062fa30": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowGameInfo",
+  "proto": "void __stdcall ShowGameInfo(void * status)"
+ },
+ "006319a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnGameInfoRefresh",
+  "proto": "bool __thiscall OnGameInfoRefresh(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00631c20": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnGameInfoTick",
+  "proto": "bool __thiscall OnGameInfoTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00631c60": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnGameInfoStatus",
+  "proto": "void __fastcall OnGameInfoStatus(void * status)"
+ },
+ "00632150": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeConnectScreen",
+  "proto": "bool __thiscall DescribeConnectScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00632270": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnConnectHidden",
+  "proto": "bool __thiscall OnConnectHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00632390": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnConnectMessage",
+  "proto": "bool __thiscall OnConnectMessage(C_MainMenu *this, void * message)"
+ },
+ "00632560": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnConnectTick",
+  "proto": "bool __thiscall OnConnectTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00633320": {
   "module": "zz_idioms",
   "name": "vector_size_e4_633320"
  },
+ "00633490": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnNetworkMessage",
+  "proto": "bool __thiscall OnNetworkMessage(C_MainMenu *this, void * message)"
+ },
+ "00634050": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeBrowserScreen",
+  "proto": "bool __thiscall DescribeBrowserScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00634580": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeServerList",
+  "proto": "bool __thiscall DescribeServerList(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00634950": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnFavoriteToggle",
+  "proto": "bool __thiscall OnFavoriteToggle(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00634b30": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnFavorites",
+  "proto": "bool __thiscall OnFavorites(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00634f90": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnRestoreList",
+  "proto": "bool __thiscall OnRestoreList(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00635360": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnRefreshList",
+  "proto": "bool __thiscall OnRefreshList(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006356d0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnBrowserShown",
+  "proto": "bool __thiscall OnBrowserShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00635710": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ListFoundServers",
+  "proto": "void __fastcall ListFoundServers(C_MainMenu *this)"
+ },
+ "00635980": {
+  "module": "main_menu",
+  "name": "C_MainMenu::IgnoreServer",
+  "proto": "void __fastcall IgnoreServer(void * server)"
+ },
+ "00635990": {
+  "module": "main_menu",
+  "name": "C_MainMenu::AddFoundServer",
+  "proto": "void __thiscall AddFoundServer(C_MainMenu *this, void * server)"
+ },
+ "00635b70": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerFound",
+  "proto": "void __fastcall OnServerFound(void * server)"
+ },
+ "00635ba0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnBrowserTick",
+  "proto": "bool __thiscall OnBrowserTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00635f10": {
+  "module": "main_menu",
+  "name": "C_MainMenu::AddServerLine",
+  "proto": "void __thiscall AddServerLine(C_MainMenu *this, void * server, int unused)"
+ },
+ "006360c0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerPicked",
+  "proto": "bool __thiscall OnServerPicked(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00636280": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerJoin",
+  "proto": "bool __thiscall OnServerJoin(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00636400": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DrainFoundServers",
+  "proto": "void __fastcall DrainFoundServers(C_MainMenu *this)"
+ },
+ "006364b0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerCountChanged",
+  "proto": "bool __thiscall OnServerCountChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00636640": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerSort",
+  "proto": "bool __thiscall OnServerSort(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006370c0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeAddServerScreen",
+  "proto": "bool __thiscall DescribeAddServerScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00637510": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnAddServerButton",
+  "proto": "bool __thiscall OnAddServerButton(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00637890": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribePasswordScreen",
+  "proto": "bool __thiscall DescribePasswordScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00637a40": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnPasswordInput",
+  "proto": "bool __thiscall OnPasswordInput(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00637a60": {
+  "module": "main_menu",
+  "name": "C_MainMenu::AskJoinPassword",
+  "proto": "void __fastcall AskJoinPassword(C_MainMenu *this)"
+ },
+ "00637c10": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerPassword",
+  "proto": "bool __thiscall OnServerPassword(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00637fd0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnParentalLockCode",
+  "proto": "bool __thiscall OnParentalLockCode(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00638660": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeFiltersScreen",
+  "proto": "bool __thiscall DescribeFiltersScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00638910": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnFiltersAccept",
+  "proto": "bool __thiscall OnFiltersAccept(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00638aa0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnFiltersShown",
+  "proto": "bool __thiscall OnFiltersShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00638e00": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMissionsMessage",
+  "proto": "bool __thiscall OnMissionsMessage(C_MainMenu *this, void * message)"
+ },
  "006392a0": {
   "module": "zz_idioms",
   "name": "get_field_10_6392a0"
+ },
+ "006392b0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeMissionsScreen",
+  "proto": "bool __thiscall DescribeMissionsScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00639b40": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeCampaignList",
+  "proto": "void __thiscall DescribeCampaignList(C_MainMenu *this, void * desc, void * group, void * operationTemplate, void * missionTemplate)"
+ },
+ "0063a1a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeSingleList",
+  "proto": "void __thiscall DescribeSingleList(C_MainMenu *this, void * desc, void * group, void * missionTemplate)"
+ },
+ "0063a670": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowCampaignMissions",
+  "proto": "void __fastcall ShowCampaignMissions(C_MainMenu *this)"
+ },
+ "0063ab60": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowSingleMissions",
+  "proto": "void __fastcall ShowSingleMissions(C_MainMenu *this)"
+ },
+ "0063af20": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnOperationPick",
+  "proto": "bool __thiscall OnOperationPick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0063b0f0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowSaveSlot",
+  "proto": "void __thiscall ShowSaveSlot(C_MainMenu *this, int mission)"
+ },
+ "0063b310": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMissionPick",
+  "proto": "bool __thiscall OnMissionPick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0063b7f0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnSingleplayerShown",
+  "proto": "bool __thiscall OnSingleplayerShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0063b9a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnSingleplayerButton",
+  "proto": "bool __thiscall OnSingleplayerButton(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "0063c2f0": {
   "module": "gdi_font",
@@ -31166,6 +32097,26 @@
   "name": "C_DescriptionScreen::Refresh",
   "proto": "void __thiscall Refresh(C_Screen *this)"
  },
+ "00669c00": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::Build",
+  "proto": "bool __thiscall Build(C_Screen *this, void * desc)"
+ },
+ "00669e90": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Screen *this, void * message)"
+ },
+ "0066a100": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::Tick",
+  "proto": "void __thiscall Tick(C_Screen *this, int time)"
+ },
+ "0066a2a0": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::Refresh",
+  "proto": "void __thiscall Refresh(C_Screen *this)"
+ },
  "0066a2f0": {
   "module": "cursor",
   "name": "C_Cursor::HasMoved",
@@ -31681,10 +32632,114 @@
   "module": "equipment_panel",
   "name": "C_EquipmentMenuBase::CallItemHover"
  },
+ "00673080": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemHover",
+  "proto": "bool __thiscall OnItemHover(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006731d0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify13",
+  "proto": "bool __thiscall OnItemNotify13(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00673450": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify0A",
+  "proto": "bool __thiscall OnItemNotify0A(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006735f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify08",
+  "proto": "bool __thiscall OnItemNotify08(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00673690": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify09",
+  "proto": "bool __thiscall OnItemNotify09(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00673730": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::TakeSquadItems",
+  "proto": "void __fastcall TakeSquadItems(C_EquipmentMenu * menu)"
+ },
+ "006739d0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_EquipmentMenu *this, void * arg)"
+ },
+ "00673b80": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_EquipmentMenu *this)"
+ },
+ "00673c30": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::LoadRoster",
+  "proto": "void __stdcall LoadRoster(void)"
+ },
+ "00673ca0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::EnsureSquad",
+  "proto": "void __stdcall EnsureSquad(void)"
+ },
  "00673cf0": {
   "module": "profile",
   "name": "S_MissionSquad::AddSoldier",
   "proto": "S_SquadSoldier * __thiscall AddSoldier(S_MissionSquad *this)"
+ },
+ "00673e40": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::ProtectionStripItems"
+ },
+ "00674060": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::IsSquadWithinWeight",
+  "proto": "bool __stdcall IsSquadWithinWeight(void)"
+ },
+ "006740d0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_EquipmentMenu *this, void * message)"
+ },
+ "006746f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::IsSquadArmed",
+  "proto": "bool __stdcall IsSquadArmed(void)"
+ },
+ "00674860": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildEquipmentPanel",
+  "proto": "bool __thiscall BuildEquipmentPanel(C_EquipmentMenu *this, void * desc, void * model)"
+ },
+ "00674d60": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::ShowSoldierStats",
+  "proto": "void __thiscall ShowSoldierStats(C_EquipmentMenu *this)"
+ },
+ "006755d0": {
+  "module": "campaign_screens",
+  "name": "GetProfileName",
+  "proto": "void * __fastcall GetProfileName(void * profile)"
+ },
+ "006755f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnStatsToggle",
+  "proto": "bool __thiscall OnStatsToggle(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006758f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildItemsScreen",
+  "proto": "bool __thiscall BuildItemsScreen(C_EquipmentMenu *this, void * desc, void * model)"
+ },
+ "00675c00": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::SetupStore",
+  "proto": "void __fastcall SetupStore(C_EquipmentMenu * menu)"
+ },
+ "00675c80": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_EquipmentMenu *this)"
  },
  "00676010": {
   "module": "screen",
@@ -31701,14 +32756,117 @@
   "name": "C_DescriptionScreen::~C_DescriptionScreen",
   "proto": "void __thiscall ~C_DescriptionScreen(C_Screen *this)"
  },
+ "00676230": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildSelectionScreen",
+  "proto": "bool __thiscall BuildSelectionScreen(C_EquipmentMenu *this, void * desc, void * model)"
+ },
  "00676410": {
   "module": "equipment_panel",
   "name": "AddDescMessage4_676410",
   "proto": "void __cdecl AddDescMessage4_676410(void * desc, uint target, uint id, uint value, uint value2)"
  },
+ "006764a0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildStatsPanel",
+  "proto": "bool __stdcall BuildStatsPanel(void * desc, void * model)"
+ },
+ "006766b0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildSquadList",
+  "proto": "bool __thiscall BuildSquadList(C_EquipmentMenu *this, void * desc, void * model)"
+ },
+ "00677010": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildStore",
+  "proto": "bool __thiscall BuildStore(C_EquipmentMenu *this, void * desc, void * model)"
+ },
+ "006771e0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::DropItem",
+  "proto": "bool __thiscall DropItem(C_EquipmentMenu *this, void * control, uint target)"
+ },
+ "006773a0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnSelectionPicked",
+  "proto": "bool __thiscall OnSelectionPicked(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00677490": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnSoldierPicked",
+  "proto": "bool __thiscall OnSoldierPicked(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00677870": {
   "module": "equipment_panel",
   "name": "C_EquipmentMenuBase::CallItemNotify60"
+ },
+ "00677880": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::CallStatsToggle"
+ },
+ "00677890": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::CallSelectionPicked"
+ },
+ "00677920": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::PutStoreItem",
+  "proto": "bool __thiscall PutStoreItem(C_EquipmentMenu *this, uint slot, int type, int count, bool fill)"
+ },
+ "006779f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::DropStoreItem",
+  "proto": "bool __thiscall DropStoreItem(C_EquipmentMenu *this, int type, int count, bool fill)"
+ },
+ "00677aa0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::Replenish",
+  "proto": "void __thiscall Replenish(C_EquipmentMenu *this, int soldier, int round, int extra)"
+ },
+ "00678000": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::AutoEquip",
+  "proto": "bool __thiscall AutoEquip(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006785b0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::DistributeRequired",
+  "proto": "void __thiscall DistributeRequired(C_EquipmentMenu *this)"
+ },
+ "00678dc0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::HasRequiredItems",
+  "proto": "bool __thiscall HasRequiredItems(C_EquipmentMenu *this)"
+ },
+ "00678fe0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify60",
+  "proto": "bool __thiscall OnItemNotify60(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00679360": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::CountCarried",
+  "proto": "int __cdecl CountCarried(void * item, int soldier)"
+ },
+ "00679670": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::CountOwn",
+  "proto": "int __stdcall CountOwn(int type, int soldier)"
+ },
+ "00679790": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::ReturnUnrequired",
+  "proto": "void __thiscall ReturnUnrequired(C_EquipmentMenu *this, int soldier, bool withHead)"
+ },
+ "00679b50": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::FindSubstitute",
+  "proto": "bool __thiscall FindSubstitute(C_EquipmentMenu *this, int * type, int ammo, bool axisOnly)"
+ },
+ "00679e80": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::MatchPreset",
+  "proto": "void * __thiscall MatchPreset(C_EquipmentMenu *this, void * preset, bool axisOnly)"
  },
  "0067a3c0": {
   "module": "loadout_presets",
@@ -31719,6 +32877,11 @@
   "module": "loadout_presets",
   "name": "S_LoadoutPreset::ClearPlaces",
   "proto": "void __fastcall ClearPlaces(void * preset)"
+ },
+ "0067a3f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::AssignSlots",
+  "proto": "void __thiscall AssignSlots(C_EquipmentMenu *this, void * record, int * assigned, int count)"
  },
  "0067a950": {
   "module": "zz_idioms",
@@ -31806,6 +32969,11 @@
   "name": "C_StoreList::SetActive",
   "proto": "void __thiscall SetActive(void *this, bool on)"
  },
+ "0067c570": {
+  "module": "equipment_screen",
+  "name": "C_StoreList::BuildEquipmentDescription",
+  "proto": "void __thiscall BuildEquipmentDescription(void * this, void * desc, void * model)"
+ },
  "0067d450": {
   "module": "loadout_presets",
   "name": "S_LoadoutPreset::CountItems",
@@ -31863,6 +33031,11 @@
   "module": "loadout_presets",
   "name": "uninitialized_fill_n4_67e3b0"
  },
+ "0067e410": {
+  "module": "equipment_screen",
+  "name": "S_MissionItems::GetRequiredCount",
+  "proto": "int __thiscall GetRequiredCount(void * this, int type)"
+ },
  "0067e460": {
   "module": "loadout_presets",
   "name": "C_MissionItems::C_MissionItems",
@@ -31882,6 +33055,11 @@
   "module": "loadout_presets",
   "name": "C_MissionItems::Setup",
   "proto": "void __fastcall Setup(void * items)"
+ },
+ "0067e620": {
+  "module": "equipment_screen",
+  "name": "C_MissionItems::GetMissionRecord",
+  "proto": "void * __thiscall GetMissionRecord(void * this, int mission)"
  },
  "0067e650": {
   "module": "loadout_presets",
@@ -32115,6 +33293,11 @@
   "name": "C_GameMenu::BuildMainScreen",
   "proto": "bool __thiscall BuildMainScreen(C_GameMenu *this, void * desc, void * model)"
  },
+ "00680ea0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemHover",
+  "proto": "bool __thiscall OnItemHover(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00681ee0": {
   "module": "game_menu",
   "name": "C_GameMenu::OnItemNotify13",
@@ -32159,6 +33342,11 @@
   "module": "game_menu",
   "name": "C_GameMenu::RenderEquipment",
   "proto": "bool __thiscall RenderEquipment(C_GameMenu *this)"
+ },
+ "006828b0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::AddChatLine",
+  "proto": "void __stdcall AddChatLine(int unused, char * name, char * text)"
  },
  "00682a20": {
   "module": "game_menu",
@@ -32258,6 +33446,11 @@
   "name": "C_GameMenu::OnGameInfo",
   "proto": "bool __thiscall OnGameInfo(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
+ "006861d0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnStatsToggle",
+  "proto": "bool __thiscall OnStatsToggle(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "006863c0": {
   "module": "game_menu",
   "name": "C_GameMenu::ShowSoldierStats",
@@ -32316,6 +33509,10 @@
   "name": "C_GameMenu::OnSavePreset",
   "proto": "bool __thiscall OnSavePreset(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
+ "00688130": {
+  "module": "campaign_screens",
+  "name": "C_str::Append_688130"
+ },
  "00688330": {
   "module": "game_app",
   "name": "C_VideoState::Start",
@@ -32325,6 +33522,21 @@
   "module": "game_app",
   "name": "C_VideoState::Stop",
   "proto": "bool __thiscall Stop(C_VideoState *this)"
+ },
+ "00688900": {
+  "module": "campaign_screens",
+  "name": "S_Subtitle::~S_Subtitle",
+  "proto": "void __fastcall ~S_Subtitle(void * this)"
+ },
+ "00688920": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::MakeSubtitleBox",
+  "proto": "void __thiscall MakeSubtitleBox(C_VideoState *this, int width, int height)"
+ },
+ "00688ab0": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::MakeCreditsBox",
+  "proto": "void __thiscall MakeCreditsBox(C_VideoState *this, int width, int height)"
  },
  "00688cb0": {
   "module": "text_box",
@@ -32341,6 +33553,11 @@
   "name": "C_VideoTextBox::~C_VideoTextBox",
   "proto": "void __thiscall ~C_VideoTextBox(C_VideoTextBox *this)"
  },
+ "00688da0": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::FitVideo",
+  "proto": "void __thiscall FitVideo(C_VideoState *this, int width, int height)"
+ },
  "00688ea0": {
   "module": "game_app",
   "name": "C_VideoState::HandleInput",
@@ -32356,6 +33573,30 @@
   "name": "C_VideoState::Render",
   "proto": "void __thiscall Render(C_VideoState *this)"
  },
+ "006892e0": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::OpenStream",
+  "proto": "void __thiscall OpenStream(C_VideoState *this, char * file)"
+ },
+ "006893e0": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::LoadScript",
+  "proto": "void __thiscall LoadScript(C_VideoState *this, char * file)"
+ },
+ "00689630": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::ParseCredits",
+  "proto": "void __fastcall ParseCredits(C_VideoState *this)"
+ },
+ "00689c60": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::ParseSubtitles",
+  "proto": "void __fastcall ParseSubtitles(C_VideoState *this)"
+ },
+ "0068a150": {
+  "module": "campaign_screens",
+  "name": "vector_insert_subtitle_68a150"
+ },
  "0068a2f0": {
   "module": "zz_idioms",
   "name": "vector_size_e4_68a2f0"
@@ -32363,6 +33604,10 @@
  "0068a310": {
   "module": "zz_idioms",
   "name": "empty_function_68a310"
+ },
+ "0068a320": {
+  "module": "campaign_screens",
+  "name": "vector_insert_voice_68a320"
  },
  "0068a4c0": {
   "module": "zz_idioms",
@@ -32396,21 +33641,473 @@
   "module": "zz_idioms",
   "name": "construct_copy4_68a5c0"
  },
+ "0068a680": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
+ },
+ "0068a720": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MenuState *this)"
+ },
  "0068a730": {
-  "module": "zz_idioms",
-  "name": "empty_function_68a730"
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnUpdate",
+  "proto": "void __thiscall OnUpdate(C_MenuState *this, int timeDelta)"
+ },
+ "0068a740": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnRender",
+  "proto": "bool __thiscall OnRender(C_MenuState *this)"
+ },
+ "0068a750": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
+ },
+ "0068aa00": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
+ },
+ "0068ac80": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::DescribeConsole",
+  "proto": "bool __thiscall DescribeConsole(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068b010": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::DescribePassword",
+  "proto": "bool __thiscall DescribePassword(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068b1b0": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnConsoleHidden",
+  "proto": "bool __thiscall OnConsoleHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0068b1c0": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnConsoleTick",
+  "proto": "bool __thiscall OnConsoleTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0068bce0": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnPasswordNotify",
+  "proto": "bool __thiscall OnPasswordNotify(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0068c000": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::GetOperationEnd",
+  "proto": "void * __cdecl GetOperationEnd(void)"
+ },
+ "0068c040": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
  },
  "0068c050": {
-  "module": "zz_idioms",
-  "name": "empty_function_68c050"
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MenuState *this)"
  },
  "0068c060": {
-  "module": "zz_idioms",
-  "name": "empty_function_68c060"
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
+ },
+ "0068c070": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::OnInput",
+  "proto": "bool __thiscall OnInput(C_MenuState *this, float * held, float * pressed)"
+ },
+ "0068c0c0": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::GetModelFile",
+  "proto": "char * __cdecl GetModelFile(void)"
+ },
+ "0068c0d0": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
+ },
+ "0068c3e0": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::DescribeScreen",
+  "proto": "bool __thiscall DescribeScreen(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068c4f0": {
+  "module": "campaign_screens",
+  "name": "vector_erase4_68c4f0"
+ },
+ "0068c5d0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::IsCampaign",
+  "proto": "bool __cdecl IsCampaign(void)"
+ },
+ "0068c5f0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::StoreProgress",
+  "proto": "void __cdecl StoreProgress(void)"
+ },
+ "0068cb80": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::FindMedal8",
+  "proto": "void __fastcall FindMedal8(bool * alive, bool * dead)"
+ },
+ "0068cbf0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::AwardMedal",
+  "proto": "void __fastcall AwardMedal(void * profile, void * soldier)"
+ },
+ "0068ce60": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ApplyResults",
+  "proto": "void __cdecl ApplyResults(void)"
+ },
+ "0068cfe0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
  },
  "0068d0e0": {
-  "module": "zz_idioms",
-  "name": "empty_function_68d0e0"
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MenuState *this)"
+ },
+ "0068d0f0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
+ },
+ "0068d5e0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
+ },
+ "0068d8b0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::DescribeDiary",
+  "proto": "bool __thiscall DescribeDiary(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068e160": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnDiaryPage",
+  "proto": "bool __thiscall OnDiaryPage(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0068e3e0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::DescribeSoldiers",
+  "proto": "void __thiscall DescribeSoldiers(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068edc0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::DescribeDebriefing",
+  "proto": "bool __thiscall DescribeDebriefing(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068f080": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ListObjectives",
+  "proto": "bool __cdecl ListObjectives(void)"
+ },
+ "0068f670": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::IsCopyRefused_68f670"
+ },
+ "0068f6c0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowMissionResult",
+  "proto": "void __thiscall ShowMissionResult(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068f8f0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::IsMissionWon",
+  "proto": "bool __fastcall IsMissionWon(C_MenuState *this)"
+ },
+ "0068f9f0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowSoldier",
+  "proto": "void __thiscall ShowSoldier(C_MenuState *this, int index)"
+ },
+ "0068ff70": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnSoldierScroll",
+  "proto": "bool __thiscall OnSoldierScroll(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00690020": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowMedals",
+  "proto": "void __thiscall ShowMedals(C_MenuState *this, void * profile, void * soldier)"
+ },
+ "00690430": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::SetBar",
+  "proto": "void __cdecl SetBar(uint bar, float maximum, float value, float gain)"
+ },
+ "006905d0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowSkills",
+  "proto": "void __cdecl ShowSkills(void * profile, void * soldier)"
+ },
+ "006907b0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowRank",
+  "proto": "void __thiscall ShowRank(C_MenuState *this, void * profile, void * soldier)"
+ },
+ "00690ba0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::IsOneSoldier",
+  "proto": "bool __cdecl IsOneSoldier(void)"
+ },
+ "00690be0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
+ },
+ "00690d50": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnMedalHover",
+  "proto": "bool __thiscall OnMedalHover(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00690ec0": {
+  "module": "campaign_screens",
+  "name": "S_SquadSlot::HasControl",
+  "proto": "bool __thiscall HasControl(void * this, uint id)"
+ },
+ "00690ef0": {
+  "module": "campaign_screens",
+  "name": "S_SquadSlot::SetSoldier",
+  "proto": "void __thiscall SetSoldier(void * this, int profile, bool locked)"
+ },
+ "006910d0": {
+  "module": "campaign_screens",
+  "name": "S_SquadSlot::ShowTexts",
+  "proto": "void __thiscall ShowTexts(void * this)"
+ },
+ "00691310": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
+ },
+ "00691570": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
+ },
+ "006918f0": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::HasPopup",
+  "proto": "bool __thiscall HasPopup(C_Screen *this)"
+ },
+ "00691900": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)"
+ },
+ "00691920": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::~C_MedalDescriptionScreen",
+  "proto": "void __thiscall ~C_MedalDescriptionScreen(C_Screen *this)"
+ },
+ "00691b30": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeSelectionScreen",
+  "proto": "bool __thiscall DescribeSelectionScreen(C_MenuState *this, void * desc, void * model)"
+ },
+ "00691cc0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSelectionPicked",
+  "proto": "bool __thiscall OnSelectionPicked(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00691db0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSelectionShown",
+  "proto": "bool __thiscall OnSelectionShown(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00691fa0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeSquadScreen",
+  "proto": "bool __thiscall DescribeSquadScreen(C_MenuState *this, void * desc, void * model)"
+ },
+ "00692100": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeRoster",
+  "proto": "bool __thiscall DescribeRoster(C_MenuState *this, void * desc, void * model)"
+ },
+ "00692c40": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeMedals",
+  "proto": "void __thiscall DescribeMedals(C_MenuState *this, void * desc, void * model)"
+ },
+ "00693320": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeStats",
+  "proto": "bool __thiscall DescribeStats(C_MenuState *this, void * desc, void * model)"
+ },
+ "006934f0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribePanel",
+  "proto": "bool __thiscall DescribePanel(C_MenuState *this, void * desc, void * model)"
+ },
+ "00693560": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeSelected",
+  "proto": "bool __thiscall DescribeSelected(C_MenuState *this, void * desc, void * model)"
+ },
+ "00693880": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeButtons",
+  "proto": "bool __thiscall DescribeButtons(C_MenuState *this, void * desc, void * model)"
+ },
+ "00693a50": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MenuState *this)"
+ },
+ "00693ae0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnDragStart",
+  "proto": "bool __thiscall OnDragStart(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00693e50": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnDragMove",
+  "proto": "bool __thiscall OnDragMove(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00693f00": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnDrop",
+  "proto": "bool __thiscall OnDrop(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006945c0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSoldierNotify13",
+  "proto": "bool __thiscall OnSoldierNotify13(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00694810": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::RemoveDeadSoldiers",
+  "proto": "void __cdecl RemoveDeadSoldiers(void)"
+ },
+ "00694930": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSoldierInfo",
+  "proto": "bool __thiscall OnSoldierInfo(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00694bc0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSoldierControl",
+  "proto": "bool __thiscall OnSoldierControl(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00694dd0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::SelectFreeSoldier",
+  "proto": "void __thiscall SelectFreeSoldier(C_MenuState *this, int index)"
+ },
+ "00694f30": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnAssign",
+  "proto": "bool __thiscall OnAssign(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006956a0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::IsInSlots",
+  "proto": "bool __thiscall IsInSlots(C_MenuState *this, int profile)"
+ },
+ "006956d0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::KeepBest",
+  "proto": "void __fastcall KeepBest(int * ids, int * scores, int * count, int id, int score)"
+ },
+ "00695740": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnAutoSelect",
+  "proto": "bool __thiscall OnAutoSelect(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00695b90": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::FillSlots",
+  "proto": "void __thiscall FillSlots(C_MenuState *this)"
+ },
+ "00695d30": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::PlaceRosterSelector",
+  "proto": "bool __thiscall PlaceRosterSelector(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00695dc0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::FirstFreeSpeechSet",
+  "proto": "int __cdecl FirstFreeSpeechSet(void)"
+ },
+ "00695e20": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::SyncSquad",
+  "proto": "bool __thiscall SyncSquad(C_MenuState *this)"
+ },
+ "00696140": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::ShowStats",
+  "proto": "void __thiscall ShowStats(C_MenuState *this)"
+ },
+ "00696a30": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::ShowMedals",
+  "proto": "void __thiscall ShowMedals(C_MenuState *this, void * profile)"
+ },
+ "00696c90": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnNameEdited",
+  "proto": "bool __thiscall OnNameEdited(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00696d60": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnScreenTick",
+  "proto": "bool __thiscall OnScreenTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00696ef0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnScreenHidden",
+  "proto": "bool __thiscall OnScreenHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00696fb0": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::GetSkillValue",
+  "proto": "int __stdcall GetSkillValue(uint id)"
+ },
+ "00697090": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(void *this, void * message)"
+ },
+ "00697480": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(void *this)"
+ },
+ "006977e0": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::DescribeQuitQuestion",
+  "proto": "bool __stdcall DescribeQuitQuestion(void * desc, void * model)"
+ },
+ "006978d0": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::DescribeHeroScreen",
+  "proto": "bool __thiscall DescribeHeroScreen(void *this, void * desc, void * model)"
+ },
+ "006979e0": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::DescribeSpecialization",
+  "proto": "bool __thiscall DescribeSpecialization(void *this, void * desc, void * model)"
+ },
+ "00697d20": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::DescribeSkills",
+  "proto": "bool __thiscall DescribeSkills(void *this, void * desc, void * model)"
+ },
+ "00698230": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::AddSkillRow",
+  "proto": "void __thiscall AddSkillRow(void *this, void * list, void * model, void * name, int index, float step)"
  },
  "006987d0": {
   "module": "game",
@@ -32673,9 +34370,9 @@
   "proto": "void __cdecl PrintMessage(C_game * game, S_vector * color, char * format)"
  },
  "0069c2a0": {
-  "module": "game",
-  "name": "GameDebugPrint",
-  "proto": "void __cdecl GameDebugPrint(char * format)"
+  "module": "net_players",
+  "name": "C_game::PrintColored",
+  "proto": "void __cdecl PrintColored(void * game, void * color, char * format)"
  },
  "0069c2b0": {
   "module": "game",
@@ -33490,10 +35187,60 @@
   "module": "zz_idioms",
   "name": "empty_function_6ac750"
  },
+ "006acb60": {
+  "module": "main_menu",
+  "name": "GetVoiceCodecTextId",
+  "proto": "int __stdcall GetVoiceCodecTextId(int codec)"
+ },
  "006acb80": {
   "module": "loader_screen",
   "name": "GetGameTypeTextId",
-  "proto": "int __cdecl GetGameTypeTextId(int gameType)"
+  "proto": "int __stdcall GetGameTypeTextId(int gameType)"
+ },
+ "006acbd0": {
+  "module": "main_menu",
+  "name": "C_MpMap::AddObjective",
+  "proto": "int __thiscall AddObjective(void *this, void * objective)"
+ },
+ "006acc10": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::ApplySetupRules",
+  "proto": "void __fastcall ApplySetupRules(void *this)"
+ },
+ "006acc50": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::MakeSetup",
+  "proto": "void __fastcall MakeSetup(void *this)"
+ },
+ "006acd30": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::DeleteSetup",
+  "proto": "void __fastcall DeleteSetup(void *this)"
+ },
+ "006acd60": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::RemoveMap",
+  "proto": "bool __thiscall RemoveMap(void *this, char * name)"
+ },
+ "006ace20": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::AddMap",
+  "proto": "bool __thiscall AddMap(void *this, char * name)"
+ },
+ "006ad200": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::WriteDescription",
+  "proto": "void __thiscall WriteDescription(void *this, char * fileName)"
+ },
+ "006ad560": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::Clear",
+  "proto": "void __fastcall Clear(void *this)"
+ },
+ "006ad600": {
+  "module": "main_menu",
+  "name": "S_MultiplayerSettings::Reset",
+  "proto": "void __fastcall Reset(void *this)"
  },
  "006ad780": {
   "module": "game",
@@ -33504,6 +35251,56 @@
   "module": "game",
   "name": "S_MultiplayerSettings::GetCurrentMap",
   "proto": "C_MpMap * __fastcall GetCurrentMap(S_MultiplayerSettings * settings)"
+ },
+ "006ad840": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::WriteCurrentMap",
+  "proto": "void __thiscall WriteCurrentMap(void *this, void * stream)"
+ },
+ "006ad860": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::ReadCurrentMap",
+  "proto": "void __thiscall ReadCurrentMap(void *this, void * stream)"
+ },
+ "006ad990": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::WriteRules",
+  "proto": "void __thiscall WriteRules(void *this, void * stream)"
+ },
+ "006ada30": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::ReadRules",
+  "proto": "void __thiscall ReadRules(void *this, void * stream)"
+ },
+ "006adad0": {
+  "module": "mp_settings",
+  "name": "C_MpMap::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "006adc40": {
+  "module": "mp_settings",
+  "name": "C_MpMap::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "006ade20": {
+  "module": "mp_settings",
+  "name": "S_MpMapObjective::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "006ade80": {
+  "module": "mp_settings",
+  "name": "S_MpMapObjective::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "006adee0": {
+  "module": "mp_settings",
+  "name": "S_MpMapItem::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "006adf20": {
+  "module": "mp_settings",
+  "name": "S_MpMapItem::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
  },
  "006ae210": {
   "module": "zz_idioms",
@@ -33538,6 +35335,11 @@
   "module": "profile",
   "name": "RenameProfileName",
   "proto": "bool __fastcall RenameProfileName(char * oldName, char * newName)"
+ },
+ "006aef40": {
+  "module": "main_menu",
+  "name": "DeleteProfile",
+  "proto": "bool __stdcall DeleteProfile(char * name)"
  },
  "006aefe0": {
   "module": "profile",
@@ -34736,15 +36538,15 @@
  },
  "006c22a0": {
   "module": "game_app",
-  "name": "C_Kind0Menu::GetTypeId"
+  "name": "C_HeroStatsMenu::GetTypeId"
  },
  "006c22b0": {
   "module": "game_app",
-  "name": "C_Kind0Menu::DeletingDestructor"
+  "name": "C_HeroStatsMenu::DeletingDestructor"
  },
  "006c22d0": {
   "module": "game_app",
-  "name": "C_Kind0Menu::~C_Kind0Menu"
+  "name": "C_HeroStatsMenu::~C_HeroStatsMenu"
  },
  "006c23e0": {
   "module": "game_app",
@@ -34847,6 +36649,22 @@
   "module": "zz_idioms",
   "name": "vector_tidy_6c52e0"
  },
+ "006c6d70": {
+  "module": "controls_input",
+  "name": "C_Controls::C_Controls"
+ },
+ "006c6e00": {
+  "module": "controls_input",
+  "name": "C_Controls::~C_Controls"
+ },
+ "006c6eb0": {
+  "module": "controls_input",
+  "name": "C_Controls::Shutdown"
+ },
+ "006c6fe0": {
+  "module": "controls_input",
+  "name": "C_Controls::SetMouseScale"
+ },
  "006c7010": {
   "module": "app",
   "name": "BindControls"
@@ -34872,9 +36690,25 @@
   "name": "C_Controls::GetValue",
   "proto": "float __thiscall GetValue(void * this, int action, bool pressed)"
  },
+ "006c7790": {
+  "module": "controls_input",
+  "name": "C_Controls::Bind"
+ },
+ "006c77d0": {
+  "module": "controls_input",
+  "name": "C_Controls::SetBinding"
+ },
  "006c7bc0": {
   "module": "app",
   "name": "C_Controls::Update"
+ },
+ "006c87f0": {
+  "module": "controls_input",
+  "name": "C_Controls::PollPress"
+ },
+ "006c90c0": {
+  "module": "controls_input",
+  "name": "WideToAnsi"
  },
  "006c9150": {
   "module": "zz_idioms",
@@ -35692,10 +37526,58 @@
   "name": "WinMain",
   "proto": "int __stdcall WinMain(void *instance, void *prevInstance, char *cmdLine, int showCmd)"
  },
+ "006ddb50": {
+  "module": "explosions_links",
+  "name": "ExplosionVictim_Save"
+ },
+ "006ddd70": {
+  "module": "explosions_links",
+  "name": "ExplosionVictim_Load"
+ },
  "006de0d0": {
   "module": "animation_actor",
   "name": "GetFrameOrModelActor",
   "proto": "C_Actor * __fastcall GetFrameOrModelActor(I3D_frame * frame)"
+ },
+ "006de110": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Hit"
+ },
+ "006de2b0": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Dtor"
+ },
+ "006de330": {
+  "module": "explosions_links",
+  "name": "ExplosionVictim_DeletingDtor"
+ },
+ "006de370": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_DefaultCtor"
+ },
+ "006de390": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Ctor"
+ },
+ "006de930": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_IsHumanExposed"
+ },
+ "006deb50": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Step"
+ },
+ "006dee10": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Save"
+ },
+ "006df0b0": {
+  "module": "explosions_links",
+  "name": "ExplosionWave_Load"
+ },
+ "006df510": {
+  "module": "explosions_links",
+  "name": "ExplosionVictim_Dtor"
  },
  "006df540": {
   "module": "script",
@@ -35729,6 +37611,10 @@
   "module": "zz_idioms",
   "name": "empty_function_6dfd10"
  },
+ "006dfd20": {
+  "module": "explosions_links",
+  "name": "ExplosionWaveVector_Insert"
+ },
  "006dff30": {
   "module": "zz_idioms",
   "name": "uninitialized_copy4_6dff30"
@@ -35744,6 +37630,46 @@
  "006dffb0": {
   "module": "zz_idioms",
   "name": "construct_copy4_6dffb0"
+ },
+ "006e0080": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Add"
+ },
+ "006e0220": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Remove"
+ },
+ "006e03a0": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_SetRate"
+ },
+ "006e0480": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Ctor"
+ },
+ "006e06b0": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Dtor"
+ },
+ "006e0750": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Update"
+ },
+ "006e0b30": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Tick"
+ },
+ "006e0b90": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Clear"
+ },
+ "006e0c60": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Save"
+ },
+ "006e0f40": {
+  "module": "explosions_links",
+  "name": "PeriodicLinks_Load"
  },
  "006e1320": {
   "module": "zz_idioms",
@@ -35813,6 +37739,10 @@
   "module": "zz_idioms",
   "name": "construct_copy4_6e1a90"
  },
+ "006e1ad0": {
+  "module": "crash_report",
+  "name": "OnFatalError"
+ },
  "006e2ab0": {
   "module": "zz_idioms",
   "name": "vector_tidy_6e2ab0"
@@ -35824,6 +37754,94 @@
  "006e2d00": {
   "module": "zz_idioms",
   "name": "construct_copy4_6e2d00"
+ },
+ "006e2db0": {
+  "module": "crash_report",
+  "name": "InitExceptionHandler"
+ },
+ "006e2dc0": {
+  "module": "crash_report",
+  "name": "ConstructExceptionHandler"
+ },
+ "006e2dd0": {
+  "module": "crash_report",
+  "name": "RegisterExceptionHandlerDtor"
+ },
+ "006e2de0": {
+  "module": "crash_report",
+  "name": "DestroyExceptionHandler"
+ },
+ "006e2df0": {
+  "module": "crash_report",
+  "name": "ReportLine"
+ },
+ "006e2e80": {
+  "module": "crash_report",
+  "name": "ListProcessModules"
+ },
+ "006e3140": {
+  "module": "crash_report",
+  "name": "S_ModuleInfo_Dtor"
+ },
+ "006e31b0": {
+  "module": "crash_report",
+  "name": "LoadSymbolFiles"
+ },
+ "006e33d0": {
+  "module": "crash_report",
+  "name": "C_ExceptionHandler_Ctor"
+ },
+ "006e33f0": {
+  "module": "crash_report",
+  "name": "C_ExceptionHandler_Dtor"
+ },
+ "006e3400": {
+  "module": "crash_report",
+  "name": "ReportUnhandledException"
+ },
+ "006e3700": {
+  "module": "crash_report",
+  "name": "ReportException"
+ },
+ "006e3940": {
+  "module": "crash_report",
+  "name": "ExceptionName"
+ },
+ "006e3bc0": {
+  "module": "crash_report",
+  "name": "GetModuleOfAddress"
+ },
+ "006e3c00": {
+  "module": "crash_report",
+  "name": "GetLogicalAddress"
+ },
+ "006e3cf0": {
+  "module": "crash_report",
+  "name": "ReportLocalVariable"
+ },
+ "006e3d30": {
+  "module": "crash_report",
+  "name": "ReportCallStack"
+ },
+ "006e4060": {
+  "module": "crash_report",
+  "name": "ModuleInfoVector_Dtor"
+ },
+ "006e40c0": {
+  "module": "crash_report",
+  "name": "ModuleInfoVector_Insert"
+ },
+ "006e4410": {
+  "module": "crash_report",
+  "name": "S_ModuleInfo_CopyConstruct"
+ },
+ "006e4560": {
+  "module": "crash_report",
+  "name": "S_ModuleInfo_DeletingDtor"
+ },
+ "006e4610": {
+  "module": "crash_report",
+  "name": "LoadMapFiles_Dead"
  },
  "006e4a10": {
   "module": "zz_idioms",
@@ -35846,15 +37864,76 @@
   "name": "RadixSortPairs",
   "proto": "void __fastcall RadixSortPairs(uchar *pairs, uint32_t count)"
  },
+ "006e4f80": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::C_GameTexts",
+  "proto": "void __fastcall C_GameTexts(void * this)"
+ },
+ "006e4fc0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::~C_GameTexts",
+  "proto": "void __fastcall ~C_GameTexts(void * this)"
+ },
+ "006e5050": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Clear",
+  "proto": "void __fastcall Clear(void * this)"
+ },
+ "006e50c0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Load",
+  "proto": "bool __thiscall Load(void * this, char * fileName)"
+ },
  "006e5330": {
   "module": "hud",
-  "name": "C_TextDatabase::Find",
-  "proto": "int __thiscall Find(void *this, int textId)"
+  "name": "C_GameTexts::Find",
+  "proto": "int __thiscall Find(void *this, int id)"
  },
  "006e5380": {
   "module": "hud",
-  "name": "C_TextDatabase::GetText",
-  "proto": "C_str * __thiscall GetText(void *this, C_str * out, int textId)"
+  "name": "C_GameTexts::Get",
+  "proto": "C_str * __thiscall Get(void *this, C_str * out, int id)"
+ },
+ "006e53e0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Has"
+ },
+ "006e5430": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Add",
+  "proto": "bool __thiscall Add(void * this, int id, char * text, bool unknown8)"
+ },
+ "006e55f0": {
+  "module": "campaign_screens",
+  "name": "S_GameText::~S_GameText"
+ },
+ "006e5610": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::ParseLine",
+  "proto": "void __thiscall ParseLine(void * this, char * line)"
+ },
+ "006e56d0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::LineLength",
+  "proto": "int __fastcall LineLength(char * begin, char * end)"
+ },
+ "006e56f0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Parse",
+  "proto": "void __thiscall Parse(void * this, char * data, int size)"
+ },
+ "006e5790": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::FreeTexts",
+  "proto": "void __fastcall FreeTexts(void * this)"
+ },
+ "006e57d0": {
+  "module": "campaign_screens",
+  "name": "vector_insert_text_6e57d0"
+ },
+ "006e5ad0": {
+  "module": "campaign_screens",
+  "name": "S_GameText::CopyConstruct_6e5ad0"
  },
  "006e5df0": {
   "module": "xml_node",
@@ -35966,6 +38045,14 @@
   "module": "xml_node",
   "name": "XmlAttr_DeletingDtor"
  },
+ "006e8860": {
+  "module": "quick_messages",
+  "name": "RenderDebugStats"
+ },
+ "006e8900": {
+  "module": "quick_messages",
+  "name": "LoadDebugFont"
+ },
  "006e8960": {
   "module": "app",
   "name": "InitUnknown8CA4C8"
@@ -35977,6 +38064,11 @@
  "006e8dd0": {
   "module": "zz_idioms",
   "name": "vector_tidy_6e8dd0"
+ },
+ "006e9170": {
+  "module": "mp_settings",
+  "name": "DeleteDirectoryTree",
+  "proto": "bool __fastcall DeleteDirectoryTree(char * path)"
  },
  "006e92a0": {
   "module": "config_file",
@@ -36091,10 +38183,30 @@
   "name": "ChangeDirectory",
   "proto": "int __fastcall ChangeDirectory(char * path)"
  },
+ "006edc80": {
+  "module": "mp_settings",
+  "name": "GetCurrentDir",
+  "proto": "char * __fastcall GetCurrentDir(char * buffer, int size)"
+ },
  "006edc90": {
   "module": "config_file",
   "name": "RenameFile",
   "proto": "bool __fastcall RenameFile(char * from, char * to)"
+ },
+ "006edca0": {
+  "module": "mp_settings",
+  "name": "RemoveDir",
+  "proto": "bool __fastcall RemoveDir(char * path)"
+ },
+ "006edcb0": {
+  "module": "mp_settings",
+  "name": "DeleteFileAt",
+  "proto": "bool __fastcall DeleteFileAt(char * path)"
+ },
+ "006edcc0": {
+  "module": "mp_settings",
+  "name": "SetAttributes",
+  "proto": "bool __fastcall SetAttributes(char * path, uint attributes)"
  },
  "006edcd0": {
   "module": "config_file",
@@ -36624,6 +38736,11 @@
   "name": "PauseSpeechSlots",
   "proto": "void __fastcall PauseSpeechSlots(bool paused)"
  },
+ "0071fad0": {
+  "module": "game",
+  "name": "DrawDebugLine",
+  "proto": "void __fastcall DrawDebugLine(float * from, float * to, uint color, uint color2)"
+ },
  "0071fd80": {
   "module": "game",
   "name": "LoadMaterialTables",
@@ -36633,32 +38750,362 @@
   "module": "zz_idioms",
   "name": "identity_71fec0"
  },
+ "00720d10": {
+  "module": "net_console_vars",
+  "name": "ShowConsoleVariable",
+  "proto": "int __fastcall ShowConsoleVariable(int index)"
+ },
+ "00720e50": {
+  "module": "net_console_vars",
+  "name": "SetConsoleVariable",
+  "proto": "int __fastcall SetConsoleVariable(int index, int value)"
+ },
  "00721f40": {
   "module": "zz_idioms",
   "name": "empty_function_721f40"
  },
+ "00721f50": {
+  "module": "net_console_vars",
+  "name": "ConsoleRangeStart",
+  "proto": "void __fastcall ConsoleRangeStart(char * range)"
+ },
+ "00721f60": {
+  "module": "net_console_vars",
+  "name": "ConsoleValueInRange",
+  "proto": "bool __fastcall ConsoleValueInRange(int number, char * range, bool * in)"
+ },
+ "00722010": {
+  "module": "net_console_vars",
+  "name": "ConsoleRangeRead",
+  "proto": "void __fastcall ConsoleRangeRead(int * token)"
+ },
+ "00722190": {
+  "module": "net_console_vars",
+  "name": "ConsoleRangeTerm",
+  "proto": "bool __fastcall ConsoleRangeTerm(int number, bool * in)"
+ },
+ "00722250": {
+  "module": "net_console_vars",
+  "name": "ConsoleRangePrimary",
+  "proto": "bool __fastcall ConsoleRangePrimary(int number, bool * in)"
+ },
+ "00722510": {
+  "module": "net_session",
+  "name": "VoiceClientHandler",
+  "proto": "long __stdcall VoiceClientHandler(void * context, ulong type, void * message)"
+ },
+ "00722520": {
+  "module": "net_session",
+  "name": "ClientMessageHandler",
+  "proto": "long __stdcall ClientMessageHandler(void * context, ulong type, void * message)"
+ },
+ "00722550": {
+  "module": "net_session",
+  "name": "C_NetGame::HandleClientMessage",
+  "proto": "long __stdcall HandleClientMessage(void * net, void * context, uint type, void * message)"
+ },
+ "00722a80": {
+  "module": "net_session",
+  "name": "C_NetGame::HostDedicated",
+  "proto": "bool __thiscall HostDedicated(void *this, bool firewall)"
+ },
+ "00722b60": {
+  "module": "net_session",
+  "name": "C_NetGame::Host",
+  "proto": "int __thiscall Host(void *this, void * desc, bool firewall)"
+ },
+ "00723190": {
+  "module": "net_search",
+  "name": "OnBrowserCallback",
+  "proto": "void __fastcall OnBrowserCallback(void * browser, int reason, void * server, void * instance)"
+ },
+ "007231b0": {
+  "module": "net_search",
+  "name": "AddBrowserServer",
+  "proto": "void __cdecl AddBrowserServer(void * server)"
+ },
+ "007233d0": {
+  "module": "net_session",
+  "name": "C_NetGame::MakeReplication",
+  "proto": "void __fastcall MakeReplication(void * net)"
+ },
+ "007235f0": {
+  "module": "net_session",
+  "name": "C_NetGame::DeleteReplication",
+  "proto": "void __fastcall DeleteReplication(void * net)"
+ },
+ "00723610": {
+  "module": "main_menu",
+  "name": "C_NetGame::PollSearch",
+  "proto": "void __fastcall PollSearch(void *this)"
+ },
+ "00723620": {
+  "module": "net_search",
+  "name": "C_NetGame::StartLanSearch",
+  "proto": "int __fastcall StartLanSearch(void * net)"
+ },
+ "00723700": {
+  "module": "net_session",
+  "name": "C_NetGame::CreateAddresses",
+  "proto": "void __thiscall CreateAddresses(void *this, void * server, void * device, void * host)"
+ },
+ "007237d0": {
+  "module": "net_search",
+  "name": "ReportServerKey",
+  "proto": "void __fastcall ReportServerKey(int key, void * buffer, void * userData)"
+ },
+ "00723a40": {
+  "module": "net_search",
+  "name": "ReportPlayerKey",
+  "proto": "void __fastcall ReportPlayerKey(int key, int index, void * buffer, void * userData)"
+ },
+ "00723b70": {
+  "module": "net_search",
+  "name": "ReportTeamKey",
+  "proto": "void __fastcall ReportTeamKey(int key, int index, void * buffer, void * userData)"
+ },
+ "00723bb0": {
+  "module": "net_search",
+  "name": "ReportKeyList",
+  "proto": "void __fastcall ReportKeyList(int keyType, void * keys, void * userData)"
+ },
+ "00723cc0": {
+  "module": "net_search",
+  "name": "ReportCount",
+  "proto": "int __fastcall ReportCount(int keyType, void * userData)"
+ },
+ "00723cf0": {
+  "module": "net_search",
+  "name": "ReportError",
+  "proto": "void __fastcall ReportError(int error, char * message, void * userData)"
+ },
+ "00723d20": {
+  "module": "net_search",
+  "name": "C_NetGame::StartReporting",
+  "proto": "void __fastcall StartReporting(void * net)"
+ },
+ "00723dc0": {
+  "module": "net_search",
+  "name": "C_NetGame::AnswerQueries",
+  "proto": "void __fastcall AnswerQueries(void * net)"
+ },
+ "00723e00": {
+  "module": "net_session",
+  "name": "C_NetGame::CreateClient",
+  "proto": "long __fastcall CreateClient(void * net)"
+ },
+ "00723e80": {
+  "module": "net_session",
+  "name": "C_NetGame::EnumHosts",
+  "proto": "int __thiscall EnumHosts(void *this, void * server, int request)"
+ },
+ "00724010": {
+  "module": "net_search",
+  "name": "C_NetGame::StartSearch",
+  "proto": "int __fastcall StartSearch(void * net)"
+ },
+ "00724040": {
+  "module": "main_menu",
+  "name": "C_NetGame::SearchServers",
+  "proto": "void __thiscall SearchServers(void *this, void * callback)"
+ },
+ "00724070": {
+  "module": "main_menu",
+  "name": "C_NetGame::PingServer",
+  "proto": "void __thiscall PingServer(void *this, void * callback, void * server)"
+ },
+ "00724090": {
+  "module": "main_menu",
+  "name": "C_NetGame::PingServers",
+  "proto": "void __thiscall PingServers(void *this, void * callback, void * servers)"
+ },
+ "007240d0": {
+  "module": "net_session",
+  "name": "C_NetGame::QueryServerStatus",
+  "proto": "int __thiscall QueryServerStatus(void *this, void * callback, void * server)"
+ },
+ "007240f0": {
+  "module": "net_session",
+  "name": "C_NetGame::Connect",
+  "proto": "int __thiscall Connect(void *this, void * server)"
+ },
  "007244c0": {
-  "module": "zz_idioms",
-  "name": "get_field_5044_7244c0"
+  "module": "campaign_screens",
+  "name": "C_NetGame::GetJoinStatus"
+ },
+ "007244e0": {
+  "module": "net_session",
+  "name": "C_NetGame::OnConnected",
+  "proto": "void __fastcall OnConnected(void * net)"
+ },
+ "00724520": {
+  "module": "net_session",
+  "name": "C_NetGame::StartVoiceServer",
+  "proto": "void __fastcall StartVoiceServer(void * net)"
+ },
+ "00724720": {
+  "module": "net_session",
+  "name": "C_NetGame::StopVoiceServer",
+  "proto": "void __fastcall StopVoiceServer(void * net)"
+ },
+ "00724740": {
+  "module": "net_session",
+  "name": "C_NetGame::StartVoiceClient",
+  "proto": "void __thiscall StartVoiceClient(void *this, bool onServer)"
+ },
+ "00724820": {
+  "module": "net_session",
+  "name": "C_NetGame::StopVoiceClient",
+  "proto": "void __fastcall StopVoiceClient(void * net)"
+ },
+ "00724840": {
+  "module": "net_session",
+  "name": "C_NetGame::MakeVoiceBuffer",
+  "proto": "void __thiscall MakeVoiceBuffer(void *this, int slot)"
+ },
+ "007248f0": {
+  "module": "net_session",
+  "name": "C_NetGame::VisitPlayers",
+  "proto": "void __fastcall VisitPlayers(void * net)"
  },
  "00724940": {
-  "module": "game",
+  "module": "net_session",
   "name": "C_NetGame::UpdateVoiceTeam",
-  "proto": "void __fastcall UpdateVoiceTeam(C_NetGame * net)"
+  "proto": "void __fastcall UpdateVoiceTeam(void * net)"
+ },
+ "00724ad0": {
+  "module": "net_session",
+  "name": "NetAnsiToWide",
+  "proto": "void __cdecl NetAnsiToWide(void * out, char * text, uint length)"
+ },
+ "00724b20": {
+  "module": "net_session",
+  "name": "DirectPlayMissing",
+  "proto": "bool __cdecl DirectPlayMissing(void)"
+ },
+ "00724b30": {
+  "module": "net_session",
+  "name": "NetWideToAnsi",
+  "proto": "void __cdecl NetWideToAnsi(char * out, void * text, int length)"
+ },
+ "00724b80": {
+  "module": "net_session",
+  "name": "NetUtf8ToWide",
+  "proto": "void __cdecl NetUtf8ToWide(void * out, char * text, uint length)"
+ },
+ "00724bd0": {
+  "module": "net_session",
+  "name": "NetWideToUtf8",
+  "proto": "void __cdecl NetWideToUtf8(char * out, void * text, int length)"
+ },
+ "00724c20": {
+  "module": "net_search",
+  "name": "C_NetGame::FindFreeNameNumber",
+  "proto": "int __thiscall FindFreeNameNumber(void *this, char * name, int number)"
+ },
+ "00724d30": {
+  "module": "net_session",
+  "name": "C_NetGame::TakeBandwidth",
+  "proto": "void __thiscall TakeBandwidth(void *this, int * figures)"
  },
  "00725080": {
   "module": "zz_idioms",
   "name": "empty_function_725080"
+ },
+ "00725190": {
+  "module": "net_session",
+  "name": "GetHostAddress",
+  "proto": "uint __cdecl GetHostAddress(void * address)"
  },
  "00725270": {
   "module": "game",
   "name": "OtherTeam",
   "proto": "int __fastcall OtherTeam(int team)"
  },
+ "007252c0": {
+  "module": "main_menu",
+  "name": "S_ServerEntry::Reset",
+  "proto": "void __fastcall Reset(void *this)"
+ },
+ "007253f0": {
+  "module": "main_menu",
+  "name": "S_ServerEntry::Save",
+  "proto": "bool __thiscall Save(void *this, void * chunk)"
+ },
+ "00725660": {
+  "module": "main_menu",
+  "name": "S_ServerEntry::Load",
+  "proto": "bool __thiscall Load(void *this, void * chunk)"
+ },
+ "00725e10": {
+  "module": "net_game",
+  "name": "S_NetPlayerState::S_NetPlayerState",
+  "proto": "void * __fastcall S_NetPlayerState(void * state)"
+ },
  "00725e90": {
-  "module": "hud",
+  "module": "net_players",
   "name": "S_NetPlayerState::IsSpectating",
-  "proto": "bool __thiscall IsSpectating(S_NetPlayerState *this)"
+  "proto": "bool __thiscall IsSpectating(void *this)"
+ },
+ "00725ed0": {
+  "module": "net_players",
+  "name": "S_NetPlayerState::GetRankName",
+  "proto": "char * __fastcall GetRankName(void * state)"
+ },
+ "00726010": {
+  "module": "net_session",
+  "name": "S_ServerStatus::ReadRules",
+  "proto": "void __thiscall ReadRules(void *this, void * stream)"
+ },
+ "00726120": {
+  "module": "net_session",
+  "name": "S_ServerStatus::WriteRules",
+  "proto": "void __thiscall WriteRules(void *this, void * stream)"
+ },
+ "00726230": {
+  "module": "net_session",
+  "name": "S_StatusPlayer::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "00726260": {
+  "module": "net_session",
+  "name": "S_StatusPlayer::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00726290": {
+  "module": "net_session",
+  "name": "S_ServerStatus::ReadPlayers",
+  "proto": "void __thiscall ReadPlayers(void *this, void * stream)"
+ },
+ "00726300": {
+  "module": "net_session",
+  "name": "S_ServerStatus::WritePlayers",
+  "proto": "void __thiscall WritePlayers(void *this, void * stream)"
+ },
+ "00726380": {
+  "module": "net_session",
+  "name": "S_ServerStatus::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "007263c0": {
+  "module": "net_session",
+  "name": "S_ServerStatus::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00726430": {
+  "module": "net_session",
+  "name": "VoiceServerHandler",
+  "proto": "long __stdcall VoiceServerHandler(void * context, ulong type, void * message)"
+ },
+ "00726440": {
+  "module": "net_session",
+  "name": "ServerMessageHandler",
+  "proto": "long __stdcall ServerMessageHandler(void * context, ulong type, void * message)"
+ },
+ "00726470": {
+  "module": "net_session",
+  "name": "C_NetGame::HandleServerMessage",
+  "proto": "long __stdcall HandleServerMessage(void * net, void * context, uint type, void * message)"
  },
  "007272a0": {
   "module": "zz_idioms",
@@ -36667,6 +39114,36 @@
  "007272e0": {
   "module": "zz_idioms",
   "name": "vector_tidy_7272e0"
+ },
+ "007277f0": {
+  "module": "net_messages",
+  "name": "NetReadSoldierItem",
+  "proto": "void __fastcall NetReadSoldierItem(void * stream, void * item)"
+ },
+ "00727820": {
+  "module": "net_messages",
+  "name": "NetWriteSoldierItem",
+  "proto": "void __fastcall NetWriteSoldierItem(void * stream, void * item)"
+ },
+ "00727850": {
+  "module": "net_messages",
+  "name": "NetWriteSoldierState",
+  "proto": "void __fastcall NetWriteSoldierState(void * msg, void * state, bool itemsOnly)"
+ },
+ "00727a30": {
+  "module": "net_messages",
+  "name": "NetReadSoldierState",
+  "proto": "void __fastcall NetReadSoldierState(void * msg, void * state, bool itemsOnly)"
+ },
+ "00727bd0": {
+  "module": "net_commands",
+  "name": "C_GameApp::HandleServerCommand",
+  "proto": "void __thiscall HandleServerCommand(void *this, int id, void * stream)"
+ },
+ "00728820": {
+  "module": "net_commands",
+  "name": "C_GameApp::HandleClientCommand",
+  "proto": "void __thiscall HandleClientCommand(void *this, int id, void * stream)"
  },
  "0072a480": {
   "module": "game_app",
@@ -36686,6 +39163,21 @@
   "module": "zz_idioms",
   "name": "empty_function_72bbe0"
  },
+ "0072c190": {
+  "module": "net_messages",
+  "name": "C_NetGame::BeginCommand",
+  "proto": "void * __thiscall BeginCommand(void *this, int id)"
+ },
+ "0072c1b0": {
+  "module": "net_messages",
+  "name": "C_NetGame::BeginReply",
+  "proto": "void * __thiscall BeginReply(void *this, int to, int id)"
+ },
+ "0072c1d0": {
+  "module": "net_messages",
+  "name": "C_NetGame::BeginGameMessage",
+  "proto": "void * __thiscall BeginGameMessage(void *this, int to, int id, bool reliable)"
+ },
  "0072c280": {
   "module": "script",
   "name": "C_NetGame::CreateMessage"
@@ -36694,9 +39186,35 @@
   "module": "actors",
   "name": "C_NetGame::CreateMessageEx"
  },
+ "0072c2c0": {
+  "module": "net_game",
+  "name": "C_NetGame::BeginMessage",
+  "proto": "void * __thiscall BeginMessage(void *this, int target, int type, bool reliable, int channel)"
+ },
  "0072c360": {
-  "module": "script",
-  "name": "C_NetGame::SendMessage"
+  "module": "net_game",
+  "name": "C_NetGame::SendNetMessage",
+  "proto": "void __thiscall SendNetMessage(void *this, void * msg)"
+ },
+ "0072c480": {
+  "module": "net_game",
+  "name": "C_NetGame::DispatchNetMessage",
+  "proto": "bool __cdecl DispatchNetMessage(void * stream, bool toClient)"
+ },
+ "0072c540": {
+  "module": "net_game",
+  "name": "C_NetGame::QueueReceived",
+  "proto": "void __thiscall QueueReceived(void *this, void * data, int size, uint flags)"
+ },
+ "0072c600": {
+  "module": "net_game",
+  "name": "C_NetGame::QueueOutgoing",
+  "proto": "void __thiscall QueueOutgoing(void *this, void * data, int size, uint flags)"
+ },
+ "0072c730": {
+  "module": "net_game",
+  "name": "TransportCallback",
+  "proto": "void __fastcall TransportCallback(int connection, void * data, int size, int kind, uint flags)"
  },
  "0072c780": {
   "module": "app",
@@ -36707,9 +39225,34 @@
   "name": "C_NetGame::Process",
   "proto": "void __thiscall Process(C_NetGame *this, int timeDelta, bool unknown)"
  },
+ "0072cde0": {
+  "module": "net_game",
+  "name": "C_NetGame::UpdateLags",
+  "proto": "void __thiscall UpdateLags(void *this, int timeDelta)"
+ },
+ "0072d120": {
+  "module": "net_game",
+  "name": "C_NetGame::SendJoinData",
+  "proto": "void __fastcall SendJoinData(void * net)"
+ },
  "0072d240": {
   "module": "app",
   "name": "C_NetGame::SendMessages"
+ },
+ "0072d4b0": {
+  "module": "net_game",
+  "name": "C_NetGame::SendToPlayers",
+  "proto": "void __thiscall SendToPlayers(void *this, int slot, void * data, int size, uint flags)"
+ },
+ "0072d590": {
+  "module": "net_session",
+  "name": "MakeObjectFactory",
+  "proto": "void * __fastcall MakeObjectFactory(int id)"
+ },
+ "0072d5c0": {
+  "module": "net_session",
+  "name": "MakeObjectStateReader",
+  "proto": "void * __fastcall MakeObjectStateReader(int id)"
  },
  "0072d670": {
   "module": "zz_idioms",
@@ -36720,10 +39263,70 @@
   "name": "C_NetGame::Command",
   "proto": "bool __thiscall Command(C_NetGame *this, int command, char * arg, int unknown)"
  },
+ "0072d9c0": {
+  "module": "net_game",
+  "name": "ScanFrameBounds",
+  "proto": "uint __stdcall ScanFrameBounds(void * frame, void * context)"
+ },
+ "0072dcd0": {
+  "module": "net_game",
+  "name": "BitsForRange",
+  "proto": "int __fastcall BitsForRange(uint * steps)"
+ },
+ "0072dd30": {
+  "module": "net_game",
+  "name": "S_NetVote::S_NetVote",
+  "proto": "void * __fastcall S_NetVote(void * vote)"
+ },
+ "0072dd50": {
+  "module": "net_game",
+  "name": "PostVote",
+  "proto": "void __cdecl PostVote(int kind, int arg)"
+ },
+ "0072dd70": {
+  "module": "net_game",
+  "name": "S_NetVote::Start",
+  "proto": "void __thiscall Start(void *this, int kind, int arg)"
+ },
+ "0072ddb0": {
+  "module": "net_game",
+  "name": "S_NetVote::Begin",
+  "proto": "void __thiscall Begin(void *this, int kind, int arg)"
+ },
+ "0072de90": {
+  "module": "net_game",
+  "name": "PrintVoteResult",
+  "proto": "void __cdecl PrintVoteResult(bool passed)"
+ },
+ "0072dfb0": {
+  "module": "net_game",
+  "name": "S_NetVote::Vote",
+  "proto": "bool __fastcall Vote(void * vote)"
+ },
+ "0072dfe0": {
+  "module": "net_game",
+  "name": "S_NetVote::CountYes",
+  "proto": "void __fastcall CountYes(void * vote)"
+ },
+ "0072e070": {
+  "module": "net_game",
+  "name": "S_NetVote::End",
+  "proto": "void __thiscall End(void *this, uint passed)"
+ },
  "0072e0a0": {
-  "module": "game",
-  "name": "C_NetGame::UpdateWatchdog",
-  "proto": "void __thiscall UpdateWatchdog(void *this, int timeDelta)"
+  "module": "net_game",
+  "name": "C_NetGame::UpdateVote",
+  "proto": "void __thiscall UpdateVote(void *this, int timeDelta)"
+ },
+ "0072e1d0": {
+  "module": "net_game",
+  "name": "C_NetGame::C_NetGame",
+  "proto": "void * __fastcall C_NetGame(void * net)"
+ },
+ "0072e3a0": {
+  "module": "net_game",
+  "name": "C_NetGame::~C_NetGame",
+  "proto": "void __fastcall ~C_NetGame(void * net)"
  },
  "0072e570": {
   "module": "app",
@@ -36753,9 +39356,24 @@
   "name": "C_NetGame::SetPlayer",
   "proto": "void __thiscall SetPlayer(C_NetGame * this, int slot, int connection, char * name)"
  },
+ "0072edf0": {
+  "module": "net_game",
+  "name": "C_NetGame::SetVoiceValue",
+  "proto": "void __thiscall SetVoiceValue(void *this, int value)"
+ },
  "0072ee60": {
   "module": "game_menu",
   "name": "C_NetGame::SendChat"
+ },
+ "0072eeb0": {
+  "module": "net_game",
+  "name": "C_NetGame::FindPlayerByName",
+  "proto": "int __thiscall FindPlayerByName(void *this, char * name)"
+ },
+ "0072efa0": {
+  "module": "net_game",
+  "name": "C_NetGame::GetPlayerName",
+  "proto": "char * __thiscall GetPlayerName(void *this, int slot)"
  },
  "0072eff0": {
   "module": "game",
@@ -36765,6 +39383,11 @@
  "0072f040": {
   "module": "actors",
   "name": "C_NetGame::LockPlayers"
+ },
+ "0072f060": {
+  "module": "net_game",
+  "name": "C_NetGame::FindPlayer",
+  "proto": "int __thiscall FindPlayer(void *this, int connection)"
  },
  "0072f100": {
   "module": "actors",
@@ -36780,19 +39403,55 @@
   "name": "C_NetGame::AddScore",
   "proto": "void __thiscall AddScore(C_NetGame *this, int slot, int points)"
  },
+ "0072f230": {
+  "module": "net_players",
+  "name": "C_NetGame::OnPlayerKilled",
+  "proto": "void __thiscall OnPlayerKilled(void *this, int victim, int killer)"
+ },
+ "0072f5e0": {
+  "module": "net_players",
+  "name": "C_NetGame::KickPlayerByName",
+  "proto": "void __thiscall KickPlayerByName(void *this, char * name, int reason)"
+ },
+ "0072f6c0": {
+  "module": "net_players",
+  "name": "C_NetGame::KickPlayer",
+  "proto": "void __thiscall KickPlayer(void *this, int slot, int reason)"
+ },
  "0072f890": {
-  "module": "player",
+  "module": "net_players",
   "name": "C_NetGame::GetPlayerStats",
   "proto": "int * __thiscall GetPlayerStats(void *this, int slot)"
  },
  "0072f8b0": {
-  "module": "game_menu",
-  "name": "C_NetGame::GetLocalPlayerStats"
+  "module": "net_players",
+  "name": "C_NetGame::GetLocalPlayerStats",
+  "proto": "int * __fastcall GetLocalPlayerStats(void * net)"
+ },
+ "0072f8d0": {
+  "module": "net_players",
+  "name": "C_NetGame::SetLevelBounds",
+  "proto": "void __thiscall SetLevelBounds(void *this, float * min, float * size)"
+ },
+ "0072fa50": {
+  "module": "net_players",
+  "name": "C_NetGame::ReadScores",
+  "proto": "void __thiscall ReadScores(void *this, void * stream)"
+ },
+ "0072fc50": {
+  "module": "net_players",
+  "name": "C_NetGame::WriteScores",
+  "proto": "void __thiscall WriteScores(void *this, void * stream)"
  },
  "0072fe90": {
-  "module": "player",
-  "name": "C_NetGame::SetPlayerClass",
-  "proto": "void __thiscall SetPlayerClass(void *this, int soldierClass, int slot)"
+  "module": "net_players",
+  "name": "C_NetGame::SetPlayerRank",
+  "proto": "void __thiscall SetPlayerRank(void *this, int rank, int slot)"
+ },
+ "00730130": {
+  "module": "net_players",
+  "name": "C_NetGame::SendPlayerScore",
+  "proto": "void __thiscall SendPlayerScore(void *this, int slot, bool lock)"
  },
  "007301d0": {
   "module": "game",
@@ -36809,10 +39468,25 @@
   "name": "C_NetGame::CountTeams",
   "proto": "void __thiscall CountTeams(C_NetGame *this, int * axis, int * allies, bool pending, bool inGame)"
  },
+ "00730410": {
+  "module": "net_players",
+  "name": "C_NetGame::CountPlayers",
+  "proto": "int __fastcall CountPlayers(void * net)"
+ },
  "007304a0": {
   "module": "game",
   "name": "C_NetGame::ApplyPendingTeams",
   "proto": "void __fastcall ApplyPendingTeams(C_NetGame * net)"
+ },
+ "00730510": {
+  "module": "net_players",
+  "name": "C_NetGame::SetPlayerTeam",
+  "proto": "void __thiscall SetPlayerTeam(void *this, int slot, int team, bool pending)"
+ },
+ "00730590": {
+  "module": "net_players",
+  "name": "C_NetGame::TeamsBalanced",
+  "proto": "bool __thiscall TeamsBalanced(void *this, int axis, int allied, bool pending)"
  },
  "007305e0": {
   "module": "game",
@@ -36820,33 +39494,104 @@
   "proto": "bool __thiscall IsTeamAlive(C_NetGame *this, int team)"
  },
  "007306a0": {
-  "module": "game",
+  "module": "net_players",
   "name": "C_NetGame::BalanceTeams",
-  "proto": "void __thiscall BalanceTeams(C_NetGame *this, int a, int b)"
+  "proto": "void __thiscall BalanceTeams(void *this, int unused, int percent)"
+ },
+ "007307e0": {
+  "module": "net_players",
+  "name": "IsPlayerAdmin",
+  "proto": "bool __cdecl IsPlayerAdmin(int slot)"
  },
  "00730830": {
   "module": "game",
   "name": "C_NetGame::GetLocalHuman",
   "proto": "C_Human * __fastcall GetLocalHuman(C_NetGame * net)"
  },
+ "00730880": {
+  "module": "net_players",
+  "name": "C_NetGame::GetLocalTeam",
+  "proto": "int __fastcall GetLocalTeam(void * net)"
+ },
  "007308a0": {
   "module": "game",
   "name": "C_NetGame::IsPlayerSpectating",
   "proto": "bool __thiscall IsPlayerSpectating(C_NetGame *this, int slot)"
  },
+ "00730900": {
+  "module": "net_players",
+  "name": "C_NetGame::GetPlayerTeam",
+  "proto": "int __thiscall GetPlayerTeam(void *this, int slot, bool pending)"
+ },
  "00730970": {
-  "module": "script",
-  "name": "IsNetPlayerConnected"
+  "module": "net_players",
+  "name": "CanPlayerRespawn",
+  "proto": "bool __cdecl CanPlayerRespawn(int slot)"
  },
  "00730a20": {
   "module": "game",
   "name": "C_NetGame::AddTeamScore",
   "proto": "void __thiscall AddTeamScore(C_NetGame *this, int team, float points)"
  },
+ "00730a50": {
+  "module": "net_players",
+  "name": "C_NetGame::PrintTeams",
+  "proto": "void __fastcall PrintTeams(void * net)"
+ },
+ "00730be0": {
+  "module": "net_players",
+  "name": "C_NetGame::FillServerStatus",
+  "proto": "void __thiscall FillServerStatus(void *this, void * status)"
+ },
  "00730e10": {
   "module": "game",
   "name": "C_NetGame::FlipSessionParity",
   "proto": "void __fastcall FlipSessionParity(C_NetGame * net)"
+ },
+ "00730f00": {
+  "module": "net_search",
+  "name": "C_NetGame::OpenKeyServer",
+  "proto": "void __fastcall OpenKeyServer(void * net)"
+ },
+ "00730fa0": {
+  "module": "net_search",
+  "name": "C_NetGame::ReceiveKeyPacket",
+  "proto": "bool __thiscall ReceiveKeyPacket(void *this, char * data, int * size, uint * address, uint * port)"
+ },
+ "007310e0": {
+  "module": "net_search",
+  "name": "C_NetGame::SendKeyPacket",
+  "proto": "void __thiscall SendKeyPacket(void *this, char * data, int size, uint address, ushort port)"
+ },
+ "007311b0": {
+  "module": "net_search",
+  "name": "RandomName",
+  "proto": "char * __fastcall RandomName(int length)"
+ },
+ "007311f0": {
+  "module": "net_search",
+  "name": "OnKeyChecked",
+  "proto": "void __fastcall OnKeyChecked(int gameId, int localId, int authenticated, char * message, void * instance)"
+ },
+ "00731250": {
+  "module": "net_search",
+  "name": "C_NetGame::ProcessKeyQueries",
+  "proto": "void __fastcall ProcessKeyQueries(void * net)"
+ },
+ "007316f0": {
+  "module": "net_search",
+  "name": "C_NetGame::StartKeyQuery",
+  "proto": "void __thiscall StartKeyQuery(void *this, void * server)"
+ },
+ "007317a0": {
+  "module": "net_search",
+  "name": "C_NetGame::RunKeyQuery",
+  "proto": "bool __fastcall RunKeyQuery(void * net)"
+ },
+ "00731990": {
+  "module": "net_search",
+  "name": "C_NetGame::DropKeyQuery",
+  "proto": "void __thiscall DropKeyQuery(void *this, int index)"
  },
  "007319e0": {
   "module": "game",
@@ -36862,6 +39607,16 @@
   "module": "loader_screen",
   "name": "C_NetGame::PrintLoadProgress",
   "proto": "void __thiscall PrintLoadProgress(C_NetGame *this, int percent)"
+ },
+ "00731e10": {
+  "module": "net_console",
+  "name": "CrashReportProc",
+  "proto": "int __stdcall CrashReportProc(void * dialog, uint message, uint wParam, int lParam)"
+ },
+ "00731ee0": {
+  "module": "net_console",
+  "name": "ReportCrash",
+  "proto": "void __stdcall ReportCrash(char * text)"
  },
  "00731fd0": {
   "module": "zz_idioms",
@@ -36879,6 +39634,46 @@
   "module": "app",
   "name": "GetCDKey"
  },
+ "00732050": {
+  "module": "net_console",
+  "name": "FirewallClickChild",
+  "proto": "int __stdcall FirewallClickChild(void * window, int param)"
+ },
+ "00732080": {
+  "module": "net_console",
+  "name": "FirewallFindSmallWindow",
+  "proto": "int __stdcall FirewallFindSmallWindow(void * window, int param)"
+ },
+ "007320c0": {
+  "module": "net_console",
+  "name": "FirewallWatchDialogs",
+  "proto": "uint __stdcall FirewallWatchDialogs(void * thread)"
+ },
+ "00732120": {
+  "module": "net_console",
+  "name": "FirewallRemovePortMapping",
+  "proto": "int __fastcall FirewallRemovePortMapping(void * manager, uchar protocol, int port)"
+ },
+ "00732470": {
+  "module": "net_console",
+  "name": "FirewallAddPortMapping",
+  "proto": "int __fastcall FirewallAddPortMapping(void * config, short port)"
+ },
+ "00732550": {
+  "module": "net_console",
+  "name": "FirewallMapConnections",
+  "proto": "int __fastcall FirewallMapConnections(void * manager, short port, bool * blocked)"
+ },
+ "00732730": {
+  "module": "net_session",
+  "name": "C_NetGame::ConfigureFirewall",
+  "proto": "void __thiscall ConfigureFirewall(void *this, int port, bool open)"
+ },
+ "007328d0": {
+  "module": "main_menu",
+  "name": "C_NetGame::FirewallBlocks",
+  "proto": "bool __thiscall FirewallBlocks(void *this, ushort port)"
+ },
  "007329b0": {
   "module": "zz_idioms",
   "name": "vector_tidy_7329b0"
@@ -36887,33 +39682,783 @@
   "module": "zz_idioms",
   "name": "empty_function_732c10"
  },
+ "00732da0": {
+  "module": "net_console",
+  "name": "InitGameRole",
+  "proto": "void __cdecl InitGameRole(void)"
+ },
+ "00732e30": {
+  "module": "net_search",
+  "name": "S_KeyQuery::Clear",
+  "proto": "void __fastcall Clear(void * query)"
+ },
+ "00732e70": {
+  "module": "net_gamespy",
+  "name": "ArrayNew"
+ },
+ "00732ed0": {
+  "module": "net_gamespy",
+  "name": "ArrayFree"
+ },
+ "00732f00": {
+  "module": "net_gamespy",
+  "name": "GS_FreeElement"
+ },
  "00732f80": {
-  "module": "zz_idioms",
-  "name": "get_first_field_732f80"
+  "module": "net_gamespy",
+  "name": "ArrayLength"
+ },
+ "00732f90": {
+  "module": "net_gamespy",
+  "name": "ArrayNth"
+ },
+ "00732fa0": {
+  "module": "net_gamespy",
+  "name": "ArrayAppend"
+ },
+ "00732fb0": {
+  "module": "net_gamespy",
+  "name": "ArrayInsertAt"
+ },
+ "00733010": {
+  "module": "net_gamespy",
+  "name": "GS_Grow"
+ },
+ "00733040": {
+  "module": "net_gamespy",
+  "name": "GS_SetElement"
+ },
+ "007330b0": {
+  "module": "net_gamespy",
+  "name": "ArrayRemoveAt"
+ },
+ "007330f0": {
+  "module": "net_gamespy",
+  "name": "ArrayDeleteAt"
+ },
+ "00733110": {
+  "module": "net_gamespy",
+  "name": "ArrayReplaceAt"
+ },
+ "00733160": {
+  "module": "net_gamespy",
+  "name": "ArraySearch"
+ },
+ "007332d0": {
+  "module": "net_gamespy",
+  "name": "ArrayClear"
+ },
+ "007332f0": {
+  "module": "net_gamespy",
+  "name": "GS_LinearSearch"
+ },
+ "00733350": {
+  "module": "net_gamespy",
+  "name": "GS_BinarySearch"
+ },
+ "00733af0": {
+  "module": "net_search",
+  "name": "gcd_compute_response",
+  "proto": "void __fastcall gcd_compute_response(char * cdKey, char * challenge, char * response)"
+ },
+ "00733cb0": {
+  "module": "net_search",
+  "name": "gcd_init",
+  "proto": "int __fastcall gcd_init(void * record, int gameId)"
+ },
+ "00733d80": {
+  "module": "net_search",
+  "name": "gcd_authenticate_user"
+ },
+ "00733f40": {
+  "module": "net_search",
+  "name": "gcd_disconnect_user",
+  "proto": "void __fastcall gcd_disconnect_user(int gameId, int localId)"
+ },
+ "00734040": {
+  "module": "net_search",
+  "name": "gcd_think"
+ },
+ "007342a0": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessPacket"
+ },
+ "00734530": {
+  "module": "net_gamespy",
+  "name": "GS_AddProduct"
+ },
+ "007345b0": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessAuthAnswer"
+ },
+ "007346a0": {
+  "module": "net_gamespy",
+  "name": "GS_FindClient"
+ },
+ "00734750": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessCount"
+ },
+ "00734830": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessIsOn"
+ },
+ "00734970": {
+  "module": "net_gamespy",
+  "name": "GS_SendDisconnect"
+ },
+ "00734a40": {
+  "module": "net_gamespy",
+  "name": "GS_SendAuthRequest"
+ },
+ "00734bc0": {
+  "module": "net_gamespy",
+  "name": "GS_ResendRequest"
+ },
+ "00734c00": {
+  "module": "net_gamespy",
+  "name": "GS_ValueForKey"
+ },
+ "00734d10": {
+  "module": "net_gamespy",
+  "name": "GS_XorKey"
+ },
+ "00734e40": {
+  "module": "net_gamespy",
+  "name": "GS_FindProduct"
+ },
+ "00734e70": {
+  "module": "net_gamespy",
+  "name": "GS_ListAdd"
+ },
+ "00734e90": {
+  "module": "net_gamespy",
+  "name": "GS_ListRemove"
  },
  "007350a0": {
-  "module": "app",
+  "module": "net_gamespy",
   "name": "ValidateCDKey"
  },
+ "00736dd0": {
+  "module": "net_gamespy",
+  "name": "TableNew2"
+ },
+ "00736e40": {
+  "module": "net_gamespy",
+  "name": "TableFree"
+ },
+ "00736eb0": {
+  "module": "net_gamespy",
+  "name": "TableEnter"
+ },
+ "00736f00": {
+  "module": "net_gamespy",
+  "name": "TableRemove"
+ },
+ "00736f50": {
+  "module": "net_gamespy",
+  "name": "TableLookup"
+ },
+ "007370c0": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Init"
+ },
+ "007370f0": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Update"
+ },
+ "00737190": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Final"
+ },
+ "00737200": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Transform"
+ },
+ "00737b40": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Encode"
+ },
+ "00737b80": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Decode"
+ },
+ "00737bd0": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Copy"
+ },
+ "00737bf0": {
+  "module": "net_gamespy",
+  "name": "GS_Md5Set"
+ },
+ "00737c20": {
+  "module": "net_gamespy",
+  "name": "GS_Md5ToHex"
+ },
+ "00737c50": {
+  "module": "net_gamespy",
+  "name": "MD5Digest"
+ },
+ "00737c90": {
+  "module": "net_gamespy",
+  "name": "current_time"
+ },
+ "00737ca0": {
+  "module": "net_gamespy",
+  "name": "msleep"
+ },
+ "00737cb0": {
+  "module": "net_gamespy",
+  "name": "SocketStartUp"
+ },
+ "00737cd0": {
+  "module": "net_gamespy",
+  "name": "GS_SocketShutDown"
+ },
+ "00737ce0": {
+  "module": "net_gamespy",
+  "name": "goastrdup"
+ },
+ "00737e60": {
+  "module": "net_gamespy",
+  "name": "CanReceiveOnSocket"
+ },
+ "00737f20": {
+  "module": "net_gamespy",
+  "name": "GS_GetLocalHost"
+ },
+ "00738260": {
+  "module": "net_gamespy",
+  "name": "GS_InitWithSocket"
+ },
+ "00738400": {
+  "module": "net_gamespy",
+  "name": "GS_InitSocket"
+ },
+ "00738500": {
+  "module": "net_search",
+  "name": "qr2_init"
+ },
+ "007385d0": {
+  "module": "net_search",
+  "name": "qr2_think",
+  "proto": "void __fastcall qr2_think(void * record)"
+ },
+ "00738670": {
+  "module": "net_gamespy",
+  "name": "GS_SendHeartbeatsIfDue"
+ },
+ "00738760": {
+  "module": "net_gamespy",
+  "name": "qr2_shutdown"
+ },
+ "007387d0": {
+  "module": "net_search",
+  "name": "qr2_keybuffer_add",
+  "proto": "void __fastcall qr2_keybuffer_add(void * keys, int key)"
+ },
+ "00738800": {
+  "module": "net_search",
+  "name": "qr2_buffer_add_int",
+  "proto": "void __fastcall qr2_buffer_add_int(void * buffer, int value)"
+ },
+ "00738830": {
+  "module": "net_search",
+  "name": "qr2_buffer_add",
+  "proto": "void __fastcall qr2_buffer_add(void * buffer, char * value)"
+ },
+ "00738890": {
+  "module": "net_gamespy",
+  "name": "GS_FindLocalIps"
+ },
+ "007388d0": {
+  "module": "net_gamespy",
+  "name": "GS_GetSockAddr"
+ },
+ "00738950": {
+  "module": "net_gamespy",
+  "name": "GS_HandlePacket"
+ },
+ "00738be0": {
+  "module": "net_gamespy",
+  "name": "GS_BeginReply"
+ },
+ "00738c00": {
+  "module": "net_gamespy",
+  "name": "GS_HandleChallenge"
+ },
+ "00738c90": {
+  "module": "net_gamespy",
+  "name": "GS_Base64"
+ },
+ "00738d50": {
+  "module": "net_gamespy",
+  "name": "GS_Base64Digit"
+ },
+ "00738d80": {
+  "module": "net_gamespy",
+  "name": "GS_Encrypt"
+ },
+ "00738ee0": {
+  "module": "net_gamespy",
+  "name": "GS_SwapBytes"
+ },
+ "00738ef0": {
+  "module": "net_gamespy",
+  "name": "GS_HandleQuery"
+ },
+ "00738fd0": {
+  "module": "net_gamespy",
+  "name": "GS_BuildReply"
+ },
+ "00739020": {
+  "module": "net_gamespy",
+  "name": "GS_BuildKeyTypeReply"
+ },
+ "00739260": {
+  "module": "net_gamespy",
+  "name": "GS_BuildOldReply"
+ },
+ "007392b0": {
+  "module": "net_gamespy",
+  "name": "GS_BuildOldKeys"
+ },
+ "00739480": {
+  "module": "net_gamespy",
+  "name": "GS_HandleClientMessage"
+ },
+ "00739520": {
+  "module": "net_gamespy",
+  "name": "GS_MessageKeySeen"
+ },
+ "00739570": {
+  "module": "net_gamespy",
+  "name": "GS_SendKeepAlive"
+ },
+ "007395d0": {
+  "module": "net_gamespy",
+  "name": "GS_SendHeartbeat"
+ },
+ "00739750": {
+  "module": "net_search",
+  "name": "qr2_register_key",
+  "proto": "void __fastcall qr2_register_key(int key, char * name)"
+ },
+ "00739770": {
+  "module": "net_gamespy",
+  "name": "GS_CipherInitNoKey"
+ },
+ "007397b0": {
+  "module": "net_gamespy",
+  "name": "GS_CipherInit"
+ },
+ "00739870": {
+  "module": "net_gamespy",
+  "name": "GS_CipherShuffle"
+ },
+ "00739a50": {
+  "module": "net_gamespy",
+  "name": "GS_CipherDecryptByte"
+ },
+ "00739b60": {
+  "module": "net_gamespy",
+  "name": "GS_CipherDecrypt"
+ },
+ "00739bd0": {
+  "module": "net_gamespy",
+  "name": "GS_EngineInit"
+ },
+ "00739c20": {
+  "module": "net_gamespy",
+  "name": "GS_QueryListInit"
+ },
+ "00739c30": {
+  "module": "net_gamespy",
+  "name": "GS_EngineSetPublicIp"
+ },
+ "00739c40": {
+  "module": "net_gamespy",
+  "name": "GS_EngineClear"
+ },
+ "00739c90": {
+  "module": "net_gamespy",
+  "name": "GS_QueueQuery"
+ },
+ "00739ce0": {
+  "module": "net_gamespy",
+  "name": "GS_AddLast"
+ },
+ "00739d10": {
+  "module": "net_gamespy",
+  "name": "GS_AddFirst"
+ },
+ "00739d30": {
+  "module": "net_gamespy",
+  "name": "GS_SendQuery"
+ },
+ "00739ea0": {
+  "module": "net_gamespy",
+  "name": "GS_EngineThink"
+ },
+ "00739ee0": {
+  "module": "net_gamespy",
+  "name": "GS_ReceiveReplies"
+ },
+ "00739fa0": {
+  "module": "net_gamespy",
+  "name": "GS_HandleReply"
+ },
+ "0073a070": {
+  "module": "net_gamespy",
+  "name": "GS_RemoveServer"
+ },
+ "0073a0c0": {
+  "module": "net_gamespy",
+  "name": "GS_HandleOldReply"
+ },
+ "0073a130": {
+  "module": "net_gamespy",
+  "name": "GS_TimeOutQueries"
+ },
+ "0073a190": {
+  "module": "net_gamespy",
+  "name": "GS_RemoveFirst"
+ },
+ "0073a1b0": {
+  "module": "net_gamespy",
+  "name": "GS_SendPending"
+ },
+ "0073a1f0": {
+  "module": "net_gamespy",
+  "name": "GS_EngineAddKey"
+ },
+ "0073a210": {
+  "module": "net_gamespy",
+  "name": "GS_EngineRemove"
+ },
+ "0073a240": {
+  "module": "net_gamespy",
+  "name": "GS_SharedStrings"
+ },
+ "0073a310": {
+  "module": "net_gamespy",
+  "name": "GS_FreeServer"
+ },
+ "0073a330": {
+  "module": "net_gamespy",
+  "name": "GS_SetValue"
+ },
+ "0073a370": {
+  "module": "net_gamespy",
+  "name": "GS_SetIntValue"
+ },
+ "0073a3f0": {
+  "module": "net_search",
+  "name": "SBServerGetStringValue",
+  "proto": "char * __fastcall SBServerGetStringValue(void * server, char * key, char * fallback)"
+ },
+ "0073a420": {
+  "module": "net_search",
+  "name": "SBServerGetIntValue",
+  "proto": "int __fastcall SBServerGetIntValue(void * server, char * key, int fallback)"
+ },
  "0073a6a0": {
-  "module": "zz_idioms",
-  "name": "get_first_field_73a6a0"
+  "module": "net_search",
+  "name": "SBServerGetPublicInetAddress",
+  "proto": "uint __fastcall SBServerGetPublicInetAddress(void * server)"
  },
  "0073a6c0": {
-  "module": "zz_idioms",
-  "name": "get_field_4_73a6c0"
+  "module": "net_gamespy",
+  "name": "SBServerGetPublicPort"
+ },
+ "0073a720": {
+  "module": "net_gamespy",
+  "name": "SBServerSetNext"
  },
  "0073a730": {
-  "module": "zz_idioms",
-  "name": "get_field_20_73a730"
+  "module": "net_gamespy",
+  "name": "SBServerGetNext"
+ },
+ "0073a740": {
+  "module": "net_gamespy",
+  "name": "GS_ParseOldReply"
+ },
+ "0073a7a0": {
+  "module": "net_gamespy",
+  "name": "GS_IsValueKey"
+ },
+ "0073a810": {
+  "module": "net_gamespy",
+  "name": "GS_NextToken"
+ },
+ "0073a860": {
+  "module": "net_gamespy",
+  "name": "GS_ParseFullReply"
+ },
+ "0073a9d0": {
+  "module": "net_gamespy",
+  "name": "GS_HashString"
  },
  "0073aa10": {
-  "module": "zz_idioms",
-  "name": "get_field_1c_73aa10"
+  "module": "net_search",
+  "name": "SBServerGetPing",
+  "proto": "uint __fastcall SBServerGetPing(void * server)"
+ },
+ "0073aa20": {
+  "module": "net_gamespy",
+  "name": "GS_NewServer"
+ },
+ "0073aaa0": {
+  "module": "net_gamespy",
+  "name": "GS_FreeKeyValue"
+ },
+ "0073aaf0": {
+  "module": "net_gamespy",
+  "name": "SBServerSetFlags"
+ },
+ "0073ab10": {
+  "module": "net_gamespy",
+  "name": "SBServerSetPrivateAddress"
+ },
+ "0073ab20": {
+  "module": "net_gamespy",
+  "name": "SBServerSetIcmpIp"
+ },
+ "0073ab30": {
+  "module": "net_gamespy",
+  "name": "SBServerSetState"
  },
  "0073ab40": {
-  "module": "zz_idioms",
-  "name": "get_field_14_73ab40"
+  "module": "net_gamespy",
+  "name": "SBServerGetState"
+ },
+ "0073ab60": {
+  "module": "net_gamespy",
+  "name": "SBServerIsNull"
+ },
+ "0073ab70": {
+  "module": "net_search",
+  "name": "ServerBrowserNew"
+ },
+ "0073abf0": {
+  "module": "net_gamespy",
+  "name": "GS_OnListEvent"
+ },
+ "0073ad50": {
+  "module": "net_gamespy",
+  "name": "GS_OnQueryEvent"
+ },
+ "0073adf0": {
+  "module": "net_gamespy",
+  "name": "ServerBrowserUpdateWithOptions"
+ },
+ "0073af00": {
+  "module": "net_search",
+  "name": "ServerBrowserUpdate"
+ },
+ "0073b240": {
+  "module": "net_search",
+  "name": "ServerBrowserThink",
+  "proto": "void __fastcall ServerBrowserThink(void * browser)"
+ },
+ "0073b260": {
+  "module": "net_gamespy",
+  "name": "ServerBrowserDisconnectAndClear"
+ },
+ "0073b280": {
+  "module": "net_search",
+  "name": "ServerBrowserClear",
+  "proto": "void __fastcall ServerBrowserClear(void * browser)"
+ },
+ "0073b3b0": {
+  "module": "net_gamespy",
+  "name": "GS_StringSize"
+ },
+ "0073b3d0": {
+  "module": "net_gamespy",
+  "name": "GS_ListInit"
+ },
+ "0073b4a0": {
+  "module": "net_gamespy",
+  "name": "GS_ListConnectAndQuery"
+ },
+ "0073b6d0": {
+  "module": "net_gamespy",
+  "name": "GS_ConnectToMaster"
+ },
+ "0073b7e0": {
+  "module": "net_gamespy",
+  "name": "GS_HashGameName"
+ },
+ "0073b820": {
+  "module": "net_gamespy",
+  "name": "GS_WriteString"
+ },
+ "0073b870": {
+  "module": "net_gamespy",
+  "name": "GS_WriteByte"
+ },
+ "0073b890": {
+  "module": "net_gamespy",
+  "name": "GS_WriteInt"
+ },
+ "0073b8b0": {
+  "module": "net_gamespy",
+  "name": "GS_WriteBytes"
+ },
+ "0073b8f0": {
+  "module": "net_gamespy",
+  "name": "GS_MakeChallenge"
+ },
+ "0073bac0": {
+  "module": "net_gamespy",
+  "name": "GS_ListDisconnect"
+ },
+ "0073bb20": {
+  "module": "net_gamespy",
+  "name": "GS_ReleasePopularValues"
+ },
+ "0073bb60": {
+  "module": "net_gamespy",
+  "name": "GS_ReleaseKeyList"
+ },
+ "0073bcd0": {
+  "module": "net_gamespy",
+  "name": "GS_ListError"
+ },
+ "0073bdf0": {
+  "module": "net_gamespy",
+  "name": "GS_ReadLanReplies"
+ },
+ "0073bed0": {
+  "module": "net_gamespy",
+  "name": "GS_ListThink"
+ },
+ "0073bf00": {
+  "module": "net_gamespy",
+  "name": "GS_ReadFromMaster"
+ },
+ "0073bfb0": {
+  "module": "net_gamespy",
+  "name": "GS_ParseMainList"
+ },
+ "0073c2e0": {
+  "module": "net_gamespy",
+  "name": "GS_SetUpCipher"
+ },
+ "0073c370": {
+  "module": "net_gamespy",
+  "name": "GS_ParseListServer"
+ },
+ "0073c480": {
+  "module": "net_gamespy",
+  "name": "GS_ServerHeaderSize"
+ },
+ "0073c4b0": {
+  "module": "net_gamespy",
+  "name": "GS_HasFullKeys"
+ },
+ "0073c4f0": {
+  "module": "net_gamespy",
+  "name": "GS_HasFixedFields"
+ },
+ "0073c580": {
+  "module": "net_gamespy",
+  "name": "GS_ReadAddress"
+ },
+ "0073c5d0": {
+  "module": "net_gamespy",
+  "name": "GS_ParseServer"
+ },
+ "0073c7a0": {
+  "module": "net_gamespy",
+  "name": "GS_ProcessMessages"
+ },
+ "0073c8a0": {
+  "module": "net_gamespy",
+  "name": "GS_ReadKeyListMessage"
+ },
+ "0073c970": {
+  "module": "net_gamespy",
+  "name": "GS_ReadRemoveMessage"
+ },
+ "0073c9b0": {
+  "module": "net_gamespy",
+  "name": "GS_ReadServerMessage"
+ },
+ "0073ccc0": {
+  "module": "net_gamespy",
+  "name": "GS_AddToList"
+ },
+ "0073cd30": {
+  "module": "net_gamespy",
+  "name": "GS_FindServer"
+ },
+ "0073cd90": {
+  "module": "net_gamespy",
+  "name": "GS_RemoveFromList"
+ },
+ "0073cdd0": {
+  "module": "net_gamespy",
+  "name": "GS_AddToDeadList"
+ },
+ "0073ce00": {
+  "module": "net_gamespy",
+  "name": "GS_ListServerAt"
+ },
+ "0073ce10": {
+  "module": "net_gamespy",
+  "name": "GS_FreeDeadList"
+ },
+ "0073ce50": {
+  "module": "net_gamespy",
+  "name": "GS_ClearList"
+ },
+ "0073ce90": {
+  "module": "net_gamespy",
+  "name": "GS_ListInitServers"
+ },
+ "0073cec0": {
+  "module": "net_gamespy",
+  "name": "GS_AddSharedString"
+ },
+ "0073cf20": {
+  "module": "net_gamespy",
+  "name": "GS_ReleaseSharedString"
+ },
+ "0073cf60": {
+  "module": "net_players",
+  "name": "InitNetQuantizations"
+ },
+ "0073cfa0": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::C_NetQuantizationTable",
+  "proto": "void * __fastcall C_NetQuantizationTable(void * table)"
+ },
+ "0073cfd0": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::DeletingDestructor",
+  "proto": "void * __thiscall DeletingDestructor(void *this, uint flags)"
+ },
+ "0073cff0": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::~C_NetQuantizationTable",
+  "proto": "void __fastcall ~C_NetQuantizationTable(void * table)"
+ },
+ "0073d010": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::SetEntry",
+  "proto": "void __thiscall SetEntry(void *this, int index, void * quantization)"
+ },
+ "0073d080": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::Set",
+  "proto": "void __thiscall Set(void *this, int index, float * span, float * from, float * step)"
+ },
+ "0073d0c0": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::SetDefaults",
+  "proto": "void __fastcall SetDefaults(void * table)"
  },
  "0073d290": {
   "module": "net_bitstream",
@@ -37019,6 +40564,66 @@
   "name": "S_NetQuantization::Setup",
   "proto": "void __fastcall Setup(S_NetQuantization *q, S_vector4 *span, S_vector4 *from, S_vector4 *step, int unknown)"
  },
+ "0073dd30": {
+  "module": "net_replication",
+  "name": "S_NetQuantization::Contains",
+  "proto": "bool __thiscall Contains(void *this, float * v)"
+ },
+ "0073dda0": {
+  "module": "net_replication",
+  "name": "S_NetQuantization::WithinSteps",
+  "proto": "bool __thiscall WithinSteps(void *this, float * v)"
+ },
+ "0073de20": {
+  "module": "net_replication",
+  "name": "C_NetProperty::C_NetProperty",
+  "proto": "void * __thiscall C_NetProperty(void *this, int index)"
+ },
+ "0073dee0": {
+  "module": "net_replication",
+  "name": "C_NetProperty::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0073df00": {
+  "module": "net_replication",
+  "name": "C_NetProperty::~C_NetProperty",
+  "proto": "void __thiscall ~C_NetProperty(void *this)"
+ },
+ "0073df60": {
+  "module": "net_replication",
+  "name": "C_NetProperty::Write",
+  "proto": "void __thiscall Write(void *this, void * stream, int player, bool delta)"
+ },
+ "0073dfb0": {
+  "module": "net_replication",
+  "name": "C_NetProperty::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "0073dfe0": {
+  "module": "net_replication",
+  "name": "C_NetProperty::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "0073e010": {
+  "module": "net_replication",
+  "name": "C_NetProperty::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "0073e030": {
+  "module": "net_replication",
+  "name": "C_NetProperty::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073e070": {
+  "module": "net_replication",
+  "name": "C_NetProperty::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073e0b0": {
+  "module": "net_replication",
+  "name": "C_NetProperty::SetLag",
+  "proto": "void __thiscall SetLag(void *this, float lag)"
+ },
  "0073e0e0": {
   "module": "car",
   "name": "C_NetProperty::SetFlags",
@@ -37029,25 +40634,115 @@
   "name": "C_NetProperty::SetField",
   "proto": "void __thiscall SetField(void *this, int field, int value)"
  },
+ "0073e190": {
+  "module": "net_replication",
+  "name": "C_NetObject::C_NetObject",
+  "proto": "void * __thiscall C_NetObject(void *this)"
+ },
+ "0073e320": {
+  "module": "net_replication",
+  "name": "C_NetObject::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0073e340": {
+  "module": "net_replication",
+  "name": "C_NetObject::~C_NetObject",
+  "proto": "void __thiscall ~C_NetObject(void *this)"
+ },
+ "0073e460": {
+  "module": "net_replication",
+  "name": "C_NetObject::AddProperty",
+  "proto": "void * __thiscall AddProperty(void *this, int index)"
+ },
  "0073e690": {
   "module": "controller",
   "name": "C_NetObject::GetProperty",
   "proto": "void * __thiscall GetProperty(void *this, int index)"
  },
+ "0073e6d0": {
+  "module": "net_replication",
+  "name": "C_NetObject::Write",
+  "proto": "bool __thiscall Write(void *this, void * stream, int player, bool fromClient)"
+ },
+ "0073e890": {
+  "module": "net_replication",
+  "name": "C_NetObject::Read",
+  "proto": "void __thiscall Read(void *this, void * stream, int sender, bool fromClient)"
+ },
+ "0073e970": {
+  "module": "net_replication",
+  "name": "C_NetObject::QueueMessage",
+  "proto": "void __thiscall QueueMessage(void *this, void * msg, int sentTo, bool outgoing)"
+ },
  "0073e9d0": {
-  "module": "car",
+  "module": "net_replication",
   "name": "C_NetObject::PopMessage",
-  "proto": "void * __thiscall PopMessage(void *this, int unknown)"
+  "proto": "void * __thiscall PopMessage(void *this, bool outgoing)"
+ },
+ "0073ea30": {
+  "module": "net_replication",
+  "name": "C_NetObject::ClearMessages",
+  "proto": "void __thiscall ClearMessages(void *this, bool release, bool outgoing, bool force)"
+ },
+ "0073eab0": {
+  "module": "net_replication",
+  "name": "C_NetObject::EraseMessageNode",
+  "proto": "void __stdcall EraseMessageNode(void * iterator, void * list)"
+ },
+ "0073eaf0": {
+  "module": "net_replication",
+  "name": "C_NetObject::Tick",
+  "proto": "void __thiscall Tick(void *this, float seconds)"
+ },
+ "0073eb20": {
+  "module": "net_replication",
+  "name": "C_NetObject::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "0073ec30": {
+  "module": "net_replication",
+  "name": "C_NetObject::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "0073ec60": {
+  "module": "net_replication",
+  "name": "C_NetObject::GetReadQuantizations",
+  "proto": "void __thiscall GetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073ec80": {
+  "module": "net_replication",
+  "name": "C_NetObject::GetWriteQuantizations",
+  "proto": "void __thiscall GetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
  },
  "0073eca0": {
-  "module": "car",
-  "name": "C_NetObject::SetQuantizations1",
-  "proto": "void __thiscall SetQuantizations1(void *this, S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)"
+  "module": "net_replication",
+  "name": "C_NetObject::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
  },
  "0073ecf0": {
-  "module": "car",
-  "name": "C_NetObject::SetQuantizations0",
-  "proto": "void __thiscall SetQuantizations0(void *this, S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)"
+  "module": "net_replication",
+  "name": "C_NetObject::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073ed40": {
+  "module": "net_replication",
+  "name": "C_NetObject::SetPropertyField2",
+  "proto": "void __thiscall SetPropertyField2(void *this, int value)"
+ },
+ "0073ed80": {
+  "module": "net_replication",
+  "name": "C_NetObject::SetLag",
+  "proto": "void __thiscall SetLag(void *this, float lag)"
+ },
+ "0073edc0": {
+  "module": "net_replication",
+  "name": "C_NetObject::HasDataToSend",
+  "proto": "bool __fastcall HasDataToSend(void * object)"
+ },
+ "0073ede0": {
+  "module": "net_replication",
+  "name": "C_NetObject::SecondsSinceRead",
+  "proto": "float __fastcall SecondsSinceRead(void * object)"
  },
  "0073ee20": {
   "module": "car",
@@ -37085,15 +40780,90 @@
   "module": "zz_idioms",
   "name": "construct_copy4_73efe0"
  },
+ "0073f020": {
+  "module": "net_replication",
+  "name": "C_NetReplication::C_NetReplication",
+  "proto": "void * __thiscall C_NetReplication(void *this)"
+ },
+ "0073f0b0": {
+  "module": "net_replication",
+  "name": "C_NetReplication::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0073f0d0": {
+  "module": "net_replication",
+  "name": "C_NetReplication::~C_NetReplication",
+  "proto": "void __thiscall ~C_NetReplication(void *this)"
+ },
+ "0073f150": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Reset",
+  "proto": "void __fastcall Reset(void * replication)"
+ },
+ "0073f1e0": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Write",
+  "proto": "bool __thiscall Write(void *this, void * stream, int player, bool fromClient)"
+ },
+ "0073f320": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Read",
+  "proto": "void __thiscall Read(void *this, void * stream, uint forwardTo, bool fromClient)"
+ },
+ "0073f550": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "0073f590": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "0073f5c0": {
+  "module": "net_replication",
+  "name": "C_NetReplication::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073f620": {
+  "module": "net_replication",
+  "name": "C_NetReplication::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073f680": {
+  "module": "net_replication",
+  "name": "C_NetReplication::CreateObject",
+  "proto": "void * __thiscall CreateObject(void *this, int id)"
+ },
+ "0073f880": {
+  "module": "net_replication",
+  "name": "C_NetReplication::InitObject",
+  "proto": "void __thiscall InitObject(void *this, void * object)"
+ },
  "0073f900": {
   "module": "controller",
   "name": "C_NetReplication::RemoveObject",
   "proto": "void __thiscall RemoveObject(void *this, void *object)"
  },
+ "0073f970": {
+  "module": "net_replication",
+  "name": "C_NetReplication::DeleteObjects",
+  "proto": "void __fastcall DeleteObjects(void * replication)"
+ },
  "0073f9c0": {
   "module": "controller",
   "name": "C_NetReplication::FindObject",
   "proto": "void * __thiscall FindObject(void *this, int id, bool create)"
+ },
+ "0073fa10": {
+  "module": "net_replication",
+  "name": "C_NetReplication::ScanObjects",
+  "proto": "void __fastcall ScanObjects(void * replication)"
+ },
+ "0073fa30": {
+  "module": "net_replication",
+  "name": "C_NetReplication::SetLag",
+  "proto": "void __thiscall SetLag(void *this, float lag)"
  },
  "0073fa70": {
   "module": "zz_idioms",
@@ -37115,46 +40885,314 @@
   "module": "zz_idioms",
   "name": "construct_copy4_73fb00"
  },
+ "0073fb40": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::C_NetObjectMessage",
+  "proto": "void * __thiscall C_NetObjectMessage(void *this, int type)"
+ },
+ "0073fb80": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::SentToAll",
+  "proto": "bool __fastcall SentToAll(void * msg)"
+ },
+ "0073fb90": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::Expired",
+  "proto": "bool __thiscall Expired(void *this)"
+ },
+ "0073fbe0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::C_NetTrack",
+  "proto": "void * __thiscall C_NetTrack(void *this)"
+ },
+ "0073fc10": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetFlags",
+  "proto": "void __thiscall SetFlags(void *this, uint flags)"
+ },
+ "0073fc20": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetLag",
+  "proto": "void __thiscall SetLag(void *this, float lag)"
+ },
+ "0073fc30": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetValue",
+  "proto": "void __thiscall SetValue(void *this, float * value)"
+ },
+ "0073fca0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetNetValue",
+  "proto": "void __thiscall SetNetValue(void *this, float * value)"
+ },
+ "0073fcc0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetRate",
+  "proto": "void __thiscall SetRate(void *this, float * rate)"
+ },
+ "0073fd60": {
+  "module": "net_replication",
+  "name": "C_NetTrack::GetCurrent",
+  "proto": "float * __thiscall GetCurrent(void *this)"
+ },
+ "0073fd70": {
+  "module": "net_replication",
+  "name": "C_NetTrack::GetTarget",
+  "proto": "float * __thiscall GetTarget(void *this)"
+ },
+ "0073fd80": {
+  "module": "net_replication",
+  "name": "C_NetTrack::GetNetValue",
+  "proto": "float * __thiscall GetNetValue(void *this)"
+ },
+ "0073fd90": {
+  "module": "net_replication",
+  "name": "C_NetTrack::GetRate",
+  "proto": "float * __thiscall GetRate(void *this)"
+ },
  "0073fdd0": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fdd0"
+  "module": "net_replication",
+  "name": "C_NetTrack::BeginWrite",
+  "proto": "void __thiscall BeginWrite(void *this, void * stream)"
  },
  "0073fde0": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fde0"
+  "module": "net_replication",
+  "name": "C_NetTrack::BeginRead",
+  "proto": "void __thiscall BeginRead(void *this, void * stream)"
  },
  "0073fdf0": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fdf0"
+  "module": "net_replication",
+  "name": "C_NetTrack::EndWrite",
+  "proto": "void __thiscall EndWrite(void *this, void * stream)"
  },
  "0073fe00": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fe00"
+  "module": "net_replication",
+  "name": "C_NetTrack::EndRead",
+  "proto": "void __thiscall EndRead(void *this, void * stream)"
  },
  "0073fe10": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fe10"
+  "module": "net_replication",
+  "name": "C_NetTrack::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "0073fe20": {
+  "module": "net_replication",
+  "name": "C_NetTrack::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0073fe40": {
+  "module": "net_replication",
+  "name": "C_NetTrack::~C_NetTrack",
+  "proto": "void __thiscall ~C_NetTrack(void *this)"
+ },
+ "0073fe50": {
+  "module": "net_replication",
+  "name": "C_NetTrack::Reset",
+  "proto": "void __fastcall Reset(void * track)"
+ },
+ "0073fee0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::Write",
+  "proto": "void __thiscall Write(void *this, void * stream, bool delta, float * lastSent)"
+ },
+ "007401e0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "00740580": {
+  "module": "net_replication",
+  "name": "C_NetTrack::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "00740770": {
+  "module": "net_replication",
+  "name": "C_NetPositionTrack::C_NetPositionTrack",
+  "proto": "void * __thiscall C_NetPositionTrack(void *this)"
+ },
+ "00740790": {
+  "module": "net_replication",
+  "name": "C_NetPositionTrack::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007407b0": {
+  "module": "net_replication",
+  "name": "C_NetPositionTrack::~C_NetPositionTrack",
+  "proto": "void __thiscall ~C_NetPositionTrack(void *this)"
  },
  "007407d0": {
   "module": "zz_idioms",
   "name": "empty_function_7407d0"
  },
+ "007407e0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::C_NetDirTrack",
+  "proto": "void * __thiscall C_NetDirTrack(void *this)"
+ },
  "007409a0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7409a0"
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
  },
  "007409b0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7409b0"
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "007409c0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007409e0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::~C_NetDirTrack",
+  "proto": "void __thiscall ~C_NetDirTrack(void *this)"
+ },
+ "007409f0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetDirection",
+  "proto": "void __thiscall SetDirection(void *this, float * dir, float angle)"
+ },
+ "00740a90": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetAngle",
+  "proto": "void __thiscall SetAngle(void *this, float angle)"
+ },
+ "00740aa0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::GetCurrent",
+  "proto": "float * __thiscall GetCurrent(void *this)"
+ },
+ "00740ab0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::GetAngle",
+  "proto": "float __thiscall GetAngle(void *this)"
+ },
+ "00740ac0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::Reset",
+  "proto": "void __fastcall Reset(void * track)"
  },
  "00740b00": {
-  "module": "zz_idioms",
-  "name": "empty_function_740b00"
+  "module": "net_replication",
+  "name": "C_NetDirTrack::BeginWrite",
+  "proto": "void __thiscall BeginWrite(void *this, void * stream)"
+ },
+ "00740b10": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::EndWrite",
+  "proto": "void __thiscall EndWrite(void *this, void * stream)"
+ },
+ "00740b70": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::EndRead",
+  "proto": "void __thiscall EndRead(void *this, void * stream)"
+ },
+ "00741010": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "007414c0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetFlags",
+  "proto": "void __thiscall SetFlags(void *this, uint flags)"
+ },
+ "00741510": {
+  "module": "net_replication",
+  "name": "C_NetViewCone::C_NetViewCone",
+  "proto": "void * __thiscall C_NetViewCone(void *this)"
+ },
+ "00741530": {
+  "module": "net_replication",
+  "name": "C_NetViewCone::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00741550": {
+  "module": "net_replication",
+  "name": "C_NetViewCone::~C_NetViewCone",
+  "proto": "void __thiscall ~C_NetViewCone(void *this)"
+ },
+ "00741560": {
+  "module": "net_replication",
+  "name": "C_NetViewCone::Contains",
+  "proto": "bool __thiscall Contains(void *this, float * pos)"
+ },
+ "00742190": {
+  "module": "net_session",
+  "name": "C_NetVoice::C_NetVoice",
+  "proto": "void * __thiscall C_NetVoice(void *this, void * clientHandler, void * serverHandler)"
+ },
+ "007421c0": {
+  "module": "net_session",
+  "name": "C_NetVoice::DeletingDestructor",
+  "proto": "void * __thiscall DeletingDestructor(void *this, uint flags)"
+ },
+ "007421e0": {
+  "module": "net_session",
+  "name": "C_NetVoice::~C_NetVoice",
+  "proto": "void __fastcall ~C_NetVoice(void * voice)"
+ },
+ "007421f0": {
+  "module": "net_session",
+  "name": "C_NetVoice::Init",
+  "proto": "long __thiscall Init(void *this, void * window, bool server, bool client, void * session, int sessionType, void * codec, void * clientConfig, int unused)"
+ },
+ "00742250": {
+  "module": "net_session",
+  "name": "C_NetVoice::Stop",
+  "proto": "long __fastcall Stop(void * voice)"
+ },
+ "007422c0": {
+  "module": "net_session",
+  "name": "C_NetVoice::CheckAudio",
+  "proto": "long __stdcall CheckAudio(void * window)"
+ },
+ "007423b0": {
+  "module": "net_session",
+  "name": "C_NetVoice::StartServer",
+  "proto": "long __thiscall StartServer(void *this, void * session, int sessionType, void * codec)"
+ },
+ "00742460": {
+  "module": "net_session",
+  "name": "C_NetVoice::StartClient",
+  "proto": "long __thiscall StartClient(void *this, void * window, void * session, void * clientConfig, int unused)"
+ },
+ "007425e0": {
+  "module": "net_session",
+  "name": "C_NetVoice::SetClientConfig",
+  "proto": "long __thiscall SetClientConfig(void *this, void * config)"
+ },
+ "00742610": {
+  "module": "net_session",
+  "name": "C_NetVoice::StopClient",
+  "proto": "long __fastcall StopClient(void * voice)"
+ },
+ "00742640": {
+  "module": "net_session",
+  "name": "C_NetVoice::StopServer",
+  "proto": "long __fastcall StopServer(void * voice)"
+ },
+ "007426a0": {
+  "module": "net_console_commands",
+  "name": "C_CommandProcessor::C_CommandProcessor",
+  "proto": "void * __thiscall C_CommandProcessor(void *this)"
+ },
+ "007426e0": {
+  "module": "net_console_commands",
+  "name": "C_CommandProcessor::~C_CommandProcessor",
+  "proto": "void __thiscall ~C_CommandProcessor(void *this)"
  },
  "00742850": {
   "module": "game",
   "name": "C_CommandProcessor::Execute",
   "proto": "bool __thiscall Execute(C_CommandProcessor *this, char * command)"
+ },
+ "007440d0": {
+  "module": "net_console_commands",
+  "name": "C_CommandProcessor::ExecuteFile",
+  "proto": "void __thiscall ExecuteFile(void *this, char * name)"
  },
  "00744210": {
   "module": "zz_idioms",
@@ -37169,15 +41207,45 @@
   "name": "C_ConsoleState::C_ConsoleState",
   "proto": "C_ConsoleState * __thiscall C_ConsoleState(C_ConsoleState *this, char * command)"
  },
+ "00744360": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::Start",
+  "proto": "bool __thiscall Start(void *this, void * arg)"
+ },
+ "00744390": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::Stop",
+  "proto": "bool __thiscall Stop(void *this)"
+ },
  "007443a0": {
   "module": "game_app",
   "name": "C_ConsoleState::ShowBanner",
   "proto": "void __thiscall ShowBanner(C_ConsoleState *this)"
  },
+ "007443d0": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::Update",
+  "proto": "void __thiscall Update(void *this, int timeDelta)"
+ },
+ "00744490": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::StartHosting",
+  "proto": "void __fastcall StartHosting(void * state)"
+ },
+ "00744540": {
+  "module": "net_console_commands",
+  "name": "C_ConsoleState::StartJoining",
+  "proto": "void __fastcall StartJoining(void * state)"
+ },
  "007445d0": {
   "module": "game_app",
   "name": "ReadConsoleToken",
   "proto": "int __fastcall ReadConsoleToken(char * * cursor, char * out, int * unknown, char * unknown2)"
+ },
+ "00744750": {
+  "module": "net_console_commands",
+  "name": "SkipConsoleSeparators",
+  "proto": "void __fastcall SkipConsoleSeparators(char * * cursor)"
  },
  "007447a0": {
   "module": "console",
@@ -37263,21 +41331,350 @@
   "module": "console",
   "name": "std_list_charptr_ConstructValue"
  },
+ "00745330": {
+  "module": "net_replication",
+  "name": "C_NetChannel::C_NetChannel",
+  "proto": "void * __thiscall C_NetChannel(void *this)"
+ },
  "007453c0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7453c0"
+  "module": "net_replication",
+  "name": "C_NetChannel::WriteAck",
+  "proto": "void __thiscall WriteAck(void *this, void * stream)"
  },
  "007453d0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7453d0"
+  "module": "net_replication",
+  "name": "C_NetChannel::ReadAck",
+  "proto": "void __thiscall ReadAck(void *this, void * stream)"
  },
  "007453e0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7453e0"
+  "module": "net_replication",
+  "name": "C_NetChannel::Resend",
+  "proto": "void __thiscall Resend(void *this)"
  },
  "007453f0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7453f0"
+  "module": "net_replication",
+  "name": "C_NetChannel::Acknowledge",
+  "proto": "void __thiscall Acknowledge(void *this)"
+ },
+ "00745400": {
+  "module": "net_replication",
+  "name": "C_NetChannel::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745420": {
+  "module": "net_replication",
+  "name": "C_NetChannel::~C_NetChannel",
+  "proto": "void __thiscall ~C_NetChannel(void *this)"
+ },
+ "00745520": {
+  "module": "net_replication",
+  "name": "UnwrapSequence",
+  "proto": "void __cdecl UnwrapSequence(uint * seq, uint reference)"
+ },
+ "00745590": {
+  "module": "net_replication",
+  "name": "C_NetChannel::Send",
+  "proto": "void __thiscall Send(void *this, void * packet)"
+ },
+ "007455f0": {
+  "module": "net_replication",
+  "name": "C_NetChannel::PopReceived",
+  "proto": "void * __thiscall PopReceived(void *this)"
+ },
+ "00745630": {
+  "module": "net_replication",
+  "name": "C_NetChannel::PopOutgoing",
+  "proto": "void * __thiscall PopOutgoing(void *this)"
+ },
+ "00745670": {
+  "module": "net_replication",
+  "name": "C_NetChannel::Receive",
+  "proto": "void __thiscall Receive(void *this, void * packet)"
+ },
+ "007457b0": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::C_NetReliableChannel",
+  "proto": "void * __thiscall C_NetReliableChannel(void *this)"
+ },
+ "00745850": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745870": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::~C_NetReliableChannel",
+  "proto": "void __thiscall ~C_NetReliableChannel(void *this)"
+ },
+ "00745980": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::Send",
+  "proto": "void __thiscall Send(void *this, void * packet)"
+ },
+ "00745a00": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::Receive",
+  "proto": "void __thiscall Receive(void *this, void * packet)"
+ },
+ "00745ab0": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::WriteAck",
+  "proto": "void __thiscall WriteAck(void *this, void * stream)"
+ },
+ "00745ae0": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::ReadAck",
+  "proto": "void __thiscall ReadAck(void *this, void * stream)"
+ },
+ "00745b30": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::Resend",
+  "proto": "void __thiscall Resend(void *this)"
+ },
+ "00745c20": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::Acknowledge",
+  "proto": "void __thiscall Acknowledge(void *this)"
+ },
+ "00745d30": {
+  "module": "net_replication",
+  "name": "C_NetOrderedChannel::C_NetOrderedChannel",
+  "proto": "void * __fastcall C_NetOrderedChannel(void * channel)"
+ },
+ "00745d50": {
+  "module": "net_replication",
+  "name": "C_NetOrderedChannel::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745d70": {
+  "module": "net_replication",
+  "name": "C_NetOrderedChannel::~C_NetOrderedChannel",
+  "proto": "void __fastcall ~C_NetOrderedChannel(void * channel)"
+ },
+ "00745d80": {
+  "module": "net_replication",
+  "name": "C_NetOrderedChannel::PopReceived",
+  "proto": "void * __thiscall PopReceived(void *this)"
+ },
+ "00745e10": {
+  "module": "net_replication",
+  "name": "C_NetRefCounted::AddRef",
+  "proto": "void __thiscall AddRef(void *this)"
+ },
+ "00745e20": {
+  "module": "net_replication",
+  "name": "C_NetRefCounted::Release",
+  "proto": "void __thiscall Release(void *this)"
+ },
+ "00745e40": {
+  "module": "net_replication",
+  "name": "C_NetPacket::C_NetPacket",
+  "proto": "void * __fastcall C_NetPacket(void * packet)"
+ },
+ "00745e90": {
+  "module": "net_replication",
+  "name": "C_NetRefCounted::~C_NetRefCounted",
+  "proto": "void __thiscall ~C_NetRefCounted(void *this)"
+ },
+ "00745ea0": {
+  "module": "net_replication",
+  "name": "C_NetRefCounted::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745ec0": {
+  "module": "net_replication",
+  "name": "C_NetPacket::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745ee0": {
+  "module": "net_replication",
+  "name": "C_NetPacket::~C_NetPacket",
+  "proto": "void __thiscall ~C_NetPacket(void *this)"
+ },
+ "00745f30": {
+  "module": "net_replication",
+  "name": "C_NetPacket::Clear",
+  "proto": "void __thiscall Clear(void *this)"
+ },
+ "00745f50": {
+  "module": "net_replication",
+  "name": "C_NetPacket::FreeData",
+  "proto": "void __thiscall FreeData(void *this)"
+ },
+ "00745f70": {
+  "module": "net_replication",
+  "name": "C_NetPacket::Release",
+  "proto": "void __thiscall Release(void *this)"
+ },
+ "00745fa0": {
+  "module": "net_replication",
+  "name": "C_NetPacket::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00746050": {
+  "module": "net_replication",
+  "name": "C_NetPacket::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "00746180": {
+  "module": "net_replication",
+  "name": "C_NetConnection::C_NetConnection",
+  "proto": "void * __thiscall C_NetConnection(void *this, int id, uint address, void * socket)"
+ },
+ "00746280": {
+  "module": "net_replication",
+  "name": "C_NetConnection::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007462a0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::~C_NetConnection",
+  "proto": "void __thiscall ~C_NetConnection(void *this)"
+ },
+ "00746300": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Send",
+  "proto": "void * __thiscall Send(void *this, void * data, int size, int kind, int channel)"
+ },
+ "00746380": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Receive",
+  "proto": "bool __thiscall Receive(void *this, void * data, void * size, void * kind, void * flags)"
+ },
+ "007463e0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Resend",
+  "proto": "void __thiscall Resend(void *this, void * packet)"
+ },
+ "00746410": {
+  "module": "net_replication",
+  "name": "C_NetConnection::PopReceived",
+  "proto": "void * __fastcall PopReceived(void * connection)"
+ },
+ "00746460": {
+  "module": "net_replication",
+  "name": "C_NetConnection::SendPing",
+  "proto": "void __fastcall SendPing(void * connection)"
+ },
+ "00746550": {
+  "module": "net_replication",
+  "name": "C_NetConnection::PingIfDue",
+  "proto": "void __fastcall PingIfDue(void * connection)"
+ },
+ "00746580": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Flush",
+  "proto": "void __thiscall Flush(void *this, bool force)"
+ },
+ "007465d0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::HandleDatagram",
+  "proto": "void __thiscall HandleDatagram(void *this, uint type, void * data, int size, void * callback)"
+ },
+ "007467f0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::ReadPackets",
+  "proto": "void __thiscall ReadPackets(void *this, void * data, int size)"
+ },
+ "007468f0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Gather",
+  "proto": "void __thiscall Gather(void *this, void * data, void * size, bool force)"
+ },
+ "00746a50": {
+  "module": "net_replication",
+  "name": "C_NetConnection::ResendAll",
+  "proto": "void __fastcall ResendAll(void * connection)"
+ },
+ "00746a90": {
+  "module": "net_replication",
+  "name": "C_NetConnection::AcknowledgeAll",
+  "proto": "void __fastcall AcknowledgeAll(void * connection)"
+ },
+ "00746ac0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::SetResendTime",
+  "proto": "void __thiscall SetResendTime(void *this, int ms)"
+ },
+ "00746b30": {
+  "module": "net_replication",
+  "name": "ReceiveThreadEntry",
+  "proto": "uint __stdcall ReceiveThreadEntry(void * transport)"
+ },
+ "00746b40": {
+  "module": "net_replication",
+  "name": "C_NetTransport::C_NetTransport",
+  "proto": "void * __fastcall C_NetTransport(void * transport)"
+ },
+ "00746bb0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::~C_NetTransport",
+  "proto": "void __fastcall ~C_NetTransport(void * transport)"
+ },
+ "00746c10": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Start",
+  "proto": "void __thiscall Start(void *this, int port)"
+ },
+ "00746ca0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Stop",
+  "proto": "void __fastcall Stop(void * transport)"
+ },
+ "00746cf0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::DeleteConnections",
+  "proto": "void __fastcall DeleteConnections(void * transport)"
+ },
+ "00746d60": {
+  "module": "net_replication",
+  "name": "C_NetTransport::FindById",
+  "proto": "void * __thiscall FindById(void *this, int id)"
+ },
+ "00746dc0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::FindByAddress",
+  "proto": "void * __thiscall FindByAddress(void *this, uint address, int port)"
+ },
+ "00746e40": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Lock",
+  "proto": "void * __fastcall Lock(void * transport)"
+ },
+ "00746e60": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Unlock",
+  "proto": "void __fastcall Unlock(void * transport)"
+ },
+ "00746e70": {
+  "module": "net_replication",
+  "name": "C_NetTransport::ReceiveAll",
+  "proto": "void __fastcall ReceiveAll(void * transport)"
+ },
+ "00746fb0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Add",
+  "proto": "void __thiscall Add(void *this, void * connection)"
+ },
+ "00747180": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Remove",
+  "proto": "void __thiscall Remove(void *this, void * connection)"
+ },
+ "00747200": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Tick",
+  "proto": "void __fastcall Tick(void * transport)"
+ },
+ "00747260": {
+  "module": "net_replication",
+  "name": "C_NetTransport::FlushAll",
+  "proto": "void __thiscall FlushAll(void *this, bool force)"
+ },
+ "00747310": {
+  "module": "net_replication",
+  "name": "C_NetTransport::ReceiveThread",
+  "proto": "void __fastcall ReceiveThread(void * transport)"
  },
  "00747360": {
   "module": "zz_idioms",
@@ -37299,21 +41696,225 @@
   "module": "zz_idioms",
   "name": "construct_copy4_7473f0"
  },
+ "00747430": {
+  "module": "net_replication",
+  "name": "C_NetHeader::C_NetHeader",
+  "proto": "void * __thiscall C_NetHeader(void *this)"
+ },
  "00747450": {
-  "module": "zz_idioms",
-  "name": "empty_function_747450"
+  "module": "net_replication",
+  "name": "C_NetHeader::WriteBody",
+  "proto": "void __thiscall WriteBody(void *this, void * stream)"
  },
  "00747460": {
-  "module": "zz_idioms",
-  "name": "empty_function_747460"
+  "module": "net_replication",
+  "name": "C_NetHeader::ReadBody",
+  "proto": "void __thiscall ReadBody(void *this, void * stream)"
+ },
+ "00747470": {
+  "module": "net_replication",
+  "name": "C_NetHeader::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00747490": {
+  "module": "net_replication",
+  "name": "C_NetHeader::~C_NetHeader",
+  "proto": "void __thiscall ~C_NetHeader(void *this)"
+ },
+ "007474a0": {
+  "module": "net_replication",
+  "name": "C_NetHeader::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "007474d0": {
+  "module": "net_replication",
+  "name": "C_NetHeader::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00747500": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::C_NetPacketList",
+  "proto": "void * __thiscall C_NetPacketList(void *this)"
+ },
+ "00747570": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00747590": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::~C_NetPacketList",
+  "proto": "void __thiscall ~C_NetPacketList(void *this)"
+ },
+ "00747660": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::WriteBody",
+  "proto": "void __thiscall WriteBody(void *this, void * stream)"
+ },
+ "007476a0": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::ReadBody",
+  "proto": "void __thiscall ReadBody(void *this, void * stream)"
+ },
+ "00747720": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::Add",
+  "proto": "void __thiscall Add(void *this, void * packet)"
+ },
+ "00747770": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::Pop",
+  "proto": "void * __fastcall Pop(void * list)"
+ },
+ "007477b0": {
+  "module": "net_replication",
+  "name": "C_NetPing::C_NetPing",
+  "proto": "void * __fastcall C_NetPing(void * ping)"
+ },
+ "007477d0": {
+  "module": "net_replication",
+  "name": "C_NetPing::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007477f0": {
+  "module": "net_replication",
+  "name": "C_NetPing::~C_NetPing",
+  "proto": "void __thiscall ~C_NetPing(void *this)"
+ },
+ "00747800": {
+  "module": "net_replication",
+  "name": "C_NetPing::WriteBody",
+  "proto": "void __thiscall WriteBody(void *this, void * stream)"
+ },
+ "00747850": {
+  "module": "net_replication",
+  "name": "C_NetPing::ReadBody",
+  "proto": "void __thiscall ReadBody(void *this, void * stream)"
+ },
+ "007478c0": {
+  "module": "net_replication",
+  "name": "C_NetEmptyMessage::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007478e0": {
+  "module": "net_replication",
+  "name": "C_NetEmptyMessage::~C_NetEmptyMessage",
+  "proto": "void __thiscall ~C_NetEmptyMessage(void *this)"
  },
  "007478f0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7478f0"
+  "module": "net_replication",
+  "name": "C_NetEmptyMessage::WriteBody",
+  "proto": "void __thiscall WriteBody(void *this, void * stream)"
  },
  "00747900": {
-  "module": "zz_idioms",
-  "name": "empty_function_747900"
+  "module": "net_replication",
+  "name": "C_NetEmptyMessage::ReadBody",
+  "proto": "void __thiscall ReadBody(void *this, void * stream)"
+ },
+ "00747940": {
+  "module": "net_replication",
+  "name": "C_NetSocket::C_NetSocket",
+  "proto": "void * __fastcall C_NetSocket(void * socket)"
+ },
+ "00747a10": {
+  "module": "net_replication",
+  "name": "C_NetSocket::~C_NetSocket",
+  "proto": "void __fastcall ~C_NetSocket(void * socket)"
+ },
+ "00747af0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Open",
+  "proto": "void __thiscall Open(void *this, int port)"
+ },
+ "00747bb0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Close",
+  "proto": "void __fastcall Close(void * socket)"
+ },
+ "00747c00": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Seal",
+  "proto": "void __thiscall Seal(void *this, void * buffer, int size)"
+ },
+ "00747c60": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Unseal",
+  "proto": "bool __thiscall Unseal(void *this, void * buffer, int size)"
+ },
+ "00747cc0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Send",
+  "proto": "void __thiscall Send(void *this, void * data, int size, uint address, int port)"
+ },
+ "00747e60": {
+  "module": "net_replication",
+  "name": "C_NetSocket::SendRaw",
+  "proto": "void __thiscall SendRaw(void *this, void * data, int size, uint address, int port)"
+ },
+ "00747ea0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Receive",
+  "proto": "void __thiscall Receive(void *this, void * data, void * size, void * address, void * port)"
+ },
+ "007480f0": {
+  "module": "net_replication",
+  "name": "FragmentLess",
+  "proto": "bool __fastcall FragmentLess(void * a, void * b)"
+ },
+ "00748110": {
+  "module": "net_replication",
+  "name": "C_NetSocket::FindComplete",
+  "proto": "bool __thiscall FindComplete(void *this, void * first, void * count)"
+ },
+ "00748230": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Reassemble",
+  "proto": "bool __thiscall Reassemble(void *this, void * data, void * size)"
+ },
+ "007483b0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::ReceiveRaw",
+  "proto": "void __thiscall ReceiveRaw(void *this, void * data, void * size, void * address, void * port)"
+ },
+ "007484d0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::FlushDelayed",
+  "proto": "void __fastcall FlushDelayed(void * socket)"
+ },
+ "00748550": {
+  "module": "net_replication",
+  "name": "C_NetSocket::QueueSend",
+  "proto": "void __thiscall QueueSend(void *this, void * data, int size, uint address, int port)"
+ },
+ "007485e0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::SendQueued",
+  "proto": "void __fastcall SendQueued(void * socket)"
+ },
+ "00748680": {
+  "module": "net_replication",
+  "name": "C_NetSocket::SendThread",
+  "proto": "void __fastcall SendThread(void * socket)"
+ },
+ "007486e0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::TakeCounters",
+  "proto": "void __thiscall TakeCounters(void *this, void * received, void * sent)"
+ },
+ "00748700": {
+  "module": "net_replication",
+  "name": "C_NetSocket::LookupLocalAddress",
+  "proto": "void __fastcall LookupLocalAddress(void * socket)"
+ },
+ "00748790": {
+  "module": "net_replication",
+  "name": "C_NetSocket::GetLocalAddress",
+  "proto": "uint __fastcall GetLocalAddress(void * socket)"
+ },
+ "007487d0": {
+  "module": "net_replication",
+  "name": "SendThreadEntry",
+  "proto": "uint __stdcall SendThreadEntry(void * socket)"
  },
  "007487e0": {
   "module": "zz_idioms",
@@ -37330,6 +41931,71 @@
  "00748dc0": {
   "module": "car",
   "name": "GetPerfTimeMs"
+ },
+ "00749830": {
+  "module": "net_replication",
+  "name": "C_NetPool::C_NetPool",
+  "proto": "void * __thiscall C_NetPool(void *this)"
+ },
+ "00749970": {
+  "module": "net_replication",
+  "name": "C_NetPool::~C_NetPool",
+  "proto": "void __thiscall ~C_NetPool(void *this)"
+ },
+ "00749a70": {
+  "module": "net_replication",
+  "name": "C_NetPool::AllocBuffer",
+  "proto": "void * __thiscall AllocBuffer(void *this, uint size)"
+ },
+ "00749b20": {
+  "module": "net_replication",
+  "name": "C_NetPool::FreeBuffer",
+  "proto": "void __thiscall FreeBuffer(void *this, void * buffer, int size)"
+ },
+ "00749b80": {
+  "module": "net_replication",
+  "name": "C_NetPool::AllocPacket",
+  "proto": "void * __fastcall AllocPacket(void * pool)"
+ },
+ "00749bd0": {
+  "module": "net_replication",
+  "name": "C_NetPool::FreePacket",
+  "proto": "void __thiscall FreePacket(void *this, void * packet)"
+ },
+ "00749c10": {
+  "module": "net_replication",
+  "name": "S_NetFreeList::~S_NetFreeList",
+  "proto": "void __thiscall ~S_NetFreeList(void *this)"
+ },
+ "00749c80": {
+  "module": "net_replication",
+  "name": "S_NetFreeList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00749d00": {
+  "module": "net_replication",
+  "name": "S_NetPacketFreeList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00749d90": {
+  "module": "net_replication",
+  "name": "C_NetPool::GrowPackets",
+  "proto": "void __fastcall GrowPackets(void * list)"
+ },
+ "00749ed0": {
+  "module": "net_players",
+  "name": "S_NetStats::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00749f40": {
+  "module": "net_players",
+  "name": "S_NetStats::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "00749fa0": {
+  "module": "net_players",
+  "name": "S_NetStats::Copy",
+  "proto": "void __thiscall Copy(void *this, void * from)"
  },
  "0074a1c0": {
   "module": "movement",
@@ -39186,6 +43852,10 @@
   "name": "C_HumanEquipment::LoadGame",
   "proto": "bool __thiscall LoadGame(C_HumanEquipment *this, C_chunk *chunk)"
  },
+ "00796830": {
+  "module": "human_stains",
+  "name": "C_StainManager_Dtor"
+ },
  "00796890": {
   "module": "game",
   "name": "C_StainManager::Init",
@@ -39200,6 +43870,58 @@
   "module": "game",
   "name": "C_StainManager::Done",
   "proto": "void __fastcall Done(C_StainManager * manager)"
+ },
+ "00796d00": {
+  "module": "human_stains",
+  "name": "StainManager_AcquireMesh"
+ },
+ "00796ff0": {
+  "module": "human_stains",
+  "name": "StainManager_ReleaseMesh"
+ },
+ "007970f0": {
+  "module": "human_stains",
+  "name": "StainManager_AcquireTextures"
+ },
+ "007971b0": {
+  "module": "human_stains",
+  "name": "StainManager_ReleaseTextures"
+ },
+ "007971e0": {
+  "module": "human_stains",
+  "name": "StainMesh_Ctor"
+ },
+ "00797480": {
+  "module": "human_stains",
+  "name": "StainMesh_Build"
+ },
+ "00797790": {
+  "module": "human_stains",
+  "name": "StainGroup_FindExtremes"
+ },
+ "00797a80": {
+  "module": "human_stains",
+  "name": "StainMesh_NearestByWalks"
+ },
+ "00797be0": {
+  "module": "human_stains",
+  "name": "StainMesh_NearestFromExtremes"
+ },
+ "00797eb0": {
+  "module": "human_stains",
+  "name": "StainGroup_FindVertex"
+ },
+ "00797f00": {
+  "module": "human_stains",
+  "name": "StainGroup_AddEdge"
+ },
+ "007982a0": {
+  "module": "human_stains",
+  "name": "StainGroup_WalkToNearest"
+ },
+ "00798470": {
+  "module": "human_stains",
+  "name": "StainGroup_SearchNearest"
  },
  "00798660": {
   "module": "weapon_pose",
@@ -39231,15 +43953,43 @@
   "name": "C_HumanStains::SkipSaved",
   "proto": "void __cdecl SkipSaved(C_chunk * chunk)"
  },
+ "007992a0": {
+  "module": "human_stains",
+  "name": "HumanStains_PrepareBuffers"
+ },
+ "007994e0": {
+  "module": "human_stains",
+  "name": "HumanStains_TakeTextures"
+ },
+ "007995d0": {
+  "module": "human_stains",
+  "name": "HumanStains_GiveBackTextures"
+ },
+ "007996d0": {
+  "module": "human_stains",
+  "name": "HumanStains_ReturnTextures"
+ },
  "007997b0": {
   "module": "weapon_pose",
   "name": "C_HumanStains::SetVisible",
   "proto": "void __thiscall SetVisible(C_HumanStains *this, bool on)"
  },
+ "007999a0": {
+  "module": "human_stains",
+  "name": "HumanStains_SetPaint"
+ },
  "00799bc0": {
   "module": "weapon_pose",
   "name": "C_HumanStains::AddHit",
   "proto": "void __thiscall AddHit(C_HumanStains *this, S_vector * pos, S_vector * dir, uint flags)"
+ },
+ "0079a010": {
+  "module": "human_stains",
+  "name": "HumanStains_PaintHit"
+ },
+ "0079a880": {
+  "module": "human_stains",
+  "name": "HumanStains_PaintSplat"
  },
  "0079aa70": {
   "module": "zz_idioms",
@@ -42112,6 +46862,18 @@
   "name": "g_vehicleSoundVolume",
   "type": "float"
  },
+ "0083fdd0": {
+  "data": true,
+  "module": "main_menu",
+  "name": "g_connectStyle",
+  "type": "int"
+ },
+ "0083fe08": {
+  "data": true,
+  "module": "main_menu",
+  "name": "g_netPollTime",
+  "type": "int"
+ },
  "00840668": {
   "data": true,
   "module": "cursor",
@@ -42123,6 +46885,36 @@
   "module": "cursor",
   "name": "g_cursorY",
   "type": "float"
+ },
+ "00840d5c": {
+  "data": true,
+  "module": "equipment_screen",
+  "name": "g_requiredCarrier",
+  "type": "int"
+ },
+ "008415a0": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_creditsIntros",
+  "type": "char *[2]"
+ },
+ "00841670": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_operationEnds",
+  "type": "uint[120]"
+ },
+ "00841cb8": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_operationMedalSoldiers",
+  "type": "int[80]"
+ },
+ "008423c8": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_rankExperience",
+  "type": "int[7]"
  },
  "00842570": {
   "data": true,
@@ -42788,17 +47580,59 @@
   "module": "script",
   "name": "g_junkers88Setup"
  },
+ "008aca88": {
+  "data": true,
+  "module": "main_menu",
+  "name": "g_gameInfoStyles",
+  "type": "int[12]"
+ },
+ "008acab8": {
+  "data": true,
+  "module": "main_menu",
+  "name": "g_gameInfoStatus",
+  "type": "void *"
+ },
  "008ae558": {
   "data": true,
   "module": "cursor",
   "name": "g_cursor",
   "type": "C_Cursor *"
  },
+ "008ae5c2": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_sessionPasswordSet",
+  "type": "bool"
+ },
  "008ae5f8": {
   "data": true,
   "module": "menu_state",
   "name": "g_menuState",
   "type": "void *"
+ },
+ "008ae61a": {
+  "data": true,
+  "module": "equipment_screen",
+  "name": "g_equipmentStatsShown",
+  "type": "bool"
+ },
+ "008ae644": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_creditsStyles",
+  "type": "int[14]"
+ },
+ "008ae680": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_creditsIntro",
+  "type": "int"
+ },
+ "008ae692": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_squadInfoShown",
+  "type": "bool"
  },
  "008ae8f4": {
   "data": true,
@@ -42971,8 +47805,15 @@
  },
  "0097d070": {
   "data": true,
-  "module": "app",
-  "name": "g_netGame"
+  "module": "net_game",
+  "name": "g_netGame",
+  "type": "int"
+ },
+ "0097d084": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netReplication",
+  "type": "void *"
  },
  "00981e6c": {
   "data": true,
@@ -42983,6 +47824,24 @@
   "data": true,
   "module": "hud",
   "name": "g_serverName"
+ },
+ "009820d4": {
+  "data": true,
+  "module": "mp_settings",
+  "name": "g_netMaxPing",
+  "type": "int"
+ },
+ "009820d8": {
+  "data": true,
+  "module": "mp_settings",
+  "name": "g_netMaxFreq",
+  "type": "int"
+ },
+ "009820dc": {
+  "data": true,
+  "module": "mp_settings",
+  "name": "g_netMaxInactivity",
+  "type": "int"
  },
  "00982100": {
   "data": true,
@@ -42998,6 +47857,60 @@
   "data": true,
   "module": "net_bitstream",
   "name": "g_netPlayerCount"
+ },
+ "00982df8": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netPerfFrequency",
+  "type": "longlong"
+ },
+ "00982e10": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netAngleRateQuantization",
+  "type": "S_NetQuantization"
+ },
+ "00982e90": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netAngleDeltaQuantization",
+  "type": "S_NetQuantization"
+ },
+ "00982f10": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netAngleQuantization",
+  "type": "S_NetQuantization"
+ },
+ "00982f90": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netUpdatePeriod",
+  "type": "float"
+ },
+ "00982f94": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netServerSide",
+  "type": "bool"
+ },
+ "009830e8": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netSendStream",
+  "type": "int"
+ },
+ "00983100": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netLastFragmentTime",
+  "type": "int"
+ },
+ "00983150": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netPool",
+  "type": "int"
  },
  "009831e8": {
   "data": true,

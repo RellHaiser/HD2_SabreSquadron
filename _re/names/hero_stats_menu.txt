@@ -1,0 +1,9 @@
+# Part 9i-i: the hero stats menu (campaign screen kind 0).
+00696fb0 C_HeroStatsMenu::GetSkillValue | int __stdcall GetSkillValue(uint id)
+00697090 C_HeroStatsMenu::OnMessage | void __thiscall OnMessage(void *this, void * message)
+00697480 C_HeroStatsMenu::BuildScreens | bool __thiscall BuildScreens(void *this)
+006977e0 C_HeroStatsMenu::DescribeQuitQuestion | bool __stdcall DescribeQuitQuestion(void * desc, void * model)
+006978d0 C_HeroStatsMenu::DescribeHeroScreen | bool __thiscall DescribeHeroScreen(void *this, void * desc, void * model)
+006979e0 C_HeroStatsMenu::DescribeSpecialization | bool __thiscall DescribeSpecialization(void *this, void * desc, void * model)
+00697d20 C_HeroStatsMenu::DescribeSkills | bool __thiscall DescribeSkills(void *this, void * desc, void * model)
+00698230 C_HeroStatsMenu::AddSkillRow | void __thiscall AddSkillRow(void *this, void * list, void * model, void * name, int index, float step)

@@ -228,7 +228,7 @@ bool C_VersionKeeper::Damage(int damage, I3D_frame **outFrame, E_VersionEffects 
         msg->WriteBits(m_master->GetIndex(), 16);
         msg->WriteBits(m_index, 8);
         msg->WriteBits(version, 8);
-        g_netGame.SendMessage(msg);
+        g_netGame.SendNetMessage(msg);
     }
     if (g_gameRole & GAME_ROLE_CLIENT) {
         bool showEffects;

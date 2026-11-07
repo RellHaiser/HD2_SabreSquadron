@@ -389,7 +389,9 @@ void C_FirstPersonView::Refresh()
         SetWeaponView(nullptr, nullptr, -1);
     } else {
         C_AnimatedItemDef *def = static_cast<C_AnimatedItemDef *>(weapon->GetDef());
-        SetWeaponView(static_cast<I3D_model *>(def->GetFpvModel()), def->GetFpvMagazine(), weapon->GetTypeId());
+        // (First the model: loading it finds the magazine.)
+        I3D_frame *model = def->GetFpvModel();
+        SetWeaponView(static_cast<I3D_model *>(model), def->GetFpvMagazine(), weapon->GetTypeId());
         if (weapon->GetTypeId() == ITEM_TYPE_PANZERFAUST)
             ShowWarhead(weapon->GetAmount() > 0.0f);
         OnInventoryEvent(FPV_EVENT_IDLE, FPV_EVENT_IDLE);
@@ -420,7 +422,9 @@ void C_FirstPersonView::RefreshWeapon()
         return;
     StopAnims();
     C_AnimatedItemDef *def = static_cast<C_AnimatedItemDef *>(weapon->GetDef());
-    SetWeaponView(static_cast<I3D_model *>(def->GetFpvModel()), def->GetFpvMagazine(), weapon->GetTypeId());
+    // (First the model: loading it finds the magazine.)
+    I3D_frame *model = def->GetFpvModel();
+    SetWeaponView(static_cast<I3D_model *>(model), def->GetFpvMagazine(), weapon->GetTypeId());
     if (weapon->GetTypeId() == ITEM_TYPE_PANZERFAUST)
         ShowWarhead(weapon->GetAmount() > 0.0f);
     if (m_model) {

@@ -931,7 +931,7 @@ public:
 class I3D_joint_override_set {
 public:
     I3DMETHOD(uint32_t, Release)() = 0;                       // 0x00
-    I3DMETHOD(void, Add)(I3D_joint_override *item) = 0;       // 0x04
+    I3DMETHOD(void, Add)(I3D_joint_override *item, const char *jointName) = 0;   // 0x04
     I3DMETHOD(void, Remove)(I3D_joint_override *item) = 0;    // 0x08
     int NumItems() const { return *reinterpret_cast<const int *>(reinterpret_cast<const uint8_t *>(this) + 0x10); }
     I3D_joint_override *GetItem(int index) const
@@ -1055,6 +1055,8 @@ public:
     // Velocity used for the Doppler effect (m/s).
     I3DMETHOD(void, SetVelocity)(const S_vector &velocity) = 0;   // 0xB0
 
+    // (PlaySpeechSlot sets it to 0x80 on a sample just opened; meaning not identified.)
+    void SetUnknown128(uint32_t value) { Field<uint32_t>(0x128) = value; }
     S_vector4 GetVelocityInline() const { return Field<S_vector4>(0x1A0); }
     float GetVolumeInline() const { return Field<float>(0x16C); }
     // The playback rate SetFrequency set (inferred: the submarine compares it with the one it sets).
@@ -1309,7 +1311,8 @@ public:
     I3DMETHOD(void, SetActiveCamera)(I3D_camera *camera) = 0; // 0x90
     // The ray from the active camera through the screen pixel (x, y): its start and unit
     // direction (the command map's picking).
-    I3DMETHOD(void, UnmapScreenPoint)(int x, int y, S_vector &origin, S_vector &dir) = 0;   // 0x94
+    // (Four floats each are written.)
+    I3DMETHOD(void, UnmapScreenPoint)(int x, int y, S_vector4 &origin, S_vector4 &dir) = 0;   // 0x94
     // World points to the screen (pixels; the interface's outline of the actor picked).
     I3DMETHOD(void, TransformPoints)(const S_vector4 *points, S_vector4 *out, int count) = 0;   // 0x98
     I3D_SLOT(9C);                                             // LS3DF: IsFrameVisible
@@ -1361,8 +1364,8 @@ public:
     I3D_SLOT(118);                                            // LS3DF: SetWorldSpace
     // Weather simulation parameter (E_WeatherParam); floats are passed as their bits.
     I3DMETHOD(void, SetWeather)(int param, uint32_t value) = 0;   // 0x11C
+    I3DMETHOD(uint32_t, GetWeather)(int param) = 0;           // 0x120
 
-    I3D_SLOT(120);                                            // LS3DF: GetWeather
     I3D_SLOT(124);                                            // LS3DF: ResetWeather
     // Called for the frames scene2.bin's chunk 0xB820 names (meaning not identified).
     I3DMETHOD(void, Unknown128)(I3D_frame *frame) = 0;        // 0x128
@@ -1505,7 +1508,7 @@ public:
     I3DMETHOD(I3D_animation_set *, CreateAnimationSet)() = 0;              // 0x70
     // A joint override for the joint named `jointName` / an empty set of them (the meleeTracker's
     // head look; inferred from that use).
-    I3DMETHOD(I3D_joint_override *, CreateJointOverride)(const char *jointName) = 0;   // 0x74
+    I3DMETHOD(I3D_joint_override *, CreateJointOverride)() = 0;   // 0x74
     I3DMETHOD(I3D_joint_override_set *, CreateJointOverrideSet)() = 0;     // 0x78
     I3D_SLOT(7C);                                             // LS3DF: GetFrameTypeName
     I3D_SLOT(80);                                             // LS3DF: GetVisualTypeName

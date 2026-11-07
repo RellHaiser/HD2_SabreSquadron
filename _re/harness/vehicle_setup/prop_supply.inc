@@ -4,7 +4,7 @@
     PR(r.box, creator && std::string(creator->GetName()) == "SupplyBox");
     // The animations' lengths (the fake animation set's slot 0x08).
     static std::map<std::string, int> animEnds;
-    animEnds = {{"crateopen", 700}, {"crateclosed", 1600}, {"cratedrop", 900}, {"cratefly", 3000}};
+    animEnds = {{"#crateopen", 700}, {"#crateclosed", 1600}, {"#cratedrop", 900}, {"#cratefly", 3000}};
     struct S_AnimEnd {
         static int __stdcall End(S_SeAnim *self) { return animEnds[self->name]; }
     };
@@ -169,10 +169,10 @@
                        box->m_flyingCrate == letibedna && morph && box->m_plane &&
                        box->m_plane->GetType() == FRAME_DUMMY && box->m_crateDummy->GetType() == FRAME_MODEL &&
                        std::string(box->m_name.c_str()) == "text 7162" && box->m_textId == 0x1BFA);
-    PR(r.boxStart, box->m_anims[0] && reinterpret_cast<S_SeAnim *>(box->m_anims[0])->name == "cratefly" &&
-                       reinterpret_cast<S_SeAnim *>(box->m_anims[1])->name == "crateopen" &&
-                       reinterpret_cast<S_SeAnim *>(box->m_anims[2])->name == "crateclosed" &&
-                       reinterpret_cast<S_SeAnim *>(box->m_anims[3])->name == "cratedrop" && !box->m_anims[4] && !box->m_anims[5]);
+    PR(r.boxStart, box->m_anims[0] && reinterpret_cast<S_SeAnim *>(box->m_anims[0])->name == "#cratefly" &&
+                       reinterpret_cast<S_SeAnim *>(box->m_anims[1])->name == "#crateopen" &&
+                       reinterpret_cast<S_SeAnim *>(box->m_anims[2])->name == "#crateclosed" &&
+                       reinterpret_cast<S_SeAnim *>(box->m_anims[3])->name == "#cratedrop" && !box->m_anims[4] && !box->m_anims[5]);
     // The morph player: on the parachute's morph (its own mesh), the animation's last frame, 130 ms.
     PR(r.boxStart, box->m_morphPlayer && box->m_morphPlayer->visual == morph && box->m_morphPlayer->animation == &ammoboxAnim &&
                        box->m_morphPlayer->maxLevel == 16 && box->m_morphPlayer->frameTime == 130 && box->m_morphPlayer->pingPong &&
@@ -208,7 +208,7 @@
                        g_soundRequests[0].group == 10 && g_soundRequests[0].chapter == 1 &&
                        g_soundRequests[0].flags == SOUND_SILENT_TO_AI && RbSame(g_soundRequests[0].pos, crate->GetMatrix()(3)));
     PR(r.boxStart, std::count(g_itLog.begin(), g_itLog.end(), "fadein crate 0 1") == 1 &&
-                       std::count(g_itLog.begin(), g_itLog.end(), "setanim crate crateopen 0 1 1") == 1);
+                       std::count(g_itLog.begin(), g_itLog.end(), "setanim crate #crateopen 0 1 1") == 1);
     // Started: nothing again.
     reset();
     box->StartMission(true);
@@ -321,11 +321,11 @@
                             std::count(g_itLog.begin(), g_itLog.end(),
                                        "setpos dummy " + ItV(S_vector(box->m_dropPos.x, (85.0f + 3.0f) + box->m_dropPos.y,
                                                                       box->m_dropPos.z))) == 1 &&
-                            std::count(g_itLog.begin(), g_itLog.end(), "setanim dummy cratefly 0 1 2") == 1 &&
+                            std::count(g_itLog.begin(), g_itLog.end(), "setanim dummy #cratefly 0 1 2") == 1 &&
                             std::count(g_itLog.begin(), g_itLog.end(), "fadein chute 0 1") == 1);
         // (In a network game under the scene's top.)
         g_gameRole = GAME_ROLE_SERVER;
-        g_netSceneTop = 60.0f;
+        g_scanMax[1] = 60.0f;
         box->m_state = C_SupplyBox::SUPPLY_HIDDEN;
         box->m_stateTime = 5;
         reset();
@@ -333,7 +333,7 @@
         PR(r.boxStates, std::count(g_itLog.begin(), g_itLog.end(),
                                    "setpos crate " + ItV(S_vector(box->m_dropPos.x, (60.0f - 0.1f) + box->m_dropPos.y,
                                                                   box->m_dropPos.z))) == 1);
-        g_netSceneTop = 1000.0f;
+        g_scanMax[1] = 1000.0f;
         box->m_state = C_SupplyBox::SUPPLY_HIDDEN;
         box->m_stateTime = 5;
         reset();
@@ -392,13 +392,13 @@
         box->Update(1000);
         PR(r.boxFall, box->m_state == C_SupplyBox::SUPPLY_OPENING && box->m_stateTime == 1000 && box->m_morphPlayer->stopped &&
                           g_soundRequests.size() == 1 && g_soundRequests[0].group == 10);
-        animEnds["crateopen"] = 1700;
+        animEnds["#crateopen"] = 1700;
         box->SetState(C_SupplyBox::SUPPLY_OPENING);
         PR(r.boxFall, box->m_stateTime == 1700);
         reset();
         box->Update(1700);
         PR(r.boxFall, box->m_state == C_SupplyBox::SUPPLY_READY && box->m_stateTime == -1);
-        animEnds["crateopen"] = 700;
+        animEnds["#crateopen"] = 700;
         // What it lands on: humans and vehicles under it are hit (-1, on the server) and keep it up.
         g_flatGround = false;
         static S_CollisionVolume crushed;
@@ -578,7 +578,7 @@
                           std::count(g_itLog.begin(), g_itLog.end(), "removeplayer morph 0") == 1 &&
                           std::count(g_itLog.begin(), g_itLog.end(), "release dummy") == 1 &&
                           std::count(g_itLog.begin(), g_itLog.end(), "release chute") == 1 &&
-                          std::count(g_itLog.begin(), g_itLog.end(), "animrelease cratefly") == 1);
+                          std::count(g_itLog.begin(), g_itLog.end(), "animrelease #cratefly") == 1);
         reset();
         box->StopMission(true);
         PR(r.boxStop, g_itLog.empty() && g_deactivations.empty());
@@ -727,8 +727,8 @@
             PR(r.boxStop, SaSame(&box->m_boxInvMatrix, &inv, sizeof inv));
         }
         crate->m_scale = oldScale;
-        PR(r.boxStop, SaLogIs({"on dummy 0", "link chute 0 1", "link crate 0 1", "setanim crate crateclosed 1 1 1", "tick crate 0",
-                               "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "animweight crate 1 1",
+        PR(r.boxStop, SaLogIs({"on dummy 0", "link chute 0 1", "link crate 0 1", "setanim crate #crateclosed 1 1 1", "tick crate 0",
+                               "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "animweight crate 1 1",
                                "animweight crate 0 0", "animactive crate 1", "tick crate 1", "findanim ammobox",
                                "removeplayer morph 0", "dupmesh morph", "animinit morph", "animreset morph 0",
                                "addplayer morph 250", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1",
@@ -753,25 +753,25 @@
         box->m_blendTime = 7;
         reset();
         box->SetAnimation(1);
-        PR(r.boxStates, box->m_animStage == 0 && box->m_anim == 1 && box->m_blendTime == 0 && logIs("anim1", {"setanim crate crateopen 0 1 1"}));
+        PR(r.boxStates, box->m_animStage == 0 && box->m_anim == 1 && box->m_blendTime == 0 && logIs("anim1", {"setanim crate #crateopen 0 1 1"}));
         reset();
         box->SetAnimation(2);
-        PR(r.boxStates, box->m_animStage == 1 && box->m_anim == 2 && box->m_blendTime == 350 && logIs("anim2", {"setanim crate crateclosed 1 0 1"}));
+        PR(r.boxStates, box->m_animStage == 1 && box->m_anim == 2 && box->m_blendTime == 350 && logIs("anim2", {"setanim crate #crateclosed 1 0 1"}));
         reset();
         box->SetAnimation(3);
-        PR(r.boxStates, box->m_animStage == 0 && box->m_anim == 3 && box->m_blendTime == 350 && logIs("anim3", {"setanim crate cratedrop 0 0 1"}));
+        PR(r.boxStates, box->m_animStage == 0 && box->m_anim == 3 && box->m_blendTime == 350 && logIs("anim3", {"setanim crate #cratedrop 0 0 1"}));
         reset();
         box->SetAnimation(0);
         PR(r.boxStates, g_itLog.empty() && box->m_anim == 3);
         box->m_animStage = -1;
         reset();
         box->SetAnimation(5);
-        PR(r.boxStates, box->m_animStage == 0 && box->m_anim == 5 && logIs("anim5", {"setanim crate crateclosed 0 1 1", "tick crate 0", "setanim crate crateopen 0 1 1", "tick crate 0", "stopanim crate 0"}));
+        PR(r.boxStates, box->m_animStage == 0 && box->m_anim == 5 && logIs("anim5", {"setanim crate #crateclosed 0 1 1", "tick crate 0", "setanim crate #crateopen 0 1 1", "tick crate 0", "stopanim crate 0"}));
         box->m_anim = 1;
         box->m_animStage = -1;
         reset();
         box->SetAnimation(2);
-        PR(r.boxStates, box->m_animStage == 0 && box->m_blendTime == 0 && logIs("anim6", {"setanim crate crateclosed 0 1 1"}));
+        PR(r.boxStates, box->m_animStage == 0 && box->m_blendTime == 0 && logIs("anim6", {"setanim crate #crateclosed 0 1 1"}));
         // The blend's weights in whole steps of 350 ms (a step below 0 clamps); none without a blend time.
         g_prAnimActive = true;
         box->m_animStage = 1;
@@ -899,14 +899,14 @@
         for (I3D_frame *a : ammo)
             partsOn = partsOn && (!a || a->IsOn());
         PR(r.boxStates, box->m_health == 6000 && box->GetCharges() == box->m_capacity && box->m_anim == 5 && partsOn &&
-                            SaSameQuat(crate->m_rot, SaNormalized(box->m_dropRot)) && logIs("drop", {"setanim crate crateclosed 1 1 1", "tick crate 0", "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "setpos crate 3 87 -4", "update crate", "sector crate 3 87 -4", "on chute 1", "setpos chute 3 87 -4", "setdir chute 0 0 1 0", "update chute", "fadein chute 0 1", "on dummy 1", "setpos dummy 3 90 -4", "update dummy", "sector dummy 3 90 -4", "link chute letibedna 1", "link crate letibedna 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "fadein crate 1000 1", "setanim dummy cratefly 0 1 2"}));
+                            SaSameQuat(crate->m_rot, SaNormalized(box->m_dropRot)) && logIs("drop", {"setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "setpos crate 3 87 -4", "update crate", "sector crate 3 87 -4", "on chute 1", "setpos chute 3 87 -4", "setdir chute 0 0 1 0", "update chute", "fadein chute 0 1", "on dummy 1", "setpos dummy 3 90 -4", "update dummy", "sector dummy 3 90 -4", "link chute letibedna 1", "link crate letibedna 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "fadein crate 1000 1", "setanim dummy #cratefly 0 1 2"}));
         g_gameRole = GAME_ROLE_SERVER;
-        g_netSceneTop = 85.0f;
+        g_scanMax[1] = 85.0f;
         box->m_state = C::SUPPLY_HIDDEN;
         reset();
         box->SetState(C::SUPPLY_FALLING);
         PR(r.boxStates, std::count(g_itLog.begin(), g_itLog.end(), "setpos crate " + ItV(S_vector(3.0f, (85.0f - 0.1f) + 2.0f, -4.0f))) == 1);
-        g_netSceneTop = 1000.0f;
+        g_scanMax[1] = 1000.0f;
         g_gameRole = GAME_ROLE_LOCAL;
         // Falling without a touch: the cratedummy's animation 1.5 times faster, the crate's, the move.
         box->m_flags = C::SUPPLY_SHOWN;
@@ -924,7 +924,7 @@
         crate->m_frameFlags = (crate->m_frameFlags & ~(FRMFLAGS_WMATRIX_VALID | FRMFLAGS_LMATRIX_VALID)) | FRMFLAGS_ROT_DIRTY;
         reset();
         box->SetState(C::SUPPLY_LANDED);
-        PR(r.boxStates, SaSameQuat(crate->m_rot, SaNormalized(box->m_dropRot)) && logIs("landed", {"setanim crate cratedrop 1 1 1", "on dummy 0", "link chute 0 1", "link crate 0 1", "sector chute 6 176.75 -8", "sector crate 6 176.75 -8"}));
+        PR(r.boxStates, SaSameQuat(crate->m_rot, SaNormalized(box->m_dropRot)) && logIs("landed", {"setanim crate #cratedrop 1 1 1", "on dummy 0", "link chute 0 1", "link crate 0 1", "sector chute 6 176.75 -8", "sector crate 6 176.75 -8"}));
         box->m_flags = C::SUPPLY_SHOWN;
         reset();
         box->SetState(C::SUPPLY_DESTROYED);
@@ -985,15 +985,15 @@
                    box->m_health == (drop ? 6000 : 500) && box->m_stateTime == 1234 && SaLogIs(log);
         };
         box->m_charges = box->m_capacity;
-        PR(r.boxNet, apply(C::SUPPLY_READY, 0, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate crateclosed 1 1 1", "tick crate 0", "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setanim crate crateopen 1 1 1", "animactive crate 1", "tick crate 10000", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})) && box->m_animStage == 1 && box->m_blendTime == 0);
-        PR(r.boxNet, apply(C::SUPPLY_CLOSING, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 0", "on Ammo12 0", "on Ammo13 0", "setanim crate crateclosed 1 1 1", "tick crate 0", "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setanim crate crateclosed 1 1 1", "animactive crate 1", "tick crate 66", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})));
-        PR(r.boxNet, apply(C::SUPPLY_HIDDEN, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate crateclosed 1 1 1", "tick crate 0", "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})));
-        PR(r.boxNet, apply(C::SUPPLY_LANDED, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate crateclosed 1 1 1", "tick crate 0", "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setanim crate cratedrop 1 1 1", "animactive crate 1", "tick crate 66", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})));
-        PR(r.boxNet, apply(C::SUPPLY_OPENING, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate crateclosed 1 1 1", "tick crate 0", "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setanim crate crateopen 1 1 1", "animactive crate 1", "tick crate 66", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})));
-        PR(r.boxNet, apply(C::SUPPLY_FALLING, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate crateclosed 1 1 1", "tick crate 0", "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "setpos crate 3 87 -4", "update crate", "sector crate 3 87 -4", "on chute 1", "setpos chute 3 87 -4", "setdir chute 0 0 1 0", "update chute", "fadein chute 0 1", "on dummy 1", "setpos dummy 3 90 -4", "update dummy", "sector dummy 3 90 -4", "link chute letibedna 1", "link crate letibedna 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "fadein crate 1000 1", "setanim dummy cratefly 0 1 2", "setpos dummy 1 2 3", "update dummy", "sector dummy 1 2 3", "setpos crate 0.5 -1 0.25", "update crate"})));
+        PR(r.boxNet, apply(C::SUPPLY_READY, 0, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setanim crate #crateopen 1 1 1", "animactive crate 1", "tick crate 10000", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})) && box->m_animStage == 1 && box->m_blendTime == 0);
+        PR(r.boxNet, apply(C::SUPPLY_CLOSING, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 0", "on Ammo12 0", "on Ammo13 0", "setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setanim crate #crateclosed 1 1 1", "animactive crate 1", "tick crate 66", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})));
+        PR(r.boxNet, apply(C::SUPPLY_HIDDEN, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})));
+        PR(r.boxNet, apply(C::SUPPLY_LANDED, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setanim crate #cratedrop 1 1 1", "animactive crate 1", "tick crate 66", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})));
+        PR(r.boxNet, apply(C::SUPPLY_OPENING, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setanim crate #crateopen 1 1 1", "animactive crate 1", "tick crate 66", "setpos crate 1 2 3", "update crate", "sector crate 1 2 3"})));
+        PR(r.boxNet, apply(C::SUPPLY_FALLING, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 0", "on Ammo01 0", "on Ammo02 0", "on Ammo03 0", "on Ammo04 0", "on Ammo05 0", "on Ammo06 0", "on Ammo08 0", "on Ammo09 0", "on Ammo10 0", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "setpos crate 3 87 -4", "update crate", "sector crate 3 87 -4", "on chute 1", "setpos chute 3 87 -4", "setdir chute 0 0 1 0", "update chute", "fadein chute 0 1", "on dummy 1", "setpos dummy 3 90 -4", "update dummy", "sector dummy 3 90 -4", "link chute letibedna 1", "link crate letibedna 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "fadein crate 1000 1", "setanim dummy #cratefly 0 1 2", "setpos dummy 1 2 3", "update dummy", "sector dummy 1 2 3", "setpos crate 0.5 -1 0.25", "update crate"})));
         // (The box moved with the crate under the cratedummy.)
         PR(r.boxNet, box->m_boxMatrix.m[3][0] == crate->GetMatrix().m[3][0] && box->m_boxMatrix.m[3][1] == crate->GetMatrix().m[3][1]);
-        PR(r.boxNet, apply(C::SUPPLY_DESTROYED, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate crateclosed 1 1 1", "tick crate 0", "setanim crate crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setpos crate 1 2 3", "update crate", "sector crate 2 4 6"})));
+        PR(r.boxNet, apply(C::SUPPLY_DESTROYED, 3, std::vector<std::string>({"animreset morph 16", "on dummy 0", "link chute 0 1", "on Ammo00 1", "on Ammo01 1", "on Ammo02 1", "on Ammo03 1", "on Ammo04 1", "on Ammo05 1", "on Ammo06 1", "on Ammo08 1", "on Ammo09 1", "on Ammo10 1", "on Ammo11 1", "on Ammo12 1", "on Ammo13 1", "setanim crate #crateclosed 1 1 1", "tick crate 0", "setanim crate #crateopen 1 1 1", "tick crate 0", "stopanim crate 1", "fadein crate 0 1", "setpos crate 1 2 3", "update crate", "sector crate 2 4 6"})));
 
         // Loaded: the parts as the loaded charges; a short state chunk: zeros.
         box->m_flags = C::SUPPLY_SHOWN;
@@ -1091,7 +1091,7 @@
         box->m_state = C::SUPPLY_READY;
         reset();
         box->StopMission(true);
-        PR(r.boxStop, !box->m_flyingCrate && logIs("stop", {"animreset morph 16", "on dummy 0", "link chute 0 1", "link crate 0 1", "setanim crate crateclosed 0 1 1", "tick crate 0", "setanim crate crateopen 0 1 1", "tick crate 0", "stopanim crate 0", "animactive crate 0", "tick crate 1", "removeplayer morph 0", "release dummy", "release plane", "release chute", "animrelease cratefly", "animrelease crateopen", "animrelease crateclosed", "animrelease cratedrop", "fadein crate 0 1", "setpos crate 3 2 -4", "update crate", "sector crate 3 2 -4"}));
+        PR(r.boxStop, !box->m_flyingCrate && logIs("stop", {"animreset morph 16", "on dummy 0", "link chute 0 1", "link crate 0 1", "setanim crate #crateclosed 0 1 1", "tick crate 0", "setanim crate #crateopen 0 1 1", "tick crate 0", "stopanim crate 0", "animactive crate 0", "tick crate 1", "removeplayer morph 0", "release dummy", "release plane", "release chute", "animrelease #cratefly", "animrelease #crateopen", "animrelease #crateclosed", "animrelease #cratedrop", "fadein crate 0 1", "setpos crate 3 2 -4", "update crate", "sector crate 3 2 -4"}));
         // (A start: the frame linked back to its parent keeping its place; the animation reset with
         // nothing shown.)
         box->m_anim = 2;

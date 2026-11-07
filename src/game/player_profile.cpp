@@ -185,6 +185,41 @@ int CreateProfile(const char *name)                     // 0x006ae8e0
     return 1;
 }
 
+bool DeleteProfile(const char *name)                    // 0x006aef40
+{
+    // No name: every profile's contents deleted.
+    if (!*name)
+        return DeleteDirectoryTree(PROFILES_DIRECTORY);
+    SetWorkingDirectory(PROFILES_DIRECTORY);
+    // (With the unicode font a profile lives in its own directory.)
+    const char *directory = name;
+    if (g_gameProfile.UsesUnicodeFont()) {
+        directory = FindProfileDirectory(name);
+        // (Not known: the working directory left in PlayersProfiles, as the original.)
+        if (!directory)
+            return false;
+    }
+    const bool deleted = DeleteDirectoryTree(directory);
+    if (deleted) {
+        if (!RemoveDir(directory)) {
+            SetAttributes(directory, FILE_ATTRIBUTE_NORMAL);
+            RemoveDir(directory);
+        }
+        ForgetProfileName(name);
+    }
+    SetWorkingDirectory(nullptr);
+    return deleted;
+}
+
+bool ForgetProfileName(const char *name)                // 0x006af0f0
+{
+    const auto it = g_profileDirectories.find(name);
+    if (it == g_profileDirectories.end())
+        return false;
+    g_profileDirectories.erase(it);
+    return true;
+}
+
 const char *FindProfileDirectory(const char *name)      // 0x006aefe0
 {
     const auto it = g_profileDirectories.find(name);

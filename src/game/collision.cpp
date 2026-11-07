@@ -30,11 +30,11 @@ constexpr int SEEK_FROM_END = 2;
 // the records (flags, then the frame's name); the rest of the file is the mesh block.
 struct S_CollisionFileHeader {                              // 0x18 bytes
     uint32_t magic;
-    uint32_t unknown04;
-    uint32_t unknown08;
-    uint32_t unknown0C;
-    int frameBlockEnd;                                      // +0x10 file offset after the records
-    int numFrames;                                          // +0x14
+    uint32_t version;                                       // +0x04 0x10005 in the game's files
+    int frameBlockEnd;                                      // +0x08 file offset after the records (and their mesh block's start)
+    int numFrames;                                          // +0x0C
+    uint32_t unknown10;                                     // (0x21F in the game's files)
+    uint32_t unknown14;
 };
 // Frame reference flags.
 enum : uint32_t {

@@ -81,6 +81,7 @@ public:
     S_LoadoutPreset *GetPreset(int index, uint32_t flags) const;       // 0x0067de40
     S_LoadoutPreset *GetUserPreset(int index, uint32_t flags) const;   // 0x0067de90
     int GetPresetCount() const { return static_cast<int>(m_presets.size()); }
+    const std::vector<S_LoadoutPreset *> &GetPresets() const { return m_presets; }
     int GetUserPresetCount() const { return static_cast<int>(m_userPresets.size()); }
 
 private:
@@ -97,7 +98,11 @@ struct S_MissionItems {
 
     int kind = 4;                                       // +0x00
     S_Slot slots[SLOTS];                                // +0x04
-    std::vector<std::pair<int, int>> pairs;             // +0x7C
+    // The items the mission needs the deployed soldiers to carry: (type, count).
+    std::vector<std::pair<int, int>> required;          // +0x7C
+
+    // The count of an item type required (none: 0).
+    int GetRequiredCount(int type) const;               // 0x0067e410
 };
 
 class C_MissionItems {                                  // 0x2AC bytes
@@ -120,6 +125,8 @@ public:
 
     S_MissionItems *GetRecord(int index) const { return m_records[index]; }
     int GetFirstRecord(int campaign, int operation) const { return m_first[operation + campaign * CAMPAIGN_STRIDE]; }
+    // The current campaign's record of a mission (its number; none past the records).
+    S_MissionItems *GetMissionRecord(int mission) const;   // 0x0067e620
 
 private:
     int m_first[MAX_OPERATIONS];                        // +0x000 (-1)

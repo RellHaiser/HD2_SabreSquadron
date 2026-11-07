@@ -1,5 +1,6 @@
 # Application core 0x006db2c0-0x006ddb00 (hand-ported: src/game/app.cpp)
 006db380 StaticInit_DefaultSetup
+006db430 IgnoreEngineError
 006db440 InitGraphics
 006db650 SetWindowTitle
 006db700 InitSound

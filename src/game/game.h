@@ -81,8 +81,10 @@ enum E_GameMessage : int {
 };
 
 class C_QuickMessages;
+class C_TextBox;
 
 class C_game : public C_GameState {                 // vtable 0x008159ac, 0xEC bytes
+    friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
 public:
     C_game();                                       // 0x006987e0
     ~C_game() override;                             // 0x00698b00 (0x00698ae0 deleting)
@@ -106,6 +108,7 @@ public:
         return m_state == GAME_STATE_RUNNING || m_state == GAME_STATE_STARTING || m_state == GAME_STATE_ENDING;
     }
     I3D_scene *GetScene() const { return m_scene; }
+    bool IsMissionLoaded() const { return m_missionLoaded; }
     // The far clipping distance (m; the birds fly off beyond it).
     float GetFarClip() const { return m_farClip; }
     float GetNearClip() const { return m_nearClip; }
@@ -154,6 +157,7 @@ public:
     // --- HUD --------------------------------------------------------------------------
     C_Checkpoints *GetCheckpoints() const { return m_checkpoints; }
     C_Interface *GetInterface() const { return m_interface; }
+    int GetEndDelay() const { return m_endDelay; }
     // Weapon / inventory part of the HUD.
     C_FirstPersonView *GetFirstPersonView() const { return m_firstPersonView; }
     // Quick chat messages of the interface (+0x60).
@@ -164,6 +168,7 @@ public:
     bool IsBinocularsView() const;                   // 0x0069a7b0
     void ShowBinocularsView(bool show);                   // 0x0069a7a0
     void Print(const char *format, ...);            // 0x0069c2b0 (empty in the release build; cdecl)
+    void PrintColored(const S_vector &color, const char *format, ...);   // 0x0069c2a0 (empty too)
     // A message line (printf format) in `color` (0..255 components): the HUD on clients,
     // the console otherwise.
     void PrintMessage(const S_vector &color, const char *format, ...);   // 0x0069c240
@@ -219,6 +224,8 @@ public:
     int GetRoundTimeLeft() const;                   // 0x0069b150
     int GetRoundTime() const { return m_roundTime; }
     int GetRespawnTimeLeft() const;                 // 0x0069b180
+    // (A client at the server's respawn wave, game message 16: the round time's milliseconds.)
+    void SetRespawnWaveTime(int ms) { m_respawnWaveTime = ms; }
     // Client side of the server's messages.
     void OnRoundOver(int winner);                   // 0x00699860
     void OnRespawnScreen(bool cancel);              // 0x006998f0
@@ -245,6 +252,13 @@ public:
     void SetMode(int mode) { m_mode = mode; }       // (the in-game menu's quit)
     // Co-op with shared lives: the respawns used.
     int GetTeamLivesUsed() const { return m_teamLivesUsed; }
+    void SetTeamLivesUsed(int used) { m_teamLivesUsed = used; }   // (a client: the server's scores message)
+    // A client: the mission's clock and the game time set from the server's (the scores message).
+    void SetMissionClock(uint32_t time)
+    {
+        m_missionTime = time;
+        m_time = time;
+    }
     // The campaign mission's number across the campaigns (-1: not a campaign mission).
     int GetCampaignMissionNumber() const { return m_campaignMissionNumber; }
 
@@ -327,6 +341,17 @@ private:
     std::vector<I3D_light *> m_staticLights;        // +0xDC switched off for the mission
 };
 
+// One dialogue (0x18 bytes): the files only ever give it one line.
+struct S_QuickDialog {
+    struct S_Line {
+        int time;                                       // ms
+        C_str text;
+    };
+    int line = -1;                                      // +0x00 the line shown
+    int id = -1;                                        // +0x04
+    std::vector<S_Line> lines;                          // +0x08
+};
+
 // Quick chat messages (C_game +0x60, 0x28 bytes).
 class C_QuickMessages {
 public:
@@ -340,6 +365,25 @@ public:
     void Update(int timeDelta);                     // 0x0048f2d0
     bool SaveGame(C_chunk &chunk);                  // 0x0048fc50
     bool LoadGame(C_chunk &chunk);                  // 0x0048fdd0
+    void ShowSubtitles(bool on);                    // 0x0048ee50
+    void SetSubtitle(int text);                     // 0x0048f080
+    // The subtitle of dubbing `dubbing`, shown `length` ms (-1: no sample).
+    void ShowDubbing(int dubbing, int length);      // 0x0048f180
+    void Render();                                  // 0x0048f390
+
+private:
+    int FindDialog(int id) const;
+    bool StartDialog(int index);
+
+    uint8_t m_layer = 0;                            // +0x00 (the byte 0x0086933c; saved)
+    bool m_ready = false;                           // +0x01 the files read
+    bool m_showing = false;                         // +0x02
+    C_TextBox *m_box = nullptr;                     // +0x04
+    uint8_t m_style = 0;                            // +0x08
+    int m_current = -1;                             // +0x0C the dialogue shown
+    int m_timeLeft = -1;                            // +0x10 ms
+    C_str m_text;                                   // +0x14
+    std::vector<S_QuickDialog *> m_dialogs;         // +0x18
 };
 
 C_game *GetGame();                                  // 0x006987d0
@@ -350,4 +394,8 @@ bool IsSpawnBlocked(const S_vector4 &pos);           // 0x0069d970
 void FaceTargetZone(S_vector4 *dir, const S_vector4 &pos, int team);   // 0x0069e370
 // Shows text `textId` in the in-game menu when it is open.
 void ShowGameMenuMessage(int textId);                // 0x0069e9b0
+// The session moves on to its next map (the settings' next; the game's pending state GAME_STATE_NEXT_MAP).
+void LoadNextMap();                                 // 0x0069bca0
+// The session switches to map `name` (null: the next one), told to the players.
+void ChangeMap(const char *name);                   // 0x0069bcc0
 extern C_game *g_game;                              // 0x008ae8f4

@@ -32,7 +32,7 @@ I3D_sound *g_clickSound = nullptr;                      // 0x0089bc8c
 namespace {
 
 // The 16 bytes of saved-game chunk 0x3EA (0x0089bc7c).
-// Dropped: the original stamps the MD5 of its executable there (0x006ea340; "BAADBAADBAADBAAD"
+// Dropped (game/copy_protection.h): the original stamps the MD5 of its executable there (0x006ea340; "BAADBAADBAADBAAD"
 // when it cannot read itself); nothing checks it. The port writes what it last loaded (zeros
 // at first) so the saves keep their format.
 uint8_t s_saveStamp[16] = {};

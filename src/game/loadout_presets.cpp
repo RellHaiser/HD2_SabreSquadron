@@ -32,18 +32,18 @@ struct S_DefaultPreset {
     int textId;
 };
 const S_DefaultPreset DEFAULT_PRESETS[USER_PRESET_COUNT] = {
-    {"Axis_user_preset1", LOADOUT_AXIS, 0x1982},          {"Axis_user_preset2", LOADOUT_AXIS, 0x1983},
-    {"Axis_user_preset3", LOADOUT_AXIS, 0x1984},          {"Axis_user_preset4", LOADOUT_AXIS, 0x1985},
-    {"Axis_user_preset5", LOADOUT_AXIS, 0x1986},          {"Axis_user_preset6", LOADOUT_AXIS, 0x1987},
-    {"Allied_user_preset1", LOADOUT_ALLIED, 0x1988},      {"Allied_user_preset2", LOADOUT_ALLIED, 0x1989},
-    {"Allied_user_preset3", LOADOUT_ALLIED, 0x198A},      {"Allied_user_preset4", LOADOUT_ALLIED, 0x198B},
-    {"Allied_user_preset5", LOADOUT_ALLIED, 0x198C},      {"Allied_user_preset6", LOADOUT_ALLIED, 0x198D},
-    {"Deadmatch_user_preset1", LOADOUT_DEATHMATCH, 0x198E}, {"Deadmatch_user_preset2", LOADOUT_DEATHMATCH, 0x198F},
-    {"Deadmatch_user_preset3", LOADOUT_DEATHMATCH, 0x1990}, {"Deadmatch_user_preset4", LOADOUT_DEATHMATCH, 0x1991},
-    {"Deadmatch_user_preset5", LOADOUT_DEATHMATCH, 0x1992}, {"Deadmatch_user_preset6", LOADOUT_DEATHMATCH, 0x1993},
-    {"User_preset1", LOADOUT_USER, -1},                   {"User_preset2", LOADOUT_USER, -1},
-    {"User_preset3", LOADOUT_USER, -1},                   {"User_preset4", LOADOUT_USER, -1},
-    {"User_preset5", LOADOUT_USER, -1},                   {"User_preset6", LOADOUT_USER, -1},
+    {"Axis user preset1", LOADOUT_AXIS, 0x1982},          {"Axis user preset2", LOADOUT_AXIS, 0x1983},
+    {"Axis user preset3", LOADOUT_AXIS, 0x1984},          {"Axis user preset4", LOADOUT_AXIS, 0x1985},
+    {"Axis user preset5", LOADOUT_AXIS, 0x1986},          {"Axis user preset6", LOADOUT_AXIS, 0x1987},
+    {"Allied user preset1", LOADOUT_ALLIED, 0x1988},      {"Allied user preset2", LOADOUT_ALLIED, 0x1989},
+    {"Allied user preset3", LOADOUT_ALLIED, 0x198A},      {"Allied user preset4", LOADOUT_ALLIED, 0x198B},
+    {"Allied user preset5", LOADOUT_ALLIED, 0x198C},      {"Allied user preset6", LOADOUT_ALLIED, 0x198D},
+    {"Deadmatch user preset1", LOADOUT_DEATHMATCH, 0x198E}, {"Deadmatch user preset2", LOADOUT_DEATHMATCH, 0x198F},
+    {"Deadmatch user preset3", LOADOUT_DEATHMATCH, 0x1990}, {"Deadmatch user preset4", LOADOUT_DEATHMATCH, 0x1991},
+    {"Deadmatch user preset5", LOADOUT_DEATHMATCH, 0x1992}, {"Deadmatch user preset6", LOADOUT_DEATHMATCH, 0x1993},
+    {"User preset1", LOADOUT_USER, -1},                   {"User preset2", LOADOUT_USER, -1},
+    {"User preset3", LOADOUT_USER, -1},                   {"User preset4", LOADOUT_USER, -1},
+    {"User preset5", LOADOUT_USER, -1},                   {"User preset6", LOADOUT_USER, -1},
 };
 
 int PresetSize(int version)
@@ -219,6 +219,22 @@ void C_MissionItems::Release()
     }
 }
 
+int S_MissionItems::GetRequiredCount(int type) const
+{
+    for (const std::pair<int, int> &item : required) {
+        if (item.first == type)
+            return item.second;
+    }
+    return 0;
+}
+
+S_MissionItems *C_MissionItems::GetMissionRecord(int mission) const
+{
+    const int index = mission + m_campaign * CAMPAIGN_STRIDE;
+    // (Fix: a negative index none; the original read before the records.)
+    return index >= 0 && index < MAX_RECORDS ? m_records[index] : nullptr;
+}
+
 void C_MissionItems::Setup()
 {
     C_Campaign *campaign = g_gameProfile.m_campaign;
@@ -258,7 +274,7 @@ bool C_MissionItems::Load()
         dtaRead(file, &present, 4);
         if (present == 0) {
             if (record) {
-                record->pairs.clear();
+                record->required.clear();
                 for (S_MissionItems::S_Slot &slot : record->slots)
                     slot = S_MissionItems::S_Slot();
             }
@@ -280,7 +296,7 @@ bool C_MissionItems::Load()
         for (int j = 0; j < pairs; ++j) {
             std::pair<int, int> pair(-1, 0);
             dtaRead(file, &pair, 8);
-            record->pairs.push_back(pair);
+            record->required.push_back(pair);
         }
     }
     dtaClose(file);

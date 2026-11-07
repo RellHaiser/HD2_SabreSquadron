@@ -15,9 +15,12 @@ float g_epFreeWeight = 100.0f;
 int g_epFreeBelt = 12, g_epFreeBackpack = 10;
 float g_epWeightFill, g_epBeltFill, g_epBackpackFill;
 std::string EpItem(const S_SoldierItem &item) { return CmText("%d %d %d", item.uid, item.typeId, item.present); }
+// (Part 9f-v: the soldiers put on, in order.)
+std::vector<const S_SquadSoldier *> g_epPutWho;
 void S_SquadSoldier::PutItem(S_SoldierItem *displaced, uint8_t slot, const S_SoldierItem &item)
 {
     GfLog("put %x %s", slot, EpItem(item).c_str());
+    g_epPutWho.push_back(this);
     S_SoldierItem none;
     *displaced = none;
     if (!g_epDisplaced.empty()) {
@@ -43,12 +46,21 @@ void S_SquadSoldier::ReturnItemsTo(C_ItemStock *) { GfLog("return items"); }
 int S_SquadSoldier::GetFreeBeltVolume() const { return g_epFreeBelt; }
 int S_SquadSoldier::GetFreeBackpackVolume() const { return g_epFreeBackpack; }
 float S_SquadSoldier::GetFreeWeight() const { return g_epFreeWeight; }
-float S_SoldierLoad::GetWeightFill() const { return g_epWeightFill; }
+// (Part 9f-ii: a load's own fill, else the shared one.)
+std::map<const S_SoldierLoad *, float> g_epWeightFills;
+float S_SoldierLoad::GetWeightFill() const
+{
+    const auto it = g_epWeightFills.find(this);
+    return it == g_epWeightFills.end() ? g_epWeightFill : it->second;
+}
 float S_SoldierLoad::GetBeltFill() const { return g_epBeltFill; }
 float S_SoldierLoad::GetBackpackFill() const { return g_epBackpackFill; }
 void C_ItemStock::Add(int type, int count) { GfLog("stock add %d %d", type, count); }
 std::vector<S_SoldierProfile *> g_epProfiles;
-S_SoldierProfile *C_HumanStore::Get(int index) const { return g_epProfiles[static_cast<size_t>(index)]; }
+S_SoldierProfile *C_HumanStore::Get(int index) const
+{
+    return index >= 0 && static_cast<size_t>(index) < g_epProfiles.size() ? g_epProfiles[static_cast<size_t>(index)] : nullptr;
+}
 // The item types' containers.
 std::map<const C_ItemDef *, uint32_t> g_epAllowed;
 uint32_t C_ItemDef::GetAllowedContainers()

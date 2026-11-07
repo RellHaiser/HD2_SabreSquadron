@@ -602,23 +602,23 @@
                 m->pos = {1, 2, 3, 1};
                 m->dir = {0, 0, 1, 0};
                 m->fromClient = true;
-                m->unknown24 = 1;                       // (held by the queue it came from)
+                m->refCount = 1;                       // (held by the queue it came from)
                 return m;
             };
             const auto reload = [](int seat) {
                 auto *m = new C_SeatWeaponReloadMessage;
                 m->seat = seat;
                 m->fromClient = true;
-                m->unknown24 = 1;
+                m->refCount = 1;
                 return m;
             };
             auto *rounds = new C_SeatWeaponRoundsMessage;
             rounds->rounds = 17;
-            rounds->unknown24 = 1;
+            rounds->refCount = 1;
             auto *ammo = new C_SeatWeaponAmmoMessage;
             ammo->typeId = 41;
             ammo->uid = 0x77;
-            ammo->unknown24 = 1;
+            ammo->refCount = 1;
             store.count = 100;                  // (no refill meanwhile)
             a->LeaveSeat(1);
             fw.shots.clear();

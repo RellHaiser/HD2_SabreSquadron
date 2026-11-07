@@ -1,0 +1,10 @@
+# Part 10e-i: the console commands (net/net_console_commands.cpp).
+007426a0 C_CommandProcessor::C_CommandProcessor | void * __thiscall C_CommandProcessor(void *this)
+007426e0 C_CommandProcessor::~C_CommandProcessor | void __thiscall ~C_CommandProcessor(void *this)
+007440d0 C_CommandProcessor::ExecuteFile | void __thiscall ExecuteFile(void *this, char * name)
+00744360 C_ConsoleState::Start | bool __thiscall Start(void *this, void * arg)
+00744390 C_ConsoleState::Stop | bool __thiscall Stop(void *this)
+007443d0 C_ConsoleState::Update | void __thiscall Update(void *this, int timeDelta)
+00744490 C_ConsoleState::StartHosting | void __fastcall StartHosting(void * state)
+00744540 C_ConsoleState::StartJoining | void __fastcall StartJoining(void * state)
+00744750 SkipConsoleSeparators | void __fastcall SkipConsoleSeparators(char * * cursor)

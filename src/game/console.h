@@ -22,6 +22,8 @@ public:
 };
 
 class C_Console : public C_ConsoleBase {                // vtable 0x008165dc
+    friend class C_NetGame;                             // a server's loading progress (net/net_console.cpp)
+
 public:
     static constexpr int MAX_HISTORY_LINES = 100;
     static constexpr int MAX_INPUT_LENGTH = 50;

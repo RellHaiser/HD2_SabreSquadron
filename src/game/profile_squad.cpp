@@ -267,8 +267,13 @@ void S_SquadSoldier::MergeItems()                       // 0x006a2d60
 
 void S_SquadSoldier::SplitStacks()                      // 0x006a2f60
 {
-    ::SplitStacks(belt);
-    ::SplitStacks(backpackContents);
+    SplitSoldierStacks(*this);
+}
+
+void SplitSoldierStacks(S_SoldierState &state)
+{
+    ::SplitStacks(state.belt);
+    ::SplitStacks(state.backpackContents);
 }
 
 void S_SquadSoldier::UpdateLoad()                       // 0x006a3120

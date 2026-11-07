@@ -312,7 +312,8 @@ bool C_TextBox::SetTextId(int textId, int style, int index)
     if (style == STYLE_VERSION) {
         int major = 0, minor = 0;
         GetGameVersion(&major, &minor);
-        text = C_fstr(text, major, minor);
+        // (The text: "ver. %d.%02d.%d". The third number is the original's global 0x009820f4, which nothing writes: zero.)
+        text = C_fstr(text, major, minor, 0);
     }
     return SetRun({text, static_cast<uint8_t>(style)}, index);
 }

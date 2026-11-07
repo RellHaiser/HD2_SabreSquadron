@@ -1,0 +1,22 @@
+# Part 11g: the blood stains on a body (game/human_stains.cpp).
+00796830 C_StainManager_Dtor
+00796d00 StainManager_AcquireMesh
+00796ff0 StainManager_ReleaseMesh
+007970f0 StainManager_AcquireTextures
+007971b0 StainManager_ReleaseTextures
+007971e0 StainMesh_Ctor
+00797480 StainMesh_Build
+00797790 StainGroup_FindExtremes
+00797a80 StainMesh_NearestByWalks
+00797be0 StainMesh_NearestFromExtremes
+00797eb0 StainGroup_FindVertex
+00797f00 StainGroup_AddEdge
+007982a0 StainGroup_WalkToNearest
+00798470 StainGroup_SearchNearest
+007992a0 HumanStains_PrepareBuffers
+007994e0 HumanStains_TakeTextures
+007995d0 HumanStains_GiveBackTextures
+007996d0 HumanStains_ReturnTextures
+007999a0 HumanStains_SetPaint
+0079a010 HumanStains_PaintHit
+0079a880 HumanStains_PaintSplat

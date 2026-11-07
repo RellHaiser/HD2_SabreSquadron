@@ -648,7 +648,7 @@ void C_InfoScreen::AddTeamPlayer(S_NetPlayerState *player, bool local, int colum
 
 void C_InfoScreen::AddServer()
 {
-    m_text->AddText(C_fstr("%s %s", g_texts.Get(TEXT_SERVER).c_str(), g_serverName), Style(55));
+    m_text->AddText(C_fstr("%s %s", g_texts.Get(TEXT_SERVER).c_str(), g_netGame.GetServerName()), Style(55));
 }
 
 void C_InfoScreen::AddMissionName()

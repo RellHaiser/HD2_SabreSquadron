@@ -21,8 +21,15 @@ void *operator new(std::size_t n)
     return p;
 }
 // (Not inlined: g++ warns of the malloc / free mismatch where it is.)
-__attribute__((noinline)) void operator delete(void *p) noexcept { std::free(p); }
-__attribute__((noinline)) void operator delete(void *p, std::size_t) noexcept { std::free(p); }
+// (Part 9h-iii: a hook seeing the deletes, main_menu_test.inc's.)
+void (*g_deleteHook)(void *p);
+__attribute__((noinline)) void operator delete(void *p) noexcept
+{
+    if (g_deleteHook)
+        g_deleteHook(p);
+    std::free(p);
+}
+__attribute__((noinline)) void operator delete(void *p, std::size_t) noexcept { operator delete(p); }
 
 namespace {
 

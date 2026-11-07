@@ -104,16 +104,38 @@ struct S_SoldierItem {                                  // 6 bytes
     int16_t present = 0;                                // the count (stacks)
 };
 
+// What a soldier carries (S_SoldierState +0x8C; 0x20 bytes, saved as they are; the squad's kept within its
+// limits, part 10d-v: sent with the state).
+struct S_SoldierLoad {
+    int capacity = 0;                                   // +0x00 (+0x8C) the weight the soldier can carry (strength)
+    float weight = 0.0f;                                // +0x04 (+0x90) everything carried
+    float backpackMaxWeight = 0.0f;                     // +0x08 (+0x94) the backpack's container
+    int backpackMaxVolume = 0;                          // +0x0C (+0x98)
+    float backpackWeight = 0.0f;                        // +0x10 (+0x9C) its contents
+    int backpackVolume = 0;                             // +0x14 (+0xA0)
+    float beltWeight = 0.0f;                            // +0x18 (+0xA4)
+    int beltVolume = 0;                                 // +0x1C (+0xA8) at most 12
+
+    // Fractions of the limits (absolute values): the belt's volume of 12, the backpack's volume,
+    // the weight carried.
+    float GetBeltFill() const;                          // 0x006a25e0
+    float GetBackpackFill() const;                      // 0x006a25f0
+    float GetWeightFill() const;                        // 0x006a2600
+};
+static_assert(sizeof(S_SoldierLoad) == 0x20, "saved as is");
+
 // What a human is and carries: kept between missions for the campaign squad (S_SquadSoldier,
 // profile.h), sent to joining network clients (C_NetMessage: 0x00727850 write, 0x00727a30
 // read).
-struct S_SoldierState {                                 // 0x8C bytes
+struct S_SoldierState {                                 // 0xAC bytes
     C_str name;
     int spawnZone = 0;                                  // +0x04 multiplayer: the net id of the zone to
                                                         //       spawn at (-1: the respawn screen picks it)
     bool spectating = false;                            // +0x08 player controllers
     bool vip = false;                                   // +0x09 objectives games: the VIP (the player
                                                         //       controller's +0x550)
+    bool autoEquip = false;                             // +0x0A the campaign squad's: equipped by the
+                                                        //       equipment screen (added on a kind 1 screen)
     int health = 0;                                     // +0x0C
     S_SoldierProgress progress;                         // +0x10
     int unknown34 = 0;                                  // +0x34 (the squad's new soldiers: -1)
@@ -130,4 +152,5 @@ struct S_SoldierState {                                 // 0x8C bytes
     S_SoldierItem hands;                                // +0x64
     std::vector<S_SoldierItem> belt;                    // +0x6C
     std::vector<S_SoldierItem> backpackContents;        // +0x7C
+    S_SoldierLoad load;                                 // +0x8C
 };

@@ -14,7 +14,7 @@ uint32_t FUN_006d6090(...)
 // 0x006d60a0
 uint32_t FUN_006d60a0(...)
 {
-  FUN_006c6d70((uint32_t *)&g_controls);
+  C_Controls__C_Controls((uint32_t *)&g_controls);
   return 0;
 }
 
@@ -30,7 +30,7 @@ uint32_t FUN_006d60b0(...)
 // 0x006d60c0
 uint32_t FUN_006d60c0(...)
 {
-  FUN_006c6e00(0x8aeb58);
+  C_Controls___C_Controls(0x8aeb58);
   return 0;
 }
 

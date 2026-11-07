@@ -86,6 +86,7 @@ void BroadcastStopMission(bool server);                      // 0x0048db90 (reve
 void BroadcastRestartMission(bool server);                   // 0x0048dbc0
 void BroadcastWriteState(C_BitStream *msg);                          // 0x0048db30
 void BroadcastReadState(C_BitStream *msg);                           // 0x0048db60
+#undef DispatchMessage                                       // (windows.h's macro would rename it where that is included)
 bool DispatchMessage(int moduleId, C_BitStream *msg);                 // 0x0048dc70
 bool CallUnknown28(int moduleId, C_BitStream *msg);          // 0x0048dc50
 bool SaveGame(C_chunk &chunk);                               // 0x0048dc90

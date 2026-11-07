@@ -1,4 +1,4 @@
-// The store's item lists of the equipment menus (original 0x0067b070..0x0067c390).
+// The store's item lists of the equipment menus (original 0x0067aa70, 0x0067b070..0x0067c390).
 #include "game/store_list.h"
 
 #include <cstring>
@@ -11,6 +11,7 @@
 #include "game/items_module.h"
 #include "game/menu_state.h"
 #include "game/profile.h"
+#include "game/screen.h"
 #include "ls3d/i3d.h"
 
 namespace {
@@ -32,20 +33,34 @@ const S_vector HIGHLIGHT_POS(0.0f, 0.0f, -0.1f);
 // The page's frames in the screen's model, and the entries' kinds.
 const char *const STORE_ANCHOR = "P_visualstore";
 const char *const STORE_HIGHLIGHT = "selitem08";
+const char *const EQUIPMENT_HIGHLIGHT = "itemselector";
 const char *const STORE_TEMPLATE = "vi_template";
 const char *const STORE_AMMO_FRAME = "ammo";
 constexpr uint32_t FIND_VISUALS = 1;
 constexpr uint32_t FIND_DUMMIES = 0x20;
 constexpr int DESC_TYPE_PAGE = 0x23;
 constexpr int DESC_TYPE_ENTRY = 0x1D;
-// A page's horizontal step between its entries.
+constexpr int DESC_TYPE_EQUIPMENT_ENTRY = 0x1C;         // (C_ItemInfo: the picture with its description's text)
+// A page's horizontal step between its entries; the equipment screen's, downward.
 constexpr float PAGE_ACROSS_STEP = 0.081f;
+constexpr float EQUIPMENT_PAGE_DOWN_STEP = 0.095f;
 // The teams of the items no store has.
 constexpr int TEAM_NONE = 3;
 // The inventory group whose head gear (behaviour 16) comes with the uniforms, not on its own.
 constexpr int GROUP_UNIFORMS = 6;
 constexpr int BEHAVIOUR_HEADGEAR_ITEM = 16;
 constexpr int FIRST_GROUP = 1;
+// The description's controls: the group, its tabs (their header's and their lines' styles, the
+// groups' texts: none for group 4) and its scroll bar; the pages by their names' and groups.
+constexpr int DESC_TYPE_GROUP = 5, DESC_TYPE_TABS = 0x11, DESC_TYPE_SCROLL_BAR = 8;
+constexpr uint32_t TABS_HEADER_STYLE = 0xC, TAB_STYLE = 0x13;
+constexpr uint32_t TAB_TEXTS[] = {0xA9F, 0xAA0, 0xAA1, 0xAA3, 0xAA4, 0xAA5};
+struct S_StorePage {
+    const char *name;
+    int group;
+};
+constexpr S_StorePage STORE_PAGE_GROUPS[] = {{"GR_SmallWeapons", 1}, {"GR_MiddleWeapons", 2}, {"GR_HeavyWeapons", 3},
+                                             {"GR_Explosives", 5},   {"GR_Dresses", 6},       {"GR_Other", 7}};
 
 uintptr_t FloatValue(float value)
 {
@@ -73,12 +88,61 @@ void Post(uint32_t target, uint32_t id, uint32_t value = 0)
 
 } // namespace
 
+void C_StoreList::BuildDescription(S_ScreenDesc *desc, I3D_frame *model)
+{
+    Describe(desc, model, "bscroll", STORE_HIGHLIGHT, true);
+}
+
+void C_StoreList::BuildEquipmentDescription(S_ScreenDesc *desc, I3D_frame *model)
+{
+    Describe(desc, model, "scroll01", EQUIPMENT_HIGHLIGHT, false);
+}
+
+void C_StoreList::Describe(S_ScreenDesc *desc, I3D_frame *model, const char *scrollBar, const char *highlight,
+                           bool inactive)
+{
+    m_screenIndex = desc->id >> 26;
+    S_ControlDesc *group = desc->AddControl(DESC_TYPE_GROUP, STORE_ANCHOR);
+    m_controlIndex = static_cast<int>(group->id >> 20 & 0x3F);
+    S_ControlDesc *tabs = group->AddChild(DESC_TYPE_TABS, "filter");
+    AddDescMessage(tabs, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0E, reinterpret_cast<uintptr_t>(this),
+                   reinterpret_cast<uintptr_t>(&C_StoreList::OnTab));
+    AddDescMessage(tabs, 0, CONTROL_MSG_SET_HEADER_TEXT_ID, TABS_HEADER_STYLE, TAB_TEXTS[0]);
+    for (uint32_t text : TAB_TEXTS)
+        AddDescMessage(tabs, 0, CONTROL_MSG_ADD_TEXT_ID, TAB_STYLE, text);
+    if (inactive)
+        AddDescMessage(tabs, 0, CONTROL_MSG_DEACTIVATE, 0);
+    AddDescMessage(group->AddChild(DESC_TYPE_SCROLL_BAR, scrollBar), 0, CONTROL_MSG_SET_VALUE,
+                   BaseId() | STORE_FIRST_PAGE << 12);
+    for (int i = 0; i < MAX_ITEM_TYPES; ++i)
+        m_entries.push_back(0);
+    // (Their results not checked.)
+    for (const S_StorePage &page : STORE_PAGE_GROUPS)
+        BuildPage(group, model, C_fstr(page.name), page.group);
+    // (Quirk kept: the highlight is not checked.)
+    m_highlight = model->FindChildFrame(highlight, FIND_VISUALS);
+    m_highlight->LinkTo(nullptr, 1);
+    m_highlight->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
+}
+
 bool C_StoreList::BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group)
 {
+    return BuildPageOf(parent, model, name, group, false);
+}
+
+// (0x0067cb60, the slot's other function.)
+bool C_EquipmentStoreList::BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group)
+{
+    return BuildPageOf(parent, model, name, group, true);
+}
+
+bool C_StoreList::BuildPageOf(S_ControlDesc *parent, I3D_frame *model, const C_str &name, int group, bool equipment)
+{
+    const char *const highlightName = equipment ? EQUIPMENT_HIGHLIGHT : STORE_HIGHLIGHT;
     I3D_frame *dummy = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
     I3D_frame *anchor = model->FindChildFrame(STORE_ANCHOR, FIND_DUMMIES);
-    I3D_frame *highlight = model->FindChildFrame(STORE_HIGHLIGHT, FIND_VISUALS);
-    m_highlight = model->FindChildFrame(STORE_HIGHLIGHT, FIND_VISUALS);
+    I3D_frame *highlight = model->FindChildFrame(highlightName, FIND_VISUALS);
+    m_highlight = model->FindChildFrame(highlightName, FIND_VISUALS);
     m_template = model->FindChildFrame(STORE_TEMPLATE, FIND_VISUALS);
     // (The dummy is kept without the frames: leaked, as the original.)
     if (!m_template || !dummy || !highlight || !anchor)
@@ -99,13 +163,18 @@ bool C_StoreList::BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name,
     S_ControlDesc *page = parent->AddChild(DESC_TYPE_PAGE, name.c_str());
     AddDescMessage(page, 0, CONTROL_MSG_SET_VALUE, BaseId() | STORE_PAGES);
     AddDescMessage(page, 0, CONTROL_MSG_SET_VISIBLE, 4);
-    AddDescMessage(page, 0, CONTROL_MSG_SET_ACROSS_STEP, 0, FloatValue(PAGE_ACROSS_STEP));
+    if (equipment)
+        AddDescMessage(page, 0, CONTROL_MSG_SET_DOWN_STEP, 0, FloatValue(EQUIPMENT_PAGE_DOWN_STEP));
+    else
+        AddDescMessage(page, 0, CONTROL_MSG_SET_ACROSS_STEP, 0, FloatValue(PAGE_ACROSS_STEP));
     // The first entry's place: the template's (the page's control frees it).
     auto *origin = static_cast<S_vector4 *>(_aligned_malloc(sizeof(S_vector4), 16));
     if (origin)
         std::memcpy(origin, &m_template->GetPos(), sizeof(S_vector4));
     AddDescMessage(page, 0, CONTROL_MSG_SET_ORIGIN, 0, reinterpret_cast<uintptr_t>(origin));
-    AddDescMessage(page, 0, CONTROL_MSG_HIDE, 0);
+    // (The equipment screen's first page stays shown.)
+    if (!equipment || group != FIRST_GROUP)
+        AddDescMessage(page, 0, CONTROL_MSG_HIDE, 0);
     if (group == FIRST_GROUP)
         m_shownPage = page->id;
     // (The menus size the entries for every type.)
@@ -130,7 +199,7 @@ bool C_StoreList::BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name,
         const C_str frameName = C_fstr("frame_%d", type);
         visual->SetName(frameName.c_str());
         visual->LinkTo(dummy, 0);
-        S_ControlDesc *entry = page->AddChild(DESC_TYPE_ENTRY, frameName.c_str());
+        S_ControlDesc *entry = page->AddChild(equipment ? DESC_TYPE_EQUIPMENT_ENTRY : DESC_TYPE_ENTRY, frameName.c_str());
         AddDescMessage(entry, 0, CONTROL_MSG_SET_ITEM, static_cast<uint32_t>(type));
         AddDescMessage(entry, 0, CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(type));
         AddDescMessage(entry, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_ANY, reinterpret_cast<uintptr_t>(this),

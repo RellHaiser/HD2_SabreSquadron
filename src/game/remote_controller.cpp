@@ -72,7 +72,7 @@ void C_RemoteController::Update(int frameTime)
     const bool seated = InVehicleSeat(m_human->m_vehicle);
     // (In a vehicle the vehicle replicates the position.)
     const S_vector4 pos = seated ? m_human->GetPosition4() : property->GetTrack().GetCurrent();
-    const S_vector4 dir = property->GetDirTrack().GetValue();
+    const S_vector4 dir = property->GetDirTrack().GetCurrent();
     const S_vector4 velocity = property->GetTrack().GetRate();
     SetViewDir(dir);
     S_vector flat(dir.x, 0.0f, dir.z);
@@ -391,7 +391,7 @@ void C_RemoteController::OnMessage(C_BitStream *stream)
             g_gameProfile.m_humanStore->GetStats(skills, m_human->GetProfileIndex(),
                                                  g_netGame.GetPlayerStats(m_human->GetNetId())[5]);
             m_human->SetSkills(skills);
-            g_netGame.SetPlayerClass(message.soldierClass, m_human->GetNetId());
+            g_netGame.SetPlayerRank(message.soldierClass, m_human->GetNetId());
             break;
         }
         case CTRL_MSG_ANIMATION: {

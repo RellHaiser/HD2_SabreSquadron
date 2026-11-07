@@ -51,6 +51,8 @@ public:
                 void *context = nullptr);                               // vtable +0x08
     // Releases every cached object.
     void Clear();                                                       // vtable +0x10
+    // Forgets what it has without releasing it, the spare released (what the game's shutdown does: the driver's Close comes next; 0x006dc770).
+    void Forget();
 
     void SetMaxEntries(uint32_t count) { m_maxEntries = count; }        // vtable +0x00
     int NumEntries() const { return static_cast<int>(m_entries.size()); }   // vtable +0x34

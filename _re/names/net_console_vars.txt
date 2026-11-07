@@ -1,0 +1,8 @@
+# Part 10e-ii: the game's console commands (net/net_console_vars.cpp).
+00720d10 ShowConsoleVariable | int __fastcall ShowConsoleVariable(int index)
+00720e50 SetConsoleVariable | int __fastcall SetConsoleVariable(int index, int value)
+00721f50 ConsoleRangeStart | void __fastcall ConsoleRangeStart(char * range)
+00721f60 ConsoleValueInRange | bool __fastcall ConsoleValueInRange(int number, char * range, bool * in)
+00722010 ConsoleRangeRead | void __fastcall ConsoleRangeRead(int * token)
+00722190 ConsoleRangeTerm | bool __fastcall ConsoleRangeTerm(int number, bool * in)
+00722250 ConsoleRangePrimary | bool __fastcall ConsoleRangePrimary(int number, bool * in)

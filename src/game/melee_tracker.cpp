@@ -909,7 +909,7 @@ void C_MeleeTracker::SetupFrame()                       // 0x005d4db0
     // The head look's joint override, put on the model.
     I3D_driver *driver = I3DGetDriver();
     m_headOverrides = driver->CreateJointOverrideSet();
-    m_headOverrides->Add(driver->CreateJointOverride(HEAD_BONE_NAME));
+    m_headOverrides->Add(driver->CreateJointOverride(), HEAD_BONE_NAME);
     static_cast<I3D_model *>(frame)->SetJointOverrides(m_headOverrides);
     m_headFrame = frame->FindChildFrame(HEAD_BONE_NAME, FRAME_MASK_ANY);
 

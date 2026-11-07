@@ -520,7 +520,7 @@ int C_HeavyFireSupport::RequestAirAttack(const S_AirAttackRequest &request)   //
     msg->WriteBits(static_cast<uint32_t>(request.kind), 32);
     msg->WriteBits(static_cast<uint32_t>(request.planes), 32);
     msg->WriteBits(CallerId(request.caller), 32);
-    g_netGame.SendMessage(msg);
+    g_netGame.SendNetMessage(msg);
     return REQUEST_SENT;
 }
 
@@ -541,7 +541,7 @@ int C_HeavyFireSupport::RequestArtillery(const S_ArtilleryRequest &request)   //
     msg->WriteBits(FloatBits(target.y), 32);
     msg->WriteBits(FloatBits(target.z), 32);
     msg->WriteBits(CallerId(request.caller), 32);
-    g_netGame.SendMessage(msg);
+    g_netGame.SendNetMessage(msg);
     return REQUEST_NOT_SERVER;
 }
 

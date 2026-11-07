@@ -11,28 +11,4 @@ uint32_t FUN_00796730(...)
 }
 
 
-// 0x00796740
-uint32_t FUN_00796740(...)
-{
-  FUN_007e35d3();
-  return 0;
-}
-
-
-// 0x00796750
-uint32_t FUN_00796750(...)
-{
-  atexit(FUN_00796760);
-  return 0;
-}
-
-
-// 0x00796760
-uint32_t FUN_00796760(...)
-{
-  FUN_007e3754();
-  return 0;
-}
-
-
 } // namespace tier1

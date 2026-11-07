@@ -89,9 +89,11 @@ public:
     bool Save(C_chunk &chunk) override;                 // 0x006bcc30
 
     const char *GetFileName() const { return m_fileName; }
+    bool IsBriefing() const { return m_briefing; }
 
 private:
     friend class C_Campaign;
+    friend class C_MovieState;                          // (Play's node)
 
     C_str m_fileName;                                   // +0x10 e.g. "BriefArctic1a.bik"
     C_str m_title;                                      // +0x14 "Briefing Arktida 1A"
@@ -104,9 +106,10 @@ struct S_CampaignItem {
     int itemId;
     int count;
     int ammo;                                           // -1: the default
-    // Set on about a third of the shipped entries; an item listed twice has it on the
-    // larger count (item 2: 5 and 25). Meaning not identified.
-    bool unknownC;
+    // The count is of the item's ammunition (the equipment screen's stock gets the rounds;
+    // about a third of the shipped entries: an item listed twice has it on the larger count,
+    // item 2: 5 and 25).
+    bool ammunition;
 };
 
 // A menu screen between the steps (vtable 0x00815b38, type 6; 0x38 bytes).
@@ -338,7 +341,7 @@ public:
     // call in; an axis caller gets the second, inferred to be the other side's planes).
     int GetAircraftAttackAxis() const { return m_aircraftAttackAxis; }
     int GetAircraftAttackAllied() const { return m_aircraftAttackAllied; }
-    // The map's value 4 (not in the shipped mpmaplist: 0): 1 makes the occupation zones be
+    // The map's mode="FRONTLINE" (C_MpMap::frontline; none in the shipped mpmaplist): 1 makes the occupation zones be
     // taken in their numbers' order.
     int GetUnknown60() const { return m_unknown60; }
     // The briefing's text id of a cooperative map (the loading screen's "briefing").

@@ -1,0 +1,12 @@
+# Part 13b: the dialogue subtitles (src/game/quick_messages.cpp), and small functions the link asked for (src/game/globals.cpp, app.cpp).
+0048ee50 QuickMessages_ShowSubtitles
+0048efc0 QuickDialog_Free
+0048f080 QuickMessages_SetSubtitle
+0048f180 QuickMessages_ShowDubbing
+0048f390 QuickMessages_Render
+0048f420 QuickMessages_LoadDialog
+0048f7d0 QuickMessages_LoadDialogs
+00490040 QuickMessages_RestoreDialog
+004900e0 QuickMessages_GetText
+006e8860 RenderDebugStats
+006e8900 LoadDebugFont

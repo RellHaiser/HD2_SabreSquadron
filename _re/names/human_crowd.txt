@@ -1,0 +1,26 @@
+# Part 12a: the humans keeping out of each other's way (src/game/human_crowd.*), the AI memory's save and load.
+00563f90 HumanCrowd_Constructor
+005640a0 HumanCrowd_Destructor
+005641b0 HumanAIMemory_SaveGame
+005643e0 HumanAIMemory_LoadGame
+005647c0 HumanCrowd_Tick
+00564ef0 HumanCrowd_StepAlone
+005653c0 HumanAIMemory_AdvanceWaypoint
+00565540 HumanCrowd_AddPush
+005656e0 HumanCrowd_Prepare
+00565f30 HumanAIMemory_MoveOneStep
+00566130 HumanAIMemory_PushFromHuman
+00566e50 HumanAIMemory_PushTargetFromHuman
+00567ab0 HumanAIMemory_PushOntoNetwork
+00567ba0 HumanAIMemory_HoldOnNetwork
+00567c80 HumanAIMemory_TurnPushAside
+00567df0 HumanCrowd_KeepInsideStrip
+00568190 HumanCrowd_KeepOnNetwork
+00568580 HumanCrowd_PushFromCar
+00568dc0 HumanCrowd_PushTargetFromCar
+00569530 HumanAIMemory_UpdateStuckTimer
+00569890 HumanCrowd_FindPointNear
+0056a0f0 HumanCrowd_Replan
+0056a8e0 HumanCrowd_ExpandNode
+0056be90 HumanCrowd_IsPointBlocked
+0056c230 HumanCrowd_FindBlocker

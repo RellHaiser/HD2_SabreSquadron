@@ -100,5 +100,3 @@
 # --- what they call that is not ported yet
 00465ea0 C_CameraModule::SetViewDir | void __thiscall SetViewDir(C_CameraModule *this, S_vector4 *dir)
 00465080 C_CameraModule::HasScriptedView | bool __thiscall HasScriptedView(C_CameraModule *this)
-0072f890 C_NetGame::GetPlayerStats | int * __thiscall GetPlayerStats(void *this, int slot)
-0072fe90 C_NetGame::SetPlayerClass | void __thiscall SetPlayerClass(void *this, int soldierClass, int slot)

@@ -8,7 +8,7 @@ lines are not checked (check_text.py's). Prints "N models, M with differences" (
 import re
 import sys
 
-CHECKS = "slCount slPage slTab slItem slUpdate slAll slStock slAddTake slClear slBuild slBuildNone".split()
+CHECKS = "slCount slPage slTab slItem slUpdate slAll slStock slAddTake slClear slBuild slBuildNone slDesc".split()
 
 
 def main():

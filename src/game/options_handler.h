@@ -36,6 +36,8 @@ public:
     // controls, the version's text. False (nothing described) without the group's frame or one of
     // the buttons' frames.
     bool BuildScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x0061cfc0
+    // The controls filled again the next time the screen opens (the main menu's profile picked).
+    void RequestFill() { m_fillOnOpen = true; }
     // The screen shown: the player's name (none: its text) on the screen's third control.
     static bool OnShown(void *handler, void *argument, C_Control *control, uint32_t notification,
                         uint32_t value);                // 0x00620530 (__thiscall)

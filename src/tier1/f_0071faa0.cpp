@@ -14,34 +14,4 @@ uint32_t FUN_0071faa0(...)
 }
 
 
-// 0x0071fad0
-uint32_t FUN_0071fad0(uint32_t *param_1,uint32_t *param_2,uint32_t param_3,uint32_t param_4, ...)
-{
-  uint8_t *puVar1;
-  puVar1 = PTR_00844230;
-  if (DAT_0097b9a8 < 15000) {
-    DAT_0097b9a8++;
-    *(uint32_t *)PTR_00844230 = *param_1;
-    *(uint32_t *)(puVar1 + 4) = param_1[1];
-    *(uint32_t *)(puVar1 + 8) = param_1[2];
-    *(uint32_t *)(puVar1 + 0xc) = param_1[3];
-    *(uint32_t *)(PTR_00844230 + 0xc) = param_3 | 0xff000000;
-    puVar1 = PTR_00844230;
-    PTR_00844230 += 0x18;
-    *(uint32_t *)PTR_00844230 = *param_2;
-    *(uint32_t *)(puVar1 + 0x1c) = param_2[1];
-    *(uint32_t *)(puVar1 + 0x20) = param_2[2];
-    *(uint32_t *)(puVar1 + 0x24) = param_2[3];
-    if (param_4 != 0) {
-      *(uint32_t *)(PTR_00844230 + 0xc) = param_4 | 0xff000000;
-      PTR_00844230 += 0x18;
-      return 0;
-    }
-    *(uint32_t *)(PTR_00844230 + 0xc) = param_3 | 0xff000000;
-    PTR_00844230 += 0x18;
-  }
-  return 0;
-}
-
-
 } // namespace tier1

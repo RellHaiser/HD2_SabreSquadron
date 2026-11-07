@@ -32,7 +32,8 @@ struct S_RankName {
     C_str name2;                                        // +0x0C
 };
 extern S_RankName g_rankNames[8];                       // 0x008ae960 (static init 0x0069f9b0)
-// 24 text ids (0x2774..0x278B) a menu uses (0x00690020; meaning not identified).
+// The medals' names and descriptions (two text ids each, 0x2774..0x278B; the debriefing's ShowMedals
+// 0x00690020).
 extern int g_rosterTexts[24];                           // 0x008ae900 (static init 0x0069fb00)
 
 // The soldiers the campaign knows (tables\HumanStore.def; C_GameProfile +0x10; 0x10 bytes).
@@ -73,25 +74,6 @@ private:
 
 // ---------------------------------------------------------------------------
 // The mission squad (profile_squad.cpp, 0x006a1f80..0x006a5a50)
-
-// What a squad soldier carries (S_SquadSoldier +0x8C; 0x20 bytes, saved as they are).
-struct S_SoldierLoad {
-    int capacity = 0;                                   // +0x00 (+0x8C) the weight the soldier can carry (strength)
-    float weight = 0.0f;                                // +0x04 (+0x90) everything carried
-    float backpackMaxWeight = 0.0f;                     // +0x08 (+0x94) the backpack's container
-    int backpackMaxVolume = 0;                          // +0x0C (+0x98)
-    float backpackWeight = 0.0f;                        // +0x10 (+0x9C) its contents
-    int backpackVolume = 0;                             // +0x14 (+0xA0)
-    float beltWeight = 0.0f;                            // +0x18 (+0xA4)
-    int beltVolume = 0;                                 // +0x1C (+0xA8) at most 12
-
-    // Fractions of the limits (absolute values): the belt's volume of 12, the backpack's volume,
-    // the weight carried.
-    float GetBeltFill() const;                          // 0x006a25e0
-    float GetBackpackFill() const;                      // 0x006a25f0
-    float GetWeightFill() const;                        // 0x006a2600
-};
-static_assert(sizeof(S_SoldierLoad) == 0x20, "saved as is");
 
 // The slots S_SquadSoldier::PutItem / RemoveItem / CountItems take (bits).
 enum : uint8_t {
@@ -142,8 +124,10 @@ struct S_SquadSoldier : S_SoldierState {
     bool SaveGame(C_chunk &chunk);                      // 0x006a49a0
     bool LoadGame(C_chunk &chunk);                      // 0x006a4c10
 
-    S_SoldierLoad load;                                 // +0x8C
+    // (+0x8C: the load, S_SoldierState's.)
 };
+// S_SquadSoldier::SplitStacks for any soldier state (the network's: a joining or respawning player's).
+void SplitSoldierStacks(S_SoldierState &state);
 
 // A soldier's records outside the soldier structures (__fastcall helpers of the original).
 void ClearSoldierItems(S_SquadSoldier *soldier);        // 0x006a2a90
@@ -414,6 +398,9 @@ public:
     // Chunk 1000 with the diary (chunk 0x15B3).
     bool SaveGame(C_chunk &chunk);                      // 0x006b4570
     bool LoadGame(C_chunk &chunk);                      // 0x006b4720
+    // A play mode's save slot (SAVE_SLOT_*): its mission (-1: none) and file (the main menu's missions screen).
+    int GetSaveSlotMission(int slot) const { return m_saveSlots[slot].mission; }
+    const C_str &GetSaveSlotFile(int slot) const { return m_saveSlots[slot].file; }
 
 private:
     struct S_SaveSlotInfo {
@@ -455,6 +442,13 @@ extern std::map<std::string, std::string> g_profileDirectories;   // 0x008ae9e8 
 int CreateProfile(const char *name);                    // 0x006ae8e0
 // The directory of a name, null if none.
 const char *FindProfileDirectory(const char *name);     // 0x006aefe0
+// The profile `name` deleted (its directory, read-only files too; its name forgotten). True when the directory
+// was removed (an empty name: whether PlayersProfiles itself was). (Not ported yet.)
+// A profile's directory deleted with what it holds, its name forgotten (no name: every profile's contents deleted;
+// part 9i-v). False when it was not emptied or (unicode font) is not known.
+bool DeleteProfile(const char *name);                   // 0x006aef40 (__stdcall)
+// A profile name's directory forgotten (none: false).
+bool ForgetProfileName(const char *name);               // 0x006af0f0 (__fastcall)
 // Finds the profiles in PlayersProfiles (the name map anew) and calls `callback` with each
 // directory name (__fastcall in the original).
 void ScanProfiles(void (*callback)(const char *name, int context), int context);   // 0x006af200

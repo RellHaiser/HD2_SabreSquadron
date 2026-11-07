@@ -1,0 +1,54 @@
+# The campaign's equipment screen C_EquipmentMenu (src/game/equipment_screen.cpp; vtable 0x00815db0).
+# Part 9f-i: the class, starting and stopping, the item slots, the stats, the pickers.
+006c1e20 C_EquipmentMenu::GetTypeId | int __thiscall GetTypeId(C_EquipmentMenu *this)
+006739d0 C_EquipmentMenu::OnStart | bool __thiscall OnStart(C_EquipmentMenu *this, void * arg)
+00673b80 C_EquipmentMenu::OnStop | void __thiscall OnStop(C_EquipmentMenu *this)
+006731d0 C_EquipmentMenu::OnItemNotify13 | bool __thiscall OnItemNotify13(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00673450 C_EquipmentMenu::OnItemNotify0A | bool __thiscall OnItemNotify0A(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+006735f0 C_EquipmentMenu::OnItemNotify08 | bool __thiscall OnItemNotify08(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00673690 C_EquipmentMenu::OnItemNotify09 | bool __thiscall OnItemNotify09(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00673080 C_EquipmentMenu::OnItemHover | bool __thiscall OnItemHover(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+006755f0 C_EquipmentMenu::OnStatsToggle | bool __thiscall OnStatsToggle(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+006773a0 C_EquipmentMenu::OnSelectionPicked | bool __thiscall OnSelectionPicked(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00677490 C_EquipmentMenu::OnSoldierPicked | bool __thiscall OnSoldierPicked(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+006771e0 C_EquipmentMenu::DropItem | bool __thiscall DropItem(C_EquipmentMenu *this, void * control, uint target)
+00674d60 C_EquipmentMenu::ShowSoldierStats | void __thiscall ShowSoldierStats(C_EquipmentMenu *this)
+00675c00 C_EquipmentMenu::SetupStore | void __fastcall SetupStore(C_EquipmentMenu * menu)
+00673730 C_EquipmentMenu::TakeSquadItems | void __fastcall TakeSquadItems(C_EquipmentMenu * menu)
+00677880 C_EquipmentMenu::CallStatsToggle
+00677890 C_EquipmentMenu::CallSelectionPicked
+# Part 9f-ii: the messages, the checks before the mission.
+006740d0 C_EquipmentMenu::OnMessage | void __thiscall OnMessage(C_EquipmentMenu *this, void * message)
+00678dc0 C_EquipmentMenu::HasRequiredItems | bool __thiscall HasRequiredItems(C_EquipmentMenu *this)
+00674060 C_EquipmentMenu::IsSquadWithinWeight | bool __stdcall IsSquadWithinWeight(void)
+006746f0 C_EquipmentMenu::IsSquadArmed | bool __stdcall IsSquadArmed(void)
+00679360 C_EquipmentMenu::CountCarried | int __cdecl CountCarried(void * item, int soldier)
+00673e40 C_EquipmentMenu::ProtectionStripItems
+0067e620 C_MissionItems::GetMissionRecord | void * __thiscall GetMissionRecord(void * this, int mission)
+00840d5c g_requiredCarrier @ int
+008ae61a g_equipmentStatsShown @ bool
+# Part 9f-iii: the screens' descriptions.
+00675c80 C_EquipmentMenu::BuildScreens | bool __thiscall BuildScreens(C_EquipmentMenu *this)
+00673c30 C_EquipmentMenu::LoadRoster | void __stdcall LoadRoster(void)
+00673ca0 C_EquipmentMenu::EnsureSquad | void __stdcall EnsureSquad(void)
+00674860 C_EquipmentMenu::BuildEquipmentPanel | bool __thiscall BuildEquipmentPanel(C_EquipmentMenu *this, void * desc, void * model)
+006766b0 C_EquipmentMenu::BuildSquadList | bool __thiscall BuildSquadList(C_EquipmentMenu *this, void * desc, void * model)
+00677010 C_EquipmentMenu::BuildStore | bool __thiscall BuildStore(C_EquipmentMenu *this, void * desc, void * model)
+006764a0 C_EquipmentMenu::BuildStatsPanel | bool __stdcall BuildStatsPanel(void * desc, void * model)
+006758f0 C_EquipmentMenu::BuildItemsScreen | bool __thiscall BuildItemsScreen(C_EquipmentMenu *this, void * desc, void * model)
+00676230 C_EquipmentMenu::BuildSelectionScreen | bool __thiscall BuildSelectionScreen(C_EquipmentMenu *this, void * desc, void * model)
+0067c570 C_StoreList::BuildEquipmentDescription | void __thiscall BuildEquipmentDescription(void * this, void * desc, void * model)
+00678000 C_EquipmentMenu::AutoEquip | bool __thiscall AutoEquip(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+# Part 9f-iv: the soldier type picked.
+00678fe0 C_EquipmentMenu::OnItemNotify60 | bool __thiscall OnItemNotify60(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00677920 C_EquipmentMenu::PutStoreItem | bool __thiscall PutStoreItem(C_EquipmentMenu *this, uint slot, int type, int count, bool fill)
+006779f0 C_EquipmentMenu::DropStoreItem | bool __thiscall DropStoreItem(C_EquipmentMenu *this, int type, int count, bool fill)
+00679790 C_EquipmentMenu::ReturnUnrequired | void __thiscall ReturnUnrequired(C_EquipmentMenu *this, int soldier, bool withHead)
+00679b50 C_EquipmentMenu::FindSubstitute | bool __thiscall FindSubstitute(C_EquipmentMenu *this, int * type, int ammo, bool axisOnly)
+00679e80 C_EquipmentMenu::MatchPreset | void * __thiscall MatchPreset(C_EquipmentMenu *this, void * preset, bool axisOnly)
+0067e410 S_MissionItems::GetRequiredCount | int __thiscall GetRequiredCount(void * this, int type)
+# Part 9f-v: the automatic equipping.
+006785b0 C_EquipmentMenu::DistributeRequired | void __thiscall DistributeRequired(C_EquipmentMenu *this)
+00679670 C_EquipmentMenu::CountOwn | int __stdcall CountOwn(int type, int soldier)
+00677aa0 C_EquipmentMenu::Replenish | void __thiscall Replenish(C_EquipmentMenu *this, int soldier, int round, int extra)
+0067a3f0 C_EquipmentMenu::AssignSlots | void __thiscall AssignSlots(C_EquipmentMenu *this, void * record, int * assigned, int count)

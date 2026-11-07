@@ -1,0 +1,29 @@
+# Part 9i-ii: the multiplayer session's settings (S_MultiplayerSettings' methods, src/game/mp_settings.cpp) and the texts' ids.
+006acc10 S_MultiplayerSettings::ApplySetupRules | void __fastcall ApplySetupRules(void *this)
+006acc50 S_MultiplayerSettings::MakeSetup | void __fastcall MakeSetup(void *this)
+006acd30 S_MultiplayerSettings::DeleteSetup | void __fastcall DeleteSetup(void *this)
+006acd60 S_MultiplayerSettings::RemoveMap | bool __thiscall RemoveMap(void *this, char * name)
+006ace20 S_MultiplayerSettings::AddMap | bool __thiscall AddMap(void *this, char * name)
+006ad560 S_MultiplayerSettings::Clear | void __fastcall Clear(void *this)
+# Part 9i-iii: the session and its map sent to the clients.
+006ad990 S_MultiplayerSettings::WriteRules | void __thiscall WriteRules(void *this, void * stream)
+006ada30 S_MultiplayerSettings::ReadRules | void __thiscall ReadRules(void *this, void * stream)
+006ad840 S_MultiplayerSettings::WriteCurrentMap | void __thiscall WriteCurrentMap(void *this, void * stream)
+006ad860 S_MultiplayerSettings::ReadCurrentMap | void __thiscall ReadCurrentMap(void *this, void * stream)
+006adad0 C_MpMap::Write | void __thiscall Write(void *this, void * stream)
+006adc40 C_MpMap::Read | void __thiscall Read(void *this, void * stream)
+006ade20 S_MpMapObjective::Write | void __thiscall Write(void *this, void * stream)
+006ade80 S_MpMapObjective::Read | void __thiscall Read(void *this, void * stream)
+006adee0 S_MpMapItem::Write | void __thiscall Write(void *this, void * stream)
+006adf20 S_MpMapItem::Read | void __thiscall Read(void *this, void * stream)
+009820d8 g_netMaxFreq @ int
+009820d4 g_netMaxPing @ int
+009820dc g_netMaxInactivity @ int
+006ad200 S_MultiplayerSettings::WriteDescription | void __thiscall WriteDescription(void *this, char * fileName)
+# Part 9i-v: the profile deletion (common/os_files.cpp, game/player_profile.cpp).
+006e9170 DeleteDirectoryTree | bool __fastcall DeleteDirectoryTree(char * path)
+006edc80 GetCurrentDir | char * __fastcall GetCurrentDir(char * buffer, int size)
+006edca0 RemoveDir | bool __fastcall RemoveDir(char * path)
+006edcb0 DeleteFileAt | bool __fastcall DeleteFileAt(char * path)
+006edcc0 SetAttributes | bool __fastcall SetAttributes(char * path, uint attributes)
+006af0f0 ForgetProfileName | bool __fastcall ForgetProfileName(char * name)

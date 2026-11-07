@@ -68,9 +68,9 @@
 006c2160 C_OperationEndMenu::GetTypeId
 006c2170 C_OperationEndMenu::DeletingDestructor
 006c2190 C_OperationEndMenu::~C_OperationEndMenu
-006c22a0 C_Kind0Menu::GetTypeId
-006c22b0 C_Kind0Menu::DeletingDestructor
-006c22d0 C_Kind0Menu::~C_Kind0Menu
+006c22a0 C_HeroStatsMenu::GetTypeId
+006c22b0 C_HeroStatsMenu::DeletingDestructor
+006c22d0 C_HeroStatsMenu::~C_HeroStatsMenu
 006c31f0 C_SessionMenu::GetTypeId
 006c3200 C_SessionMenu::DeletingDestructor
 006c3220 C_SessionMenu::~C_SessionMenu

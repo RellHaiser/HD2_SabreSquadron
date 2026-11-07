@@ -54,10 +54,10 @@ public:
 };
 
 // A message popped from the human's net object that was not queued again: deleted unless the
-// object still holds it (C_NetObjectMessage::unknown24 1 or more).
+// object still holds it (C_NetObjectMessage::refCount 1 or more).
 inline void ReleaseNetMessage(C_NetObjectMessage *message)
 {
-    if (message->unknown24 < 1)
+    if (message->refCount < 1)
         delete message;
 }
 

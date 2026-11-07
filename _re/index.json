@@ -169535,10 +169535,10 @@
 "in_vtables": []
 },
 "00616c50": {
-"name": "FUN_00616c50",
+"name": "S_ServerFilter::Reset",
 "size": 43,
 "lines": 18,
-"chars": 501,
+"chars": 549,
 "callers": [
 "0061a730"
 ],
@@ -169550,10 +169550,10 @@
 "in_vtables": []
 },
 "00616c80": {
-"name": "FUN_00616c80",
+"name": "S_ServerFilter::Save",
 "size": 656,
 "lines": 100,
-"chars": 3968,
+"chars": 4227,
 "callers": [
 "0061abe0"
 ],
@@ -169572,10 +169572,10 @@
 "in_vtables": []
 },
 "00616f10": {
-"name": "FUN_00616f10",
+"name": "S_ServerFilter::Load",
 "size": 977,
 "lines": 191,
-"chars": 8072,
+"chars": 8153,
 "callers": [
 "0061a830"
 ],
@@ -169592,10 +169592,10 @@
 "in_vtables": []
 },
 "006172f0": {
-"name": "FUN_006172f0",
+"name": "S_MpRotation::Save",
 "size": 791,
-"lines": 157,
-"chars": 5782,
+"lines": 156,
+"chars": 5839,
 "callers": [
 "00617df0"
 ],
@@ -169616,10 +169616,10 @@
 "in_vtables": []
 },
 "00617610": {
-"name": "FUN_00617610",
+"name": "S_MpRotation::Load",
 "size": 1218,
-"lines": 173,
-"chars": 6971,
+"lines": 174,
+"chars": 6957,
 "callers": [
 "00618130"
 ],
@@ -169645,10 +169645,10 @@
 "in_vtables": []
 },
 "00617b00": {
-"name": "FUN_00617b00",
+"name": "S_MpRotation::Clear",
 "size": 121,
 "lines": 16,
-"chars": 570,
+"chars": 628,
 "callers": [
 "00617610",
 "00617b80",
@@ -169662,10 +169662,10 @@
 "in_vtables": []
 },
 "00617b80": {
-"name": "FUN_00617b80",
+"name": "C_MpGameSetup::Clear",
 "size": 317,
-"lines": 75,
-"chars": 2354,
+"lines": 74,
+"chars": 2465,
 "callers": [
 "006189f0",
 "0061af70",
@@ -169688,10 +169688,10 @@
 "in_vtables": []
 },
 "00617cc0": {
-"name": "FUN_00617cc0",
+"name": "C_MpGameSetup::FindMap",
 "size": 134,
 "lines": 46,
-"chars": 984,
+"chars": 989,
 "callers": [
 "00617610"
 ],
@@ -169765,10 +169765,10 @@
 "in_vtables": []
 },
 "00617df0": {
-"name": "FUN_00617df0",
+"name": "C_MpGameSetup::Save",
 "size": 824,
-"lines": 124,
-"chars": 4561,
+"lines": 126,
+"chars": 4831,
 "callers": [
 "0061abe0"
 ],
@@ -169791,10 +169791,10 @@
 "in_vtables": []
 },
 "00618130": {
-"name": "FUN_00618130",
+"name": "C_MpGameSetup::Load",
 "size": 1387,
-"lines": 241,
-"chars": 8527,
+"lines": 245,
+"chars": 8701,
 "callers": [
 "0061a830"
 ],
@@ -169814,10 +169814,10 @@
 "in_vtables": []
 },
 "006186e0": {
-"name": "FUN_006186e0",
+"name": "C_MpGameSetup::LoadItems",
 "size": 706,
 "lines": 107,
-"chars": 3272,
+"chars": 3276,
 "callers": [
 "006189f0"
 ],
@@ -169846,10 +169846,10 @@
 "in_vtables": []
 },
 "006189f0": {
-"name": "FUN_006189f0",
+"name": "C_MpGameSetup::LoadMapList",
 "size": 3353,
-"lines": 673,
-"chars": 25375,
+"lines": 676,
+"chars": 25525,
 "callers": [
 "0061a730",
 "006acc50"
@@ -170155,10 +170155,10 @@
 "in_vtables": []
 },
 "0061a730": {
-"name": "FUN_0061a730",
+"name": "C_MpMenuSettings::Reset",
 "size": 23,
 "lines": 9,
-"chars": 165,
+"chars": 202,
 "callers": [
 "0061a830",
 "006264c0"
@@ -170174,10 +170174,10 @@
 "in_vtables": []
 },
 "0061a750": {
-"name": "FUN_0061a750",
+"name": "C_MpMenuSettings::Load",
 "size": 101,
-"lines": 25,
-"chars": 632,
+"lines": 26,
+"chars": 676,
 "callers": [
 "0062c2a0",
 "00633490"
@@ -170196,10 +170196,10 @@
 "in_vtables": []
 },
 "0061a7c0": {
-"name": "FUN_0061a7c0",
+"name": "C_MpMenuSettings::Save",
 "size": 101,
-"lines": 25,
-"chars": 632,
+"lines": 26,
+"chars": 676,
 "callers": [
 "0062c290",
 "00633490",
@@ -170219,10 +170219,10 @@
 "in_vtables": []
 },
 "0061a830": {
-"name": "FUN_0061a830",
+"name": "C_MpMenuSettings::LoadFile",
 "size": 931,
-"lines": 146,
-"chars": 4893,
+"lines": 145,
+"chars": 4897,
 "callers": [
 "0061a750"
 ],
@@ -170253,10 +170253,10 @@
 "in_vtables": []
 },
 "0061abe0": {
-"name": "FUN_0061abe0",
+"name": "C_MpMenuSettings::SaveFile",
 "size": 911,
-"lines": 136,
-"chars": 4618,
+"lines": 135,
+"chars": 4614,
 "callers": [
 "0061a7c0"
 ],
@@ -170283,10 +170283,10 @@
 "in_vtables": []
 },
 "0061af70": {
-"name": "FUN_0061af70",
+"name": "C_MpMenuSettings::ClearAll",
 "size": 80,
 "lines": 20,
-"chars": 492,
+"chars": 569,
 "callers": [
 "006269b0"
 ],
@@ -170301,10 +170301,10 @@
 "in_vtables": []
 },
 "0061afc0": {
-"name": "FUN_0061afc0",
+"name": "C_MpMenuSettings::IsInSecondList",
 "size": 54,
-"lines": 25,
-"chars": 580,
+"lines": 23,
+"chars": 515,
 "callers": [
 "00636400"
 ],
@@ -170316,10 +170316,10 @@
 "in_vtables": []
 },
 "0061b000": {
-"name": "FUN_0061b000",
+"name": "C_MpMenuSettings::IsInFirstList",
 "size": 54,
-"lines": 25,
-"chars": 579,
+"lines": 23,
+"chars": 513,
 "callers": [
 "00635710",
 "00636400"
@@ -170332,10 +170332,10 @@
 "in_vtables": []
 },
 "0061b040": {
-"name": "FUN_0061b040",
+"name": "C_MpMenuSettings::CountServers",
 "size": 74,
 "lines": 29,
-"chars": 710,
+"chars": 785,
 "callers": [
 "006364b0"
 ],
@@ -170347,10 +170347,10 @@
 "in_vtables": []
 },
 "0061b090": {
-"name": "FUN_0061b090",
+"name": "C_MpMenuSettings::SetListKind",
 "size": 20,
 "lines": 10,
-"chars": 163,
+"chars": 168,
 "callers": [
 "00634b30"
 ],
@@ -170362,10 +170362,10 @@
 "in_vtables": []
 },
 "0061b0b0": {
-"name": "FUN_0061b0b0",
+"name": "C_MpMenuSettings::ClearServers",
 "size": 73,
 "lines": 19,
-"chars": 459,
+"chars": 516,
 "callers": [
 "00635360"
 ],
@@ -170379,10 +170379,10 @@
 "in_vtables": []
 },
 "0061b100": {
-"name": "FUN_0061b100",
+"name": "C_MpMenuSettings::GetList",
 "size": 30,
 "lines": 15,
-"chars": 270,
+"chars": 297,
 "callers": [
 "00633490",
 "00634950",
@@ -170569,10 +170569,10 @@
 "in_vtables": []
 },
 "0061b470": {
-"name": "FUN_0061b470",
+"name": "~C_MpMap",
 "size": 117,
 "lines": 30,
-"chars": 931,
+"chars": 945,
 "callers": [
 "00617b80",
 "006acd60",
@@ -171113,10 +171113,10 @@
 "in_vtables": []
 },
 "0061bf00": {
-"name": "FUN_0061bf00",
+"name": "C_OptionsHandler::HandleMessage",
 "size": 4034,
-"lines": 559,
-"chars": 19221,
+"lines": 551,
+"chars": 18889,
 "callers": [
 "00626ca0",
 "0067f850"
@@ -171164,10 +171164,10 @@
 "in_vtables": []
 },
 "0061cfa0": {
-"name": "FUN_0061cfa0",
+"name": "C_OptionsHandler::~C_OptionsHandler",
 "size": 22,
 "lines": 11,
-"chars": 187,
+"chars": 227,
 "callers": [
 "00626ad0",
 "0067f760"
@@ -171182,10 +171182,10 @@
 "in_vtables": []
 },
 "0061cfc0": {
-"name": "FUN_0061cfc0",
+"name": "C_OptionsHandler::BuildScreen",
 "size": 2726,
-"lines": 358,
-"chars": 13567,
+"lines": 373,
+"chars": 13559,
 "callers": [
 "006271e0",
 "0067fe00"
@@ -171236,10 +171236,10 @@
 "in_vtables": []
 },
 "0061da70": {
-"name": "FUN_0061da70",
+"name": "AddChild",
 "size": 417,
 "lines": 90,
-"chars": 2705,
+"chars": 2676,
 "callers": [
 "0061cfc0",
 "0061dc20",
@@ -171273,10 +171273,10 @@
 "in_vtables": []
 },
 "0061dc20": {
-"name": "FUN_0061dc20",
+"name": "C_OptionsHandler::BuildVideoPage",
 "size": 1239,
-"lines": 95,
-"chars": 4654,
+"lines": 94,
+"chars": 4702,
 "callers": [
 "0061cfc0"
 ],
@@ -171365,10 +171365,10 @@
 "in_vtables": []
 },
 "0061e1a0": {
-"name": "FUN_0061e1a0",
+"name": "C_OptionsHandler::BuildSoundPage",
 "size": 590,
-"lines": 39,
-"chars": 1996,
+"lines": 38,
+"chars": 1998,
 "callers": [
 "0061cfc0"
 ],
@@ -171397,10 +171397,10 @@
 "in_vtables": []
 },
 "0061e3f0": {
-"name": "FUN_0061e3f0",
+"name": "C_OptionsHandler::BuildControlsPage",
 "size": 3648,
-"lines": 474,
-"chars": 17938,
+"lines": 476,
+"chars": 17788,
 "callers": [
 "0061cfc0"
 ],
@@ -171460,10 +171460,10 @@
 "in_vtables": []
 },
 "0061f230": {
-"name": "FUN_0061f230",
+"name": "C_OptionsHandler::BuildGamePage",
 "size": 380,
-"lines": 34,
-"chars": 1442,
+"lines": 30,
+"chars": 1372,
 "callers": [
 "0061cfc0"
 ],
@@ -171489,10 +171489,10 @@
 "in_vtables": []
 },
 "0061f3b0": {
-"name": "FUN_0061f3b0",
+"name": "C_OptionsHandler::BuildMultiplayerPage",
 "size": 580,
-"lines": 39,
-"chars": 2000,
+"lines": 38,
+"chars": 2030,
 "callers": [
 "0061cfc0"
 ],
@@ -171522,10 +171522,10 @@
 "in_vtables": []
 },
 "0061f600": {
-"name": "FUN_0061f600",
+"name": "C_OptionsHandler::BuildKeyGroup",
 "size": 1711,
-"lines": 293,
-"chars": 10452,
+"lines": 292,
+"chars": 10306,
 "callers": [
 "0061e3f0"
 ],
@@ -171567,10 +171567,10 @@
 "in_vtables": []
 },
 "0061fcb0": {
-"name": "FUN_0061fcb0",
+"name": "C_OptionsHandler::OnKeyLayout",
 "size": 79,
 "lines": 24,
-"chars": 541,
+"chars": 581,
 "callers": [
 "0061e3f0"
 ],
@@ -171589,10 +171589,10 @@
 "in_vtables": []
 },
 "0061fd00": {
-"name": "FUN_0061fd00",
+"name": "C_OptionsHandler::OnDetail",
 "size": 1502,
-"lines": 210,
-"chars": 6717,
+"lines": 204,
+"chars": 6540,
 "callers": [
 "0061dc20"
 ],
@@ -171615,10 +171615,10 @@
 "in_vtables": []
 },
 "00620300": {
-"name": "FUN_00620300",
+"name": "C_OptionsHandler::OnSlider",
 "size": 410,
-"lines": 73,
-"chars": 2248,
+"lines": 75,
+"chars": 2225,
 "callers": [
 "0061dc20",
 "0061e1a0",
@@ -171645,10 +171645,10 @@
 "in_vtables": []
 },
 "006204a0": {
-"name": "FUN_006204a0",
+"name": "C_OptionsHandler::OnCheck",
 "size": 121,
-"lines": 33,
-"chars": 933,
+"lines": 28,
+"chars": 786,
 "callers": [
 "0061e3f0",
 "0061f230"
@@ -171665,10 +171665,10 @@
 "in_vtables": []
 },
 "00620530": {
-"name": "FUN_00620530",
+"name": "C_OptionsHandler::OnShown",
 "size": 309,
-"lines": 66,
-"chars": 1887,
+"lines": 58,
+"chars": 1700,
 "callers": [
 "0061cfc0"
 ],
@@ -171726,10 +171726,10 @@
 "in_vtables": []
 },
 "00620780": {
-"name": "FUN_00620780",
+"name": "C_OptionsHandler::OnVoiceChat",
 "size": 408,
-"lines": 87,
-"chars": 2384,
+"lines": 88,
+"chars": 2297,
 "callers": [
 "0061f3b0"
 ],
@@ -171753,10 +171753,10 @@
 "in_vtables": []
 },
 "006209b0": {
-"name": "FUN_006209b0",
+"name": "C_OptionsHandler::OnKeyChanged",
 "size": 8,
-"lines": 8,
-"chars": 92,
+"lines": 11,
+"chars": 220,
 "callers": [
 "0061f600"
 ],
@@ -171770,10 +171770,10 @@
 "in_vtables": []
 },
 "006209c0": {
-"name": "FUN_006209c0",
+"name": "C_OptionsHandler::OnKeyGroup",
 "size": 543,
-"lines": 103,
-"chars": 3511,
+"lines": 102,
+"chars": 3464,
 "callers": [
 "0061e3f0"
 ],
@@ -171791,10 +171791,10 @@
 "in_vtables": []
 },
 "00620be0": {
-"name": "FUN_00620be0",
+"name": "C_OptionsHandler::RefreshKeyGroups",
 "size": 482,
-"lines": 83,
-"chars": 2441,
+"lines": 81,
+"chars": 2381,
 "callers": [
 "0061bf00",
 "0061fcb0",
@@ -172134,9 +172134,9 @@
 },
 "00621240": {
 "name": "FUN_00621240",
-"size": 1,
-"lines": 156,
-"chars": 4590,
+"size": 654,
+"lines": 158,
+"chars": 4595,
 "callers": [
 "00626ca0"
 ],
@@ -172147,6 +172147,7 @@
 "00622af0",
 "00622ed0",
 "0066cc50",
+"006aef40",
 "007e2120",
 "007e566f"
 ],
@@ -172154,11 +172155,17 @@
 "strings": [],
 "vtables": [],
 "globals": [
+"00867a90",
+"00867a91",
+"00867a94",
+"00867a95",
+"008ae590",
 "008ae5d8",
 "008ae5dc",
 "008ae5e0",
 "008ae5e4",
-"008ae5f0"
+"008ae5f0",
+"008aea2c"
 ],
 "in_vtables": []
 },
@@ -172874,10 +172881,10 @@
 ]
 },
 "00626710": {
-"name": "FUN_00626710",
+"name": "S_ServerFilter::S_ServerFilter",
 "size": 39,
 "lines": 16,
-"chars": 419,
+"chars": 479,
 "callers": [
 "006264c0"
 ],
@@ -172889,10 +172896,10 @@
 "in_vtables": []
 },
 "00626740": {
-"name": "FUN_00626740",
+"name": "C_MpGameSetup::C_MpGameSetup",
 "size": 166,
-"lines": 39,
-"chars": 1167,
+"lines": 41,
+"chars": 1382,
 "callers": [
 "006264c0"
 ],
@@ -172906,10 +172913,10 @@
 "in_vtables": []
 },
 "006267f0": {
-"name": "FUN_006267f0",
+"name": "C_MpGameSetup::~C_MpGameSetup",
 "size": 206,
 "lines": 45,
-"chars": 1451,
+"chars": 1546,
 "callers": [
 "006acd30",
 "006ad560",
@@ -172961,10 +172968,10 @@
 "in_vtables": []
 },
 "006268e0": {
-"name": "FUN_006268e0",
+"name": "S_MpRotation::S_MpRotation",
 "size": 70,
 "lines": 26,
-"chars": 731,
+"chars": 911,
 "callers": [
 "00626740",
 "006acc50"
@@ -172977,10 +172984,10 @@
 "in_vtables": []
 },
 "00626930": {
-"name": "FUN_00626930",
+"name": "S_MpRotation::~S_MpRotation",
 "size": 84,
 "lines": 23,
-"chars": 728,
+"chars": 842,
 "callers": [
 "00626740",
 "006267f0",
@@ -172999,10 +173006,10 @@
 "in_vtables": []
 },
 "00626990": {
-"name": "FUN_00626990",
+"name": "C_MpMenuSettings::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 213,
+"lines": 12,
+"chars": 249,
 "callers": [],
 "callees": [
 "006269b0",
@@ -173020,10 +173027,10 @@
 ]
 },
 "006269b0": {
-"name": "FUN_006269b0",
+"name": "C_MpMenuSettings::~C_MpMenuSettings",
 "size": 284,
 "lines": 79,
-"chars": 2568,
+"chars": 2655,
 "callers": [
 "00626990"
 ],
@@ -173103,8 +173110,8 @@
 "00626ca0": {
 "name": "FUN_00626ca0",
 "size": 1125,
-"lines": 259,
-"chars": 7419,
+"lines": 260,
+"chars": 7434,
 "callers": [],
 "callees": [
 "004050e0",
@@ -173858,8 +173865,8 @@
 "0062a060": {
 "name": "FUN_0062a060",
 "size": 8745,
-"lines": 877,
-"chars": 36216,
+"lines": 878,
+"chars": 36189,
 "callers": [
 "00628610"
 ],
@@ -175136,9 +175143,9 @@
 },
 "00632390": {
 "name": "FUN_00632390",
-"size": 1,
-"lines": 90,
-"chars": 2618,
+"size": 455,
+"lines": 89,
+"chars": 2557,
 "callers": [
 "00626ca0"
 ],
@@ -175155,6 +175162,7 @@
 "strings": [],
 "vtables": [],
 "globals": [
+"008ae590",
 "008ae5a8",
 "008ae5ac",
 "008ae5bc",
@@ -175169,8 +175177,8 @@
 "00632560": {
 "name": "FUN_00632560",
 "size": 3405,
-"lines": 584,
-"chars": 17775,
+"lines": 585,
+"chars": 17861,
 "callers": [
 "00632150"
 ],
@@ -175786,7 +175794,7 @@
 "name": "FUN_00635b70",
 "size": 46,
 "lines": 15,
-"chars": 286,
+"chars": 300,
 "callers": [
 "00633490",
 "007231b0"
@@ -176884,9 +176892,9 @@
 },
 "00638e00": {
 "name": "FUN_00638e00",
-"size": 1,
-"lines": 194,
-"chars": 6702,
+"size": 1024,
+"lines": 189,
+"chars": 6490,
 "callers": [
 "00626ca0"
 ],
@@ -176909,9 +176917,14 @@
 "007e2120"
 ],
 "imports": [],
-"strings": [],
+"strings": [
+"008400ec"
+],
 "vtables": [],
 "globals": [
+"008ae590",
+"008ae5c4",
+"008aea0c",
 "008aea10",
 "008aea1c",
 "008aea2c",
@@ -200607,10 +200620,10 @@
 "in_vtables": []
 },
 "006698c0": {
-"name": "FUN_006698c0",
+"name": "C_DescriptionScreen::Build",
 "size": 395,
-"lines": 68,
-"chars": 2384,
+"lines": 66,
+"chars": 2328,
 "callers": [
 "00675c80"
 ],
@@ -200644,10 +200657,10 @@
 ]
 },
 "00669a50": {
-"name": "FUN_00669a50",
+"name": "C_DescriptionScreen::HandleMessage",
 "size": 68,
-"lines": 23,
-"chars": 591,
+"lines": 24,
+"chars": 627,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -200662,10 +200675,10 @@
 ]
 },
 "00669aa0": {
-"name": "FUN_00669aa0",
+"name": "C_DescriptionScreen::Tick",
 "size": 331,
 "lines": 64,
-"chars": 1956,
+"chars": 1978,
 "callers": [],
 "callees": [
 "0066a3a0",
@@ -200688,10 +200701,10 @@
 ]
 },
 "00669bf0": {
-"name": "FUN_00669bf0",
+"name": "C_DescriptionScreen::Refresh",
 "size": 11,
 "lines": 10,
-"chars": 299,
+"chars": 315,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -200706,10 +200719,10 @@
 ]
 },
 "00669c00": {
-"name": "FUN_00669c00",
+"name": "C_MedalDescriptionScreen::Build",
 "size": 649,
-"lines": 134,
-"chars": 4671,
+"lines": 133,
+"chars": 4641,
 "callers": [
 "00691570"
 ],
@@ -200746,10 +200759,10 @@
 ]
 },
 "00669e90": {
-"name": "FUN_00669e90",
+"name": "C_MedalDescriptionScreen::HandleMessage",
 "size": 617,
-"lines": 115,
-"chars": 3806,
+"lines": 109,
+"chars": 3500,
 "callers": [],
 "callees": [
 "007e2120"
@@ -200766,10 +200779,10 @@
 ]
 },
 "0066a100": {
-"name": "FUN_0066a100",
+"name": "C_MedalDescriptionScreen::Tick",
 "size": 402,
 "lines": 79,
-"chars": 2614,
+"chars": 2641,
 "callers": [],
 "callees": [
 "0066a3a0",
@@ -200792,10 +200805,10 @@
 ]
 },
 "0066a2a0": {
-"name": "FUN_0066a2a0",
+"name": "C_MedalDescriptionScreen::Refresh",
 "size": 26,
 "lines": 11,
-"chars": 347,
+"chars": 368,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -203664,10 +203677,10 @@
 "in_vtables": []
 },
 "0066f160": {
-"name": "FUN_0066f160",
+"name": "C_EquipmentPanel::IsLargeWeapon",
 "size": 61,
 "lines": 18,
-"chars": 365,
+"chars": 381,
 "callers": [
 "0066f1a0",
 "00681ee0",
@@ -203684,10 +203697,10 @@
 "in_vtables": []
 },
 "0066f1a0": {
-"name": "FUN_0066f1a0",
+"name": "C_EquipmentPanel::HasLargeWeapon",
 "size": 89,
-"lines": 28,
-"chars": 744,
+"lines": 27,
+"chars": 686,
 "callers": [
 "00681ee0",
 "00682020",
@@ -203703,10 +203716,10 @@
 "in_vtables": []
 },
 "0066f200": {
-"name": "FUN_0066f200",
+"name": "C_EquipmentPanel::BuildDescription",
 "size": 6476,
-"lines": 864,
-"chars": 32362,
+"lines": 870,
+"chars": 32894,
 "callers": [
 "00674860",
 "00684690"
@@ -203785,10 +203798,10 @@
 "in_vtables": []
 },
 "00670b50": {
-"name": "FUN_00670b50",
+"name": "AddDescMessage4_670b50",
 "size": 138,
-"lines": 32,
-"chars": 796,
+"lines": 30,
+"chars": 728,
 "callers": [
 "0066f200",
 "006764a0",
@@ -203807,10 +203820,10 @@
 "in_vtables": []
 },
 "00670be0": {
-"name": "FUN_00670be0",
+"name": "C_EquipmentPanel::TickSoldier",
 "size": 15,
 "lines": 11,
-"chars": 200,
+"chars": 218,
 "callers": [
 "006808d0"
 ],
@@ -203824,10 +203837,10 @@
 "in_vtables": []
 },
 "00670bf0": {
-"name": "FUN_00670bf0",
+"name": "C_EquipmentPanel::RenderSoldier",
 "size": 13,
 "lines": 11,
-"chars": 163,
+"chars": 211,
 "callers": [
 "00682790"
 ],
@@ -203841,10 +203854,10 @@
 "in_vtables": []
 },
 "00670c00": {
-"name": "FUN_00670c00",
+"name": "C_EquipmentPanel::CreateSoldier",
 "size": 575,
-"lines": 97,
-"chars": 2408,
+"lines": 96,
+"chars": 2561,
 "callers": [
 "00682c80"
 ],
@@ -203864,10 +203877,10 @@
 "in_vtables": []
 },
 "00670e40": {
-"name": "FUN_00670e40",
+"name": "C_EquipmentPanel::DeleteSoldier",
 "size": 80,
 "lines": 31,
-"chars": 664,
+"chars": 705,
 "callers": [
 "00673b80",
 "0067f760"
@@ -203883,10 +203896,10 @@
 "in_vtables": []
 },
 "00670e90": {
-"name": "FUN_00670e90",
+"name": "C_EquipmentPanel::UpdateFace",
 "size": 76,
 "lines": 21,
-"chars": 576,
+"chars": 627,
 "callers": [
 "00685420",
 "00685ab0",
@@ -203906,10 +203919,10 @@
 "in_vtables": []
 },
 "00670ee0": {
-"name": "FUN_00670ee0",
+"name": "C_EquipmentPanel::AddToSoldier",
 "size": 53,
 "lines": 14,
-"chars": 333,
+"chars": 356,
 "callers": [
 "00670f20"
 ],
@@ -203923,10 +203936,10 @@
 "in_vtables": []
 },
 "00670f20": {
-"name": "FUN_00670f20",
+"name": "C_EquipmentPanel::DressSoldier",
 "size": 239,
-"lines": 46,
-"chars": 1515,
+"lines": 50,
+"chars": 1779,
 "callers": [
 "00685ab0"
 ],
@@ -203940,10 +203953,10 @@
 "in_vtables": []
 },
 "00671010": {
-"name": "FUN_00671010",
+"name": "C_EquipmentPanel::SelectSoldier",
 "size": 578,
 "lines": 105,
-"chars": 3313,
+"chars": 3314,
 "callers": [
 "006766b0",
 "00677490",
@@ -203969,10 +203982,10 @@
 "in_vtables": []
 },
 "00671260": {
-"name": "FUN_00671260",
+"name": "C_EquipmentPanel::CountItems",
 "size": 46,
 "lines": 15,
-"chars": 348,
+"chars": 355,
 "callers": [
 "006771e0",
 "00682350"
@@ -203988,10 +204001,10 @@
 "in_vtables": []
 },
 "00671290": {
-"name": "FUN_00671290",
+"name": "C_EquipmentPanel::SlotOfControl",
 "size": 163,
 "lines": 36,
-"chars": 642,
+"chars": 632,
 "callers": [
 "00671260",
 "006713c0",
@@ -204010,10 +204023,10 @@
 "in_vtables": []
 },
 "00671360": {
-"name": "FUN_00671360",
+"name": "C_EquipmentPanel::RemoveItem",
 "size": 81,
-"lines": 22,
-"chars": 614,
+"lines": 21,
+"chars": 581,
 "callers": [
 "006713c0",
 "00672720"
@@ -204029,10 +204042,10 @@
 "in_vtables": []
 },
 "006713c0": {
-"name": "FUN_006713c0",
+"name": "C_EquipmentPanel::RemoveItemAt",
 "size": 68,
-"lines": 17,
-"chars": 323,
+"lines": 18,
+"chars": 421,
 "callers": [
 "006719a0",
 "006731d0",
@@ -204052,10 +204065,10 @@
 "in_vtables": []
 },
 "00671410": {
-"name": "FUN_00671410",
+"name": "C_EquipmentPanel::PutItem",
 "size": 229,
-"lines": 40,
-"chars": 1450,
+"lines": 38,
+"chars": 1427,
 "callers": [
 "00671500",
 "006716f0"
@@ -204072,10 +204085,10 @@
 "in_vtables": []
 },
 "00671500": {
-"name": "FUN_00671500",
+"name": "C_EquipmentPanel::PutItemChecked",
 "size": 444,
 "lines": 75,
-"chars": 2359,
+"chars": 2584,
 "callers": [
 "006716c0",
 "00677920",
@@ -204095,10 +204108,10 @@
 "in_vtables": []
 },
 "006716c0": {
-"name": "FUN_006716c0",
+"name": "C_EquipmentPanel::PutItemAt",
 "size": 41,
 "lines": 14,
-"chars": 265,
+"chars": 306,
 "callers": [
 "006719a0",
 "006771e0",
@@ -204115,10 +204128,10 @@
 "in_vtables": []
 },
 "006716f0": {
-"name": "FUN_006716f0",
+"name": "C_EquipmentPanel::DropItem",
 "size": 680,
-"lines": 119,
-"chars": 3883,
+"lines": 117,
+"chars": 4117,
 "callers": [
 "006719a0",
 "006731d0",
@@ -204141,10 +204154,10 @@
 "in_vtables": []
 },
 "006719a0": {
-"name": "FUN_006719a0",
+"name": "C_EquipmentPanel::MoveItem",
 "size": 282,
-"lines": 55,
-"chars": 1532,
+"lines": 56,
+"chars": 1667,
 "callers": [
 "006771e0",
 "00682350"
@@ -204162,10 +204175,10 @@
 "in_vtables": []
 },
 "00671ac0": {
-"name": "FUN_00671ac0",
+"name": "C_EquipmentPanel::OnScroll",
 "size": 1180,
 "lines": 216,
-"chars": 6377,
+"chars": 6359,
 "callers": [
 "0066f200",
 "006713c0",
@@ -204186,10 +204199,10 @@
 "in_vtables": []
 },
 "00671f60": {
-"name": "FUN_00671f60",
+"name": "C_EquipmentPanel::ShowItem",
 "size": 965,
-"lines": 199,
-"chars": 5875,
+"lines": 194,
+"chars": 5842,
 "callers": [
 "00672580"
 ],
@@ -204215,10 +204228,10 @@
 "in_vtables": []
 },
 "00672330": {
-"name": "FUN_00672330",
+"name": "C_EquipmentPanel::SetBackpackInactive",
 "size": 587,
 "lines": 93,
-"chars": 2832,
+"chars": 2851,
 "callers": [
 "00672580"
 ],
@@ -204236,10 +204249,10 @@
 "in_vtables": []
 },
 "00672580": {
-"name": "FUN_00672580",
+"name": "C_EquipmentPanel::Refresh",
 "size": 376,
-"lines": 67,
-"chars": 2022,
+"lines": 73,
+"chars": 2429,
 "callers": [
 "00671ac0",
 "00672700",
@@ -204271,7 +204284,7 @@
 "name": "FUN_00672700",
 "size": 25,
 "lines": 12,
-"chars": 253,
+"chars": 266,
 "callers": [],
 "callees": [
 "00672580",
@@ -204284,10 +204297,10 @@
 "in_vtables": []
 },
 "00672720": {
-"name": "FUN_00672720",
+"name": "C_EquipmentPanel::ReturnBackpack",
 "size": 199,
 "lines": 37,
-"chars": 1145,
+"chars": 1192,
 "callers": [
 "006731d0",
 "006771e0",
@@ -204306,10 +204319,10 @@
 "in_vtables": []
 },
 "006727f0": {
-"name": "FUN_006727f0",
+"name": "C_EquipmentPanel::ReturnItems",
 "size": 47,
-"lines": 15,
-"chars": 408,
+"lines": 14,
+"chars": 442,
 "callers": [
 "00685550",
 "00687360"
@@ -204326,10 +204339,10 @@
 "in_vtables": []
 },
 "00672820": {
-"name": "FUN_00672820",
+"name": "C_EquipmentPanel::FindHighlights",
 "size": 124,
 "lines": 31,
-"chars": 802,
+"chars": 824,
 "callers": [
 "0066f200"
 ],
@@ -204350,10 +204363,10 @@
 "in_vtables": []
 },
 "006728a0": {
-"name": "FUN_006728a0",
+"name": "C_EquipmentPanel::ShowAllowed",
 "size": 392,
-"lines": 76,
-"chars": 2557,
+"lines": 75,
+"chars": 2592,
 "callers": [],
 "callees": [
 "006a2bb0",
@@ -204376,10 +204389,10 @@
 ]
 },
 "00672a30": {
-"name": "FUN_00672a30",
+"name": "C_EquipmentPanel::UpdateLoad",
 "size": 1345,
 "lines": 213,
-"chars": 7998,
+"chars": 8014,
 "callers": [],
 "callees": [
 "004050e0",
@@ -204436,10 +204449,10 @@
 ]
 },
 "00672fb0": {
-"name": "FUN_00672fb0",
+"name": "CallItemNotify13",
 "size": 5,
 "lines": 10,
-"chars": 262,
+"chars": 291,
 "callers": [
 "0066f200"
 ],
@@ -204451,10 +204464,10 @@
 "in_vtables": []
 },
 "00672fc0": {
-"name": "FUN_00672fc0",
+"name": "CallItemNotify0A",
 "size": 5,
 "lines": 10,
-"chars": 261,
+"chars": 291,
 "callers": [
 "0066f200"
 ],
@@ -204466,10 +204479,10 @@
 "in_vtables": []
 },
 "00672fd0": {
-"name": "FUN_00672fd0",
+"name": "CallItemNotify08",
 "size": 5,
 "lines": 10,
-"chars": 262,
+"chars": 291,
 "callers": [
 "0066f200"
 ],
@@ -204481,10 +204494,10 @@
 "in_vtables": []
 },
 "00672fe0": {
-"name": "FUN_00672fe0",
+"name": "CallItemNotify09",
 "size": 5,
 "lines": 10,
-"chars": 262,
+"chars": 291,
 "callers": [
 "0066f200"
 ],
@@ -204496,10 +204509,10 @@
 "in_vtables": []
 },
 "00672ff0": {
-"name": "FUN_00672ff0",
+"name": "CallItemHover",
 "size": 5,
 "lines": 10,
-"chars": 262,
+"chars": 288,
 "callers": [
 "0066f200"
 ],
@@ -204663,10 +204676,10 @@
 "in_vtables": []
 },
 "00673080": {
-"name": "FUN_00673080",
+"name": "OnItemHover",
 "size": 330,
-"lines": 71,
-"chars": 2355,
+"lines": 68,
+"chars": 1796,
 "callers": [],
 "callees": [
 "007e2120"
@@ -204686,10 +204699,10 @@
 ]
 },
 "006731d0": {
-"name": "FUN_006731d0",
+"name": "OnItemNotify13",
 "size": 631,
-"lines": 130,
-"chars": 3653,
+"lines": 132,
+"chars": 3597,
 "callers": [],
 "callees": [
 "006157d0",
@@ -204721,10 +204734,10 @@
 ]
 },
 "00673450": {
-"name": "FUN_00673450",
+"name": "OnItemNotify0A",
 "size": 411,
-"lines": 61,
-"chars": 2023,
+"lines": 60,
+"chars": 1993,
 "callers": [],
 "callees": [
 "007e2120",
@@ -204745,10 +204758,10 @@
 ]
 },
 "006735f0": {
-"name": "FUN_006735f0",
+"name": "OnItemNotify08",
 "size": 157,
-"lines": 31,
-"chars": 889,
+"lines": 32,
+"chars": 892,
 "callers": [],
 "callees": [
 "0066a450",
@@ -204766,10 +204779,10 @@
 ]
 },
 "00673690": {
-"name": "FUN_00673690",
+"name": "OnItemNotify09",
 "size": 150,
-"lines": 38,
-"chars": 928,
+"lines": 39,
+"chars": 945,
 "callers": [],
 "callees": [
 "0066bb80",
@@ -204787,10 +204800,10 @@
 ]
 },
 "00673730": {
-"name": "FUN_00673730",
+"name": "TakeSquadItems",
 "size": 663,
-"lines": 115,
-"chars": 4043,
+"lines": 117,
+"chars": 4075,
 "callers": [
 "00675c00"
 ],
@@ -204809,10 +204822,10 @@
 "in_vtables": []
 },
 "006739d0": {
-"name": "FUN_006739d0",
+"name": "OnStart",
 "size": 419,
-"lines": 74,
-"chars": 2354,
+"lines": 69,
+"chars": 2019,
 "callers": [],
 "callees": [
 "006a5d70",
@@ -204844,10 +204857,10 @@
 ]
 },
 "00673b80": {
-"name": "FUN_00673b80",
+"name": "OnStop",
 "size": 170,
 "lines": 24,
-"chars": 710,
+"chars": 722,
 "callers": [],
 "callees": [
 "00670e40",
@@ -204878,10 +204891,10 @@
 ]
 },
 "00673c30": {
-"name": "FUN_00673c30",
+"name": "LoadRoster",
 "size": 109,
 "lines": 26,
-"chars": 737,
+"chars": 752,
 "callers": [
 "00673ca0"
 ],
@@ -204902,10 +204915,10 @@
 "in_vtables": []
 },
 "00673ca0": {
-"name": "FUN_00673ca0",
+"name": "EnsureSquad",
 "size": 66,
 "lines": 26,
-"chars": 632,
+"chars": 646,
 "callers": [
 "00675c80"
 ],
@@ -204945,10 +204958,10 @@
 "in_vtables": []
 },
 "00673e40": {
-"name": "FUN_00673e40",
+"name": "ProtectionStripItems",
 "size": 532,
 "lines": 88,
-"chars": 3299,
+"chars": 3352,
 "callers": [
 "006740d0"
 ],
@@ -204972,10 +204985,10 @@
 "in_vtables": []
 },
 "00674060": {
-"name": "FUN_00674060",
+"name": "IsSquadWithinWeight",
 "size": 101,
 "lines": 38,
-"chars": 1085,
+"chars": 984,
 "callers": [
 "006740d0"
 ],
@@ -204992,10 +205005,10 @@
 "in_vtables": []
 },
 "006740d0": {
-"name": "FUN_006740d0",
+"name": "OnMessage",
 "size": 1345,
 "lines": 286,
-"chars": 8536,
+"chars": 8557,
 "callers": [],
 "callees": [
 "004050e0",
@@ -205042,10 +205055,10 @@
 ]
 },
 "006746f0": {
-"name": "FUN_006746f0",
+"name": "IsSquadArmed",
 "size": 365,
-"lines": 116,
-"chars": 3187,
+"lines": 111,
+"chars": 2967,
 "callers": [
 "006740d0"
 ],
@@ -205060,10 +205073,10 @@
 "in_vtables": []
 },
 "00674860": {
-"name": "FUN_00674860",
+"name": "BuildEquipmentPanel",
 "size": 1275,
 "lines": 195,
-"chars": 7575,
+"chars": 7603,
 "callers": [
 "00675c80"
 ],
@@ -205105,10 +205118,10 @@
 "in_vtables": []
 },
 "00674d60": {
-"name": "FUN_00674d60",
+"name": "ShowSoldierStats",
 "size": 2151,
 "lines": 292,
-"chars": 10375,
+"chars": 10379,
 "callers": [
 "006755f0",
 "00675c80",
@@ -205139,10 +205152,10 @@
 "in_vtables": []
 },
 "006755d0": {
-"name": "FUN_006755d0",
+"name": "GetProfileName",
 "size": 23,
 "lines": 13,
-"chars": 240,
+"chars": 293,
 "callers": [
 "00674d60",
 "006910d0",
@@ -205156,10 +205169,10 @@
 "in_vtables": []
 },
 "006755f0": {
-"name": "FUN_006755f0",
+"name": "OnStatsToggle",
 "size": 763,
-"lines": 131,
-"chars": 3706,
+"lines": 127,
+"chars": 3570,
 "callers": [],
 "callees": [
 "004050e0",
@@ -205183,10 +205196,10 @@
 ]
 },
 "006758f0": {
-"name": "FUN_006758f0",
+"name": "BuildItemsScreen",
 "size": 776,
 "lines": 60,
-"chars": 2754,
+"chars": 2876,
 "callers": [
 "00675c80"
 ],
@@ -205218,10 +205231,10 @@
 "in_vtables": []
 },
 "00675c00": {
-"name": "FUN_00675c00",
+"name": "SetupStore",
 "size": 120,
 "lines": 21,
-"chars": 707,
+"chars": 723,
 "callers": [
 "00677010"
 ],
@@ -205242,10 +205255,10 @@
 "in_vtables": []
 },
 "00675c80": {
-"name": "FUN_00675c80",
+"name": "BuildScreens",
 "size": 903,
-"lines": 161,
-"chars": 4906,
+"lines": 159,
+"chars": 4884,
 "callers": [],
 "callees": [
 "00626000",
@@ -205293,10 +205306,10 @@
 ]
 },
 "00676010": {
-"name": "FUN_00676010",
+"name": "C_DescriptionScreen::HasPopup",
 "size": 7,
 "lines": 7,
-"chars": 105,
+"chars": 122,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -205311,10 +205324,10 @@
 ]
 },
 "00676020": {
-"name": "FUN_00676020",
+"name": "C_DescriptionScreen::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 213,
+"lines": 12,
+"chars": 258,
 "callers": [],
 "callees": [
 "00676040",
@@ -205332,10 +205345,10 @@
 ]
 },
 "00676040": {
-"name": "FUN_00676040",
+"name": "C_DescriptionScreen::~C_DescriptionScreen",
 "size": 493,
 "lines": 85,
-"chars": 2725,
+"chars": 2754,
 "callers": [
 "00676020"
 ],
@@ -205364,10 +205377,10 @@
 "in_vtables": []
 },
 "00676230": {
-"name": "FUN_00676230",
+"name": "BuildSelectionScreen",
 "size": 473,
-"lines": 59,
-"chars": 2252,
+"lines": 58,
+"chars": 2265,
 "callers": [
 "00675c80"
 ],
@@ -205398,10 +205411,10 @@
 "in_vtables": []
 },
 "00676410": {
-"name": "FUN_00676410",
+"name": "AddDescMessage4_676410",
 "size": 138,
-"lines": 32,
-"chars": 796,
+"lines": 30,
+"chars": 728,
 "callers": [
 "00676230",
 "006838e0",
@@ -205418,10 +205431,10 @@
 "in_vtables": []
 },
 "006764a0": {
-"name": "FUN_006764a0",
+"name": "BuildStatsPanel",
 "size": 516,
 "lines": 80,
-"chars": 2424,
+"chars": 2461,
 "callers": [
 "00675c80"
 ],
@@ -205470,10 +205483,10 @@
 "in_vtables": []
 },
 "006766b0": {
-"name": "FUN_006766b0",
+"name": "BuildSquadList",
 "size": 2399,
-"lines": 458,
-"chars": 16477,
+"lines": 460,
+"chars": 16638,
 "callers": [
 "00675c80"
 ],
@@ -205524,10 +205537,10 @@
 "in_vtables": []
 },
 "00677010": {
-"name": "FUN_00677010",
+"name": "BuildStore",
 "size": 454,
-"lines": 68,
-"chars": 2334,
+"lines": 69,
+"chars": 2511,
 "callers": [
 "00675c80"
 ],
@@ -205556,10 +205569,10 @@
 "in_vtables": []
 },
 "006771e0": {
-"name": "FUN_006771e0",
+"name": "DropItem",
 "size": 437,
-"lines": 64,
-"chars": 2244,
+"lines": 56,
+"chars": 1913,
 "callers": [
 "00673690"
 ],
@@ -205584,10 +205597,10 @@
 "in_vtables": []
 },
 "006773a0": {
-"name": "FUN_006773a0",
+"name": "OnSelectionPicked",
 "size": 230,
-"lines": 55,
-"chars": 1590,
+"lines": 54,
+"chars": 1553,
 "callers": [],
 "callees": [
 "007e2120",
@@ -205605,10 +205618,10 @@
 ]
 },
 "00677490": {
-"name": "FUN_00677490",
+"name": "OnSoldierPicked",
 "size": 258,
 "lines": 57,
-"chars": 1782,
+"chars": 1720,
 "callers": [
 "006766b0"
 ],
@@ -205666,10 +205679,10 @@
 ]
 },
 "00677870": {
-"name": "FUN_00677870",
+"name": "CallItemNotify60",
 "size": 5,
 "lines": 10,
-"chars": 262,
+"chars": 299,
 "callers": [
 "006758f0",
 "00682c80"
@@ -205682,10 +205695,10 @@
 "in_vtables": []
 },
 "00677880": {
-"name": "FUN_00677880",
+"name": "CallStatsToggle",
 "size": 5,
 "lines": 10,
-"chars": 262,
+"chars": 282,
 "callers": [
 "006758f0"
 ],
@@ -205697,10 +205710,10 @@
 "in_vtables": []
 },
 "00677890": {
-"name": "FUN_00677890",
+"name": "CallSelectionPicked",
 "size": 5,
 "lines": 10,
-"chars": 262,
+"chars": 286,
 "callers": [
 "00676230"
 ],
@@ -205864,10 +205877,10 @@
 "in_vtables": []
 },
 "00677920": {
-"name": "FUN_00677920",
+"name": "PutStoreItem",
 "size": 194,
-"lines": 42,
-"chars": 1243,
+"lines": 37,
+"chars": 1019,
 "callers": [
 "00677aa0",
 "00678000",
@@ -205886,10 +205899,10 @@
 "in_vtables": []
 },
 "006779f0": {
-"name": "FUN_006779f0",
+"name": "DropStoreItem",
 "size": 170,
-"lines": 38,
-"chars": 1097,
+"lines": 34,
+"chars": 916,
 "callers": [
 "00677aa0",
 "006785b0"
@@ -205906,10 +205919,10 @@
 "in_vtables": []
 },
 "00677aa0": {
-"name": "FUN_00677aa0",
+"name": "Replenish",
 "size": 1362,
-"lines": 213,
-"chars": 6996,
+"lines": 206,
+"chars": 6567,
 "callers": [
 "00678000"
 ],
@@ -205935,10 +205948,10 @@
 "in_vtables": []
 },
 "00678000": {
-"name": "FUN_00678000",
+"name": "AutoEquip",
 "size": 1443,
-"lines": 260,
-"chars": 9194,
+"lines": 258,
+"chars": 9317,
 "callers": [
 "006758f0",
 "00675c80"
@@ -205970,10 +205983,10 @@
 "in_vtables": []
 },
 "006785b0": {
-"name": "FUN_006785b0",
+"name": "DistributeRequired",
 "size": 2059,
 "lines": 383,
-"chars": 13447,
+"chars": 13662,
 "callers": [
 "00678000"
 ],
@@ -206009,10 +206022,10 @@
 "in_vtables": []
 },
 "00678dc0": {
-"name": "FUN_00678dc0",
+"name": "HasRequiredItems",
 "size": 536,
-"lines": 118,
-"chars": 3894,
+"lines": 114,
+"chars": 3747,
 "callers": [
 "006740d0"
 ],
@@ -206039,10 +206052,10 @@
 "in_vtables": []
 },
 "00678fe0": {
-"name": "FUN_00678fe0",
+"name": "OnItemNotify60",
 "size": 894,
-"lines": 164,
-"chars": 5007,
+"lines": 161,
+"chars": 4893,
 "callers": [],
 "callees": [
 "0066daa0",
@@ -206069,10 +206082,10 @@
 ]
 },
 "00679360": {
-"name": "FUN_00679360",
+"name": "CountCarried",
 "size": 776,
-"lines": 128,
-"chars": 4883,
+"lines": 129,
+"chars": 5050,
 "callers": [
 "006785b0",
 "00678dc0",
@@ -206090,10 +206103,10 @@
 "in_vtables": []
 },
 "00679670": {
-"name": "FUN_00679670",
+"name": "CountOwn",
 "size": 274,
 "lines": 60,
-"chars": 1802,
+"chars": 1797,
 "callers": [
 "00677aa0"
 ],
@@ -206107,10 +206120,10 @@
 "in_vtables": []
 },
 "00679790": {
-"name": "FUN_00679790",
+"name": "ReturnUnrequired",
 "size": 953,
-"lines": 179,
-"chars": 5702,
+"lines": 181,
+"chars": 5924,
 "callers": [
 "00678000",
 "00678fe0"
@@ -206133,10 +206146,10 @@
 "in_vtables": []
 },
 "00679b50": {
-"name": "FUN_00679b50",
+"name": "FindSubstitute",
 "size": 766,
-"lines": 162,
-"chars": 4794,
+"lines": 160,
+"chars": 4569,
 "callers": [
 "00679e80"
 ],
@@ -206153,10 +206166,10 @@
 "in_vtables": []
 },
 "00679e80": {
-"name": "FUN_00679e80",
+"name": "MatchPreset",
 "size": 1334,
-"lines": 274,
-"chars": 8832,
+"lines": 260,
+"chars": 8650,
 "callers": [
 "00678000",
 "00678fe0"
@@ -206177,10 +206190,10 @@
 "in_vtables": []
 },
 "0067a3c0": {
-"name": "FUN_0067a3c0",
+"name": "S_PresetItem::Reset",
 "size": 16,
 "lines": 9,
-"chars": 119,
+"chars": 148,
 "callers": [
 "00679e80",
 "006876b0"
@@ -206193,10 +206206,10 @@
 "in_vtables": []
 },
 "0067a3d0": {
-"name": "FUN_0067a3d0",
+"name": "S_LoadoutPreset::ClearPlaces",
 "size": 30,
 "lines": 14,
-"chars": 391,
+"chars": 436,
 "callers": [
 "00679e80",
 "006876b0"
@@ -206209,10 +206222,10 @@
 "in_vtables": []
 },
 "0067a3f0": {
-"name": "FUN_0067a3f0",
+"name": "AssignSlots",
 "size": 1375,
 "lines": 271,
-"chars": 8969,
+"chars": 8947,
 "callers": [
 "00678000"
 ],
@@ -206487,10 +206500,10 @@
 "in_vtables": []
 },
 "0067aa70": {
-"name": "FUN_0067aa70",
+"name": "C_StoreList::BuildDescription",
 "size": 1528,
-"lines": 211,
-"chars": 7883,
+"lines": 212,
+"chars": 7977,
 "callers": [
 "00684b90"
 ],
@@ -206527,10 +206540,10 @@
 "in_vtables": []
 },
 "0067b070": {
-"name": "FUN_0067b070",
+"name": "C_StoreList::BuildPage",
 "size": 2239,
 "lines": 372,
-"chars": 13996,
+"chars": 13986,
 "callers": [],
 "callees": [
 "004050e0",
@@ -206573,10 +206586,10 @@
 ]
 },
 "0067b930": {
-"name": "FUN_0067b930",
+"name": "C_StoreList::GetCount",
 "size": 17,
 "lines": 13,
-"chars": 265,
+"chars": 271,
 "callers": [
 "00682020"
 ],
@@ -206590,10 +206603,10 @@
 "in_vtables": []
 },
 "0067b950": {
-"name": "FUN_0067b950",
+"name": "C_StoreList::OnTab",
 "size": 133,
-"lines": 34,
-"chars": 853,
+"lines": 32,
+"chars": 779,
 "callers": [
 "0067aa70",
 "0067c570"
@@ -206609,7 +206622,7 @@
 "in_vtables": []
 },
 "0067b9e0": {
-"name": "FUN_0067b9e0",
+"name": "C_StoreList::ShowPage",
 "size": 530,
 "lines": 84,
 "chars": 2575,
@@ -206635,10 +206648,10 @@
 "in_vtables": []
 },
 "0067bc00": {
-"name": "FUN_0067bc00",
+"name": "C_StoreList::OnItem",
 "size": 341,
-"lines": 54,
-"chars": 2053,
+"lines": 51,
+"chars": 1831,
 "callers": [
 "0067b070",
 "0067cb60"
@@ -206651,10 +206664,10 @@
 "in_vtables": []
 },
 "0067bd60": {
-"name": "FUN_0067bd60",
+"name": "C_StoreList::UpdateType",
 "size": 730,
-"lines": 142,
-"chars": 5213,
+"lines": 130,
+"chars": 4657,
 "callers": [
 "0067c040",
 "0067c060",
@@ -206683,10 +206696,10 @@
 "in_vtables": []
 },
 "0067c040": {
-"name": "FUN_0067c040",
+"name": "C_StoreList::UpdateAll",
 "size": 26,
 "lines": 14,
-"chars": 198,
+"chars": 213,
 "callers": [
 "006731d0",
 "006771e0",
@@ -206708,10 +206721,10 @@
 "in_vtables": []
 },
 "0067c060": {
-"name": "FUN_0067c060",
+"name": "C_StoreList::UpdateAllIfStock",
 "size": 39,
-"lines": 18,
-"chars": 335,
+"lines": 17,
+"chars": 291,
 "callers": [
 "0067c090"
 ],
@@ -206725,10 +206738,10 @@
 "in_vtables": []
 },
 "0067c090": {
-"name": "FUN_0067c090",
+"name": "C_StoreList::SetStock",
 "size": 15,
 "lines": 9,
-"chars": 155,
+"chars": 167,
 "callers": [
 "00675c00",
 "00685550"
@@ -206743,10 +206756,10 @@
 "in_vtables": []
 },
 "0067c0a0": {
-"name": "FUN_0067c0a0",
+"name": "C_StoreList::AddItem",
 "size": 43,
 "lines": 10,
-"chars": 266,
+"chars": 290,
 "callers": [
 "006731d0",
 "006771e0",
@@ -206768,10 +206781,10 @@
 "in_vtables": []
 },
 "0067c0d0": {
-"name": "FUN_0067c0d0",
+"name": "C_StoreList::TakeItem",
 "size": 120,
 "lines": 25,
-"chars": 870,
+"chars": 885,
 "callers": [
 "006731d0",
 "00673730",
@@ -206796,10 +206809,10 @@
 "in_vtables": []
 },
 "0067c150": {
-"name": "FUN_0067c150",
+"name": "C_StoreList::ClearPages",
 "size": 572,
-"lines": 71,
-"chars": 2446,
+"lines": 77,
+"chars": 2582,
 "callers": [
 "00673b80",
 "00677010",
@@ -206818,10 +206831,10 @@
 "in_vtables": []
 },
 "0067c390": {
-"name": "FUN_0067c390",
+"name": "C_StoreList::SetActive",
 "size": 469,
 "lines": 90,
-"chars": 2470,
+"chars": 2462,
 "callers": [
 "00685550"
 ],
@@ -206844,10 +206857,10 @@
 "in_vtables": []
 },
 "0067c570": {
-"name": "FUN_0067c570",
+"name": "C_StoreList::BuildEquipmentDescription",
 "size": 1510,
 "lines": 210,
-"chars": 7653,
+"chars": 7700,
 "callers": [
 "00677010"
 ],
@@ -206887,8 +206900,8 @@
 "0067cb60": {
 "name": "FUN_0067cb60",
 "size": 2228,
-"lines": 372,
-"chars": 14092,
+"lines": 373,
+"chars": 14119,
 "callers": [],
 "callees": [
 "004050e0",
@@ -206953,10 +206966,10 @@
 ]
 },
 "0067d450": {
-"name": "FUN_0067d450",
+"name": "S_LoadoutPreset::CountItems",
 "size": 124,
 "lines": 48,
-"chars": 1176,
+"chars": 1182,
 "callers": [
 "00679e80",
 "006876b0"
@@ -206969,10 +206982,10 @@
 "in_vtables": []
 },
 "0067d4d0": {
-"name": "FUN_0067d4d0",
+"name": "C_LoadoutPresets::Clear",
 "size": 161,
 "lines": 29,
-"chars": 938,
+"chars": 1001,
 "callers": [
 "0067d960",
 "0067f400",
@@ -206989,10 +207002,10 @@
 "in_vtables": []
 },
 "0067d580": {
-"name": "FUN_0067d580",
+"name": "C_LoadoutPresets::AddPreset",
 "size": 484,
-"lines": 91,
-"chars": 2922,
+"lines": 92,
+"chars": 3051,
 "callers": [
 "0067d960"
 ],
@@ -207011,10 +207024,10 @@
 "in_vtables": []
 },
 "0067d770": {
-"name": "FUN_0067d770",
+"name": "C_LoadoutPresets::AddUserPreset",
 "size": 487,
 "lines": 92,
-"chars": 2990,
+"chars": 3116,
 "callers": [
 "0067def0"
 ],
@@ -207033,10 +207046,10 @@
 "in_vtables": []
 },
 "0067d960": {
-"name": "FUN_0067d960",
+"name": "C_LoadoutPresets::Load",
 "size": 716,
-"lines": 185,
-"chars": 5655,
+"lines": 179,
+"chars": 5437,
 "callers": [
 "0067eb40",
 "006c1db0"
@@ -207071,10 +207084,10 @@
 "in_vtables": []
 },
 "0067dc30": {
-"name": "FUN_0067dc30",
+"name": "C_LoadoutPresets::SaveUser",
 "size": 515,
-"lines": 131,
-"chars": 3993,
+"lines": 128,
+"chars": 3870,
 "callers": [
 "0067d960",
 "00687dd0",
@@ -207109,10 +207122,10 @@
 "in_vtables": []
 },
 "0067de40": {
-"name": "FUN_0067de40",
+"name": "C_LoadoutPresets::GetPreset",
 "size": 77,
 "lines": 22,
-"chars": 526,
+"chars": 532,
 "callers": [
 "006758f0",
 "00678fe0",
@@ -207127,10 +207140,10 @@
 "in_vtables": []
 },
 "0067de90": {
-"name": "FUN_0067de90",
+"name": "C_LoadoutPresets::GetUserPreset",
 "size": 83,
-"lines": 23,
-"chars": 582,
+"lines": 22,
+"chars": 587,
 "callers": [
 "00685da0",
 "00686e10",
@@ -207146,10 +207159,10 @@
 "in_vtables": []
 },
 "0067def0": {
-"name": "FUN_0067def0",
+"name": "C_LoadoutPresets::CreateUserPresets",
 "size": 1161,
 "lines": 129,
-"chars": 6721,
+"chars": 7095,
 "callers": [
 "0067d960",
 "0067dc30"
@@ -207262,7 +207275,7 @@
 ]
 },
 "0067e410": {
-"name": "FUN_0067e410",
+"name": "S_MissionItems::GetRequiredCount",
 "size": 69,
 "lines": 17,
 "chars": 441,
@@ -207277,10 +207290,10 @@
 "in_vtables": []
 },
 "0067e460": {
-"name": "FUN_0067e460",
+"name": "C_MissionItems::C_MissionItems",
 "size": 34,
 "lines": 20,
-"chars": 399,
+"chars": 417,
 "callers": [
 "0067eb40",
 "006c1210"
@@ -207293,10 +207306,10 @@
 "in_vtables": []
 },
 "0067e490": {
-"name": "FUN_0067e490",
+"name": "C_MissionItems::Release",
 "size": 52,
 "lines": 23,
-"chars": 411,
+"chars": 454,
 "callers": [
 "0067f3f0",
 "0067f4a0",
@@ -207313,13 +207326,12 @@
 "in_vtables": []
 },
 "0067e4d0": {
-"name": "FUN_0067e4d0",
+"name": "S_MissionItems::~S_MissionItems",
 "size": 40,
 "lines": 11,
-"chars": 234,
+"chars": 270,
 "callers": [
-"0067e490",
-"0067f3f0"
+"0067e490"
 ],
 "callees": [
 "007e2120"
@@ -207331,10 +207343,10 @@
 "in_vtables": []
 },
 "0067e500": {
-"name": "FUN_0067e500",
+"name": "C_MissionItems::Setup",
 "size": 279,
 "lines": 61,
-"chars": 1800,
+"chars": 1839,
 "callers": [
 "0067eb40",
 "006c1210"
@@ -207354,10 +207366,10 @@
 "in_vtables": []
 },
 "0067e620": {
-"name": "FUN_0067e620",
+"name": "C_MissionItems::GetMissionRecord",
 "size": 39,
 "lines": 13,
-"chars": 246,
+"chars": 266,
 "callers": [
 "00678000",
 "006785b0",
@@ -207372,10 +207384,10 @@
 "in_vtables": []
 },
 "0067e650": {
-"name": "FUN_0067e650",
+"name": "C_MissionItems::Load",
 "size": 509,
-"lines": 101,
-"chars": 3000,
+"lines": 102,
+"chars": 2976,
 "callers": [
 "0067e500"
 ],
@@ -207395,10 +207407,10 @@
 "in_vtables": []
 },
 "0067e850": {
-"name": "FUN_0067e850",
+"name": "MissionItemPairs_Insert",
 "size": 575,
 "lines": 126,
-"chars": 3897,
+"chars": 4093,
 "callers": [
 "0067e650"
 ],
@@ -207590,8 +207602,9 @@
 "name": "C_GameMenu",
 "size": 426,
 "lines": 163,
-"chars": 5164,
+"chars": 5236,
 "callers": [
+"0067f480",
 "0069e8f0"
 ],
 "callees": [
@@ -208671,10 +208684,10 @@
 "in_vtables": []
 },
 "0067f300": {
-"name": "FUN_0067f300",
+"name": "OnItemNotify13",
 "size": 5,
 "lines": 7,
-"chars": 109,
+"chars": 111,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -208689,10 +208702,10 @@
 ]
 },
 "0067f310": {
-"name": "FUN_0067f310",
+"name": "OnItemNotify0A",
 "size": 5,
 "lines": 7,
-"chars": 109,
+"chars": 111,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -208707,10 +208720,10 @@
 ]
 },
 "0067f320": {
-"name": "FUN_0067f320",
+"name": "OnItemNotify08",
 "size": 5,
 "lines": 7,
-"chars": 109,
+"chars": 111,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -208725,10 +208738,10 @@
 ]
 },
 "0067f330": {
-"name": "FUN_0067f330",
+"name": "OnItemNotify09",
 "size": 5,
 "lines": 7,
-"chars": 109,
+"chars": 111,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -208743,10 +208756,10 @@
 ]
 },
 "0067f340": {
-"name": "FUN_0067f340",
+"name": "OnItemHover",
 "size": 5,
 "lines": 7,
-"chars": 109,
+"chars": 108,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -208782,10 +208795,10 @@
 ]
 },
 "0067f370": {
-"name": "FUN_0067f370",
+"name": "C_StoreList::~C_StoreList",
 "size": 34,
 "lines": 12,
-"chars": 337,
+"chars": 350,
 "callers": [
 "0067f3a0",
 "00807ff5"
@@ -208802,10 +208815,10 @@
 "in_vtables": []
 },
 "0067f3a0": {
-"name": "FUN_0067f3a0",
+"name": "C_StoreList::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 204,
+"lines": 12,
+"chars": 234,
 "callers": [],
 "callees": [
 "0067f370",
@@ -208842,10 +208855,10 @@
 "in_vtables": []
 },
 "0067f3d0": {
-"name": "FUN_0067f3d0",
+"name": "C_EquipmentPanel::ScalarDeletingDestructor",
 "size": 32,
-"lines": 11,
-"chars": 242,
+"lines": 12,
+"chars": 289,
 "callers": [],
 "callees": [
 "007e2120"
@@ -208867,7 +208880,7 @@
 "name": "FUN_0067f3f0",
 "size": 5,
 "lines": 23,
-"chars": 411,
+"chars": 440,
 "callers": [
 "00807fb8",
 "00808148",
@@ -208875,7 +208888,6 @@
 "0080b304"
 ],
 "callees": [
-"0067e4d0",
 "007e2120"
 ],
 "imports": [],
@@ -208888,7 +208900,7 @@
 "name": "FUN_0067f400",
 "size": 101,
 "lines": 25,
-"chars": 620,
+"chars": 639,
 "callers": [
 "00807fd9",
 "0080b142"
@@ -208904,10 +208916,10 @@
 "in_vtables": []
 },
 "0067f470": {
-"name": "FUN_0067f470",
+"name": "GetTypeId",
 "size": 6,
 "lines": 7,
-"chars": 93,
+"chars": 83,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -208922,12 +208934,13 @@
 ]
 },
 "0067f480": {
-"name": "FUN_0067f480",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 201,
+"chars": 194,
 "callers": [],
 "callees": [
+"0067eb40",
 "0067f4a0",
 "007e559c"
 ],
@@ -208943,10 +208956,10 @@
 ]
 },
 "0067f4a0": {
-"name": "FUN_0067f4a0",
+"name": "~C_GameMenu",
 "size": 418,
 "lines": 101,
-"chars": 3431,
+"chars": 3554,
 "callers": [
 "0067f480"
 ],
@@ -208981,10 +208994,10 @@
 "in_vtables": []
 },
 "0067f650": {
-"name": "FUN_0067f650",
+"name": "OnStart",
 "size": 272,
-"lines": 57,
-"chars": 1574,
+"lines": 54,
+"chars": 1467,
 "callers": [],
 "callees": [
 "004336c0",
@@ -209015,10 +209028,10 @@
 ]
 },
 "0067f760": {
-"name": "FUN_0067f760",
+"name": "OnStop",
 "size": 238,
-"lines": 51,
-"chars": 1547,
+"lines": 50,
+"chars": 1579,
 "callers": [],
 "callees": [
 "00496dc0",
@@ -209045,10 +209058,10 @@
 ]
 },
 "0067f850": {
-"name": "FUN_0067f850",
+"name": "OnMessage",
 "size": 1116,
-"lines": 233,
-"chars": 7845,
+"lines": 232,
+"chars": 7822,
 "callers": [],
 "callees": [
 "00496e40",
@@ -209104,10 +209117,10 @@
 "in_vtables": []
 },
 "0067fe00": {
-"name": "FUN_0067fe00",
+"name": "BuildScreens",
 "size": 996,
-"lines": 185,
-"chars": 5460,
+"lines": 183,
+"chars": 5413,
 "callers": [],
 "callees": [
 "0061cfc0",
@@ -209151,10 +209164,10 @@
 ]
 },
 "006801f0": {
-"name": "FUN_006801f0",
+"name": "CountUniformSides",
 "size": 163,
 "lines": 39,
-"chars": 983,
+"chars": 976,
 "callers": [
 "006802a0"
 ],
@@ -209171,10 +209184,10 @@
 "in_vtables": []
 },
 "006802a0": {
-"name": "FUN_006802a0",
+"name": "UpdateNetStatus",
 "size": 1571,
 "lines": 254,
-"chars": 8765,
+"chars": 8808,
 "callers": [
 "006808d0"
 ],
@@ -209211,10 +209224,10 @@
 "in_vtables": []
 },
 "006808d0": {
-"name": "FUN_006808d0",
+"name": "OnUpdate",
 "size": 76,
 "lines": 15,
-"chars": 357,
+"chars": 382,
 "callers": [],
 "callees": [
 "00670be0",
@@ -209235,10 +209248,10 @@
 ]
 },
 "00680920": {
-"name": "FUN_00680920",
+"name": "OnTick",
 "size": 51,
 "lines": 14,
-"chars": 434,
+"chars": 432,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -209256,10 +209269,10 @@
 ]
 },
 "00680960": {
-"name": "FUN_00680960",
+"name": "OnInput",
 "size": 24,
-"lines": 12,
-"chars": 255,
+"lines": 10,
+"chars": 203,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -209274,10 +209287,10 @@
 ]
 },
 "00680980": {
-"name": "FUN_00680980",
+"name": "BuildMainScreen",
 "size": 1152,
-"lines": 128,
-"chars": 4786,
+"lines": 127,
+"chars": 4752,
 "callers": [
 "0067fe00"
 ],
@@ -209333,10 +209346,10 @@
 "in_vtables": []
 },
 "00680ea0": {
-"name": "FUN_00680ea0",
+"name": "OnItemHover",
 "size": 4159,
-"lines": 728,
-"chars": 28803,
+"lines": 757,
+"chars": 28964,
 "callers": [],
 "callees": [
 "004050e0",
@@ -209371,10 +209384,10 @@
 ]
 },
 "00681ee0": {
-"name": "FUN_00681ee0",
+"name": "OnItemNotify13",
 "size": 305,
 "lines": 59,
-"chars": 1824,
+"chars": 1683,
 "callers": [],
 "callees": [
 "0066f160",
@@ -209399,10 +209412,10 @@
 ]
 },
 "00682020": {
-"name": "FUN_00682020",
+"name": "OnItemNotify0A",
 "size": 492,
 "lines": 74,
-"chars": 2816,
+"chars": 2814,
 "callers": [],
 "callees": [
 "0066f160",
@@ -209426,10 +209439,10 @@
 ]
 },
 "00682210": {
-"name": "FUN_00682210",
+"name": "OnItemNotify08",
 "size": 157,
 "lines": 33,
-"chars": 1035,
+"chars": 1013,
 "callers": [],
 "callees": [
 "0066a450",
@@ -209447,10 +209460,10 @@
 ]
 },
 "006822b0": {
-"name": "FUN_006822b0",
+"name": "OnItemNotify09",
 "size": 150,
 "lines": 47,
-"chars": 1255,
+"chars": 1252,
 "callers": [],
 "callees": [
 "0066bb80",
@@ -209468,10 +209481,10 @@
 ]
 },
 "00682350": {
-"name": "FUN_00682350",
+"name": "DropItem",
 "size": 408,
-"lines": 58,
-"chars": 2016,
+"lines": 54,
+"chars": 1804,
 "callers": [
 "006822b0"
 ],
@@ -209493,10 +209506,10 @@
 "in_vtables": []
 },
 "006824f0": {
-"name": "FUN_006824f0",
+"name": "OnRender",
 "size": 215,
 "lines": 47,
-"chars": 1216,
+"chars": 1151,
 "callers": [],
 "callees": [
 "00633370",
@@ -209521,10 +209534,10 @@
 ]
 },
 "006825d0": {
-"name": "FUN_006825d0",
+"name": "RenderGame",
 "size": 402,
-"lines": 70,
-"chars": 2133,
+"lines": 69,
+"chars": 2042,
 "callers": [
 "006824f0"
 ],
@@ -209546,10 +209559,10 @@
 "in_vtables": []
 },
 "00682770": {
-"name": "FUN_00682770",
+"name": "OnDrawScreens",
 "size": 30,
-"lines": 17,
-"chars": 413,
+"lines": 13,
+"chars": 293,
 "callers": [],
 "callees": [
 "00496e00"
@@ -209566,10 +209579,10 @@
 ]
 },
 "00682790": {
-"name": "FUN_00682790",
+"name": "RenderEquipment",
 "size": 279,
 "lines": 53,
-"chars": 1724,
+"chars": 1684,
 "callers": [
 "006824f0"
 ],
@@ -209591,10 +209604,10 @@
 "in_vtables": []
 },
 "006828b0": {
-"name": "FUN_006828b0",
+"name": "AddChatLine",
 "size": 359,
 "lines": 71,
-"chars": 1865,
+"chars": 1866,
 "callers": [
 "00728820"
 ],
@@ -209619,10 +209632,10 @@
 "in_vtables": []
 },
 "00682a20": {
-"name": "FUN_00682a20",
+"name": "OnChat",
 "size": 115,
-"lines": 32,
-"chars": 844,
+"lines": 31,
+"chars": 756,
 "callers": [
 "00682c80"
 ],
@@ -209645,7 +209658,7 @@
 "name": "ShowMessage",
 "size": 181,
 "lines": 34,
-"chars": 832,
+"chars": 831,
 "callers": [
 "00685550",
 "0069e9b0"
@@ -209860,10 +209873,10 @@
 "in_vtables": []
 },
 "00682c80": {
-"name": "FUN_00682c80",
+"name": "BuildPlayerScreen",
 "size": 3102,
-"lines": 408,
-"chars": 15164,
+"lines": 405,
+"chars": 15309,
 "callers": [
 "0067fe00"
 ],
@@ -209923,10 +209936,10 @@
 "in_vtables": []
 },
 "006838a0": {
-"name": "FUN_006838a0",
+"name": "C_DescriptionScreen::C_DescriptionScreen",
 "size": 52,
-"lines": 13,
-"chars": 333,
+"lines": 14,
+"chars": 351,
 "callers": [
 "00682c80"
 ],
@@ -209942,10 +209955,10 @@
 "in_vtables": []
 },
 "006838e0": {
-"name": "FUN_006838e0",
+"name": "BuildSoldiersPanel",
 "size": 3493,
-"lines": 508,
-"chars": 19239,
+"lines": 511,
+"chars": 19267,
 "callers": [
 "00682c80"
 ],
@@ -210000,10 +210013,10 @@
 "in_vtables": []
 },
 "00684690": {
-"name": "FUN_00684690",
+"name": "BuildEquipmentPanel",
 "size": 1272,
 "lines": 195,
-"chars": 7720,
+"chars": 7681,
 "callers": [
 "00682c80"
 ],
@@ -210045,10 +210058,10 @@
 "in_vtables": []
 },
 "00684b90": {
-"name": "FUN_00684b90",
+"name": "BuildItemsPanel",
 "size": 600,
-"lines": 90,
-"chars": 3864,
+"lines": 89,
+"chars": 3832,
 "callers": [
 "00682c80"
 ],
@@ -210088,10 +210101,10 @@
 "in_vtables": []
 },
 "00684df0": {
-"name": "FUN_00684df0",
+"name": "BuildSkillsPanel",
 "size": 461,
-"lines": 78,
-"chars": 2313,
+"lines": 77,
+"chars": 2289,
 "callers": [
 "00682c80"
 ],
@@ -210139,10 +210152,10 @@
 "in_vtables": []
 },
 "00684fc0": {
-"name": "FUN_00684fc0",
+"name": "OnPlayerScreenHidden",
 "size": 5,
-"lines": 7,
-"chars": 56,
+"lines": 9,
+"chars": 167,
 "callers": [
 "00682c80"
 ],
@@ -210154,10 +210167,10 @@
 "in_vtables": []
 },
 "00684fd0": {
-"name": "FUN_00684fd0",
+"name": "OnPlayerScreenShown",
 "size": 352,
-"lines": 96,
-"chars": 3206,
+"lines": 94,
+"chars": 3069,
 "callers": [
 "00682c80"
 ],
@@ -210198,10 +210211,10 @@
 "in_vtables": []
 },
 "00685170": {
-"name": "FUN_00685170",
+"name": "SetupStocks",
 "size": 685,
-"lines": 128,
-"chars": 3719,
+"lines": 127,
+"chars": 3718,
 "callers": [
 "00684b90"
 ],
@@ -210228,10 +210241,10 @@
 "in_vtables": []
 },
 "00685420": {
-"name": "FUN_00685420",
+"name": "OnSoldierPicked",
 "size": 192,
 "lines": 43,
-"chars": 1180,
+"chars": 1103,
 "callers": [
 "006838e0"
 ],
@@ -210252,10 +210265,10 @@
 "in_vtables": []
 },
 "006854e0": {
-"name": "FUN_006854e0",
+"name": "OnSide",
 "size": 99,
-"lines": 39,
-"chars": 860,
+"lines": 37,
+"chars": 769,
 "callers": [
 "006838e0"
 ],
@@ -210273,10 +210286,10 @@
 "in_vtables": []
 },
 "00685550": {
-"name": "FUN_00685550",
+"name": "SetTeam",
 "size": 810,
-"lines": 137,
-"chars": 4035,
+"lines": 138,
+"chars": 4049,
 "callers": [
 "00684fd0",
 "00728820"
@@ -210305,10 +210318,10 @@
 "in_vtables": []
 },
 "00685880": {
-"name": "FUN_00685880",
+"name": "TakeSoldierItems",
 "size": 557,
-"lines": 93,
-"chars": 2934,
+"lines": 96,
+"chars": 2953,
 "callers": [
 "00685550"
 ],
@@ -210324,10 +210337,10 @@
 "in_vtables": []
 },
 "00685ab0": {
-"name": "FUN_00685ab0",
+"name": "ShowTeamSoldiers",
 "size": 744,
 "lines": 124,
-"chars": 3869,
+"chars": 3735,
 "callers": [
 "00685550"
 ],
@@ -210352,10 +210365,10 @@
 "in_vtables": []
 },
 "00685da0": {
-"name": "FUN_00685da0",
+"name": "UpdateSoldierTypes",
 "size": 1015,
-"lines": 182,
-"chars": 5771,
+"lines": 185,
+"chars": 5998,
 "callers": [
 "00682c80",
 "00685550",
@@ -210398,10 +210411,10 @@
 "in_vtables": []
 },
 "006861b0": {
-"name": "FUN_006861b0",
+"name": "OnGameInfo",
 "size": 18,
-"lines": 8,
-"chars": 139,
+"lines": 9,
+"chars": 202,
 "callers": [
 "00682c80"
 ],
@@ -210415,10 +210428,10 @@
 "in_vtables": []
 },
 "006861d0": {
-"name": "FUN_006861d0",
+"name": "OnStatsToggle",
 "size": 487,
 "lines": 73,
-"chars": 2013,
+"chars": 2027,
 "callers": [],
 "callees": [
 "00615a90",
@@ -210434,10 +210447,10 @@
 "in_vtables": []
 },
 "006863c0": {
-"name": "FUN_006863c0",
+"name": "ShowSoldierStats",
 "size": 1489,
 "lines": 239,
-"chars": 7513,
+"chars": 7502,
 "callers": [
 "00685420",
 "00685ab0",
@@ -210468,10 +210481,10 @@
 "in_vtables": []
 },
 "006869a0": {
-"name": "FUN_006869a0",
+"name": "UpdateLoadButton",
 "size": 485,
 "lines": 106,
-"chars": 2739,
+"chars": 2755,
 "callers": [
 "006808d0"
 ],
@@ -210727,10 +210740,10 @@
 "in_vtables": []
 },
 "00686ca0": {
-"name": "FUN_00686ca0",
+"name": "AddPresetItem",
 "size": 191,
-"lines": 41,
-"chars": 1205,
+"lines": 36,
+"chars": 1000,
 "callers": [
 "00686e10"
 ],
@@ -210746,10 +210759,10 @@
 "in_vtables": []
 },
 "00686e10": {
-"name": "FUN_00686e10",
+"name": "OnItemNotify60",
 "size": 1351,
-"lines": 251,
-"chars": 8068,
+"lines": 246,
+"chars": 7996,
 "callers": [],
 "callees": [
 "004050e0",
@@ -210787,10 +210800,10 @@
 ]
 },
 "00687360": {
-"name": "FUN_00687360",
+"name": "ClearSoldier",
 "size": 33,
 "lines": 9,
-"chars": 182,
+"chars": 194,
 "callers": [
 "00686e10"
 ],
@@ -210805,10 +210818,10 @@
 "in_vtables": []
 },
 "00687390": {
-"name": "FUN_00687390",
+"name": "FindSubstitute",
 "size": 747,
-"lines": 161,
-"chars": 4724,
+"lines": 158,
+"chars": 4492,
 "callers": [
 "006876b0"
 ],
@@ -210825,10 +210838,10 @@
 "in_vtables": []
 },
 "006876b0": {
-"name": "FUN_006876b0",
+"name": "MatchPreset",
 "size": 1286,
-"lines": 274,
-"chars": 8763,
+"lines": 258,
+"chars": 8536,
 "callers": [
 "00686e10"
 ],
@@ -210848,10 +210861,10 @@
 "in_vtables": []
 },
 "00687bc0": {
-"name": "FUN_00687bc0",
+"name": "StorePreset",
 "size": 518,
 "lines": 130,
-"chars": 3950,
+"chars": 4274,
 "callers": [
 "00687dd0",
 "00687f50"
@@ -210866,10 +210879,10 @@
 "in_vtables": []
 },
 "00687dd0": {
-"name": "FUN_00687dd0",
+"name": "OnSoldierType",
 "size": 375,
-"lines": 87,
-"chars": 2376,
+"lines": 86,
+"chars": 2296,
 "callers": [
 "00682c80"
 ],
@@ -210890,10 +210903,10 @@
 "in_vtables": []
 },
 "00687f50": {
-"name": "FUN_00687f50",
+"name": "OnSavePreset",
 "size": 475,
-"lines": 95,
-"chars": 2875,
+"lines": 94,
+"chars": 2790,
 "callers": [
 "00682c80"
 ],
@@ -210921,10 +210934,10 @@
 "in_vtables": []
 },
 "00688130": {
-"name": "FUN_00688130",
+"name": "Append_688130",
 "size": 279,
 "lines": 95,
-"chars": 2525,
+"chars": 2504,
 "callers": [
 "00687f50",
 "006e1d80",
@@ -211140,8 +211153,8 @@
 "00688330": {
 "name": "Start",
 "size": 1045,
-"lines": 182,
-"chars": 6083,
+"lines": 180,
+"chars": 6062,
 "callers": [
 "0066ede0",
 "006c1210"
@@ -211205,7 +211218,7 @@
 "name": "Stop",
 "size": 428,
 "lines": 83,
-"chars": 2544,
+"chars": 2552,
 "callers": [
 "0066f030"
 ],
@@ -211235,10 +211248,10 @@
 ]
 },
 "00688900": {
-"name": "FUN_00688900",
+"name": "S_Subtitle::~S_Subtitle",
 "size": 22,
 "lines": 14,
-"chars": 246,
+"chars": 258,
 "callers": [
 "00688750"
 ],
@@ -211252,10 +211265,10 @@
 "in_vtables": []
 },
 "00688920": {
-"name": "FUN_00688920",
+"name": "MakeSubtitleBox",
 "size": 396,
 "lines": 90,
-"chars": 2405,
+"chars": 2391,
 "callers": [
 "00688330"
 ],
@@ -211277,10 +211290,10 @@
 "in_vtables": []
 },
 "00688ab0": {
-"name": "FUN_00688ab0",
+"name": "MakeCreditsBox",
 "size": 507,
 "lines": 114,
-"chars": 3157,
+"chars": 3147,
 "callers": [
 "00688330"
 ],
@@ -211383,10 +211396,10 @@
 "in_vtables": []
 },
 "00688da0": {
-"name": "FUN_00688da0",
+"name": "FitVideo",
 "size": 252,
 "lines": 48,
-"chars": 1256,
+"chars": 1240,
 "callers": [
 "00688330"
 ],
@@ -211408,8 +211421,8 @@
 "00688ea0": {
 "name": "HandleInput",
 "size": 91,
-"lines": 26,
-"chars": 685,
+"lines": 24,
+"chars": 604,
 "callers": [
 "0066f050"
 ],
@@ -211493,10 +211506,10 @@
 ]
 },
 "006892e0": {
-"name": "FUN_006892e0",
+"name": "OpenStream",
 "size": 246,
-"lines": 52,
-"chars": 1486,
+"lines": 51,
+"chars": 1432,
 "callers": [
 "00688330"
 ],
@@ -211518,10 +211531,10 @@
 "in_vtables": []
 },
 "006893e0": {
-"name": "FUN_006893e0",
+"name": "LoadScript",
 "size": 579,
 "lines": 144,
-"chars": 4165,
+"chars": 4125,
 "callers": [
 "00688330"
 ],
@@ -211550,10 +211563,10 @@
 "in_vtables": []
 },
 "00689630": {
-"name": "FUN_00689630",
+"name": "ParseCredits",
 "size": 1582,
-"lines": 394,
-"chars": 14423,
+"lines": 399,
+"chars": 14684,
 "callers": [
 "006893e0"
 ],
@@ -211619,10 +211632,10 @@
 "in_vtables": []
 },
 "00689c60": {
-"name": "FUN_00689c60",
+"name": "ParseSubtitles",
 "size": 1255,
-"lines": 301,
-"chars": 10100,
+"lines": 304,
+"chars": 10212,
 "callers": [
 "006893e0"
 ],
@@ -211655,10 +211668,10 @@
 "in_vtables": []
 },
 "0068a150": {
-"name": "FUN_0068a150",
+"name": "vector_insert_subtitle_68a150",
 "size": 406,
-"lines": 74,
-"chars": 2333,
+"lines": 75,
+"chars": 2351,
 "callers": [
 "00689c60"
 ],
@@ -211708,10 +211721,10 @@
 "in_vtables": []
 },
 "0068a320": {
-"name": "FUN_0068a320",
+"name": "vector_insert_voice_68a320",
 "size": 406,
-"lines": 74,
-"chars": 2333,
+"lines": 75,
+"chars": 2348,
 "callers": [
 "00689c60"
 ],
@@ -212025,10 +212038,10 @@
 "in_vtables": []
 },
 "0068a680": {
-"name": "FUN_0068a680",
+"name": "C_SessionMenu::OnStart",
 "size": 159,
 "lines": 40,
-"chars": 908,
+"chars": 893,
 "callers": [],
 "callees": [
 "00643c00"
@@ -212045,10 +212058,10 @@
 ]
 },
 "0068a720": {
-"name": "FUN_0068a720",
+"name": "C_SessionMenu::OnStop",
 "size": 11,
 "lines": 8,
-"chars": 114,
+"chars": 124,
 "callers": [],
 "callees": [
 "00643bf0"
@@ -212065,10 +212078,10 @@
 ]
 },
 "0068a730": {
-"name": "empty_function_68a730",
+"name": "C_SessionMenu::OnUpdate",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 90,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -212083,10 +212096,10 @@
 ]
 },
 "0068a740": {
-"name": "FUN_0068a740",
+"name": "C_SessionMenu::OnRender",
 "size": 3,
 "lines": 7,
-"chars": 56,
+"chars": 82,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -212101,10 +212114,10 @@
 ]
 },
 "0068a750": {
-"name": "FUN_0068a750",
+"name": "C_SessionMenu::BuildScreens",
 "size": 685,
-"lines": 137,
-"chars": 3965,
+"lines": 132,
+"chars": 3838,
 "callers": [],
 "callees": [
 "00626000",
@@ -212140,10 +212153,10 @@
 ]
 },
 "0068aa00": {
-"name": "FUN_0068aa00",
+"name": "C_SessionMenu::OnMessage",
 "size": 632,
 "lines": 125,
-"chars": 3160,
+"chars": 3179,
 "callers": [],
 "callees": [
 "00615a90",
@@ -212175,10 +212188,10 @@
 ]
 },
 "0068ac80": {
-"name": "FUN_0068ac80",
+"name": "C_SessionMenu::DescribeConsole",
 "size": 898,
-"lines": 119,
-"chars": 4255,
+"lines": 121,
+"chars": 4605,
 "callers": [
 "0068a750"
 ],
@@ -212210,10 +212223,10 @@
 "in_vtables": []
 },
 "0068b010": {
-"name": "FUN_0068b010",
+"name": "C_SessionMenu::DescribePassword",
 "size": 403,
 "lines": 32,
-"chars": 1292,
+"chars": 1313,
 "callers": [
 "0068a750"
 ],
@@ -212238,10 +212251,10 @@
 "in_vtables": []
 },
 "0068b1b0": {
-"name": "FUN_0068b1b0",
+"name": "C_SessionMenu::OnConsoleHidden",
 "size": 5,
-"lines": 7,
-"chars": 56,
+"lines": 8,
+"chars": 147,
 "callers": [
 "0068ac80"
 ],
@@ -212253,10 +212266,10 @@
 "in_vtables": []
 },
 "0068b1c0": {
-"name": "FUN_0068b1c0",
+"name": "C_SessionMenu::OnConsoleTick",
 "size": 2793,
-"lines": 487,
-"chars": 15402,
+"lines": 466,
+"chars": 14253,
 "callers": [
 "0068ac80"
 ],
@@ -212289,10 +212302,10 @@
 "in_vtables": []
 },
 "0068bce0": {
-"name": "FUN_0068bce0",
+"name": "C_SessionMenu::OnPasswordNotify",
 "size": 611,
-"lines": 123,
-"chars": 3725,
+"lines": 124,
+"chars": 3528,
 "callers": [
 "0068b010"
 ],
@@ -212486,10 +212499,10 @@
 "in_vtables": []
 },
 "0068c000": {
-"name": "FUN_0068c000",
+"name": "C_OperationEndMenu::GetOperationEnd",
 "size": 62,
 "lines": 17,
-"chars": 423,
+"chars": 422,
 "callers": [
 "0068c0c0",
 "0068c3e0"
@@ -212509,10 +212522,10 @@
 "in_vtables": []
 },
 "0068c040": {
-"name": "FUN_0068c040",
+"name": "C_OperationEndMenu::OnStart",
 "size": 5,
 "lines": 7,
-"chars": 56,
+"chars": 95,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -212527,10 +212540,10 @@
 ]
 },
 "0068c050": {
-"name": "empty_function_68c050",
+"name": "C_OperationEndMenu::OnStop",
 "size": 1,
 "lines": 7,
-"chars": 57,
+"chars": 79,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -212545,10 +212558,10 @@
 ]
 },
 "0068c060": {
-"name": "empty_function_68c060",
+"name": "C_OperationEndMenu::OnMessage",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 96,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -212563,10 +212576,10 @@
 ]
 },
 "0068c070": {
-"name": "FUN_0068c070",
+"name": "C_OperationEndMenu::OnInput",
 "size": 71,
-"lines": 24,
-"chars": 598,
+"lines": 19,
+"chars": 452,
 "callers": [],
 "callees": [
 "007e530e"
@@ -212583,10 +212596,10 @@
 ]
 },
 "0068c0c0": {
-"name": "FUN_0068c0c0",
+"name": "C_OperationEndMenu::GetModelFile",
 "size": 8,
 "lines": 10,
-"chars": 121,
+"chars": 172,
 "callers": [
 "0068c0d0"
 ],
@@ -212600,10 +212613,10 @@
 "in_vtables": []
 },
 "0068c0d0": {
-"name": "FUN_0068c0d0",
+"name": "C_OperationEndMenu::BuildScreens",
 "size": 774,
-"lines": 143,
-"chars": 4565,
+"lines": 142,
+"chars": 4557,
 "callers": [],
 "callees": [
 "00626000",
@@ -212637,10 +212650,10 @@
 ]
 },
 "0068c3e0": {
-"name": "FUN_0068c3e0",
+"name": "C_OperationEndMenu::DescribeScreen",
 "size": 260,
-"lines": 41,
-"chars": 1356,
+"lines": 37,
+"chars": 1438,
 "callers": [
 "0068c0d0"
 ],
@@ -212661,10 +212674,10 @@
 "in_vtables": []
 },
 "0068c4f0": {
-"name": "FUN_0068c4f0",
+"name": "vector_erase4_68c4f0",
 "size": 48,
 "lines": 21,
-"chars": 480,
+"chars": 488,
 "callers": [
 "0068c0d0"
 ],
@@ -212850,10 +212863,10 @@
 "in_vtables": []
 },
 "0068c5d0": {
-"name": "FUN_0068c5d0",
+"name": "C_DebriefingMenu::IsCampaign",
 "size": 17,
 "lines": 7,
-"chars": 95,
+"chars": 119,
 "callers": [
 "0068cfe0",
 "0068d0f0",
@@ -212870,10 +212883,10 @@
 "in_vtables": []
 },
 "0068c5f0": {
-"name": "FUN_0068c5f0",
+"name": "C_DebriefingMenu::StoreProgress",
 "size": 1420,
 "lines": 238,
-"chars": 9452,
+"chars": 9479,
 "callers": [
 "0068d0f0"
 ],
@@ -212900,10 +212913,10 @@
 "in_vtables": []
 },
 "0068cb80": {
-"name": "FUN_0068cb80",
+"name": "C_DebriefingMenu::FindMedal8",
 "size": 105,
 "lines": 41,
-"chars": 973,
+"chars": 976,
 "callers": [
 "0068cbf0"
 ],
@@ -212920,10 +212933,10 @@
 "in_vtables": []
 },
 "0068cbf0": {
-"name": "FUN_0068cbf0",
+"name": "C_DebriefingMenu::AwardMedal",
 "size": 604,
 "lines": 152,
-"chars": 4462,
+"chars": 4564,
 "callers": [
 "0068ce60"
 ],
@@ -212941,10 +212954,10 @@
 "in_vtables": []
 },
 "0068ce60": {
-"name": "FUN_0068ce60",
+"name": "C_DebriefingMenu::ApplyResults",
 "size": 383,
 "lines": 78,
-"chars": 2673,
+"chars": 2719,
 "callers": [
 "0068cfe0"
 ],
@@ -212976,10 +212989,10 @@
 "in_vtables": []
 },
 "0068cfe0": {
-"name": "FUN_0068cfe0",
+"name": "C_DebriefingMenu::OnStart",
 "size": 244,
-"lines": 39,
-"chars": 1150,
+"lines": 37,
+"chars": 1133,
 "callers": [],
 "callees": [
 "0068c5d0",
@@ -213009,10 +213022,10 @@
 ]
 },
 "0068d0e0": {
-"name": "empty_function_68d0e0",
+"name": "C_DebriefingMenu::OnStop",
 "size": 1,
 "lines": 7,
-"chars": 57,
+"chars": 77,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -213027,10 +213040,10 @@
 ]
 },
 "0068d0f0": {
-"name": "FUN_0068d0f0",
+"name": "C_DebriefingMenu::OnMessage",
 "size": 1044,
 "lines": 194,
-"chars": 6023,
+"chars": 6142,
 "callers": [],
 "callees": [
 "00615a90",
@@ -213072,10 +213085,10 @@
 ]
 },
 "0068d5e0": {
-"name": "FUN_0068d5e0",
+"name": "C_DebriefingMenu::BuildScreens",
 "size": 720,
-"lines": 142,
-"chars": 4047,
+"lines": 140,
+"chars": 3964,
 "callers": [],
 "callees": [
 "00626000",
@@ -213113,10 +213126,10 @@
 ]
 },
 "0068d8b0": {
-"name": "FUN_0068d8b0",
+"name": "C_DebriefingMenu::DescribeDiary",
 "size": 2210,
-"lines": 289,
-"chars": 10359,
+"lines": 293,
+"chars": 10561,
 "callers": [
 "0068d5e0"
 ],
@@ -213158,10 +213171,10 @@
 "in_vtables": []
 },
 "0068e160": {
-"name": "FUN_0068e160",
+"name": "C_DebriefingMenu::OnDiaryPage",
 "size": 632,
-"lines": 120,
-"chars": 3595,
+"lines": 119,
+"chars": 3585,
 "callers": [
 "0068d8b0",
 "0068edc0"
@@ -213180,10 +213193,10 @@
 "in_vtables": []
 },
 "0068e3e0": {
-"name": "FUN_0068e3e0",
+"name": "C_DebriefingMenu::DescribeSoldiers",
 "size": 2522,
-"lines": 381,
-"chars": 13482,
+"lines": 383,
+"chars": 13026,
 "callers": [
 "0068edc0"
 ],
@@ -213267,10 +213280,10 @@
 "in_vtables": []
 },
 "0068edc0": {
-"name": "FUN_0068edc0",
+"name": "C_DebriefingMenu::DescribeDebriefing",
 "size": 699,
-"lines": 83,
-"chars": 2883,
+"lines": 82,
+"chars": 2990,
 "callers": [
 "0068d5e0"
 ],
@@ -213305,10 +213318,10 @@
 "in_vtables": []
 },
 "0068f080": {
-"name": "FUN_0068f080",
+"name": "C_DebriefingMenu::ListObjectives",
 "size": 1517,
-"lines": 275,
-"chars": 9131,
+"lines": 278,
+"chars": 9034,
 "callers": [
 "0068f6c0"
 ],
@@ -213336,10 +213349,10 @@
 "in_vtables": []
 },
 "0068f670": {
-"name": "FUN_0068f670",
+"name": "C_DebriefingMenu::IsCopyRefused_68f670",
 "size": 67,
 "lines": 15,
-"chars": 345,
+"chars": 371,
 "callers": [
 "0068f6c0",
 "0068f8f0"
@@ -213360,10 +213373,10 @@
 "in_vtables": []
 },
 "0068f6c0": {
-"name": "FUN_0068f6c0",
+"name": "C_DebriefingMenu::ShowMissionResult",
 "size": 557,
-"lines": 102,
-"chars": 2775,
+"lines": 103,
+"chars": 2862,
 "callers": [
 "0068d5e0"
 ],
@@ -213388,10 +213401,10 @@
 "in_vtables": []
 },
 "0068f8f0": {
-"name": "FUN_0068f8f0",
+"name": "C_DebriefingMenu::IsMissionWon",
 "size": 247,
-"lines": 74,
-"chars": 2641,
+"lines": 81,
+"chars": 2627,
 "callers": [
 "0068edc0"
 ],
@@ -213411,10 +213424,10 @@
 "in_vtables": []
 },
 "0068f9f0": {
-"name": "FUN_0068f9f0",
+"name": "C_DebriefingMenu::ShowSoldier",
 "size": 1397,
-"lines": 246,
-"chars": 8669,
+"lines": 247,
+"chars": 8633,
 "callers": [
 "0068d5e0",
 "0068ff70"
@@ -213445,10 +213458,10 @@
 "in_vtables": []
 },
 "0068ff70": {
-"name": "FUN_0068ff70",
+"name": "C_DebriefingMenu::OnSoldierScroll",
 "size": 164,
 "lines": 37,
-"chars": 943,
+"chars": 901,
 "callers": [
 "0068edc0"
 ],
@@ -213463,10 +213476,10 @@
 "in_vtables": []
 },
 "00690020": {
-"name": "FUN_00690020",
+"name": "C_DebriefingMenu::ShowMedals",
 "size": 1033,
 "lines": 166,
-"chars": 5716,
+"chars": 5771,
 "callers": [
 "0068f9f0"
 ],
@@ -213486,10 +213499,10 @@
 "in_vtables": []
 },
 "00690430": {
-"name": "FUN_00690430",
+"name": "C_DebriefingMenu::SetBar",
 "size": 411,
-"lines": 76,
-"chars": 1967,
+"lines": 74,
+"chars": 1907,
 "callers": [
 "006905d0"
 ],
@@ -213512,10 +213525,10 @@
 "in_vtables": []
 },
 "006905d0": {
-"name": "FUN_006905d0",
+"name": "C_DebriefingMenu::ShowSkills",
 "size": 473,
-"lines": 74,
-"chars": 2406,
+"lines": 75,
+"chars": 2515,
 "callers": [
 "0068f9f0"
 ],
@@ -213536,10 +213549,10 @@
 "in_vtables": []
 },
 "006907b0": {
-"name": "FUN_006907b0",
+"name": "C_DebriefingMenu::ShowRank",
 "size": 330,
 "lines": 54,
-"chars": 1997,
+"chars": 2074,
 "callers": [
 "0068f9f0"
 ],
@@ -213725,10 +213738,10 @@
 "in_vtables": []
 },
 "00690ba0": {
-"name": "FUN_00690ba0",
+"name": "C_SquadMenu::IsOneSoldier",
 "size": 60,
-"lines": 21,
-"chars": 650,
+"lines": 20,
+"chars": 467,
 "callers": [
 "00692100",
 "00694f30",
@@ -213747,10 +213760,10 @@
 "in_vtables": []
 },
 "00690be0": {
-"name": "FUN_00690be0",
+"name": "C_SquadMenu::OnStart",
 "size": 357,
 "lines": 83,
-"chars": 2653,
+"chars": 2682,
 "callers": [],
 "callees": [
 "00405100",
@@ -213784,10 +213797,10 @@
 ]
 },
 "00690d50": {
-"name": "FUN_00690d50",
+"name": "C_SquadMenu::OnMedalHover",
 "size": 368,
 "lines": 72,
-"chars": 2273,
+"chars": 2192,
 "callers": [
 "00692c40"
 ],
@@ -213805,10 +213818,10 @@
 "in_vtables": []
 },
 "00690ec0": {
-"name": "FUN_00690ec0",
+"name": "S_SquadSlot::HasControl",
 "size": 34,
 "lines": 11,
-"chars": 245,
+"chars": 241,
 "callers": [
 "00693f00"
 ],
@@ -213820,10 +213833,10 @@
 "in_vtables": []
 },
 "00690ef0": {
-"name": "FUN_00690ef0",
+"name": "S_SquadSlot::SetSoldier",
 "size": 475,
 "lines": 98,
-"chars": 2566,
+"chars": 2561,
 "callers": [
 "00691310",
 "00693f00",
@@ -213852,10 +213865,10 @@
 "in_vtables": []
 },
 "006910d0": {
-"name": "FUN_006910d0",
+"name": "S_SquadSlot::ShowTexts",
 "size": 565,
 "lines": 106,
-"chars": 3112,
+"chars": 3121,
 "callers": [
 "00690ef0",
 "00696c90"
@@ -213883,10 +213896,10 @@
 "in_vtables": []
 },
 "00691310": {
-"name": "FUN_00691310",
+"name": "C_SquadMenu::OnMessage",
 "size": 601,
-"lines": 130,
-"chars": 3351,
+"lines": 132,
+"chars": 3437,
 "callers": [],
 "callees": [
 "006157d0",
@@ -213922,10 +213935,10 @@
 ]
 },
 "00691570": {
-"name": "FUN_00691570",
+"name": "C_SquadMenu::BuildScreens",
 "size": 882,
-"lines": 168,
-"chars": 5175,
+"lines": 165,
+"chars": 5139,
 "callers": [],
 "callees": [
 "00626000",
@@ -213971,10 +213984,10 @@
 ]
 },
 "006918f0": {
-"name": "FUN_006918f0",
+"name": "C_MedalDescriptionScreen::HasPopup",
 "size": 7,
 "lines": 7,
-"chars": 105,
+"chars": 127,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -213989,10 +214002,10 @@
 ]
 },
 "00691900": {
-"name": "FUN_00691900",
+"name": "C_MedalDescriptionScreen::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 213,
+"lines": 13,
+"chars": 285,
 "callers": [],
 "callees": [
 "00691920",
@@ -214010,10 +214023,10 @@
 ]
 },
 "00691920": {
-"name": "FUN_00691920",
+"name": "C_MedalDescriptionScreen::~C_MedalDescriptionScreen",
 "size": 513,
-"lines": 122,
-"chars": 4208,
+"lines": 123,
+"chars": 4248,
 "callers": [
 "00691900"
 ],
@@ -214041,10 +214054,10 @@
 "in_vtables": []
 },
 "00691b30": {
-"name": "FUN_00691b30",
+"name": "C_SquadMenu::DescribeSelectionScreen",
 "size": 393,
 "lines": 45,
-"chars": 1629,
+"chars": 1646,
 "callers": [
 "00691570"
 ],
@@ -214071,10 +214084,10 @@
 "in_vtables": []
 },
 "00691cc0": {
-"name": "FUN_00691cc0",
+"name": "C_SquadMenu::OnSelectionPicked",
 "size": 230,
-"lines": 54,
-"chars": 1640,
+"lines": 53,
+"chars": 1605,
 "callers": [
 "00691b30"
 ],
@@ -214089,10 +214102,10 @@
 "in_vtables": []
 },
 "00691db0": {
-"name": "FUN_00691db0",
+"name": "C_SquadMenu::OnSelectionShown",
 "size": 487,
-"lines": 107,
-"chars": 2943,
+"lines": 108,
+"chars": 2916,
 "callers": [
 "00691b30"
 ],
@@ -214116,10 +214129,10 @@
 "in_vtables": []
 },
 "00691fa0": {
-"name": "FUN_00691fa0",
+"name": "C_SquadMenu::DescribeSquadScreen",
 "size": 340,
 "lines": 28,
-"chars": 1120,
+"chars": 1108,
 "callers": [
 "00691570"
 ],
@@ -214147,10 +214160,10 @@
 "in_vtables": []
 },
 "00692100": {
-"name": "FUN_00692100",
+"name": "C_SquadMenu::DescribeRoster",
 "size": 2880,
-"lines": 520,
-"chars": 18357,
+"lines": 522,
+"chars": 18412,
 "callers": [
 "00691fa0"
 ],
@@ -214203,10 +214216,10 @@
 "in_vtables": []
 },
 "00692c40": {
-"name": "FUN_00692c40",
+"name": "C_SquadMenu::DescribeMedals",
 "size": 1760,
-"lines": 275,
-"chars": 9669,
+"lines": 278,
+"chars": 9814,
 "callers": [
 "00691fa0"
 ],
@@ -214259,10 +214272,10 @@
 "in_vtables": []
 },
 "00693320": {
-"name": "FUN_00693320",
+"name": "C_SquadMenu::DescribeStats",
 "size": 464,
 "lines": 77,
-"chars": 2243,
+"chars": 2327,
 "callers": [
 "00691fa0"
 ],
@@ -214310,10 +214323,10 @@
 "in_vtables": []
 },
 "006934f0": {
-"name": "FUN_006934f0",
+"name": "C_SquadMenu::DescribePanel",
 "size": 110,
-"lines": 15,
-"chars": 384,
+"lines": 16,
+"chars": 465,
 "callers": [
 "00691fa0"
 ],
@@ -214332,10 +214345,10 @@
 "in_vtables": []
 },
 "00693560": {
-"name": "FUN_00693560",
+"name": "C_SquadMenu::DescribeSelected",
 "size": 789,
-"lines": 120,
-"chars": 4089,
+"lines": 119,
+"chars": 4111,
 "callers": [
 "00691fa0"
 ],
@@ -214370,10 +214383,10 @@
 "in_vtables": []
 },
 "00693880": {
-"name": "FUN_00693880",
+"name": "C_SquadMenu::DescribeButtons",
 "size": 462,
 "lines": 44,
-"chars": 1705,
+"chars": 1734,
 "callers": [
 "00691fa0"
 ],
@@ -214402,10 +214415,10 @@
 "in_vtables": []
 },
 "00693a50": {
-"name": "FUN_00693a50",
+"name": "C_SquadMenu::OnStop",
 "size": 131,
 "lines": 19,
-"chars": 506,
+"chars": 512,
 "callers": [],
 "callees": [
 "009967e0"
@@ -214427,10 +214440,10 @@
 ]
 },
 "00693ae0": {
-"name": "FUN_00693ae0",
+"name": "C_SquadMenu::OnDragStart",
 "size": 875,
-"lines": 147,
-"chars": 4760,
+"lines": 144,
+"chars": 4635,
 "callers": [
 "00692100",
 "00693560"
@@ -214460,7 +214473,7 @@
 "in_vtables": []
 },
 "00693e50": {
-"name": "FUN_00693e50",
+"name": "C_SquadMenu::OnDragMove",
 "size": 168,
 "lines": 32,
 "chars": 960,
@@ -214479,10 +214492,10 @@
 "in_vtables": []
 },
 "00693f00": {
-"name": "FUN_00693f00",
+"name": "C_SquadMenu::OnDrop",
 "size": 1717,
-"lines": 264,
-"chars": 9076,
+"lines": 261,
+"chars": 8697,
 "callers": [
 "00692100",
 "00693560"
@@ -214511,10 +214524,10 @@
 "in_vtables": []
 },
 "006945c0": {
-"name": "FUN_006945c0",
+"name": "C_SquadMenu::OnSoldierNotify13",
 "size": 585,
-"lines": 106,
-"chars": 3163,
+"lines": 104,
+"chars": 3002,
 "callers": [
 "00692100",
 "00693560"
@@ -214540,10 +214553,10 @@
 "in_vtables": []
 },
 "00694810": {
-"name": "FUN_00694810",
+"name": "C_SquadMenu::RemoveDeadSoldiers",
 "size": 282,
 "lines": 79,
-"chars": 2867,
+"chars": 2894,
 "callers": [
 "00691570"
 ],
@@ -214564,10 +214577,10 @@
 "in_vtables": []
 },
 "00694930": {
-"name": "FUN_00694930",
+"name": "C_SquadMenu::OnSoldierInfo",
 "size": 656,
-"lines": 99,
-"chars": 2850,
+"lines": 98,
+"chars": 2843,
 "callers": [
 "00691fa0"
 ],
@@ -214586,10 +214599,10 @@
 "in_vtables": []
 },
 "00694bc0": {
-"name": "FUN_00694bc0",
+"name": "C_SquadMenu::OnSoldierControl",
 "size": 528,
-"lines": 100,
-"chars": 2950,
+"lines": 96,
+"chars": 2875,
 "callers": [
 "00692100",
 "00693560",
@@ -214618,10 +214631,10 @@
 "in_vtables": []
 },
 "00694dd0": {
-"name": "FUN_00694dd0",
+"name": "C_SquadMenu::SelectFreeSoldier",
 "size": 344,
-"lines": 85,
-"chars": 2058,
+"lines": 87,
+"chars": 2084,
 "callers": [
 "00691310",
 "00691570",
@@ -214647,10 +214660,10 @@
 "in_vtables": []
 },
 "00694f30": {
-"name": "FUN_00694f30",
+"name": "C_SquadMenu::OnAssign",
 "size": 1902,
-"lines": 297,
-"chars": 11250,
+"lines": 299,
+"chars": 9884,
 "callers": [
 "00693880",
 "00693f00",
@@ -214695,10 +214708,10 @@
 "in_vtables": []
 },
 "006956a0": {
-"name": "FUN_006956a0",
+"name": "C_SquadMenu::IsInSlots",
 "size": 35,
 "lines": 19,
-"chars": 356,
+"chars": 321,
 "callers": [
 "00694dd0",
 "00695740",
@@ -214712,10 +214725,10 @@
 "in_vtables": []
 },
 "006956d0": {
-"name": "FUN_006956d0",
+"name": "C_SquadMenu::KeepBest",
 "size": 106,
 "lines": 37,
-"chars": 826,
+"chars": 692,
 "callers": [
 "00695740"
 ],
@@ -214727,10 +214740,10 @@
 "in_vtables": []
 },
 "00695740": {
-"name": "FUN_00695740",
+"name": "C_SquadMenu::OnAutoSelect",
 "size": 1097,
-"lines": 191,
-"chars": 6019,
+"lines": 190,
+"chars": 5991,
 "callers": [
 "00693880"
 ],
@@ -214775,10 +214788,10 @@
 "in_vtables": []
 },
 "00695b90": {
-"name": "FUN_00695b90",
+"name": "C_SquadMenu::FillSlots",
 "size": 412,
-"lines": 98,
-"chars": 2801,
+"lines": 97,
+"chars": 2825,
 "callers": [
 "00691570"
 ],
@@ -214801,10 +214814,10 @@
 "in_vtables": []
 },
 "00695d30": {
-"name": "FUN_00695d30",
+"name": "C_SquadMenu::PlaceRosterSelector",
 "size": 136,
 "lines": 25,
-"chars": 865,
+"chars": 849,
 "callers": [
 "00694bc0",
 "00694f30"
@@ -214817,10 +214830,10 @@
 "in_vtables": []
 },
 "00695dc0": {
-"name": "FUN_00695dc0",
+"name": "C_SquadMenu::FirstFreeSpeechSet",
 "size": 94,
 "lines": 38,
-"chars": 1044,
+"chars": 1071,
 "callers": [
 "00695e20"
 ],
@@ -214834,10 +214847,10 @@
 "in_vtables": []
 },
 "00695e20": {
-"name": "FUN_00695e20",
+"name": "C_SquadMenu::SyncSquad",
 "size": 790,
-"lines": 168,
-"chars": 6417,
+"lines": 169,
+"chars": 6420,
 "callers": [
 "00691310",
 "00693880"
@@ -214863,10 +214876,10 @@
 "in_vtables": []
 },
 "00696140": {
-"name": "FUN_00696140",
+"name": "C_SquadMenu::ShowStats",
 "size": 2284,
 "lines": 317,
-"chars": 11039,
+"chars": 11072,
 "callers": [
 "00694bc0",
 "00694f30",
@@ -214897,10 +214910,10 @@
 "in_vtables": []
 },
 "00696a30": {
-"name": "FUN_00696a30",
+"name": "C_SquadMenu::ShowMedals",
 "size": 606,
 "lines": 93,
-"chars": 3657,
+"chars": 3720,
 "callers": [
 "00696140"
 ],
@@ -214912,10 +214925,10 @@
 "in_vtables": []
 },
 "00696c90": {
-"name": "FUN_00696c90",
+"name": "C_SquadMenu::OnNameEdited",
 "size": 195,
-"lines": 48,
-"chars": 1290,
+"lines": 47,
+"chars": 1304,
 "callers": [
 "00691fa0"
 ],
@@ -214935,10 +214948,10 @@
 "in_vtables": []
 },
 "00696d60": {
-"name": "FUN_00696d60",
+"name": "C_SquadMenu::OnScreenTick",
 "size": 396,
-"lines": 90,
-"chars": 2415,
+"lines": 92,
+"chars": 2369,
 "callers": [
 "00691fa0"
 ],
@@ -214960,10 +214973,10 @@
 "in_vtables": []
 },
 "00696ef0": {
-"name": "FUN_00696ef0",
+"name": "C_SquadMenu::OnScreenHidden",
 "size": 16,
-"lines": 10,
-"chars": 174,
+"lines": 9,
+"chars": 206,
 "callers": [
 "00691fa0"
 ],
@@ -219821,10 +219834,10 @@
 "in_vtables": []
 },
 "006a2bb0": {
-"name": "FUN_006a2bb0",
+"name": "GetFreeBeltVolume",
 "size": 17,
 "lines": 10,
-"chars": 102,
+"chars": 150,
 "callers": [
 "006728a0"
 ],
@@ -222257,10 +222270,10 @@
 "in_vtables": []
 },
 "006acbd0": {
-"name": "FUN_006acbd0",
+"name": "AddObjective",
 "size": 61,
-"lines": 11,
-"chars": 301,
+"lines": 14,
+"chars": 372,
 "callers": [
 "006189f0"
 ],
@@ -230573,7 +230586,7 @@
 "name": "C_MovieState::~C_MovieState",
 "size": 112,
 "lines": 39,
-"chars": 1111,
+"chars": 1140,
 "callers": [
 "006c10e0"
 ],
@@ -230634,7 +230647,7 @@
 "name": "~C_VideoState",
 "size": 112,
 "lines": 39,
-"chars": 1097,
+"chars": 1126,
 "callers": [
 "006c1180"
 ],
@@ -230655,7 +230668,7 @@
 "name": "StartStep",
 "size": 1495,
 "lines": 401,
-"chars": 14442,
+"chars": 14446,
 "callers": [
 "006c2410",
 "006c43a0"
@@ -230973,7 +230986,7 @@
 "name": "FUN_006c1db0",
 "size": 98,
 "lines": 26,
-"chars": 633,
+"chars": 638,
 "callers": [
 "006c1210"
 ],
@@ -231029,7 +231042,7 @@
 "name": "~C_EquipmentMenu",
 "size": 464,
 "lines": 108,
-"chars": 3611,
+"chars": 3716,
 "callers": [
 "006c1e30"
 ],
@@ -231106,7 +231119,7 @@
 "name": "C_DebriefingMenu::~C_DebriefingMenu",
 "size": 272,
 "lines": 46,
-"chars": 1524,
+"chars": 1575,
 "callers": [
 "006c2030"
 ],
@@ -231173,7 +231186,7 @@
 "name": "C_OperationEndMenu::~C_OperationEndMenu",
 "size": 272,
 "lines": 46,
-"chars": 1528,
+"chars": 1579,
 "callers": [
 "006c2170"
 ],
@@ -231480,7 +231493,7 @@
 "name": "C_SessionMenu::~C_SessionMenu",
 "size": 272,
 "lines": 46,
-"chars": 1518,
+"chars": 1569,
 "callers": [
 "006c3200"
 ],
@@ -231508,7 +231521,7 @@
 "name": "C_VideoState",
 "size": 173,
 "lines": 68,
-"chars": 1867,
+"chars": 1900,
 "callers": [
 "006c1180",
 "006c2410"
@@ -242479,10 +242492,10 @@
 "in_vtables": []
 },
 "006e4f80": {
-"name": "FUN_006e4f80",
+"name": "C_GameTexts::C_GameTexts",
 "size": 56,
 "lines": 14,
-"chars": 287,
+"chars": 304,
 "callers": [
 "006c0fc0",
 "006c1210",
@@ -242497,10 +242510,10 @@
 "in_vtables": []
 },
 "006e4fc0": {
-"name": "FUN_006e4fc0",
+"name": "C_GameTexts::~C_GameTexts",
 "size": 131,
 "lines": 34,
-"chars": 876,
+"chars": 903,
 "callers": [
 "006c1100",
 "006c11a0",
@@ -242519,10 +242532,10 @@
 "in_vtables": []
 },
 "006e5050": {
-"name": "FUN_006e5050",
+"name": "C_GameTexts::Clear",
 "size": 105,
 "lines": 24,
-"chars": 710,
+"chars": 732,
 "callers": [
 "00689630",
 "00689c60",
@@ -242539,10 +242552,10 @@
 "in_vtables": []
 },
 "006e50c0": {
-"name": "FUN_006e50c0",
+"name": "C_GameTexts::Load",
 "size": 623,
-"lines": 144,
-"chars": 4520,
+"lines": 138,
+"chars": 4261,
 "callers": [
 "006893e0",
 "006b13b0"
@@ -242570,10 +242583,10 @@
 "in_vtables": []
 },
 "006e5330": {
-"name": "C_TextDatabase::Find",
+"name": "C_GameTexts::Find",
 "size": 68,
 "lines": 23,
-"chars": 497,
+"chars": 486,
 "callers": [
 "006e5380",
 "006e53e0"
@@ -242586,10 +242599,10 @@
 "in_vtables": []
 },
 "006e5380": {
-"name": "C_TextDatabase::GetText",
+"name": "C_GameTexts::Get",
 "size": 85,
 "lines": 22,
-"chars": 519,
+"chars": 497,
 "callers": [
 "00496f00",
 "00497380",
@@ -242675,10 +242688,10 @@
 "in_vtables": []
 },
 "006e53e0": {
-"name": "FUN_006e53e0",
+"name": "C_GameTexts::Has",
 "size": 19,
 "lines": 10,
-"chars": 154,
+"chars": 155,
 "callers": [
 "006e5430"
 ],
@@ -242692,10 +242705,10 @@
 "in_vtables": []
 },
 "006e5430": {
-"name": "FUN_006e5430",
+"name": "C_GameTexts::Add",
 "size": 443,
-"lines": 99,
-"chars": 2914,
+"lines": 96,
+"chars": 2724,
 "callers": [
 "006e5610"
 ],
@@ -242712,10 +242725,10 @@
 "in_vtables": []
 },
 "006e55f0": {
-"name": "FUN_006e55f0",
+"name": "S_GameText::~S_GameText",
 "size": 21,
 "lines": 14,
-"chars": 247,
+"chars": 258,
 "callers": [
 "006e5050",
 "006e5790",
@@ -242732,10 +242745,10 @@
 "in_vtables": []
 },
 "006e5610": {
-"name": "FUN_006e5610",
+"name": "C_GameTexts::ParseLine",
 "size": 181,
-"lines": 47,
-"chars": 1219,
+"lines": 45,
+"chars": 1120,
 "callers": [
 "006e56f0"
 ],
@@ -242757,10 +242770,10 @@
 "in_vtables": []
 },
 "006e56d0": {
-"name": "FUN_006e56d0",
+"name": "C_GameTexts::LineLength",
 "size": 28,
 "lines": 12,
-"chars": 254,
+"chars": 251,
 "callers": [
 "006e56f0"
 ],
@@ -242772,10 +242785,10 @@
 "in_vtables": []
 },
 "006e56f0": {
-"name": "FUN_006e56f0",
+"name": "C_GameTexts::Parse",
 "size": 159,
 "lines": 52,
-"chars": 1273,
+"chars": 1129,
 "callers": [
 "006e50c0"
 ],
@@ -242792,10 +242805,10 @@
 "in_vtables": []
 },
 "006e5790": {
-"name": "FUN_006e5790",
+"name": "C_GameTexts::FreeTexts",
 "size": 56,
 "lines": 18,
-"chars": 438,
+"chars": 470,
 "callers": [
 "0080c820",
 "0080c840"
@@ -242811,10 +242824,10 @@
 "in_vtables": []
 },
 "006e57d0": {
-"name": "FUN_006e57d0",
+"name": "vector_insert_text_6e57d0",
 "size": 758,
 "lines": 112,
-"chars": 3801,
+"chars": 3945,
 "callers": [
 "006e5430"
 ],
@@ -242832,10 +242845,10 @@
 "in_vtables": []
 },
 "006e5ad0": {
-"name": "FUN_006e5ad0",
+"name": "S_GameText::CopyConstruct_6e5ad0",
 "size": 32,
 "lines": 18,
-"chars": 345,
+"chars": 365,
 "callers": [
 "006e57d0"
 ],
@@ -251115,10 +251128,10 @@
 "in_vtables": []
 },
 "00722b60": {
-"name": "FUN_00722b60",
+"name": "Host",
 "size": 1584,
-"lines": 288,
-"chars": 9212,
+"lines": 316,
+"chars": 10509,
 "callers": [
 "00632560",
 "0068b1c0",
@@ -251689,10 +251702,10 @@
 "in_vtables": []
 },
 "007240f0": {
-"name": "FUN_007240f0",
+"name": "Connect",
 "size": 964,
-"lines": 198,
-"chars": 6304,
+"lines": 212,
+"chars": 6891,
 "callers": [
 "00632560",
 "0068b1c0",
@@ -251737,10 +251750,10 @@
 "in_vtables": []
 },
 "007244c0": {
-"name": "get_field_5044_7244c0",
+"name": "GetJoinStatus",
 "size": 7,
 "lines": 7,
-"chars": 115,
+"chars": 130,
 "callers": [
 "00632560",
 "0068b1c0",
@@ -255171,10 +255184,10 @@
 "in_vtables": []
 },
 "0072ee60": {
-"name": "FUN_0072ee60",
+"name": "SendChat",
 "size": 80,
 "lines": 24,
-"chars": 519,
+"chars": 562,
 "callers": [
 "00682a20",
 "00720710"
@@ -255547,10 +255560,10 @@
 "in_vtables": []
 },
 "0072f8b0": {
-"name": "FUN_0072f8b0",
+"name": "GetLocalPlayerStats",
 "size": 24,
 "lines": 7,
-"chars": 120,
+"chars": 150,
 "callers": [
 "006863c0"
 ],
@@ -266800,7 +266813,7 @@
 "name": "FUN_007443d0",
 "size": 190,
 "lines": 54,
-"chars": 1475,
+"chars": 1493,
 "callers": [],
 "callees": [
 "0069f4b0",
@@ -266829,7 +266842,7 @@
 "name": "FUN_00744490",
 "size": 164,
 "lines": 37,
-"chars": 878,
+"chars": 894,
 "callers": [
 "007443d0"
 ],
@@ -266853,7 +266866,7 @@
 "name": "FUN_00744540",
 "size": 40,
 "lines": 12,
-"chars": 282,
+"chars": 301,
 "callers": [
 "007443d0"
 ],
@@ -290339,10 +290352,10 @@
 "in_vtables": []
 },
 "007d0200": {
-"name": "FUN_007d0200",
+"name": "MenuSoldier_StaticInit_7d0200",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 168,
 "callers": [],
 "callees": [
 "007e562e"
@@ -290361,10 +290374,10 @@
 ]
 },
 "007d0230": {
-"name": "thunk_FUN_007d0240",
+"name": "InitLongGunOffsetSoldier_7d0230",
 "size": 5,
 "lines": 10,
-"chars": 144,
+"chars": 203,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -290383,10 +290396,10 @@
 ]
 },
 "007d0240": {
-"name": "FUN_007d0240",
+"name": "InitLongGunOffsetSoldier_7d0240",
 "size": 31,
 "lines": 10,
-"chars": 138,
+"chars": 203,
 "callers": [
 "007d0230"
 ],
@@ -290402,10 +290415,10 @@
 "in_vtables": []
 },
 "007d0260": {
-"name": "thunk_FUN_007d0270",
+"name": "InitHeadOffsetSoldier_7d0260",
 "size": 5,
 "lines": 10,
-"chars": 144,
+"chars": 193,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -290424,10 +290437,10 @@
 ]
 },
 "007d0270": {
-"name": "FUN_007d0270",
+"name": "InitHeadOffsetSoldier_7d0270",
 "size": 31,
 "lines": 10,
-"chars": 138,
+"chars": 193,
 "callers": [
 "007d0260"
 ],
@@ -290443,10 +290456,10 @@
 "in_vtables": []
 },
 "007d0290": {
-"name": "thunk_FUN_007d02a0",
+"name": "InitBackpackOffsetSoldier_7d0290",
 "size": 5,
 "lines": 10,
-"chars": 144,
+"chars": 210,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -290465,10 +290478,10 @@
 ]
 },
 "007d02a0": {
-"name": "FUN_007d02a0",
+"name": "InitBackpackOffsetSoldier_7d02a0",
 "size": 31,
 "lines": 10,
-"chars": 138,
+"chars": 210,
 "callers": [
 "007d0290"
 ],
@@ -290484,10 +290497,10 @@
 "in_vtables": []
 },
 "007d02c0": {
-"name": "FUN_007d02c0",
+"name": "C_MenuSoldier::Setup",
 "size": 2972,
 "lines": 570,
-"chars": 22128,
+"chars": 22112,
 "callers": [
 "00670c00"
 ],
@@ -290571,10 +290584,10 @@
 "in_vtables": []
 },
 "007d0ee0": {
-"name": "FUN_007d0ee0",
+"name": "C_MenuSoldier::Release",
 "size": 78,
 "lines": 31,
-"chars": 718,
+"chars": 740,
 "callers": [
 "00670e40"
 ],
@@ -290588,10 +290601,10 @@
 "in_vtables": []
 },
 "007d0f30": {
-"name": "FUN_007d0f30",
+"name": "C_MenuSoldier::HideHolsters",
 "size": 71,
 "lines": 30,
-"chars": 570,
+"chars": 592,
 "callers": [
 "007d3080"
 ],
@@ -290603,10 +290616,10 @@
 "in_vtables": []
 },
 "007d0f80": {
-"name": "FUN_007d0f80",
+"name": "C_MenuSoldier::ReleaseHolsters",
 "size": 86,
 "lines": 32,
-"chars": 663,
+"chars": 688,
 "callers": [
 "007d1bf0"
 ],
@@ -290618,10 +290631,10 @@
 "in_vtables": []
 },
 "007d0fe0": {
-"name": "FUN_007d0fe0",
+"name": "C_MenuSoldier::InitHolsters",
 "size": 2649,
 "lines": 578,
-"chars": 20248,
+"chars": 20297,
 "callers": [
 "007d1bf0"
 ],
@@ -290706,10 +290719,10 @@
 "in_vtables": []
 },
 "007d1a70": {
-"name": "FUN_007d1a70",
+"name": "C_MenuSoldier::RemoveFromHolster",
 "size": 170,
 "lines": 48,
-"chars": 1258,
+"chars": 1272,
 "callers": [
 "007d3080"
 ],
@@ -290723,10 +290736,10 @@
 "in_vtables": []
 },
 "007d1b20": {
-"name": "FUN_007d1b20",
+"name": "C_MenuSoldier::AddToHolster",
 "size": 29,
 "lines": 11,
-"chars": 198,
+"chars": 223,
 "callers": [
 "007d1fc0"
 ],
@@ -290741,10 +290754,10 @@
 "in_vtables": []
 },
 "007d1b40": {
-"name": "FUN_007d1b40",
+"name": "C_MenuSoldier::AddToHolsterSlot",
 "size": 168,
 "lines": 33,
-"chars": 842,
+"chars": 831,
 "callers": [
 "007d1b20",
 "007d1bf0"
@@ -290757,10 +290770,10 @@
 "in_vtables": []
 },
 "007d1bf0": {
-"name": "FUN_007d1bf0",
+"name": "C_MenuSoldier::SetModel",
 "size": 974,
 "lines": 149,
-"chars": 5961,
+"chars": 6104,
 "callers": [
 "007d02c0",
 "007d0ee0",
@@ -290798,10 +290811,10 @@
 "in_vtables": []
 },
 "007d1fc0": {
-"name": "FUN_007d1fc0",
+"name": "C_MenuSoldier::AddItem",
 "size": 4214,
 "lines": 603,
-"chars": 24874,
+"chars": 25055,
 "callers": [
 "00670ee0",
 "00671410",
@@ -290855,10 +290868,10 @@
 "in_vtables": []
 },
 "007d3080": {
-"name": "FUN_007d3080",
+"name": "C_MenuSoldier::RemoveItem",
 "size": 356,
 "lines": 64,
-"chars": 1997,
+"chars": 2035,
 "callers": [
 "00671360",
 "00671410",
@@ -290880,10 +290893,10 @@
 "in_vtables": []
 },
 "007d3220": {
-"name": "FUN_007d3220",
+"name": "C_MenuSoldier::ResetItems",
 "size": 117,
 "lines": 21,
-"chars": 583,
+"chars": 667,
 "callers": [
 "006727f0",
 "007d1bf0"
@@ -290905,10 +290918,10 @@
 "in_vtables": []
 },
 "007d32a0": {
-"name": "FUN_007d32a0",
+"name": "C_MenuSoldier::PlayIdle",
 "size": 107,
 "lines": 23,
-"chars": 757,
+"chars": 760,
 "callers": [
 "007d1bf0",
 "007d3390"
@@ -290921,10 +290934,10 @@
 "in_vtables": []
 },
 "007d3310": {
-"name": "FUN_007d3310",
+"name": "C_MenuSoldier::PlayPose",
 "size": 71,
-"lines": 18,
-"chars": 500,
+"lines": 17,
+"chars": 485,
 "callers": [
 "007d1bf0",
 "007d1fc0",
@@ -290938,7 +290951,7 @@
 "in_vtables": []
 },
 "007d3360": {
-"name": "FUN_007d3360",
+"name": "C_MenuSoldier::SetFace",
 "size": 39,
 "lines": 12,
 "chars": 264,
@@ -290956,10 +290969,10 @@
 "in_vtables": []
 },
 "007d3390": {
-"name": "FUN_007d3390",
+"name": "C_MenuSoldier::UpdateAnims",
 "size": 379,
 "lines": 56,
-"chars": 2147,
+"chars": 2160,
 "callers": [
 "007d1bf0",
 "007d3510"
@@ -290981,10 +290994,10 @@
 "in_vtables": []
 },
 "007d3510": {
-"name": "FUN_007d3510",
+"name": "C_MenuSoldier::Tick",
 "size": 185,
 "lines": 27,
-"chars": 1028,
+"chars": 1037,
 "callers": [
 "00670be0"
 ],
@@ -291003,10 +291016,10 @@
 "in_vtables": []
 },
 "007d35d0": {
-"name": "FUN_007d35d0",
+"name": "C_MenuSoldier::Render",
 "size": 115,
 "lines": 26,
-"chars": 737,
+"chars": 763,
 "callers": [
 "00670bf0"
 ],
@@ -326434,6 +326447,21 @@
 "callers": [],
 "callees": [
 "0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00807ff5": {
+"name": "Unwind@00807ff5",
+"size": 14,
+"lines": 11,
+"chars": 192,
+"callers": [],
+"callees": [
+"0067f370"
 ],
 "imports": [],
 "strings": [],

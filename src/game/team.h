@@ -36,8 +36,29 @@ enum E_FormationType {
     FORMATION_NONE = 13,                                // frees the slots
 };
 
+// A member's place in a formation (0xA0 bytes).
+struct alignas(16) S_FormationSlot {
+    S_vector4 basePos = {};                             // +0x00 from the table
+    S_vector4 scaledPos = {};                           // +0x10 by the shape's matrix
+    S_vector4 target = {};                              // +0x20 where it should be
+    S_vector4 current = {};                             // +0x30 moving toward it
+    S_vector4 dir = {};                                 // +0x40 faces
+    S_vector4 baseDir = {};                             // +0x50 from the table
+    S_vector4 scaledDir = {};                           // +0x60 by the shape's matrix
+    C_Human *member = nullptr;                          // +0x70
+    C_Actor *unknown74 = nullptr;                       // +0x74 (only saved and loaded)
+    float distance = 0.0f;                              // +0x78 from the first slot, by the shape
+    bool pushedAside = false;                           // +0x7C
+    uint16_t checkpoint = 0xFFFF;                       // +0x7E
+    int seat = 0;                                       // +0x80 in a vehicle
+    int vehicleId = -1;                                 // +0x84
+    bool dirty = false;                                 // +0x88 the place has changed
+    std::vector<uint16_t> path;                         // +0x8C to the first slot's checkpoint
+    uint16_t pathFrom = 0xFFFF;                         // +0x9C its checkpoint when found
+};
+
 // Shape of a formation and its member slots (0xA0 bytes, 16-byte aligned; humans that lead
-// one keep it in C_Human::GetFormation()).
+// one keep it in C_Human::GetFormation()). game/formation.cpp.
 class alignas(16) C_FormationShape {
 public:
     static constexpr int SLOT_COUNT = 6;
@@ -46,12 +67,12 @@ public:
     ~C_FormationShape();                                // 0x00594a70 (SetType(FORMATION_NONE))
     void SetType(E_FormationType type);                 // 0x00597420
     void SetScale(const S_vector &scale);               // 0x005977f0
-    E_FormationType GetType() const;                    // 0x00597b40 (+0x78)
-    int GetMemberCount() const;                         // +0x7C
-    void AddMember(C_Human *member);                    // 0x00597f80
-    void RemoveMember(C_Human *member);                 // 0x005981c0
-    void SetLeader(C_Human *leader);                    // 0x00597c50
-    C_Human *GetLeader() const;                         // +0x74
+    E_FormationType GetType() const { return m_type; }  // 0x00597b40 (+0x78)
+    int GetMemberCount() const { return m_memberCount; }   // +0x7C
+    bool AddMember(C_Human *member);                    // 0x00597f80
+    bool RemoveMember(C_Human *member);                 // 0x005981c0
+    bool SetLeader(C_Human *leader);                    // 0x00597c50
+    C_Human *GetLeader() const { return m_leader; }     // +0x74
     // Squad members of the formation that hold (squad commands 0xC..0xF) switch to 0x10 / 0x11.
     void OnLeaderDied();                                // 0x00595710
     void Tick(int timeDelta);                           // 0x0059ba70
@@ -59,14 +80,14 @@ public:
     bool LoadGame(C_chunk &chunk);                      // 0x00594560
     // Byte +0x8C: set for the scripts' formations (C_Formation). While it is clear the shape
     // plans its slots again whenever the leader moves (0x0059af30; meaning inferred).
-    void SetUnknown8C(bool on);
+    void SetUnknown8C(bool on) { m_scripted = on; }
     // The slot array exists (+0x90, SLOT_COUNT entries of 0xA0 bytes).
-    bool HasSlots() const;
+    bool HasSlots() const { return m_slots != nullptr; }
     // Human in slot `slot` (+0x70 of the entry), null if free.
-    C_Human *GetSlotMember(int slot) const;
+    C_Human *GetSlotMember(int slot) const { return m_slots[slot].member; }
     // The slot of `member` (false: none).
     bool FindSlot(const C_Human *member, int *slot) const;              // 0x00598290
-    // Where `member`'s slot is and its walking point (false: no slot).
+    // Where `member`'s slot is and its walking point (true only when the place has changed since last asked).
     bool GetSlotTarget(const C_Human *member, S_vector4 *pos, uint16_t *checkpoint);   // 0x00598320
     // The direction `member`'s slot faces (false: no slot).
     bool GetSlotDir(const C_Human *member, S_vector4 *dir);             // 0x005983c0
@@ -76,8 +97,37 @@ public:
     void InvalidateSlot(const C_Human *member);                         // 0x005982d0
     // Puts `member`'s slot at `pos` (no walking point; planned again).
     void SetSlotTarget(const C_Human *member, const S_vector4 &pos);    // 0x00599040
-    // Plans slot `slot`'s place on the walking network.
+    // Plans slot `slot`'s place on the walking network: as far along the way from the first slot as the shape says.
     void PlanSlot(int slot);                                            // 0x0059af30
+    // Lines up around a door's point instead (0xFFFF: back to the shape).
+    void SetDoorPoint(uint16_t checkpoint) { m_doorState = -1; m_doorPoint = checkpoint; }   // 0x00594a50
+
+private:
+    void SetDir(const S_vector &dir);                   // 0x00597760
+    void ApplyMatrix();                                 // 0x005978e0
+    void MoveSlots(int timeDelta);                      // 0x0059bb60
+    // (0x005990c0; a stack argument in the original, not used)
+    void FollowLeader();
+    // (0x0059a2e0; a stack argument in the original, not used)
+    void LineUpAtDoor();
+    void BoardVehicle(C_Actor *vehicle);                // 0x005957d0
+    void KeepApart();                                   // 0x00598550
+    void PushAside(int slot, float distance);           // 0x00598810
+    bool FitOnNetwork(int slot);                        // 0x0059b7b0
+
+    S_matrix m_matrix;                                  // +0x00
+    S_vector4 m_dir = {};                               // +0x40
+    S_vector4 m_scale = {};                             // +0x50
+    S_vector4 m_lastDir = {};                           // +0x60
+    bool m_changed = false;                             // +0x70
+    C_Human *m_leader = nullptr;                        // +0x74
+    E_FormationType m_type = FORMATION_FOLLOW;          // +0x78
+    int m_memberCount = 0;                              // +0x7C
+    int m_mode = 0;                                     // +0x80 1 by the shape, 2 at a door
+    uint16_t m_doorPoint = 0xFFFF;                      // +0x84
+    int m_doorState = -1;                               // +0x88
+    bool m_scripted = false;                            // +0x8C
+    S_FormationSlot *m_slots = nullptr;                 // +0x90
 };
 // Scale of the formations of humans following a leader.
 extern S_vector g_defaultFormationScale;                // 0x0089ae50

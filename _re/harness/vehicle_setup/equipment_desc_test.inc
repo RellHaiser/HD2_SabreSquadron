@@ -116,9 +116,9 @@ std::vector<std::string> EdExpected(bool menu, bool overload, bool description)
             item(v, true);
         }
     };
-    scroll(7, "scroll13", "hlcpct00", "3f000000", "barrow_up23", "barrow_down23", "text_hlstrscap", "a9c", "slider12");
+    scroll(7, "scroll13", "hlcpct00", "3f000000", "barrow up23", "barrow down23", "text_hlstrscap", "a9c", "slider12");
     pane(8, "GB_Holsters", 0);
-    scroll(9, "scroll14", "hlcpct01", "3f4ccccd", "barrow_up24", "barrow_down24", "text_bkpckcap", "a9d", "slider13");
+    scroll(9, "scroll14", "hlcpct01", "3f4ccccd", "barrow up24", "barrow down24", "text_bkpckcap", "a9d", "slider13");
     pane(10, "GR_BackPack", 4);
     v.push_back("1 13 text_cpcty 830b000");
     v.push_back("  0 1000015 b 7d2 0 ");

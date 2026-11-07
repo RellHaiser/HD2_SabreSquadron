@@ -1,0 +1,134 @@
+# The campaign's screens (part 9g).
+# Part 9g-i: the operation's end C_OperationEndMenu (src/game/operation_end.cpp; vtable 0x00815c90).
+0068c000 C_OperationEndMenu::GetOperationEnd | void * __cdecl GetOperationEnd(void)
+0068c040 C_OperationEndMenu::OnStart | bool __thiscall OnStart(C_MenuState *this, void * arg)
+0068c050 C_OperationEndMenu::OnStop | void __thiscall OnStop(C_MenuState *this)
+0068c060 C_OperationEndMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
+0068c070 C_OperationEndMenu::OnInput | bool __thiscall OnInput(C_MenuState *this, float * held, float * pressed)
+0068c0c0 C_OperationEndMenu::GetModelFile | char * __cdecl GetModelFile(void)
+0068c0d0 C_OperationEndMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
+0068c3e0 C_OperationEndMenu::DescribeScreen | bool __thiscall DescribeScreen(C_MenuState *this, void * desc, void * model)
+0068c4f0 vector_erase4_68c4f0
+00841670 g_operationEnds @ uint[120]
+# Part 9g-ii: the session menu C_SessionMenu (src/game/session_menu.cpp; vtable 0x00815e98).
+0068a680 C_SessionMenu::OnStart | bool __thiscall OnStart(C_MenuState *this, void * arg)
+0068a720 C_SessionMenu::OnStop | void __thiscall OnStop(C_MenuState *this)
+0068a730 C_SessionMenu::OnUpdate | void __thiscall OnUpdate(C_MenuState *this, int timeDelta)
+0068a740 C_SessionMenu::OnRender | bool __thiscall OnRender(C_MenuState *this)
+0068a750 C_SessionMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
+0068aa00 C_SessionMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
+0068ac80 C_SessionMenu::DescribeConsole | bool __thiscall DescribeConsole(C_MenuState *this, void * desc, void * model)
+0068b010 C_SessionMenu::DescribePassword | bool __thiscall DescribePassword(C_MenuState *this, void * desc, void * model)
+0068b1b0 C_SessionMenu::OnConsoleHidden | bool __thiscall OnConsoleHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+0068b1c0 C_SessionMenu::OnConsoleTick | bool __thiscall OnConsoleTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+0068bce0 C_SessionMenu::OnPasswordNotify | bool __thiscall OnPasswordNotify(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+007244c0 C_NetGame::GetJoinStatus
+008ae5c2 g_sessionPasswordSet @ bool
+# Part 9g-iii: the game's texts C_GameTexts (src/game/game_texts.cpp; g_texts) and a C_str append.
+006e4f80 C_GameTexts::C_GameTexts | void __fastcall C_GameTexts(void * this)
+006e4fc0 C_GameTexts::~C_GameTexts | void __fastcall ~C_GameTexts(void * this)
+006e5050 C_GameTexts::Clear | void __fastcall Clear(void * this)
+006e50c0 C_GameTexts::Load | bool __thiscall Load(void * this, char * fileName)
+006e53e0 C_GameTexts::Has
+006e5430 C_GameTexts::Add | bool __thiscall Add(void * this, int id, char * text, bool unknown8)
+006e55f0 S_GameText::~S_GameText
+006e5610 C_GameTexts::ParseLine | void __thiscall ParseLine(void * this, char * line)
+006e56d0 C_GameTexts::LineLength | int __fastcall LineLength(char * begin, char * end)
+006e56f0 C_GameTexts::Parse | void __thiscall Parse(void * this, char * data, int size)
+006e5790 C_GameTexts::FreeTexts | void __fastcall FreeTexts(void * this)
+006e57d0 vector_insert_text_6e57d0
+006e5ad0 S_GameText::CopyConstruct_6e5ad0
+00688130 C_str::Append_688130
+# Part 9g-iv: the video player C_VideoState / C_MovieState (src/game/video_state.cpp; the rest in game_app.txt).
+00688900 S_Subtitle::~S_Subtitle | void __fastcall ~S_Subtitle(void * this)
+00688920 C_VideoState::MakeSubtitleBox | void __thiscall MakeSubtitleBox(C_VideoState *this, int width, int height)
+00688ab0 C_VideoState::MakeCreditsBox | void __thiscall MakeCreditsBox(C_VideoState *this, int width, int height)
+00688da0 C_VideoState::FitVideo | void __thiscall FitVideo(C_VideoState *this, int width, int height)
+006892e0 C_VideoState::OpenStream | void __thiscall OpenStream(C_VideoState *this, char * file)
+006893e0 C_VideoState::LoadScript | void __thiscall LoadScript(C_VideoState *this, char * file)
+00689630 C_VideoState::ParseCredits | void __fastcall ParseCredits(C_VideoState *this)
+00689c60 C_VideoState::ParseSubtitles | void __fastcall ParseSubtitles(C_VideoState *this)
+0068a150 vector_insert_subtitle_68a150
+0068a320 vector_insert_voice_68a320
+008ae644 g_creditsStyles @ int[14]
+008ae680 g_creditsIntro @ int
+008415a0 g_creditsIntros @ char *[2]
+# Part 9g-v: the debriefing C_DebriefingMenu (src/game/debriefing.cpp; vtable 0x00815cf0).
+0068c5d0 C_DebriefingMenu::IsCampaign | bool __cdecl IsCampaign(void)
+0068c5f0 C_DebriefingMenu::StoreProgress | void __cdecl StoreProgress(void)
+0068cb80 C_DebriefingMenu::FindMedal8 | void __fastcall FindMedal8(bool * alive, bool * dead)
+0068cbf0 C_DebriefingMenu::AwardMedal | void __fastcall AwardMedal(void * profile, void * soldier)
+0068ce60 C_DebriefingMenu::ApplyResults | void __cdecl ApplyResults(void)
+0068cfe0 C_DebriefingMenu::OnStart | bool __thiscall OnStart(C_MenuState *this, void * arg)
+0068d0e0 C_DebriefingMenu::OnStop | void __thiscall OnStop(C_MenuState *this)
+0068d0f0 C_DebriefingMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
+0068d5e0 C_DebriefingMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
+008423c8 g_rankExperience @ int[7]
+# Part 9g-vi: the debriefing's diary and screen (src/game/debriefing_screens.cpp).
+0068d8b0 C_DebriefingMenu::DescribeDiary | bool __thiscall DescribeDiary(C_MenuState *this, void * desc, void * model)
+0068e160 C_DebriefingMenu::OnDiaryPage | bool __thiscall OnDiaryPage(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+0068edc0 C_DebriefingMenu::DescribeDebriefing | bool __thiscall DescribeDebriefing(C_MenuState *this, void * desc, void * model)
+0068f8f0 C_DebriefingMenu::IsMissionWon | bool __fastcall IsMissionWon(C_MenuState *this)
+0068f670 C_DebriefingMenu::IsCopyRefused_68f670
+# Part 9g-vii: the debriefing's soldiers' panel and the mission's result (src/game/debriefing_screens.cpp).
+0068e3e0 C_DebriefingMenu::DescribeSoldiers | void __thiscall DescribeSoldiers(C_MenuState *this, void * desc, void * model)
+0068f080 C_DebriefingMenu::ListObjectives | bool __cdecl ListObjectives(void)
+0068f6c0 C_DebriefingMenu::ShowMissionResult | void __thiscall ShowMissionResult(C_MenuState *this, void * desc, void * model)
+# Part 9g-viii: the debriefing's soldier shown (src/game/debriefing_screens.cpp).
+0068f9f0 C_DebriefingMenu::ShowSoldier | void __thiscall ShowSoldier(C_MenuState *this, int index)
+0068ff70 C_DebriefingMenu::OnSoldierScroll | bool __thiscall OnSoldierScroll(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+006905d0 C_DebriefingMenu::ShowSkills | void __cdecl ShowSkills(void * profile, void * soldier)
+00690430 C_DebriefingMenu::SetBar | void __cdecl SetBar(uint bar, float maximum, float value, float gain)
+006907b0 C_DebriefingMenu::ShowRank | void __thiscall ShowRank(C_MenuState *this, void * profile, void * soldier)
+00690020 C_DebriefingMenu::ShowMedals | void __thiscall ShowMedals(C_MenuState *this, void * profile, void * soldier)
+# Part 9g-ix: the squad screen C_SquadMenu (src/game/squad_menu.cpp; vtable 0x00815d50).
+00690ba0 C_SquadMenu::IsOneSoldier | bool __cdecl IsOneSoldier(void)
+00690be0 C_SquadMenu::OnStart | bool __thiscall OnStart(C_MenuState *this, void * arg)
+00691310 C_SquadMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
+00693a50 C_SquadMenu::OnStop | void __thiscall OnStop(C_MenuState *this)
+006956a0 C_SquadMenu::IsInSlots | bool __thiscall IsInSlots(C_MenuState *this, int profile)
+00695dc0 C_SquadMenu::FirstFreeSpeechSet | int __cdecl FirstFreeSpeechSet(void)
+00695e20 C_SquadMenu::SyncSquad | bool __thiscall SyncSquad(C_MenuState *this)
+00694dd0 C_SquadMenu::SelectFreeSoldier | void __thiscall SelectFreeSoldier(C_MenuState *this, int index)
+00690ef0 S_SquadSlot::SetSoldier | void __thiscall SetSoldier(void * this, int profile, bool locked)
+006910d0 S_SquadSlot::ShowTexts | void __thiscall ShowTexts(void * this)
+00690ec0 S_SquadSlot::HasControl | bool __thiscall HasControl(void * this, uint id)
+006755d0 GetProfileName | void * __fastcall GetProfileName(void * profile)
+00841cb8 g_operationMedalSoldiers @ int[80]
+# Part 9g-x: the squad screen's screens (src/game/squad_menu.cpp).
+00691570 C_SquadMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
+00694810 C_SquadMenu::RemoveDeadSoldiers | void __cdecl RemoveDeadSoldiers(void)
+00695b90 C_SquadMenu::FillSlots | void __thiscall FillSlots(C_MenuState *this)
+00691fa0 C_SquadMenu::DescribeSquadScreen | bool __thiscall DescribeSquadScreen(C_MenuState *this, void * desc, void * model)
+00691b30 C_SquadMenu::DescribeSelectionScreen | bool __thiscall DescribeSelectionScreen(C_MenuState *this, void * desc, void * model)
+00691cc0 C_SquadMenu::OnSelectionPicked | bool __thiscall OnSelectionPicked(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00691db0 C_SquadMenu::OnSelectionShown | bool __thiscall OnSelectionShown(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+# Part 9g-xi: the squad screen's roster and medals (src/game/squad_menu.cpp).
+00692100 C_SquadMenu::DescribeRoster | bool __thiscall DescribeRoster(C_MenuState *this, void * desc, void * model)
+00692c40 C_SquadMenu::DescribeMedals | void __thiscall DescribeMedals(C_MenuState *this, void * desc, void * model)
+00690d50 C_SquadMenu::OnMedalHover | bool __thiscall OnMedalHover(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+# Part 9g-xii: the squad screen's stats, panel, places, buttons and a soldier picked (src/game/squad_menu.cpp).
+00693320 C_SquadMenu::DescribeStats | bool __thiscall DescribeStats(C_MenuState *this, void * desc, void * model)
+006934f0 C_SquadMenu::DescribePanel | bool __thiscall DescribePanel(C_MenuState *this, void * desc, void * model)
+00693560 C_SquadMenu::DescribeSelected | bool __thiscall DescribeSelected(C_MenuState *this, void * desc, void * model)
+00693880 C_SquadMenu::DescribeButtons | bool __thiscall DescribeButtons(C_MenuState *this, void * desc, void * model)
+00694930 C_SquadMenu::OnSoldierInfo | bool __thiscall OnSoldierInfo(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00694bc0 C_SquadMenu::OnSoldierControl | bool __thiscall OnSoldierControl(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00695d30 C_SquadMenu::PlaceRosterSelector | bool __thiscall PlaceRosterSelector(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+008ae692 g_squadInfoShown @ bool
+# Part 9g-xiii: a soldier assigned or detached (src/game/squad_menu.cpp).
+00694f30 C_SquadMenu::OnAssign | bool __thiscall OnAssign(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+# Part 9g-xiv: a soldier's picture dragged and dropped (src/game/squad_menu.cpp).
+00693ae0 C_SquadMenu::OnDragStart | bool __thiscall OnDragStart(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00693e50 C_SquadMenu::OnDragMove | bool __thiscall OnDragMove(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00693f00 C_SquadMenu::OnDrop | bool __thiscall OnDrop(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+006945c0 C_SquadMenu::OnSoldierNotify13 | bool __thiscall OnSoldierNotify13(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+# Part 9g-xv: the automatic selection (src/game/squad_menu.cpp).
+00695740 C_SquadMenu::OnAutoSelect | bool __thiscall OnAutoSelect(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+006956d0 C_SquadMenu::KeepBest | void __fastcall KeepBest(int * ids, int * scores, int * count, int id, int score)
+# Part 9g-xvi: the selected soldier's stats, medals and name; the screen's tick and hiding (src/game/squad_menu.cpp).
+00696140 C_SquadMenu::ShowStats | void __thiscall ShowStats(C_MenuState *this)
+00696a30 C_SquadMenu::ShowMedals | void __thiscall ShowMedals(C_MenuState *this, void * profile)
+00696c90 C_SquadMenu::OnNameEdited | bool __thiscall OnNameEdited(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00696d60 C_SquadMenu::OnScreenTick | bool __thiscall OnScreenTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00696ef0 C_SquadMenu::OnScreenHidden | bool __thiscall OnScreenHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)

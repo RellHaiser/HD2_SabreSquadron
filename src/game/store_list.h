@@ -1,6 +1,7 @@
 // The store's item lists of the in-game menu and the equipment screen (vtable 0x008157c4, 0x38 bytes;
 // C_GameMenu +0x580): a page of the item stock per inventory group (the tabs choose the page shown),
-// each item type's entry showing its count. Original 0x0067b070..0x0067c390 (parts 9e-iii-a and -b).
+// each item type's entry showing its count. Original 0x0067aa70, 0x0067b070..0x0067c390 (parts
+// 9e-iii-a and -b; 9e-xxiv the description).
 #pragma once
 
 #include <cstdint>
@@ -58,11 +59,23 @@ public:
     void SetActive(bool on);                            // 0x0067c390
 
     void SetMenu(C_EquipmentMenuBase *menu) { m_menu = menu; }
-    // The list's description: the group "P_visualstore", its tabs and pages (not ported yet).
+    // The list's description: the group "P_visualstore" (the screen's next control: the list's
+    // indices), its tabs (OnTab; the groups' texts; inactive) and scroll bar (the first page), the
+    // entries (500 more, none yet), a page per group (BuildPage; not the 4th), the highlight
+    // ("selitem08") unlinked at the origin.
     void BuildDescription(S_ScreenDesc *desc, I3D_frame *model);   // 0x0067aa70
+    // The equipment screen's copy: its scroll bar "scroll01", its highlight "itemselector", the tabs
+    // active.
+    void BuildEquipmentDescription(S_ScreenDesc *desc, I3D_frame *model);   // 0x0067c570
     C_ItemStock *GetStock() const { return m_stock; }
 
+protected:
+    // A page: the base's, or the equipment screen's (its highlight, entries with their descriptions, stepped downward, the first page left shown).
+    bool BuildPageOf(S_ControlDesc *parent, I3D_frame *model, const C_str &name, int group, bool equipment);
+
 private:
+    // The descriptions' body: the scroll bar's and the highlight's frames, the tabs inactive or not.
+    void Describe(S_ScreenDesc *desc, I3D_frame *model, const char *scrollBar, const char *highlight, bool inactive);
     // The list's controls: the screen's control m_controlIndex of screen m_screenIndex.
     uint32_t BaseId() const { return (static_cast<uint32_t>(m_controlIndex) & 0x3F | m_screenIndex << 6) << 20; }
 
@@ -77,4 +90,10 @@ private:
     I3D_frame *m_highlight = nullptr;                   // +0x2C
     uint32_t m_screenIndex = 0;                         // +0x30
     int m_controlIndex = 0;                             // +0x34
+};
+
+// The equipment screen's list: only its pages differ.
+class C_EquipmentStoreList : public C_StoreList {
+public:
+    bool BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group) override;   // 0x00 0x0067cb60
 };

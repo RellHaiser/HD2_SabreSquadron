@@ -2414,5 +2414,5 @@ void SendExplosionMessage(const S_vector &pos, int material)
     msg->WriteBits(SHOT_MESSAGE_EXPLOSION, SHOT_MESSAGE_BITS);
     static_cast<C_NetMessage *>(msg)->WritePosition(pos);
     msg->WriteBits(static_cast<uint32_t>(material), 8);
-    g_netGame.SendMessage(msg);
+    g_netGame.SendNetMessage(msg);
 }

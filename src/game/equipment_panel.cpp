@@ -196,14 +196,14 @@ void C_EquipmentPanel::BuildDescription(S_ScreenDesc *screen, I3D_frame *model)
         AddItemCallbacks(panel->AddChild(DESC_TYPE_ITEM, PLACE_CONTROLS[i]), m_menu, i != PLACE_UNIFORM);
     panel->AddChild(DESC_TYPE_ITEM, "drop");
     // The belt: its scroll group (7) and items (8), the backpack's (9, 10).
-    AddScrollGroup(panel->AddChild(DESC_TYPE_GROUP, "scroll13"), this, "hlcpct00", BELT_BAR_START, "barrow_up23",
-                   "barrow_down23", "text_hlstrscap", 0xA9C, "slider12");
+    AddScrollGroup(panel->AddChild(DESC_TYPE_GROUP, "scroll13"), this, "hlcpct00", BELT_BAR_START, "barrow up23",
+                   "barrow down23", "text_hlstrscap", 0xA9C, "slider12");
     S_ControlDesc *belt = panel->AddChild(DESC_TYPE_PANE, "GB_Holsters");
     AddDescMessage(belt, 0, CONTROL_MSG_SET_VISIBLE, 4);
     for (const char *name : BELT_ITEMS)
         AddItemCallbacks(belt->AddChild(DESC_TYPE_ITEM, name), m_menu, true);
-    AddScrollGroup(panel->AddChild(DESC_TYPE_GROUP, "scroll14"), this, "hlcpct01", LOAD_BAR_START, "barrow_up24",
-                   "barrow_down24", "text_bkpckcap", 0xA9D, "slider13");
+    AddScrollGroup(panel->AddChild(DESC_TYPE_GROUP, "scroll14"), this, "hlcpct01", LOAD_BAR_START, "barrow up24",
+                   "barrow down24", "text_bkpckcap", 0xA9D, "slider13");
     S_ControlDesc *backpack = panel->AddChild(DESC_TYPE_PANE, "GR_BackPack");
     AddDescMessage(backpack, 0, CONTROL_MSG_SET_VISIBLE, 4);
     for (const char *name : BACKPACK_ITEMS)

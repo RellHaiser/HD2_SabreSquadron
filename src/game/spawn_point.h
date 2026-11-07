@@ -13,6 +13,7 @@ class C_Human;
 struct S_SoldierState;
 
 class alignas(16) C_SpawnPoint : public C_Actor {       // "SpawnPoint", vtable 0x008138e0
+    friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
 public:
     C_SpawnPoint() : C_Actor(ACTOR_SPAWN_POINT) {}      // 0x006118d0
     ~C_SpawnPoint() override = default;                 // 0x00611940 (scalar deleting 0x00611920)

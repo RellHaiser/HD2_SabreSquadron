@@ -17,6 +17,8 @@
 #include "game/module.h"
 #include "game/pending.h"
 #include "game/profile.h"
+#include "game/copy_protection.h"
+#include "game/crash_report.h"
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "ls3d/rw_data.h"
@@ -24,7 +26,7 @@
 
 // Note: the original interleaves calls into the copy-protection layer and shuffled
 // indirection tables with this code. They have no effect on the game logic and are
-// not reproduced.
+// not reproduced (game/copy_protection.h).
 
 S_LS3DSetup g_setup = {                            // 0x008aedf8, defaults from 0x006db380
     0x0C, 0, 1024, 768, 32, 0,
@@ -97,34 +99,45 @@ bool ReadSetupFromRegistry(S_LS3DSetup &setup)
     return size == sizeof(setup) && setup.version == 0x0C;
 }
 
+// (0x006db430)
+void __cdecl IgnoreEngineError(uint32_t, int, const char *, uint32_t)
+{
+}
+
 // Creates the window and Direct3D device from the setup.  0x006db440
 bool InitGraphics()
 {
+    InitProtectionTables();
     S_IGraphInit init = {};
     init.instance = g_instance;
     init.adapter = g_setup.adapter;
-    SetRect(&init.windowRect, 50, 50, g_setup.width, g_setup.height);
-    SetRect(&init.clientRect, 0, 0, g_setup.width, g_setup.height);
+    init.x = init.y = 50;
+    init.width = init.childWidth = g_setup.width;
+    init.height = init.childHeight = g_setup.height;
+    init.errorCallback = IgnoreEngineError;
 
-    uint32_t flags = IG_INIT_DEFAULT;
-    if (g_setup.textureFormat == 4)
-        flags |= IG_INIT_32BIT;
-    if (g_setup.textureFormat == 2)
-        flags |= IG_INIT_16BIT;
-    if (g_setup.unknown16)
-        flags |= IG_INIT_16BIT;
-    if (g_setup.fullscreen) {
+    uint32_t flags = IG_INIT_CHILD_WINDOW;
+    if (g_setup.antialiasing == 4)
+        flags |= IG_INIT_FSAA4;
+    if (g_setup.antialiasing == 2)
+        flags |= IG_INIT_FSAA2;
+    if (g_setup.hardwareTnl)
+        flags |= IG_INIT_HW_TNL;
+    // (The port's own switch: a window whatever the setup says, without touching the registry that the installed game shares.)
+    if (g_setup.fullscreen && !std::strstr(GetCommandLineA(), " -window")) {
         // Console mode ("-c") stays windowed unless it is joining a game ("-join").
         const char *commandLine = GetCommandLineA();
         const bool consoleMode = std::strstr(commandLine, "-c") && !std::strstr(commandLine, "-join");
         if (!consoleMode) {
             flags |= g_setup.tripleBuffer ? (IG_INIT_FULLSCREEN | IG_INIT_TRIPLE_BUFFER) : IG_INIT_FULLSCREEN;
+            init.bitDepth = static_cast<uint8_t>(g_setup.bitsPerPixel);
             if (g_setup.vsync)
                 flags |= IG_INIT_VSYNC;
+            init.refreshRate = static_cast<uint8_t>(g_setup.refreshRate);
         }
     }
-    if (g_setup.forceInit32)
-        flags |= IG_INIT_32BIT;
+    if (g_setup.waitInactive)
+        flags |= IG_INIT_WAIT_INACTIVE;
     init.flags = flags;
 
     IGraph *graph = GetIGraph();
@@ -183,7 +196,7 @@ void ApplyRenderSettings()                         // 0x006db830
 // Keyboard set-up, language selection and game texts.  0x006db970
 void InitInputAndTexts()
 {
-    GetIGraph()->InitInput();
+    GetIGraph()->InitInput(0);
     InitControls(g_controls);
     const unsigned listenerCount = g_frameListenersBegin
         ? static_cast<unsigned>(g_frameListenersEnd - g_frameListenersBegin) : 0;
@@ -378,7 +391,7 @@ uint32_t LimitFrameTime(uint32_t minMs, uint32_t maxMs)
     if (elapsedMs < minMs) {
         // Sleep the rest of the minimum frame time on a one-shot multimedia timer.
         timeSetEvent(minMs - elapsedMs, 0, reinterpret_cast<LPTIMECALLBACK>(g_frameTimerEvent), 0,
-                     TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
+                     TIME_ONESHOT | TIME_CALLBACK_EVENT_PULSE);
         WaitForSingleObject(g_frameTimerEvent, 100);
         g_lastFrameMicros = static_cast<uint32_t>(MicrosecondsNow());
         return minMs;
@@ -554,9 +567,11 @@ int RunGame()
             SaveScreenshot();
 
         if ((g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL && app->IsStateActive()) {
-            if (GetGame()->IsPlayerInputEnabled())
-                ExecutePendingCommand(*app);
-            else if (app->m_pendingCommand != APP_COMMAND_NONE) {
+            // In a game the command waits until the player's controls are on again; in the menus (no game) only a load from the menu is done.
+            if (GetGame()) {
+                if (GetGame()->IsPlayerInputEnabled())
+                    ExecutePendingCommand(*app);
+            } else if (app->m_pendingCommand != APP_COMMAND_NONE) {
                 if (app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU)
                     app->LoadFromMenu();
                 app->m_pendingCommand = APP_COMMAND_NONE;
@@ -584,6 +599,32 @@ int RunGame()
     ShutdownGame();
     CloseHandle(g_frameTimerEvent);
     return 1;
+}
+
+// (0x006dd8d0) The running instance woken by another; everything else to the window's own.
+LRESULT CALLBACK GameWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if (msg == g_activateMessage) {
+        ShowWindow(hwnd, SW_RESTORE);
+        SetForegroundWindow(hwnd);
+    }
+    return CallWindowProcA(reinterpret_cast<WNDPROC>(g_originalWndProc), hwnd, msg, wParam, lParam);
+}
+
+// (The end of 0x006dceb0.) Made if it was not: the set-up it makes is deleted with it.
+void RunExitSequence()
+{
+    delete GetCommandProcessor();
+    ClearCommandProcessor();
+}
+
+// (The middle of 0x006dc770.) The caches, not their objects.
+void FreeResourceCaches()
+{
+    g_modelCache.Forget();
+    g_soundCache.Forget();
+    g_shadowCache.Forget();
+    g_versionModelCache.Forget();
 }
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLine*/, int /*showCmd*/)

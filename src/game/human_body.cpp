@@ -486,6 +486,12 @@ I3D_frame *S_HumanBody::GetUnknown6E0(int *out) const
     return movement->GetUnknown6E0();
 }
 
+// (0x005ac4c0, on the member at +0x98. Fix: another kind of actor has none; the original reads what is there.)
+I3D_sector *C_Actor::GetSector() const
+{
+    return m_type == ACTOR_HUMAN ? static_cast<const C_Human *>(this)->GetBodySector() : nullptr;
+}
+
 I3D_sector *S_HumanBody::GetSector() const
 {
     return movement->GetSector();

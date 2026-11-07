@@ -578,9 +578,12 @@ const char *C_Human::GetFullName() const
 int C_Human::GetProfileUnknown24() const
 {
     if (!IsLocalGame()) {
-        // (The original copies part of the player's network state here and does not use it.)
-        g_netGame.LockPlayers();
+        // A network game: the rank the round's score gave the player, not the profile's.
+        // (Fix: the original reads past the players for a human without a slot.)
+        const S_NetPlayerState *players = g_netGame.LockPlayers();
+        const int rank = m_netId >= 0 && m_netId < g_netGame.GetPlayerCount() ? players[m_netId].stats[NET_STAT_RANK] : 0;
         g_netGame.UnlockPlayers();
+        return rank;
     }
     return m_profile ? m_profile->unknown24 : 0;
 }
