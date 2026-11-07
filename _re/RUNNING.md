@@ -89,9 +89,11 @@ On the user's LAN server, as a client: occupation on Normandy3; objectives on Cz
 
 Africa5, part of it: the stealth and disguise meter; saving and loading in a mission; every squad order tried (some need gear not at hand, a launcher for "Use RPG"). The tactical map's crash: above; the user confirmed the double right-click works since the fix. (Scripted right clicks, `send_keys` `rclick`, `rclick2`, pan the camera and place no known order; the user's bind is Caps Lock, and an odd number of presses leaves the keyboard's Caps Lock on.)
 
+Every single player mission loads without a crash. The aqualung and submarines on Norway and Normandy1. Africa2 and Africa6 played to their ends.
+
 ## Not tested
 
-- **The rest of the game:** the other missions and weapons.
+- **The rest of the game:** the other missions past loading, and the weapons not used yet.
 - **Multiplayer:** a session with another player; hosting with the port, listen or dedicated. To join a local server of the original's: `HD2DS_SabreSquadron.exe -cmd -exec` a file with `domain internet`, `port 11001`, `style deathmatch`, `mapname Africa1`, `server`; the client: `-window -cmd domain internet port 11001 join <address>`.
 - **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.
