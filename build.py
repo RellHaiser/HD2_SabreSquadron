@@ -23,9 +23,9 @@ VSWHERE = r"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe
 WORK = os.path.join(tempfile.gettempdir(), "ls3df_build")
 LIBS = ["kernel32.lib", "user32.lib", "gdi32.lib", "ole32.lib", "winmm.lib", "version.lib", "advapi32.lib",
         "dinput8.lib", "dxguid.lib", "dsound.lib", "strmiids.lib"]
-# Import libraries made from lib/*.def (binkw32, vorbisfile, rw_data): MSVC's lib.exe cannot keep
+# Import libraries made from lib/*.def (binkw32, d3d8, vorbisfile, rw_data): MSVC's lib.exe cannot keep
 # the leading underscore of decorated __stdcall export names ("_BinkOpen@8"), MinGW dlltool can.
-IMPORT_DEFS = ["binkw32", "rw_data", "vorbisfile"]
+IMPORT_DEFS = ["binkw32", "d3d8", "rw_data", "vorbisfile"]
 # Where to look for it: %DLLTOOL%, PATH, then common 32-bit MinGW installs (MSYS2, Nim's own).
 DLLTOOL_PATHS = [r"C:\msys64\mingw32\bin\dlltool.exe", r"C:\mingw32\bin\dlltool.exe",
                  r"C:\nim-2.2.6\dist\mingw32\bin\dlltool.exe"]

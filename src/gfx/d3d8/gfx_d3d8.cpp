@@ -19,8 +19,6 @@ using d3d8::D3D;
 using ig::g_pD3D;
 using ig::g_pDevice;
 
-using Direct3DCreate8Fn = IDirect3D8 *(__stdcall *)(UINT);
-
 // Out-parameters: `call` writes a Direct3D object, the caller gets its handle. (The object starts as
 // the caller's handle, so a call that does not write it leaves the caller's variable as it was.)
 template <typename H, typename Call>
@@ -36,12 +34,9 @@ class DeviceD3D8 final : public Device {
 public:
     bool Open() override
     {
-        // The original links d3d8.lib; the port binds Direct3DCreate8 at run time (the SDK has no
-        // Direct3D 8 import library any more).
-        if (HMODULE d3d8 = LoadLibraryA("d3d8.dll")) {
-            if (auto create = reinterpret_cast<Direct3DCreate8Fn>(GetProcAddress(d3d8, "Direct3DCreate8")))
-                g_pD3D = create(D3D_SDK_VERSION);
-        }
+        // Imported like the original (lib/d3d8.def), so d3d8.dll loads with the game and
+        // LS3DF.dll's import table matches the original's.
+        g_pD3D = Direct3DCreate8(D3D_SDK_VERSION);
         return g_pD3D != nullptr;
     }
     bool IsOpen() override { return g_pD3D != nullptr; }
