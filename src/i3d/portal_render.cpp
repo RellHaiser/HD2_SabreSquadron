@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "core/debug.h"
+#include "core/enhance.h"
 #include "i3d/camera.h"
 #include "i3d/i3d_hooks.h"
 #include "i3d/occluder.h"
@@ -511,8 +512,16 @@ static void ParsePortal(I3D_portal *prev, I3D_portal *portal, bool backwards)
         const S_vector p = v * m;
         proj[i] = S_vector4{ inv * p.x, inv * p.y, wv, 0.0f };
     }
-    if (portal->renderFlags & PRTR_ALL_BEHIND)
+    if (portal->renderFlags & PRTR_ALL_BEHIND) {
+        // (Port enhancement, LS3DF.ini NearPortalDistance) A portal of the camera's own sector:
+        // when the camera stands just past it, looking away, what sticks out of the sector beyond
+        // is still in view - a bunker gun's camera outside its embrasure, the gun's sight in front.
+        // That sector is looked into with the whole view (its frames are culled by the frustum;
+        // the depth buffer keeps what the camera's sector hides).
+        if (!prev && NearPortal(portal))
+            fullView();
         return;
+    }
     if (portal->renderFlags & PRTR_PARTLY_BEHIND) {
         // From the first vertex in front after one behind, around to the last in front: the
         // rect of those, open towards the sides where the edges go behind the camera.

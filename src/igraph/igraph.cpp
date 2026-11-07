@@ -1436,7 +1436,8 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     dbgPrintf("\n");
     {
         const S_enhancements &e = Enhancements();
-        if (e.anisotropy || e.trilinear || e.mipmaps || e.trueColorTextures || e.trueColorLightmaps) {
+        if (e.anisotropy || e.trilinear || e.mipmaps || e.trueColorTextures || e.trueColorLightmaps ||
+                    e.nearPortalDistance > 0.0f) {
             EnhancementLog("Port enhancements (LS3DF.ini):");
             if (e.anisotropy)
                 EnhancementLog("   Anisotropic filtering: %ix asked, %ix used (device maximum %lu%s)", e.anisotropy,
@@ -1450,6 +1451,8 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
                 EnhancementLog("   Textures from image files: %s", g_fmtTrueColor ? "A8R8G8B8" : "unchanged (no A8R8G8B8)");
             if (e.trueColorLightmaps)
                 EnhancementLog("   Lightmaps: %s", g_fmtTrueColor ? "32-bit" : "unchanged (no A8R8G8B8)");
+            if (e.nearPortalDistance > 0.0f)
+                EnhancementLog("   Portals behind the camera: looked through within %.2f m", e.nearPortalDistance);
             EnhancementLog("");
         }
     }

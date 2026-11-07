@@ -11,6 +11,7 @@ TrilinearFiltering=1
 ImprovedMipmaps=1
 TrueColorTextures=1
 TrueColorLightmaps=1
+NearPortalDistance=100
 ```
 
 A missing key is off. The DLL reads the file once, at start-up.
@@ -24,6 +25,24 @@ A missing key is off. The DLL reads the file once, at start-up.
 | `ImprovedMipmaps` | 0 / 1 | A new mip-map filter for BMP / TGA textures (details below). |
 | `TrueColorTextures` | 0 / 1 | Textures loaded from image files are 32-bit (A8R8G8B8) instead of 16-bit or DXT. DDS files keep their own format, and textures the engine fills itself (shadow maps, video, lightmaps) are left alone. |
 | `TrueColorLightmaps` | 0 / 1 | Lightmaps are always 32-bit. |
+| `NearPortalDistance` | 0–1000 (cm) | A camera standing just outside a room's opening (portal), looking away from it, still draws the room. Needed by gun cameras placed past an embrasure (details below). 100 is enough for the game's bunkers. |
+
+**NearPortalDistance** fixes cameras that sit just outside a sector (room). The engine draws the
+camera's own sector and enters a neighbouring sector only through a portal at least partly in
+front of the camera. Anything of that sector that sticks out past the opening is therefore lost
+when the camera is just past it and looking away:
+
+- The TK vz. 37 bunker gun of the Czech6 missions (`la_m_Bunkr01`) has its first-person camera
+  0.5–0.7 m outside the embrasure, in the outdoor sector. The gun belongs to the bunker sector, so
+  neither the gun nor a sight added to the model (`VIEW00`, the C++ repo's
+  `tools/build_bunker_sight.py`) was ever drawn.
+- With the option, a portal of the camera's own sector whose corners are all behind the camera is
+  still looked through when the camera is within the distance of its opening. The sector beyond
+  is then entered with the whole view: its frames are culled by the view frustum as usual (the
+  room itself is behind the camera), and the depth buffer keeps whatever the camera's own sector
+  hides.
+- The cost is a little extra culling work when a camera stands right in front of a door or window
+  looking away. Around the Czech6 bunkers that happens for 0.7% of random camera positions.
 
 **ImprovedMipmaps** replaces the original's filter, which weighs each 2 × 2 block unevenly, rounds
 down at every step and averages gamma-encoded values:
@@ -82,6 +101,8 @@ How it works and what it covers: [sound_device.md](sound_device.md#the-openal-so
   maximum anisotropy on stages 0–2, `SetState(2)` the trilinear floor, `LightmapsTrueColor()`
   (also used by `lightmap.cpp` and `litobject.cpp`); `driver_draw.cpp` restores the filter after
   drawing text.
+- `i3d/portal_render.cpp`: `NearPortal()` (the camera's distance to a portal's polygon) and the
+  look-through in `ParsePortal` for a camera-sector portal that is all behind the camera.
 - Every change is marked `(Port enhancement, LS3DF.ini <key>)` in the source.
 
 ## Tests
@@ -102,3 +123,9 @@ How it works and what it covers: [sound_device.md](sound_device.md#the-openal-so
   are texture formats and levels, plus texture ids one lower from `d_lamp_05` on. That is because
   `2DE_RAC1.TGA` is asked for with and without `ITC_TRUECOLOR`, and with the option both requests
   are identical, so the port shares one texture.
+- `test_near_portal <la_m_Bunkr01.4ds with VIEW00>`: loads the Czech6 scenes on a fake device,
+  places the bunker gun where each of the five bunker frames of CZECH6 and CZECH6_MP_ZONE puts
+  it, turns it over its range (15 poses each) and runs the sector pass from its camera. With the
+  option off (the original's behaviour) the sight is drawn in 0 of 75 poses; at 1 m it is drawn in
+  all 75. 20,000 random cameras around the bunkers check that the option only ever adds sectors;
+  two deliberately introduced bugs are caught.

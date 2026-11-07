@@ -38,6 +38,8 @@ S_enhancements ReadIni()
     o.mipmaps = get("ImprovedMipmaps") != 0;
     o.trueColorTextures = get("TrueColorTextures") != 0;
     o.trueColorLightmaps = get("TrueColorLightmaps") != 0;
+    const int nearPortal = get("NearPortalDistance");
+    o.nearPortalDistance = nearPortal <= 0 ? 0.0f : (nearPortal > 1000 ? 1000 : nearPortal) * 0.01f;
     o.openal = GetPrivateProfileIntA("Sound", "OpenAL", 0, path) != 0;
     return o;
 }

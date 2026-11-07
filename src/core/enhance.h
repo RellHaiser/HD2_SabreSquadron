@@ -9,6 +9,9 @@
 //                              ; their alpha-tested coverage at every level
 //   TrueColorTextures=1        ; textures from image files in A8R8G8B8 (not 16-bit or DXT)
 //   TrueColorLightmaps=1       ; lightmap atlases in 32-bit whatever driver state 0x22 says
+//   NearPortalDistance=100     ; centimetres: a camera this close to a portal of its sector that is
+//                              ; behind it still draws the sector beyond (a gun's camera just
+//                              ; outside a bunker's embrasure sees the gun's sight); 0: off
 //
 //   [Sound]
 //   OpenAL=1                   ; sound through OpenAL Soft (soft_oal.dll next to the DLL) instead of
@@ -23,6 +26,7 @@ struct S_enhancements {
     bool mipmaps;                           // ImprovedMipmaps
     bool trueColorTextures;                 // TrueColorTextures
     bool trueColorLightmaps;                // TrueColorLightmaps
+    float nearPortalDistance;               // NearPortalDistance, in metres (0: off)
     bool openal;                            // [Sound] OpenAL
 };
 
