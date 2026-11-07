@@ -134,7 +134,7 @@ or rendering that the dedicated server loads (`ls3drf/`).
 | `rw_data` | The virtual file system DLL, `rw_data.dll` ([RellHaiser/rw_data](https://github.com/RellHaiser/rw_data), kept in sync with `git subtree --prefix=rw_data`); `src/ls3d/rw_data.h` forwards to its header; built by `_re/tools/build_rw_data.py` |
 | `ls3drf` | The dedicated server's engine DLL, `LS3DRF.dll`: LS3DF's port without sound, video, input or the render device ([readher/LS3DRF](https://github.com/readher/LS3DRF) is split from it); built and tested with its own `build.py` |
 | `hd2ds_sabresquadron` | The dedicated server, `HD2DS_SabreSquadron.exe`: not started (the binary's facts only) |
-| `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md), [reverse-engineering findings](docs/findings/README.md) (formats, archives, binaries) |
+| `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md) |
 
 ## Legal
 
