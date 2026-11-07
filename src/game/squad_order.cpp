@@ -2,6 +2,7 @@
 // 0x0058d7e0) and their pool (0x005825c0..0x00582640, 0x00583980).
 #include "game/squad_order.h"
 
+#include <malloc.h>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -42,7 +43,7 @@ S_vector4 FramePos4(const I3D_frame *frame)
 
 void FreePath(S_Vector4Array &path)
 {
-    std::free(path.data);
+    _aligned_free(path.data);
     path.data = nullptr;
     path.count = 0;
     path.capacity = 0;
@@ -53,10 +54,10 @@ void AppendPoint(S_Vector4Array &path, const S_vector4 &point)
 {
     if (path.count >= path.capacity) {
         path.capacity += path.growBy;
-        S_vector4 *data = static_cast<S_vector4 *>(std::malloc(sizeof(S_vector4) * path.capacity));
+        S_vector4 *data = static_cast<S_vector4 *>(_aligned_malloc(sizeof(S_vector4) * path.capacity, 16));
         for (int i = 0; i < path.count; ++i)
             data[i] = path.data[i];
-        std::free(path.data);
+        _aligned_free(path.data);
         path.data = data;
     }
     path.data[path.count++] = point;
@@ -101,7 +102,7 @@ S_HumanOrder::~S_HumanOrder()
 {
     if (marker)
         RemoveMarker();
-    std::free(path.data);
+    _aligned_free(path.data);
 }
 
 void S_HumanOrder::Init(C_Human *human_, int kind_, int arg_, const S_vector4 &pos_, const S_vector4 &data_,
@@ -272,7 +273,7 @@ void S_HumanOrder::UpdatePath(const S_vector4 &from)
         // The path is the start and the marker.
         FreePath(path);
         path.capacity = path.growBy;
-        path.data = static_cast<S_vector4 *>(std::malloc(sizeof(S_vector4) * path.capacity));
+        path.data = static_cast<S_vector4 *>(_aligned_malloc(sizeof(S_vector4) * path.capacity, 16));
         AppendPoint(path, from);
         AppendPoint(path, FramePos4(marker));
         UpdateMarker();

@@ -1311,7 +1311,8 @@ public:
     I3DMETHOD(void, SetActiveCamera)(I3D_camera *camera) = 0; // 0x90
     // The ray from the active camera through the screen pixel (x, y): its start and unit
     // direction (the command map's picking).
-    I3DMETHOD(void, UnmapScreenPoint)(int x, int y, S_vector &origin, S_vector &dir) = 0;   // 0x94
+    // (Four floats each are written.)
+    I3DMETHOD(void, UnmapScreenPoint)(int x, int y, S_vector4 &origin, S_vector4 &dir) = 0;   // 0x94
     // World points to the screen (pixels; the interface's outline of the actor picked).
     I3DMETHOD(void, TransformPoints)(const S_vector4 *points, S_vector4 *out, int count) = 0;   // 0x98
     I3D_SLOT(9C);

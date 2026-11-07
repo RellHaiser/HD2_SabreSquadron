@@ -74,6 +74,8 @@ Every LS3DF branch so far draws no sky: `I3D_driver::Render` tests `backdropSect
 The early files (`app.cpp` above all) were ported before the later rigour: expect more of this kind there. `InitSound`, `InitRenderer` and `ApplyRenderSettings` were compared with the assembly and agree. Most of the rest of `app.cpp` has not been.
 | After 13e (the user: the gamma slider is grey): one variable of the original ported as two. `C_NetGame` is a global at 0x0097d070, so its fields also appear as absolute addresses, and those got names of their own: `g_graphFlags` is +0x4DFC, `g_netReplication` +0x14, `g_serverName` +0x4E00, `g_netMaxPing`/`Freq`/`Inactivity` +0x5064 on. `g_levelMinY` and `g_netSceneTop` are `g_scanMin[1]` and `g_scanMax[1]`. Each half was set on one side and read on the other. | `m_graphFlags` stayed 0, and `Close`, on showing the main menu, cleared all of IGraph's flags, the full screen one too, which the slider tests. `g_netReplication` was never set: a null pointer in any multiplayer game. `g_levelMinY` stayed 0: a human below y = -5 was killed. The server's name on the info screen was empty, and the console's limits never reached the ping and inactivity checks. |
 | After 13e (the user: joining a server stays at "Connecting"): the same kind of split. `C_NetGame`'s transport is a pointer in the port and by value in the original (+0x33C), so `+0x414` is the transport's own `m_callback` (+0xD8), which the port kept as a second field. `Init` set that one, the transport's stayed null, and every datagram was dropped. | The server's first message, which ends "Connecting", never reached the game, as a client. A server hosted by the port would have lost its clients' messages the same way (not run). |
+| After 13e (the user: the tactical map crashed on a double right-click): `S_HumanOrder`'s path was made with `std::malloc` and freed with `std::free` in `squad_order.cpp`, while `BuildPathPoints` makes the same array with `_aligned_malloc`, as the original does throughout (0x0058c8e0). | `free` of an aligned block: the second click hits the new order's marker, deletes the order, and the heap fails in `ReleaseHumanOrder` (the user's `HD2_Port.RPT`). |
+| Also then, found by the checked build: `IScene::UnmapScreenPoint` writes four floats each, into the port's three-float `S_vector`s. | `_RTC_CheckStackVars` in `C_CommandPanel::PickTarget` on opening the map; in the release build, two floats written over neighbouring locals. |
 
 ## Tested by the user, playing (2026-11-06)
 
@@ -85,9 +87,11 @@ Multiplayer, as a client: an RpR internet deathmatch server (joined, spawned, mo
 
 On the user's LAN server, as a client: occupation on Normandy3; objectives on Czech3, spawned as Axis, with the VIP role and its defined uniform assigned.
 
+Africa5, part of it: the stealth and disguise meter; saving and loading in a mission; every squad order tried (some need gear not at hand, a launcher for "Use RPG"). The tactical map's crash: above; the user confirmed the double right-click works since the fix. (Scripted right clicks, `send_keys` `rclick`, `rclick2`, pan the camera and place no known order; the user's bind is Caps Lock, and an odd number of presses leaves the keyboard's Caps Lock on.)
+
 ## Not tested
 
-- **The rest of the game:** the other missions and weapons, squad orders and the command map not reported yet.
+- **The rest of the game:** the other missions and weapons.
 - **Multiplayer:** a session with another player; hosting with the port, listen or dedicated. To join a local server of the original's: `HD2DS_SabreSquadron.exe -cmd -exec` a file with `domain internet`, `port 11001`, `style deathmatch`, `mapname Africa1`, `server`; the client: `-window -cmd domain internet port 11001 join <address>`.
 - **The fight's balance:** enemies acted (they closed in from 90 m, shot, killed), but it was not compared with the original's. Getting near them used a temporary hook and scripted walking, not committed.
 - **How it plays.** One walk compared with the original: W held the same time ends in nearly the same place (the gate looks about 8 % larger in the port's picture, one sample, within this test's timing). Climbing, animation and AI not compared.

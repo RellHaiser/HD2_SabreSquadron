@@ -1,5 +1,5 @@
 # Presses keys in the running game (DirectInput: by scan code). Usage: send_keys.ps1 <process name> <scan code in hex>[,<scan code>...] [-Hold ms]
-# Also mouse: "click:x:y" clicks at the game's cursor coordinates; "click:x:y:move" only moves there.
+# Also mouse: "click:x:y" clicks at the game's cursor coordinates; "click:x:y:move" only moves there; "rclick:x:y", "rclick2:x:y": a right click, a double one.
 param([string]$Name, [string]$Keys, [int]$Hold = 250)
 Add-Type @"
 using System;
@@ -22,7 +22,7 @@ Start-Sleep -Milliseconds 300
 # Never into another program: nothing is sent unless the game has the focus.
 if ([K]::GetForegroundWindow() -ne $h) { "the game is not in front: no keys sent"; exit 3 }
 foreach ($key in $Keys.Split(',')) {
-    if ($key.StartsWith('click:')) {
+    if ($key.StartsWith('click:') -or $key.StartsWith('rclick')) {
         $parts = $key.Split(':')
         # The game's cursor adds up DirectInput's relative moves: to the corner first, then to the place.
         for ($i = 0; $i -lt 40; ++$i) { [K]::mouse_event(1, [uint32]4294967196, [uint32]4294967196, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 15 }
@@ -39,6 +39,14 @@ foreach ($key in $Keys.Split(',')) {
         [K]::mouse_event(1, [uint32]4294967295, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 100
         [K]::mouse_event(1, 1, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 200
         if ($parts.Count -gt 3) { continue }           # "click:x:y:move": only moves.
+        if ($key.StartsWith('rclick')) {
+            $times = if ($key.StartsWith('rclick2')) { 2 } else { 1 }
+            for ($i = 0; $i -lt $times; ++$i) {
+                [K]::mouse_event(8, 0, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 60
+                [K]::mouse_event(16, 0, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 60
+            }
+            continue
+        }
         [K]::mouse_event(2, 0, 0, 0, [UIntPtr]::Zero)
         Start-Sleep -Milliseconds $Hold
         [K]::mouse_event(4, 0, 0, 0, [UIntPtr]::Zero)
