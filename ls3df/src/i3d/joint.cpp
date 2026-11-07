@@ -17,12 +17,13 @@ void I3D_joint::Init()
 
 void I3D_joint::Uninit()
 {
-    if (mesh) {
-        if (mesh->joints && mesh->joints[jointIndex])
-            mesh->joints[jointIndex]->mesh = nullptr;
+    // (The original keeps the mesh in a register: the slot's joint is usually this one, whose member the next line clears.)
+    if (auto *const owner = mesh) {
+        if (owner->joints && owner->joints[jointIndex])
+            owner->joints[jointIndex]->mesh = nullptr;
         // Fix: the original also clears the slot when the mesh has no joint array (a null write).
-        if (mesh->joints)
-            mesh->joints[jointIndex] = nullptr;
+        if (owner->joints)
+            owner->joints[jointIndex] = nullptr;
     }
     I3D_frame::Uninit();
 }
