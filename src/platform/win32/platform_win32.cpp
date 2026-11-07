@@ -139,6 +139,14 @@ bool WaitEvent(Event *event)
     return MsgWaitForMultipleObjects(1, &handle, FALSE, INFINITE, 0xbf) == WAIT_OBJECT_0;
 }
 HANDLE NativeEvent(Event *event) { return reinterpret_cast<HANDLE>(event); }
+Event *EventFromNative(HANDLE handle) { return reinterpret_cast<Event *>(handle); }
+
+Library *OpenLibrary(const char *name) { return reinterpret_cast<Library *>(LoadLibraryA(name)); }
+void *LibrarySymbol(Library *library, const char *name)
+{
+    return reinterpret_cast<void *>(GetProcAddress(reinterpret_cast<HMODULE>(library), name));
+}
+void CloseLibrary(Library *library) { FreeLibrary(reinterpret_cast<HMODULE>(library)); }
 
 // ---------------------------------------------------------------- the window
 

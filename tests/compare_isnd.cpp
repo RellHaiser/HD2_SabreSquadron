@@ -7,7 +7,7 @@
 // Usage: compare_isnd.exe [original LS3DF.dll] [rounds] [seed]
 //
 // test-sources: src/isnd/*.cpp src/core/debug.cpp
-// test-sources: src/audio/dsound/audio_dsound.cpp
+// test-sources: src/audio/dsound/audio_dsound.cpp src/audio/audio.cpp src/audio/openal/audio_openal.cpp src/core/enhance.cpp
 // test-sources: src/platform/win32/platform_win32.cpp
 #include <windows.h>
 

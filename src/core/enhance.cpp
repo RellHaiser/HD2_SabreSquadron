@@ -38,6 +38,7 @@ S_enhancements ReadIni()
     o.mipmaps = get("ImprovedMipmaps") != 0;
     o.trueColorTextures = get("TrueColorTextures") != 0;
     o.trueColorLightmaps = get("TrueColorLightmaps") != 0;
+    o.openal = GetPrivateProfileIntA("Sound", "OpenAL", 0, path) != 0;
     return o;
 }
 

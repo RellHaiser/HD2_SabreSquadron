@@ -38,6 +38,20 @@ down at every step and averages gamma-encoded values:
 - These textures get their own cache files (a `G` before the extension), so old cache files are
   never used for them.
 
+## Sound
+
+```ini
+[Sound]
+OpenAL=1
+```
+
+| Key | Values | What it does |
+|---|---|---|
+| `OpenAL` | 0 / 1 | Sound plays through OpenAL Soft instead of DirectSound (the cross-platform plan's phase 2, [cross_platform.md](cross_platform.md)). Needs `soft_oal.dll` (built with the DLL) in the game folder; without it the DLL falls back to DirectSound. The game's EAX reverb works again, as on the sound cards of its time: OpenAL Soft emulates EAX, while DirectSound on today's Windows has none. |
+
+How it works and what it covers: [sound_device.md](sound_device.md#the-openal-soft-backend).
+`log.txt` says which one is in use.
+
 ## Things to know
 
 - **Trilinear filtering and 32-bit lightmaps are already the engine's defaults.** Those two

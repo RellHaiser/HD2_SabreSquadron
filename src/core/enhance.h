@@ -1,6 +1,6 @@
-// Port enhancements: graphics options the original engine does not have, read from LS3DF.ini next
-// to the DLL. Each one is off when the file or its key is missing; the engine then works as the
-// original (the compare_* tests run that way).
+// Port enhancements: options the original engine does not have, read from LS3DF.ini next to the
+// DLL. Each one is off when the file or its key is missing; the engine then works as the original
+// (the compare_* tests run that way).
 //
 //   [Graphics]
 //   AnisotropicFiltering=16    ; 2 - 16: anisotropic texture filtering (capped by the device); 0: off
@@ -9,6 +9,10 @@
 //                              ; their alpha-tested coverage at every level
 //   TrueColorTextures=1        ; textures from image files in A8R8G8B8 (not 16-bit or DXT)
 //   TrueColorLightmaps=1       ; lightmap atlases in 32-bit whatever driver state 0x22 says
+//
+//   [Sound]
+//   OpenAL=1                   ; sound through OpenAL Soft (soft_oal.dll next to the DLL) instead of
+//                              ; DirectSound (audio/openal); DirectSound when the library is missing
 #pragma once
 
 namespace ls3d {
@@ -19,6 +23,7 @@ struct S_enhancements {
     bool mipmaps;                           // ImprovedMipmaps
     bool trueColorTextures;                 // TrueColorTextures
     bool trueColorLightmaps;                // TrueColorLightmaps
+    bool openal;                            // [Sound] OpenAL
 };
 
 // The options (LS3DF.ini is read on the first call).

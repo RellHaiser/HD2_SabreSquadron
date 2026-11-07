@@ -2,6 +2,8 @@
 // unchanged, so the engine makes exactly the DirectSound calls the original made.
 #include "audio/dsound/dsound_device.h"
 
+#include "audio/backends.h"
+
 namespace ls3d::audio {
 
 namespace {
@@ -178,6 +180,9 @@ DeviceDSound s_device;
 
 }  // namespace
 
+// (The default device; ChooseDevice, audio/audio.cpp, may switch to another backend.)
 Device *g_pAudio = &s_device;
+
+Device *DirectSoundDevice() { return &s_device; }
 
 }  // namespace ls3d::audio

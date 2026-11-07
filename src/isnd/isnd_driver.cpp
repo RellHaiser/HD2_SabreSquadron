@@ -110,6 +110,7 @@ HRESULT ISND_driver::Init(HWND hwnd, int frequency, int channels, int bits, uint
 bool ISND_driver::OpenDevice(HWND hwnd, int frequency, int channels, int bits, uint32_t initFlags)
 {
     flags = initFlags;
+    audio::ChooseDevice();      // (Port: the sound backend, LS3DF.ini [Sound] OpenAL)
     dbgPrintf("Sound hardware enumeration:");
     if (FAILED(audio::g_pAudio->Enumerate(snd::LogDevice, nullptr)))
         return false;

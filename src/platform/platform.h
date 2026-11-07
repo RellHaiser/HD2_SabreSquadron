@@ -59,6 +59,15 @@ void SetEvent(Event *event);
 bool WaitEvent(Event *event);
 // The native handle, for an API that sets the event itself (DirectSound's position notifications).
 HANDLE NativeEvent(Event *event);
+// The event of a native handle (a sound backend that emulates those notifications sets it).
+Event *EventFromNative(HANDLE handle);
+
+struct Library;                 // opaque: a shared library loaded at run time
+
+// Null when the library cannot be loaded (the system's search order).
+Library *OpenLibrary(const char *name);
+void *LibrarySymbol(Library *library, const char *name);
+void CloseLibrary(Library *library);
 
 // ---------------------------------------------------------------- the window
 

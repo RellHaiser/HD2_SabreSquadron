@@ -20,7 +20,7 @@ with the original DLL, and each new backend is checked against it before the old
 | Phase | What | Status |
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
-| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | next |
+| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft written and tested, not yet tried in the game |
 | 3 | An SDL_GPU render backend on Windows, its output compared pixel by pixel with the Direct3D 8 backend's | |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
@@ -55,21 +55,33 @@ the INI path from the module name, the command line.
 Known escape hatch: Bink plays its own sound through DirectSound, handed the sound device's object
 (`audio::Device::Native`); an FFmpeg backend plays its sound through the sound device instead.
 
-### Phase 2: SDL3, OpenAL Soft, FFmpeg (next)
+### Phase 2: SDL3, OpenAL Soft, FFmpeg (in progress)
 
 Each new backend sits beside the Windows one and is chosen at build time (the platform) or start-up
 (the devices), so the two can be compared in the same tests:
 
+| Part | Status |
+|---|---|
+| **Sound on OpenAL Soft** (`src/audio/openal`) | Written and tested on OpenAL Soft's loopback device (`test_audio_openal`); chosen with `[Sound] OpenAL=1` in LS3DF.ini; not yet tried in the game. Details in [sound_device.md](sound_device.md#the-openal-soft-backend). |
+| **Platform and input on SDL3** | Not started |
+| **Video on FFmpeg** | Not started |
+
+- **Sound on OpenAL Soft:** a buffer is an OpenAL source reading the buffer's bytes through a
+  callback, which keeps DirectSound's ring-buffer model (locks while playing, the play cursor,
+  position notifications). Pan and volume follow DirectSound's rules exactly. 3D uses
+  DirectSound's distance model with the axes flipped. EAX 3 goes to OpenAL Soft's own EAX
+  emulation, which answers the open question about EFX: OpenAL Soft maps EAX 3 to its reverb
+  itself. The library (OpenAL Soft 1.24.3, built 32-bit with the static C runtime) is loaded at run
+  time, so the DLL still works without it.
 - **Platform and input on SDL3:** the window, messages and the decisions IGraph makes on them
   (`platform::WindowEvents`), the clock, threads, locks and events; the keyboard and mouse with
-  DirectInput's key codes (DIK) kept as the engine's vocabulary.
-- **Sound on OpenAL Soft:** buffers, streaming with position notifications, 3D sound and the
-  listener, EAX 3 reverb mapped to EFX.
+  DirectInput's key codes (DIK) kept as the engine's vocabulary. The sound backend's position
+  notifications set the platform's events, so they move with it.
 - **Video on FFmpeg:** Bink 1 movies stepped frame by frame (the `video::Device` movie model), its
-  sound through the sound device; the DirectShow graphs (AVI and others) on FFmpeg too.
+  sound through the sound device; the DirectShow graphs (AVI and others) on FFmpeg too. Until then,
+  with OpenAL, Bink opens its own DirectSound for a movie's sound.
 
-Open questions: how close OpenAL's EFX reverb gets to EAX 3; how well FFmpeg decodes Bink 1 (the
-game's movies are Bink 1.x).
+Open question: how well FFmpeg decodes Bink 1 (the game's movies are Bink 1.x).
 
 ### Phase 3: SDL_GPU
 

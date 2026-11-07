@@ -29,6 +29,27 @@ IMPORT_DEFS = ["binkw32", "rw_data", "vorbisfile"]
 # Where to look for it: %DLLTOOL%, PATH, then common 32-bit MinGW installs (MSYS2, Nim's own).
 DLLTOOL_PATHS = [r"C:\msys64\mingw32\bin\dlltool.exe", r"C:\mingw32\bin\dlltool.exe",
                  r"C:\nim-2.2.6\dist\mingw32\bin\dlltool.exe"]
+# OpenAL Soft, 32-bit (the sound device's OpenAL backend, docs/sound_device.md): %OPENAL_DIR%, else
+# deps\openal-soft-x86 next to the checkout. Its headers are needed to compile; its library
+# (bin\OpenAL32.dll) is copied next to the DLL and the tests as soft_oal.dll, which the backend loads
+# at run time.
+OPENAL_DIR = os.environ.get("OPENAL_DIR") or os.path.join(os.path.dirname(ROOT), "deps", "openal-soft-x86")
+
+
+def openal_include():
+    inc = os.path.join(OPENAL_DIR, "include")
+    if not os.path.exists(os.path.join(inc, "AL", "alext.h")):
+        sys.exit("OpenAL Soft not found in %s: set OPENAL_DIR to an OpenAL Soft (1.23 or later) 32-bit "
+                 "install or binary release (include\\AL, bin\\OpenAL32.dll); see docs/sound_device.md" % OPENAL_DIR)
+    return inc
+
+
+def copy_openal(folder):
+    """soft_oal.dll into `folder` (from a built install, or a binary release's bin\\Win32)."""
+    for dll in (os.path.join(OPENAL_DIR, "bin", "OpenAL32.dll"), os.path.join(OPENAL_DIR, "bin", "Win32", "soft_oal.dll")):
+        if os.path.exists(dll):
+            shutil.copyfile(dll, os.path.join(folder, "soft_oal.dll"))
+            return
 
 
 def sources(only=None):
@@ -82,7 +103,7 @@ def cflags(debug):
             "/D_CRT_SECURE_NO_WARNINGS", "/DWIN32_LEAN_AND_MEAN", "/DNOMINMAX", "/DLS3D_API=", "/Zi",
             "/Od" if debug else "/O2", "/DNDEBUG" if not debug else "/D_DEBUG",
             "/wd4100",                      # unreferenced parameters (interface methods)
-            "/I" + SRC, "/I" + os.path.join(ROOT, "include")]
+            "/I" + SRC, "/I" + os.path.join(ROOT, "include"), "/I" + openal_include()]
 
 
 # The device seams (docs/render_device.md, sound_device.md, input_device.md, video_device.md): only a
@@ -95,6 +116,8 @@ SEAMS = [
     ("the DirectSound backend", ("dx/", "audio/dsound/"),
      re.compile(r'#include <dsound\.h>|#include "audio/dsound/|\bIDirectSound\w*|\bIKsPropertySet\b|'
                 r'\bLPDIRECTSOUND\w*|\bDirectSound(Create8|Enumerate\w*)\b')),
+    ("the OpenAL backend", ("audio/openal/",),
+     re.compile(r'#include <AL/|#include "audio/openal/|\balc?[A-Z]\w*\s*\(|\bEAX(Set|Get)\b')),
     ("the DirectInput backend", ("dx/", "input/dinput/"),
      re.compile(r'#include <dinput\.h>|#include "input/dinput/|\bIDirectInput\w*|\bLPDIRECTINPUT\w*|'
                 r'\bDirectInput8Create\b')),
@@ -197,6 +220,7 @@ def link(objs, debug):
     for name in ("LS3DF.dll", "LS3DF.lib", "LS3DF.pdb"):
         if os.path.exists(os.path.join(WORK, name)):
             shutil.copyfile(os.path.join(WORK, name), os.path.join(out, name))
+    copy_openal(out)
     print("link: ok ->", os.path.join(out, "LS3DF.dll"))
     return True
 
@@ -245,6 +269,7 @@ def build_tests(debug, only=None):
             shutil.copyfile(exe, os.path.join(out, f[:-4] + ".exe"))
         ok &= r.returncode == 0
         print("test %s: %s" % (f, "ok" if r.returncode == 0 else "FAILED"))
+    copy_openal(out)
     return ok
 
 
