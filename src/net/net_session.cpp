@@ -276,7 +276,7 @@ int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
         m_playersLock.Leave();
     } else {
         // A dedicated server: nothing shown.
-        GetIGraph()->UnknownDC(0);
+        GetIGraph()->InitMouse(0);
         ShowWindow(GetIGraph()->GetHWND(), SW_HIDE);
     }
     if (address)

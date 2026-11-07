@@ -123,7 +123,7 @@ void OwnMesh(I3D_frame *frame)
 {
     auto *visual = static_cast<I3D_object_visual *>(frame);
     visual->DuplicateMesh();
-    visual->GetVisualMesh()->Unknown18();
+    visual->GetVisualMesh()->DuplicateMaterials();
 }
 
 // The squad's soldier `index` (none: null).
