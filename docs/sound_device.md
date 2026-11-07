@@ -177,4 +177,5 @@ openal-soft.org works too: point `OPENAL_DIR` at it, and `build.py` takes its `b
 ## Not covered
 
 Like before, device creation, EAX detection and enumeration need real hardware and are not
-compared. The OpenAL backend has run only on the loopback device so far, not in the game.
+compared. The OpenAL backend has been tried in the game (November 2026) and works; beyond that
+session, only the loopback test checks it.

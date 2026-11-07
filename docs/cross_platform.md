@@ -20,7 +20,7 @@ with the original DLL, and each new backend is checked against it before the old
 | Phase | What | Status |
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
-| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft written and tested, not yet tried in the game |
+| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft done (works in the game) |
 | 3 | An SDL_GPU render backend on Windows, its output compared pixel by pixel with the Direct3D 8 backend's | |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
@@ -62,7 +62,7 @@ Each new backend sits beside the Windows one and is chosen at build time (the pl
 
 | Part | Status |
 |---|---|
-| **Sound on OpenAL Soft** (`src/audio/openal`) | Written and tested on OpenAL Soft's loopback device (`test_audio_openal`); chosen with `[Sound] OpenAL=1` in LS3DF.ini; not yet tried in the game. Details in [sound_device.md](sound_device.md#the-openal-soft-backend). |
+| **Sound on OpenAL Soft** (`src/audio/openal`) | Written and tested on OpenAL Soft's loopback device (`test_audio_openal`); chosen with `[Sound] OpenAL=1` in LS3DF.ini; tried in the game, where it works (November 2026). Details in [sound_device.md](sound_device.md#the-openal-soft-backend). |
 | **Platform and input on SDL3** | Not started |
 | **Video on FFmpeg** | Not started |
 
