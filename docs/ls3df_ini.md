@@ -71,6 +71,20 @@ OpenAL=1
 How it works and what it covers: [sound_device.md](sound_device.md#the-openal-soft-backend).
 `log.txt` says which one is in use.
 
+## Video
+
+```ini
+[Video]
+FFmpeg=1
+```
+
+| Key | Values | What it does |
+|---|---|---|
+| `FFmpeg` | 0 / 1 | Movies (Bink) and other videos are decoded by FFmpeg instead of Bink and DirectShow (the cross-platform plan's phase 2, [cross_platform.md](cross_platform.md)). Needs FFmpeg's five DLLs (`avutil-59.dll`, `avcodec-61.dll`, `avformat-61.dll`, `swscale-8.dll`, `swresample-5.dll`, built with the DLL) in the game folder; without them the DLL falls back to Bink and DirectShow. A movie's sound then plays through the game's sound device, so with `[Sound] OpenAL=1` too, nothing uses DirectSound. |
+
+How it works and what it covers: [video_device.md](video_device.md#the-ffmpeg-backend). `log.txt`
+says which one is in use.
+
 ## Things to know
 
 - **Trilinear filtering and 32-bit lightmaps are already the engine's defaults.** Those two

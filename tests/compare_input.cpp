@@ -12,6 +12,7 @@
 // test-sources: src/gfx/d3d8/gfx_d3d8.cpp src/audio/dsound/audio_dsound.cpp src/input/dinput/input_dinput.cpp
 // test-sources: src/platform/win32/platform_win32.cpp
 // test-sources: src/video/win32/*.cpp
+// test-sources: src/video/video.cpp src/video/ffmpeg/video_ffmpeg.cpp
 #include <windows.h>
 
 #include <cstdarg>

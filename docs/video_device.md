@@ -1,14 +1,17 @@
 # The video device (video)
 
 IShow plays its videos through one interface, `video::Device` (`video::g_pVideo`), declared in
-[`src/video/video.h`](../src/video/video.h). Its only implementation so far is the Windows backend
-in [`src/video/win32`](../src/video/win32). That backend is IShow's Bink and DirectShow code, moved
-there unchanged, with the texture renderer filter. The DLL therefore makes exactly the Bink and
-DirectShow calls it made before.
+[`src/video/video.h`](../src/video/video.h). It has two backends:
+
+- **Windows** ([`src/video/win32`](../src/video/win32)), the default: IShow's Bink and DirectShow
+  code, moved there unchanged, with the texture renderer filter. The DLL therefore makes exactly
+  the Bink and DirectShow calls the original made.
+- **FFmpeg** ([`src/video/ffmpeg`](../src/video/ffmpeg)), chosen in LS3DF.ini with
+  `[Video] FFmpeg=1` ([below](#the-ffmpeg-backend)): part of phase 2 of the
+  [cross-platform plan](cross_platform.md).
 
 This is the last of the device seams (after [render](render_device.md), [sound](sound_device.md),
-[input](input_device.md) and the [platform](platform.md)). FFmpeg is the planned successor for
-the movies.
+[input](input_device.md) and the [platform](platform.md)).
 
 ## Design
 
@@ -57,7 +60,9 @@ their places and the object its size (0x8C).
 
 **One escape hatch remains.** Bink plays a movie's sound itself, through DirectSound, so
 `UseSound` hands it the sound device's own object (`audio::Device::Native`). The two Windows
-backends meet there. A new video backend will play the sound through the sound device instead.
+backends meet there. The FFmpeg backend plays the sound through the sound device instead. Graphs
+get the sound device through `UseGraphSound`, which DirectShow, with a sound renderer of its own,
+does not need.
 
 **The platform got events.** The Ogg stream thread waits for the sound buffer's position
 notifications. `platform::Event` (`NewEvent`, `SetEvent`, `WaitEvent`, `DeleteEvent`) replaces
@@ -80,6 +85,85 @@ Everything in `video::Device`:
   into a `FrameSink` (in the sink's pixel layout, bottom-up rows) and its sound to the sound card;
   run, pause, stop; seek and report the position (100 ns units); the volume; the next event; the
   size of the picture rendered into the sink.
+
+## The FFmpeg backend
+
+**Choosing it.** IShow calls `video::ChooseDevice()` ([`src/video/video.cpp`](../src/video/video.cpp))
+on its first `Open`. With `[Video] FFmpeg=1` in LS3DF.ini ([ls3df_ini.md](ls3df_ini.md#video)),
+the backend loads FFmpeg's libraries at run time (`avutil-59.dll`, `avcodec-61.dll`,
+`avformat-61.dll`, `swscale-8.dll`, `swresample-5.dll`, through `platform::OpenLibrary`). If they are
+missing, Bink and DirectShow stay; `log.txt` says which. The choice is made once, so every movie
+and graph has one backend.
+
+**Movies keep Bink's model:**
+
+- **The clock.** IShow asks whether the next frame is due. The answer comes from the wall clock,
+  counting from the frame the movie was started or sought at, at the movie's rate (rate /
+  divisor, from the file), and standing still while the movie is paused. The clock and the sound
+  start at the first frame decoded after the open or a seek: a movie opened long before `Play`
+  starts in step, and one IShow stopped (it seeks back to frame 1) stays silent.
+- **Pictures.** Frames are decoded in order, and a seek goes to the keyframe before the frame and
+  decodes up to it. FFmpeg's Bink decoder gives YUV 4:2:0. Each picture is converted once per
+  format asked for (RGB32 as BGRA, RGB565, RGB555) with swscale, and rectangles are copied out of
+  it, as IShow copies its tiles.
+- **Sound** plays through the sound device (DirectSound or OpenAL Soft), not Bink's own
+  DirectSound.
+  - It is a looping 16-bit buffer. The backend keeps it about a second ahead of its play cursor
+    whenever IShow asks about the movie, which it does every frame it draws.
+  - The rest of the ring is kept silent. A watchdog thread stops the buffer once everything written
+    has played, so a movie IShow stops asking about falls silent, as Bink's did, instead of
+    replaying old sound.
+  - Bink's 0–32,768 volume becomes 2000 · log10(v / 32768) hundredths of a decibel.
+
+**Graphs keep DirectShow's model:**
+
+- **States and events.** A graph is stopped, paused or running, has a position (100 ns), and queues
+  events for `NextEvent`: paused on `Pause`, complete at the end.
+- **Frames.** A thread decodes the file. While the graph runs, it hands each frame to the sink when
+  its time comes, in bottom-up rows of DWORD-aligned pitch as the texture renderer got them, and
+  keeps the sound's buffer filled. A seek goes to the keyframe before and drops what lies before
+  the position.
+- **What it does not do:**
+  - A file rendered without a sink (`RenderFile`) plays its sound only: there is no window for its
+    pictures.
+  - Only the last file rendered into a graph plays. DirectShow kept earlier ones connected; IShow
+    renders one file per graph unless one fails.
+
+**The libraries.** `build.py` needs FFmpeg's headers in `%FFMPEG_DIR%`, by default `deps\ffmpeg-x86`
+next to the checkout. It copies the five DLLs next to the DLL and the tests. They are a 32-bit
+shared build of FFmpeg 7.1.1, licensed LGPL 2.1, with only what the game's files need:
+
+- the Bink, AVI and WAV demuxers;
+- the Bink video and audio decoders, raw video, PCM, MS and IMA ADPCM, MS Video 1 and Cinepak;
+- the file protocol, swscale and swresample.
+
+They depend only on Windows' own DLLs. To build them, first clone FFmpeg:
+
+```sh
+git clone --depth 1 --branch n7.1.1 https://github.com/FFmpeg/FFmpeg.git ffmpeg
+```
+
+Configure and build it with a 32-bit MinGW (gcc and make), from a POSIX shell such as Git's bash.
+Do this in the source folder, on a path without spaces:
+
+```sh
+./configure --prefix=<install> --arch=x86 --target-os=mingw32 --cc=i686-w64-mingw32-gcc \
+  --enable-shared --disable-static --disable-programs --disable-doc --disable-network \
+  --disable-autodetect --disable-x86asm --disable-avdevice --disable-avfilter --disable-postproc \
+  --disable-everything --enable-w32threads --enable-protocol=file --enable-demuxer=bink,avi,wav \
+  --enable-decoder=bink,binkaudio_rdft,binkaudio_dct,rawvideo,pcm_s16le,pcm_u8,adpcm_ms,adpcm_ima_wav,msvideo1,cinepak \
+  --enable-swscale --enable-swresample --extra-ldflags=-static-libgcc \
+  --extra-libs="-Wl,-Bstatic -lwinpthread -Wl,-Bdynamic"
+mingw32-make -j16 SHELL=sh && mingw32-make install SHELL=sh
+```
+
+Then copy the install's `bin` and `include` to `deps\ffmpeg-x86`.
+
+Two catches with MinGW's own `make`:
+
+- It cannot read MSYS-style paths, hence building in the source folder.
+- It picks the wrong rule for the version resources. Compile them by hand first with
+  `windres -I. -o libX/Xres.o libX/Xres.rc`, and give each an empty, older `libX/Xres.s`.
 
 ## Tests
 
@@ -139,7 +223,48 @@ Two things the test has to take care of, both outside the players' logic:
   The test waits for it before running the graph, so that both sides see their events in the
   same order.
 
+### The FFmpeg backend: `test_video_ffmpeg`
+
+The FFmpeg backend has no original to compare with, so the test puts it beside the Windows
+backend, which makes exactly the original's calls (above):
+
+- **Movies.** The game's Bink movies are decoded by both. Every frame is copied out in RGB32, and
+  every seventh also in RGB565 and RGB555. The sizes, frame counts, rates and frame numbers must
+  be the same, and the pictures close: FFmpeg's YUV-to-RGB is not Bink's. Then come seeks (the
+  first frame, the last, random ones) and a tile-sized rectangle copy.
+- **Graphs.** Uncompressed AVI files, written by the test as `compare_show` writes them, are
+  rendered into a sink by both. DirectShow runs without a reference clock. Both must deliver the
+  same frames, in the same order, with the same pixels. The 16-bit conversions may differ by one
+  5-bit step: DirectShow's colour converter truncates where swscale rounds. Then FFmpeg's graph
+  alone: a seek while stopped, the paused event, the end event (once), a sound-only file, a
+  missing file.
+- **Sound.** A movie's sound goes through the sound device: the OpenAL Soft backend on its
+  loopback device. It must play without gaps, at half the level at Bink volume 16,384, stay
+  silent while paused and play on after, and fall silent when IShow stops asking about the movie.
+
+Result: all 68 of the game's movies and 101,158 frames, in 12 minutes.
+
+- RGB32 averages 49.7 dB, and no movie is under 47.7 dB. Most movies' pixels are all within 2
+  of 255. A few movies have single blocks further off: up to 150 in `D_OutCistFrance1` and
+  `D_OutGenFrance1`, where FFmpeg's decoder does not match binkw32 exactly.
+- The 16-bit copies average 35 dB: both quantize to 5 or 6 bits, differently.
+- 78 AVI frames are identical in 32 bits.
+- The suite runs 60 frames each of the 8 smallest movies.
+
+Of 20 deliberately introduced bugs, 15 are caught: the pixel formats, the copy rectangle, the
+frame numbers, the next frame, the rate, the graph's row order and dropped frames, the paused
+event, a repeated end event, the volume, the watchdog, pause, the sound not starting, and a stale
+conversion. The other 5 change nothing these files show:
+
+- a frame count the Bink demuxer never gives;
+- a seek one frame late, when the only keyframe is the first;
+- unaligned graph rows, read with the pitch the sink is given;
+- a coarser seek in a graph, whose dropped frames hide it;
+- the silencing of the ring, which the watchdog makes redundant.
+
 ## Not covered
 
 PlayModal (it reads the keyboard), Draw (IGraph's render states), the external stream API
-(nothing in LS3DF installs one), Bink's own sound, and graphs that open a video window.
+(nothing in LS3DF installs one), Bink's own sound, and graphs that open a video window. The FFmpeg
+backend has been tried in the game (November 2026): the intro, a briefing and the credits play
+with their sound, and a movie can be skipped.

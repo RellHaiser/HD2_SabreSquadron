@@ -52,6 +52,30 @@ def copy_openal(folder):
             return
 
 
+# FFmpeg 7.1, 32-bit shared (the video device's FFmpeg backend, docs/video_device.md): %FFMPEG_DIR%,
+# else deps\ffmpeg-x86 next to the checkout. Its headers are needed to compile; its DLLs (bin\*.dll)
+# are copied next to the DLL and the tests, and the backend loads them at run time.
+FFMPEG_DIR = os.environ.get("FFMPEG_DIR") or os.path.join(os.path.dirname(ROOT), "deps", "ffmpeg-x86")
+FFMPEG_DLLS = ["avutil-59.dll", "avcodec-61.dll", "avformat-61.dll", "swscale-8.dll", "swresample-5.dll"]
+
+
+def ffmpeg_include():
+    inc = os.path.join(FFMPEG_DIR, "include")
+    if not os.path.exists(os.path.join(inc, "libavformat", "avformat.h")):
+        sys.exit("FFmpeg not found in %s: set FFMPEG_DIR to a 32-bit FFmpeg 7.1 shared build (include\\lib*, "
+                 "bin\\*.dll); see docs/video_device.md" % FFMPEG_DIR)
+    return inc
+
+
+def copy_libraries(folder):
+    """The run-time libraries of the optional backends (OpenAL Soft, FFmpeg) into `folder`."""
+    copy_openal(folder)
+    for name in FFMPEG_DLLS:
+        dll = os.path.join(FFMPEG_DIR, "bin", name)
+        if os.path.exists(dll):
+            shutil.copyfile(dll, os.path.join(folder, name))
+
+
 def sources(only=None):
     out = []
     for d, _, files in os.walk(SRC):
@@ -103,7 +127,7 @@ def cflags(debug):
             "/D_CRT_SECURE_NO_WARNINGS", "/DWIN32_LEAN_AND_MEAN", "/DNOMINMAX", "/DLS3D_API=", "/Zi",
             "/Od" if debug else "/O2", "/DNDEBUG" if not debug else "/D_DEBUG",
             "/wd4100",                      # unreferenced parameters (interface methods)
-            "/I" + SRC, "/I" + os.path.join(ROOT, "include"), "/I" + openal_include()]
+            "/I" + SRC, "/I" + os.path.join(ROOT, "include"), "/I" + openal_include(), "/I" + ffmpeg_include()]
 
 
 # The device seams (docs/render_device.md, sound_device.md, input_device.md, video_device.md): only a
@@ -118,6 +142,9 @@ SEAMS = [
                 r'\bLPDIRECTSOUND\w*|\bDirectSound(Create8|Enumerate\w*)\b')),
     ("the OpenAL backend", ("audio/openal/",),
      re.compile(r'#include <AL/|#include "audio/openal/|\balc?[A-Z]\w*\s*\(|\bEAX(Set|Get)\b')),
+    ("the FFmpeg backend", ("video/ffmpeg/",),
+     re.compile(r'#include <lib(avcodec|avformat|avutil|swscale|swresample)/|#include "video/ffmpeg/|'
+                r'\b(av|avcodec|avformat|sws|swr)_\w+\s*\(|\bAV[A-Z][A-Za-z]+\b')),
     ("the DirectInput backend", ("dx/", "input/dinput/"),
      re.compile(r'#include <dinput\.h>|#include "input/dinput/|\bIDirectInput\w*|\bLPDIRECTINPUT\w*|'
                 r'\bDirectInput8Create\b')),
@@ -220,7 +247,7 @@ def link(objs, debug):
     for name in ("LS3DF.dll", "LS3DF.lib", "LS3DF.pdb"):
         if os.path.exists(os.path.join(WORK, name)):
             shutil.copyfile(os.path.join(WORK, name), os.path.join(out, name))
-    copy_openal(out)
+    copy_libraries(out)
     print("link: ok ->", os.path.join(out, "LS3DF.dll"))
     return True
 
@@ -269,7 +296,7 @@ def build_tests(debug, only=None):
             shutil.copyfile(exe, os.path.join(out, f[:-4] + ".exe"))
         ok &= r.returncode == 0
         print("test %s: %s" % (f, "ok" if r.returncode == 0 else "FAILED"))
-    copy_openal(out)
+    copy_libraries(out)
     return ok
 
 

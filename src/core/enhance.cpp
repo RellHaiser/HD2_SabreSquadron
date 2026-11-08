@@ -41,6 +41,7 @@ S_enhancements ReadIni()
     const int nearPortal = get("NearPortalDistance");
     o.nearPortalDistance = nearPortal <= 0 ? 0.0f : (nearPortal > 1000 ? 1000 : nearPortal) * 0.01f;
     o.openal = GetPrivateProfileIntA("Sound", "OpenAL", 0, path) != 0;
+    o.ffmpeg = GetPrivateProfileIntA("Video", "FFmpeg", 0, path) != 0;
     return o;
 }
 

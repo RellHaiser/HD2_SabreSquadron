@@ -31,7 +31,7 @@ with the original DLL, and each new backend is checked against it before the old
 | Phase | What | Status |
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
-| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft done (works in the game) |
+| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft done (works in the game); FFmpeg done (works in the game); SDL3 next |
 | 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
@@ -75,7 +75,7 @@ Each new backend sits beside the Windows one and is chosen at build time (the pl
 |---|---|
 | **Sound on OpenAL Soft** (`src/audio/openal`) | Written and tested on OpenAL Soft's loopback device (`test_audio_openal`); chosen with `[Sound] OpenAL=1` in LS3DF.ini; tried in the game, where it works (November 2026). Details in [sound_device.md](sound_device.md#the-openal-soft-backend). |
 | **Platform and input on SDL3** | Not started |
-| **Video on FFmpeg** | Not started |
+| **Video on FFmpeg** (`src/video/ffmpeg`) | Written and tested against Bink and DirectShow (`test_video_ffmpeg`); chosen with `[Video] FFmpeg=1` in LS3DF.ini; tried in the game, where it works (November 2026: the intro, a briefing, the credits, skipping a movie). Details in [video_device.md](video_device.md#the-ffmpeg-backend). |
 
 - **Sound on OpenAL Soft:** a buffer is an OpenAL source reading the buffer's bytes through a
   callback, which keeps DirectSound's ring-buffer model (locks while playing, the play cursor,
@@ -88,11 +88,14 @@ Each new backend sits beside the Windows one and is chosen at build time (the pl
   (`platform::WindowEvents`), the clock, threads, locks and events; the keyboard and mouse with
   DirectInput's key codes (DIK) kept as the engine's vocabulary. The sound backend's position
   notifications set the platform's events, so they move with it.
-- **Video on FFmpeg:** Bink 1 movies stepped frame by frame (the `video::Device` movie model), its
-  sound through the sound device; the DirectShow graphs (AVI and others) on FFmpeg too. Until then,
-  with OpenAL, Bink opens its own DirectSound for a movie's sound.
-
-Open question: how well FFmpeg decodes Bink 1 (the game's movies are Bink 1.x).
+- **Video on FFmpeg:** Bink movies stepped frame by frame (the `video::Device` movie model), their
+  sound through the sound device, so the escape hatch above is gone with this backend; the
+  DirectShow graphs (AVI and others) on FFmpeg too, with a thread handing frames to IShow's tiles.
+  This answers the open question about Bink: FFmpeg decodes all 68 of the game's movies (101,158
+  frames) to within 49.7 dB of binkw32's pictures on average, none under 47.7 dB (most pixels within
+  2 of 255; a few movies have single blocks further off). The
+  libraries (FFmpeg 7.1.1, a 32-bit LGPL build of just the Bink, AVI and WAV parts) are loaded at
+  run time, so the DLL still works without them.
 
 ### Phase 3: SDL_GPU and OpenGL 3.3
 

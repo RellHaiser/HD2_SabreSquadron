@@ -373,6 +373,7 @@ D3DFORMAT ls3d::ig::CreateShowTiles(int width, int height, IShow *show)
 // 0x10071630
 HRESULT __stdcall IShow::Open(const char *fileName, uint32_t openFlags)
 {
+    video::ChooseDevice();          // (Port: the video backend, LS3DF.ini [Video] FFmpeg)
     Close();
     flags = openFlags;
     if (std::strstr(fileName, ".ogg") || std::strstr(fileName, ".OGG")) {
@@ -441,6 +442,8 @@ HRESULT __stdcall IShow::Open(const char *fileName, uint32_t openFlags)
         const video::S_movieInfo info = video::g_pVideo->Info(movie);
         CreateShowTiles(static_cast<int>(info.width), static_cast<int>(info.height), this);
     } else {
+        // (Port: a graph's sound; the original's DirectShow had a sound renderer of its own.)
+        video::g_pVideo->UseGraphSound(g_sndDriver->IsInitialized() ? g_sndDriver->dsound : nullptr);
         if (!graph) {
             graph = video::g_pVideo->CreateGraph();
             if (!graph)
