@@ -51,11 +51,11 @@ public:
     // 0x04 0x10004ce0: loads the file's tracks; the name becomes the file's base name.
     virtual I3D_RESULT __stdcall Open(const char *fileName, uint32_t flags);
     // 0x08 0x10004e80: the length in ms (frames x 40).
-    virtual int __stdcall GetLength();
+    virtual int __stdcall GetEndTime();
     // 0x0C / 0x10 / 0x14 0x10004e60 / 0x10004ea0 / 0x10004ee0
-    virtual int __stdcall NumTracks();
-    virtual const char *__stdcall GetTrackName(int track);
-    virtual int __stdcall FindTrack(const char *name);       // -1 if none (case-sensitive)
+    virtual int __stdcall NumAnimations();
+    virtual const char *__stdcall GetAnimLink(int track);
+    virtual int __stdcall GetAnimIndex(const char *name);       // -1 if none (case-sensitive)
     // 0x18 - 0x38 0x10005020 - 0x100053d0: the keys of a track (times in ms).
     virtual int __stdcall NumPositionKeys(int track);
     virtual I3D_RESULT __stdcall GetPositionKey(int track, int key, int *time, S_vector *pos);

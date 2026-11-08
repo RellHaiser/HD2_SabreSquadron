@@ -205,11 +205,11 @@ I3D_RESULT I3D_animation_set::Open(const char *fileName, uint32_t)
     return I3D_OK;
 }
 
-int I3D_animation_set::GetLength() { return data ? U16(data + 2) * kAnimFrameTime : 0; }
+int I3D_animation_set::GetEndTime() { return data ? U16(data + 2) * kAnimFrameTime : 0; }
 
-int I3D_animation_set::NumTracks() { return data ? U16(data) : 0; }
+int I3D_animation_set::NumAnimations() { return data ? U16(data) : 0; }
 
-const char *I3D_animation_set::GetTrackName(int track)
+const char *I3D_animation_set::GetAnimLink(int track)
 {
     // (The original takes a negative index: a read before the table. Refused.)
     if (!data || track < 0 || U16(data) <= track)
@@ -217,7 +217,7 @@ const char *I3D_animation_set::GetTrackName(int track)
     return Tracks()[track].name;
 }
 
-int I3D_animation_set::FindTrack(const char *trackName)
+int I3D_animation_set::GetAnimIndex(const char *trackName)
 {
     if (!data)
         return -1;
@@ -817,7 +817,7 @@ I3D_RESULT I3D_anim_stack::SetAnimation(I3D_animation_set *set, int stage, float
     st.mode = mode;
     // The owner's first frame of each track's name gets the track's keys.
     const I3D_animation_set::TrackEntry *entry = set->Tracks();
-    for (int n = set->NumTracks(); n; --n, ++entry) {
+    for (int n = set->NumAnimations(); n; --n, ++entry) {
         for (I3D_frame *frame : OwnedFrames(owner)) {
             if (std::strcmp(ShortName(frame), entry->name))
                 continue;
@@ -880,7 +880,7 @@ void I3D_anim_stack::EndStages()
         // set through null: such a stage never ends.)
         if (!st.set)
             continue;
-        if (!(st.time < 0 || st.set->GetLength() <= st.time))
+        if (!(st.time < 0 || st.set->GetEndTime() <= st.time))
             continue;
         // The end: the first animated frame that wants to know is told.
         for (I3D_anim_track *track : tracks) {
@@ -891,7 +891,7 @@ void I3D_anim_stack::EndStages()
             }
         }
         if (st.mode == ANIMMODE_LOOP)
-            st.time = st.time < 0 ? st.time + st.set->GetLength() : st.time - st.set->GetLength();
+            st.time = st.time < 0 ? st.time + st.set->GetEndTime() : st.time - st.set->GetEndTime();
         else
             st.active = false;
     }
