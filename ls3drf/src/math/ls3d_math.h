@@ -98,8 +98,8 @@ struct S_vector {
     {
         return S_vector(y * v.z - z * v.y, z * v.x - v.z * x, x * v.y - y * v.x);
     }
-    float Square() const { return x * x + y * y + z * z; }                   // 0x10011d80
-    float Magnitude() const { return ls3d::MagnitudeOfSquare(Square()); }    // 0x1002fe90
+    float Magnitude2() const { return x * x + y * y + z * z; }                   // 0x10011d80
+    float Magnitude() const { return ls3d::MagnitudeOfSquare(Magnitude2()); }    // 0x1002fe90
 
     // SDK Normalize: a (nearly) zero vector becomes a unit vector along its first non-zero axis
     // (x, then z, then y).

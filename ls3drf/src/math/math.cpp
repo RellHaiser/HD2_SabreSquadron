@@ -272,7 +272,7 @@ void __stdcall S_matrix::SetDir3(const S_vector &dir, const S_vector &up)
         if (u.x * u.x + u.y * u.y + u.z * u.z < kEpsilon) {
             p = S_vector(z.z * z.x, z.y * z.z, z.z * z.z);
             u = S_vector(-p.x, -p.y, 1.0f - p.z);
-            if (u.Square() < kEpsilon)
+            if (u.Magnitude2() < kEpsilon)
                 u = S_vector(1.0f, 0.0f, 0.0f);
         }
     }
