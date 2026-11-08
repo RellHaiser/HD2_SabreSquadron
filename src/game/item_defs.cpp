@@ -160,13 +160,13 @@ void C_ItemComponent::Put(void *buffer, int offset, const void *field, int size)
 
 void C_ItemComponent::GetBase(const void *data)
 {
-    Get(m_unknown04, data, 0x04);
+    Get(m_reserved04, data, 0x04);
     Get(m_kind, data, 0x08);
 }
 
 void C_ItemComponent::PutBase(void *buffer) const
 {
-    Put(buffer, 0x04, m_unknown04);
+    Put(buffer, 0x04, m_reserved04);
     Put(buffer, 0x08, m_kind);
 }
 

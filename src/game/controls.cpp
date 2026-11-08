@@ -11,6 +11,7 @@
 #include "game/cursor.h"
 #include "game/item_defs.h"
 #include "game/key_bindings.h"
+#include "game/mp_game_setup.h"
 #include "game/mp_zone.h"
 #include "game/pending.h"
 #include "game/profile.h"
@@ -4509,11 +4510,9 @@ bool C_PoolList::HandleMessage(S_ControlMessage *message)
         return false;
     // The first hidden item named, indexed and shown.
     const uint32_t item = m_hidden.front()->GetId();
-    // (The name read at value2 + 1, unaligned: the original's.)
-    alignas(C_str) unsigned char raw[sizeof(C_str)];
-    std::memcpy(raw, reinterpret_cast<const char *>(message->value2) + 1, sizeof(raw));
-    const C_str &name = *reinterpret_cast<const C_str *>(raw);
-    S_ControlMessage text = ValueMessage(CONTROL_MSG_SET_TEXT, POOL_ENTRY_STYLE, name);
+    // (value2: the C_MpMap of the picked maps' list, its name at +0x01 in the original.)
+    S_ControlMessage text =
+        ValueMessage(CONTROL_MSG_SET_TEXT, POOL_ENTRY_STYLE, reinterpret_cast<const C_MpMap *>(message->value2)->name);
     text.target = item;
     HandleMessageCopy(text);
     S_ControlMessage index = ValueMessage(CONTROL_MSG_SET_INDEX, message->value);

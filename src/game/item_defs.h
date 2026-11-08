@@ -115,7 +115,7 @@ protected:
     void GetBase(const void *data);
     void PutBase(void *buffer) const;
 
-    int m_unknown04 = 0;                                // +0x04 always 0 in items.sav
+    int m_reserved04 = 0;                               // +0x04 always 0 in items.sav; set and copied, never read
     E_ItemComponentKind m_kind;                         // +0x08
 };
 
@@ -153,7 +153,10 @@ protected:
     void GetWeapon(const void *data);
     void PutWeapon(void *buffer) const;
 
-    float m_unknown0c = 0.0f;                           // +0x0C 0.6 pistols, 0.8 SMGs, 1 rifles
+    // +0x0C No read found in the original (static search only; not proven). Values in items.sav: 0.15 knives, 0.5 the
+    // flare gun, 0.6 pistols, 0.625 empty hands, 0.8 SMGs, 1 rifles, machine guns, launchers, cannons, grenades, the
+    // clam and anti-tank mines, 1.2 the shotgun, 1.5 the Bouncing Betty.
+    float m_unknown0c = 0.0f;
     float m_damage = 0.0f;                              // +0x10 see GetDamage()
     int m_shotSound = 0;                                // +0x14
     float m_attackDelay = 0.0f;                         // +0x18 ms
