@@ -115,7 +115,7 @@ protected:
     void GetBase(const void *data);
     void PutBase(void *buffer) const;
 
-    int m_unknown04 = 0;                                // +0x04 always 0 in items.sav
+    int m_reserved04 = 0;                               // +0x04 always 0 in items.sav; set and copied, never read
     E_ItemComponentKind m_kind;                         // +0x08
 };
 
