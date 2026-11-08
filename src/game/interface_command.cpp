@@ -282,9 +282,9 @@ void PrepareMarkerPart(I3D_frame *part, const S_vector &emissive, bool own)
     }
     I3D_material *material = visual->GetVisualMesh()->GetLevel(0)->GetFaceGroup(0)->material;
     material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-    material->SetEmissive(emissive);
+    material->SetEmissiveColor(emissive);
     material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetDiffuse(S_vector(0.0f, 0.0f, 0.0f));
+    material->SetDiffuseColor(S_vector(0.0f, 0.0f, 0.0f));
     material->SetPower(0.0f);
     visual->SetLightLevel(MARKER_LIGHT);
 }

@@ -999,7 +999,7 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                     break;
                 case PROJECTOR_MODE:
                     chunk.Read(number);
-                    projector->SetMode(number);
+                    projector->SetProjectionMode(number);
                     break;
                 case PROJECTOR_BUFFERED:
                     chunk.Read(number);
