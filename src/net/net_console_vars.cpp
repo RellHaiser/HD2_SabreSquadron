@@ -19,6 +19,7 @@
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/team.h"
+#include "game/vehicle_spawn.h"
 
 namespace {
 
@@ -373,6 +374,8 @@ int ExecuteConsoleCommand(int command, const char *args)
 
 int ExecuteConsoleLine(const char *line)
 {
+    if (ExecuteVehicleSpawnCommand(line))
+        return CONSOLE_OK;
     // ".text": say; "x,text": say to the team.
     if (line[0] == '.')
         return ExecuteConsoleCommand(CONSOLE_SAY, line + 1);

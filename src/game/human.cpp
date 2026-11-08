@@ -504,8 +504,15 @@ void C_Human::LoadState(C_chunk &chunk)
     }
     CreateController(static_cast<E_HumanController>(controllerType));
     if (vehicleId >= 0) {
-        m_vehicle = g_actorsModule.GetActorById(vehicleId);
-        m_vehicle->SetSeatOccupant(m_seat, this);
+        // Fix: the vehicle can be missing, or the seat not one of its: a spawned vehicle
+        // (game/vehicle_spawn.h) that could not be made again. The original calls through it.
+        C_Actor *vehicle = g_actorsModule.GetActorById(vehicleId);
+        if (vehicle && (vehicle->GetType() != ACTOR_CAR || (m_seat >= 0 && m_seat < vehicle->GetSeatCount()))) {
+            m_vehicle = vehicle;
+            m_vehicle->SetSeatOccupant(m_seat, this);
+        } else {
+            ClearVehicle();
+        }
     }
     if (carriedId >= 0)
         m_carried = g_actorsModule.GetActorById(carriedId);

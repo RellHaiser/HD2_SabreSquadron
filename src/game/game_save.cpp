@@ -10,6 +10,7 @@
 #include "game/human.h"
 #include "game/human_stains.h"
 #include "game/interface.h"
+#include "game/vehicle_spawn.h"
 #include "game/world.h"
 
 namespace {
@@ -224,6 +225,7 @@ bool C_game::SaveGame(C_chunk &chunk)               // 0x0069cbb0
     chunk.WriteChunk(CHUNK_GAME_SAVES_USED, m_savesUsed);
     const int pistolFired = m_signalPistolFired ? 1 : 0;
     chunk.WriteChunk(CHUNK_GAME_SIGNAL_PISTOL, pistolFired);
+    SaveSpawnedVehicles(chunk);                     // (before the modules: see the header)
     chunk.Begin(CHUNK_GAME_MODULES);
     ModuleManager::SaveGame(chunk);
     chunk.Ascend();
@@ -267,6 +269,7 @@ bool C_game::LoadGame(C_chunk &chunk)               // 0x0069d290
         return false;
     }
     m_paused = false;
+    bool spawnedVehiclesLoaded = false;
     while (chunk.RemainingSize() > 0) {
         chunk.Descend(id);
         switch (id) {
@@ -297,7 +300,14 @@ bool C_game::LoadGame(C_chunk &chunk)               // 0x0069d290
             m_interface->LoadGame(chunk);
             chunk.Ascend();
             break;
+        case CHUNK_GAME_SPAWNED_VEHICLES:
+            LoadSpawnedVehicles(chunk);
+            spawnedVehiclesLoaded = true;
+            chunk.Ascend();
+            break;
         case CHUNK_GAME_MODULES:
+            if (!spawnedVehiclesLoaded)
+                RemoveSpawnedVehicles();
             ModuleManager::LoadGame(chunk);
             chunk.Ascend();
             break;

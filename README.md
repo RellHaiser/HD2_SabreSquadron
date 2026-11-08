@@ -59,6 +59,10 @@ copy of the game's folder.
 - Do not use `-c`: it is the console mode, and hides the window. The game looks for ` -c` and `-cmd` with a
   plain text search, so avoid them in folder names too.
 - A crash writes `HD2_Port.RPT` next to the executable, with the call stack. The next crash overwrites it.
+- `vehicle tiger|panther|sherman|panzer|puma|isu` in the console (single player) makes that vehicle next to the
+  player, armed and kept in saved games (`src/game/vehicle_spawn.cpp`, from a community patch; `panzer` alone
+  makes a Tiger). It reads the vehicle's physics from `tables\vehicles\<tiger|panther|sherman|panzer3|puma|Isu152>.tbl`
+  in the game's folder: a car's block from a mission, not kept here (`tools/extract_vehicle_table.py`).
 
 ## Building
 
