@@ -44,6 +44,7 @@ constexpr HRESULT E_PENDING_ = static_cast<HRESULT>(0x8000000A);
 constexpr DWORD DPNA_DATATYPE_STRING = 1;
 constexpr DWORD DPNA_DATATYPE_DWORD = 2;
 constexpr DWORD DPNSESSION_CLIENT_SERVER = 1;
+constexpr DWORD DPNSESSION_NODPNSVR = 0x40;
 constexpr DWORD DPNINFO_NAME = 1;
 constexpr DWORD DPNSETCLIENTINFO_SYNC = 0x80000000;
 
@@ -247,7 +248,9 @@ int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
     wchar_t name[200];
     WideName(name, desc.name);
     DPN_APPLICATION_DESC application;
-    application.flags = DPNSESSION_CLIENT_SERVER;
+    // (Fix: without DPNSVR. On current Windows, with DirectPlay's address family forced to IPv4, Host fails with
+    // 0x80158185 and nothing is bound; clients always name the port, so they don't need it. The original: only the first.)
+    application.flags = DPNSESSION_CLIENT_SERVER | DPNSESSION_NODPNSVR;
     application.application = g_netApplicationGuid;
     application.sessionName = name;
     DPN_CAPS caps = SessionCaps();
