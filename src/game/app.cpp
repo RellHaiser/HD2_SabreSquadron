@@ -22,6 +22,7 @@
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "ls3d/rw_data.h"
+#include "net/net_autorestart.h"
 #include "script/script_module.h"
 
 // Note: the original interleaves calls into the copy-protection layer and shuffled
@@ -568,8 +569,8 @@ int RunGame()
 #endif
         I3DGetDriver()->Tick(timeDelta);
 
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll; (DS 0x00725e71) the server goes on to the messages
         if (g_gameRole & GAME_ROLE_CLIENT) {
-#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             if (g_scriptModule.IsCutsceneRunning()) {
                 // Full-screen pass (the cutscene's letterbox bars): temporarily widen the viewport
                 // and clear it.
@@ -582,9 +583,9 @@ int RunGame()
                 graph->SetViewport(viewport);
                 graph->Clear(0, 1.0f, 3);
             }
-#endif
             app->RenderState();
         }
+#endif
 
         g_netGame.ReceiveMessages(timeDelta, true);
         bool keepRunning = true;
@@ -592,10 +593,14 @@ int RunGame()
             keepRunning = app->UpdateServer(timeDelta);
         if (keepRunning) {
             g_netGame.ReceiveMessages(timeDelta, false);
+#ifdef HD2_DEDICATED
+            keepRunning = app->UpdateClient(timeDelta);     // (DS 0x00725eab) whatever the role
+#else
             const bool runClient = (g_gameRole & GAME_ROLE_CLIENT) ||
                                    ((g_gameRole & GAME_ROLE_LOCAL) != GAME_ROLE_LOCAL && g_mpSettings->dedicated);
             if (runClient)
                 keepRunning = app->UpdateClient(timeDelta);
+#endif
         }
         if (!keepRunning)
             break;
@@ -675,6 +680,11 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLi
     // (DS 0x007263d0) Any number of servers may run, beside a client too; the key is read but not checked.
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+    // (DS 0x007263fa)
+    if (std::strstr(GetCommandLineA(), "-autorestart")) {
+        RunAutoRestartWatchdog();
+        return 0;
+    }
     g_fatalErrorHandler = OnFatalError;
     GetCDKey();
 #else

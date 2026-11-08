@@ -23,6 +23,7 @@
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "net/dplay8.h"
+#include "net/net_autorestart.h"
 #include "net/net_channel.h"
 #include "net/net_object.h"
 #include "net/net_transport.h"
@@ -230,6 +231,14 @@ void C_NetGame::Close(bool now)
         m_closePending = true;
         return;
     }
+#ifdef HD2_DEDICATED
+    // (DS 0x007886fc) The file the session wrote gone; the watchdog told it has ended.
+    char file[52];
+    std::sprintf(file, "XDServer_%5d.txt", g_gameProfile.m_mpSettings->port);
+    DeleteFileA(file);
+    if (g_gameProfile.m_mpSettings->autoRestart)
+        UnwatchSession(g_gameProfile.m_mpSettings->sessionName);
+#endif
     ConfigureFirewall(0, false);
     GetIGraph()->SetFlags(g_graphFlags);
     Process(1000, false);

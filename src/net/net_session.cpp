@@ -6,6 +6,7 @@
 #include <windows.h>
 
 #include "net/dplay8.h"
+#include "net/net_autorestart.h"
 #include "net/net_game.h"
 
 #include <cmath>
@@ -176,6 +177,17 @@ uint32_t GetHostAddress(IDirectPlay8Address *address)
 int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
 {
     Close(true);
+#ifdef HD2_DEDICATED
+    // (DS 0x007798a4) The session's settings in a file, for a server started again; `autorestart`: the watchdog told.
+    char file[52];
+    std::sprintf(file, "XDServer_%5d.txt", g_gameProfile.m_mpSettings->port);
+    g_gameProfile.m_mpSettings->WriteDescription(file);
+    if (g_gameProfile.m_mpSettings->autoRestart) {
+        StartAutoRestartWatchdog();
+        Sleep(100);
+        WatchSession(g_gameProfile.m_mpSettings->sessionName);
+    }
+#endif
     int port = kDefaultPort;
     if (g_gameProfile.m_mpSettings->unknown174 == 1)
         port = g_gameProfile.m_mpSettings->port;

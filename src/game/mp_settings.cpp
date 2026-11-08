@@ -120,7 +120,11 @@ void S_MultiplayerSettings::Reset()
     adminPassword = DEFAULT_ADMIN_PASSWORD;
     unknown178 = 0;
     unknown174 = 0;
+#ifdef HD2_DEDICATED
+    dedicated = true;                               // (DS 0x006ee095)
+#else
     dedicated = false;
+#endif
     reinterpret_cast<S_ServerEntry *>(unknown17C)->Reset();
     std::memset(sessionName, 0, sizeof sessionName);
     S_MpGameRules rules = {};
