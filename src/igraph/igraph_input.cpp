@@ -102,6 +102,7 @@ void ResetInputState()
 
 HRESULT InitDirectInput(HINSTANCE instance)
 {
+    input::ChooseDevice();          // (Port: the platform's input backend, LS3DF.ini [Platform] SDL3)
     return input::g_pInput->Create(instance, &g_dinput);
 }
 

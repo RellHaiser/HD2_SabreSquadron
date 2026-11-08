@@ -58,6 +58,7 @@ The engine's file formats, as the source reads them: [docs/4ds_format.md](docs/4
 | IShow: Ogg music streaming, Bink movies, AVI and other files through DirectShow, into textures | `compare_show`: 80,000 operations on the game's music and movies, 24 AVI playbacks |
 | The OpenAL Soft sound backend (new, optional; the original has none to compare with) | `test_audio_openal`: 66 checks of DirectSound's behaviour, rendered on OpenAL Soft's loopback device |
 | The FFmpeg video backend (new, optional) | `test_video_ffmpeg`: beside Bink and DirectShow, all 68 of the game's movies (101,158 frames, 49.7 dB) and AVI graphs frame for frame |
+| The SDL3 window, clock and input backends (new, optional) | `test_platform_sdl3`: beside the Win32 window, what IGraph is told for the same messages; all 132 keys, the mouse and the focus rules of the input device |
 | The scene's weather: rain and snow particles, their vertices, the weather settings | `compare_weather`: 140,000 frames, every vertex |
 | The rest of the renderer, IGraph's device and window creation, ISND start-up, IShow's full-screen playback and drawing | not compared with the original; they ran in the first game session (above) |
 
@@ -74,7 +75,9 @@ system's `d3d8.dll`, DirectInput 8 and DirectSound. To play sound through OpenAL
 `[Sound]` / `OpenAL=1` in an `LS3DF.ini` next to the DLL. To decode the movies with FFmpeg
 instead of Bink ([docs/ls3df_ini.md](docs/ls3df_ini.md#video)), copy the five FFmpeg DLLs from
 `build\msvc` (`avutil-59.dll`, `avcodec-61.dll`, `avformat-61.dll`, `swscale-8.dll`,
-`swresample-5.dll`) and put `[Video]` / `FFmpeg=1` in it.
+`swresample-5.dll`) and put `[Video]` / `FFmpeg=1` in it. To run the window, keyboard, mouse and
+clock on SDL3 ([docs/ls3df_ini.md](docs/ls3df_ini.md#platform)), copy `build\msvc\SDL3.dll` and
+put `[Platform]` / `SDL3=1` in it.
 
 ## Building
 
@@ -91,7 +94,10 @@ Requirements:
   [docs/sound_device.md](docs/sound_device.md#the-openal-soft-backend));
 - FFmpeg 7.1, a 32-bit shared build: its headers to compile, its five DLLs to copy next to the DLL
   (`%FFMPEG_DIR%`, else `deps\ffmpeg-x86` next to the checkout; how to build a small one:
-  [docs/video_device.md](docs/video_device.md#the-ffmpeg-backend)).
+  [docs/video_device.md](docs/video_device.md#the-ffmpeg-backend));
+- SDL 3.2 or later, 32-bit: its headers to compile, `SDL3.dll` to copy next to the DLL
+  (`%SDL3_DIR%`, else `deps\sdl3-x86` next to the checkout; how to build it:
+  [docs/platform.md](docs/platform.md#the-sdl3-implementation)).
 
 ```bat
 python build.py          rem the DLL: build\msvc\LS3DF.dll (+ .pdb)
@@ -144,8 +150,8 @@ first difference (exit code 1); `compare_loader ... "" all` lists every differen
 | `src/igraph` | IGraph, textures, image loading and conversion, the DXT encoder, IShow |
 | `src/gfx` | the render device all drawing goes through, and its Direct3D 8 backend ([docs/render_device.md](docs/render_device.md)) |
 | `src/audio` | the sound device all sound goes through, and its backends: DirectSound (the default) and OpenAL Soft ([docs/sound_device.md](docs/sound_device.md)) |
-| `src/input` | the input device IGraph reads the keyboard and mouse through, and its DirectInput backend ([docs/input_device.md](docs/input_device.md)) |
-| `src/platform` | the window and its messages, the cursor, time, threads, locks and events, and their Win32 implementation ([docs/platform.md](docs/platform.md)) |
+| `src/input` | the input device IGraph reads the keyboard and mouse through, and its backends: DirectInput (the default) and SDL3 ([docs/input_device.md](docs/input_device.md)) |
+| `src/platform` | the window and its messages, the cursor, time, threads, locks and events, and their implementations: Win32 (the default) and SDL3 for the window, cursor and clock ([docs/platform.md](docs/platform.md)) |
 | `src/video` | the video device IShow plays its movies and DirectShow files through, and its backends: Windows (Bink, DirectShow and the texture renderer; the default) and FFmpeg ([docs/video_device.md](docs/video_device.md)) |
 | `src/isnd` | ISND |
 | `src/dshow` | the DirectShow base classes the video backend's texture renderer is built on |
@@ -172,8 +178,9 @@ well:
 declares the interfaces of Bink (RAD Game Tools), vorbisfile (Xiph.Org) and `rw_data.dll`.
 
 The optional backends use libraries that are not part of this repository, loaded at run time from
-their own DLLs: OpenAL Soft (LGPL 2.1 or later) and FFmpeg (built LGPL 2.1 or later, without GPL
-parts). Whoever passes on those DLLs with the game passes on their licences and sources with them.
+their own DLLs: OpenAL Soft (LGPL 2.1 or later), FFmpeg (built LGPL 2.1 or later, without GPL
+parts) and SDL3 (zlib licence). Whoever passes on those DLLs with the game passes on their
+licences, and for the LGPL ones their sources, with them.
 
 ## Disclaimer
 

@@ -13,7 +13,8 @@
 //
 // Usage: test_audio_openal.exe (soft_oal.dll next to it: build.py copies it)
 //
-// test-sources: src/audio/openal/audio_openal.cpp src/platform/win32/platform_win32.cpp
+// test-sources: src/audio/openal/audio_openal.cpp src/platform/*.cpp src/platform/win32/*.cpp src/platform/sdl3/*.cpp
+// test-sources: src/core/enhance.cpp src/core/debug.cpp
 #include <windows.h>
 
 #include <cmath>

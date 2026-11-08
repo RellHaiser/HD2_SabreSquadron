@@ -14,7 +14,8 @@
 //
 // test-sources: src/video/win32/*.cpp src/video/ffmpeg/video_ffmpeg.cpp src/dshow/*.cpp src/core/debug.cpp
 // test-sources: src/audio/dsound/audio_dsound.cpp src/audio/openal/audio_openal.cpp
-// test-sources: src/platform/win32/platform_win32.cpp
+// test-sources: src/platform/*.cpp src/platform/win32/*.cpp src/platform/sdl3/*.cpp
+// test-sources: src/core/enhance.cpp
 #include <windows.h>
 
 #include <dshow.h>

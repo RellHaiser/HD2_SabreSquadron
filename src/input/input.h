@@ -42,7 +42,11 @@ public:
     virtual HRESULT GetProperty(Peripheral *peripheral, REFGUID property, DIPROPHEADER *header) = 0;
 };
 
-// The device in use (the DirectInput backend's, input/dinput).
+// The device in use: the DirectInput backend's (input/dinput) unless ChooseDevice picked another.
 extern Device *g_pInput;
+
+// Sets g_pInput to the platform's input backend: SDL3's (input/sdl3) with the SDL3 platform,
+// DirectInput otherwise. IGraph calls it before it creates the input system (after its window).
+void ChooseDevice();
 
 }  // namespace ls3d::input

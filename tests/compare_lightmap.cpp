@@ -36,7 +36,8 @@
 //        logged, the first different one printed]
 //
 // test-sources: src/i3d/lightmap_build.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
-// test-sources: src/platform/win32/platform_win32.cpp
+// test-sources: src/platform/*.cpp src/platform/win32/*.cpp src/platform/sdl3/*.cpp
+// test-sources: src/core/enhance.cpp
 #include <float.h>
 
 #include <algorithm>

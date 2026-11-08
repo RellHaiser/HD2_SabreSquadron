@@ -67,13 +67,28 @@ def ffmpeg_include():
     return inc
 
 
+# SDL 3, 32-bit (the platform's and the input device's SDL3 backends, docs/platform.md): %SDL3_DIR%,
+# else deps\sdl3-x86 next to the checkout. Its headers are needed to compile; its library
+# (bin\SDL3.dll) is copied next to the DLL and the tests, and the backends load it at run time.
+SDL3_DIR = os.environ.get("SDL3_DIR") or os.path.join(os.path.dirname(ROOT), "deps", "sdl3-x86")
+
+
+def sdl3_include():
+    inc = os.path.join(SDL3_DIR, "include")
+    if not os.path.exists(os.path.join(inc, "SDL3", "SDL.h")):
+        sys.exit("SDL3 not found in %s: set SDL3_DIR to a 32-bit SDL 3 install or development release "
+                 "(include\\SDL3, bin\\SDL3.dll); see docs/platform.md" % SDL3_DIR)
+    return inc
+
+
 def copy_libraries(folder):
-    """The run-time libraries of the optional backends (OpenAL Soft, FFmpeg) into `folder`."""
+    """The run-time libraries of the optional backends (OpenAL Soft, FFmpeg, SDL3) into `folder`."""
     copy_openal(folder)
-    for name in FFMPEG_DLLS:
-        dll = os.path.join(FFMPEG_DIR, "bin", name)
+    dlls = [os.path.join(FFMPEG_DIR, "bin", name) for name in FFMPEG_DLLS]
+    dlls += [os.path.join(SDL3_DIR, "bin", "SDL3.dll"), os.path.join(SDL3_DIR, "lib", "x86", "SDL3.dll")]
+    for dll in dlls:
         if os.path.exists(dll):
-            shutil.copyfile(dll, os.path.join(folder, name))
+            shutil.copyfile(dll, os.path.join(folder, os.path.basename(dll)))
 
 
 def sources(only=None):
@@ -127,7 +142,8 @@ def cflags(debug):
             "/D_CRT_SECURE_NO_WARNINGS", "/DWIN32_LEAN_AND_MEAN", "/DNOMINMAX", "/DLS3D_API=", "/Zi",
             "/Od" if debug else "/O2", "/DNDEBUG" if not debug else "/D_DEBUG",
             "/wd4100",                      # unreferenced parameters (interface methods)
-            "/I" + SRC, "/I" + os.path.join(ROOT, "include"), "/I" + openal_include(), "/I" + ffmpeg_include()]
+            "/I" + SRC, "/I" + os.path.join(ROOT, "include"), "/I" + openal_include(), "/I" + ffmpeg_include(),
+            "/I" + sdl3_include()]
 
 
 # The device seams (docs/render_device.md, sound_device.md, input_device.md, video_device.md): only a
@@ -145,6 +161,8 @@ SEAMS = [
     ("the FFmpeg backend", ("video/ffmpeg/",),
      re.compile(r'#include <lib(avcodec|avformat|avutil|swscale|swresample)/|#include "video/ffmpeg/|'
                 r'\b(av|avcodec|avformat|sws|swr)_\w+\s*\(|\bAV[A-Z][A-Za-z]+\b')),
+    ("the SDL3 backends", ("platform/sdl3/", "input/sdl3/"),
+     re.compile(r'#include <SDL3/|#include "platform/sdl3/|\bSDL_[A-Za-z]\w*\s*\(')),
     ("the DirectInput backend", ("dx/", "input/dinput/"),
      re.compile(r'#include <dinput\.h>|#include "input/dinput/|\bIDirectInput\w*|\bLPDIRECTINPUT\w*|'
                 r'\bDirectInput8Create\b')),

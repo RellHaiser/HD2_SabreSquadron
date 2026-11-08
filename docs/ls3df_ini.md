@@ -14,7 +14,9 @@ TrueColorLightmaps=1
 NearPortalDistance=100
 ```
 
-A missing key is off. The DLL reads the file once, at start-up.
+A missing key is off. The DLL reads the file once, at start-up. The `[Sound]`, `[Video]` and
+`[Platform]` sections ([below](#sound)) choose the new cross-platform backends instead of
+Windows' own APIs.
 
 ## Options
 
@@ -84,6 +86,20 @@ FFmpeg=1
 
 How it works and what it covers: [video_device.md](video_device.md#the-ffmpeg-backend). `log.txt`
 says which one is in use.
+
+## Platform
+
+```ini
+[Platform]
+SDL3=1
+```
+
+| Key | Values | What it does |
+|---|---|---|
+| `SDL3` | 0 / 1 | The window, its messages, the keyboard and mouse, and the clock go through SDL3 instead of Windows' own functions and DirectInput (the cross-platform plan's phase 2, [cross_platform.md](cross_platform.md)). Needs `SDL3.dll` (built with the DLL) in the game folder; without it the DLL falls back to Windows and DirectInput. Drawing is still Direct3D 8, on SDL's window. |
+
+How it works and what it covers: [platform.md](platform.md#the-sdl3-implementation) and
+[input_device.md](input_device.md#the-sdl3-backend). `log.txt` says which one is in use.
 
 ## Things to know
 

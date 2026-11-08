@@ -21,6 +21,11 @@
 //   FFmpeg=1                   ; movies and videos decoded by FFmpeg (avcodec-61.dll ... next to the
 //                              ; DLL) instead of Bink and DirectShow (video/ffmpeg); the movies' sound
 //                              ; through the sound device; Bink and DirectShow when it is missing
+//
+//   [Platform]
+//   SDL3=1                     ; the window, its keyboard and mouse and the clock through SDL3
+//                              ; (SDL3.dll next to the DLL; platform/sdl3, input/sdl3) instead of
+//                              ; Win32 and DirectInput; Win32 and DirectInput when it is missing
 #pragma once
 
 namespace ls3d {
@@ -34,6 +39,7 @@ struct S_enhancements {
     float nearPortalDistance;               // NearPortalDistance, in metres (0: off)
     bool openal;                            // [Sound] OpenAL
     bool ffmpeg;                            // [Video] FFmpeg
+    bool sdl3;                              // [Platform] SDL3
 };
 
 // The options (LS3DF.ini is read on the first call).

@@ -31,7 +31,7 @@ with the original DLL, and each new backend is checked against it before the old
 | Phase | What | Status |
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
-| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft done (works in the game); FFmpeg done (works in the game); SDL3 next |
+| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft done (works in the game); FFmpeg done (works in the game); SDL3 written and tested, to be tried in the game |
 | 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
@@ -68,13 +68,13 @@ Known escape hatch: Bink plays its own sound through DirectSound, handed the sou
 
 ### Phase 2: SDL3, OpenAL Soft, FFmpeg (in progress)
 
-Each new backend sits beside the Windows one and is chosen at build time (the platform) or start-up
-(the devices), so the two can be compared in the same tests:
+Each new backend sits beside the Windows one and is chosen at start-up in LS3DF.ini, so the two can
+be compared in the same tests:
 
 | Part | Status |
 |---|---|
 | **Sound on OpenAL Soft** (`src/audio/openal`) | Written and tested on OpenAL Soft's loopback device (`test_audio_openal`); chosen with `[Sound] OpenAL=1` in LS3DF.ini; tried in the game, where it works (November 2026). Details in [sound_device.md](sound_device.md#the-openal-soft-backend). |
-| **Platform and input on SDL3** | Not started |
+| **Platform and input on SDL3** (`src/platform/sdl3`, `src/input/sdl3`) | Written and tested against the Win32 implementation (`test_platform_sdl3`); chosen with `[Platform] SDL3=1` in LS3DF.ini; not yet tried in the game. Details in [platform.md](platform.md#the-sdl3-implementation) and [input_device.md](input_device.md#the-sdl3-backend). |
 | **Video on FFmpeg** (`src/video/ffmpeg`) | Written and tested against Bink and DirectShow (`test_video_ffmpeg`); chosen with `[Video] FFmpeg=1` in LS3DF.ini; tried in the game, where it works (November 2026: the intro, a briefing, the credits, skipping a movie). Details in [video_device.md](video_device.md#the-ffmpeg-backend). |
 
 - **Sound on OpenAL Soft:** a buffer is an OpenAL source reading the buffer's bytes through a
@@ -84,10 +84,15 @@ Each new backend sits beside the Windows one and is chosen at build time (the pl
   emulation, which answers the open question about EFX: OpenAL Soft maps EAX 3 to its reverb
   itself. The library (OpenAL Soft 1.24.3, built 32-bit with the static C runtime) is loaded at run
   time, so the DLL still works without it.
-- **Platform and input on SDL3:** the window, messages and the decisions IGraph makes on them
-  (`platform::WindowEvents`), the clock, threads, locks and events; the keyboard and mouse with
-  DirectInput's key codes (DIK) kept as the engine's vocabulary. The sound backend's position
-  notifications set the platform's events, so they move with it.
+- **Platform and input on SDL3:** the main window is SDL's, and Direct3D 8 draws on its native
+  handle. SDL's events drive the decisions IGraph makes on the window's messages
+  (`platform::WindowEvents`), and the clock is SDL's, counted on from `timeGetTime`. The keyboard
+  and mouse are SDL's state, with DirectInput's key codes (DIK) kept as the engine's vocabulary.
+  The window functions became a `platform::Windowing` object chosen at start-up rather than at
+  build time. Left on Win32 for now: threads, locks and events (DirectSound sets the events
+  itself, so they have to be Windows events while it can be in use), and the editors' child
+  windows, menu and dialogs, which SDL has no notion of. The library (SDL 3.4.20, built 32-bit
+  with the static C runtime) is loaded at run time, so the DLL still works without it.
 - **Video on FFmpeg:** Bink movies stepped frame by frame (the `video::Device` movie model), their
   sound through the sound device, so the escape hatch above is gone with this backend; the
   DirectShow graphs (AVI and others) on FFmpeg too, with a thread handing frames to IShow's tiles.
