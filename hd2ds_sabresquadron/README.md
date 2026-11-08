@@ -54,6 +54,6 @@ body (a default return; `true` for `Init` / `Done` / `LoadGame` / `SaveGame`). `
 - Runs: `HD2DS_Port.exe -cmd -exec ServerConfigs\NAME.cfg` hosts a local deathmatch on Africa1, with the same console
   output and UDP ports as the original server; 2 minutes with nobody connected, and closing the console ends it. With no
   command line it waits at an empty console, as the original does. A client has not joined it yet.
-- Server code in `src/` so far: the main loop's message pump and `maxfreq` frame limit, and the console-only start.
-  Known missing: `XDServer_<port>.txt` is not written or deleted. Other client paths (fonts, movie controls, faces and
+- Server code in `src/` so far: WinMain (no instance mutex or CD key check), the main loop's message pump and `maxfreq` frame limit, and the console-only start.
+  Known missing: `-autorestart` and `XDServer_<port>.txt` (not written or deleted). Other client paths (fonts, movie controls, faces and
   decals with null textures, a message box with no window) may still fail or block at run time.

@@ -671,6 +671,13 @@ void FreeResourceCaches()
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLine*/, int /*showCmd*/)
 {
+#ifdef HD2_DEDICATED
+    // (DS 0x007263d0) Any number of servers may run, beside a client too; the key is read but not checked.
+    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+    g_fatalErrorHandler = OnFatalError;
+    GetCDKey();
+#else
     // Only one instance: wake the running one instead.
     g_instanceMutex = CreateMutexA(nullptr, FALSE, INSTANCE_GUID);
     const DWORD error = GetLastError();
@@ -688,6 +695,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLi
         ShowMessage("Wrong CDKey. Please contact Illusion Softworks.", "Security", 0);
         return -3000;
     }
+#endif
 
     // Disable the Sticky Keys hot key while the game runs.
     STICKYKEYS stickyKeys = {sizeof(STICKYKEYS), 0};
