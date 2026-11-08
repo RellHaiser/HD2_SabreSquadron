@@ -965,7 +965,7 @@ void I3D_anim_stack::SetPoseBlend(float weight)
     dirty = true;
 }
 
-I3D_RESULT I3D_anim_stack::SetPoseWeight(float weight, I3D_pose_set *set)
+I3D_RESULT I3D_anim_stack::SetPoseBlend(float weight, I3D_pose_set *set)
 {
     dirty = true;
     for (I3D_pose *pose : set->poses) {
@@ -977,7 +977,7 @@ I3D_RESULT I3D_anim_stack::SetPoseWeight(float weight, I3D_pose_set *set)
     return I3D_OK;
 }
 
-float I3D_anim_stack::GetPoseWeight()
+float I3D_anim_stack::GetPoseBlend()
 {
     for (I3D_anim_track *track : tracks) {
         if (track->pose)

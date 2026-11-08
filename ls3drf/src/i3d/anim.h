@@ -229,8 +229,8 @@ public:
     I3D_RESULT SetPose(const char *frameName, I3D_pose *pose);     // 0x10020500
     I3D_RESULT SetPoseSet(I3D_pose_set *set);                      // 0x10020530
     void SetPoseBlend(float weight);                              // 0x10020590: every track's
-    I3D_RESULT SetPoseWeight(float weight, I3D_pose_set *set);     // 0x100205d0: the set's frames'
-    float GetPoseWeight();                                         // 0x10020630: the first posed track's
+    I3D_RESULT SetPoseBlend(float weight, I3D_pose_set *set);     // 0x100205d0: the set's frames'
+    float GetPoseBlend();                                         // 0x10020630: the first posed track's
     void ResetAllPoses();                                             // 0x10020670
 
     I3D_frame *owner;                       // +0x00

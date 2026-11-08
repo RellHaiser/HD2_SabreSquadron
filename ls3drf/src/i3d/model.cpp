@@ -347,7 +347,7 @@ I3D_RESULT I3D_model::SetPoseSetWeight(float weight, I3D_pose_set *set)
 {
     if (!animStack)
         return I3DERR_OBJECTNOTFOUND;
-    return animStack->SetPoseWeight(weight, set);
+    return animStack->SetPoseBlend(weight, set);
 }
 
 I3D_RESULT I3D_model::SetPoseWeight(float weight)
@@ -358,7 +358,7 @@ I3D_RESULT I3D_model::SetPoseWeight(float weight)
     return I3D_OK;
 }
 
-float I3D_model::GetPoseWeight() { return animStack ? animStack->GetPoseWeight() : 0.0f; }
+float I3D_model::GetPoseWeight() { return animStack ? animStack->GetPoseBlend() : 0.0f; }
 
 void I3D_model::ClearPoses()
 {
