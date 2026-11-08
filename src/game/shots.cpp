@@ -234,9 +234,9 @@ I3D_billboard_visual *CreateTrace(I3D_frame *traceModel)
     trace->Duplicate(traceModel);
     I3D_material *material = trace->GetMesh()->GetLevel(0)->GetFaceGroup(0)->material;
     material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-    material->SetEmissive(S_vector(1.0f, 1.0f, 1.0f));
+    material->SetEmissiveColor(S_vector(1.0f, 1.0f, 1.0f));
     material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetDiffuse(S_vector(0.0f, 0.0f, 0.0f));
+    material->SetDiffuseColor(S_vector(0.0f, 0.0f, 0.0f));
     material->SetPower(0.0f);
     return trace;
 }
@@ -1433,7 +1433,7 @@ void C_BloodPool::Init(const S_vector &pos, const S_vector &normal, IImage *text
     m_visual->SetPos(at);
     m_visual->SetScale(S_vector(0.1f, 0.1f, 0.1f));
     m_visual->SetDir(-normal, (RandFloat() - 0.5f) * TWO_PI);
-    m_visual->SetMode(1);
+    m_visual->SetProjectionMode(1);
     m_visual->LinkTo(nullptr, I3DLINK_KEEP_WORLD);
     I3D_sector *sector = GetScene()->GetSector(at);
     m_visual->LinkTo(sector, I3DLINK_KEEP_WORLD);
@@ -1582,7 +1582,7 @@ void C_BloodDrop::Land(const S_vector &pos, const S_vector &normal)
     const float size = (RandFloat() - 0.5f) * 0.1f + 0.2f;
     m_visual->SetScale(S_vector(size, size, 0.05f));
     m_visual->SetWorldDir(-normal, (RandFloat() - 0.5f) * TWO_PI);
-    m_visual->SetMode(1);
+    m_visual->SetProjectionMode(1);
     m_visual->SetOn(true);
     m_visual->Update();
     m_visual->LinkTo(nullptr, I3DLINK_KEEP_WORLD);
@@ -2179,7 +2179,7 @@ S_ShotDecal *C_ShotManager::AllocDecal(bool setOrthogonal)
     auto *decal = new S_ShotDecal;
     decal->visual = static_cast<I3D_projector_visual *>(I3DGetDriver()->CreateVisual(I3DVISUAL_PROJECTOR));
     decal->visual->SetBuffered(PROJECTOR_BUFFERED_DECAL);
-    decal->visual->SetMode(1);
+    decal->visual->SetProjectionMode(1);
     if (setOrthogonal)
         decal->visual->SetOrthogonal(1);
     return decal;

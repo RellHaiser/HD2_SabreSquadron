@@ -352,9 +352,9 @@ bool C_Crosshair::Init(I3D_scene *scene)
         level->FaceGroups()[0].DuplicateMaterial();
         I3D_material *material = level->GetFaceGroup(0)->material;
         material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-        material->SetEmissive(S_vector(0.0f, 0.0f, 0.0f));
+        material->SetEmissiveColor(S_vector(0.0f, 0.0f, 0.0f));
         material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
-        material->SetDiffuse(S_vector(1.0f, 1.0f, 1.0f));
+        material->SetDiffuseColor(S_vector(1.0f, 1.0f, 1.0f));
         material->SetPower(0.0f);
         static_cast<I3D_object_visual *>(part)->SetLightLevel(0.6f);
     }
@@ -400,10 +400,10 @@ void C_Crosshair::SetColor(const float *color)
     for (int i = 0; i < 4; ++i)
         m_color[i] = color[i];
     const S_vector emissive(color[0], color[1], color[2]);
-    FirstMaterial(m_top)->SetEmissive(emissive);
-    FirstMaterial(m_bottom)->SetEmissive(emissive);
-    FirstMaterial(m_right)->SetEmissive(emissive);
-    FirstMaterial(m_left)->SetEmissive(emissive);
+    FirstMaterial(m_top)->SetEmissiveColor(emissive);
+    FirstMaterial(m_bottom)->SetEmissiveColor(emissive);
+    FirstMaterial(m_right)->SetEmissiveColor(emissive);
+    FirstMaterial(m_left)->SetEmissiveColor(emissive);
     m_frame->Update();
 }
 

@@ -157,7 +157,7 @@ void SetMarkLook(S_SurfaceMark *mark, const S_vector &scale)
 {
     I3D_projector_visual *visual = Projector(mark);
     visual->SetScale(scale);
-    visual->SetMode(5);
+    visual->SetProjectionMode(5);
     visual->SetRange(FOOTPRINT_RANGE);
     visual->SetOrthogonal(1);
 }
@@ -459,7 +459,7 @@ void SurfaceMarks_Tick(int timeDelta)
             if (opacity < visual->GetIntensity()) {
                 if (mark->time <= FADE_STEP) {
                     visual->SetBuffered(0);
-                    visual->SetMode(5);
+                    visual->SetProjectionMode(5);
                 }
                 visual->SetIntensity(opacity);
                 visual->Update();

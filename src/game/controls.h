@@ -1355,7 +1355,8 @@ protected:
 };
 
 // The hot key control's messages: its binding (value; GET has two codes), set with its name's text
-// id (value2) for the title; posted (target 0) when an edit ends or a key is bound.
+// id (value2) for the title. HOT_KEY_DONE is the menu's MENU_MSG_KEYBOARD_OFF (target 0): value 1
+// when the edit starts (the menu's keys and clicks off), 0 when it ends or a key is bound.
 enum : uint32_t {
     CONTROL_MSG_GET_BINDING = 0x100003C,
     CONTROL_MSG_SET_BINDING = 0x100003D,
@@ -1386,7 +1387,7 @@ public:
     int OnEnter(int id) override;                        // 0x0064ed40
     // Not while editing (0); both parts' (handled).
     int OnLeave(int id) override;                        // 0x0064ed70
-    // Not while editing (0); the edit box's (handled: HOT_KEY_DONE posted).
+    // Not while editing (0); the edit box's (handled: HOT_KEY_DONE posted, value 1: keys off).
     int OnClick(int id) override;                        // 0x0064eec0
     // The edit box's (handled: HOT_KEY_DONE posted; else 0).
     int OnInput02(int id) override;                      // 0x0064edb0

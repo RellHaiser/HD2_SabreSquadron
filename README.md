@@ -132,7 +132,7 @@ or rendering that the dedicated server loads (`ls3drf/`).
 | `tools` | Model and animation (`.4ds`, `.5ds`) tools and statistics |
 | `ls3df` | The LS3D engine DLL, `LS3DF.dll` ([RellHaiser/LS3DF](https://github.com/RellHaiser/LS3DF), kept in sync with `git subtree --prefix=ls3df`); built and tested with its own `build.py` |
 | `rw_data` | The virtual file system DLL, `rw_data.dll` ([RellHaiser/rw_data](https://github.com/RellHaiser/rw_data), kept in sync with `git subtree --prefix=rw_data`); `src/ls3d/rw_data.h` forwards to its header; built by `_re/tools/build_rw_data.py` |
-| `ls3drf` | The dedicated server's engine DLL, `LS3DRF.dll`: LS3DF's port without sound, video, input or the render device ([readher/LS3DRF](https://github.com/readher/LS3DRF) is split from it); built and tested with its own `build.py` |
+| `ls3drf` | The dedicated server's engine DLL, `LS3DRF.dll`: LS3DF's port without sound, video, input or the render device ([readher/LS3DRF](https://github.com/readher/LS3DRF), kept in sync with `git subtree --prefix=ls3drf`); built and tested with its own `build.py`. Its code began as a copy of LS3DF's, so LS3DF's fixes are carried over by hand ([how](ls3drf/README.md#source-and-ls3df)) |
 | `hd2ds_sabresquadron` | The dedicated server, `HD2DS_SabreSquadron.exe`: not started (the binary's facts only) |
 | `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md) |
 

@@ -1,5 +1,9 @@
 # LS3DRF.dll — source port
 
+> The source is [readher/LS3DRF](https://github.com/readher/LS3DRF). The `ls3drf/` folder of
+> [HD2_SabreSquadron](https://github.com/RellHaiser/HD2_SabreSquadron) is a `git subtree` of it:
+> make changes in readher/LS3DRF, not in the folder.
+
 Clean C++17 rewrite of `LS3DRF.dll`, the build of the LS3D engine (version 5.59.5, build of
 16 August 2004) that the Hidden & Dangerous 2 / Sabre Squadron dedicated server
 (`HD2DS_SabreSquadron.exe`) loads in place of `LS3DF.dll`. It is the same engine without what a
@@ -17,7 +21,8 @@ vertex / index buffers and the math exports.
 | Exports | 59 ([ls3drf.def](ls3drf.def)): LS3DF's 60 minus `ISndGetDriver`, the ordinals after it shifted down by one |
 
 The port starts from the [LS3DF.dll port](https://github.com/RellHaiser/LS3DF) (taken at its
-commit `aecd644`), cut down to what `LS3DRF.dll` has. Its address comments come in two kinds:
+commit `aecd644`, with its later fixes carried over: see [Source and LS3DF](#source-and-ls3df)),
+cut down to what `LS3DRF.dll` has. Its address comments come in two kinds:
 
 - `// 0x1000xxxx` — inherited from the LS3DF port: the address of the function in **LS3DF.dll**;
 - `// LS3DRF 0x1000xxxx (from LS3DF 0x1000xxxx)` — ported from the body in **LS3DRF.dll**, where
@@ -128,6 +133,35 @@ first difference (exit code 1).
 | `tests` | the differential tests, their fake Direct3D device and the Direct3D 8 backend |
 | `lib` | import definitions for `rw_data.dll` |
 | `ls3drf.def` | the exports and their ordinals |
+
+## Source and LS3DF
+
+The source is [readher/LS3DRF](https://github.com/readher/LS3DRF): make changes there. The
+`ls3drf/` folder of [HD2_SabreSquadron](https://github.com/RellHaiser/HD2_SabreSquadron) is a
+`git subtree` of it, like that repository's `ls3df/` and `rw_data/`, and is updated with:
+
+```bat
+git subtree pull --prefix=ls3drf https://github.com/readher/LS3DRF main
+```
+
+The port itself began as a copy of LS3DF's, not a subtree: its classes have LS3DRF's layouts and
+much of the code is gone, so the two are different files from then on. A fix in LS3DF does not reach
+it by itself. **`LS3DF_CARRIED` in `build.py` names the LS3DF commit carried over so far**, and in
+HD2_SabreSquadron `python ls3drf/build.py check` fails, listing the files, when `ls3df/` has since
+changed a file this port still has. (Of the changes after `aecd644`, only `I3D_joint::Uninit`
+applied; the others are in the render path, the Direct3D device or the import libraries, which
+LS3DRF does not have.)
+
+To carry changes over, in this repository (`NEW` is the LS3DF commit):
+
+```bat
+git fetch https://github.com/RellHaiser/LS3DF main
+git log --oneline CARRIED..NEW -- src tests build.py
+git diff CARRIED NEW -- src/i3d/joint.cpp | git apply --ignore-whitespace
+```
+
+Apply what touches a file this port still has, one file at a time as in the last line, run the
+tests, and set `LS3DF_CARRIED` to `NEW`.
 
 ## Third-party code
 

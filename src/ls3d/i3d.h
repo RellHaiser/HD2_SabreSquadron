@@ -582,9 +582,9 @@ class I3D_material {
 public:
     I3DMETHOD(uint32_t, Release)() = 0;                       // 0x00
     // (The member panels pass their photo's colour: (1, 1, 1) or the human's +0x1E0.)
-    I3DMETHOD(void, SetAmbient)(const S_vector &color) = 0;   // 0x04
-    I3DMETHOD(void, SetDiffuse)(const S_vector &color) = 0;   // 0x08
-    I3DMETHOD(void, SetEmissive)(const S_vector &color) = 0;  // 0x0C
+    I3DMETHOD(void, SetAmbientColor)(const S_vector &color) = 0;   // 0x04 LS3DF: SetAmbient
+    I3DMETHOD(void, SetDiffuseColor)(const S_vector &color) = 0;   // 0x08 LS3DF: SetDiffuse
+    I3DMETHOD(void, SetEmissiveColor)(const S_vector &color) = 0;   // 0x0C LS3DF: SetEmissive
     I3DMETHOD(void, SetSpecular)(const S_vector &color) = 0;  // 0x10
     I3DMETHOD(void, SetPower)(float power) = 0;               // 0x14
     I3D_SLOT(18);                                             // LS3DF: SetOpacity
@@ -704,7 +704,7 @@ public:
 };
 
 // Projected texture (I3DVISUAL_PROJECTOR): bullet holes, blood and scorch marks. Slot
-// meanings inferred from the shot manager, which always calls SetBuffered(3), SetMode(1)
+// meanings inferred from the shot manager, which always calls SetBuffered(3), SetProjectionMode(1)
 // and SetOrthogonal(1).
 class I3D_projector_visual : public I3D_visual {
 public:
@@ -719,7 +719,7 @@ public:
     I3DMETHOD(void, SetIntensity)(float opacity) = 0;           // 0xA8
     I3D_SLOT(AC);                                             // LS3DF: SetOpacity
     I3DMETHOD(void, SetColor)(const S_vector &color) = 0;     // 0xB0
-    I3DMETHOD(void, SetMode)(int value) = 0;             // 0xB4
+    I3DMETHOD(void, SetProjectionMode)(int value) = 0;   // 0xB4 LS3DF: SetMode
     I3DMETHOD(void, SetBuffered)(int mode) = 0;                   // 0xB8
     // Projects the texture onto the geometry under it again (footprints call it with 0, 0).
     I3DMETHOD(void, Reproject)(int unknown1, int unknown2) = 0;   // 0xBC
