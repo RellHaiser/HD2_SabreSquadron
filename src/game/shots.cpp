@@ -2311,7 +2311,9 @@ void C_ShotManager::SprayBlood(const S_vector &pos, const S_vector &dir)
 
 void C_ShotManager::SprayBloodRandom(const S_vector &pos, const S_vector &dir)
 {
+#ifndef HD2_DEDICATED   // the server's copy is empty (DS 0x0046a770): no draw from rand()
     AddBloodDrop(pos, dir, m_splatTextures[1 + 1 + std::rand() % 3]);
+#endif
 }
 
 void C_ShotManager::AddBloodDrop(const S_vector &pos, const S_vector &dir, IImage *texture)
