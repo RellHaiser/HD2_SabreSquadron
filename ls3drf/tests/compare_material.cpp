@@ -457,8 +457,8 @@ void RunOp()
         break;
     }
     case 10:
-        g_lastOp = "SetTwoSided";
-        Check("SetTwoSided", CallV<I3D_RESULT>(o, 0x24), p->SetTwoSided());
+        g_lastOp = "Set2Sided";
+        Check("Set2Sided", CallV<I3D_RESULT>(o, 0x24), p->Set2Sided());
         break;
     case 11: {
         g_lastOp = "SetEnvironment";

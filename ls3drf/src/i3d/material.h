@@ -25,7 +25,7 @@ enum : uint32_t {
     MATF_ENV_TEXTURE = 0x00080000,          // has the second texture (the files' environment map)
     MATF_ANIMATED = 0x04000000,             // I3D_anim_material: the textures follow the time
     MATF_COLORS = 0x08000000,               // drawn with its own colors (else IGraph's default material)
-    MATF_TWO_SIDED = 0x10000000,            // SetTwoSided: drawn without culling
+    MATF_TWO_SIDED = 0x10000000,            // Set2Sided: drawn without culling
     MATF_COLORKEY = 0x20000000,             // the texture's 1-bit alpha (ITC_ALPHA_1BIT)
     MATF_ALPHA = 0x40000000,                // a texture has alpha
     MATF_ADDITIVE = 0x80000000,             // (file flag) drawn additively (one + source alpha)
@@ -49,7 +49,7 @@ public:
     virtual I3D_RESULT __stdcall SetTexture(ITexture *newTexture);
     // 0x20 0x1002b350: the colors, flags and textures of another material.
     virtual I3D_RESULT __stdcall CopyFrom(const I3D_material *source);
-    virtual I3D_RESULT __stdcall SetTwoSided();                    // 0x24 0x1002b3b0
+    virtual I3D_RESULT __stdcall Set2Sided();                    // 0x24 0x1002b3b0
     // 0x28 0x1002b300: SetEnvTexture, SetBits8, SetBits12 and SetAlpha in turn (the first
     // failure's result; else 0).
     virtual I3D_RESULT __stdcall SetEnvironment(ITexture *env, uint32_t bits8, uint32_t bits12, float alpha);

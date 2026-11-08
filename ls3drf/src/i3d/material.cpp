@@ -121,7 +121,7 @@ I3D_RESULT I3D_material::CopyFrom(const I3D_material *source)
 }
 
 // LS3DRF 0x10019500 (from LS3DF 0x1002b3b0)
-I3D_RESULT I3D_material::SetTwoSided()
+I3D_RESULT I3D_material::Set2Sided()
 {
     matFlags |= MATF_TWO_SIDED;
     return I3D_OK;
