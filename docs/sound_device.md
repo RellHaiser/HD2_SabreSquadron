@@ -84,9 +84,12 @@ linked against OpenAL, so the DLL runs without it.
 - **Buffers.** A buffer is an OpenAL source playing a *callback buffer* (`AL_SOFT_callback_buffer`).
   The backend keeps the buffer's bytes itself, as DirectSound does: the engine locks and writes
   them, also while they play (IShow's ring). The mixer takes them through the callback. That
-  callback converts them (8- or 16-bit, mono or stereo), moves the play cursor, wraps at the end
+  callback converts them, moves the play cursor, wraps at the end
   of a looping buffer or ends a one-shot one, and sets the position notifications the cursor
   passes.
+- **Formats** are DirectSound's: PCM of 8, 16, 24 or 32 bits and 32-bit float, plain or
+  extensible, mono or stereo. Mods ship 24-bit sounds; the first version took only 8 and 16 bits,
+  and a mod's 24-bit Springfield shots stayed silent.
 - **The play cursor** is the next byte the mixer takes. It is a few frames ahead of what is heard,
   like DirectSound's.
   - `Stop` keeps the cursor and `Play` goes on from it.
@@ -156,6 +159,7 @@ openal-soft.org works too: point `OPENAL_DIR` at it, and `build.py` takes its `b
   device (stereo float, 44.1 kHz, no HRTF or limiter), and its output and state are checked against
   what DirectSound does with the same calls:
   - volume and pan, 8- and 16-bit, mono and stereo, and silence at -10000;
+  - 24- and 32-bit PCM and float, plain and extensible, play; other formats are refused;
   - the cursor following the mix;
   - IShow's notifications, each set exactly when the cursor passes it, over two laps;
   - locks across the end;
@@ -164,7 +168,7 @@ openal-soft.org works too: point `OPENAL_DIR` at it, and `build.py` takes its `b
   - distance (1 / d), the maximum distance, rolloff, left / right, 3D off, the cone's -20 dB;
   - the EAX listener properties kept, and the reverb tail present only with the room on.
 
-  Result: 66 checks pass, and 20 deliberately introduced bugs in the backend are all caught:
+  Result: 80 checks pass, and 20 deliberately introduced bugs in the backend are all caught:
   - 6 in volume, pan and conversion: the gain formula, the pan side, 8-bit's offset, mono in one
     channel, a duplicate's volume, the looping flag;
   - 6 in the cursor and notifications: one at the cursor itself, the end not resetting it or not

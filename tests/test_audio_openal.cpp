@@ -105,6 +105,105 @@ Buffer *NewBuffer(System *system, DWORD flags, int channels, int bits, DWORD byt
     return b;
 }
 
+// The formats DirectSound takes besides 8 and 16 bits (mods ship 24-bit sounds): each stereo
+// buffer holds left 0.5 and right -0.25, and must play them.
+void TestFormats(System *system)
+{
+    struct S_case {
+        const char *name;
+        WORD tag;           // WAVE_FORMAT_PCM / _IEEE_FLOAT / EXTENSIBLE (0xfffe, sub-format below)
+        WORD subFormat;
+        int bits;
+    } cases[] = {
+        {"24-bit PCM", WAVE_FORMAT_PCM, 0, 24},
+        {"32-bit PCM", WAVE_FORMAT_PCM, 0, 32},
+        {"32-bit float", WAVE_FORMAT_IEEE_FLOAT, 0, 32},
+        {"extensible 24-bit PCM", 0xfffe, WAVE_FORMAT_PCM, 24},
+        {"extensible float", 0xfffe, WAVE_FORMAT_IEEE_FLOAT, 32},
+    };
+    for (const S_case &c : cases) {
+        // WAVEFORMATEXTENSIBLE: the WAVEFORMATEX, wValidBitsPerSample, dwChannelMask, SubFormat
+        // (KSDATAFORMAT_SUBTYPE_*: the format tag, then a fixed tail).
+        alignas(4) uint8_t format[40] = {};
+        WAVEFORMATEX f = Format(2, c.bits);
+        f.wFormatTag = c.tag;
+        if (c.tag == 0xfffe) {
+            f.cbSize = 22;
+            const WORD valid = static_cast<WORD>(c.bits);
+            const DWORD mask = 3;
+            const uint8_t tail[14] = {0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xaa, 0, 0x38, 0x9b, 0x71};
+            std::memcpy(format + 18, &valid, 2);
+            std::memcpy(format + 20, &mask, 4);
+            std::memcpy(format + 24, &c.subFormat, 2);
+            std::memcpy(format + 26, tail, sizeof tail);
+        }
+        std::memcpy(format, &f, sizeof f);
+        DSBUFFERDESC desc = {};
+        desc.dwSize = sizeof desc;
+        desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPAN;
+        desc.dwBufferBytes = 4410u * f.nBlockAlign;
+        desc.lpwfxFormat = reinterpret_cast<WAVEFORMATEX *>(format);
+        Buffer *b = nullptr;
+        const HRESULT hr = dev->CreateSoundBuffer(system, &desc, &b);
+        Check(hr == DS_OK && b, "%s: CreateSoundBuffer %08lx", c.name, hr);
+        if (!b)
+            continue;
+        void *p1 = nullptr;
+        DWORD s1 = 0;
+        dev->Lock(b, 0, 0, &p1, &s1, nullptr, nullptr, DSBLOCK_ENTIREBUFFER);
+        auto *p = static_cast<uint8_t *>(p1);
+        const int bytes = c.bits / 8;
+        const bool isFloat = c.tag == WAVE_FORMAT_IEEE_FLOAT || c.subFormat == WAVE_FORMAT_IEEE_FLOAT;
+        for (DWORD i = 0; i + 2 * bytes <= s1; i += 2 * bytes) {
+            for (int ch = 0; ch < 2; ++ch) {
+                const double v = ch == 0 ? 0.5 : -0.25;
+                uint8_t *s = p + i + ch * bytes;
+                if (isFloat) {
+                    const float x = static_cast<float>(v);
+                    std::memcpy(s, &x, 4);
+                } else {
+                    const int32_t x = static_cast<int32_t>(v * 2147483648.0);  // (the top `bits` bits)
+                    for (int k = 0; k < bytes; ++k)
+                        s[k] = static_cast<uint8_t>(static_cast<uint32_t>(x) >> (8 * (4 - bytes + k)));
+                }
+            }
+        }
+        dev->Unlock(b, p1, s1, nullptr, 0);
+        dev->Play(b, 0, 0, DSBPLAY_LOOPING);
+        const S_level l = Level(Render(8192), 2048);
+        Check(Near(l.left, 0.5, 1e-4) && Near(l.right, -0.25, 1e-4), "%s plays: %.5f %.5f", c.name, l.left, l.right);
+        dev->Stop(b);
+        dev->Release(b);
+    }
+
+    // A mod's sound: 24-bit mono 3D at 44,092 Hz.
+    WAVEFORMATEX mono = Format(1, 24, 44092);
+    DSBUFFERDESC desc = {};
+    desc.dwSize = sizeof desc;
+    desc.dwFlags = DSBCAPS_CTRL3D | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
+    desc.dwBufferBytes = 44092 * 3;
+    desc.lpwfxFormat = &mono;
+    Buffer *b3 = nullptr;
+    Check(dev->CreateSoundBuffer(system, &desc, &b3) == DS_OK && b3, "a 24-bit mono 3D buffer");
+    if (b3)
+        dev->Release(b3);
+
+    // Formats DirectSound has no use for stay refused.
+    for (const auto &bad : {std::make_pair(WORD(WAVE_FORMAT_PCM), 12), std::make_pair(WORD(WAVE_FORMAT_IEEE_FLOAT), 64),
+                            std::make_pair(WORD(WAVE_FORMAT_IEEE_FLOAT), 16)}) {
+        WAVEFORMATEX f = Format(2, bad.second);
+        f.wFormatTag = bad.first;
+        desc.dwFlags = 0;
+        desc.dwBufferBytes = 4096;
+        desc.lpwfxFormat = &f;
+        Buffer *b = nullptr;
+        Check(dev->CreateSoundBuffer(system, &desc, &b) == DSERR_BADFORMAT, "format %u with %d bits refused", bad.first,
+              bad.second);
+        if (b)
+            dev->Release(b);
+    }
+}
+
 // 16-bit samples written through Lock.
 void Write16(Buffer *b, const std::vector<int16_t> &samples)
 {
@@ -460,6 +559,7 @@ int main()
     Check(dev->SetSpeakerConfig(system, DSSPEAKER_STEREO) == DS_OK, "SetSpeakerConfig");
 
     TestVolumeAndPan(system);
+    TestFormats(system);
     TestNotifications(system);
     TestPlayback(system);
     Test3D(system, listener);

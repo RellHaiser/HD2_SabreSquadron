@@ -12,6 +12,8 @@
 // - 3D buffers are mono sources that OpenAL places with DirectSound's distance model (inverse
 //   distance, clamped between the minimum and maximum distances, the listener's rolloff factor).
 //   DirectSound's axes are left-handed, OpenAL's right-handed: z is negated.
+// - Buffers take the formats DirectSound takes: PCM of 8, 16, 24 or 32 bits and 32-bit float, as
+//   WAVEFORMATEX or WAVEFORMATEXTENSIBLE, mono or stereo (mods ship 24-bit sounds).
 // - Volumes in hundredths of a decibel become gains (10^(mB / 2000)); -10000 is silence.
 // - EAX 3 goes to OpenAL Soft's EAX emulation (EAXSet / EAXGet take EAX 3's property sets).
 // - The output follows the system and OpenAL Soft's own settings: SetSpeakerConfig is accepted and
@@ -303,25 +305,46 @@ void NotifyStop(S_buffer *b)
     }
 }
 
-// One sample of the buffer's format as a float (-1 - 1).
-inline float Sample(const uint8_t *p, int bits)
+// One sample of the buffer's format as a float (-1 - 1): PCM of 8 (unsigned), 16, 24 or 32 bits,
+// or 32-bit float (`isFloat`).
+inline float Sample(const uint8_t *p, int bits, bool isFloat)
 {
-    if (bits == 8)
+    switch (bits) {
+    case 8:
         return (static_cast<float>(*p) - 128.0f) * (1.0f / 128.0f);
-    int16_t v;
-    std::memcpy(&v, p, 2);
-    return static_cast<float>(v) * (1.0f / 32768.0f);
+    case 16: {
+        int16_t v;
+        std::memcpy(&v, p, 2);
+        return static_cast<float>(v) * (1.0f / 32768.0f);
+    }
+    case 24: {
+        const int32_t v = static_cast<int32_t>(static_cast<uint32_t>(p[0]) << 8 | static_cast<uint32_t>(p[1]) << 16 |
+                                               static_cast<uint32_t>(p[2]) << 24) >> 8;
+        return static_cast<float>(v) * (1.0f / 8388608.0f);
+    }
+    default: {
+        if (isFloat) {
+            float f;
+            std::memcpy(&f, p, 4);
+            return f;
+        }
+        int32_t v;
+        std::memcpy(&v, p, 4);
+        return static_cast<float>(v) * (1.0f / 2147483648.0f);
+    }
+    }
 }
 
 // `frames` frames of the buffer from `src` into `dst`: stereo with the pan (2D) or mono (3D).
 void Convert(const S_buffer *b, const uint8_t *src, int frames, float *dst)
 {
     const int bits = b->format.wBitsPerSample;
+    const bool isFloat = b->format.wFormatTag == WAVE_FORMAT_IEEE_FLOAT;
     const int bytes = bits / 8;
     const bool stereo = b->format.nChannels == 2;
     for (int i = 0; i < frames; ++i, src += b->format.nBlockAlign) {
-        const float left = Sample(src, bits);
-        const float right = stereo ? Sample(src + bytes, bits) : left;
+        const float left = Sample(src, bits, isFloat);
+        const float right = stereo ? Sample(src + bytes, bits, isFloat) : left;
         if (b->is3D) {
             *dst++ = stereo ? (left + right) * 0.5f : left;
         } else {
@@ -398,6 +421,21 @@ void ApplyListener(S_system *s)
 }
 
 // ---------------------------------------------------------------- the device
+
+// The sample format (WAVE_FORMAT_PCM, _IEEE_FLOAT, ...) of a format, the extensible one's from its
+// sub-format GUID (whose first two bytes are the format tag).
+WORD SampleFormat(const WAVEFORMATEX &f)
+{
+    const WORD kExtensible = 0xfffe;        // WAVE_FORMAT_EXTENSIBLE
+    if (f.wFormatTag != kExtensible)
+        return f.wFormatTag;
+    if (f.cbSize < 22)
+        return 0;
+    // WAVEFORMATEXTENSIBLE: the WAVEFORMATEX, wValidBitsPerSample, dwChannelMask, SubFormat.
+    WORD tag;
+    std::memcpy(&tag, reinterpret_cast<const uint8_t *>(&f) + 24, sizeof tag);
+    return tag;
+}
 
 // A secondary buffer's OpenAL objects and first settings; false when OpenAL has none left.
 bool CreateSource(S_buffer *b)
@@ -575,8 +613,11 @@ public:
             return DS_OK;
         }
         const WAVEFORMATEX *f = desc->lpwfxFormat;
-        if (!f || f->wFormatTag != WAVE_FORMAT_PCM || (f->nChannels != 1 && f->nChannels != 2) ||
-            (f->wBitsPerSample != 8 && f->wBitsPerSample != 16) ||
+        const WORD tag = f ? SampleFormat(*f) : 0;
+        const bool pcm = tag == WAVE_FORMAT_PCM &&
+            (f->wBitsPerSample == 8 || f->wBitsPerSample == 16 || f->wBitsPerSample == 24 || f->wBitsPerSample == 32);
+        const bool ieeeFloat = tag == WAVE_FORMAT_IEEE_FLOAT && f->wBitsPerSample == 32;
+        if (!(pcm || ieeeFloat) || (f->nChannels != 1 && f->nChannels != 2) ||
             f->nBlockAlign != f->nChannels * f->wBitsPerSample / 8 || f->nSamplesPerSec < kMinFrequency ||
             f->nSamplesPerSec > kMaxFrequency)
             return DSERR_BADFORMAT;
@@ -586,6 +627,7 @@ public:
             return DSERR_INVALIDPARAM;      // (DirectSound's 3D buffers are mono)
         S_buffer *b = new S_buffer(s, desc->dwFlags, false);
         b->format = *f;
+        b->format.wFormatTag = tag;         // (an extensible format as its sample format)
         b->format.cbSize = 0;
         const uint8_t silence = f->wBitsPerSample == 8 ? 0x80 : 0;
         b->data = std::make_shared<std::vector<uint8_t>>(desc->dwBufferBytes, silence);

@@ -56,7 +56,7 @@ The engine's file formats, as the source reads them: [docs/4ds_format.md](docs/4
 | The lightmap baker | `compare_lightmap`: 20,000 rounds of bakes and light probes |
 | Model, scene, animation and shadow loading | `compare_loader`: all 6,200 of the game's files plus 14 synthetic ones, member by member |
 | IShow: Ogg music streaming, Bink movies, AVI and other files through DirectShow, into textures | `compare_show`: 80,000 operations on the game's music and movies, 24 AVI playbacks |
-| The OpenAL Soft sound backend (new, optional; the original has none to compare with) | `test_audio_openal`: 66 checks of DirectSound's behaviour, rendered on OpenAL Soft's loopback device |
+| The OpenAL Soft sound backend (new, optional; the original has none to compare with) | `test_audio_openal`: 80 checks of DirectSound's behaviour, rendered on OpenAL Soft's loopback device |
 | The FFmpeg video backend (new, optional) | `test_video_ffmpeg`: beside Bink and DirectShow, all 68 of the game's movies (101,158 frames, 49.7 dB) and AVI graphs frame for frame |
 | The SDL3 window, clock and input backends (new, optional) | `test_platform_sdl3`: beside the Win32 window, what IGraph is told for the same messages; all 132 keys, the mouse and the focus rules of the input device |
 | The scene's weather: rain and snow particles, their vertices, the weather settings | `compare_weather`: 140,000 frames, every vertex |
