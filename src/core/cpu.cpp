@@ -14,7 +14,7 @@ namespace {
 
 // 0x10068620: the names the original knows, by vendor, family and model. Families it does not
 // list leave the name empty; known families with an unknown model give "Unknown".
-const char *CpuName(int family, int model, const char *vendor)
+const char *map_mname(int family, int model, const char *vendor)
 {
     if (std::strncmp("AuthenticAMD", vendor, 12) == 0) {
         if (family == 4)
@@ -69,7 +69,7 @@ const char *CpuName(int family, int model, const char *vendor)
 
 }  // namespace
 
-uint32_t DetectCpu(S_cpuInfo *info)
+uint32_t _cpuid(S_cpuInfo *info)
 {
     // (The original probes CPUID under a structured exception handler; every processor that can
     // run this port has it.)
@@ -105,13 +105,13 @@ uint32_t DetectCpu(S_cpuInfo *info)
         info->family = (version >> 8) & 0xF;
         info->stepping = version & 0xF;
         std::memcpy(info->vendor, vendor, sizeof vendor);
-        std::strcpy(info->name, CpuName(info->family, info->model, info->vendor));
+        std::strcpy(info->name, map_mname(info->family, info->model, info->vendor));
         info->valid = 0xF;
     }
     return flags;
 }
 
-uint32_t MeasureCpuMhz()
+uint32_t GetCpuSpeed()
 {
     DWORD t0 = platform::Milliseconds(), t1;
     do

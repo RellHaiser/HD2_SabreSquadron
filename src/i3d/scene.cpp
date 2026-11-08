@@ -275,7 +275,7 @@ void I3D_scene::AddTickFrame(I3D_frame *frame)
     frame->frameFlags |= FRMFLAGS_SCENE_SOUND;
 }
 
-I3D_RESULT I3D_scene::RemoveTickFrame(I3D_frame *frame)
+I3D_RESULT I3D_scene::DeleteTickFrame(I3D_frame *frame)
 {
     if (!tickFrames.RemoveSwap(frame))
         return I3DERR_OBJECTNOTFOUND;
@@ -679,7 +679,7 @@ void I3D_scene::Close()
     nearSector->renderVisuals = nullptr;
     g_activeAreas.Clear();
     for (int n = primarySector->sounds.Size(); n != 0; --n)
-        primarySector->RemoveSound(primarySector->sounds[0]);
+        primarySector->DeleteSound(primarySector->sounds[0]);
     for (int i = lensFlares.Size(); i != 0; --i)
         lensFlares[i - 1]->Release();
     lensFlares.Clear();
@@ -1217,7 +1217,7 @@ namespace ls3d::i3d {
 
 void SceneAddFrame(I3D_frame *scene, I3D_frame *frame) { static_cast<I3D_scene *>(scene)->AddFrame(frame); }
 void SceneFrameReleased(I3D_frame *scene, I3D_frame *frame) { static_cast<I3D_scene *>(scene)->RemoveFrame(frame); }
-I3D_RESULT SceneRemoveSoundFrame(I3D_scene *scene, I3D_frame *frame) { return scene->RemoveTickFrame(frame); }
+I3D_RESULT SceneRemoveSoundFrame(I3D_scene *scene, I3D_frame *frame) { return scene->DeleteTickFrame(frame); }
 I3D_sector *SceneLocateSector(I3D_scene *scene, const S_vector &pos, I3D_sector *hint)
 {
     return scene->LocateSector(pos, hint);

@@ -507,10 +507,10 @@ static bool NearPortal(const I3D_portal *portal)
         const float turn = edge.Cross(foot - a).Dot(portal->plane.normal);
         positive |= turn > 0.0f;
         negative |= turn < 0.0f;
-        const float len2 = edge.Square();
+        const float len2 = edge.Magnitude2();
         float t = len2 > 0.0f ? (e - a).Dot(edge) / len2 : 0.0f;
         t = t < 0.0f ? 0.0f : t > 1.0f ? 1.0f : t;
-        const float sq = (e - (a + edge * t)).Square();
+        const float sq = (e - (a + edge * t)).Magnitude2();
         if (sq < nearest)
             nearest = sq;
     }

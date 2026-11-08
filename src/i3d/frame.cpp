@@ -140,7 +140,7 @@ uint32_t __stdcall OccluderSceneProc(I3D_frame *frame, void *scene)
 }
 uint32_t __stdcall AreaSceneProc(I3D_frame *frame, void *scene)
 {
-    static_cast<I3D_area *>(frame)->SetScene(static_cast<I3D_scene *>(scene));
+    static_cast<I3D_area *>(frame)->AddToRemoveFromSceneRing(static_cast<I3D_scene *>(scene));
     return 0;
 }
 
@@ -263,11 +263,11 @@ void I3D_frame::Uninit()
         RemoveName();
     NotifyOwnerRemoved();
     if (frameFlags & FRMFLAGS_TARGETED)
-        RemoveFromTargets(this);
+        DeleteFromAnyTarget(this);
     if (frameFlags & FRMFLAGS_SHADOW_CASTER)
-        RemoveShadowCaster(this);
+        DeleteFromAnyShadow(this);
     if (frameFlags & FRMFLAGS_SCENE_SOUND)
-        g_driver->FrameReleased(this);
+        g_driver->DeleteFromSceneTickList(this);
     if (parent) {
         parent->frameFlags &= ~FRMFLAGS_BOUND_VALID;
         if (RemoveChild(parent, this)) {
@@ -726,7 +726,7 @@ I3D_RESULT __stdcall I3D_frame::LinkTo(I3D_frame *newParent, uint32_t flags)
     // (0x800 is no type bit EnumFrames knows: the original's occluder pass finds nothing.)
     EnumFrames(OccluderSceneProc, newScene, 0x800, nullptr);
     if (type == FRAME_AREA)
-        static_cast<I3D_area *>(this)->SetScene(newScene);
+        static_cast<I3D_area *>(this)->AddToRemoveFromSceneRing(newScene);
     EnumFrames(AreaSceneProc, newScene, EnumTypeBit(FRAME_AREA), nullptr);
     return I3D_OK;
 }
@@ -932,7 +932,7 @@ void __stdcall I3D_frame::UpdateBound()
             const S_matrix &m = GetMatrix();
             bound.bbox.min = bound.bbox.max = box.Corner(0) * m;
             for (int i = 1; i < 8; ++i)
-                bound.bbox.Expand(box.Corner(i) * m);
+                bound.bbox.Absorb(box.Corner(i) * m);
             bound.MakeSphere();
         }
         frameFlags |= FRMFLAGS_BOUND_VALID;
