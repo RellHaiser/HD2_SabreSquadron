@@ -479,9 +479,9 @@ struct I3D_texture {
 };
 struct I3D_material_vtbl {
     unsigned int (__stdcall *Release)(struct I3D_material *self);
-    void (__stdcall *SetAmbient)(struct I3D_material *self, struct S_vector * color);
-    void (__stdcall *SetDiffuse)(struct I3D_material *self, struct S_vector * color);
-    void (__stdcall *SetEmissive)(struct I3D_material *self, struct S_vector * color);
+    void (__stdcall *SetAmbientColor)(struct I3D_material *self, struct S_vector * color);
+    void (__stdcall *SetDiffuseColor)(struct I3D_material *self, struct S_vector * color);
+    void (__stdcall *SetEmissiveColor)(struct I3D_material *self, struct S_vector * color);
     void (__stdcall *SetSpecular)(struct I3D_material *self, struct S_vector * color);
     void (__stdcall *SetPower)(struct I3D_material *self, float power);
     void *Slot18;
@@ -665,7 +665,7 @@ struct I3D_projector_visual_vtbl {
     void (__stdcall *SetIntensity)(struct I3D_projector_visual *self, float opacity);
     void *SlotAC;
     void (__stdcall *SetColor)(struct I3D_projector_visual *self, struct S_vector * color);
-    void (__stdcall *SetMode)(struct I3D_projector_visual *self, int value);
+    void (__stdcall *SetProjectionMode)(struct I3D_projector_visual *self, int value);
     void (__stdcall *SetBuffered)(struct I3D_projector_visual *self, int mode);
     void (__stdcall *Reproject)(struct I3D_projector_visual *self, int unknown1, int unknown2);
 };
