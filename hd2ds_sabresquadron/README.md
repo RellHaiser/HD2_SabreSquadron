@@ -47,6 +47,6 @@ body (a default return; `true` for `Init` / `Done` / `LoadGame` / `SaveGame`). `
   only `ISndGetDriver`.
 - Imports from LS3DRF.dll: the original server's 38 plus three `S_matrix` methods (`RotateByMatrix`, `SetDir` with
   two vectors, `SetRot`), by the same ordinals as the original DLL's.
-- Not a server yet: no `HD2_DEDICATED` branch is in `src/`. The code is the client's, and the window, the input and
-  the rendering still start; LS3DRF's `IGraph` has fewer methods than LS3DF's, so a client call to a missing one
+- Not a server yet: no `HD2_DEDICATED` branch is in `src/`. The code is the client's: the window, the input and
+  the rendering are still in it. LS3DRF's `IGraph` has fewer methods than LS3DF's, so a client call to a missing one
   would fail at run time. Not run.
