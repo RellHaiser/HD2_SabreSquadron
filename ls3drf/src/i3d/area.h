@@ -39,7 +39,7 @@ public:
     virtual uint32_t __stdcall GetFadeTime();
 
     // 0x10005640: the scene's area ring (I3D_scene::firstArea); always leaves the old ring first.
-    void SetScene(I3D_scene *newScene);
+    void AddToRemoveFromSceneRing(I3D_scene *newScene);
 
     int numVertices;                        // +0x120
     S_vector4 *vertices;                    // +0x124 local (16-byte aligned)

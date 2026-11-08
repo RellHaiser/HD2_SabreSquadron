@@ -55,12 +55,12 @@ void I3D_area::Uninit()
     AlignedFree(worldVertices);
     ::operator delete(faces);
     AlignedFree(planes);
-    SetScene(nullptr);
+    AddToRemoveFromSceneRing(nullptr);
     I3D_frame::Uninit();
 }
 
 // LS3DRF 0x10001b10 (from LS3DF 0x10005640)
-void I3D_area::SetScene(I3D_scene *newScene)
+void I3D_area::AddToRemoveFromSceneRing(I3D_scene *newScene)
 {
     if (scene && prevInScene) {
         if (scene->firstArea == this)
@@ -97,7 +97,7 @@ I3D_RESULT I3D_area::LinkTo(I3D_frame *newParent, uint32_t flags)
 {
     if (newParent == parent)
         return I3D_OK;
-    SetScene(nullptr);
+    AddToRemoveFromSceneRing(nullptr);
     if (newParent) {
         I3D_frame *const owner = newParent->ownerModel;
         I3D_scene *newScene = nullptr;
@@ -113,7 +113,7 @@ I3D_RESULT I3D_area::LinkTo(I3D_frame *newParent, uint32_t flags)
                 }
             }
         }
-        SetScene(newScene);
+        AddToRemoveFromSceneRing(newScene);
     }
     I3D_frame::LinkTo(newParent, flags);
     return I3D_OK;
