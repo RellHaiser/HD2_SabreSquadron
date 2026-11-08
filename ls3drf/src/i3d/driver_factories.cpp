@@ -25,7 +25,7 @@ I3D_anim_material *I3D_driver::CreateAnimMaterial()
     return m;
 }
 
-I3D_triface *I3D_driver::AllocFaces(int count)
+I3D_triface *I3D_driver::CreateTrifaceArray(int count)
 {
     return static_cast<I3D_triface *>(::operator new(sizeof(I3D_triface) * static_cast<size_t>(count)));
 }

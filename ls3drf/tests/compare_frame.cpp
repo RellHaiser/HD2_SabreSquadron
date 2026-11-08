@@ -136,7 +136,7 @@ I3D_frame *__stdcall I3D_driver::CreateVisual(uint32_t) { return nullptr; }
 I3D_frame *__stdcall I3D_driver::CreateFrame(int) { return nullptr; }
 I3D_material *__stdcall I3D_driver::CreateMaterial() { return nullptr; }
 I3D_anim_material *__stdcall I3D_driver::CreateAnimMaterial() { return nullptr; }
-I3D_triface *__stdcall I3D_driver::AllocFaces(int) { return nullptr; }
+I3D_triface *__stdcall I3D_driver::CreateTrifaceArray(int) { return nullptr; }
 I3D_face_group *__stdcall I3D_driver::CreateFaceGroup() { return nullptr; }
 I3D_mesh_level *__stdcall I3D_driver::CreateMeshLevel() { return nullptr; }
 I3D_mesh *__stdcall I3D_driver::CreateMesh() { return nullptr; }

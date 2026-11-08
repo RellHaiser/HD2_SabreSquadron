@@ -35,7 +35,7 @@ public:
     virtual I3D_material *__stdcall CreateMaterial();                   // 0x28 0x10018ae0
     virtual I3D_anim_material *__stdcall CreateAnimMaterial();          // 0x2C 0x10018b60
     // 0x30 0x10018be0: room for `count` faces (operator new).
-    virtual I3D_triface *__stdcall AllocFaces(int count);
+    virtual I3D_triface *__stdcall CreateTrifaceArray(int count);
     virtual I3D_face_group *__stdcall CreateFaceGroup();                // 0x34 0x10018c00
     virtual I3D_mesh_level *__stdcall CreateMeshLevel();                // 0x38 0x10018c60
     virtual I3D_mesh *__stdcall CreateMesh();                           // 0x3C 0x10018cc0
