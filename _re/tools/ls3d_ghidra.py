@@ -23,7 +23,7 @@ SCALARS = {
     "short": "short", "long": "long", "unsigned": "unsigned int",
     "int8_t": "char", "uint8_t": "unsigned char", "int16_t": "short", "uint16_t": "unsigned short",
     "int32_t": "int", "uint32_t": "unsigned int", "int64_t": "long long", "uint64_t": "unsigned long long",
-    "size_t": "unsigned int", "HRESULT": "long", "DWORD": "unsigned int", "BOOL": "int",
+    "size_t": "unsigned int", "uintptr_t": "unsigned int", "HRESULT": "long", "DWORD": "unsigned int", "BOOL": "int",
     "wchar_t": "unsigned short",
     "HWND": "void *", "HANDLE": "void *", "HINSTANCE": "void *",
     "I3D_ENUMPROC": "void", "I3D_LOAD_CB_PROC": "void",
