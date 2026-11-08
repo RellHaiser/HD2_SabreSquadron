@@ -997,7 +997,9 @@ void C_SoundModule::SetDopplerWobble(bool on)
 {
     const float speed = std::cos(static_cast<float>(GetGame()->GetTime()) * 0.01f) * 50.0f + 25.0f;
     const S_vector velocity = on ? S_vector(speed, speed, speed) : S_vector(0, 0, 0);
+#ifndef HD2_DEDICATED   // no sound listener in LS3DRF.dll
     GetGame()->GetScene()->GetSoundListener()->SetVelocity(velocity);
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -1018,8 +1020,10 @@ bool C_SoundModule::OpenStream(ISND_stream *&stream, const char *fileName, float
     if (!IsClient())
         return true;
     if (!stream) {
+#ifndef HD2_DEDICATED   // no streams in LS3DRF.dll
         if (fileName)
             stream = GetIGraph()->CreateStream();
+#endif
         if (!stream)
             return false;
     }
@@ -1084,8 +1088,10 @@ void C_SoundModule::PlayMusic(int track)
         }
         return;
     }
+#ifndef HD2_DEDICATED   // no streams in LS3DRF.dll
     if (!m_overlay)
         m_overlay = GetIGraph()->CreateStream();
+#endif
     const S_SoundGroup *group = g_soundTable.GetGroup(SOUND_CHAPTER_MUSIC, track);
     if (!group || group->samples.empty())
         return;

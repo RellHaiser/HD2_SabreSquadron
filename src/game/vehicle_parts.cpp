@@ -119,10 +119,12 @@ I3D_projector_visual *__stdcall CreateLamp(I3D_frame *frame, I3D_light **light) 
     projector->SetMode(4);
     projector->LinkTo(nullptr, 0);
     IImage *texture = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(name.c_str(), "", 0, &texture) == 0) {
         projector->SetTexture(texture);
         texture->Release();
     }
+#endif
     projector->SetOrthogonal(0);
     projector->SetOn(false);
     projector->Update();
@@ -351,6 +353,7 @@ I3D_projector_visual *C_Vehicle::CreateProjector(I3D_frame *frame, I3D_light **l
     projector->SetMode(4);
     projector->LinkTo(nullptr, 0);
     IImage *textures[3] = {};
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     for (int n = 0; n < 3; ++n) {
         if (GetIGraph()->LoadTexture(names[n].c_str(), "", 0, &textures[n]) != 0) {
             projector->Release();
@@ -359,6 +362,7 @@ I3D_projector_visual *C_Vehicle::CreateProjector(I3D_frame *frame, I3D_light **l
             return nullptr;
         }
     }
+#endif
     projector->SetOrthogonal(0);
     projector->SetOn(false);
     projector->Update();

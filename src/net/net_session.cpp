@@ -276,8 +276,10 @@ int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
         m_playersLock.Leave();
     } else {
         // A dedicated server: nothing shown.
+#ifndef HD2_DEDICATED   // no window or input in LS3DRF.dll
         GetIGraph()->InitMouse(0);
         ShowWindow(GetIGraph()->GetHWND(), SW_HIDE);
+#endif
     }
     if (address)
         address->Release();
@@ -656,7 +658,11 @@ void C_NetGame::StartVoiceServer()
         return;
     m_voiceServer = new C_NetVoice(nullptr, VoiceServerHandler);
     const GUID &guid = codec >= 1 && codec <= 7 ? g_netVoiceCodecs[codec] : g_netVoiceCodecs[0];
+#ifndef HD2_DEDICATED   // no window in LS3DRF.dll
     m_voiceServer->Init(GetIGraph()->GetHWND(), true, false, m_server, 3, &guid, nullptr, 0);
+#else
+    m_voiceServer->Init(nullptr, true, false, m_server, 3, &guid, nullptr, 0);
+#endif
 }
 
 void C_NetGame::StartVoiceClient(bool onServer)
@@ -669,7 +675,11 @@ void C_NetGame::StartVoiceClient(bool onServer)
     config[3] = 0;
     config[4] = 0xFFFFFFFE;
     IUnknown *session = onServer ? static_cast<IUnknown *>(m_server) : static_cast<IUnknown *>(m_client);
+#ifndef HD2_DEDICATED   // no window in LS3DRF.dll
     m_voiceClient->Init(GetIGraph()->GetHWND(), false, true, session, 3, nullptr, config, 0);
+#else
+    m_voiceClient->Init(nullptr, false, true, session, 3, nullptr, config, 0);
+#endif
 }
 
 void C_NetGame::StopVoiceServer()

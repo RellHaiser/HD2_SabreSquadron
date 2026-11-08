@@ -143,7 +143,9 @@ bool C_MemberPanel::Init(I3D_scene *scene, int index, I3D_texture **stateIcons, 
     I3D_frame *blank = scene->FindFrame("univerz", FRAME_MASK_ANY);
     blank->SetOn(false);
     m_blankTexture = FirstMaterialTexture(blank);
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     GetIGraph()->LoadTexture("x_fc_death.bmp", "x_fc_a.bmp", 4, &m_deathImage);
+#endif
     m_name = NewText(scene, m_frame);
     m_visibility = FindPart(m_frame, "visibility*");
     m_visibilityText = NewText(scene, m_visibility);

@@ -402,7 +402,9 @@ bool C_MissionLoader::LoadObjects(C_chunk &chunk, int stage)
         }
         case OBJECTS_RENDER_STATE_C:
             chunk.Read(renderState);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->SetRenderState(0xC, renderState);
+#endif
             break;
         case OBJECTS_UNKNOWN_B650: {
             int unknown = 0;
@@ -1013,6 +1015,7 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                 case PROJECTOR_TEXTURE: {
                     const C_str file = ReadRemainingString(chunk);
                     IImage *image = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
                     if (GetIGraph()->LoadTexture(file, nullptr, 0, &image) == 0 && image) {
                         projector->SetTexture(image);
                         image->Release();
@@ -1020,6 +1023,7 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                         projector->Reproject(0, 0);
                         projector->Update();
                     }
+#endif
                     continue;
                 }
                 default:

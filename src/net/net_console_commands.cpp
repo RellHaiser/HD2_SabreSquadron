@@ -368,8 +368,10 @@ bool C_CommandProcessor::Execute(const char *command)
                 Print("Cannot create server! No map!");
                 return true;
             }
+#ifndef HD2_DEDICATED   // no window or input in LS3DRF.dll
             GetIGraph()->InitMouse(settings->dedicated ? 0 : 1);
             ShowWindow(GetIGraph()->GetHWND(), settings->dedicated ? SW_HIDE : SW_SHOW);
+#endif
             settings->sessionType = 2;
             GetGameApp()->m_state->SetPendingState(GAME_STATE_HOST_SESSION);
             break;
@@ -382,8 +384,10 @@ bool C_CommandProcessor::Execute(const char *command)
         case KEY_JOIN:
             if (!local)
                 return true;
+#ifndef HD2_DEDICATED   // no window or input in LS3DRF.dll
             GetIGraph()->InitMouse(1);
             ShowWindow(GetIGraph()->GetHWND(), SW_SHOW);
+#endif
             ReadConsoleToken(&command, word, &value, nullptr);
             SessionServer().address = inet_addr(word);
             settings->sessionType = 1;

@@ -336,7 +336,9 @@ void AddSearchDir(const char *dir, E_DataDirectory type)
 {
     switch (type) {
     case DATA_DIR_MAPS:
+#ifndef HD2_DEDICATED   // no texture directories in LS3DRF.dll
         GetIGraph()->AddDir(dir, 0);
+#endif
         break;
     case DATA_DIR_MODELS:
         g_modelCache.AddDir(dir);

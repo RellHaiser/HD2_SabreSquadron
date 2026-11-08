@@ -1035,9 +1035,15 @@ void C_GEffectsModule::SetFadeLevel(float level, const S_vector *color)
     I3D_driver *driver = I3DGetDriver();
     const bool state3 = driver->GetState(3) != 0;
     IGraph *graph = GetIGraph();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     const bool renderState14 = graph->GetRenderState(0xE) != 0;
+#else
+    const bool renderState14 = false;
+#endif
     driver->SetState(3, 0);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     graph->SetRenderState(0xE, 0);
+#endif
     const float width = static_cast<float>(static_cast<uint32_t>(graph->ScrnX()));
     const float height = static_cast<float>(static_cast<uint32_t>(graph->ScrnY()));
     const int a = static_cast<int>(std::lrint(level * 255.0f));
@@ -1055,11 +1061,15 @@ void C_GEffectsModule::SetFadeLevel(float level, const S_vector *color)
     g_fadeQuad[3].y = height;
     for (S_TLVertex &vertex : g_fadeQuad)
         vertex.color = argb;
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     graph->SetRenderState(0, 1);
     graph->SetTexture(nullptr, 0);
     graph->DrawPrimitives(5, 2, g_fadeQuad, 1);
+#endif
     driver->SetState(3, state3);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     graph->SetRenderState(0xE, renderState14);
+#endif
 }
 
 // 0x00486b30
@@ -1347,8 +1357,13 @@ bool C_GEffectsModule::SwitchFaceTexture(I3D_frame *model, const char *texture)
         return false;
     name += ".bmp";
     IImage *image = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(name.c_str(), "", 0x400, &image) != 0)
         return false;
+#else
+    if (!image)
+        return false;
+#endif
     // The first face group's own material with the texture, shared by the others.
     groups[0]->DuplicateMaterial();
     I3D_material *material = groups[0]->material;

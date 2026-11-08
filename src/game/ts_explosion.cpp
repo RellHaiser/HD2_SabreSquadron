@@ -67,8 +67,13 @@ void C_TSExplosion::StartMission(bool server)           // 0x0060eef0
     m_serverTime = 0;
     m_flags = 0;
     m_texture = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (!server && GetIGraph()->LoadTexture("x_expl00.tga", nullptr, TEXTURE_MODE, &m_texture) != 0)
         return;
+#else
+    if (!server)
+        return;
+#endif
     Activate(server);
 }
 

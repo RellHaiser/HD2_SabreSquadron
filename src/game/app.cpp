@@ -145,8 +145,10 @@ bool InitGraphics()
         return false;
     g_graphFlags = graph->GetInfo()->flags;
 
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     graph->Clear(0, 1.0f, 3);
     graph->Flip();
+#endif
     return true;
 }
 
@@ -174,7 +176,11 @@ void InitSound()
     case 3: flags |= 0x2000; break;
     default: break;
     }
+#ifndef HD2_DEDICATED   // no window
     ISndGetDriver()->Init(GetIGraph()->GetHWND(), 22050, 2, 16, flags);
+#else
+    ISndGetDriver()->Init(nullptr, 22050, 2, 16, flags);
+#endif
 }
 
 bool InitRenderer()                                // 0x006db810
@@ -196,7 +202,9 @@ void ApplyRenderSettings()                         // 0x006db830
 // Keyboard set-up, language selection and game texts.  0x006db970
 void InitInputAndTexts()
 {
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
     GetIGraph()->InitInput(0);
+#endif
     InitControls(g_controls);
     const unsigned listenerCount = g_frameListenersBegin
         ? static_cast<unsigned>(g_frameListenersEnd - g_frameListenersBegin) : 0;
@@ -286,13 +294,16 @@ void RestoreWindowPosition()
     dtaRead(file, &x, sizeof(x));
     dtaRead(file, &y, sizeof(y));
     dtaClose(file);
+#ifndef HD2_DEDICATED   // no window
     HWND window = GetIGraph()->GetHWND();
     SetWindowPos(window, nullptr, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
     SetFocus(GetIGraph()->GetHWND());
+#endif
 }
 
 void SaveWindowPosition()
 {
+#ifndef HD2_DEDICATED   // no window
     const int file = dtaOpenWrite("window.cfg", 0x10000);
     if (file < 0)
         return;
@@ -301,6 +312,7 @@ void SaveWindowPosition()
     dtaWrite(file, &rect.left, sizeof(rect.left));
     dtaWrite(file, &rect.top, sizeof(rect.top));
     dtaClose(file);
+#endif
 }
 
 // Registers the message a second instance broadcasts to bring the first one up.
@@ -331,8 +343,10 @@ bool InitGame(HINSTANCE instance)
     if (!InitGraphics())
         return false;
 
+#ifndef HD2_DEDICATED   // no window
     HWND window = GetIGraph()->GetHWND();
     SetClassLongA(window, GCL_HICON, reinterpret_cast<LONG>(LoadIconA(GetModuleHandleA(nullptr), MAKEINTRESOURCEA(1))));
+#endif
     SetWindowTitle();
     InitSound();
     if (!InitRenderer())
@@ -411,7 +425,11 @@ namespace {
 // for a server that is not also the local client.
 void UpdateThreadPriority()
 {
+#ifndef HD2_DEDICATED   // no window
     const bool background = GetIGraph()->GetHWND() != GetForegroundWindow();
+#else
+    const bool background = false;
+#endif
     const bool mayIdle = (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL || !(g_gameRole & GAME_ROLE_SERVER);
     if (mayIdle && background) {
         if (!g_lowPriority) {
@@ -449,7 +467,9 @@ void SaveScreenshot()
         const HANDLE search = FindFirstFileA(fileName, &found);
         if (search == INVALID_HANDLE_VALUE) {
             FindClose(search);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->SaveShot(fileName, 0, 0, 0);
+#endif
             return;
         }
         FindClose(search);
@@ -504,10 +524,12 @@ int RunGame()
     g_startupChunkHolder->chunk.Close();
 
     // Route the window messages through the game first.
+#ifndef HD2_DEDICATED   // no window
     HWND window = GetIGraph()->GetHWND();
     g_originalWndProc = GetWindowLongA(window, GWL_WNDPROC);
     if (g_originalWndProc)
         SetWindowLongA(window, GWL_WNDPROC, reinterpret_cast<LONG>(GameWindowProc));
+#endif
 
     for (;;) {
         UpdateThreadPriority();
@@ -516,15 +538,19 @@ int RunGame()
         if (g_pollKeyboard) {
             IGraph *graph = GetIGraph();
             graph->ProcessWinMessages();
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
             graph->ReadKeyboard();
             key = graph->GetAsciiKey();
+#endif
         }
 
         int timeDelta = static_cast<int>(LimitFrameTime(10, 100));
         if (app->IsStateActive())
             timeDelta = ScaleFrameTime(timeDelta);
 
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
         GetIGraph()->BeginFrame();
+#endif
         if (g_frameListenersBegin) {
             for (C_FrameListener **it = g_frameListenersEnd; it != g_frameListenersBegin;)
                 (*--it)->OnFrame(true);
@@ -533,6 +559,7 @@ int RunGame()
         I3DGetDriver()->Tick(timeDelta);
 
         if (g_gameRole & GAME_ROLE_CLIENT) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             if (g_scriptModule.IsCutsceneRunning()) {
                 // Full-screen pass (the cutscene's letterbox bars): temporarily widen the viewport
                 // and clear it.
@@ -545,6 +572,7 @@ int RunGame()
                 graph->SetViewport(viewport);
                 graph->Clear(0, 1.0f, 3);
             }
+#endif
             app->RenderState();
         }
 
@@ -578,13 +606,17 @@ int RunGame()
             }
         }
 
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         if (g_gameRole & GAME_ROLE_CLIENT)
             GetIGraph()->Flip();
+#endif
         _controlfp(_PC_53, _MCW_PC);
     }
 
+#ifndef HD2_DEDICATED   // no window
     if (g_originalWndProc)
         SetWindowLongA(GetIGraph()->GetHWND(), GWL_WNDPROC, g_originalWndProc);
+#endif
     if (app->IsStateActive() && (g_gameRole & GAME_ROLE_SERVER))
         app->Shutdown();
     delete app;

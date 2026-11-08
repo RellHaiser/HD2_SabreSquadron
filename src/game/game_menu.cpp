@@ -1661,7 +1661,9 @@ bool C_GameMenu::OnRender()
         return RenderGame();
     }
     if (m_game && m_game->GetTypeId() == GAME_STATE_TYPE_GAME) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         static_cast<C_game *>(m_game)->GetScene()->Render(0);
+#endif
         return true;
     }
     return false;
@@ -1671,13 +1673,17 @@ bool C_GameMenu::RenderGame()
 {
     const int state5 = I3DGetDriver()->GetState(DRIVER_STATE_5);
     const int state6 = I3DGetDriver()->GetState(DRIVER_STATE_6);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->Clear(0, 1.0f, 3);
+#endif
     if (!m_game || m_game->GetTypeId() != GAME_STATE_TYPE_GAME)
         return false;
     // The game's scene without its callback (the interface).
     I3D_scene *scene = static_cast<C_game *>(m_game)->GetScene();
     void *callback = scene->SetRenderCallback(nullptr, 0);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     scene->Render(0);
+#endif
     scene->SetRenderCallback(callback, GAME_RENDER_PHASES);
     I3DGetDriver()->SetState(DRIVER_STATE_5, 0);
     I3DGetDriver()->SetState(DRIVER_STATE_6, 1);
@@ -1685,13 +1691,19 @@ bool C_GameMenu::RenderGame()
     if (m_underPopup && top) {
         top->GetScreenFrame()->SetOn(false);
         m_underPopup->GetScreenFrame()->SetOn(true);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         m_scene->Render(0);
+#endif
         top->GetScreenFrame()->SetOn(true);
         m_underPopup->GetScreenFrame()->SetOn(false);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         m_scene->Render(0);
+#endif
         m_underPopup->GetScreenFrame()->SetOn(true);
     } else if (m_scene) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         m_scene->Render(0);
+#endif
     }
     I3DGetDriver()->SetState(DRIVER_STATE_5, state5);
     I3DGetDriver()->SetState(DRIVER_STATE_6, state6);
@@ -1700,8 +1712,10 @@ bool C_GameMenu::RenderGame()
 
 bool C_GameMenu::RenderEquipment()
 {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     if (m_scene)
         m_scene->Render(0);
+#endif
     if (m_infoScreen && m_infoScreen->IsShown())
         return true;
     m_panel.RenderSoldier();
@@ -1712,7 +1726,9 @@ bool C_GameMenu::RenderEquipment()
         I3DGetDriver()->SetState(DRIVER_STATE_5, 0);
         top->GetScreenFrame()->SetOn(false);
         m_popup->GetScreenFrame()->SetOn(true);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         m_scene->Render(0);
+#endif
         I3DGetDriver()->SetState(DRIVER_STATE_5, state5);
         top->GetScreenFrame()->SetOn(true);
         m_popup->GetScreenFrame()->SetOn(false);

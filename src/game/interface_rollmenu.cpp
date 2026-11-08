@@ -922,8 +922,13 @@ void C_RollMenu::HandleInput(float *held, float *pressed)
     if (m_commandMap)
         return;
     // The number keys choose the entries (0: the last) and act at once.
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
     const int key = GetIGraph()->GetAsciiKey();
     const int digit = static_cast<int>(GetIGraph()->KeyToChar(key, 0) & 0xFF) - '0';
+#else
+    const int key = 0;
+    const int digit = -1;
+#endif
     if (digit >= 0 && digit <= 9) {
         const int index = digit == 0 ? ENTRIES - 1 : digit - 1;
         g_controls.ClearKey(key, held, pressed);

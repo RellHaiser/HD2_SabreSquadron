@@ -95,11 +95,28 @@ def split_top(text):
     return [p for p in parts if p.strip()]
 
 
+def client_only(text):
+    """The headers as the client sees them: drops the `#ifdef HD2_DEDICATED` branches (the dedicated server's
+    LS3DRF.dll layout) and keeps `#ifndef HD2_DEDICATED` / `#else` text. The headers nest no other #if."""
+    out, skip = [], False
+    for line in text.splitlines(keepends=True):
+        d = line.strip()
+        if d.startswith("#ifdef HD2_DEDICATED"):
+            skip = True
+        elif d.startswith("#ifndef HD2_DEDICATED"):
+            skip = False
+        elif d.startswith("#else") or d.startswith("#endif"):
+            skip = False
+        elif not skip:
+            out.append(line)
+    return "".join(out)
+
+
 def parse_classes():
     classes = {}
     order = []
     for path in HEADERS:
-        text = open(path, encoding="utf-8").read()
+        text = client_only(open(path, encoding="utf-8").read())
         for m in re.finditer(r"(?ms)^class (\w+)(?: : public (\w+))? \{\n(.*?)^\};", text):
             name, base, body = m.group(1), m.group(2), m.group(3)
             body_nc = re.sub(r"//[^\n]*", "", body)

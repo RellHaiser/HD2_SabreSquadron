@@ -100,7 +100,11 @@ bool C_VideoState::Start(void *arg)
         LoadScript(NodeFile(m_video));
     } else {
         m_voicePlayer = ISndGetDriver()->CreateSource();
+#ifndef HD2_DEDICATED   // no streams in LS3DRF.dll
         m_stream = graph->CreateStream();
+#else
+        m_stream = nullptr;
+#endif
         OpenStream(NodeFile(m_video));
         if (m_outro2) {
             // (Over the main menu: its music back afterwards.)
@@ -138,10 +142,12 @@ bool C_VideoState::Start(void *arg)
 bool C_VideoState::Stop()
 {
     IGraph *graph = GetIGraph();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     for (int i = 0; i < 3; ++i) {
         graph->Clear(0, 1.0f, 3);
         graph->Flip();
     }
+#endif
     if (!m_video->IsBriefing())
         g_gameProfile.GetPlayerProfile()->SetMovieSeen(NodeFile(m_video), true);
     if (m_musicTrack == -1 || m_musicPosition == -1)
@@ -174,12 +180,18 @@ bool C_VideoState::Stop()
 
 bool C_VideoState::HandleInput(float *, float *)
 {
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
     const int key = GetIGraph()->GetAsciiKey();
+#else
+    const int key = 0;
+#endif
     if (key == KEY_ESCAPE || (m_ending && key == KEY_SPACE)) {
         if (m_stream)
             m_stream->Stop();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->Clear(0, 1.0f, 3);
         GetIGraph()->Flip();
+#endif
         m_state = GAME_STATE_ENDED;
     }
     return true;
@@ -208,8 +220,10 @@ void C_VideoState::Update(int timeDelta)
         }
         if (stopped) {
             m_stream->Stop();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->Clear(0, 1.0f, 3);
             GetIGraph()->Flip();
+#endif
             m_state = GAME_STATE_ENDED;
         }
         m_stream->GetPosition(&m_time);
@@ -267,6 +281,7 @@ void C_VideoState::Update(int timeDelta)
 
 void C_VideoState::Render()
 {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     IGraph *graph = GetIGraph();
     const int old = graph->GetRenderState(0);
     graph->Clear(0, 1.0f, 3);
@@ -282,6 +297,7 @@ void C_VideoState::Render()
         graph->EndScene();
     }
     graph->SetRenderState(0, old);
+#endif
 }
 
 void C_VideoState::OpenStream(const char *file)

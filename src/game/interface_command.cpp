@@ -362,8 +362,10 @@ void DrawScreenLines(const float (*points)[2], int count, const float *color)
         vertex.u = 0.0f;
         vertex.v = 0.0f;
     }
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetTexture(nullptr, 0);
     GetIGraph()->DrawPrimitives(1, count / 2, vertices, 1);
+#endif
 }
 
 }  // namespace
@@ -1220,14 +1222,18 @@ void C_CommandPanel::RenderOverlay()
 {
     for (S_MemberLines &lines : m_lines) {
         if (lines.routeSegments != 0) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->SetTexture(nullptr, 0);
             GetIGraph()->SetWorldMatrix(IdentityMatrix());
             GetIGraph()->DrawPrimitives(2, lines.routeSegments, lines.routes, 0);
+#endif
         }
         if (lines.pathSegments != 0) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->SetTexture(nullptr, 0);
             GetIGraph()->SetWorldMatrix(IdentityMatrix());
             GetIGraph()->DrawPrimitives(2, lines.pathSegments, lines.paths, 0);
+#endif
         }
     }
 }
@@ -1635,8 +1641,13 @@ void C_CommandPanel::HandleInput(float *held, float *pressed)
         // The number keys choose the entries (0: the last) and act at once; a click acts on the
         // entry under the cursor.
         bool chosen = false;
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
         const int key = GetIGraph()->GetAsciiKey();
         const int digit = static_cast<int>(GetIGraph()->KeyToChar(key, 0) & 0xFF) - '0';
+#else
+        const int key = 0;
+        const int digit = -1;
+#endif
         if (digit >= 0 && digit <= 9) {
             chosen = m_rollMenu.Select(digit == 0 ? C_RollMenu::ENTRIES - 1 : digit - 1);
             g_controls.ClearKey(key, held, pressed);

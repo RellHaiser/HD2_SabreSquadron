@@ -103,7 +103,12 @@ void C_MeshPlayer::Play(const std::vector<I3D_frame *> &frames, const char *movi
         return;
     char path[0x100];
     std::snprintf(path, sizeof path, "GameMovie\\%s", movie);
+#ifndef HD2_DEDICATED   // no streams in LS3DRF.dll
     m_stream = GetIGraph()->CreateStream();
+#else
+    m_stream = nullptr;
+    return;
+#endif
     m_frames.clear();
     if (m_stream->Open(path, 0) != 0) {
         m_stream->Release();

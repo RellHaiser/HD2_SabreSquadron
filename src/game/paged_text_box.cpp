@@ -48,11 +48,15 @@ void C_PagedTextBox::RenderPage(const S_TextPage *page)
 {
     S_IGraphViewport screen = {};
     if (page->overflows) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         screen = *GetIGraph()->GetViewport();
+#endif
         S_IGraphViewport clip = {};
         if (!ClipArea(&clip, m_areas[page->area]))
             return;
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->SetViewport(clip);
+#endif
     }
     // A word without its style ends the lines after its own (the line's other words still drawn);
     // one not drawn (the font size 0) at once.
@@ -76,8 +80,10 @@ void C_PagedTextBox::RenderPage(const S_TextPage *page)
             }
         }
     }
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     if (page->overflows)
         GetIGraph()->SetViewport(screen);
+#endif
 }
 
 bool C_PagedTextBox::ClipArea(S_IGraphViewport *viewport, const S_TextArea &area) const

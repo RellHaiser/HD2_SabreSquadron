@@ -865,8 +865,10 @@ bool C_Vehicle::LoadGlassTextures(const char *name, const char *alphaName)      
         if (part.type != VEHICLE_PART_GLASS || part.glassTexture || !*name)
             continue;
         IImage *image = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(name, alphaName, 4, &image) == 0)
             part.glassTexture = reinterpret_cast<I3D_texture *>(image);
+#endif
     }
     return true;
 }

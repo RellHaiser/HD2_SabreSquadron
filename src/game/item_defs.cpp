@@ -557,8 +557,12 @@ IImage *C_ItemDef::GetImage()
     char path[128];
     std::strcpy(path, m_imageName);
     std::strcat(path, ".bmp");
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(path, 0, 0, &m_image) != 0)
         m_image = nullptr;
+#else
+    m_image = nullptr;
+#endif
     driver->SetState(DRIVER_STATE_15, state15);
     driver->SetState(DRIVER_STATE_19, state19);
     return m_image;

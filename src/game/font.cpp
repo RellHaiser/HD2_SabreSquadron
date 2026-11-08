@@ -59,8 +59,10 @@ void C_TextureFont::GrowVertices()
 void C_TextureFont::Flush()
 {
     if (m_numVertices != 0 && m_texture && m_vertices) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->SetTexture(m_texture, 0);
         GetIGraph()->DrawPrimitives(PRIMITIVE_TRIANGLES, m_numVertices / 3, m_vertices, 1);
+#endif
     }
 }
 
@@ -71,8 +73,10 @@ void C_TextureFont::ClearVertices()
 
 void C_TextureFont::Select()
 {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     if (m_texture)
         GetIGraph()->SetTexture(m_texture, 0);
+#endif
 }
 
 const S_Glyph *C_TextureFont::GetGlyph(int ch)
@@ -111,10 +115,14 @@ void C_TextureFont::AddQuad(int ch, uint32_t color, int width, int height, int x
 
 bool C_TextureFont::Load(const char *texture, const char *table)
 {
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(texture, nullptr, FONT_TEXTURE_MODE, &m_texture) < 0) {
         m_texture = nullptr;
         return false;
     }
+#else
+    m_texture = nullptr;
+#endif
     std::memset(m_table, 0, sizeof m_table);
     const int file = dtaOpen(table, false);
     if (file == -1) {
@@ -145,10 +153,14 @@ const S_Glyph *C_MapFont::GetGlyph(int ch)
 
 bool C_MapFont::Load(const char *texture, const char *table)
 {
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(texture, nullptr, FONT_TEXTURE_MODE, &m_texture) < 0) {
         m_texture = nullptr;
         return false;
     }
+#else
+    m_texture = nullptr;
+#endif
     m_glyphs.clear();
     const int file = dtaOpen(table, false);
     if (file == -1) {
@@ -462,7 +474,11 @@ bool C_GdiFont::Init(void *dc, const char *face, int textureWidth, int textureHe
     m_cellHeight = m_cellWidth = extent.cy;
     m_textureWidth = textureWidth;
     m_textureHeight = textureHeight;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     m_image = GetIGraph()->CreateImage();
+#else
+    m_image = nullptr;
+#endif
     if (!m_image)
         return false;
     m_image->Open(nullptr, nullptr, GDI_TEXTURE_FLAGS, textureWidth, textureHeight, 0);
@@ -542,8 +558,10 @@ void C_GdiFont::Reset()
 
 void C_GdiFont::Select()
 {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     if (m_image)
         GetIGraph()->SetTexture(m_image, 0);
+#endif
     ++m_frame;
 }
 

@@ -1831,13 +1831,19 @@ void C_ShotManager::LoadTextures()
     char fileName[44];
     for (int i = 0; i < 9; ++i) {
         std::sprintf(fileName, "x_decal%02d.tga", i);
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         graph->LoadTexture(fileName, 0, 2, &m_decalTextures[i]);
+#endif
     }
     std::sprintf(fileName, "x_expl%02d.tga", 0);
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     graph->LoadTexture(fileName, 0, 2, &m_splatTextures[0]);
+#endif
     for (int i = 0; i < 6; ++i) {
         std::sprintf(fileName, "x_blood%02d.tga", i);
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         graph->LoadTexture(fileName, 0, 2, &m_splatTextures[1 + i]);
+#endif
     }
 }
 

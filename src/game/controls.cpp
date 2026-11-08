@@ -313,12 +313,16 @@ bool C_PictureControl::HandleMessage(S_ControlMessage *message)
     }
     case CONTROL_MSG_LOAD_TEXTURE: {
         IImage *image = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(message->text.c_str(), nullptr, TEXTURE_MODE, &image) < 0) {
             m_faceGroup->material->SetTexture(m_texture);
         } else {
             m_faceGroup->material->SetTexture(reinterpret_cast<I3D_texture *>(image));
             image->Release();
         }
+#else
+        m_faceGroup->material->SetTexture(m_texture);
+#endif
         return true;
     }
     case CONTROL_MSG_FIND_FACE_GROUP: {
@@ -5407,7 +5411,11 @@ bool C_MovieControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDe
     if (!C_Control::Create(frame, root, desc))
         return false;
     m_frame->SetOn(false);
+#ifndef HD2_DEDICATED   // no streams in LS3DRF.dll
     m_stream = GetIGraph()->CreateStream();
+#else
+    m_stream = nullptr;
+#endif
     if (!m_stream)
         return false;
     FindArea();
@@ -5461,9 +5469,13 @@ void C_MovieControl::Refresh()
     I3D_driver *driver = I3DGetDriver();
     const bool state3 = driver->GetState(DRIVER_STATE_3) != 0;
     driver->SetState(DRIVER_STATE_3, 0);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     const int renderState = GetIGraph()->GetRenderState(RENDER_STATE_0);
+#endif
     m_stream->Draw(false);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetRenderState(RENDER_STATE_0, renderState);
+#endif
     I3DGetDriver()->SetState(DRIVER_STATE_3, state3);
     const int state = m_stream->GetState();
     if (state == ISNDSTREAM_STATE_FINISHED || state == -1) {

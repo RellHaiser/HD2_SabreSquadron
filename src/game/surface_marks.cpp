@@ -288,13 +288,19 @@ void SurfaceMarks_Init()
         std::strcpy(name, kind.prefix);
         std::strcat(name, LEFT_SUFFIX);
         kind.left = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(name, 0, 0x402, &kind.left) != I3D_OK)
             return;
+#else
+        return;
+#endif
         std::strcpy(name, kind.prefix);
         std::strcat(name, RIGHT_SUFFIX);
         kind.right = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(name, 0, 0x402, &kind.right) != I3D_OK)
             return;
+#endif
     }
 }
 

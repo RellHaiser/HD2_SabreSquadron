@@ -280,7 +280,9 @@ C_str GetText(int id)
 C_str GetKeyName(uint8_t key)                       // 0x006ab7d0
 {
     char name[32] = {};
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
     WideToAnsi(name, GetIGraph()->GetKeyName(key), 31);
+#endif
     CapitalizeKeyName(name);
     // Fix: the original passed the name to C_fstr as its format.
     return C_str(name);

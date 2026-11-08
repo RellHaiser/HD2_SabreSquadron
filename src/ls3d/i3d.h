@@ -528,8 +528,10 @@ public:
 // Object visual (I3DVISUAL_OBJECT, 'OBJ_').
 class I3D_object_visual : public I3D_visual {
 public:
+#ifndef HD2_DEDICATED   // no render slots in LS3DRF.dll
     I3D_SLOT(94);                                             // LS3DF: Prepare
     I3D_SLOT(98);                                             // LS3DF: Draw
+#endif
     // Gives the visual another mesh (the vehicle passes 0; meaning of the flag not identified).
     I3DMETHOD(void, SetMesh)(class I3D_mesh *mesh, int unknown) = 0;   // 0x9C
     // Gives the visual its own copy of its mesh (before the HUD changes a face group's material;
@@ -689,8 +691,10 @@ public:
 // Billboard visual (I3DVISUAL_BILLBOARD): a quad stretched along its z axis (bullet traces).
 class I3D_billboard_visual : public I3D_visual {
 public:
+#ifndef HD2_DEDICATED   // no render slots in LS3DRF.dll
     I3D_SLOT(94);                                             // LS3DF: Prepare
     I3D_SLOT(98);                                             // LS3DF: Draw
+#endif
     I3D_SLOT(9C);                                             // LS3DF: SetMesh
     I3D_SLOT(A0);                                             // LS3DF: DuplicateMesh
     // Called with 1.0 on the traces of client bullets only (meaning not identified).
@@ -704,8 +708,10 @@ public:
 // and SetOrthogonal(1).
 class I3D_projector_visual : public I3D_visual {
 public:
+#ifndef HD2_DEDICATED   // no render slots in LS3DRF.dll
     I3D_SLOT(94);                                             // LS3DF: Prepare
     I3D_SLOT(98);                                             // LS3DF: Draw
+#endif
     I3DMETHOD(void, SetTexture)(class IImage *image) = 0;     // 0x9C
     I3D_SLOT(A0);                                             // LS3DF: SetMaterial
     I3DMETHOD(void, SetOrthogonal)(int value) = 0;             // 0xA4
@@ -729,8 +735,10 @@ public:
 // versions module, which carries the lighting over to a replacement visual.
 class I3D_lmap_visual : public I3D_visual {
 public:
+#ifndef HD2_DEDICATED   // no render slots in LS3DRF.dll
     I3D_SLOT(94);                                             // LS3DF: Prepare
     I3D_SLOT(98);                                             // LS3DF: Draw
+#endif
     I3D_SLOT(9C);                                             // LS3DF: SetMesh
     I3D_SLOTS_4(A0, A4, A8, AC);                              // LS3DF: DuplicateMesh, SetLightLevel, SetAlpha, RefreshLevel
     I3D_SLOT(B0);                                             // LS3DF: RefreshLevels
@@ -768,8 +776,10 @@ struct I3D_emitter_key {
 // own particles instead: set up by properties (SetRenderState), run by Tick.
 class I3D_particle_visual : public I3D_visual {
 public:
+#ifndef HD2_DEDICATED   // no render slots in LS3DRF.dll
     I3D_SLOT(94);                                             // LS3DF: Prepare
     I3D_SLOT(98);                                             // LS3DF: Draw
+#endif
     I3DMETHOD(void, SetTexture)(class IImage *image) = 0;     // 0x9C
     // A property (the value's bits: an int, a float or a pointer): 0x13 the blend mode; the car
     // effects' 0..0x1A, 0x1D / 0x1E (colours, float[3] pointers), 0x22 (S_CarEffectDef).
@@ -790,9 +800,11 @@ public:
     I3DMETHOD(void, RemoveKey)(int index) = 0;                // 0xC8
     I3D_SLOT(CC);                                             // LS3DF: ClearParticles
     I3D_SLOT(D0);                                             // LS3DF: UpdateParticleBound
+#ifndef HD2_DEDICATED   // LS3DRF.dll's emitor ends at 0xC8
     // Resizes the quad list to `count` quads (4 vertices each) and returns it for
     // filling; `depth` sorts the visual among the transparent ones.
     I3DMETHOD(I3D_particle_vertex *, LockQuads)(int count, float depth) = 0;   // 0xD4
+#endif
 
     // Stamp of the last rendered frame (I3D_scene::GetRenderStamp()), -1 before the first.
     int &RenderStamp() { return Field<int>(0x11C); }
@@ -811,8 +823,10 @@ public:
     {
         return reinterpret_cast<const float *>(Field<const uint8_t *>(0x1F4) + index * 0x3C);
     }
+#ifndef HD2_DEDICATED   // LS3DRF.dll keeps no particles
     // The particles alive (its own emission).
     int NumParticles() const { return Field<int>(0x220); }
+#endif
 };
 
 // Vertex of I3D_particle_visual quads (in the visual's local space).
@@ -828,7 +842,12 @@ public:
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOTS_4(70, 74, 78, 7C);                              // LS3DF: Load, SetBoundVolume, SetBBox, SetWorldSpace
     I3D_SLOTS_4(80, 84, 88, 8C);                              // LS3DF: SetModeA, GetModeA, SetModeB, GetModeB
-    I3D_SLOTS_4(90, 94, 98, 9C);                              // LS3DF: UpdateLocalBound, Prepare, Draw, SetTexture
+    I3D_SLOT(90);                                             // LS3DF: UpdateLocalBound
+#ifndef HD2_DEDICATED   // no render slots in LS3DRF.dll
+    I3D_SLOT(94);                                             // LS3DF: Prepare
+    I3D_SLOT(98);                                             // LS3DF: Draw
+#endif
+    I3D_SLOT(9C);                                             // LS3DF: SetTexture
     I3D_SLOTS_4(A0, A4, A8, AC);                              // LS3DF: SetMaterial, SetOrthogonal, SetIntensity, SetOpacity
     I3D_SLOT(B0);                                             // LS3DF: SetColor
     I3D_SLOT(B4);                                             // LS3DF: SetMode
@@ -1150,11 +1169,19 @@ public:
     float GetConeOuterCos() const { return Field<float>(0x1D0); }
     float GetConeInnerCos() const { return Field<float>(0x1D4); }
     float GetConeFalloff() const { return Field<float>(0x1D8); }
+#ifdef HD2_DEDICATED
+    // The dedicated server's LS3DRF.dll light (0x230 bytes) keeps its own copy of the
+    // Direct3D light's position, direction and attenuation, at other offsets.
+    const S_vector &GetLightPos() const { return Field<S_vector>(0x1F0); }
+    const S_vector &GetLightDir() const { return Field<S_vector>(0x200); }
+    float GetAttenuation(int index) const { return (&Field<float>(0x218))[index]; }
+#else
     // Where the light is and where it points, as the light computes them (+0x224 / +0x230).
     const S_vector &GetLightPos() const { return Field<S_vector>(0x224); }
     const S_vector &GetLightDir() const { return Field<S_vector>(0x230); }
     // Attenuation: constant, linear, quadratic (+0x244, the light's Direct3D copy).
     float GetAttenuation(int index) const { return (&Field<float>(0x244))[index]; }
+#endif
     // ... as SetAttenuation set it (+0x17C).
     float GetOwnAttenuation(int index) const { return (&Field<float>(0x17C))[index]; }
     const S_vector &GetColor() const { return Field<S_vector>(0x130); }   // SetColor
@@ -1297,7 +1324,9 @@ public:
     // A function the scene calls while it renders (C_game: GameRenderCallback, flags 6).
     // (The previous callback.)
     I3DMETHOD(void *, SetRenderCallback)(void *callback, uint32_t flags) = 0;   // 0x74
+#ifndef HD2_DEDICATED   // LS3DRF.dll's scene does not render
     I3DMETHOD(void, Render)(uint32_t flags) = 0;              // 0x78
+#endif
     // Finds a frame by name; typeMask selects frame types (0xCFFFF = all regular types).
     I3DMETHOD(PI3D_frame, FindFrame)(const char *name, uint32_t typeMask) = 0;   // 0x7C
     // Adds a frame (and its children) to the scene; the scene holds a reference.
@@ -1387,6 +1416,18 @@ public:
 
     // Number of the frame being rendered; visuals drawn in it carry the same stamp.
     int GetRenderStamp() const { return Field<int>(0x11C); }
+#ifdef HD2_DEDICATED
+    // The dedicated server's LS3DRF.dll scene (0x420 bytes): no render fields before these, so
+    // each is 0x20 lower than LS3DF's; no sound listener.
+    const int *GetViewportRect() const { return &Field<int>(0x224); }
+    I3D_camera *GetActiveCamera() const { return Field<I3D_camera *>(0x13C); }
+    I3D_sector *GetPrimarySector() const { return Field<I3D_sector *>(0x1D8); }
+    I3D_sector *GetBackdropSector() const { return Field<I3D_sector *>(0x1DC); }
+    I3D_sector *GetOmniSector() const { return Field<I3D_sector *>(0x1E0); }
+    I3D_frame *GetDynamicRoot() const { return Field<I3D_frame *>(0x1E0); }
+    I3D_frame *GetFirstPersonRoot() const { return Field<I3D_frame *>(0x1E4); }
+    void SetUnknown210(const S_vector &v) { MutableField<S_vector>(0x1F0) = v; }
+#else
     // The viewport set with SetViewport (left, top, right, bottom; +0x244).
     const int *GetViewportRect() const { return &Field<int>(0x244); }
     I3D_camera *GetActiveCamera() const { return Field<I3D_camera *>(0x15C); }
@@ -1405,6 +1446,7 @@ public:
     // +0x210: scene2.bin's chunk 0x3200, three floats (meaning not identified; the original also
     // writes +0x21C from its stack).
     void SetUnknown210(const S_vector &v) { MutableField<S_vector>(0x210) = v; }
+#endif
 
 private:
     template <class T> const T &Field(size_t offset) const
@@ -1482,6 +1524,7 @@ public:
     I3D_SLOT(14);                                             // LS3DF: GetStats
     I3DMETHOD(void, SetState)(int state, uint32_t value) = 0;             // 0x18
     I3DMETHOD(uint32_t, GetState)(int state) = 0;                         // 0x1C
+#ifndef HD2_DEDICATED   // LS3DRF.dll's driver neither renders nor draws
     I3D_SLOT(20);                                             // LS3DF: Render
     I3D_SLOT(24);                                             // LS3DF: DrawPoint
     I3D_SLOT(28);                                             // LS3DF: DrawPoint2D
@@ -1494,6 +1537,7 @@ public:
     I3D_SLOT(44);                                             // LS3DF: DrawSprite
     I3D_SLOT(48);                                             // LS3DF: DrawBox
     I3D_SLOT(4C);                                             // LS3DF: DrawSphere
+#endif
     // Creates an empty visual of the given type (I3DVISUAL_*), e.g. to copy another one into.
     I3DMETHOD(PI3D_frame, CreateVisual)(uint32_t visualType) = 0;          // 0x50
     I3DMETHOD(PI3D_frame, CreateFrame)(int type) = 0;                     // 0x54

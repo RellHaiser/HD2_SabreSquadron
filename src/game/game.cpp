@@ -373,8 +373,10 @@ C_GameState *C_game::OpenGameMenu(int arg)         // 0x0069e8f0
 void C_game::Render()                               // 0x0069bb40
 {
     // A dedicated server draws nothing.
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     if (IsLocalGame() || !g_mpSettings->dedicated)
         m_scene->Render(0);
+#endif
 }
 
 bool C_game::HandleInput(float *held, float *pressed)   // 0x0069a830

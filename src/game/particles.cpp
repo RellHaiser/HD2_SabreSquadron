@@ -614,10 +614,12 @@ void C_ParticleEmitter::Start(I3D_scene *scene, I3D_frame *parent, const S_matri
 void C_ParticleEmitter::SetupMaterial()
 {
     IImage *texture = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(m_def->m_texture, 0, 2, &texture) == I3D_OK) {
         m_visual->SetTexture(texture);
         texture->Release();
     }
+#endif
     if (m_def->m_blendMode == BLEND_MODE_CUSTOM) {
         m_visual->SetRenderState(VISUAL_STATE_BLEND, VISUAL_BLEND_CUSTOM);
         m_visual->SetSrcBlend(m_def->m_srcBlend);
@@ -809,7 +811,9 @@ void C_ParticleEmitter::BuildQuads()
 {
     const int count = std::min(static_cast<int>(g_particleSortKeys.size()), MAX_QUADS);
     if (count == 0) {
+#ifndef HD2_DEDICATED   // no particle quads in LS3DRF.dll
         m_visual->LockQuads(0, 0.0f);
+#endif
         return;
     }
 
@@ -817,7 +821,11 @@ void C_ParticleEmitter::BuildQuads()
     if (!m_faceCamera)
         orientation.SetDir(-m_matrix(2));
 
+#ifndef HD2_DEDICATED   // no particle quads in LS3DRF.dll
     I3D_particle_vertex *vertices = m_visual->LockQuads(count, m_depth);
+#else
+    I3D_particle_vertex *vertices = nullptr;
+#endif
     if (!vertices)
         return;
     UpdateMatrix();
@@ -840,12 +848,18 @@ void C_ParticleEmitter::BuildQuadsCameraAligned()
 {
     const int count = std::min(static_cast<int>(g_particleSortKeys.size()), MAX_QUADS);
     if (count == 0) {
+#ifndef HD2_DEDICATED   // no particle quads in LS3DRF.dll
         m_visual->LockQuads(0, 0.0f);
+#endif
         return;
     }
 
     const S_matrix &orientation = m_scene->GetActiveCamera()->GetMatrix();
+#ifndef HD2_DEDICATED   // no particle quads in LS3DRF.dll
     I3D_particle_vertex *vertices = m_visual->LockQuads(count, m_depth);
+#else
+    I3D_particle_vertex *vertices = nullptr;
+#endif
     if (!vertices)
         return;
     UpdateMatrix();
@@ -867,7 +881,9 @@ bool C_ParticleEmitter::Tick(int time)
 {
     m_empty = true;
     if (m_flags & EMITTER_HIDDEN) {
+#ifndef HD2_DEDICATED   // no particle quads in LS3DRF.dll
         m_visual->LockQuads(0, 0.0f);
+#endif
         return true;
     }
     const bool visible = WasVisible();
@@ -877,8 +893,10 @@ bool C_ParticleEmitter::Tick(int time)
     Sort(visible);
     if (visible)
         BuildQuads();
+#ifndef HD2_DEDICATED   // no particle quads in LS3DRF.dll
     else
         m_visual->LockQuads(0, 0.0f);
+#endif
     RemoveDead();
     return !m_empty;
 }
@@ -886,15 +904,19 @@ bool C_ParticleEmitter::Tick(int time)
 void C_ParticleEmitter::Draw(int /*time*/)
 {
     if (m_flags & EMITTER_HIDDEN) {
+#ifndef HD2_DEDICATED   // no particle quads in LS3DRF.dll
         m_visual->LockQuads(0, 0.0f);
+#endif
         return;
     }
     const bool visible = WasVisible();
     Sort(visible);
     if (visible)
         BuildQuads();
+#ifndef HD2_DEDICATED   // no particle quads in LS3DRF.dll
     else
         m_visual->LockQuads(0, 0.0f);
+#endif
 }
 
 void C_ParticleEmitter::Finish()

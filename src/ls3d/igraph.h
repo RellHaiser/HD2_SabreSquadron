@@ -80,6 +80,7 @@ public:
     I3DMETHOD(int, ScrnX)() = 0;                                         // 0x18
     I3DMETHOD(int, ScrnY)() = 0;                                         // 0x1C
     I3D_SLOT(20);                                             // LS3DF: GetBitDepth
+#ifndef HD2_DEDICATED   // LS3DRF.dll's IGraph (13 slots) keeps 0x00..0x20, SetAppName(F) and the timer
     I3D_SLOT(24);                                             // LS3DF: GetCaps
     I3D_SLOT(28);                                             // LS3DF: GetBackBufferFormat
     I3D_SLOT(2C);                                             // LS3DF: GetFormatName
@@ -98,8 +99,10 @@ public:
     I3DMETHOD(void, SetTexture)(void *texture, int stage) = 0;           // 0x44
     I3DMETHOD(HWND, GetHWND)() = 0;                                      // 0x48
     I3D_SLOT(4C);                                             // LS3DF: GetChildHWND
+#endif
     I3DMETHOD(void, SetAppName)(const char *name) = 0;                   // 0x50
     I3D_SLOT(54);                                             // LS3DF: SetAppNameF
+#ifndef HD2_DEDICATED   // ... nor dialogs, rendering, input or mouse
     I3D_SLOT(58);                                             // LS3DF: GetAppName
     I3D_SLOT(5C);                                             // LS3DF: AddDlg
     I3D_SLOT(60);                                             // LS3DF: DelDlg
@@ -168,8 +171,10 @@ public:
     I3DMETHOD(int, GetMouseY)() = 0;                                     // 0x100
     // Mouse buttons 0 .. 4 as bits (LS3DF's name).
     I3DMETHOD(uint32_t, GetMouseButtons)() = 0;                          // 0x104
+#endif
     I3DMETHOD(void, ReadTimer)() = 0;                                   // 0x108
     I3D_SLOT(10C);                                            // LS3DF: GetTimer
+#ifndef HD2_DEDICATED   // LS3DRF.dll's IGraph has no texture directories or gamma
     // Adds a texture search directory.
     I3DMETHOD(void, AddDir)(const char *dir, uint32_t flags) = 0;        // 0x110
     I3D_SLOT(114);                                            // LS3DF: DelDir
@@ -180,6 +185,7 @@ public:
     I3D_SLOT(128);                                            // LS3DF: NumUncachedTextures
     // Sets the display's gamma ramp: 3 x 256 words (red, green, blue).
     I3DMETHOD(void, SetGammaRamp)(const uint16_t *ramp, uint32_t flags) = 0;   // 0x12C
+#endif
 };
 
 // LS3D sound driver (ISndGetDriver()).

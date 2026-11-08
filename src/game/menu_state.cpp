@@ -366,7 +366,11 @@ bool ReadTypedChars(wchar_t *out, int size)
     int count = 0;
     out[0] = 0;
     do {
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
         const char c = static_cast<char>(GetIGraph()->ReadChar());
+#else
+        const char c = 0;
+#endif
         typed[count++] = c;
         if (c == 0)
             break;
@@ -491,10 +495,18 @@ bool C_MenuState::HandleInput(float *held, float *pressed)
     OnInput(held, pressed);
     if (g_menuScreens.empty())
         return true;
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
     const int pressedKey = GetIGraph()->GetAsciiKey();
+#else
+    const int pressedKey = 0;
+#endif
     // The characters typed, to the control editing.
     if (!g_gameProfile.UsesUnicodeFont()) {
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
         const uint8_t c = static_cast<uint8_t>(GetIGraph()->ReadChar());
+#else
+        const uint8_t c = 0;
+#endif
         if (c != 0 && m_editing && m_editing->OnChar(c))
             return true;
     } else {
@@ -510,6 +522,7 @@ bool C_MenuState::HandleInput(float *held, float *pressed)
         }
     }
     uint8_t key = static_cast<uint8_t>(pressedKey);
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
     if (key == KEY_N) {
         if (GetIGraph()->IsAltDown() && GetIGraph()->IsShiftDown() && GetIGraph()->IsCtrlDown()) {
             S_ControlMessage message;
@@ -531,6 +544,14 @@ bool C_MenuState::HandleInput(float *held, float *pressed)
         else
             return true;
     }
+#else
+    if (key == 0) {
+        if (pressed && pressed[CONTROL_ESCAPE] != 0.0f)
+            key = KEY_ESCAPE;
+        else
+            return true;
+    }
+#endif
     if (g_menuScreens.back()->Unknown20(key) || key != KEY_ESCAPE)
         return true;
     // Escape not taken: the drag ended, the menu told.
@@ -570,6 +591,7 @@ void C_MenuState::Update(int timeDelta)
 
 void C_MenuState::Render()
 {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     if (!OnRender() && m_scene) {
         C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();
         if (m_underPopup && top) {
@@ -603,6 +625,7 @@ void C_MenuState::Render()
             m_scene->Render(0);
         }
     }
+#endif
     m_cursor->Draw();
 }
 
