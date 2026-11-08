@@ -147,8 +147,18 @@ bool C_GameApp::StartFromCommandLine()                  // 0x006c0e10
         return true;
     }
     const char *script = std::strstr(commandLine, SCRIPT_SWITCH);
-    if (!script)
+    if (!script) {
+#ifdef HD2_DEDICATED
+        // (DS 0x00706ad1) No command line: the server has no intro, only the empty console.
+        auto *idleConsole = new C_ConsoleState(nullptr);
+        m_state = idleConsole;
+        idleConsole->Start(nullptr);
+        idleConsole->ShowBanner();
+        return true;
+#else
         return false;
+#endif
+    }
     // The console alone: the window is hidden.
 #ifndef HD2_DEDICATED   // no window or input in LS3DRF.dll
     GetIGraph()->InitMouse(0);

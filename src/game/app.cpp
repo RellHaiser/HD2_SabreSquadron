@@ -532,30 +532,40 @@ int RunGame()
 #endif
 
     for (;;) {
+#ifdef HD2_DEDICATED
+        // (DS 0x00725d8c) The server's own message loop, for its console: LS3DRF.dll's ProcessWinMessages does
+        // nothing. The frame is at most net rate `maxfreq` a second.
+        const char key = 0;
+        MSG message;
+        while (PeekMessageA(&message, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&message);
+            DispatchMessageA(&message);
+        }
+        int timeDelta = static_cast<int>(LimitFrameTime(1000 / g_netMaxFreq, 100));
+#else
         UpdateThreadPriority();
 
         char key = 0;
         if (g_pollKeyboard) {
             IGraph *graph = GetIGraph();
             graph->ProcessWinMessages();
-#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
             graph->ReadKeyboard();
             key = graph->GetAsciiKey();
-#endif
         }
 
         int timeDelta = static_cast<int>(LimitFrameTime(10, 100));
+#endif
         if (app->IsStateActive())
             timeDelta = ScaleFrameTime(timeDelta);
 
-#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll; the server's loop has no frame listeners or controls
         GetIGraph()->BeginFrame();
-#endif
         if (g_frameListenersBegin) {
             for (C_FrameListener **it = g_frameListenersEnd; it != g_frameListenersBegin;)
                 (*--it)->OnFrame(true);
         }
         g_controls.Update(false);
+#endif
         I3DGetDriver()->Tick(timeDelta);
 
         if (g_gameRole & GAME_ROLE_CLIENT) {

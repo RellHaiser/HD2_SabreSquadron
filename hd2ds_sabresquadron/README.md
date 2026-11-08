@@ -1,4 +1,4 @@
-# HD2DS_SabreSquadron.exe — source port (started: it builds, not yet a server)
+# HD2DS_SabreSquadron.exe — source port (started: it hosts a map; no client has joined yet)
 
 The Sabre Squadron dedicated server. It links the engine without sound
 ([LS3DRF.dll](../ls3drf)) and the data layer [rw_data.dll](../rw_data).
@@ -51,5 +51,9 @@ body (a default return; `true` for `Init` / `Done` / `LoadGame` / `SaveGame`). `
   or window methods (IGraph keeps LS3DRF's 13 slots), and the scene's and light's inline accessors read LS3DRF's
   offsets. The game's calls to the removed methods are guarded in `src/`: the server gets no-ops, zero input and
   null textures, streams and windows. Without the define the client's code is unchanged.
-- Not a server yet: beyond those guards `src/` has no server code, and some client paths (fonts, movie controls,
-  faces and decals with null textures, a message box with no window) may fail or block at run time. Not run.
+- Runs: `HD2DS_Port.exe -cmd -exec ServerConfigs\NAME.cfg` hosts a local deathmatch on Africa1, with the same console
+  output and UDP ports as the original server; 2 minutes with nobody connected, and closing the console ends it. With no
+  command line it waits at an empty console, as the original does. A client has not joined it yet.
+- Server code in `src/` so far: the main loop's message pump and `maxfreq` frame limit, and the console-only start.
+  Known missing: `XDServer_<port>.txt` is not written or deleted. Other client paths (fonts, movie controls, faces and
+  decals with null textures, a message box with no window) may still fail or block at run time.
