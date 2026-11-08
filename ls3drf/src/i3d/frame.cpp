@@ -919,7 +919,7 @@ void __stdcall I3D_frame::UpdateBound()
             const S_matrix &m = GetMatrix();
             bound.bbox.min = bound.bbox.max = box.Corner(0) * m;
             for (int i = 1; i < 8; ++i)
-                bound.bbox.Expand(box.Corner(i) * m);
+                bound.bbox.Absorb(box.Corner(i) * m);
             bound.MakeSphere();
         }
         frameFlags |= FRMFLAGS_BOUND_VALID;

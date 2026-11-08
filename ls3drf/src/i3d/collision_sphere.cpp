@@ -338,7 +338,7 @@ void AxialSweepBox(float radius)
     I3D_bbox box;
     box.min = q.sweepMin;
     box.max = q.sweepMax;
-    box.Expand(farEnd);
+    box.Absorb(farEnd);
     q.sweepMin = box.min;
     q.sweepMax = box.max;
 }

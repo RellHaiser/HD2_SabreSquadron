@@ -137,7 +137,7 @@ I3D_bbox HierarchyBound(I3D_frame *frame)
             continue;
         c->UpdateLMatrix();
         for (int i = 0; i < 8; ++i)
-            box.Expand(childBox.Corner(i) * c->localMatrix);
+            box.Absorb(childBox.Corner(i) * c->localMatrix);
     }
     return box;
 }
@@ -152,7 +152,7 @@ void AddVisualBoxes(I3D_frame *frame, const S_matrix &parentMatrix)
         const I3D_bbox &box = static_cast<I3D_visual *>(frame)->GetLocalBound().bbox;
         if (box.IsValid()) {
             for (int i = 0; i < 8; ++i)
-                g_hierarchyBox.Expand(box.Corner(i) * m);
+                g_hierarchyBox.Absorb(box.Corner(i) * m);
         }
     }
     for (I3D_frame *c = frame->firstChild; c; c = c->nextSibling)

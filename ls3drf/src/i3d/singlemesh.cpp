@@ -307,7 +307,7 @@ void I3D_singlemesh::ComputeBound()
                     continue;
                 const S_matrix &m = joint->GetModelMatrix();
                 for (int c = 0; c < 8; ++c)
-                    box.Expand(jb.Corner(c) * m);
+                    box.Absorb(jb.Corner(c) * m);
             }
         }
         localBound.bbox = box;
