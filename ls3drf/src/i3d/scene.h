@@ -131,7 +131,7 @@ public:
     virtual void *__stdcall GetTracks();
     // 0xC4 / 0xC8 0x100477d0 / 0x10047880: frames ticked with the scene (FRMFLAGS_SCENE_SOUND).
     virtual void __stdcall AddTickFrame(I3D_frame *frame);
-    virtual I3D_RESULT __stdcall RemoveTickFrame(I3D_frame *frame);
+    virtual I3D_RESULT __stdcall DeleteTickFrame(I3D_frame *frame);
     virtual I3D_sector *__stdcall CreateSector();                       // 0xCC 0x100479a0
     // 0xD0 0x10047c20: the last of `sectors` that holds `pos`, else the primary sector.
     virtual I3D_sector *__stdcall LocateSectorIn(const S_vector &pos, I3D_sector **sectors, int count);

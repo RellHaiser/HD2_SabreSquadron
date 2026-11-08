@@ -73,7 +73,7 @@ I3D_RESULT __stdcall I3D_driver::EnumVisualTypes(I3D_VISUALTYPEPROC *, bool) { r
 I3D_frame *__stdcall I3D_driver::FindFrame(I3D_scene *, const char *) { return nullptr; }
 void __stdcall I3D_driver::RebalanceNameTree() {}
 I3D_RESULT __stdcall I3D_driver::EnumNamedFrames(I3D_ENUMPROC *, void *) { return 0; }
-void __stdcall I3D_driver::FrameReleased(I3D_frame *) {}
+void __stdcall I3D_driver::DeleteFromSceneTickList(I3D_frame *) {}
 void __stdcall I3D_driver::RemoveShadowCaster(I3D_frame *) {}
 void __stdcall I3D_driver::RemoveTargetFrame(I3D_frame *) {}
 void __stdcall I3D_driver::SetHierarchyLightLevel(I3D_frame *, float) {}

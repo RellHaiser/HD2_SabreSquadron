@@ -257,7 +257,7 @@ void I3D_frame::Uninit()
     if (frameFlags & FRMFLAGS_SHADOW_CASTER)
         RemoveShadowCaster(this);
     if (frameFlags & FRMFLAGS_SCENE_SOUND)
-        g_driver->FrameReleased(this);
+        g_driver->DeleteFromSceneTickList(this);
     if (parent) {
         parent->frameFlags &= ~FRMFLAGS_BOUND_VALID;
         if (RemoveChild(parent, this)) {
