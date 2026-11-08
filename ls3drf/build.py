@@ -120,6 +120,31 @@ SEAMS = [
 ]
 
 
+# The LS3DF commit whose changes this port has taken (README, "Source and LS3DF").
+LS3DF_CARRIED = "d8ced1c"
+
+
+def check_ls3df():
+    """In HD2_SabreSquadron: False when ls3df/ changed, since LS3DF_CARRIED, a file this port has."""
+    repo = os.path.dirname(ROOT)
+    if not os.path.isdir(os.path.join(repo, "ls3df", "src")):
+        return True                                     # (the standalone repository)
+    r = subprocess.run(["git", "-C", repo, "diff", "--name-only", LS3DF_CARRIED + "^{tree}", "HEAD:ls3df",
+                        "--", "src", "tests", "lib"], capture_output=True, text=True)
+    if r.returncode:
+        print("ls3df: cannot compare with %s: %s" % (LS3DF_CARRIED, r.stderr.strip()))
+        return False
+    changed = r.stdout.split()
+    here = [f for f in changed if os.path.exists(os.path.join(ROOT, f))]
+    if changed and not here:
+        print("ls3df: %d file(s) changed since %s, none of them in this port" % (len(changed), LS3DF_CARRIED))
+    if here:
+        print("ls3df: changed since %s and not carried over (README, \"Source and LS3DF\"):" % LS3DF_CARRIED)
+        for f in here:
+            print("  " + f)
+    return not here
+
+
 def check_seams():
     """Lines outside the backends that use what only a backend may (printed); True when none."""
     bad = []
@@ -306,6 +331,7 @@ def main():
     if "check" in targets or "dll" in targets:
         ok &= check_seams()
     if "check" in targets:
+        ok &= check_ls3df()
         ok &= compile_all(debug, only)[0]
     if "dll" in targets:
         good, objs = compile_all(debug)
