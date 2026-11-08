@@ -114,6 +114,7 @@ CaptureFrames=1
 |---|---|---|
 | `SDLGPU` | 0 / 1 | Drawing through SDL_GPU (Direct3D 12 or Vulkan) instead of Direct3D 8 (the cross-platform plan's phase 3, [render_device.md](render_device.md#the-sdl_gpu-backend)). Needs `SDL3.dll` (3.2 or later) in the game folder; without it the DLL draws with Direct3D 8. Best with `[Platform] SDL3=1`. Fullscreen is a borderless window, the picture scaled to it. |
 | `SDLGPUDriver` | `direct3d12` / `vulkan` | The API SDL_GPU draws with; empty or missing: SDL's choice. |
+| `SDLGPUStats` | 0 / 1 | Every 5 seconds, what the frames cost (time apart, building, waiting, draws, uploads) in `LS3DF_sdlgpu.log` next to the DLL. |
 | `SDLGPUDebug` | 0 / 1 | The API's validation layer (Direct3D 12's debug layer, the Vulkan SDK's layers); slow, for finding faults. |
 | `CaptureFrames` | 0 / 1 | **Ctrl+Shift+F11** saves the next frame the game draws to `LS3DF_frames\frame_<n>.ls3dframe` next to the DLL: every drawing call, the state and resources it uses, and the picture the game drew. The render tests replay these files on each backend and compare the pictures (the cross-platform plan's phase 3, [render_device.md](render_device.md#frame-captures)). A file can be large (tens of MB), and keeping copies of the vertex buffers costs some memory while the option is on. |
 

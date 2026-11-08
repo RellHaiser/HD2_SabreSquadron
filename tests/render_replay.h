@@ -287,6 +287,7 @@ public:
     Replayer(Device *d, HWND w) : device(d), window(w) {}
     ~Replayer() { Release(); }
 
+    bool noVsync = false;               // presents not waiting for the display (where the device allows)
     std::string error;                  // the first failure that stopped the replay
     int failedCalls = 0;                // device calls that failed (the replay goes on)
     S_image reference;                  // the picture the game drew, from the capture (none: empty)
@@ -296,14 +297,83 @@ public:
     {
         Capture::S_record r;
         while (capture.Next(&r)) {
+            Keep(r);
             if (!Do(r))
                 return false;
         }
         return capture.cutShort ? Fail("the capture is cut short") : true;
     }
 
+    // The frame drawn and presented `times` more times after Run, the last one waited for (its
+    // picture read back); the milliseconds a frame took on average (0: none drawn).
+    double Repeat(int times)
+    {
+        if (times <= 0 || kept.empty())
+            return 0;
+        LARGE_INTEGER frequency, start, end;
+        QueryPerformanceFrequency(&frequency);
+        QueryPerformanceCounter(&start);
+        for (int i = 0; i < times; ++i) {
+            for (const S_kept &k : kept) {
+                const Capture::S_record r = {k.op, k.payload.data(), static_cast<uint32_t>(k.payload.size())};
+                if (!Do(r))
+                    return 0;
+            }
+            device->Present();
+        }
+        if (!ReadBack())                // (waits for the last frame)
+            return 0;
+        QueryPerformanceCounter(&end);
+        return 1000.0 * static_cast<double>(end.QuadPart - start.QuadPart) / static_cast<double>(frequency.QuadPart) / times;
+    }
+
     // The depth format the device was made with when the capture's could not be (0: the capture's).
     D3DFORMAT depthFallback = D3DFMT_UNKNOWN;
+
+private:
+    // What a repeat of the frame replays: the states set before it, then its calls (the resources
+    // stay as Run made them; the picture is read back instead of presented).
+    struct S_kept {
+        E_op op;
+        std::vector<uint8_t> payload;
+    };
+    std::vector<S_kept> kept;
+    bool frameStarted = false, definingTexture = false;
+    void Keep(const Capture::S_record &r)
+    {
+        // (A texture's levels right after its definition are its first contents, not a write.)
+        const bool defining = definingTexture;
+        definingTexture = r.op == OP_DEF_TEXTURE || (defining && r.op == OP_TEXTURE_DATA);
+        if (defining && r.op == OP_TEXTURE_DATA)
+            return;
+        switch (r.op) {
+        case OP_HEADER:
+        case OP_DEF_SHADER:
+        case OP_DEF_TEXTURE:
+        case OP_DEF_VERTEX_BUFFER:
+        case OP_DEF_INDEX_BUFFER:
+        case OP_DROP:
+        case OP_FRAME_IMAGE:
+        case OP_PRESENT:
+        case OP_GAMMA:
+            return;
+        case OP_CLEAR:
+        case OP_BEGIN_SCENE:
+            frameStarted = true;
+            break;
+        case OP_TEXTURE_DATA:
+        case OP_VERTEX_DATA:
+        case OP_INDEX_DATA:
+            if (!frameStarted)              // (the resources' first contents)
+                return;
+            break;
+        default:
+            break;
+        }
+        kept.push_back({r.op, std::vector<uint8_t>(r.payload, r.payload + r.size)});
+    }
+
+public:
 
 private:
     bool Fail(const std::string &what)
@@ -505,8 +575,17 @@ private:
         // (Windowed, the back buffer is in the desktop's format.)
         D3DDISPLAYMODE mode = {};
         device->GetAdapterDisplayMode(0, &mode);
-        HRESULT hr = device->CreateDevice(0, D3DDEVTYPE_HAL, window,
-                                          D3DCREATE_MIXED_VERTEXPROCESSING | D3DCREATE_MULTITHREADED, &p);
+        HRESULT hr = E_FAIL;
+        if (noVsync) {
+            p.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+            hr = device->CreateDevice(0, D3DDEVTYPE_HAL, window,
+                                      D3DCREATE_MIXED_VERTEXPROCESSING | D3DCREATE_MULTITHREADED, &p);
+            if (FAILED(hr))
+                p.FullScreen_PresentationInterval = 0;     // (Direct3D 8 windowed: the default only)
+        }
+        if (FAILED(hr))
+            hr = device->CreateDevice(0, D3DDEVTYPE_HAL, window,
+                                      D3DCREATE_MIXED_VERTEXPROCESSING | D3DCREATE_MULTITHREADED, &p);
         if (FAILED(hr) && mode.Format != p.BackBufferFormat) {
             p.BackBufferFormat = mode.Format;
             hr = device->CreateDevice(0, D3DDEVTYPE_HAL, window,

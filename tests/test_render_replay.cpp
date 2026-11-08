@@ -8,7 +8,9 @@
 //
 // Usage: test_render_replay.exe <capture.ls3dframe> ... [--tolerance N] [--d3d8 <d3d8.dll>]
 //                               [--backend d3d8 | sdlgpu] [--driver direct3d12 | vulkan] [--debug]
-//                               [--min-psnr DB]
+//                               [--min-psnr DB] [--repeat N] [--no-vsync]
+//   --repeat N draws and presents each frame N more times after it and prints the time a frame took
+//   (the last one waited for): the backend's speed on the game's own frames.
 //        test_render_replay.exe --selftest   (draws a scene through the recorder, captures it and
 //                                              replays the capture: the two pictures must be equal)
 //          [--live sdlgpu]                     (the scene drawn on SDL_GPU, live: Present, and the
@@ -286,7 +288,9 @@ int main(int argc, char **argv)
     bool selfTest = false;
     std::string d3d8Path, backend = "d3d8", driver, live = "d3d8";
     bool debug = false;
-    double minPsnr = 0;             // (the SDL_GPU backend: the least it must reach; 0: report only)
+    double minPsnr = 0;
+    int repeat = 0;
+    bool noVsync = false;             // (the SDL_GPU backend: the least it must reach; 0: report only)
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--selftest"))
             selfTest = true;
@@ -304,6 +308,10 @@ int main(int argc, char **argv)
             live = argv[++i];
         else if (!std::strcmp(argv[i], "--min-psnr") && i + 1 < argc)
             minPsnr = std::atof(argv[++i]);
+        else if (!std::strcmp(argv[i], "--repeat") && i + 1 < argc)
+            repeat = std::atoi(argv[++i]);
+        else if (!std::strcmp(argv[i], "--no-vsync"))
+            noVsync = true;
         else
             captures.push_back(argv[i]);
     }
@@ -395,6 +403,7 @@ int main(int argc, char **argv)
         HWND window = CreateWindowA("LS3DFReplay", "replay", WS_POPUP, 0, 0, 64, 64, nullptr, nullptr,
                                     GetModuleHandleA(nullptr), nullptr);
         replay::Replayer r(device, window);
+        r.noVsync = noVsync;
         const bool ran = r.Run(capture);
         if (!ran) {
             std::printf("%s: %s\n", path.c_str(), r.error.c_str());
@@ -420,6 +429,10 @@ int main(int argc, char **argv)
             replay::WritePng((path + (sdlGpu ? ".sdlgpu.png" : ".d3d8.png")).c_str(), r.picture);
             replay::WritePng((path + ".game.png").c_str(), r.reference);
             replay::WritePng((path + (sdlGpu ? ".sdlgpu.diff.png" : ".diff.png")).c_str(), diff);
+        }
+        if (ran && repeat > 0) {
+            const double ms = r.Repeat(repeat);
+            std::printf("    %d more frames: %.2f ms a frame\n", repeat, ms);
         }
         DestroyWindow(window);
     }

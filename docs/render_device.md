@@ -141,25 +141,32 @@ Direct3D 8's rules kept: a draw from user memory unsets stream 0 (and the indice
 rectangles clears the viewport; LightEnable on a light never set makes Direct3D's default one.
 
 **In the game** (November 2026): menus and the Africa1 mission, driven across its whole map, on
-Direct3D 12 and on Vulkan: everything looks right, but it runs less smoothly than Direct3D 8.
-The first tries crashed, and taught two things:
+Direct3D 12 and on Vulkan: everything looks right, and it runs smoothly, about 95 frames a second,
+the backend taking 1.5 - 2.7 ms of CPU for a frame of up to 1,700 draws. The first tries crashed or
+stuttered, and taught three things:
 - **Uploads must not each take memory.** Every texture upload had a transfer buffer of its own,
   mapped into the process until the GPU was done. A mission's hundreds of textures left the 32-bit
   process without address space, and the driver failed (in AMD's shader compiler, in Direct3D 12's
   debug layer). Textures now go through one 16 MB staging buffer in batches, and each frame's
   vertices through one transfer buffer.
+- **Uploads must not wait.** The engine's texture thread loads textures all the time. Each upload
+  batch used to wait for the GPU to finish all it had been given, which made the game stutter. Now
+  only a fifth batch in flight waits (each holds its 16 MB until the GPU is done).
 - **SDL 3.4's Direct3D 12 backend writes past its descriptor heap** when a draw's descriptors
   straddle the heap's end: it checks only that the heap is not full yet. With 3 samplers a draw
   that happens; the backend binds 4 (2048 and 65536 are multiples of 4) and re-binds them only when
   they change.
 
-`SDLGPUDebug=1` also writes `LS3DF_sdlgpu.log` next to the DLL: each pipeline and texture made, the
+`SDLGPUStats=1` writes what the frames cost every 5 seconds to `LS3DF_sdlgpu.log` next to the
+DLL: the time between frames, building one, waiting for the swapchain and for uploads, the draws,
+vertices and uploads. `SDLGPUDebug=1` also writes there: each pipeline and texture made, the
 address space left, each line flushed before the call (a crash leaves the culprit last). Vulkan's
 validation layer needs a 32-bit build of the layers, which the Vulkan SDK no longer ships: without
 one the device starts without validation.
 
 **Not yet:**
-- speed: each draw's vertices are copied every frame;
+- buffers kept on the GPU (each draw's vertices are copied every frame; at about 2 ms a frame it
+  has not mattered);
 - display mode changes: fullscreen is the borderless window, scaled;
 - the gamma ramp;
 - multisampling;
@@ -229,7 +236,8 @@ The SDL_GPU backend is compared the same way (`--backend sdlgpu`, `--driver dire
   apart (the two APIs' filtering), and the rest are along alpha-tested foliage edges.
 
 Direct3D 12 and Vulkan draw the same pictures (the self-test: identical, 47.2 dB from Windows'
-Direct3D 8).
+Direct3D 8). `--repeat N` draws a capture N more times and times it (`--no-vsync` for SDL_GPU;
+Direct3D 8 windowed always waits): the mission captures take 5 - 7 ms a frame on SDL_GPU.
 
 ## Not covered
 

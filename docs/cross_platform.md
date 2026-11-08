@@ -32,7 +32,7 @@ with the original DLL, and each new backend is checked against it before the old
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
 | 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **done**: OpenAL Soft, FFmpeg and SDL3 each work in the game, chosen in LS3DF.ini |
-| 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | **in progress**: frame captures and their replay done; SDL_GPU works in the game on Direct3D 12 and Vulkan (looks right, slower than Direct3D 8: to be made faster); OpenGL 3.3 after it |
+| 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | **in progress**: frame captures and their replay done; SDL_GPU works in the game on Direct3D 12 and Vulkan (looks right, smooth); OpenGL 3.3 next |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
 

@@ -47,6 +47,7 @@ S_enhancements ReadIni()
     o.sdlGpu = GetPrivateProfileIntA("Render", "SDLGPU", 0, path) != 0;
     GetPrivateProfileStringA("Render", "SDLGPUDriver", "", o.sdlGpuDriver, sizeof o.sdlGpuDriver, path);
     o.sdlGpuDebug = GetPrivateProfileIntA("Render", "SDLGPUDebug", 0, path) != 0;
+    o.sdlGpuStats = GetPrivateProfileIntA("Render", "SDLGPUStats", 0, path) != 0;
     return o;
 }
 

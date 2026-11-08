@@ -20,6 +20,8 @@
 #include "gfx/sdlgpu/sdlgpu_device.h"
 
 #include <algorithm>
+#include <chrono>
+#include <deque>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
@@ -33,6 +35,10 @@
 #include "gfx/trace/trace_format.h"
 #include "platform/sdl3/sdl3_api.h"
 #include "sdlgpu_shaders.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4324)     // (structures padded for the uniforms' 16-byte alignment, as meant)
+#endif
 
 namespace ls3d::gfx {
 
@@ -144,12 +150,13 @@ F4 TransformDirection(const D3DVECTOR &v, const D3DMATRIX &m)
 // ---------------------------------------------------------------- the diagnostic log
 
 // LS3DF_sdlgpu.log next to the DLL, with [Render] SDLGPUDebug=1: what the backend asks of SDL_GPU,
-// each line flushed before the call (a driver that crashes leaves the last one as the culprit).
+// each line flushed before the call (a driver that crashes leaves the last one as the culprit); with
+// SDLGPUStats=1 (or debug), what the frames cost every 5 seconds.
 void Trace(const char *format, ...)
 {
     static FILE *log;
     static bool opened;
-    if (!Enhancements().sdlGpuDebug)
+    if (!Enhancements().sdlGpuDebug && !Enhancements().sdlGpuStats)
         return;
     if (!opened) {
         opened = true;
@@ -711,6 +718,9 @@ public:
             api.SDL_UnmapGPUTransferBuffer(gpu, staging);
         stagingMap = nullptr;
         staged.clear();
+        for (SDL_GPUFence *f : stagingFences)
+            api.SDL_ReleaseGPUFence(gpu, f);
+        stagingFences.clear();
         for (SDL_GPUTransferBuffer *t : {frameTransfer, staging})
             if (t)
                 api.SDL_ReleaseGPUTransferBuffer(gpu, t);
@@ -758,12 +768,20 @@ public:
         Guard g(m);
         if (!gpu)
             return D3DERR_INVALIDCALL;
+        using Clock = std::chrono::steady_clock;
+        const auto start = Clock::now();
+        stats.draws += frame.size();
+        stats.vertexBytes += frameVertices.size() + frameIndices.size() * 2;
         SDL_GPUCommandBuffer *cmd = Execute();
         if (!cmd)
             return D3DERR_DRIVERINTERNALERROR;
+        const auto built = Clock::now();
+        stats.build += built - start;
         SDL_GPUTexture *swapchain = nullptr;
         Uint32 w = 0, h = 0;
-        if (window && api.SDL_WaitAndAcquireGPUSwapchainTexture(cmd, window, &swapchain, &w, &h) && swapchain) {
+        const bool acquired = window && api.SDL_WaitAndAcquireGPUSwapchainTexture(cmd, window, &swapchain, &w, &h);
+        stats.acquire += Clock::now() - built;
+        if (acquired && swapchain) {
             SDL_GPUBlitInfo blit = {};
             blit.source.texture = backBuffer;
             blit.source.w = present.BackBufferWidth;
@@ -776,6 +794,19 @@ public:
             api.SDL_BlitGPUTexture(cmd, &blit);
         }
         api.SDL_SubmitGPUCommandBuffer(cmd);
+        // Every 5 seconds, what a frame cost (LS3DF.ini SDLGPUStats).
+        const auto now = Clock::now();
+        if (stats.frames++ == 0)
+            stats.since = now;
+        if (now - stats.since >= std::chrono::seconds(5)) {
+            const double n = static_cast<double>(stats.frames);
+            auto ms = [&](Clock::duration d) { return std::chrono::duration<double, std::milli>(d).count() / n; };
+            Trace("frames: %.0f, %.2f ms apart; building %.2f ms, waiting for the swapchain %.2f ms, for uploads %.2f ms; "
+                  "%.0f draws, %.2f MB of vertices; %.1f upload batches, %.2f MB",
+                  n, ms(now - stats.since), ms(stats.build), ms(stats.acquire), ms(stats.uploadWait), stats.draws / n,
+                  stats.vertexBytes / n / 1048576.0, stats.uploadBatches / n, stats.uploadBytes / n / 1048576.0);
+            stats = {};
+        }
         return D3D_OK;
     }
     void SetGammaRamp(DWORD, const D3DGAMMARAMP *ramp) override { gamma = *ramp; }
@@ -2161,8 +2192,8 @@ private:
             if (!staging)
                 return;
         }
-        if (!stagingMap)
-            stagingMap = static_cast<uint8_t *>(api.SDL_MapGPUTransferBuffer(gpu, staging, false));
+        if (!stagingMap)       // (cycled: the batches still in flight keep their own)
+            stagingMap = static_cast<uint8_t *>(api.SDL_MapGPUTransferBuffer(gpu, staging, true));
         if (!stagingMap)
             return;
         std::memcpy(stagingMap + at, data, size);
@@ -2192,14 +2223,25 @@ private:
             api.SDL_UploadToGPUTexture(copy, &from, &to, false);
         }
         api.SDL_EndGPUCopyPass(copy);
-        SDL_GPUFence *fence = api.SDL_SubmitGPUCommandBufferAndAcquireFence(cmd);
-        if (fence) {
-            api.SDL_WaitForGPUFences(gpu, true, &fence, 1);
-            api.SDL_ReleaseGPUFence(gpu, fence);
+        // Not waited for: only when more than kStagingInFlight batches are (each holds its own
+        // 16 MB until the GPU is done with it, which a 32-bit process must keep bounded).
+        if (SDL_GPUFence *fence = api.SDL_SubmitGPUCommandBufferAndAcquireFence(cmd))
+            stagingFences.push_back(fence);
+        while (stagingFences.size() > kStagingInFlight) {
+            const auto start = std::chrono::steady_clock::now();
+            SDL_GPUFence *oldest = stagingFences.front();
+            api.SDL_WaitForGPUFences(gpu, true, &oldest, 1);
+            api.SDL_ReleaseGPUFence(gpu, oldest);
+            stagingFences.pop_front();
+            stats.uploadWait += std::chrono::steady_clock::now() - start;
         }
+        stats.uploadBatches += 1;
+        stats.uploadBytes += stagingUsed;
         staged.clear();
         stagingUsed = 0;
     }
+    static constexpr size_t kStagingInFlight = 4;
+    std::deque<SDL_GPUFence *> stagingFences;
 
     // The back buffer as BGRA8 rows (the frame so far drawn first).
     bool ReadBackBuffer(std::vector<uint8_t> *rows)
@@ -2234,6 +2276,13 @@ private:
         api.SDL_ReleaseGPUTransferBuffer(gpu, transfer);
         return p != nullptr;
     }
+
+    // What the frames cost since the last report.
+    struct S_stats {
+        std::chrono::steady_clock::time_point since;
+        std::chrono::steady_clock::duration build{}, acquire{}, uploadWait{};
+        size_t frames = 0, draws = 0, vertexBytes = 0, uploadBatches = 0, uploadBytes = 0;
+    } stats;
 
     std::recursive_mutex m;
     bool open = false;
