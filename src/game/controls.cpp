@@ -4979,7 +4979,11 @@ int C_HotKeyControl::OnClick(int id)
 {
     if (m_edit->IsEditing() || m_edit->OnClick(id) != CONTROL_HANDLED)
         return 0;
-    PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+    // The menu's keys off while the key is waited for (value 1, the edit box's answer): no typed
+    // character reaches the edit box (Tick's or OnInput02's, value 0, turns them on again).
+    S_ControlMessage message = Message(CONTROL_MSG_HOT_KEY_DONE);
+    message.value = 1;
+    PostControlMessage(message);
     return CONTROL_HANDLED;
 }
 
