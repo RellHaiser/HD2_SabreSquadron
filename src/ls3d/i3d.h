@@ -184,7 +184,8 @@ public:
     I3DMETHOD(void, EnumFrames)(I3D_ENUMPROC *callback, void *context, uint32_t typeMask,
                                 const char *mask) = 0;        // 0x44
     I3DMETHOD(I3D_frame *, FindChildFrame)(const char *name, uint32_t typeMask) = 0;   // 0x48
-    // Copies the contents (visual, children) of another frame of the same type.
+    // Copies the contents (visual, children) of another frame of the same type; < 0 on failure
+    // (LS3DF I3D_RESULT; LS3DRF's model duplication tests it).
     I3DMETHOD(HRESULT, Duplicate)(I3D_frame *source) = 0;    // 0x4C
     // Called with 1.0 on a weapon's "flash" visual when it fires (meaning not identified).
     I3DMETHOD(void, SetHierarchyLightLevel)(float value) = 0;           // 0x50
@@ -442,7 +443,7 @@ enum : uint32_t {
 // Methods common to all visual types (vtable slots 0x50..0x90).
 class I3D_visual : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     // Sets the bounds used for culling (particle visuals, whose quads the game
@@ -823,7 +824,7 @@ struct I3D_particle_vertex {
 
 class I3D_projector : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOTS_4(70, 74, 78, 7C);                              // LS3DF: Load, SetBoundVolume, SetBBox, SetWorldSpace
     I3D_SLOTS_4(80, 84, 88, 8C);                              // LS3DF: SetModeA, GetModeA, SetModeB, GetModeB
@@ -839,7 +840,7 @@ public:
 // Joint of a model's skeleton (FRAME_JOINT).
 class I3D_joint : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);
     I3D_SLOTS_4(70, 74, 78, 7C);
     I3D_SLOTS_4(80, 84, 88, 8C);
@@ -887,7 +888,7 @@ public:
     I3DMETHOD(HRESULT, Open)(const char *fileName, uint32_t flags) = 0;   // 0x04
     I3DMETHOD(int, GetEndTime)() = 0;                         // 0x08 ms
     I3D_SLOT(0C);
-    I3D_SLOT(10);                                             // LS3DF: Unlock
+    I3D_SLOT(10);
     // The keys of the joints by name (C_HumanWeaponPose reads them; -1: no track).
     I3DMETHOD(int, FindTrack)(const char *name) = 0;          // 0x14
     I3DMETHOD(int, NumPosKeys)(int track) = 0;                // 0x18
@@ -919,7 +920,7 @@ enum E_I3D_ANIM_MODE {
 class I3D_joint_override {
 public:
     I3D_SLOT(00);
-    I3D_SLOT(04);                                             // LS3DF: SetFaces
+    I3D_SLOT(04);
     // Stops overriding: the joint follows the animation again.
     I3DMETHOD(void, Clear)() = 0;                             // 0x08
     I3D_SLOTS_4(0C, 10, 14, 18);
@@ -955,7 +956,7 @@ public:
 // Animated model (FRAME_MODEL). Animation stages blend on top of each other.
 class I3D_model : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     // Loads the model file (hierarchy, meshes, animations) into this frame.
@@ -1013,7 +1014,7 @@ public:
 // Target frame: other frames aim at it (FRM_SetTarget).
 class I3D_target : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     I3DMETHOD(void, AddFrame)(I3D_frame *frame) = 0;          // 0x74
@@ -1026,7 +1027,7 @@ public:
 
 class I3D_sound : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     I3DMETHOD(HRESULT, Open)(const char *fileName, uint32_t flags) = 0;   // 0x74
@@ -1119,7 +1120,7 @@ inline I3D_morph *I3D_GetMorph(I3D_frame *visual)
 // mode 0x11, white, power fading from 1, range fading from 4 m).
 class I3D_light : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     I3DMETHOD(void, SetLightType)(int type) = 0;              // 0x74
@@ -1175,7 +1176,7 @@ constexpr uint32_t I3DLIGHTMODE_WEAPON_FLASH = 0x11;        // mode of muzzle li
 // User data (I3D_frame::GetData()) of sectors is owned by the sound module.
 class I3D_sector : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     // Makes a light shine in this sector.
@@ -1212,7 +1213,7 @@ public:
 // Projected shadow of a model (FRAME_SHADOW), loaded from its own file.
 class I3D_shadow : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     I3DMETHOD(HRESULT, Open)(const char *fileName, uint32_t flags) = 0;   // 0x74
@@ -1233,7 +1234,7 @@ public:
 
 class I3D_camera : public I3D_frame {
 public:
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     I3DMETHOD(void, SetFOV)(float radians) = 0;               // 0x74
@@ -1287,7 +1288,7 @@ public:
     I3D_SLOT(50);                                             // LS3DF: SetHierarchyLightLevel
     I3D_SLOT(54);                                             // LS3DF: SetHierarchyAlpha
     I3D_SLOT(58);                                             // LS3DF: UpdateBound
-    I3D_SLOT(5C);                                             // LS3DF: CreateAnimMaterial
+    I3D_SLOT(5C);
     I3D_SLOT(60);                                             // LS3DF: Init
     I3D_SLOT(64);                                             // LS3DF: Uninit
     I3D_SLOT(68);                                             // LS3DF: MatrixChanged
@@ -1446,7 +1447,7 @@ enum : uint32_t {
 class I3D_sound_listener {
 public:
     I3D_SLOT(00);
-    I3D_SLOT(04);                                             // LS3DF: SetFaces
+    I3D_SLOT(04);
     I3D_SLOT(08);
     I3D_SLOT(0C);
     // Velocity used for the Doppler effect (m/s).
