@@ -31,7 +31,8 @@ Tested by playing:
 
 Not tested yet:
 
-- Hosting with the port (listen or dedicated).
+- Hosting with another player joined, and a dedicated server. (A LAN listen server has been started and spawned
+  in, alone.)
 - The other missions past loading, the few squad orders that need particular gear, and a side-by-side
   measurement against the original of how the fights balance.
 
