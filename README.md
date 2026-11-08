@@ -31,8 +31,8 @@ Tested by playing:
 
 Not tested yet:
 
-- Hosting with another player joined, and a dedicated server. (A LAN listen server has been started and spawned
-  in, alone.)
+- Hosting with another player joined, and a dedicated server. (LAN and internet listen servers have been started and
+  spawned in; no report yet of another player joining.)
 - The other missions past loading, the few squad orders that need particular gear, and a side-by-side
   measurement against the original of how the fights balance.
 
