@@ -10,7 +10,18 @@ portable libraries:
 | DirectInput 8 | SDL3 |
 | DirectSound 8 + EAX 3 | OpenAL Soft (EAX reverb through EFX) |
 | Bink 1, DirectShow | FFmpeg |
-| Direct3D 8 | SDL_GPU (Vulkan, Metal, Direct3D 12 underneath) |
+| Direct3D 8 | SDL_GPU (see below), and OpenGL 3.3 beside it |
+
+SDL_GPU draws through each system's own graphics API:
+
+| System | SDL_GPU's API |
+|---|---|
+| Windows | Direct3D 12 or Vulkan |
+| Linux | Vulkan |
+| macOS | Metal |
+
+OpenGL 3.3 (core profile, its context made by SDL3) is a second render backend beside SDL_GPU, on
+the same three systems, for GPUs and drivers that have none of those three APIs.
 
 The 32-bit Windows build on Direct3D 8 stays as the reference: the differential tests compare it
 with the original DLL, and each new backend is checked against it before the old one goes.
@@ -21,7 +32,7 @@ with the original DLL, and each new backend is checked against it before the old
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
 | 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft done (works in the game) |
-| 3 | An SDL_GPU render backend on Windows, its output compared pixel by pixel with the Direct3D 8 backend's | |
+| 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
 
@@ -83,10 +94,15 @@ Each new backend sits beside the Windows one and is chosen at build time (the pl
 
 Open question: how well FFmpeg decodes Bink 1 (the game's movies are Bink 1.x).
 
-### Phase 3: SDL_GPU
+### Phase 3: SDL_GPU and OpenGL 3.3
 
-A render backend on SDL_GPU behind `gfx::Device`: fixed-function Direct3D 8 states turned into
-shaders, its frames compared pixel by pixel with the Direct3D 8 backend's.
+Two render backends behind `gfx::Device`, each turning the fixed-function Direct3D 8 states into
+shaders, their frames compared pixel by pixel with the Direct3D 8 backend's:
+
+- **SDL_GPU:** Direct3D 12 or Vulkan on Windows, Vulkan on Linux, Metal on macOS. On Windows both
+  of its APIs can be compared with Direct3D 8.
+- **OpenGL 3.3** (core profile), its context made by SDL3: for GPUs and drivers without Direct3D 12,
+  Vulkan or Metal.
 
 ### Phase 4: 64 bits
 
@@ -95,4 +111,4 @@ which is why the 32-bit build stays as the reference.
 
 ### Phase 5: other systems
 
-Linux, then macOS.
+Linux, then macOS: SDL_GPU on Vulkan (Linux) and Metal (macOS), OpenGL 3.3 on both.
