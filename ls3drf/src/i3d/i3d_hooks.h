@@ -20,12 +20,12 @@ void FreeFrameObject(I3D_frame *frame);
 // Targets (target.cpp): the targets' frame lists lose `frame` (0x100565f0); a target's frames
 // follow it (0x100566d0). Targets moved by Update wait in g_targetUpdates (0x100be464) until the
 // outermost Update ends (g_targetUpdateBusy 0x100be478).
-void RemoveFromTargets(I3D_frame *frame);
+void DeleteFromAnyTarget(I3D_frame *frame);
 void UpdateTarget(I3D_frame *target);
 
 // Shadows (shadow.cpp): the shadows' caster lists lose `frame` (0x1004efd0); the frame a shadow
 // is cast from (I3D_shadow 0x1004e970, __thiscall; null when its parent goes away).
-void RemoveShadowCaster(I3D_frame *frame);
+void DeleteFromAnyShadow(I3D_frame *frame);
 void ShadowSetSource(I3D_frame *shadow, I3D_frame *source);
 
 // The loader (load.cpp): an animation file into the set's blob (0x1005d5b0, (file, set)); a model

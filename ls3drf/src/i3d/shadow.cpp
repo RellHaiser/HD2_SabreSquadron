@@ -199,7 +199,7 @@ namespace ls3d::i3d {
 void ShadowSetSource(I3D_frame *shadow, I3D_frame *source) { static_cast<I3D_shadow *>(shadow)->SetSource(source); }
 
 // LS3DRF 0x1002b0f0 (from LS3DF 0x1004efd0)
-void RemoveShadowCaster(I3D_frame *frame)
+void DeleteFromAnyShadow(I3D_frame *frame)
 {
     for (I3D_shadow *s : g_shadows) {
         for (int i = 0; i < s->numCasters; ++i) {

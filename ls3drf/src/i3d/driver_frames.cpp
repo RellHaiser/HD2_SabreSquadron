@@ -265,7 +265,7 @@ void __stdcall I3D_driver::DeleteFromSceneTickList(I3D_frame *frame)
 }
 
 void __stdcall I3D_driver::RemoveShadowCaster(I3D_frame *) {}
-void __stdcall I3D_driver::RemoveTargetFrame(I3D_frame *frame) { RemoveFromTargets(frame); }
+void __stdcall I3D_driver::RemoveTargetFrame(I3D_frame *frame) { DeleteFromAnyTarget(frame); }
 
 // LS3DRF 0x10010ac0 (from LS3DF 0x1001a6d0)
 void __stdcall I3D_driver::SetHierarchyLightLevel(I3D_frame *frame, float level)

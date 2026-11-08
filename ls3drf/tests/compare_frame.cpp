@@ -111,7 +111,7 @@ C_vector<I3D_target *> g_loadTargets;
 I3D_sector *SceneLocateSector(I3D_scene *, const S_vector &, I3D_sector *) { return nullptr; }
 void SceneAddFrame(I3D_frame *, I3D_frame *) {}
 void SceneRemoveDummy(I3D_scene *, I3D_frame *) {}
-void RemoveShadowCaster(I3D_frame *) {}
+void DeleteFromAnyShadow(I3D_frame *) {}
 void ShadowSetSource(I3D_frame *, I3D_frame *) {}
 I3D_RESULT OpenAnimationFile(const char *, I3D_animation_set *) { return I3DERR_NOFILE; }
 I3D_RESULT OpenModelFile(const char *, uint32_t, void *, void *, I3D_frame *) { return I3DERR_NOFILE; }

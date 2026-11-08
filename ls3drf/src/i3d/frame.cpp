@@ -253,9 +253,9 @@ void I3D_frame::Uninit()
         RemoveName();
     NotifyOwnerRemoved();
     if (frameFlags & FRMFLAGS_TARGETED)
-        RemoveFromTargets(this);
+        DeleteFromAnyTarget(this);
     if (frameFlags & FRMFLAGS_SHADOW_CASTER)
-        RemoveShadowCaster(this);
+        DeleteFromAnyShadow(this);
     if (frameFlags & FRMFLAGS_SCENE_SOUND)
         g_driver->DeleteFromSceneTickList(this);
     if (parent) {

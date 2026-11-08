@@ -52,7 +52,7 @@ I3D_RESULT CloneChildren(I3D_frame *parent, I3D_frame *source)
         if (result < 0)
             return result;
         if (c->frameFlags & FRMFLAGS_TARGETED)
-            s_targetLinks.PushBack({copy, FindTargetOf(c)});
+            s_targetLinks.PushBack({copy, GetTarget(c)});
         if (copy->type == FRAME_SHADOW)
             s_shadows.PushBack(copy);
         parent->AddChildFront(copy);
