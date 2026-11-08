@@ -101,6 +101,17 @@ SDL3=1
 How it works and what it covers: [platform.md](platform.md#the-sdl3-implementation) and
 [input_device.md](input_device.md#the-sdl3-backend). `log.txt` says which one is in use.
 
+## Render
+
+```ini
+[Render]
+CaptureFrames=1
+```
+
+| Key | Values | What it does |
+|---|---|---|
+| `CaptureFrames` | 0 / 1 | **Ctrl+Shift+F11** saves the next frame the game draws to `LS3DF_frames\frame_<n>.ls3dframe` next to the DLL: every drawing call, the state and resources it uses, and the picture the game drew. The render tests replay these files on each backend and compare the pictures (the cross-platform plan's phase 3, [render_device.md](render_device.md#frame-captures)). A file can be large (tens of MB), and keeping copies of the vertex buffers costs some memory while the option is on. |
+
 ## Things to know
 
 - **Trilinear filtering and 32-bit lightmaps are already the engine's defaults.** Those two

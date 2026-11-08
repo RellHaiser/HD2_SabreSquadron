@@ -26,6 +26,10 @@
 //   SDL3=1                     ; the window, its keyboard and mouse and the clock through SDL3
 //                              ; (SDL3.dll next to the DLL; platform/sdl3, input/sdl3) instead of
 //                              ; Win32 and DirectInput; Win32 and DirectInput when it is missing
+//
+//   [Render]
+//   CaptureFrames=1            ; Ctrl+Shift+F11 saves the next frame's drawing to LS3DF_frames\ next
+//                              ; to the DLL, for the render tests to replay (gfx/trace)
 #pragma once
 
 namespace ls3d {
@@ -40,6 +44,7 @@ struct S_enhancements {
     bool openal;                            // [Sound] OpenAL
     bool ffmpeg;                            // [Video] FFmpeg
     bool sdl3;                              // [Platform] SDL3
+    bool captureFrames;                     // [Render] CaptureFrames
 };
 
 // The options (LS3DF.ini is read on the first call).

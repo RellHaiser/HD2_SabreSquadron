@@ -32,7 +32,7 @@ with the original DLL, and each new backend is checked against it before the old
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
 | 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **done**: OpenAL Soft, FFmpeg and SDL3 each work in the game, chosen in LS3DF.ini |
-| 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | |
+| 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | **in progress**: frame captures from the game and their replay on Direct3D 8 done; SDL_GPU next |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
 
@@ -102,10 +102,18 @@ be compared in the same tests:
   libraries (FFmpeg 7.1.1, a 32-bit LGPL build of just the Bink, AVI and WAV parts) are loaded at
   run time, so the DLL still works without them.
 
-### Phase 3: SDL_GPU and OpenGL 3.3
+### Phase 3: SDL_GPU and OpenGL 3.3 (in progress)
 
 Two render backends behind `gfx::Device`, each turning the fixed-function Direct3D 8 states into
-shaders, their frames compared pixel by pixel with the Direct3D 8 backend's:
+shaders, their frames compared pixel by pixel with the Direct3D 8 backend's.
+
+The frames come from the game: with `[Render] CaptureFrames=1` in LS3DF.ini, Ctrl+Shift+F11 saves
+one frame's drawing calls, state, resources and picture. `test_render_replay` replays a capture on
+a backend and compares its picture with the game's ([render_device.md](render_device.md#frame-captures)).
+On Direct3D 8 the replay matches the game's picture exactly, so a capture holds everything its
+frame needs.
+
+The backends:
 
 - **SDL_GPU:** Direct3D 12 or Vulkan on Windows, Vulkan on Linux, Metal on macOS. On Windows both
   of its APIs can be compared with Direct3D 8.

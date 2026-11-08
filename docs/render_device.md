@@ -87,6 +87,61 @@ fixed-function features (the game can also pass values of its own through `IGrap
   `compare_frame`, `compare_collision` and `compare_lightmap` identical, `compare_loader` 6,214
   game files with 0 mismatched, `test_enhance` passed.
 
+## Frame captures
+
+Phase 3 of the [cross-platform plan](cross_platform.md) puts new backends behind the device. Their
+pictures are compared with Direct3D 8's on frames captured from the game.
+
+**The recorder** ([`src/gfx/trace`](../src/gfx/trace)) is a device placed in front of the backend
+when LS3DF.ini says `[Render] CaptureFrames=1` ([ls3df_ini.md](ls3df_ini.md#render)). It passes
+every call on unchanged. Ctrl+Shift+F11 saves the next frame to
+`LS3DF_frames\frame_<n>.ls3dframe` next to the DLL ([`trace_format.h`](../src/gfx/trace/trace_format.h)).
+The file holds:
+- the state the engine had set, and the resources that state names;
+- every call up to Present, with each resource defined before its first use, and the bytes the
+  frame writes into buffers and textures as it goes;
+- the picture the game drew, read from the back buffer as IGraph's screenshots are.
+
+A frame draws with things made long before it, so while it runs the recorder keeps:
+- the states set since the device was made or reset;
+- a copy of every vertex and index buffer's bytes (the engine's are write-only);
+- the levels `UpdateTexture` puts into default-pool textures, which cannot be locked;
+- the vertex shaders' declarations.
+
+Managed textures are read back when the frame first uses them. The texture thread's calls go
+through the same lock.
+
+**Direct3D 8's rules the capture follows** (and so must every backend): a draw from user memory
+(`DrawPrimitiveUP`, `DrawIndexedPrimitiveUP`) leaves stream 0 unset, and the indexed one leaves
+the index buffer unset too.
+
+**`test_render_replay`** replays captures on the Direct3D 8 backend in a hidden window. It reads
+the back buffer back and compares it with the game's picture; the same driver must draw the same
+frame. It writes `<capture>.d3d8.png`, `.game.png` and `.diff.png` (differences x4) next to each
+capture.
+- **The same driver:** the game's picture was drawn by its folder's `d3d8.dll`, which may be a
+  wrapper such as dgVoodoo's. The replay loads `--d3d8 <path>`, else a `d3d8.dll` in the folder
+  above the capture's (the game's), else Windows' own. A depth format the driver lacks (dgVoodoo
+  offers D32, Windows' does not) falls back to the nearest one it has.
+- **Big files:** a capture of a mission can be several hundred MB (its textures, every level), so
+  records are read one at a time. With `--selftest` it draws its own two frames through the recorder and captures the second.
+The scene covers:
+- states and resources from before the capture;
+- a write-only vertex buffer;
+- a default-pool texture filled by `UpdateTexture`;
+- lighting, fog and blending;
+- buffer and texel writes during the frame;
+- draws from user memory, and a draw refused after them.
+
+Result on the self-test: the replay matches pixel for pixel (0 apart). Six deliberate bugs in the recorder are all
+caught: the frame's buffer writes or texel rows dropped, the user-memory draws' reset of stream 0
+ignored, a default-pool texture left empty, the earlier states not saved, the buffer copies not
+kept.
+
+Result on the game (November 2026): 12 frames captured in the game, through dgVoodoo, all replayed
+pixel for pixel (0 apart), among them a mission at night in rain and fog with trees, a character
+and the HUD. The captures run from 10 to 600 MB.
+
 ## Not covered
 
 Like the rest of the renderer, the backend has not run on a real Direct3D device yet. The tests'

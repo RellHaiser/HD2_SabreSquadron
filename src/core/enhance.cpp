@@ -43,6 +43,7 @@ S_enhancements ReadIni()
     o.openal = GetPrivateProfileIntA("Sound", "OpenAL", 0, path) != 0;
     o.ffmpeg = GetPrivateProfileIntA("Video", "FFmpeg", 0, path) != 0;
     o.sdl3 = GetPrivateProfileIntA("Platform", "SDL3", 0, path) != 0;
+    o.captureFrames = GetPrivateProfileIntA("Render", "CaptureFrames", 0, path) != 0;
     return o;
 }
 

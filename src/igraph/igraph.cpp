@@ -1103,6 +1103,7 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     }
     platform::Focus(g_mainWnd);
 
+    gfx::ChooseDevice();            // (Port: the frame recorder, LS3DF.ini [Render] CaptureFrames)
     if (!gfx::g_pGfx->Open()) {
         dbgPrintf("IGraph::Init() - Error create D3D8 object !!");
         return I3DERR_GENERIC;

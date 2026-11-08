@@ -130,4 +130,8 @@ public:
 // The device in use (the Direct3D 8 backend's, gfx/d3d8).
 extern Device *g_pGfx;
 
+// Puts in the devices LS3DF.ini asks for (gfx/gfx.cpp): the frame recorder in front of the backend
+// ([Render] CaptureFrames). IGraph calls it before it opens the API.
+void ChooseDevice();
+
 }  // namespace ls3d::gfx
