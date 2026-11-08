@@ -32,7 +32,7 @@ with the original DLL, and each new backend is checked against it before the old
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
 | 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **done**: OpenAL Soft, FFmpeg and SDL3 each work in the game, chosen in LS3DF.ini |
-| 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | **in progress**: frame captures and their replay done; SDL_GPU works in the game on Direct3D 12 and Vulkan (looks right, smooth); OpenGL 3.3 next |
+| 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | **done**: frame captures and their replay; SDL_GPU (Direct3D 12 and Vulkan) and OpenGL 3.3 both work in the game, chosen in LS3DF.ini, and draw the same pictures on the captures |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
 
@@ -102,7 +102,7 @@ be compared in the same tests:
   libraries (FFmpeg 7.1.1, a 32-bit LGPL build of just the Bink, AVI and WAV parts) are loaded at
   run time, so the DLL still works without them.
 
-### Phase 3: SDL_GPU and OpenGL 3.3 (in progress)
+### Phase 3: SDL_GPU and OpenGL 3.3 (done)
 
 Two render backends behind `gfx::Device`, each turning the fixed-function Direct3D 8 states into
 shaders, their frames compared pixel by pixel with the Direct3D 8 backend's.

@@ -28,6 +28,7 @@ public:
     virtual HMENU LoadDefaultMenu() = 0;
     virtual void Refresh(HWND window) = 0;
     virtual void Focus(HWND window) = 0;
+    virtual void Minimize(HWND window) = 0;
     virtual bool SetTitle(HWND window, const char *title) = 0;
     virtual bool ForegroundIsOwn(HWND window) = 0;
     virtual POINT ClientOrigin(HWND window, bool framed, bool withMenu) = 0;

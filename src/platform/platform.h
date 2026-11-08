@@ -112,6 +112,7 @@ HMENU LoadDefaultMenu();
 // Paints the window now (what needs painting).
 void Refresh(HWND window);
 void Focus(HWND window);
+void Minimize(HWND window);
 bool SetTitle(HWND window, const char *title);
 // True when the foreground window is `window` or one of its children (the focus stays in the
 // engine's windows).

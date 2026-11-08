@@ -797,6 +797,9 @@ void IGraphWindowEvents::OnActivate(bool active, bool minimized)
                 platform::Suspend(g_textureThread);
         }
         g_inactive = true;
+        // Direct3D's exclusive full screen leaves by itself; a window over the display would stay on top.
+        if (gfx::g_pGfx->HasDevice() && gfx::g_pGfx->BorderlessFullScreen())
+            platform::Minimize(g_mainWnd);
     } else if (reactivate) {
         g_pIGraph->SetAppName(g_savedAppName);
         g_inactive = false;

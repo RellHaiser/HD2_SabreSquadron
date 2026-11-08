@@ -33,8 +33,14 @@
 //   SDLGPU=1                   ; drawing through SDL_GPU (SDL3.dll next to the DLL; gfx/sdlgpu)
 //                              ; instead of Direct3D 8; Direct3D 8 when SDL3 is missing
 //   SDLGPUDriver=vulkan        ; SDL_GPU's API: direct3d12 or vulkan (empty: SDL's choice)
-//   SDLGPUDebug=1              ; the API's validation (the Vulkan SDK's layers, Direct3D 12's debug layer)
-//   SDLGPUStats=1              ; what the frames cost, every 5 seconds, in LS3DF_sdlgpu.log
+//   PresentMode=vsync          ; how SDL_GPU and OpenGL show frames: vsync, mailbox or immediate
+//                              ; (empty: what the game asks for)
+//   OpenGL=1                   ; drawing through OpenGL 3.3 (SDL3.dll next to the DLL; gfx/opengl)
+//                              ; instead of Direct3D 8; Direct3D 8 when SDL3 is missing
+//   SDLGPUDebug=1              ; the API's validation (the Vulkan SDK's layers, Direct3D 12's debug
+//                              ; layer, OpenGL's debug output), and what is asked of it in
+//                              ; LS3DF_render.log
+//   SDLGPUStats=1              ; what the frames cost, every 5 seconds, in LS3DF_render.log
 #pragma once
 
 namespace ls3d {
@@ -51,9 +57,11 @@ struct S_enhancements {
     bool sdl3;                              // [Platform] SDL3
     bool captureFrames;                     // [Render] CaptureFrames
     bool sdlGpu;                            // [Render] SDLGPU
+    bool openGl;                            // [Render] OpenGL
     char sdlGpuDriver[16];                  // [Render] SDLGPUDriver ("": SDL's choice)
     bool sdlGpuDebug;                       // [Render] SDLGPUDebug
     bool sdlGpuStats;                       // [Render] SDLGPUStats
+    char presentMode[16];                   // [Render] PresentMode ("": what the game asks for)
 };
 
 // The options (LS3DF.ini is read on the first call).

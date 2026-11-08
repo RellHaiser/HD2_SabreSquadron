@@ -1,13 +1,19 @@
 # The render device (gfx)
 
 All of the engine's drawing goes through one interface, `gfx::Device` (`gfx::g_pGfx`), declared
-in [`src/gfx/gfx.h`](../src/gfx/gfx.h). It has two backends:
+in [`src/gfx/gfx.h`](../src/gfx/gfx.h). It has three backends:
 - **Direct3D 8** ([`src/gfx/d3d8`](../src/gfx/d3d8)), the default, which passes every call to
   Direct3D 8 unchanged. The DLL therefore makes exactly the Direct3D calls the original made, and
   the differential tests compare equal.
 - **SDL_GPU** ([`src/gfx/sdlgpu`](../src/gfx/sdlgpu)), chosen with `[Render] SDLGPU=1` in
   LS3DF.ini: Direct3D 8's fixed-function model drawn by shaders, on Direct3D 12 or Vulkan
   ([below](#the-sdl_gpu-backend)).
+- **OpenGL 3.3** ([`src/gfx/opengl`](../src/gfx/opengl)), chosen with `[Render] OpenGL=1`: the same
+  model on GPUs and drivers without those APIs ([below](#the-opengl-33-backend)).
+
+The last two share [`src/gfx/fixed`](../src/gfx/fixed): the device itself (states, resources in
+memory, frames recorded), with a small `Renderer` per API that uploads textures, runs a recorded
+frame, presents it and reads it back.
 
 This is the first step towards other backends (a modern graphics API, other operating systems).
 It moves no pixels and changes no behaviour; it only makes Direct3D replaceable. Sound has the same
@@ -157,21 +163,66 @@ stuttered, and taught three things:
   that happens; the backend binds 4 (2048 and 65536 are multiples of 4) and re-binds them only when
   they change.
 
-`SDLGPUStats=1` writes what the frames cost every 5 seconds to `LS3DF_sdlgpu.log` next to the
+`SDLGPUStats=1` writes what the frames cost every 5 seconds to `LS3DF_render.log` next to the
 DLL: the time between frames, building one, waiting for the swapchain and for uploads, the draws,
 vertices and uploads. `SDLGPUDebug=1` also writes there: each pipeline and texture made, the
 address space left, each line flushed before the call (a crash leaves the culprit last). Vulkan's
 validation layer needs a 32-bit build of the layers, which the Vulkan SDK no longer ships: without
 one the device starts without validation.
 
+**Full screen** is SDL's, in the desktop's mode: the display mode does not change (both this backend
+and OpenGL). SDL's borderless window moved over the display will not do: it keeps a caption in its
+style, and on Windows frames then reach the display unevenly (with vsync, one every 33, 3 and 13 ms on
+OpenGL, 40 a second on Direct3D 12). The picture is scaled to fit with its shape kept, black bars filling the
+rest, so a 4:3 mode is not stretched on a wide display. Losing the focus to another program minimizes it, as
+Direct3D's exclusive mode does.
+
 **Not yet:**
 - buffers kept on the GPU (each draw's vertices are copied every frame; at about 2 ms a frame it
   has not mattered);
-- display mode changes: fullscreen is the borderless window, scaled;
+- display mode changes;
 - the gamma ramp;
 - multisampling;
 - the stencil buffer (the engine does not use it);
 - the w-buffer (drawn as the z-buffer).
+
+## The OpenGL 3.3 backend
+
+For GPUs and drivers without Direct3D 12, Vulkan or Metal. Chosen with `[Render] OpenGL=1`
+([ls3df_ini.md](ls3df_ini.md#render)); SDLGPU wins when both are set. SDL3 makes the core-profile
+context and finds the functions at run time, so nothing is linked. Everything but the `Renderer`
+is the SDL_GPU backend's.
+
+**One shader source.** The driver compiles the same
+[`fixed_function.hlsl`](../src/gfx/sdlgpu/shaders/fixed_function.hlsl) as GLSL 3.30: a few macros
+cover the differences, and the source keeps to what both languages take. `build.py` embeds the
+text, so building needs no OpenGL tools.
+
+**Direct3D's conventions.** The GLSL `main` moves clip depth to OpenGL's -w to w and turns y over.
+So the back buffer (a framebuffer object) has Direct3D's rows:
+- viewports and scissors are as Direct3D gives them, and read-backs are in order;
+- Direct3D's clockwise front faces become counter-clockwise;
+- an edge exactly on a pixel centre, as a pre-transformed quad's often is, falls as by Direct3D's
+  top-left rule. (Keeping OpenGL's upward rows put such quads one row off.)
+
+Present scales the back buffer into the window, turning it back over.
+
+**In the game** (November 2026): the Africa1 mission runs smoothly with full screen and Alt-Tab
+working, about 16.6 ms a frame on a 60 Hz display with `PresentMode=vsync`, though with a few short
+bursts of frames over 20 ms that Direct3D 12 through SDL_GPU mostly did not have. Left to what the
+game asks for (no vsync, its own limit of about 96 frames a second), Direct3D 12 held about 10.5 ms
+and felt no different from its vsync, so the default stays what the game asks for.
+
+**Only the render thread touches OpenGL.** The engine's texture thread works on memory alone; a
+texture it releases has its GPU copy deleted at the next frame.
+
+Uniforms go up as one buffer a frame, each block a range of it; vertices and indices likewise. The
+pipeline key becomes state changes, made only when it differs. `SDLGPUDebug=1` also asks for a debug
+context, and OpenGL's errors go to the log.
+
+Result on the 12 game frames: the pictures are SDL_GPU's (31.0 - 45.6 dB; the menus differ from it
+in no pixel count, 1,245,333 and 5,142 over 0 apart), no OpenGL errors, 0.5 - 10 ms a frame without
+vsync.
 
 ## Frame captures
 

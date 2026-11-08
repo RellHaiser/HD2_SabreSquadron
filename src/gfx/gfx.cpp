@@ -1,8 +1,9 @@
 // The render device's choice (gfx/gfx.h): the Direct3D 8 backend, or the SDL_GPU one ([Render]
-// SDLGPU), behind the frame recorder when LS3DF.ini asks for it ([Render] CaptureFrames).
+// SDLGPU) or the OpenGL 3.3 one ([Render] OpenGL), behind the frame recorder when LS3DF.ini asks for it ([Render] CaptureFrames).
 #include "gfx/gfx.h"
 
 #include "core/enhance.h"
+#include "gfx/opengl/opengl_device.h"
 #include "gfx/sdlgpu/sdlgpu_device.h"
 #include "gfx/trace/recorder.h"
 
@@ -21,6 +22,15 @@ void ChooseDevice()
             EnhancementLog("LS3DF.ini SDLGPU: drawing through SDL_GPU");
         } else {
             EnhancementLog("LS3DF.ini SDLGPU: SDL3.dll (3.2 or later) not found, drawing with Direct3D 8");
+        }
+    }
+    if (Enhancements().openGl && g_pGfx != SdlGpuDevice()) {
+        Device *openGl = OpenGlDevice();
+        if (openGl->Open()) {
+            g_pGfx = openGl;
+            EnhancementLog("LS3DF.ini OpenGL: drawing through OpenGL 3.3");
+        } else {
+            EnhancementLog("LS3DF.ini OpenGL: SDL3.dll (3.2 or later) not found, drawing with Direct3D 8");
         }
     }
     if (Enhancements().captureFrames) {

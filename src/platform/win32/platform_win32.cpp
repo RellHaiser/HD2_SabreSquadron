@@ -198,6 +198,7 @@ public:
 
     void Refresh(HWND window) override { UpdateWindow(window); }
     void Focus(HWND window) override { SetFocus(window); }
+    void Minimize(HWND window) override { ShowWindow(window, SW_MINIMIZE); }
     bool SetTitle(HWND window, const char *title) override { return SetWindowTextA(window, title) != FALSE; }
 
     bool ForegroundIsOwn(HWND window) override

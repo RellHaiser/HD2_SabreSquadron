@@ -4,6 +4,7 @@
 #pragma once
 
 #include <windows.h>
+#include <mmsystem.h>
 
 #include <cmath>
 #include <cstdint>
@@ -287,6 +288,8 @@ public:
     Replayer(Device *d, HWND w) : device(d), window(w) {}
     ~Replayer() { Release(); }
 
+    void (*pump)() = nullptr;           // the window's messages, in a repeat (none: Windows' own loop)
+    bool fullScreen = false;            // the device in full screen, as the game's (SDL_GPU and OpenGL)
     bool noVsync = false;               // presents not waiting for the display (where the device allows)
     std::string error;                  // the first failure that stopped the replay
     int failedCalls = 0;                // device calls that failed (the replay goes on)
@@ -306,20 +309,57 @@ public:
 
     // The frame drawn and presented `times` more times after Run, the last one waited for (its
     // picture read back); the milliseconds a frame took on average (0: none drawn).
-    double Repeat(int times)
+    double Repeat(int times, std::vector<double> *gaps = nullptr, double workMs = 0, int limitMs = 0)
     {
         if (times <= 0 || kept.empty())
             return 0;
         LARGE_INTEGER frequency, start, end;
         QueryPerformanceFrequency(&frequency);
         QueryPerformanceCounter(&start);
+        const auto ms = [&](const LARGE_INTEGER &a, const LARGE_INTEGER &b) {
+            return 1000.0 * static_cast<double>(b.QuadPart - a.QuadPart) / static_cast<double>(frequency.QuadPart);
+        };
+        LARGE_INTEGER last = start, frameStart = start;
+        // (The game's own limit on frames: its LimitFrameTime, a one-shot multimedia timer.)
+        const HANDLE limitEvent = limitMs ? CreateEventA(nullptr, FALSE, FALSE, nullptr) : nullptr;
         for (int i = 0; i < times; ++i) {
+            if (limitMs) {
+                LARGE_INTEGER a;
+                QueryPerformanceCounter(&a);
+                const int elapsed = static_cast<int>(ms(frameStart, a));
+                if (elapsed < limitMs) {
+                    timeSetEvent(limitMs - elapsed, 0, reinterpret_cast<LPTIMECALLBACK>(limitEvent), 0, TIME_ONESHOT | TIME_CALLBACK_EVENT_PULSE);
+                    WaitForSingleObject(limitEvent, 100);
+                }
+                QueryPerformanceCounter(&frameStart);
+            }
+            // (The game's part of a frame, when asked to act one.)
+            if (workMs > 0) {
+                LARGE_INTEGER a, b;
+                QueryPerformanceCounter(&a);
+                do
+                    QueryPerformanceCounter(&b);
+                while (ms(a, b) < workMs);
+            }
             for (const S_kept &k : kept) {
                 const Capture::S_record r = {k.op, k.payload.data(), static_cast<uint32_t>(k.payload.size())};
                 if (!Do(r))
                     return 0;
             }
             device->Present();
+            if (gaps) {
+                if (pump) {
+                    pump();
+                } else {
+                    MSG message;
+                    while (PeekMessageA(&message, nullptr, 0, 0, PM_REMOVE))
+                        DispatchMessageA(&message);
+                }
+                LARGE_INTEGER now;
+                QueryPerformanceCounter(&now);
+                gaps->push_back(ms(last, now));
+                last = now;
+            }
         }
         if (!ReadBack())                // (waits for the last frame)
             return 0;
@@ -568,7 +608,7 @@ private:
         p.MultiSampleType = static_cast<D3DMULTISAMPLE_TYPE>(samples);
         p.SwapEffect = D3DSWAPEFFECT_DISCARD;
         p.hDeviceWindow = window;
-        p.Windowed = TRUE;
+        p.Windowed = fullScreen ? FALSE : TRUE;
         p.EnableAutoDepthStencil = depth != 0;
         p.AutoDepthStencilFormat = static_cast<D3DFORMAT>(depth);
         p.Flags = flags;

@@ -142,6 +142,7 @@ public:
         return hr;
     }
     HRESULT TestCooperativeLevel() override { return in->TestCooperativeLevel(); }
+    bool BorderlessFullScreen() override { return in->BorderlessFullScreen(); }
     HRESULT Present() override
     {
         Guard g(m);

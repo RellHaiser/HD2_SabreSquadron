@@ -5,16 +5,24 @@
 // - On the SDL_GPU backend (--backend sdlgpu, on --driver direct3d12 or vulkan, SDL's choice
 //   otherwise; --debug for the API's validation) the picture is Direct3D 8's model drawn by shaders:
 //   how far it is from the game's is the measure.
+// - On the OpenGL 3.3 backend (--backend opengl) likewise.
 //
 // Usage: test_render_replay.exe <capture.ls3dframe> ... [--tolerance N] [--d3d8 <d3d8.dll>]
-//                               [--backend d3d8 | sdlgpu] [--driver direct3d12 | vulkan] [--debug]
+//                               [--backend d3d8 | sdlgpu | opengl] [--driver direct3d12 | vulkan] [--debug]
 //                               [--min-psnr DB] [--repeat N] [--no-vsync]
 //   --repeat N draws and presents each frame N more times after it and prints the time a frame took
 //   (the last one waited for): the backend's speed on the game's own frames.
 //        test_render_replay.exe --selftest   (draws a scene through the recorder, captures it and
 //                                              replays the capture: the two pictures must be equal)
-//          [--live sdlgpu]                     (the scene drawn on SDL_GPU, live: Present, and the
-//                                              picture read back as IGraph's screenshots are)
+//          [--live sdlgpu | opengl]            (the scene drawn on that backend, live: Present, and
+//                                              the picture read back as IGraph's screenshots are)
+//          [--present vsync | mailbox | immediate]  (LS3DF.ini's PresentMode, for SDL_GPU and OpenGL)
+//          [--sdl-window LETTERS]              (with --show: SDL's window, as with [Platform] SDL3=1: see below)
+//          [--show] [--work MS] [--limit MS]   (with --repeat: the window over the display, how far apart
+//                                              the frames were; each frame first busy for MS, and at
+//                                              least --limit MS apart, as the game's)
+//          [--fullscreen]                      (with --live: the device in full screen: the window must
+//                                              cover the display)
 //   The game's frame was drawn by the d3d8.dll of its folder (a wrapper such as dgVoodoo's, or
 //   Windows'); the replay must use the same one to draw the same picture: --d3d8 names it, else a
 //   d3d8.dll in the folder above the capture's (the game's, for LS3DF_frames\) is used, else
@@ -22,11 +30,12 @@
 //   Writes <capture>.d3d8.png, <capture>.game.png and <capture>.diff.png (differences x4) next to
 //   each capture. Fails when a pixel's channel is more than N (default 0) apart.
 //
-// test-sources: src/gfx/d3d8/gfx_d3d8.cpp src/gfx/trace/*.cpp src/gfx/sdlgpu/*.cpp
+// test-sources: src/gfx/d3d8/gfx_d3d8.cpp src/gfx/trace/*.cpp src/gfx/sdlgpu/*.cpp src/gfx/fixed/*.cpp src/gfx/opengl/*.cpp
 // test-sources: src/core/enhance.cpp src/core/debug.cpp
 // test-sources: src/platform/*.cpp src/platform/win32/*.cpp src/platform/sdl3/*.cpp
 #include <windows.h>
 
+#include <array>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -36,6 +45,9 @@
 
 #include "render_replay.h"
 #include "../src/core/enhance.h"
+#include "../src/gfx/fixed/fixed_device.h"
+#include "../src/platform/sdl3/sdl3_api.h"
+#include "../src/gfx/opengl/opengl_device.h"
 #include "../src/gfx/sdlgpu/sdlgpu_device.h"
 #include "../src/gfx/trace/recorder.h"
 
@@ -67,7 +79,7 @@ DWORD FloatBits(float f)
 // carry over from before the capture (states, a write-only vertex buffer, a default-pool texture
 // filled by UpdateTexture, lights, fog) and what changes during it (a buffer and a texture written
 // mid-frame, user-memory draws). The capture's path (empty: none).
-std::string SelfTestCapture(Device *d, HWND window)
+std::string SelfTestCapture(Device *d, HWND window, bool fullscreen)
 {
     if (!d->Open())
         return "";
@@ -80,7 +92,9 @@ std::string SelfTestCapture(Device *d, HWND window)
     p.BackBufferCount = 1;
     p.SwapEffect = D3DSWAPEFFECT_DISCARD;
     p.hDeviceWindow = window;
-    p.Windowed = TRUE;
+    p.Windowed = fullscreen ? FALSE : TRUE;
+    if (fullscreen)
+        ShowWindow(window, SW_SHOW);
     p.EnableAutoDepthStencil = TRUE;
     p.AutoDepthStencilFormat = D3DFMT_D16;
     if (FAILED(d->CreateDevice(0, D3DDEVTYPE_HAL, window, D3DCREATE_MIXED_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
@@ -88,6 +102,25 @@ std::string SelfTestCapture(Device *d, HWND window)
         FAILED(d->CreateDevice(0, D3DDEVTYPE_HAL, window,
                                D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED, &p)))
         return "";
+    if (fullscreen) {
+        // The window covers the display, the picture in it the back buffer's shape.
+        RECT r = {};
+        GetClientRect(window, &r);
+        const int w = GetSystemMetrics(SM_CXSCREEN), h = GetSystemMetrics(SM_CYSCREEN);
+        std::printf("self-test: full screen: window %ldx%ld, display %dx%d%s\n", r.right, r.bottom, w, h,
+                    r.right == w && r.bottom == h ? "" : "  FAIL");
+        if (r.right != w || r.bottom != h)
+            return "";
+        for (const auto &c : {std::array<int, 8>{1600, 1200, 1600, 1200, 0, 0, 1600, 1200},
+                              std::array<int, 8>{1920, 1080, 1600, 1200, 240, 0, 1440, 1080},
+                              std::array<int, 8>{1000, 1000, 1600, 800, 0, 250, 1000, 500}}) {
+            const fixed::S_rectangle a = fixed::PictureRectangle(c[0], c[1], static_cast<UINT>(c[2]), static_cast<UINT>(c[3]));
+            if (a.x != c[4] || a.y != c[5] || a.w != c[6] || a.h != c[7]) {
+                std::printf("self-test: the picture in %dx%d: %d,%d %dx%d  FAIL\n", c[0], c[1], a.x, a.y, a.w, a.h);
+                return "";
+            }
+        }
+    }
 
     // A managed checker texture with its mip levels.
     Texture *checker = nullptr;
@@ -290,7 +323,12 @@ int main(int argc, char **argv)
     bool debug = false;
     double minPsnr = 0;
     int repeat = 0;
-    bool noVsync = false;             // (the SDL_GPU backend: the least it must reach; 0: report only)
+    const char *presentMode = "";
+    bool show = false;
+    double workMs = 0;
+    int limitMs = 0;
+    const char *sdlWindow = nullptr;
+    bool noVsync = false, fullscreen = false;             // (the SDL_GPU backend: the least it must reach; 0: report only)
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--selftest"))
             selfTest = true;
@@ -312,6 +350,18 @@ int main(int argc, char **argv)
             repeat = std::atoi(argv[++i]);
         else if (!std::strcmp(argv[i], "--no-vsync"))
             noVsync = true;
+        else if (!std::strcmp(argv[i], "--fullscreen"))
+            fullscreen = true;
+        else if (!std::strcmp(argv[i], "--present") && i + 1 < argc)
+            presentMode = argv[++i];
+        else if (!std::strcmp(argv[i], "--show"))
+            show = true;
+        else if (!std::strcmp(argv[i], "--work") && i + 1 < argc)
+            workMs = std::atof(argv[++i]);
+        else if (!std::strcmp(argv[i], "--limit") && i + 1 < argc)
+            limitMs = std::atoi(argv[++i]);
+        else if (!std::strcmp(argv[i], "--sdl-window") && i + 1 < argc)
+            sdlWindow = argv[++i];
         else
             captures.push_back(argv[i]);
     }
@@ -327,13 +377,17 @@ int main(int argc, char **argv)
         if (live == "sdlgpu") {
             S_enhancements e = Enhancements();
             std::snprintf(e.sdlGpuDriver, sizeof e.sdlGpuDriver, "%s", driver.c_str());
+            std::snprintf(e.presentMode, sizeof e.presentMode, "%s", presentMode);
             SetEnhancements(e);
             g_pGfx = FrameRecorder(SdlGpuDevice());
             std::printf("self-test: drawn live on SDL_GPU\n");
+        } else if (live == "opengl") {
+            g_pGfx = FrameRecorder(OpenGlDevice());
+            std::printf("self-test: drawn live on OpenGL\n");
         } else {
             g_pGfx = FrameRecorder(direct);
         }
-        const std::string path = SelfTestCapture(g_pGfx, window);
+        const std::string path = SelfTestCapture(g_pGfx, window, fullscreen);
         g_pGfx = direct;
         DestroyWindow(window);
         if (path.empty()) {
@@ -381,11 +435,20 @@ int main(int argc, char **argv)
 
     // The backend.
     Device *device = g_pGfx;
-    const bool sdlGpu = backend == "sdlgpu";
+    const bool sdlGpu = backend == "sdlgpu", openGl = backend == "opengl";
+    if (openGl) {
+        S_enhancements e = Enhancements();
+        e.sdlGpuDebug = debug;
+        std::snprintf(e.presentMode, sizeof e.presentMode, "%s", presentMode);
+        SetEnhancements(e);
+        device = OpenGlDevice();
+        std::printf("replaying on OpenGL\n");
+    }
     if (sdlGpu) {
         S_enhancements e = Enhancements();
         std::snprintf(e.sdlGpuDriver, sizeof e.sdlGpuDriver, "%s", driver.c_str());
         e.sdlGpuDebug = debug;
+        std::snprintf(e.presentMode, sizeof e.presentMode, "%s", presentMode);
         SetEnhancements(e);
         device = SdlGpuDevice();
         std::printf("replaying on SDL_GPU%s%s\n", driver.empty() ? "" : " / ", driver.c_str());
@@ -402,8 +465,41 @@ int main(int argc, char **argv)
         // A hidden window: Direct3D draws into the back buffer anyway.
         HWND window = CreateWindowA("LS3DFReplay", "replay", WS_POPUP, 0, 0, 64, 64, nullptr, nullptr,
                                     GetModuleHandleA(nullptr), nullptr);
+        // SDL's own window, as the game's with [Platform] SDL3=1. The letters say what it has as the
+        // game's has: t always on top, b borderless, x text input, p its events read each frame.
+        if (sdlWindow) {
+            using sdl3::api;
+            if (!sdl3::StartGpu()) {
+                std::printf("no SDL3\n");
+                return 1;
+            }
+            const auto has = [&](char c) { return std::strchr(sdlWindow, c) != nullptr; };
+            const SDL_WindowFlags flags = SDL_WINDOW_HIDDEN | (has('b') ? SDL_WINDOW_BORDERLESS : 0) | (has('t') ? SDL_WINDOW_ALWAYS_ON_TOP : 0) |
+                                          (openGl ? SDL_WINDOW_OPENGL : 0);
+            SDL_Window *w = api.SDL_CreateWindow("replay", GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), flags);
+            api.SDL_SetWindowPosition(w, 0, 0);
+            DestroyWindow(window);
+            window = static_cast<HWND>(api.SDL_GetPointerProperty(api.SDL_GetWindowProperties(w), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
+            api.SDL_ShowWindow(w);
+            if (has('x'))
+                api.SDL_StartTextInput(w);
+            sdl3::g_window = w;
+        }
         replay::Replayer r(device, window);
         r.noVsync = noVsync;
+        if (sdlWindow) {
+            r.fullScreen = true;
+            if (std::strchr(sdlWindow, 'p')) {
+                r.pump = [] {
+                    SDL_Event e;
+                    while (sdl3::api.SDL_PollEvent(&e)) {
+                    }
+                };
+            }
+        } else if (show) {
+            // The window over the display, as a full-screen game's.
+            SetWindowPos(window, HWND_TOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), SWP_SHOWWINDOW);
+        }
         const bool ran = r.Run(capture);
         if (!ran) {
             std::printf("%s: %s\n", path.c_str(), r.error.c_str());
@@ -418,7 +514,7 @@ int main(int argc, char **argv)
         } else {
             replay::S_image diff;
             const replay::S_difference d = replay::Compare(r.reference, r.picture, tolerance, &diff);
-            const bool ok = sdlGpu ? d.psnr >= minPsnr : d.pixelsOver == 0;
+            const bool ok = sdlGpu || openGl ? d.psnr >= minPsnr : d.pixelsOver == 0;
             std::printf("%s: %ux%u, %llu pixels over %u apart (largest %u), %.1f dB, %d device calls failed%s%s\n",
                         path.c_str(), r.picture.width, r.picture.height,
                         static_cast<unsigned long long>(d.pixelsOver), tolerance, d.maxChannel, d.psnr,
@@ -426,13 +522,24 @@ int main(int argc, char **argv)
                         ok ? "" : "  FAIL");
             if (!ok)
                 ++failures;
-            replay::WritePng((path + (sdlGpu ? ".sdlgpu.png" : ".d3d8.png")).c_str(), r.picture);
+            replay::WritePng((path + (openGl ? ".opengl.png" : sdlGpu ? ".sdlgpu.png" : ".d3d8.png")).c_str(), r.picture);
             replay::WritePng((path + ".game.png").c_str(), r.reference);
-            replay::WritePng((path + (sdlGpu ? ".sdlgpu.diff.png" : ".diff.png")).c_str(), diff);
+            replay::WritePng((path + (openGl ? ".opengl.diff.png" : sdlGpu ? ".sdlgpu.diff.png" : ".diff.png")).c_str(), diff);
         }
         if (ran && repeat > 0) {
-            const double ms = r.Repeat(repeat);
+            std::vector<double> gaps;
+            const double ms = r.Repeat(repeat, show ? &gaps : nullptr, workMs, limitMs);
             std::printf("    %d more frames: %.2f ms a frame\n", repeat, ms);
+            if (show) {
+                int counts[6] = {};
+                for (const double g : gaps)
+                    ++counts[g < 6 ? 0 : g < 14 ? 1 : g < 20 ? 2 : g < 30 ? 3 : g < 40 ? 4 : 5];
+                std::printf("    apart under 6 / 14 / 20 / 30 / 40 ms / longer: %d %d %d %d %d %d\n    the last:", counts[0], counts[1],
+                            counts[2], counts[3], counts[4], counts[5]);
+                for (size_t i = gaps.size() > 24 ? gaps.size() - 24 : 0; i < gaps.size(); ++i)
+                    std::printf(" %.1f", gaps[i]);
+                std::printf("\n");
+            }
         }
         DestroyWindow(window);
     }

@@ -21,6 +21,10 @@ namespace ls3d::sdl3 {
     X(SDL_GetWindowPosition)                                                                             \
     X(SDL_SetWindowSize)                                                                                 \
     X(SDL_ShowWindow)                                                                                    \
+    X(SDL_SyncWindow)                                                                                    \
+    X(SDL_SetWindowFullscreen)                                                                           \
+    X(SDL_SetWindowFullscreenMode)                                                                       \
+    X(SDL_MinimizeWindow)                                                                                \
     X(SDL_SetWindowTitle)                                                                                \
     X(SDL_RaiseWindow)                                                                                   \
     X(SDL_GetWindowFlags)                                                                                \
@@ -48,6 +52,15 @@ namespace ls3d::sdl3 {
     X(SDL_CreateProperties)                                                                              \
     X(SDL_DestroyProperties)                                                                             \
     X(SDL_SetPointerProperty)                                                                            \
+    X(SDL_SetBooleanProperty)                                                                            \
+    X(SDL_GetWindowSizeInPixels)                                                                         \
+    X(SDL_GL_SetAttribute)                                                                               \
+    X(SDL_GL_CreateContext)                                                                              \
+    X(SDL_GL_DestroyContext)                                                                             \
+    X(SDL_GL_MakeCurrent)                                                                                \
+    X(SDL_GL_GetProcAddress)                                                                             \
+    X(SDL_GL_SetSwapInterval)                                                                            \
+    X(SDL_GL_SwapWindow)                                                                                 \
     X(SDL_CreateWindowWithProperties)                                                                    \
     X(SDL_DestroyWindow)                                                                                 \
     X(SDL_GetWindowFromID)                                                                               \

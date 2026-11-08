@@ -152,7 +152,7 @@ first difference (exit code 1); `compare_loader ... "" all` lists every differen
 | `src/math` | the math exports |
 | `src/i3d` | the scene graph, renderer, collision, lightmaps, loaders, buffer managers |
 | `src/igraph` | IGraph, textures, image loading and conversion, the DXT encoder, IShow |
-| `src/gfx` | the render device all drawing goes through, and its backends: Direct3D 8 (the default) and SDL_GPU; the frame recorder the render tests replay ([docs/render_device.md](docs/render_device.md)) |
+| `src/gfx` | the render device all drawing goes through, and its backends: Direct3D 8 (the default), SDL_GPU and OpenGL 3.3; the frame recorder the render tests replay ([docs/render_device.md](docs/render_device.md)) |
 | `src/audio` | the sound device all sound goes through, and its backends: DirectSound (the default) and OpenAL Soft ([docs/sound_device.md](docs/sound_device.md)) |
 | `src/input` | the input device IGraph reads the keyboard and mouse through, and its backends: DirectInput (the default) and SDL3 ([docs/input_device.md](docs/input_device.md)) |
 | `src/platform` | the window and its messages, the cursor, time, threads, locks and events, and their implementations: Win32 (the default) and SDL3 for the window, cursor and clock ([docs/platform.md](docs/platform.md)) |

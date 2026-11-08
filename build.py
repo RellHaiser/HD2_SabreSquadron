@@ -143,6 +143,9 @@ def build_shaders():
             lines.append("inline const uint8_t %s%s[] = {%s};" % (
                 name, suffix, ", ".join(str(b) for b in data) if data else "0"))
             lines.append("inline const size_t %s%sSize = %d;" % (name, suffix, len(data)))
+    # The source itself, for the OpenGL driver to compile (a terminating 0).
+    text = open(os.path.join(SHADERS, "fixed_function.hlsl"), "rb").read().replace(b"\r\n", b"\n") + b"\0"
+    lines.append("inline const char kFixedFunctionSource[] = {%s};" % ", ".join(str(c) for c in text))
     if ok:
         open(header, "w").write("\n".join(lines) + "\n")
     return ok
@@ -228,8 +231,10 @@ SEAMS = [
     ("the FFmpeg backend", ("video/ffmpeg/",),
      re.compile(r'#include <lib(avcodec|avformat|avutil|swscale|swresample)/|#include "video/ffmpeg/|'
                 r'\b(av|avcodec|avformat|sws|swr)_\w+\s*\(|\bAV[A-Z][A-Za-z]+\b')),
-    ("the SDL3 backends", ("platform/sdl3/", "input/sdl3/", "gfx/sdlgpu/"),
+    ("the SDL3 backends", ("platform/sdl3/", "input/sdl3/", "gfx/sdlgpu/", "gfx/fixed/", "gfx/opengl/"),
      re.compile(r'#include <SDL3/|#include "platform/sdl3/|\bSDL_[A-Za-z]\w*\s*\(')),
+    ("the OpenGL backend", ("gfx/opengl/",),
+     re.compile(r'#include "gfx/opengl/gfx|\bgl[A-Z]\w*\s*\(')),
     ("the DirectInput backend", ("dx/", "input/dinput/"),
      re.compile(r'#include <dinput\.h>|#include "input/dinput/|\bIDirectInput\w*|\bLPDIRECTINPUT\w*|'
                 r'\bDirectInput8Create\b')),

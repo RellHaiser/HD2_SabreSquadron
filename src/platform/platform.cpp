@@ -54,6 +54,7 @@ HWND CreateChildWindow(HINSTANCE instance, HWND parent, int x, int y, int width,
 HMENU LoadDefaultMenu() { return Chosen().LoadDefaultMenu(); }
 void Refresh(HWND window) { Chosen().Refresh(window); }
 void Focus(HWND window) { Chosen().Focus(window); }
+void Minimize(HWND window) { Chosen().Minimize(window); }
 bool SetTitle(HWND window, const char *title) { return Chosen().SetTitle(window, title); }
 bool ForegroundIsOwn(HWND window) { return Chosen().ForegroundIsOwn(window); }
 POINT ClientOrigin(HWND window, bool framed, bool withMenu) { return Chosen().ClientOrigin(window, framed, withMenu); }

@@ -55,6 +55,9 @@ public:
     virtual void ReleaseDevice() = 0;
     virtual HRESULT Reset(D3DPRESENT_PARAMETERS *params) = 0;
     virtual HRESULT TestCooperativeLevel() = 0;
+    // True when full screen is only a window over the display: nothing like Direct3D's exclusive mode
+    // takes it away when the focus goes to another program.
+    virtual bool BorderlessFullScreen() { return false; }
     // Shows the whole back buffer in the device window.
     virtual HRESULT Present() = 0;
     virtual void SetGammaRamp(DWORD flags, const D3DGAMMARAMP *ramp) = 0;

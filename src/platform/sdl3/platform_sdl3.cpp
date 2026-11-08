@@ -21,6 +21,7 @@
 #include <cstring>
 #include <string>
 
+#include "core/enhance.h"
 #include "dx/dinput_types.h"
 #include "platform/sdl3/sdl3_api.h"
 
@@ -103,7 +104,8 @@ public:
     HWND CreateMainWindow(HINSTANCE, bool fullscreen, int x, int y, int width, int height, bool, HMENU menu) override
     {
         const SDL_WindowFlags flags =
-            SDL_WINDOW_HIDDEN | (fullscreen ? SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALWAYS_ON_TOP : 0);
+            SDL_WINDOW_HIDDEN | (fullscreen ? SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALWAYS_ON_TOP : 0) |
+            (Enhancements().openGl ? SDL_WINDOW_OPENGL : 0);
         SDL_Window *window = api.SDL_CreateWindow("LS3D engine", width, height, flags);
         if (!window)
             return nullptr;
@@ -137,6 +139,13 @@ public:
             api.SDL_RaiseWindow(sdl3::g_window);
         else
             Win32Windowing()->Focus(window);
+    }
+    void Minimize(HWND window) override
+    {
+        if (window == main && main)
+            api.SDL_MinimizeWindow(sdl3::g_window);
+        else
+            Win32Windowing()->Minimize(window);
     }
     bool SetTitle(HWND window, const char *title) override
     {
