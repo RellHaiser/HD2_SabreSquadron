@@ -600,18 +600,15 @@ void C_MeleeTrackerMovement::UpdateAnimation(int timeDelta)
     }
     m_mixer.SetTrackRate(0, m_speed);
 
+#ifndef HD2_DEDICATED   // no mouse in LS3DRF.dll; MouseLook would also reset m_facing
     if (AiMode(m_meleeTracker) == 1) {
         // The player drives the tracker: the mouse turns it.
         IGraph *graph = GetIGraph();
-#ifndef HD2_DEDICATED   // no mouse in LS3DRF.dll
         const int dy = graph->GetMouseDeltaY();
         const int dx = graph->GetMouseDeltaX();
-#else
-        const int dy = 0;
-        const int dx = 0;
-#endif
         static_cast<C_MeleeTrackerPlayerControl *>(m_meleeTracker->GetAI())->MouseLook(dx, dy);
     }
+#endif
 
     m_mixer.UpdateStages(timeDelta, timeDelta, false, nullptr);
     TurnToFacing(timeDelta, 1);
