@@ -47,6 +47,6 @@ namespace ls3d::i3d {
 // Every target (0x100c0570).
 extern C_vector<I3D_target *> g_targets;
 // The target `frame` follows, null if none (0x100565a0).
-I3D_target *FindTargetOf(const I3D_frame *frame);
+I3D_target *GetTarget(const I3D_frame *frame);
 
 }  // namespace ls3d::i3d

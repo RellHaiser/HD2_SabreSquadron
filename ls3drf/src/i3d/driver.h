@@ -35,7 +35,7 @@ public:
     virtual I3D_material *__stdcall CreateMaterial();                   // 0x28 0x10018ae0
     virtual I3D_anim_material *__stdcall CreateAnimMaterial();          // 0x2C 0x10018b60
     // 0x30 0x10018be0: room for `count` faces (operator new).
-    virtual I3D_triface *__stdcall AllocFaces(int count);
+    virtual I3D_triface *__stdcall CreateTrifaceArray(int count);
     virtual I3D_face_group *__stdcall CreateFaceGroup();                // 0x34 0x10018c00
     virtual I3D_mesh_level *__stdcall CreateMeshLevel();                // 0x38 0x10018c60
     virtual I3D_mesh *__stdcall CreateMesh();                           // 0x3C 0x10018cc0
@@ -56,7 +56,7 @@ public:
     virtual I3D_RESULT __stdcall EnumNamedFrames(I3D_ENUMPROC *proc, void *context);
     // 0x64 0x1001a670: tells the scenes (from the last) that a frame they know goes away, until one
     // takes it (scene slot 0xC8 returns 0).
-    virtual void __stdcall FrameReleased(I3D_frame *frame);
+    virtual void __stdcall DeleteFromSceneTickList(I3D_frame *frame);
     // 0x68 0x1001a6b0: does nothing (I3D_frame::Uninit takes a caster off the shadows' lists).
     virtual void __stdcall RemoveShadowCaster(I3D_frame *frame);
     // 0x6C 0x1001a6c0: removes a frame from the targets' frame lists.

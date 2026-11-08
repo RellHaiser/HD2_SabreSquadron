@@ -112,7 +112,7 @@ HRESULT ReadHeader(int file, const char *magic, int version, const FILETIME *tim
 }
 
 // 0x1005d210: a progress message every 2 %.
-void Progress(float progress)
+void LoadProgress(float progress)
 {
     if (!(s_progressSent + 0.02f > progress) && (s_loadFlags & 2)) {
         s_progressSent = progress;
@@ -147,7 +147,7 @@ HRESULT ReadModelFile(const char *fileName)
     }
     int i = 0;
     for (; i < g_loadNumMaterials; ++i) {
-        Progress(static_cast<float>(i / 2) / static_cast<float>(g_loadNumMaterials));
+        LoadProgress(static_cast<float>(i / 2) / static_cast<float>(g_loadNumMaterials));
         uint32_t flags;
         dtaRead(g_loadFile, &flags, 4);
         I3D_material *m;
@@ -184,7 +184,7 @@ HRESULT ReadModelFile(const char *fileName)
         }
         int f = 0;
         for (; f < g_loadNumFrames; ++f) {
-            Progress(static_cast<float>(f / 2) / static_cast<float>(g_loadNumFrames) + 0.5f);
+            LoadProgress(static_cast<float>(f / 2) / static_cast<float>(g_loadNumFrames) + 0.5f);
             int type = 0;
             dtaRead(g_loadFile, &type, 1);
             I3D_frame *frame;

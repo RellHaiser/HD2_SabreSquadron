@@ -68,15 +68,15 @@ void I3D_sound::Init()
 void I3D_sound::Uninit()
 {
     SetOn(false);
-    // (RemoveSound takes the sound out of `sectors` while this walks it: the walk reads the stale
+    // (DeleteSound takes the sound out of `sectors` while this walks it: the walk reads the stale
     // entries the removals leave behind, as the original does.)
     I3D_sector **s = sectors.Data();
     for (int n = sectors.Size(); n != 0; --n, ++s)
-        (*s)->RemoveSound(this);
+        (*s)->DeleteSound(this);
     sectors.Clear();
     I3D_area **a = areas.Data();
     for (int n = areas.Size(); n != 0; --n, ++a)
-        (*a)->RemoveSound(this);
+        (*a)->DeleteSound(this);
     areas.Clear();
     g_driver->soundFrames.RemoveSwap(this);
     I3D_frame::Uninit();

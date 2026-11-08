@@ -393,8 +393,9 @@ I3D_projector_visual *C_Vehicle::CreateProjector(I3D_frame *frame, I3D_light **l
     return projector;
 }
 
-void C_Vehicle::SetupLights()                                                   // 0x004e7450
+void C_Vehicle::SetupLights()                                                   // 0x004e7450 (DS 0x004d8550)
 {
+#ifndef HD2_DEDICATED   // the server has no lamps: its SetupLights is empty, so m_lamps and m_projectors stay empty
     // The lamps of each kind: the billboard below switched off, its own projected light; the
     // sided kinds by their x in the model's space (right above 0).
     std::vector<I3D_frame *> frames;
@@ -488,4 +489,5 @@ void C_Vehicle::SetupLights()                                                   
             m_lamps[b].projectorIndex = m_lamps[a].projectorIndex;
         }
     }
+#endif
 }

@@ -1088,11 +1088,15 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         break;
 
     case OP_HINT_ClearAll:
+#ifndef HD2_DEDICATED   // the server's hint commands only advance (DS 0x00436f9b)
         GetGame()->GetInterface()->ClearHints();
+#endif
         break;
 
     case OP_HINT_Add:
+#ifndef HD2_DEDICATED
         GetGame()->GetInterface()->AddHint(numberArg(0));
+#endif
         break;
 
     case OP_MP_EnableSpawnZone:
