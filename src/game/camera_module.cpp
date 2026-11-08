@@ -967,6 +967,9 @@ void ShrinkOffset(S_vector4 &offset, int &delay, int timeDelta)
 
 void C_CameraModule::Update(int timeDelta)
 {
+#ifdef HD2_DEDICATED   // empty in the server (DS 0x004873e0)
+    return;
+#endif
     if (m_spectating && !m_debugCamera)
         return;
     if (m_debugCamera) {
