@@ -48,7 +48,7 @@ void I3D_area::Init()
 void I3D_area::Uninit()
 {
     for (int n = sounds.Size(); n; --n)
-        RemoveSound(sounds[0]);
+        DeleteSound(sounds[0]);
     sounds.Clear();
     // (The pointers stay until Init.)
     AlignedFree(vertices);
@@ -202,7 +202,7 @@ void I3D_area::AddSound(I3D_sound *sound)
         sound->areas.PushBack(this);
 }
 
-I3D_RESULT I3D_area::RemoveSound(I3D_sound *sound)
+I3D_RESULT I3D_area::DeleteSound(I3D_sound *sound)
 {
     testedChangeCount = -1;
     if (!Contains(sounds, sound))
