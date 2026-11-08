@@ -22,6 +22,7 @@
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "ls3d/rw_data.h"
+#include "net/net_autorestart.h"
 #include "script/script_module.h"
 
 // Note: the original interleaves calls into the copy-protection layer and shuffled
@@ -675,6 +676,10 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLi
     // (DS 0x007263d0) Any number of servers may run, beside a client too; the key is read but not checked.
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+    if (std::strstr(GetCommandLineA(), "-autorestart")) {
+        RunAutoRestartWatchdog();
+        return 0;
+    }
     g_fatalErrorHandler = OnFatalError;
     GetCDKey();
 #else
