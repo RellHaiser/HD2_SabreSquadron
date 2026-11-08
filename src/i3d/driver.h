@@ -100,7 +100,7 @@ public:
     virtual I3D_RESULT __stdcall EnumNamedFrames(I3D_ENUMPROC *proc, void *context);
     // 0x94 0x1001a670: tells the scenes (from the last) that a frame they know goes away, until one
     // takes it (scene slot 0xCC returns 0).
-    virtual void __stdcall FrameReleased(I3D_frame *frame);
+    virtual void __stdcall DeleteFromSceneTickList(I3D_frame *frame);
     // 0x98 / 0x9C 0x1001a6b0 / 0x1001a6c0: removes a frame from the shadows' caster lists / the
     // targets' frame lists.
     virtual void __stdcall RemoveShadowCaster(I3D_frame *frame);

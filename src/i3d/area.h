@@ -30,7 +30,7 @@ public:
                                        int stride);
     // 0x78 / 0x7C 0x10005cd0 / 0x10005e30: a sound plays in the area (each side's list).
     virtual void __stdcall AddSound(I3D_sound *sound);
-    virtual I3D_RESULT __stdcall RemoveSound(I3D_sound *sound);
+    virtual I3D_RESULT __stdcall DeleteSound(I3D_sound *sound);
     // 0x80 0x10005c70: `pos` (world) behind or on every face plane.
     virtual bool __stdcall IsInside(const S_vector &pos);
     // 0x84 / 0x88 0x1001bb30 / 0x1001bb60: the time (ms, at least 1; Init 500) its sounds fade in
@@ -39,7 +39,7 @@ public:
     virtual uint32_t __stdcall GetFadeTime();
 
     // 0x10005640: the scene's area ring (I3D_scene::firstArea); always leaves the old ring first.
-    void SetScene(I3D_scene *newScene);
+    void AddToRemoveFromSceneRing(I3D_scene *newScene);
 
     int numVertices;                        // +0x120
     S_vector4 *vertices;                    // +0x124 local (16-byte aligned)

@@ -135,7 +135,7 @@ I3D_bbox HierarchyBound(I3D_frame *frame)
             continue;
         c->UpdateLMatrix();
         for (int i = 0; i < 8; ++i)
-            box.Expand(childBox.Corner(i) * c->localMatrix);
+            box.Absorb(childBox.Corner(i) * c->localMatrix);
     }
     return box;
 }
@@ -150,7 +150,7 @@ void AddVisualBoxes(I3D_frame *frame, const S_matrix &parentMatrix)
         const I3D_bbox &box = static_cast<I3D_visual *>(frame)->GetLocalBound().bbox;
         if (box.IsValid()) {
             for (int i = 0; i < 8; ++i)
-                g_hierarchyBox.Expand(box.Corner(i) * m);
+                g_hierarchyBox.Absorb(box.Corner(i) * m);
         }
     }
     for (I3D_frame *c = frame->firstChild; c; c = c->nextSibling)
@@ -253,7 +253,7 @@ I3D_RESULT __stdcall I3D_driver::EnumNamedFrames(I3D_ENUMPROC *proc, void *conte
     return EnumNameNodes(proc, context, g_nameRoot) ? I3DERR_CANCELED : I3D_OK;
 }
 
-void __stdcall I3D_driver::FrameReleased(I3D_frame *frame)
+void __stdcall I3D_driver::DeleteFromSceneTickList(I3D_frame *frame)
 {
     for (int i = scenes.Size(); i > 0; --i) {
         if (SceneRemoveSoundFrame(scenes[i - 1], frame) == I3D_OK)
@@ -261,8 +261,8 @@ void __stdcall I3D_driver::FrameReleased(I3D_frame *frame)
     }
 }
 
-void __stdcall I3D_driver::RemoveShadowCaster(I3D_frame *frame) { ls3d::i3d::RemoveShadowCaster(frame); }
-void __stdcall I3D_driver::RemoveTargetFrame(I3D_frame *frame) { RemoveFromTargets(frame); }
+void __stdcall I3D_driver::RemoveShadowCaster(I3D_frame *frame) { ls3d::i3d::DeleteFromAnyShadow(frame); }
+void __stdcall I3D_driver::RemoveTargetFrame(I3D_frame *frame) { DeleteFromAnyTarget(frame); }
 
 void __stdcall I3D_driver::SetHierarchyLightLevel(I3D_frame *frame, float level)
 {
