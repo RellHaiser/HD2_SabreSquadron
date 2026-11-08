@@ -1,0 +1,6 @@
+; Import definitions for d3d8.dll (the original LS3DF.dll links d3d8.lib; the SDK no longer ships it).
+; d3d8.dll exports the undecorated name, so "Sym@N == Sym" binds the __stdcall symbol to it.
+; Importing it, as the original does, loads d3d8.dll with the game at process start.
+LIBRARY d3d8.dll
+EXPORTS
+    Direct3DCreate8@4 == Direct3DCreate8

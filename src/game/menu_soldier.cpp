@@ -709,7 +709,9 @@ void C_MenuSoldier::Render()
     const uint32_t state6 = I3DGetDriver()->GetState(DRIVER_STATE_6);
     I3DGetDriver()->SetState(DRIVER_STATE_5, 0);
     I3DGetDriver()->SetState(DRIVER_STATE_6, 1);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     m_scene->Render(0);
+#endif
     I3DGetDriver()->SetState(DRIVER_STATE_5, state5);
     I3DGetDriver()->SetState(DRIVER_STATE_6, state6);
 }

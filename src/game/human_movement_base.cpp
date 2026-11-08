@@ -1132,11 +1132,11 @@ void C_HumanMovement::Footstep(bool left)
     mark->kind = kind;
     auto *projector = static_cast<I3D_projector_visual *>(mark->visual);
     if (printMaterial == -2 || printMaterial == -3)
-        projector->SetOpacity(static_cast<float>(m_footstepSurface) * 0.2f + 0.1f);
+        projector->SetIntensity(static_cast<float>(m_footstepSurface) * 0.2f + 0.1f);
     else if (printMaterial == -4 || printMaterial == -5)
-        projector->SetOpacity(0.5f - static_cast<float>(m_footstepSurface) * 0.0625f);
+        projector->SetIntensity(0.5f - static_cast<float>(m_footstepSurface) * 0.0625f);
     else
-        projector->SetOpacity(1.0f);
+        projector->SetIntensity(1.0f);
     projector->SetColor(S_vector(brightness, brightness, brightness));
     const float flatDir[2] = {dir.x, dir.z};
     const float north[2] = {0.0f, 1.0f};
@@ -1208,7 +1208,7 @@ void C_HumanMovement::OnPickUpBody(C_Human *body)
         for (int i = 0; i < bodyModel->NumModelFrames(); ++i) {
             I3D_frame *frame = bodyModel->GetModelFrame(i);
             if (frame->GetType() == FRAME_VISUAL)
-                static_cast<I3D_visual *>(frame)->SetUnknown80(0);
+                static_cast<I3D_visual *>(frame)->SetModeA(0);
         }
         GetGEffects()->SetModelTransparency(body->GetFrame(), m_owner->GetUnknown94());
     }
@@ -1246,7 +1246,7 @@ void C_HumanMovement::OnDropBody(C_Human *body)
         for (int i = 0; i < bodyModel->NumModelFrames(); ++i) {
             I3D_frame *frame = bodyModel->GetModelFrame(i);
             if (frame->GetType() == FRAME_VISUAL)
-                static_cast<I3D_visual *>(frame)->SetUnknown80(2);
+                static_cast<I3D_visual *>(frame)->SetModeA(2);
         }
         // (The original refreshes the carrier's own hit volumes here, typed as a dead body's,
         // instead of the body's.)

@@ -402,7 +402,9 @@ bool C_MissionLoader::LoadObjects(C_chunk &chunk, int stage)
         }
         case OBJECTS_RENDER_STATE_C:
             chunk.Read(renderState);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->SetRenderState(0xC, renderState);
+#endif
             break;
         case OBJECTS_UNKNOWN_B650: {
             int unknown = 0;
@@ -987,11 +989,11 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                 switch (id) {
                 case PROJECTOR_RANGE:
                     chunk.Read(value);
-                    projector->SetUnknown1E4(value);
+                    projector->SetRange(value);
                     break;
                 case PROJECTOR_INTENSITY:
                     chunk.Read(value);
-                    projector->SetOpacity(value);
+                    projector->SetIntensity(value);
                     break;
                 case PROJECTOR_COLOR:
                     chunk.Read(&vector, sizeof vector);
@@ -999,20 +1001,21 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                     break;
                 case PROJECTOR_MODE:
                     chunk.Read(number);
-                    projector->SetUnknownB4(number);
+                    projector->SetProjectionMode(number);
                     break;
                 case PROJECTOR_BUFFERED:
                     chunk.Read(number);
-                    projector->SetMode(number);
+                    projector->SetBuffered(number);
                     break;
                 case PROJECTOR_ORTHOGONAL:
                     // (The original passes the byte with its stack's three above it.)
                     chunk.Read(&orthogonal, 1);
-                    projector->SetUnknownA4(orthogonal);
+                    projector->SetOrthogonal(orthogonal);
                     break;
                 case PROJECTOR_TEXTURE: {
                     const C_str file = ReadRemainingString(chunk);
                     IImage *image = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
                     if (GetIGraph()->LoadTexture(file, nullptr, 0, &image) == 0 && image) {
                         projector->SetTexture(image);
                         image->Release();
@@ -1020,6 +1023,7 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                         projector->Reproject(0, 0);
                         projector->Update();
                     }
+#endif
                     continue;
                 }
                 default:

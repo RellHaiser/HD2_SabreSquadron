@@ -198,7 +198,9 @@ void C_MessageLog::OpenInput(bool open)
 {
     if (open) {
         m_caretTime = 0;
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
         GetIGraph()->FlushChars();
+#endif
         m_inputOpen = open;
         return;
     }
@@ -211,10 +213,15 @@ void C_MessageLog::OpenInput(bool open)
 // The chat line's keys: the history's scrolling (held keys repeat), typing, backspace, enter.
 void C_MessageLog::HandleKeys()
 {
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
     int key = GetIGraph()->GetAsciiKey();
+#else
+    int key = 0;
+#endif
     if (key == 0) {
         if (m_repeatKey != 0) {
             if (m_repeatTime > m_repeatDelay) {
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
                 if (GetIGraph()->IsKeyDown(static_cast<uint8_t>(m_repeatKey))) {
                     key = m_repeatKey;
                     m_repeatDelay = REPEAT_NEXT;
@@ -222,6 +229,9 @@ void C_MessageLog::HandleKeys()
                 } else {
                     m_repeatKey = 0;
                 }
+#else
+                m_repeatKey = 0;
+#endif
             }
         }
     } else {
@@ -257,7 +267,11 @@ void C_MessageLog::HandleKeys()
     };
 
     if (!g_gameProfile.UsesUnicodeFont()) {
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
         const uint32_t ch = GetIGraph()->ReadChar();
+#else
+        const uint32_t ch = 0;
+#endif
         if (ch == 0)
             return;
         if (ch == CHAR_BACKSPACE) {
@@ -395,7 +409,9 @@ void C_MessageLog::Flush(C_Font *font)
     if (m_vertexCount == 0)
         return;
     font->Select();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->DrawPrimitives(3, m_vertexCount / 3, m_vertices, 1);
+#endif
     m_vertexCount = 0;
 }
 

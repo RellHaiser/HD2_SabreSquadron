@@ -11,6 +11,7 @@
 #include "game/cursor.h"
 #include "game/item_defs.h"
 #include "game/key_bindings.h"
+#include "game/mp_game_setup.h"
 #include "game/mp_zone.h"
 #include "game/pending.h"
 #include "game/profile.h"
@@ -313,12 +314,16 @@ bool C_PictureControl::HandleMessage(S_ControlMessage *message)
     }
     case CONTROL_MSG_LOAD_TEXTURE: {
         IImage *image = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(message->text.c_str(), nullptr, TEXTURE_MODE, &image) < 0) {
             m_faceGroup->material->SetTexture(m_texture);
         } else {
             m_faceGroup->material->SetTexture(reinterpret_cast<I3D_texture *>(image));
             image->Release();
         }
+#else
+        m_faceGroup->material->SetTexture(m_texture);
+#endif
         return true;
     }
     case CONTROL_MSG_FIND_FACE_GROUP: {
@@ -4505,11 +4510,9 @@ bool C_PoolList::HandleMessage(S_ControlMessage *message)
         return false;
     // The first hidden item named, indexed and shown.
     const uint32_t item = m_hidden.front()->GetId();
-    // (The name read at value2 + 1, unaligned: the original's.)
-    alignas(C_str) unsigned char raw[sizeof(C_str)];
-    std::memcpy(raw, reinterpret_cast<const char *>(message->value2) + 1, sizeof(raw));
-    const C_str &name = *reinterpret_cast<const C_str *>(raw);
-    S_ControlMessage text = ValueMessage(CONTROL_MSG_SET_TEXT, POOL_ENTRY_STYLE, name);
+    // (value2: the C_MpMap of the picked maps' list, its name at +0x01 in the original.)
+    S_ControlMessage text =
+        ValueMessage(CONTROL_MSG_SET_TEXT, POOL_ENTRY_STYLE, reinterpret_cast<const C_MpMap *>(message->value2)->name);
     text.target = item;
     HandleMessageCopy(text);
     S_ControlMessage index = ValueMessage(CONTROL_MSG_SET_INDEX, message->value);
@@ -4979,7 +4982,11 @@ int C_HotKeyControl::OnClick(int id)
 {
     if (m_edit->IsEditing() || m_edit->OnClick(id) != CONTROL_HANDLED)
         return 0;
-    PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+    // The menu's keys off while the key is waited for (value 1, the edit box's answer): no typed
+    // character reaches the edit box (Tick's or OnInput02's, value 0, turns them on again).
+    S_ControlMessage message = Message(CONTROL_MSG_HOT_KEY_DONE);
+    message.value = 1;
+    PostControlMessage(message);
     return CONTROL_HANDLED;
 }
 
@@ -5407,7 +5414,11 @@ bool C_MovieControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDe
     if (!C_Control::Create(frame, root, desc))
         return false;
     m_frame->SetOn(false);
+#ifndef HD2_DEDICATED   // no streams in LS3DRF.dll
     m_stream = GetIGraph()->CreateStream();
+#else
+    m_stream = nullptr;
+#endif
     if (!m_stream)
         return false;
     FindArea();
@@ -5461,9 +5472,13 @@ void C_MovieControl::Refresh()
     I3D_driver *driver = I3DGetDriver();
     const bool state3 = driver->GetState(DRIVER_STATE_3) != 0;
     driver->SetState(DRIVER_STATE_3, 0);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     const int renderState = GetIGraph()->GetRenderState(RENDER_STATE_0);
+#endif
     m_stream->Draw(false);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetRenderState(RENDER_STATE_0, renderState);
+#endif
     I3DGetDriver()->SetState(DRIVER_STATE_3, state3);
     const int state = m_stream->GetState();
     if (state == ISNDSTREAM_STATE_FINISHED || state == -1) {

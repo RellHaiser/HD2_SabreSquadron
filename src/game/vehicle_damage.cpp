@@ -200,7 +200,7 @@ void C_Vehicle::Deform(const S_vector4 &point, const S_vector4 &direction, float
                 part.mesh->GetLevel(0)->Unknown2C();
             if (hit1)
                 part.mesh->GetLevel(1)->Unknown2C();
-            part.mesh->Unknown14();
+            part.mesh->ComputeBounds();
             static_cast<I3D_object_visual *>(part.frame)->UnknownAC(0);
             part.frame->Update();
         }

@@ -455,10 +455,10 @@ I3D_frame *C_Decorators::TakeModel(unsigned set, int, int *decorator, bool *rand
         I3D_mesh *mesh = static_cast<I3D_visual *>(model->GetChild(0))->GetVisualMesh();
         I3D_material *material = mesh->GetLevel(0)->GetFaceGroup(0)->material;
         material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-        material->SetDiffuse(S_vector(1.0f, 1.0f, 1.0f));
-        material->SetUnknown04(S_vector(0.0f, 0.0f, 0.0f));
-        material->SetEmissive(S_vector(0.0f, 0.0f, 0.0f));
-        material->SetAlpha(0.0f);
+        material->SetEmissiveColor(S_vector(1.0f, 1.0f, 1.0f));
+        material->SetAmbientColor(S_vector(0.0f, 0.0f, 0.0f));
+        material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
+        material->SetPower(0.0f);
         // The pool keeps a copy as its original.
         I3D_frame *original = I3DGetDriver()->CreateFrame(FRAME_MODEL);
         models.push_back(original);
@@ -1097,7 +1097,7 @@ bool S_DecoratorBend::Update(int time)
         light = light - t * 0.0003f;
         if (light < lightTarget)
             light = lightTarget;
-        model->SetUnknown50(light);
+        model->SetHierarchyLightLevel(light);
         return true;
     }
     return going;

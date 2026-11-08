@@ -6,6 +6,7 @@
 #include <windows.h>
 
 #include "net/dplay8.h"
+#include "net/net_autorestart.h"
 #include "net/net_game.h"
 
 #include <cmath>
@@ -44,6 +45,7 @@ constexpr HRESULT E_PENDING_ = static_cast<HRESULT>(0x8000000A);
 constexpr DWORD DPNA_DATATYPE_STRING = 1;
 constexpr DWORD DPNA_DATATYPE_DWORD = 2;
 constexpr DWORD DPNSESSION_CLIENT_SERVER = 1;
+constexpr DWORD DPNSESSION_NODPNSVR = 0x40;
 constexpr DWORD DPNINFO_NAME = 1;
 constexpr DWORD DPNSETCLIENTINFO_SYNC = 0x80000000;
 
@@ -175,6 +177,17 @@ uint32_t GetHostAddress(IDirectPlay8Address *address)
 int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
 {
     Close(true);
+#ifdef HD2_DEDICATED
+    // (DS 0x007798a4) The session's settings in a file, for a server started again; `autorestart`: the watchdog told.
+    char file[52];
+    std::sprintf(file, "XDServer_%5d.txt", g_gameProfile.m_mpSettings->port);
+    g_gameProfile.m_mpSettings->WriteDescription(file);
+    if (g_gameProfile.m_mpSettings->autoRestart) {
+        StartAutoRestartWatchdog();
+        Sleep(100);
+        WatchSession(g_gameProfile.m_mpSettings->sessionName);
+    }
+#endif
     int port = kDefaultPort;
     if (g_gameProfile.m_mpSettings->unknown174 == 1)
         port = g_gameProfile.m_mpSettings->port;
@@ -247,7 +260,9 @@ int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
     wchar_t name[200];
     WideName(name, desc.name);
     DPN_APPLICATION_DESC application;
-    application.flags = DPNSESSION_CLIENT_SERVER;
+    // (Fix: without DPNSVR. On current Windows, with DirectPlay's address family forced to IPv4, Host fails with
+    // 0x80158185 and nothing is bound; clients always name the port, so they don't need it. The original: only the first.)
+    application.flags = DPNSESSION_CLIENT_SERVER | DPNSESSION_NODPNSVR;
     application.application = g_netApplicationGuid;
     application.sessionName = name;
     DPN_CAPS caps = SessionCaps();
@@ -276,8 +291,10 @@ int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
         m_playersLock.Leave();
     } else {
         // A dedicated server: nothing shown.
-        GetIGraph()->UnknownDC(0);
+#ifndef HD2_DEDICATED   // no window or input in LS3DRF.dll
+        GetIGraph()->InitMouse(0);
         ShowWindow(GetIGraph()->GetHWND(), SW_HIDE);
+#endif
     }
     if (address)
         address->Release();
@@ -656,7 +673,11 @@ void C_NetGame::StartVoiceServer()
         return;
     m_voiceServer = new C_NetVoice(nullptr, VoiceServerHandler);
     const GUID &guid = codec >= 1 && codec <= 7 ? g_netVoiceCodecs[codec] : g_netVoiceCodecs[0];
+#ifndef HD2_DEDICATED   // no window in LS3DRF.dll
     m_voiceServer->Init(GetIGraph()->GetHWND(), true, false, m_server, 3, &guid, nullptr, 0);
+#else
+    m_voiceServer->Init(nullptr, true, false, m_server, 3, &guid, nullptr, 0);
+#endif
 }
 
 void C_NetGame::StartVoiceClient(bool onServer)
@@ -669,7 +690,11 @@ void C_NetGame::StartVoiceClient(bool onServer)
     config[3] = 0;
     config[4] = 0xFFFFFFFE;
     IUnknown *session = onServer ? static_cast<IUnknown *>(m_server) : static_cast<IUnknown *>(m_client);
+#ifndef HD2_DEDICATED   // no window in LS3DRF.dll
     m_voiceClient->Init(GetIGraph()->GetHWND(), false, true, session, 3, nullptr, config, 0);
+#else
+    m_voiceClient->Init(nullptr, false, true, session, 3, nullptr, config, 0);
+#endif
 }
 
 void C_NetGame::StopVoiceServer()

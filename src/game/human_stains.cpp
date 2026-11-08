@@ -565,7 +565,7 @@ void C_HumanStains::Bind(char mode)
     m_level = LevelOfVisual(child);
     if (m_visual) {
         reinterpret_cast<I3D_object_visual *>(m_visual)->DuplicateMesh();
-        m_visual->GetVisualMesh()->Unknown18();
+        m_visual->GetVisualMesh()->DuplicateMaterials();
     }
     if (!m_level)
         return;

@@ -60,7 +60,11 @@ int ShowMessage(const char *text, const char *title, unsigned int flags)
     if (!text)
         text = "<no text>";
     IGraph *const graph = GetIGraph();
+#ifndef HD2_DEDICATED   // no window in LS3DRF.dll
     switch (MessageBoxA(graph ? graph->GetHWND() : nullptr, text, title, type)) {
+#else
+    switch (MessageBoxA(nullptr, text, title, type)) {
+#endif
     case IDCANCEL: return 2;
     case IDRETRY:
     case IDYES: return 1;
@@ -88,7 +92,11 @@ bool ReadUnicodeInput(wchar_t *buffer, int maxLength)
     buffer[0] = 0;
     IGraph *const graph = GetIGraph();
     do {
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
         typed[count] = static_cast<char>(graph->ReadChar());
+#else
+        typed[count] = 0;
+#endif
         ++count;
     } while (typed[count - 1] != 0 && count < 0x3FF);
     typed[count] = 0;                                   // (Fix: terminated when the input fills it.)
@@ -136,10 +144,15 @@ uint32_t g_debugFontMatrix[0x500];                      // 0x008c90b8
 // (0x006e8960, 0x006e8900)
 void InitUnknown8CA4C8()
 {
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture("editfont.bmp", nullptr, 8, &g_debugFont) < 0) {
         g_debugFont = nullptr;
         return;
     }
+#else
+    g_debugFont = nullptr;
+    return;
+#endif
     std::memset(g_debugFontMatrix, 0, sizeof g_debugFontMatrix);
     const int file = dtaOpen("tables\\fnt_matrix.bin", 0);
     if (file != -1) {
@@ -162,6 +175,8 @@ void RenderDebugStats()
     I3D_driver *const driver = I3DGetDriver();
     const uint32_t state = driver->GetState(3);
     driver->SetState(3, 0);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetTexture(g_debugFont, 0);
+#endif
     driver->SetState(3, state);
 }

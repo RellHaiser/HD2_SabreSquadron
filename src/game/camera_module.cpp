@@ -984,8 +984,13 @@ void C_CameraModule::Update(int timeDelta)
         return;
     }
 
+#ifndef HD2_DEDICATED   // no mouse in LS3DRF.dll
     int yaw = GetIGraph()->GetMouseDeltaX();
     int pitch = GetIGraph()->GetMouseDeltaY();
+#else
+    int yaw = 0;
+    int pitch = 0;
+#endif
     if (g_gameProfile.GetDetailSettings()->invertMouse)
         pitch = -pitch;
     C_Human *selected = g_teamManager.GetPlayerTeam()->GetSelectedMember();
@@ -1253,7 +1258,11 @@ void C_CameraModule::UpdateDebugCamera(int timeDelta)
         XyzRef(m_wantedDir).Normalize();
     }
     // The mouse buttons: forward, back.
+#ifndef HD2_DEDICATED   // no mouse in LS3DRF.dll
     uint32_t buttons = GetIGraph()->GetMouseButtons();
+#else
+    uint32_t buttons = 0;
+#endif
     if (!m_mouseLook || !GetGame()->IsPlayerInputEnabled())
         buttons = 0;
     if (buttons & 1) {

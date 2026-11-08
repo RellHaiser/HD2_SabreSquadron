@@ -230,10 +230,14 @@ void C_QuickMessages::Render()
     if (!m_ready || !m_showing || m_current < 0 || !m_box || !g_gameProfile.m_player->GetOptions()->subtitles)
         return;
     IGraph *const graph = GetIGraph();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     const int state = graph->GetRenderState(0);
     graph->SetRenderState(0, 1);
+#endif
     m_box->Render();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     graph->SetRenderState(0, state);
+#endif
 }
 
 bool C_QuickMessages::SaveGame(C_chunk &chunk)

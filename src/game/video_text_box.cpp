@@ -46,7 +46,9 @@ void C_VideoTextBox::Render()
 
     const int fade = static_cast<int>(static_cast<float>(m_screenWidth) * WIDTH_UNIT * FADE_HEIGHT);
     const float width = static_cast<float>(m_screenWidth), height = static_cast<float>(m_screenHeight);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetTexture(nullptr, 0);
+#endif
     SetTextBoxQuad(0.0f, 0.0f, width, static_cast<float>(fade), BLACK, CLEAR);
     DrawTextBoxQuad();
     SetTextBoxQuad(0.0f, static_cast<float>(m_screenHeight - fade), width, height, CLEAR, BLACK);

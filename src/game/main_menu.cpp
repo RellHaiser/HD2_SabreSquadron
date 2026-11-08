@@ -877,7 +877,7 @@ bool C_MainMenu::DescribeMissionsScreen(S_ScreenDesc *desc, I3D_frame *model)
         video->SetOn(false);
     if (auto *shot = static_cast<I3D_object_visual *>(model->FindChildFrame("screen_shot", FRAME_MASK_VISUAL))) {
         shot->DuplicateMesh();
-        shot->GetVisualMesh()->Unknown18();
+        shot->GetVisualMesh()->DuplicateMaterials();
     }
     I3D_frame *operationTemplate = model->FindChildFrame("blong", FRAME_MASK_DUMMY);
     I3D_frame *missionTemplate = model->FindChildFrame("bshort", FRAME_MASK_DUMMY);
@@ -1246,7 +1246,7 @@ bool C_MainMenu::DescribeCinematicsScreen(S_ScreenDesc *desc, I3D_frame *model)
         text->SetOn(false);
     if (auto *shot = static_cast<I3D_object_visual *>(model->FindChildFrame("screen_shot", FRAME_MASK_VISUAL))) {
         shot->DuplicateMesh();
-        shot->GetVisualMesh()->Unknown18();
+        shot->GetVisualMesh()->DuplicateMaterials();
     }
     I3D_frame *lineTemplate = model->FindChildFrame("blong", FRAME_MASK_DUMMY);
     I3D_frame *shortTemplate = model->FindChildFrame("bshort", FRAME_MASK_DUMMY);

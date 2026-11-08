@@ -716,7 +716,9 @@ void C_PlayerProfile::ApplyGamma()                      // 0x006b3530
         else
             value = 0xFFFF;
     }
+#ifndef HD2_DEDICATED   // no display in LS3DRF.dll
     GetIGraph()->SetGammaRamp(&ramp[0][0], 0);
+#endif
 }
 
 void C_PlayerProfile::ApplyVolume()                     // 0x006b35c0

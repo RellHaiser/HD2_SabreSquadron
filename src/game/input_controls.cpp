@@ -241,7 +241,9 @@ bool C_Controls::SetBinding(const S_Press *binding, int action)   // 0x006c77d0
             if (m_keys[i] == static_cast<char>(old.key)) {
                 if (--m_keyCounts[i] == 0) {
                     m_keys[i] = 0;
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
                     m_graph->SetWatchedKeys(m_keys, 0x40);
+#endif
                 }
                 break;
             }
@@ -274,7 +276,9 @@ bool C_Controls::SetBinding(const S_Press *binding, int action)   // 0x006c77d0
                     return false;
             }
             m_keys[empty] = static_cast<char>(binding->key);
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
             m_graph->SetWatchedKeys(m_keys, 0x40);
+#endif
             ++m_keyCounts[empty];
         }
     } else if (binding->device == MOUSE_DEVICE) {
@@ -302,14 +306,24 @@ void C_Controls::Update(bool processAll)
     }
     if (processAll) {
         m_graph->ProcessWinMessages();
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
         m_graph->BeginFrame();
         m_graph->ReadKeyboard();
+#endif
     }
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
     const uint64_t keys = m_graph->GetWatchedKeyBits();
     const uint32_t buttons = m_graph->GetMouseButtons();
     float moveX = static_cast<float>(m_graph->GetMouseDeltaX());
     float moveY = static_cast<float>(m_graph->GetMouseDeltaY());
     float wheel = static_cast<float>(m_graph->GetMouseWheel());
+#else
+    const uint64_t keys = 0;
+    const uint32_t buttons = 0;
+    float moveX = 0.0f;
+    float moveY = 0.0f;
+    float wheel = 0.0f;
+#endif
     // A key's "pressed" goes to each of its bindings once, until it has been released.
     char mouseCounts[6];
     std::memcpy(mouseCounts, m_mouseCounts, sizeof mouseCounts);
@@ -402,15 +416,26 @@ const C_Controls::S_Press *C_Controls::PollPress(int filter, bool reread)
     }
     if (reread) {
         m_graph->ProcessWinMessages();
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
         m_graph->BeginFrame();
         m_graph->ReadKeyboard();
+#endif
     }
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
     const uint32_t modifiers = m_graph->GetModifiers(0);
     const auto typed = static_cast<uint8_t>(m_graph->GetAsciiKey());
     const uint32_t buttons = m_graph->GetMouseButtons();
     const int moveX = m_graph->GetMouseDeltaX();
     const int moveY = m_graph->GetMouseDeltaY();
     const int wheel = m_graph->GetMouseWheel();
+#else
+    const uint32_t modifiers = 0;
+    const uint8_t typed = 0;
+    const uint32_t buttons = 0;
+    const int moveX = 0;
+    const int moveY = 0;
+    const int wheel = 0;
+#endif
 
     const auto result = [this](int device, int key, int direction = 0, int joy = 0) {
         m_press.device = static_cast<uint16_t>(device);
@@ -524,6 +549,7 @@ int __stdcall GameRenderCallback(int phase, int, int)
         // (Then a debug drawing, 0x0079bbc0, behind the flag 0x0098af98, which nothing sets.)
     } else if (phase == 2) {
         if (g_scriptModule.IsCutsceneRunning()) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             IGraph *graph = GetIGraph();
             S_IGraphViewport viewport = *graph->GetViewport();
             viewport.x = 0;
@@ -531,6 +557,7 @@ int __stdcall GameRenderCallback(int phase, int, int)
             viewport.width = graph->ScrnX();
             viewport.height = graph->ScrnY();
             graph->SetViewport(viewport);
+#endif
         } else if (!g_scriptModule.IsFakeCutscene() && interfaces->IsActive()) {
             interfaces->Render();
         }

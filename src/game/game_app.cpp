@@ -68,10 +68,12 @@ bool EnterSavedMission(C_chunk &chunk)
 // Three cleared frames before a load or a restart.
 void ClearScreens()
 {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     for (int i = 0; i < 3; ++i) {
         GetIGraph()->Clear(0, 1.0f, 3);
         GetIGraph()->Flip();
     }
+#endif
 }
 
 // The diary records nothing while a saved game is written / read or the mission restarts.
@@ -114,8 +116,10 @@ bool C_GameApp::Init(bool resume)                       // 0x006c0b40
     m_resume = resume;
     if (IsStateActive())
         return false;
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
     if (g_gameRole & GAME_ROLE_CLIENT)
-        GetIGraph()->UnknownDC(1);
+        GetIGraph()->InitMouse(1);
+#endif
     if (!m_resume) {
         if (!g_gameProfile.Init())
             return false;
@@ -143,11 +147,24 @@ bool C_GameApp::StartFromCommandLine()                  // 0x006c0e10
         return true;
     }
     const char *script = std::strstr(commandLine, SCRIPT_SWITCH);
+#ifdef HD2_DEDICATED
+    if (!script) {
+        // (DS 0x00706ad1) No command line: the server has no intro, only the empty console.
+        auto *idleConsole = new C_ConsoleState(nullptr);
+        m_state = idleConsole;
+        idleConsole->Start(nullptr);
+        idleConsole->ShowBanner();
+        return true;
+    }
+#else
     if (!script)
         return false;
+#endif
     // The console alone: the window is hidden.
-    GetIGraph()->UnknownDC(0);
+#ifndef HD2_DEDICATED   // no window or input in LS3DRF.dll
+    GetIGraph()->InitMouse(0);
     ShowWindow(GetIGraph()->GetHWND(), SW_HIDE);
+#endif
     script += std::strlen(SCRIPT_SWITCH);
     char command[0x108];
     // Fix: the original's sprintf had no bound (a 264-byte buffer).
@@ -195,8 +212,10 @@ bool C_GameApp::Close()                                 // 0x006c0c40
         delete m_state;
         m_state = nullptr;
     }
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
     if (g_gameRole & GAME_ROLE_CLIENT)
-        GetIGraph()->UnknownE4();
+        GetIGraph()->CloseMouse();
+#endif
     return true;
 }
 

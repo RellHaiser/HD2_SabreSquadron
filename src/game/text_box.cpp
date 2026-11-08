@@ -1165,7 +1165,9 @@ void SetTextBoxQuad(float x0, float y0, float x1, float y1, uint32_t colour0, ui
 
 void DrawTextBoxQuad()
 {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->DrawPrimitives(PRIMITIVE_FAN, 2, g_textBoxQuad, 1);
+#endif
 }
 
 void ReadScreenSize(int, int)
@@ -1184,18 +1186,24 @@ void C_TextBox::Render()
     if (m_dirty)
         Layout();
     if (m_overflows) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         screen = *GetIGraph()->GetViewport();
+#endif
         ReadScreenSize(screen.x + screen.width, screen.y + screen.height);
         if (!ClipViewport(&clip))
             return;
         ReadScreenSize(clip.x + clip.width, clip.y + clip.height);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->SetViewport(clip);
+#endif
     }
     if (m_background != 0) {
         const bool state = I3DGetDriver()->GetState(DRIVER_STATE_3) != 0;
         I3DGetDriver()->SetState(DRIVER_STATE_3, 0);
         SetTextBoxQuad(m_left, m_bottom, m_right, m_top, m_background, m_background);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->SetTexture(nullptr, 0);
+#endif
         DrawTextBoxQuad();
         I3DGetDriver()->SetState(DRIVER_STATE_3, state);
     }
@@ -1243,10 +1251,14 @@ void C_TextBox::Render()
 
     if (m_overflows) {
         ReadScreenSize(screen.x + screen.width, screen.y + screen.height);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->SetViewport(screen);
+#endif
     }
     if (g_textBoxOutline && m_overflows) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->SetTexture(nullptr, 0);
+#endif
         const uint32_t state = I3DGetDriver()->GetState(DRIVER_STATE_9);
         I3DGetDriver()->SetState(DRIVER_STATE_9, 0);
         // (The clip's numbers as unsigned.)
@@ -1410,7 +1422,9 @@ void C_TextBox::AddVertex(float x, float y, float u, float v, uint32_t colour)
 void C_TextBox::FlushVertices()
 {
     m_font->Select();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->DrawPrimitives(PRIMITIVE_TRIANGLES, g_numTextVertices / 3, g_textVertices, 1);
+#endif
     g_numTextVertices = 0;
 }
 

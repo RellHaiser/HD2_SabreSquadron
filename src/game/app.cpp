@@ -22,6 +22,7 @@
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "ls3d/rw_data.h"
+#include "net/net_autorestart.h"
 #include "script/script_module.h"
 
 // Note: the original interleaves calls into the copy-protection layer and shuffled
@@ -145,8 +146,10 @@ bool InitGraphics()
         return false;
     g_graphFlags = graph->GetInfo()->flags;
 
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     graph->Clear(0, 1.0f, 3);
     graph->Flip();
+#endif
     return true;
 }
 
@@ -174,7 +177,11 @@ void InitSound()
     case 3: flags |= 0x2000; break;
     default: break;
     }
+#ifndef HD2_DEDICATED   // no window
     ISndGetDriver()->Init(GetIGraph()->GetHWND(), 22050, 2, 16, flags);
+#else
+    ISndGetDriver()->Init(nullptr, 22050, 2, 16, flags);
+#endif
 }
 
 bool InitRenderer()                                // 0x006db810
@@ -196,7 +203,9 @@ void ApplyRenderSettings()                         // 0x006db830
 // Keyboard set-up, language selection and game texts.  0x006db970
 void InitInputAndTexts()
 {
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll
     GetIGraph()->InitInput(0);
+#endif
     InitControls(g_controls);
     const unsigned listenerCount = g_frameListenersBegin
         ? static_cast<unsigned>(g_frameListenersEnd - g_frameListenersBegin) : 0;
@@ -286,13 +295,16 @@ void RestoreWindowPosition()
     dtaRead(file, &x, sizeof(x));
     dtaRead(file, &y, sizeof(y));
     dtaClose(file);
+#ifndef HD2_DEDICATED   // no window
     HWND window = GetIGraph()->GetHWND();
     SetWindowPos(window, nullptr, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
     SetFocus(GetIGraph()->GetHWND());
+#endif
 }
 
 void SaveWindowPosition()
 {
+#ifndef HD2_DEDICATED   // no window
     const int file = dtaOpenWrite("window.cfg", 0x10000);
     if (file < 0)
         return;
@@ -301,6 +313,7 @@ void SaveWindowPosition()
     dtaWrite(file, &rect.left, sizeof(rect.left));
     dtaWrite(file, &rect.top, sizeof(rect.top));
     dtaClose(file);
+#endif
 }
 
 // Registers the message a second instance broadcasts to bring the first one up.
@@ -331,8 +344,10 @@ bool InitGame(HINSTANCE instance)
     if (!InitGraphics())
         return false;
 
+#ifndef HD2_DEDICATED   // no window
     HWND window = GetIGraph()->GetHWND();
     SetClassLongA(window, GCL_HICON, reinterpret_cast<LONG>(LoadIconA(GetModuleHandleA(nullptr), MAKEINTRESOURCEA(1))));
+#endif
     SetWindowTitle();
     InitSound();
     if (!InitRenderer())
@@ -411,7 +426,11 @@ namespace {
 // for a server that is not also the local client.
 void UpdateThreadPriority()
 {
+#ifndef HD2_DEDICATED   // no window
     const bool background = GetIGraph()->GetHWND() != GetForegroundWindow();
+#else
+    const bool background = false;
+#endif
     const bool mayIdle = (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL || !(g_gameRole & GAME_ROLE_SERVER);
     if (mayIdle && background) {
         if (!g_lowPriority) {
@@ -449,7 +468,9 @@ void SaveScreenshot()
         const HANDLE search = FindFirstFileA(fileName, &found);
         if (search == INVALID_HANDLE_VALUE) {
             FindClose(search);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->SaveShot(fileName, 0, 0, 0);
+#endif
             return;
         }
         FindClose(search);
@@ -495,7 +516,7 @@ int RunGame()
         delete app;
         return -1;
     }
-    GetIGraph()->Unknown108();
+    GetIGraph()->ReadTimer();
     if (!app->Init(false))
         return -1;
 
@@ -504,12 +525,25 @@ int RunGame()
     g_startupChunkHolder->chunk.Close();
 
     // Route the window messages through the game first.
+#ifndef HD2_DEDICATED   // no window
     HWND window = GetIGraph()->GetHWND();
     g_originalWndProc = GetWindowLongA(window, GWL_WNDPROC);
     if (g_originalWndProc)
         SetWindowLongA(window, GWL_WNDPROC, reinterpret_cast<LONG>(GameWindowProc));
+#endif
 
     for (;;) {
+#ifdef HD2_DEDICATED
+        // (DS 0x00725d8c) The server's own message loop, for its console: LS3DRF.dll's ProcessWinMessages does
+        // nothing. The frame is at most net rate `maxfreq` a second.
+        const char key = 0;
+        MSG message;
+        while (PeekMessageA(&message, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&message);
+            DispatchMessageA(&message);
+        }
+        int timeDelta = static_cast<int>(LimitFrameTime(1000 / g_netMaxFreq, 100));
+#else
         UpdateThreadPriority();
 
         char key = 0;
@@ -521,17 +555,21 @@ int RunGame()
         }
 
         int timeDelta = static_cast<int>(LimitFrameTime(10, 100));
+#endif
         if (app->IsStateActive())
             timeDelta = ScaleFrameTime(timeDelta);
 
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll; the server's loop has no frame listeners or controls
         GetIGraph()->BeginFrame();
         if (g_frameListenersBegin) {
             for (C_FrameListener **it = g_frameListenersEnd; it != g_frameListenersBegin;)
                 (*--it)->OnFrame(true);
         }
         g_controls.Update(false);
+#endif
         I3DGetDriver()->Tick(timeDelta);
 
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll; (DS 0x00725e71) the server goes on to the messages
         if (g_gameRole & GAME_ROLE_CLIENT) {
             if (g_scriptModule.IsCutsceneRunning()) {
                 // Full-screen pass (the cutscene's letterbox bars): temporarily widen the viewport
@@ -547,6 +585,7 @@ int RunGame()
             }
             app->RenderState();
         }
+#endif
 
         g_netGame.ReceiveMessages(timeDelta, true);
         bool keepRunning = true;
@@ -554,10 +593,14 @@ int RunGame()
             keepRunning = app->UpdateServer(timeDelta);
         if (keepRunning) {
             g_netGame.ReceiveMessages(timeDelta, false);
+#ifdef HD2_DEDICATED
+            keepRunning = app->UpdateClient(timeDelta);     // (DS 0x00725eab) whatever the role
+#else
             const bool runClient = (g_gameRole & GAME_ROLE_CLIENT) ||
                                    ((g_gameRole & GAME_ROLE_LOCAL) != GAME_ROLE_LOCAL && g_mpSettings->dedicated);
             if (runClient)
                 keepRunning = app->UpdateClient(timeDelta);
+#endif
         }
         if (!keepRunning)
             break;
@@ -578,13 +621,17 @@ int RunGame()
             }
         }
 
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         if (g_gameRole & GAME_ROLE_CLIENT)
             GetIGraph()->Flip();
+#endif
         _controlfp(_PC_53, _MCW_PC);
     }
 
+#ifndef HD2_DEDICATED   // no window
     if (g_originalWndProc)
         SetWindowLongA(GetIGraph()->GetHWND(), GWL_WNDPROC, g_originalWndProc);
+#endif
     if (app->IsStateActive() && (g_gameRole & GAME_ROLE_SERVER))
         app->Shutdown();
     delete app;
@@ -629,6 +676,18 @@ void FreeResourceCaches()
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLine*/, int /*showCmd*/)
 {
+#ifdef HD2_DEDICATED
+    // (DS 0x007263d0) Any number of servers may run, beside a client too; the key is read but not checked.
+    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+    // (DS 0x007263fa)
+    if (std::strstr(GetCommandLineA(), "-autorestart")) {
+        RunAutoRestartWatchdog();
+        return 0;
+    }
+    g_fatalErrorHandler = OnFatalError;
+    GetCDKey();
+#else
     // Only one instance: wake the running one instead.
     g_instanceMutex = CreateMutexA(nullptr, FALSE, INSTANCE_GUID);
     const DWORD error = GetLastError();
@@ -646,6 +705,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLi
         ShowMessage("Wrong CDKey. Please contact Illusion Softworks.", "Security", 0);
         return -3000;
     }
+#endif
 
     // Disable the Sticky Keys hot key while the game runs.
     STICKYKEYS stickyKeys = {sizeof(STICKYKEYS), 0};

@@ -67,7 +67,7 @@ constexpr int DETAIL_CHECK_TIME = 1400;                 // ms between looks at t
 // Size of the footprint projectors (the loaded ones are less deep, as in the original).
 const S_vector FOOTPRINT_SCALE(0.12f, 0.12f, 0.7f);
 const S_vector LOADED_FOOTPRINT_SCALE(0.12f, 0.12f, 0.6f);
-constexpr float FOOTPRINT_UNKNOWN1E4 = 22.0f;
+constexpr float FOOTPRINT_RANGE = 22.0f;
 constexpr float PI_4 = 0.785398f;
 // The blood pools near a step (half the box).
 constexpr float BLOOD_REACH_XZ = 0.42f;
@@ -99,7 +99,7 @@ enum : uint16_t {
     CHUNK_MARK_LEFT = 4,
     CHUNK_MARK_POS = 5,
     CHUNK_MARK_ROT = 6,                                 // quaternion, scalar first
-    CHUNK_MARK_OPACITY = 7,
+    CHUNK_MARK_INTENSITY = 7,
     CHUNK_MARK_COLOR = 8,                               // ends a mark
     // In CHUNK_MARKS_BLOOD:
     CHUNK_BLOOD_POS = 1,
@@ -138,7 +138,7 @@ void RemoveFromScene(S_SurfaceMark *mark, bool release)
         visual->Release();
         mark->visual = nullptr;
     } else {
-        Projector(mark)->SetMode(3);
+        Projector(mark)->SetBuffered(3);
     }
 }
 
@@ -148,7 +148,7 @@ void ShowMark(S_SurfaceMark *mark)
     const S_FootprintKind &kind = g_footprintKinds[mark->kind];
     I3D_projector_visual *visual = Projector(mark);
     visual->SetTexture(mark->left ? kind.left : kind.right);
-    visual->SetMode(0);
+    visual->SetBuffered(0);
     visual->SetOn(true);
     GetGame()->GetScene()->AddFrame(visual);
 }
@@ -157,9 +157,9 @@ void SetMarkLook(S_SurfaceMark *mark, const S_vector &scale)
 {
     I3D_projector_visual *visual = Projector(mark);
     visual->SetScale(scale);
-    visual->SetUnknownB4(5);
-    visual->SetUnknown1E4(FOOTPRINT_UNKNOWN1E4);
-    visual->SetUnknownA4(1);
+    visual->SetProjectionMode(5);
+    visual->SetRange(FOOTPRINT_RANGE);
+    visual->SetOrthogonal(1);
 }
 
 void SaveMark(C_chunk &chunk, const S_SurfaceMark *mark)
@@ -176,7 +176,7 @@ void SaveMark(C_chunk &chunk, const S_SurfaceMark *mark)
     rot.ToFile(file);
     chunk.WriteChunk(CHUNK_MARK_ROT, file, sizeof(file));
     const I3D_projector_visual *visual = Projector(mark);
-    chunk.WriteChunk(CHUNK_MARK_OPACITY, visual->GetOpacity());
+    chunk.WriteChunk(CHUNK_MARK_INTENSITY, visual->GetIntensity());
     chunk.WriteChunk(CHUNK_MARK_COLOR, &visual->GetBaseColor(), 0x0C);
 }
 
@@ -218,10 +218,10 @@ void LoadMarks(C_chunk &chunk, std::list<S_SurfaceMark *> &list)
             mark->visual->SetRot(S_quat::FromFile(file));
             break;
         }
-        case CHUNK_MARK_OPACITY: {
+        case CHUNK_MARK_INTENSITY: {
             float opacity = 0.0f;
             chunk.Read(opacity);
-            Projector(mark)->SetOpacity(opacity);
+            Projector(mark)->SetIntensity(opacity);
             break;
         }
         case CHUNK_MARK_COLOR: {
@@ -233,7 +233,7 @@ void LoadMarks(C_chunk &chunk, std::list<S_SurfaceMark *> &list)
                 SetMarkLook(mark, LOADED_FOOTPRINT_SCALE);
                 mark->visual->Update();
                 Projector(mark)->Reproject(0, 0);
-                Projector(mark)->SetMode(3);
+                Projector(mark)->SetBuffered(3);
                 list.push_back(mark);
             }
             break;
@@ -288,13 +288,19 @@ void SurfaceMarks_Init()
         std::strcpy(name, kind.prefix);
         std::strcat(name, LEFT_SUFFIX);
         kind.left = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(name, 0, 0x402, &kind.left) != I3D_OK)
             return;
+#else
+        return;
+#endif
         std::strcpy(name, kind.prefix);
         std::strcat(name, RIGHT_SUFFIX);
         kind.right = nullptr;
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(name, 0, 0x402, &kind.right) != I3D_OK)
             return;
+#endif
     }
 }
 
@@ -372,7 +378,7 @@ void SurfaceMarks_AddFootprint(S_SurfaceMark *mark, const S_vector &pos, float a
     visual->LinkTo(sector, 0);
     visual->Update();
     Projector(mark)->Reproject(0, 0);
-    Projector(mark)->SetMode(3);
+    Projector(mark)->SetBuffered(3);
     g_footprints.push_back(mark);
 }
 
@@ -450,12 +456,12 @@ void SurfaceMarks_Tick(int timeDelta)
         if (mark->time < FADE_TIME) {
             const float opacity = 1.0f - static_cast<float>(mark->time) * 0.00033333333f;
             I3D_projector_visual *visual = Projector(mark);
-            if (opacity < visual->GetOpacity()) {
+            if (opacity < visual->GetIntensity()) {
                 if (mark->time <= FADE_STEP) {
-                    visual->SetMode(0);
-                    visual->SetUnknownB4(5);
+                    visual->SetBuffered(0);
+                    visual->SetProjectionMode(5);
                 }
-                visual->SetOpacity(opacity);
+                visual->SetIntensity(opacity);
                 visual->Update();
             }
             ++it;
@@ -463,7 +469,7 @@ void SurfaceMarks_Tick(int timeDelta)
             mark->visual->LinkTo(nullptr, 0);
             GetGame()->GetScene()->RemoveFrame(mark->visual);
             it = g_fadingMarks.erase(it);
-            Projector(mark)->SetMode(3);
+            Projector(mark)->SetBuffered(3);
             ReturnMark(mark);
         }
     }

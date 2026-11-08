@@ -300,7 +300,7 @@ void C_HumanAnimMixer::Init(C_Human *owner)
     }
     for (int stage = 0; stage < MIXER_STAGES; ++stage)
         m_model->SetAnimation(nullptr, stage, 1.0f, 0);
-    m_model->SetUnknownC4(0);
+    m_model->SetPoseWeight(0);
     if (I3D_frame *frame = owner->GetFrame()->FindChildFrame(NOTE_FRAME_NAME, FRAME_MASK_ANY))
         frame->SetCallback(NoteHook, I3DCALLBACK_ANIM_NOTE);
     SetXYZ(m_velocityA, S_vector(0.0f, 0.0f, 0.0f));
@@ -1110,8 +1110,8 @@ void C_HumanAnimMixer::FadeOutTrack3(int time)
 
 void C_HumanAnimMixer::NotifyFrames(int track, I3D_frame **frames, int count)
 {
-    const int parts = m_model->NumUnknownD0();
-    I3D_model_part **list = m_model->GetUnknownD4();
+    const int parts = m_model->NumTracks();
+    I3D_model_part **list = m_model->GetTracks();
     for (int p = 0; p < parts; ++p) {
         for (int i = 0; i < count; ++i) {
             if (list[p]->GetFrame() != frames[i])

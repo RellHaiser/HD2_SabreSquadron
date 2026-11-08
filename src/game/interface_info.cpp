@@ -296,11 +296,15 @@ void C_InfoScreen::Done()
 void C_InfoScreen::Render()
 {
     IGraph *graph = GetIGraph();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     const uint32_t old = graph->GetRenderState(4);
     GetIGraph()->SetRenderState(4, 4);
+#endif
     if (m_text)
         m_text->Render();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetRenderState(4, old);
+#endif
 }
 
 void C_InfoScreen::Show(bool show)

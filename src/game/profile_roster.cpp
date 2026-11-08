@@ -175,10 +175,14 @@ bool S_SoldierProfile::LoadFaceImage()                  // 0x006a1170
 {
     if (faceImage)
         faceImage->Release();
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(faceFile.c_str(), "x_fc_a.bmp", 4, &faceImage) < 0) {
         faceImage = nullptr;
         return false;
     }
+#else
+    faceImage = nullptr;
+#endif
     return true;
 }
 

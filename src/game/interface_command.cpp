@@ -273,7 +273,7 @@ uint32_t HalfColor(const float *color)
 }
 
 // A part of an order's marker made its own (its mesh and material duplicated) and lit evenly.
-void PrepareMarkerPart(I3D_frame *part, const S_vector &diffuse, bool own)
+void PrepareMarkerPart(I3D_frame *part, const S_vector &emissive, bool own)
 {
     auto *visual = static_cast<I3D_object_visual *>(part);
     if (own) {
@@ -282,10 +282,10 @@ void PrepareMarkerPart(I3D_frame *part, const S_vector &diffuse, bool own)
     }
     I3D_material *material = visual->GetVisualMesh()->GetLevel(0)->GetFaceGroup(0)->material;
     material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-    material->SetDiffuse(diffuse);
-    material->SetEmissive(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetAmbient(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetAlpha(0.0f);
+    material->SetEmissiveColor(emissive);
+    material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
+    material->SetDiffuseColor(S_vector(0.0f, 0.0f, 0.0f));
+    material->SetPower(0.0f);
     visual->SetLightLevel(MARKER_LIGHT);
 }
 
@@ -362,8 +362,10 @@ void DrawScreenLines(const float (*points)[2], int count, const float *color)
         vertex.u = 0.0f;
         vertex.v = 0.0f;
     }
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetTexture(nullptr, 0);
     GetIGraph()->DrawPrimitives(1, count / 2, vertices, 1);
+#endif
 }
 
 }  // namespace
@@ -1220,14 +1222,18 @@ void C_CommandPanel::RenderOverlay()
 {
     for (S_MemberLines &lines : m_lines) {
         if (lines.routeSegments != 0) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->SetTexture(nullptr, 0);
             GetIGraph()->SetWorldMatrix(IdentityMatrix());
             GetIGraph()->DrawPrimitives(2, lines.routeSegments, lines.routes, 0);
+#endif
         }
         if (lines.pathSegments != 0) {
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
             GetIGraph()->SetTexture(nullptr, 0);
             GetIGraph()->SetWorldMatrix(IdentityMatrix());
             GetIGraph()->DrawPrimitives(2, lines.pathSegments, lines.paths, 0);
+#endif
         }
     }
 }
@@ -1635,8 +1641,13 @@ void C_CommandPanel::HandleInput(float *held, float *pressed)
         // The number keys choose the entries (0: the last) and act at once; a click acts on the
         // entry under the cursor.
         bool chosen = false;
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
         const int key = GetIGraph()->GetAsciiKey();
         const int digit = static_cast<int>(GetIGraph()->KeyToChar(key, 0) & 0xFF) - '0';
+#else
+        const int key = 0;
+        const int digit = -1;
+#endif
         if (digit >= 0 && digit <= 9) {
             chosen = m_rollMenu.Select(digit == 0 ? C_RollMenu::ENTRIES - 1 : digit - 1);
             g_controls.ClearKey(key, held, pressed);

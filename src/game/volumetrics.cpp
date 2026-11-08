@@ -171,7 +171,9 @@ void S_VolumetricCone::Build(bool load, float zBase)
             std::snprintf(name, sizeof name - 4, "%s", texture.c_str());
             if (!std::strrchr(name, '.'))
                 std::strcat(name, ".bmp");
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
             GetIGraph()->LoadTexture(name, name, 0x404, &image);
+#endif
         }
     }
     // (Fix: the original has room for 10 segments and does not check the count read.)
@@ -222,7 +224,9 @@ void S_VolumetricCone::Render(int time, float phase, float fade)
     if (!image)
         return;
     IGraph *graph = GetIGraph();
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     graph->SetTexture(image, 0);
+#endif
     if (flat) {
         const int t = static_cast<int>(base * 1000.0f + static_cast<float>(time));
         const float du = static_cast<float>(t) * scrollU * 0.001f;
@@ -233,7 +237,9 @@ void S_VolumetricCone::Render(int time, float phase, float fade)
             if (!(fade < 0.0f))
                 fan[k].color = Alpha(fade * alphas[0][k] * 255.0f);
         }
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->DrawPrimitives(3, 1, fan, 0);
+#endif
         return;
     }
     const int count = segments < MAX_SEGMENTS ? segments : MAX_SEGMENTS;
@@ -253,7 +259,9 @@ void S_VolumetricCone::Render(int time, float phase, float fade)
             cone[i][2].color = Alpha(fade * alphas[i][2] * 255.0f);
         }
     }
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->DrawPrimitives(3, segments, cone, 0);
+#endif
 }
 
 // ---- the shafts --------------------------------------------------------------------------------
@@ -385,8 +393,10 @@ bool S_Volumetric::Draw(int time, const S_vector &camera, float yaw)
     m.m[0][3] = 0.0f;
     m.m[1][3] = 0.0f;
     m.m[2][3] = 0.0f;
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetWorldMatrix(m);
     GetIGraph()->SetRenderState(0xD, depthDistance < distance);
+#endif
     const float distancePhase = distanceTurn * distance;
     const float viewPhase = viewAngle * viewTurn;
     float fade = -1.0f;                                  // (under 0: the colours as they are)
@@ -477,9 +487,14 @@ void C_Volumetrics::Render(int time)
     I3D_driver *driver = I3DGetDriver();
     IGraph *graph = GetIGraph();
     const bool state3 = driver->GetState(3) != 0;
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     const bool state0E = graph->GetRenderState(0xE) != 0;
     const bool state0D = graph->GetRenderState(0xD) != 0;
     GetIGraph()->SetRenderState(0xE, 0);
+#else
+    const bool state0E = false;
+    const bool state0D = false;
+#endif
     DrawClouds(time);
     I3DGetDriver()->SetState(3, 1);
     // (The original times the drawing: QueryPerformanceCounter, not used.)
@@ -570,8 +585,10 @@ void C_Volumetrics::Render(int time)
         m_shafts[i]->Draw(time, cameraPos, m_yaw);
     }
     I3DGetDriver()->SetState(3, state3);
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     GetIGraph()->SetRenderState(0xE, state0E);
     GetIGraph()->SetRenderState(0xD, state0D);
+#endif
 }
 
 // ---- the clouds --------------------------------------------------------------------------------
@@ -595,8 +612,10 @@ void FreeClouds()
 void LoadClouds()
 {
     FreeClouds();
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     GetIGraph()->LoadTexture("clouder.tga", nullptr, 0x502, &g_clouds.images[0]);
     GetIGraph()->LoadTexture("clouder2.tga", nullptr, 0x502, &g_clouds.images[1]);
+#endif
     // (A quad of 6 vertices for each of the 12 x 12 x 12 cells.)
     g_cloudVertices[0] = new S_LitVertex[0x3CC00 / sizeof(S_LitVertex)];
     g_cloudVertices[1] = new S_LitVertex[0x3CC00 / sizeof(S_LitVertex)];
@@ -668,8 +687,10 @@ void DrawClouds(int)
     for (int k = 0; k < 2; ++k) {
         if (counts[k] / 3 == 0)
             continue;
+#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->SetTexture(g_clouds.images[k], 0);
         GetIGraph()->SetWorldMatrix(IdentityMatrix());
         GetIGraph()->DrawPrimitives(3, counts[k] / 3, g_cloudVertices[k], 0);
+#endif
     }
 }

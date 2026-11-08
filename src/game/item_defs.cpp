@@ -160,13 +160,13 @@ void C_ItemComponent::Put(void *buffer, int offset, const void *field, int size)
 
 void C_ItemComponent::GetBase(const void *data)
 {
-    Get(m_unknown04, data, 0x04);
+    Get(m_reserved04, data, 0x04);
     Get(m_kind, data, 0x08);
 }
 
 void C_ItemComponent::PutBase(void *buffer) const
 {
-    Put(buffer, 0x04, m_unknown04);
+    Put(buffer, 0x04, m_reserved04);
     Put(buffer, 0x08, m_kind);
 }
 
@@ -557,8 +557,12 @@ IImage *C_ItemDef::GetImage()
     char path[128];
     std::strcpy(path, m_imageName);
     std::strcat(path, ".bmp");
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(path, 0, 0, &m_image) != 0)
         m_image = nullptr;
+#else
+    m_image = nullptr;
+#endif
     driver->SetState(DRIVER_STATE_15, state15);
     driver->SetState(DRIVER_STATE_19, state19);
     return m_image;

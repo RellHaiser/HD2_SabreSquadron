@@ -143,7 +143,9 @@ bool C_MemberPanel::Init(I3D_scene *scene, int index, I3D_texture **stateIcons, 
     I3D_frame *blank = scene->FindFrame("univerz", FRAME_MASK_ANY);
     blank->SetOn(false);
     m_blankTexture = FirstMaterialTexture(blank);
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     GetIGraph()->LoadTexture("x_fc_death.bmp", "x_fc_a.bmp", 4, &m_deathImage);
+#endif
     m_name = NewText(scene, m_frame);
     m_visibility = FindPart(m_frame, "visibility*");
     m_visibilityText = NewText(scene, m_visibility);
@@ -213,7 +215,7 @@ void C_MemberPanel::SetHuman(C_Human *human)
             m_photoMaterial->SetTexture(reinterpret_cast<I3D_texture *>(profile->faceImage));
         ShowWeapon(m_name, m_human);
     }
-    m_photoMaterial->SetUnknown04(S_vector(1.0f, 1.0f, 1.0f));
+    m_photoMaterial->SetAmbientColor(S_vector(1.0f, 1.0f, 1.0f));
     m_photo->Update();
     m_alive = true;
     m_disguise = 1;
@@ -268,7 +270,7 @@ void C_MemberPanel::Update()
             SetBar(m_staminaBar, 1.0f);
             SetBar(m_disguiseBar, 1.0f);
             m_photoMaterial->SetTexture(reinterpret_cast<I3D_texture *>(m_deathImage));
-            m_photoMaterial->SetUnknown04(S_vector(1.0f, 1.0f, 1.0f));
+            m_photoMaterial->SetAmbientColor(S_vector(1.0f, 1.0f, 1.0f));
             m_photo->Update();
             m_visibilityText->Clear();
             if (IsLocalGame() || g_gameProfile.IsCooperativeGame())
@@ -306,7 +308,7 @@ void C_MemberPanel::Update()
     }
     const S_vector4 &color = m_human->GetScale();
     if (m_photoColor.x != color.x || m_photoColor.y != color.y || m_photoColor.z != color.z) {
-        m_photoMaterial->SetUnknown04(S_vector(color.x, color.y, color.z));
+        m_photoMaterial->SetAmbientColor(S_vector(color.x, color.y, color.z));
         m_photoColor = color;
         m_photo->Update();
     }
