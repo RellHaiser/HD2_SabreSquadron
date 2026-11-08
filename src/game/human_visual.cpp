@@ -316,7 +316,7 @@ void C_HumanVisual::Glide(int time)
     if ((pos - model->GetWorldPos()).Square() <= 1e-7f)
         return;
     model->SetPos(pos);
-    GetGame()->GetScene()->Unknown144(model);
+    GetGame()->GetScene()->MarkTrackedModel(model);
     model->Update();
 }
 
@@ -350,7 +350,7 @@ void C_HumanVisual::SetNetworkPosition(const S_vector4 &pos)
     m_movement->m_unknown240.y = MOVE_NO_VALUE;
     m_movement->m_unknown240.z = MOVE_NO_VALUE;
     model->SetPos(XYZ(pos));
-    GetGame()->GetScene()->Unknown144(model);
+    GetGame()->GetScene()->MarkTrackedModel(model);
     model->Update();
 }
 
@@ -404,7 +404,7 @@ void C_HumanVisual::SetPosition(const S_vector4 &pos)
     I3D_frame *model = m_owner->GetFrame();
     model->GetWorldPos();   // (the original measures the move but does not use it)
     model->SetPos(XYZ(pos));
-    GetGame()->GetScene()->Unknown144(model);
+    GetGame()->GetScene()->MarkTrackedModel(model);
     model->Update();
     C_HumanMovement &body = *m_movement;
     body.UpdateDummies();

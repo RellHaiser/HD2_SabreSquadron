@@ -21,7 +21,18 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_check import VCVARS, ROOT, SRC, collect
 
 UP = os.path.dirname(ROOT)
-LIBS = [os.path.join(UP, r"LS3DF\build\msvc\LS3DF.lib"), os.path.join(UP, r"RW_DATA\build\msvc\rw_data.lib"),
+
+
+def dll_lib(subtree, sibling, name):
+    """The import library of a DLL built in this repository (ls3df/build.py, build_rw_data.py), else in a sibling clone of its repository."""
+    for base in (os.path.join(ROOT, subtree), os.path.join(UP, sibling)):
+        lib = os.path.join(base, "build", "msvc", name)
+        if os.path.exists(lib):
+            return lib
+    return os.path.join(ROOT, subtree, "build", "msvc", name)
+
+
+LIBS = [dll_lib("ls3df", "LS3DF", "LS3DF.lib"), dll_lib("rw_data", "RW_DATA", "rw_data.lib"),
         "kernel32.lib", "advapi32.lib", "gdi32.lib", "imagehlp.lib", "mpr.lib", "ole32.lib", "oleaut32.lib", "user32.lib", "winmm.lib", "wsock32.lib", "shell32.lib"]
 COMMON = ["/nologo", "/c", "/std:c++17", "/EHsc", "/W3", "/permissive-", "/Zc:__cplusplus", "/D_CRT_SECURE_NO_WARNINGS", "/DWIN32_LEAN_AND_MEAN", "/DNOMINMAX",
           "/arch:IA32", "/Z7", "/MP", '/I"%s"' % SRC]

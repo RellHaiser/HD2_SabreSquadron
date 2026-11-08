@@ -273,7 +273,7 @@ uint32_t HalfColor(const float *color)
 }
 
 // A part of an order's marker made its own (its mesh and material duplicated) and lit evenly.
-void PrepareMarkerPart(I3D_frame *part, const S_vector &diffuse, bool own)
+void PrepareMarkerPart(I3D_frame *part, const S_vector &emissive, bool own)
 {
     auto *visual = static_cast<I3D_object_visual *>(part);
     if (own) {
@@ -282,10 +282,10 @@ void PrepareMarkerPart(I3D_frame *part, const S_vector &diffuse, bool own)
     }
     I3D_material *material = visual->GetVisualMesh()->GetLevel(0)->GetFaceGroup(0)->material;
     material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-    material->SetDiffuse(diffuse);
-    material->SetEmissive(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetAmbient(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetAlpha(0.0f);
+    material->SetEmissiveColor(emissive);
+    material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
+    material->SetDiffuseColor(S_vector(0.0f, 0.0f, 0.0f));
+    material->SetPower(0.0f);
     visual->SetLightLevel(MARKER_LIGHT);
 }
 

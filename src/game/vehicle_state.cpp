@@ -722,7 +722,7 @@ bool C_Vehicle::LoadState(const void *buffer)                                 //
             to->UnlockVertices();
             static_cast<I3D_object_visual *>(part.frame)->UnknownAC(level);
             part.mesh->GetLevel(level)->Unknown2C();
-            part.mesh->Unknown14();
+            part.mesh->ComputeBounds();
         }
         part.frame->Update();
     }

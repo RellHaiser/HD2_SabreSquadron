@@ -637,7 +637,7 @@ I3D_frame *C_MenuState::CloneVisual(const C_str &name, I3D_frame *parent, I3D_fr
     CloneFrameTree(copy, source, nullptr);
     auto *visual = static_cast<I3D_object_visual *>(copy);
     visual->DuplicateMesh();
-    visual->GetVisualMesh()->Unknown18();
+    visual->GetVisualMesh()->DuplicateMaterials();
     copy->SetName(name.c_str());
     copy->LinkTo(parent, 0);
     m_frames.push_back(copy);

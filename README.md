@@ -42,9 +42,10 @@ Known problem: one crash while healing a teammate in a cooperative game, not exp
 ## Running
 
 You need an installed copy of the game, *Hidden & Dangerous 2: Sabre Squadron* version 1.12, and a build of
-[LS3DF](https://github.com/RellHaiser/LS3DF), the engine port. Work in a copy of the game's folder.
+[LS3DF](https://github.com/RellHaiser/LS3DF), the engine port (its `main` branch is in `ls3df/`). Work in a
+copy of the game's folder.
 
-1. Build `LS3DF.dll` from LS3DF's `main` branch and put it in the folder. **The game's original
+1. Build `LS3DF.dll` (`python ls3df/build.py`, below) and put it in the folder. **The game's original
    `LS3DF.dll` does not work with the port**: it writes 16 bytes through 12-byte results, which a modern
    compiler's stack layout does not survive, so it crashes loading a mission. An older LS3DF build lacks
    the fixes for rain, loading a saved game and the sky.
@@ -60,11 +61,26 @@ You need an installed copy of the game, *Hidden & Dangerous 2: Sabre Squadron* v
 
 ## Building
 
-Needs Visual Studio with the C++ x86 tools, and Python. From the repository root:
+Needs Visual Studio with the C++ x86 tools, and Python; the engine DLLs also need MinGW's 32-bit `dlltool`
+(MSYS2's mingw32 package, for instance). From the repository root, the DLLs the executable links against
+first, then the executable:
+
+```bash
+python ls3df/build.py
+```
+
+```bash
+python _re/tools/build_rw_data.py
+```
 
 ```bash
 python _re/tools/build_game.py
 ```
+
+`ls3df/build.py` makes `ls3df\build\msvc\LS3DF.dll` and `build_rw_data.py` makes `rw_data\build\msvc\rw_data.dll`,
+each with its import library; `build_game.py` links against those, or against sibling clones of the two
+repositories (`..\LS3DF`, `..\RW_DATA`) when they are not built here. `python ls3drf/build.py` makes
+`LS3DRF.dll`, the dedicated server's engine (not needed by the game).
 
 The executable and its symbols land in `%TEMP%\hd2_game`; add `--copy DIR` to copy them to the game's
 folder. Only changed sources are compiled, so use `--all` after a header change. A full build takes about a
@@ -98,7 +114,9 @@ compiled with diagnostics, then the link.
 
 Related ports, each a drop-in for the game's own DLL: [LS3DF](https://github.com/RellHaiser/LS3DF) (the
 engine), [rw_data](https://github.com/RellHaiser/rw_data) (the archives), [IJOY](https://github.com/RellHaiser/IJOY)
-(joystick input). The port needs LS3DF; the other two are optional.
+(joystick input). The port needs LS3DF; the other two are optional. LS3DF and rw_data are included here as
+subtrees (`ls3df/`, `rw_data/`), with [LS3DRF](https://github.com/readher/LS3DRF), the engine without sound
+or rendering that the dedicated server loads (`ls3drf/`).
 
 ## Layout
 
@@ -112,6 +130,10 @@ engine), [rw_data](https://github.com/RellHaiser/rw_data) (the archives), [IJOY]
 | `src/tier1` | Generated code (see above), not built into the executable |
 | `_re` | The reverse-engineering workspace: build and analysis tools, test harnesses, notes (`RUNNING.md`, `TRIAGE.md`, `PROGRESS.md`), patches for LS3DF |
 | `tools` | Model and animation (`.4ds`, `.5ds`) tools and statistics |
+| `ls3df` | The LS3D engine DLL, `LS3DF.dll` ([RellHaiser/LS3DF](https://github.com/RellHaiser/LS3DF), kept in sync with `git subtree --prefix=ls3df`); built and tested with its own `build.py` |
+| `rw_data` | The virtual file system DLL, `rw_data.dll` ([RellHaiser/rw_data](https://github.com/RellHaiser/rw_data), kept in sync with `git subtree --prefix=rw_data`); `src/ls3d/rw_data.h` forwards to its header; built by `_re/tools/build_rw_data.py` |
+| `ls3drf` | The dedicated server's engine DLL, `LS3DRF.dll`: LS3DF's port without sound, video, input or the render device ([readher/LS3DRF](https://github.com/readher/LS3DRF), kept in sync with `git subtree --prefix=ls3drf`); built and tested with its own `build.py`. Its code began as a copy of LS3DF's, so LS3DF's fixes are carried over by hand ([how](ls3drf/README.md#source-and-ls3df)) |
+| `hd2ds_sabresquadron` | The dedicated server, `HD2DS_SabreSquadron.exe`: not started (the binary's facts only) |
 | `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md) |
 
 ## Legal

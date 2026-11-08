@@ -139,7 +139,7 @@ void SetBar(I3D_frame *bar, float value)
 // The visual's own copy of its mesh made ready (the inventory's icons).
 void PrepareIcon(I3D_frame *icon)
 {
-    static_cast<I3D_visual *>(icon)->GetVisualMesh()->Unknown18();
+    static_cast<I3D_visual *>(icon)->GetVisualMesh()->DuplicateMaterials();
 }
 
 }  // namespace

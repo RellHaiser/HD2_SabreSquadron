@@ -769,7 +769,7 @@ private:
     I3D_frame *m_bottom = nullptr;                      // +0x10 "cross_B"
     float m_spread = 0.0f;                              // +0x14 the parts' distance from the centre
     uint8_t m_unused18[8] = {};
-    float m_color[4] = {};                              // +0x20 the parts' diffuse (w copied, not compared)
+    float m_color[4] = {};                              // +0x20 the parts' emissive (w copied, not compared)
     C_Actor *m_target = nullptr;                        // +0x30
     bool m_usable = false;                              // +0x34
     bool m_shown = false;                               // +0x35

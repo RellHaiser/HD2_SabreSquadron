@@ -28,7 +28,7 @@ enum : uint16_t {
 constexpr float EFFECT_HEIGHT = 1.0f;                   // m above the frame: the explosion, the sounds
 constexpr float SCORCH_HEIGHT = 0.5f;
 constexpr float SCORCH_SCALE = 2.5f;
-constexpr int SCORCH_UNKNOWN_B4 = 5;
+constexpr int SCORCH_MODE = 5;
 constexpr uint32_t TEXTURE_MODE = 0x402;
 
 // A sound of the explosion chapter 1 m above the frame.
@@ -293,18 +293,18 @@ void C_TSExplosion::MakeScorch()                        // 0x0060fe50
     auto *scorch = static_cast<I3D_projector_visual *>(I3DGetDriver()->CreateVisual(I3DVISUAL_PROJECTOR));
     m_scorch = scorch;
     scorch->SetTexture(m_texture);
-    scorch->SetMode(0);
+    scorch->SetBuffered(0);
     scorch->SetOn(true);
     I3D_scene *scene = GetGame()->GetScene();
     scene->AddFrame(scorch);
     scorch->SetPos(pos);
     scorch->SetDir(S_vector(0.0f, -1.0f, 0.0f), 0.0f);
     scorch->SetScale(S_vector(SCORCH_SCALE, SCORCH_SCALE, SCORCH_SCALE));
-    scorch->SetUnknownB4(SCORCH_UNKNOWN_B4);
-    scorch->SetUnknownA4(1);
+    scorch->SetProjectionMode(SCORCH_MODE);
+    scorch->SetOrthogonal(1);
     scorch->LinkTo(scene->GetSector(pos), 0);
     scorch->Update();
-    scorch->SetMode(3);
+    scorch->SetBuffered(3);
 }
 
 // --- creator --------------------------------------------------------------------------------------

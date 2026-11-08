@@ -900,7 +900,7 @@ bool C_GEffectsModule::SetModelLightLevel(I3D_frame *model, float level)
 {
     if (!(g_gameRole & GAME_ROLE_CLIENT) || !model)
         return false;
-    model->SetUnknown50(level);
+    model->SetHierarchyLightLevel(level);
     return true;
 }
 

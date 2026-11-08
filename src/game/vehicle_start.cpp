@@ -779,7 +779,7 @@ void C_Vehicle::RepairParts(bool healthOnly)                                    
                     part.mesh->GetLevel(0)->Unknown2C();
                     if (twoLevels)
                         part.mesh->GetLevel(1)->Unknown2C();
-                    part.mesh->Unknown14();
+                    part.mesh->ComputeBounds();
                     visual->UnknownAC(0);
                     if (twoLevels)
                         visual->UnknownAC(1);

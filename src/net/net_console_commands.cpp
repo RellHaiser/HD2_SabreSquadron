@@ -368,7 +368,7 @@ bool C_CommandProcessor::Execute(const char *command)
                 Print("Cannot create server! No map!");
                 return true;
             }
-            GetIGraph()->UnknownDC(settings->dedicated ? 0 : 1);
+            GetIGraph()->InitMouse(settings->dedicated ? 0 : 1);
             ShowWindow(GetIGraph()->GetHWND(), settings->dedicated ? SW_HIDE : SW_SHOW);
             settings->sessionType = 2;
             GetGameApp()->m_state->SetPendingState(GAME_STATE_HOST_SESSION);
@@ -382,7 +382,7 @@ bool C_CommandProcessor::Execute(const char *command)
         case KEY_JOIN:
             if (!local)
                 return true;
-            GetIGraph()->UnknownDC(1);
+            GetIGraph()->InitMouse(1);
             ShowWindow(GetIGraph()->GetHWND(), SW_SHOW);
             ReadConsoleToken(&command, word, &value, nullptr);
             SessionServer().address = inet_addr(word);

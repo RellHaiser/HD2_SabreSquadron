@@ -876,7 +876,7 @@ void C_FirstPersonView::PlayAnim(int event)
         if (m_flash) {
             // The muzzle flash: 50 ms, 0.7..1.1 of its size, a random roll.
             m_flashTime = FLASH_TIME;
-            m_flash->SetUnknown50(1.0f);
+            m_flash->SetHierarchyLightLevel(1.0f);
             const float scale = static_cast<float>(RandFloat() * 0.4f + 0.7);
             m_flash->SetScale(S_vector(scale, scale, scale));
             const S_vector dir = m_flash->GetLocalDir();
@@ -890,7 +890,7 @@ void C_FirstPersonView::PlayAnim(int event)
             m_current.weight = 0.0f;
             m_current.speed = BLEND_SPEED;
             m_model->SetAnimTime(m_current.stage, 0);
-            m_model->Unknown90(m_current.stage);
+            m_model->StartAnimation(m_current.stage);
             m_model->Update();
             return;
         }

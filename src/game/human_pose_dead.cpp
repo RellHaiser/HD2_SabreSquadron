@@ -323,7 +323,7 @@ void C_HumanWeaponPose::StartRagdoll(uint32_t hitFlags, const float *force, C_Hu
     // Quirk: the scene's two frames are passed the other way round than C_HumanMovement::Init
     // passes them ("z", then "q").
     GetGame()->GetScene()->AddHumanModel(m_model, m_dummyZ, m_bones[POSE_BONE_RIGHT_FOOT].frame);
-    GetGame()->GetScene()->Unknown144(m_model);
+    GetGame()->GetScene()->MarkTrackedModel(m_model);
 
     if (!(hitFlags & DEATH_HIT_FALL) && !carrier) {
         S_vector push(force[0], force[1], force[2]);

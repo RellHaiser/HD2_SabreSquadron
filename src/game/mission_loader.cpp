@@ -987,11 +987,11 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                 switch (id) {
                 case PROJECTOR_RANGE:
                     chunk.Read(value);
-                    projector->SetUnknown1E4(value);
+                    projector->SetRange(value);
                     break;
                 case PROJECTOR_INTENSITY:
                     chunk.Read(value);
-                    projector->SetOpacity(value);
+                    projector->SetIntensity(value);
                     break;
                 case PROJECTOR_COLOR:
                     chunk.Read(&vector, sizeof vector);
@@ -999,16 +999,16 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                     break;
                 case PROJECTOR_MODE:
                     chunk.Read(number);
-                    projector->SetUnknownB4(number);
+                    projector->SetProjectionMode(number);
                     break;
                 case PROJECTOR_BUFFERED:
                     chunk.Read(number);
-                    projector->SetMode(number);
+                    projector->SetBuffered(number);
                     break;
                 case PROJECTOR_ORTHOGONAL:
                     // (The original passes the byte with its stack's three above it.)
                     chunk.Read(&orthogonal, 1);
-                    projector->SetUnknownA4(orthogonal);
+                    projector->SetOrthogonal(orthogonal);
                     break;
                 case PROJECTOR_TEXTURE: {
                     const C_str file = ReadRemainingString(chunk);

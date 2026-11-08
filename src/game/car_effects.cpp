@@ -154,7 +154,7 @@ bool __fastcall SetupCarEmitter(S_CarEmitter *emitter, uint32_t effect)        /
     visual->SetScale(S_vector(1.0f, 1.0f, 1.0f));
     visual->SetWorldDir(S_vector(0.0f, 0.0f, 1.0f), 0.0f);
     visual->Update();
-    visual->UnknownA8();
+    visual->SetDefaults();
     SetProperties(*emitter, def, true);
     for (int k = visual->NumKeys(); k-- > 0;)
         visual->RemoveKey(k);

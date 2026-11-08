@@ -928,7 +928,7 @@ void C_HumanEquipment::DetachModel(int place)
         }
         movement->RestoreCollision(false);
         m_specialModel->SetPos(pos);
-        scene->Unknown144(ownerFrame);
+        scene->MarkTrackedModel(ownerFrame);
         m_specialModel->Update();
         m_specialModel->Release();
         m_specialModel = nullptr;
@@ -1240,7 +1240,7 @@ void C_HumanEquipment::Unknown7938f0(int time)
     m_specialModel->SetPos(m_handDummy1->GetWorldPos());
     m_specialModel->SetDir(m_handDummy1->GetWorldDir(), 0.0f);
     m_specialModel->Update();
-    GetGame()->GetScene()->Unknown144(m_specialModel);
+    GetGame()->GetScene()->MarkTrackedModel(m_specialModel);
     m_specialModel->LinkTo(m_owner->GetMovement()->GetSectorFrame(), LINK_1);
     m_specialModel->SetOn(m_owner->GetFrame()->IsOn());
     if (m_unknownD0 > 0.0f && time > 0)
