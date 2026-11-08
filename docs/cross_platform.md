@@ -34,7 +34,7 @@ with the original DLL, and each new backend is checked against it before the old
 | 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **done**: OpenAL Soft, FFmpeg and SDL3 each work in the game, chosen in LS3DF.ini |
 | 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | **done**: frame captures and their replay; SDL_GPU (Direct3D 12 and Vulkan) and OpenGL 3.3 both work in the game, chosen in LS3DF.ini, and draw the same pictures on the captures |
 | 4 | A 64-bit build, together with the game's port | |
-| 5 | Linux, then macOS | |
+| 5 | Linux, then macOS, each on amd64 and ARM64 | |
 
 ### Phase 1: the seams (done)
 
@@ -123,8 +123,10 @@ The backends:
 ### Phase 4: 64 bits
 
 The engine and the game's port built as 64-bit. The x87 bit-exactness the tests rely on ends here,
-which is why the 32-bit build stays as the reference.
+which is why the 32-bit build stays as the reference. The code must not assume x86, as phase 5 also
+builds it for ARM64.
 
 ### Phase 5: other systems
 
-Linux, then macOS: SDL_GPU on Vulkan (Linux) and Metal (macOS), OpenGL 3.3 on both.
+Linux, then macOS, each as both amd64 and ARM64 builds: SDL_GPU on Vulkan (Linux) and Metal (macOS),
+OpenGL 3.3 on both.
