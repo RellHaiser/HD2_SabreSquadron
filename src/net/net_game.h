@@ -440,7 +440,7 @@ public:
     int Connect(S_ServerEntry *server);             // 0x007240f0
     // A dedicated server started (its description written, hd2ds_sabresquadron.exe run; the main menu's connect
     // screen): false failed.
-    bool HostDedicated(bool firewall);              // 0x00722a80
+    bool HostDedicated(bool firewall);              // 0x00722a80 (DS 0x00779760)
     // DirectPlay's client made and initialised (once).
     long CreateClient();                            // 0x00723e00 (__fastcall)
     // DirectPlay addresses on TCP/IP: `device` only that, `host` the server's address and port (none: the

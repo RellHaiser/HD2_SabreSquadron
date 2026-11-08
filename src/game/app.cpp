@@ -676,6 +676,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLi
     // (DS 0x007263d0) Any number of servers may run, beside a client too; the key is read but not checked.
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+    // (DS 0x007263fa)
     if (std::strstr(GetCommandLineA(), "-autorestart")) {
         RunAutoRestartWatchdog();
         return 0;
