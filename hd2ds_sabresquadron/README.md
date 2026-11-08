@@ -47,6 +47,9 @@ body (a default return; `true` for `Init` / `Done` / `LoadGame` / `SaveGame`). `
   only `ISndGetDriver`.
 - Imports from LS3DRF.dll: the original server's 38 plus three `S_matrix` methods (`RotateByMatrix`, `SetDir` with
   two vectors, `SetRot`), by the same ordinals as the original DLL's.
-- Not a server yet: no `HD2_DEDICATED` branch is in `src/`. The code is the client's: the window, the input and
-  the rendering are still in it. LS3DRF's `IGraph` has fewer methods than LS3DF's, so a client call to a missing one
-  would fail at run time. Not run.
+- With `HD2_DEDICATED`, `src/ls3d/i3d.h` and `igraph.h` declare LS3DRF.dll's interfaces: no render, draw, input
+  or window methods (IGraph keeps LS3DRF's 13 slots), and the scene's and light's inline accessors read LS3DRF's
+  offsets. The game's calls to the removed methods are guarded in `src/`: the server gets no-ops, zero input and
+  null textures, streams and windows. Without the define the client's code is unchanged.
+- Not a server yet: beyond those guards `src/` has no server code, and some client paths (fonts, movie controls,
+  faces and decals with null textures, a message box with no window) may fail or block at run time. Not run.
