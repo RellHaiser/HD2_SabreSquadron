@@ -5,7 +5,7 @@
 
 namespace ls3d {
 
-// Feature bits returned by DetectCpu.
+// Feature bits returned by _cpuid.
 enum : uint32_t {
     kCpuMmx = 0x1,
     kCpuSse = 0x2,
@@ -25,8 +25,8 @@ struct S_cpuInfo {              // 0x40 bytes
 static_assert(sizeof(S_cpuInfo) == 0x40, "S_cpuInfo layout");
 
 // Fills `info` (if given) and returns the feature bits; 0 without CPUID (0x10068b00).
-uint32_t DetectCpu(S_cpuInfo *info);
+uint32_t _cpuid(S_cpuInfo *info);
 // Clock rate in MHz, measured with the time-stamp counter over one second (0x10068c10).
-uint32_t MeasureCpuMhz();
+uint32_t GetCpuSpeed();
 
 }  // namespace ls3d

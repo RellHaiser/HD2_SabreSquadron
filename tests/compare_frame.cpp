@@ -126,7 +126,7 @@ I3D_frame *__stdcall I3D_driver::CreateVisual(uint32_t) { return nullptr; }
 I3D_frame *__stdcall I3D_driver::CreateFrame(int) { return nullptr; }
 I3D_material *__stdcall I3D_driver::CreateMaterial() { return nullptr; }
 I3D_anim_material *__stdcall I3D_driver::CreateAnimMaterial() { return nullptr; }
-I3D_triface *__stdcall I3D_driver::AllocFaces(int) { return nullptr; }
+I3D_triface *__stdcall I3D_driver::CreateTrifaceArray(int) { return nullptr; }
 I3D_face_group *__stdcall I3D_driver::CreateFaceGroup() { return nullptr; }
 I3D_mesh_level *__stdcall I3D_driver::CreateMeshLevel() { return nullptr; }
 I3D_mesh *__stdcall I3D_driver::CreateMesh() { return nullptr; }
@@ -2192,12 +2192,12 @@ void RunOp()
         const int key = Rand(6);
         std::snprintf(text, sizeof text, "set %d track %d key %d", si, t, key);
         g_lastOp = text;
-        if (CallV<int>(os, 0x0C) != ps->NumTracks() || CallV<int>(os, 0x08) != ps->GetLength() ||
-            (t >= 0 && !SameString(CallV<const char *>(os, 0x10, t), ps->GetTrackName(t))))
+        if (CallV<int>(os, 0x0C) != ps->NumAnimations() || CallV<int>(os, 0x08) != ps->GetEndTime() ||
+            (t >= 0 && !SameString(CallV<const char *>(os, 0x10, t), ps->GetAnimLink(t))))
             Fail("set header", si);
         {
             const char *n = kTrackNames[Rand(4)];
-            if (CallV<int>(os, 0x14, n) != ps->FindTrack(n))
+            if (CallV<int>(os, 0x14, n) != ps->GetAnimIndex(n))
                 Fail("FindTrack", si);
         }
         if (CallV<int>(os, 0x18, t) != ps->NumPositionKeys(t) || CallV<int>(os, 0x20, t) != ps->NumRotationKeys(t) ||

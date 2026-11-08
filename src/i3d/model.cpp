@@ -354,7 +354,7 @@ I3D_RESULT I3D_model::SetPoseWeight(float weight)
 {
     if (!animStack)
         return I3DERR_OBJECTNOTFOUND;
-    animStack->SetPoseWeight(weight);
+    animStack->SetPoseBlend(weight);
     return I3D_OK;
 }
 
@@ -363,7 +363,7 @@ float I3D_model::GetPoseWeight() { return animStack ? animStack->GetPoseWeight()
 void I3D_model::ClearPoses()
 {
     if (animStack)
-        animStack->ClearPoses();
+        animStack->ResetAllPoses();
 }
 
 int I3D_model::NumTracks() { return animStack ? animStack->tracks.Size() : 0; }
