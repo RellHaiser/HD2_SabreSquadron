@@ -1,10 +1,13 @@
 # The render device (gfx)
 
 All of the engine's drawing goes through one interface, `gfx::Device` (`gfx::g_pGfx`), declared
-in [`src/gfx/gfx.h`](../src/gfx/gfx.h). Its only implementation so far is the Direct3D 8 backend
-in [`src/gfx/d3d8`](../src/gfx/d3d8), which passes every call to Direct3D 8 unchanged. The DLL
-therefore makes exactly the Direct3D calls it made before, in the same order with the same
-arguments, and the differential tests still compare equal.
+in [`src/gfx/gfx.h`](../src/gfx/gfx.h). It has two backends:
+- **Direct3D 8** ([`src/gfx/d3d8`](../src/gfx/d3d8)), the default, which passes every call to
+  Direct3D 8 unchanged. The DLL therefore makes exactly the Direct3D calls the original made, and
+  the differential tests compare equal.
+- **SDL_GPU** ([`src/gfx/sdlgpu`](../src/gfx/sdlgpu)), chosen with `[Render] SDLGPU=1` in
+  LS3DF.ini: Direct3D 8's fixed-function model drawn by shaders, on Direct3D 12 or Vulkan
+  ([below](#the-sdl_gpu-backend)).
 
 This is the first step towards other backends (a modern graphics API, other operating systems).
 It moves no pixels and changes no behaviour; it only makes Direct3D replaceable. Sound has the same
@@ -87,6 +90,82 @@ fixed-function features (the game can also pass values of its own through `IGrap
   `compare_frame`, `compare_collision` and `compare_lightmap` identical, `compare_loader` 6,214
   game files with 0 mismatched, `test_enhance` passed.
 
+## The SDL_GPU backend
+
+Phase 3 of the [cross-platform plan](cross_platform.md): the engine draws through SDL_GPU, which
+uses Direct3D 12 or Vulkan on Windows (Vulkan on Linux, Metal on macOS). Chosen with
+`[Render] SDLGPU=1` ([ls3df_ini.md](ls3df_ini.md#render)); without SDL3.dll (3.2 or later) the DLL
+draws with Direct3D 8. `SDLGPUDriver=direct3d12` or `vulkan` picks the API (otherwise SDL's
+choice), and `SDLGPUDebug=1` turns on the API's validation. The window is the SDL3 platform's
+([platform.md](platform.md#the-sdl3-implementation)), or the engine's own window wrapped by SDL.
+
+**The fixed-function pipeline as shaders.** One vertex shader and one pixel shader
+([`shaders/fixed_function.hlsl`](../src/gfx/sdlgpu/shaders/fixed_function.hlsl)), driven by uniforms
+the device fills from its states, follow Direct3D's documented rules:
+- the transforms, and the pre-transformed vertices' screen positions;
+- Direct3D 9's pixel centres, half a pixel from SDL_GPU's;
+- the lights in camera space, with attenuation, spot falloff and specular, and the colour sources
+  (COLORVERTEX and the material sources);
+- vertex fog, linear and exponential (and the specular alpha as a pre-transformed vertex's fog);
+- texture coordinate generation and texture transforms;
+- three texture stages with their operations, arguments and modifiers, each result clamped;
+- BUMPENVMAP, the specular sum, the alpha test on 8-bit alpha and the fog blend.
+
+A stage that reads a texture it does not have is off, as Direct3D's drivers treat it; the frame
+captures showed that. Every stage's texture is sampled outside any branch: Vulkan's drivers give a
+sample in a branch no reliable mip level. The engine's one vertex shader (the sky's: `dp4` into
+`oPos`, `mov oD0`) is read and run as a mode of the same shader. `build.py` compiles the shaders
+with `dxc`: DXIL for Direct3D 12 with the Windows SDK's, SPIR-V for Vulkan with the Vulkan SDK's.
+
+**Pipelines.** What an SDL_GPU pipeline fixes makes the pipeline, cached by those settings:
+- blending, the colour write mask;
+- the depth test, write and function, ZBIAS;
+- culling and the fill mode;
+- the vertex format and the primitive type.
+
+The missing vertex inputs come from a buffer of Direct3D's defaults (white diffuse). Samplers are
+cached by their filters, addressing, mip bias and anisotropy.
+
+**Resources in memory, frames recorded.** A texture keeps its levels in its own format and a buffer
+its bytes, as Direct3D's managed resources do: the engine locks and writes them at any time.
+- A texture goes to the GPU when a frame first draws with it after a change. The formats with no
+  GPU equal (16-bit, luminance, 24-bit) go as 32-bit BGRA, DXT as BC, V8U8 as RG8 signed.
+- A frame is recorded and run when its picture is needed (Present, a read-back). Each draw keeps a
+  copy of the vertices and indices it uses, taken at the draw, so a buffer may be rewritten mid-frame
+  as Direct3D allows.
+- At run time, one copy pass uploads the frame's vertices and indices, and one render pass draws it.
+  Fans become lists, and clears are quads over the viewport.
+- The back buffer is a texture of the device's size; Present scales it into the window.
+
+Direct3D 8's rules kept: a draw from user memory unsets stream 0 (and the indices); Clear without
+rectangles clears the viewport; LightEnable on a light never set makes Direct3D's default one.
+
+**In the game** (November 2026): menus and the Africa1 mission, driven across its whole map, on
+Direct3D 12 and on Vulkan: everything looks right, but it runs less smoothly than Direct3D 8.
+The first tries crashed, and taught two things:
+- **Uploads must not each take memory.** Every texture upload had a transfer buffer of its own,
+  mapped into the process until the GPU was done. A mission's hundreds of textures left the 32-bit
+  process without address space, and the driver failed (in AMD's shader compiler, in Direct3D 12's
+  debug layer). Textures now go through one 16 MB staging buffer in batches, and each frame's
+  vertices through one transfer buffer.
+- **SDL 3.4's Direct3D 12 backend writes past its descriptor heap** when a draw's descriptors
+  straddle the heap's end: it checks only that the heap is not full yet. With 3 samplers a draw
+  that happens; the backend binds 4 (2048 and 65536 are multiples of 4) and re-binds them only when
+  they change.
+
+`SDLGPUDebug=1` also writes `LS3DF_sdlgpu.log` next to the DLL: each pipeline and texture made, the
+address space left, each line flushed before the call (a crash leaves the culprit last). Vulkan's
+validation layer needs a 32-bit build of the layers, which the Vulkan SDK no longer ships: without
+one the device starts without validation.
+
+**Not yet:**
+- speed: each draw's vertices are copied every frame;
+- display mode changes: fullscreen is the borderless window, scaled;
+- the gamma ramp;
+- multisampling;
+- the stencil buffer (the engine does not use it);
+- the w-buffer (drawn as the z-buffer).
+
 ## Frame captures
 
 Phase 3 of the [cross-platform plan](cross_platform.md) puts new backends behind the device. Their
@@ -141,6 +220,16 @@ kept.
 Result on the game (November 2026): 12 frames captured in the game, through dgVoodoo, all replayed
 pixel for pixel (0 apart), among them a mission at night in rain and fog with trees, a character
 and the HUD. The captures run from 10 to 600 MB.
+
+The SDL_GPU backend is compared the same way (`--backend sdlgpu`, `--driver direct3d12` or `vulkan`;
+`--live sdlgpu` draws the self-test live on it, through Present and the read-back). On the
+12 game frames, against dgVoodoo's pictures (Direct3D 11), first version, November 2026:
+- 31 to 45.5 dB; the menus 37.6 - 45.5 dB, the missions 31 - 38.4 dB;
+- no frame has a bias of more than 0.6 of 255 in any channel. Most pixels that differ are 1 or 2
+  apart (the two APIs' filtering), and the rest are along alpha-tested foliage edges.
+
+Direct3D 12 and Vulkan draw the same pictures (the self-test: identical, 47.2 dB from Windows'
+Direct3D 8).
 
 ## Not covered
 

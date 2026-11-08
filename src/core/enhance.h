@@ -30,6 +30,10 @@
 //   [Render]
 //   CaptureFrames=1            ; Ctrl+Shift+F11 saves the next frame's drawing to LS3DF_frames\ next
 //                              ; to the DLL, for the render tests to replay (gfx/trace)
+//   SDLGPU=1                   ; drawing through SDL_GPU (SDL3.dll next to the DLL; gfx/sdlgpu)
+//                              ; instead of Direct3D 8; Direct3D 8 when SDL3 is missing
+//   SDLGPUDriver=vulkan        ; SDL_GPU's API: direct3d12 or vulkan (empty: SDL's choice)
+//   SDLGPUDebug=1              ; the API's validation (the Vulkan SDK's layers, Direct3D 12's debug layer)
 #pragma once
 
 namespace ls3d {
@@ -45,6 +49,9 @@ struct S_enhancements {
     bool ffmpeg;                            // [Video] FFmpeg
     bool sdl3;                              // [Platform] SDL3
     bool captureFrames;                     // [Render] CaptureFrames
+    bool sdlGpu;                            // [Render] SDLGPU
+    char sdlGpuDriver[16];                  // [Render] SDLGPUDriver ("": SDL's choice)
+    bool sdlGpuDebug;                       // [Render] SDLGPUDebug
 };
 
 // The options (LS3DF.ini is read on the first call).

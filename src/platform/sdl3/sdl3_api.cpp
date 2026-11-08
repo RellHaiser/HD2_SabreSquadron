@@ -10,6 +10,10 @@ S_api api;
 SDL_Window *g_window;
 float g_wheel;
 
+namespace {
+platform::Library *g_library;
+}
+
 bool Start()
 {
     static int state;               // 0: not tried, 1: started, -1: failed
@@ -29,7 +33,25 @@ bool Start()
         return false;
     }
     state = 1;
+    g_library = library;
     return true;
+}
+
+bool StartGpu()
+{
+    static int state;
+    if (state)
+        return state > 0;
+    state = -1;
+    if (!Start())
+        return false;
+    bool found = true;
+#define LS3D_SDL_LOAD(name) \
+    found &= (api.name = reinterpret_cast<decltype(api.name)>(platform::LibrarySymbol(g_library, #name))) != nullptr;
+    LS3D_SDL_GPU_FUNCTIONS(LS3D_SDL_LOAD)
+#undef LS3D_SDL_LOAD
+    state = found ? 1 : -1;
+    return found;
 }
 
 namespace {

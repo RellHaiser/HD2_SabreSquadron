@@ -98,7 +98,10 @@ Requirements:
   [docs/video_device.md](docs/video_device.md#the-ffmpeg-backend));
 - SDL 3.2 or later, 32-bit: its headers to compile, `SDL3.dll` to copy next to the DLL
   (`%SDL3_DIR%`, else `deps\sdl3-x86` next to the checkout; how to build it:
-  [docs/platform.md](docs/platform.md#the-sdl3-implementation)).
+  [docs/platform.md](docs/platform.md#the-sdl3-implementation));
+- the SDL_GPU backend's shader compiler, `dxc`: the Windows SDK's (installed with Visual Studio's
+  C++ tools) for Direct3D 12, and the Vulkan SDK's (`%VULKAN_SDK%`) for Vulkan. Without the
+  Vulkan SDK the backend is built for Direct3D 12 only.
 
 ```bat
 python build.py          rem the DLL: build\msvc\LS3DF.dll (+ .pdb)
@@ -149,7 +152,7 @@ first difference (exit code 1); `compare_loader ... "" all` lists every differen
 | `src/math` | the math exports |
 | `src/i3d` | the scene graph, renderer, collision, lightmaps, loaders, buffer managers |
 | `src/igraph` | IGraph, textures, image loading and conversion, the DXT encoder, IShow |
-| `src/gfx` | the render device all drawing goes through, and its Direct3D 8 backend ([docs/render_device.md](docs/render_device.md)) |
+| `src/gfx` | the render device all drawing goes through, and its backends: Direct3D 8 (the default) and SDL_GPU; the frame recorder the render tests replay ([docs/render_device.md](docs/render_device.md)) |
 | `src/audio` | the sound device all sound goes through, and its backends: DirectSound (the default) and OpenAL Soft ([docs/sound_device.md](docs/sound_device.md)) |
 | `src/input` | the input device IGraph reads the keyboard and mouse through, and its backends: DirectInput (the default) and SDL3 ([docs/input_device.md](docs/input_device.md)) |
 | `src/platform` | the window and its messages, the cursor, time, threads, locks and events, and their implementations: Win32 (the default) and SDL3 for the window, cursor and clock ([docs/platform.md](docs/platform.md)) |

@@ -1,11 +1,18 @@
-// Replays captured frames (LS3DF.ini [Render] CaptureFrames, src/gfx/trace) on the Direct3D 8
-// backend and compares each picture with the one the game drew when it was captured: the same
-// driver must draw the same frame, which shows the capture holds everything the frame needs.
-// (The SDL_GPU backend's pictures will be compared with these.)
+// Replays captured frames (LS3DF.ini [Render] CaptureFrames, src/gfx/trace) on a render backend and
+// compares each picture with the one the game drew when it was captured.
+// - On the Direct3D 8 backend (the default) the same driver must draw the same frame, which shows
+//   the capture holds everything the frame needs.
+// - On the SDL_GPU backend (--backend sdlgpu, on --driver direct3d12 or vulkan, SDL's choice
+//   otherwise; --debug for the API's validation) the picture is Direct3D 8's model drawn by shaders:
+//   how far it is from the game's is the measure.
 //
 // Usage: test_render_replay.exe <capture.ls3dframe> ... [--tolerance N] [--d3d8 <d3d8.dll>]
+//                               [--backend d3d8 | sdlgpu] [--driver direct3d12 | vulkan] [--debug]
+//                               [--min-psnr DB]
 //        test_render_replay.exe --selftest   (draws a scene through the recorder, captures it and
 //                                              replays the capture: the two pictures must be equal)
+//          [--live sdlgpu]                     (the scene drawn on SDL_GPU, live: Present, and the
+//                                              picture read back as IGraph's screenshots are)
 //   The game's frame was drawn by the d3d8.dll of its folder (a wrapper such as dgVoodoo's, or
 //   Windows'); the replay must use the same one to draw the same picture: --d3d8 names it, else a
 //   d3d8.dll in the folder above the capture's (the game's, for LS3DF_frames\) is used, else
@@ -13,7 +20,9 @@
 //   Writes <capture>.d3d8.png, <capture>.game.png and <capture>.diff.png (differences x4) next to
 //   each capture. Fails when a pixel's channel is more than N (default 0) apart.
 //
-// test-sources: src/gfx/d3d8/gfx_d3d8.cpp src/gfx/trace/*.cpp src/core/enhance.cpp src/core/debug.cpp
+// test-sources: src/gfx/d3d8/gfx_d3d8.cpp src/gfx/trace/*.cpp src/gfx/sdlgpu/*.cpp
+// test-sources: src/core/enhance.cpp src/core/debug.cpp
+// test-sources: src/platform/*.cpp src/platform/win32/*.cpp src/platform/sdl3/*.cpp
 #include <windows.h>
 
 #include <cmath>
@@ -24,6 +33,8 @@
 #include <vector>
 
 #include "render_replay.h"
+#include "../src/core/enhance.h"
+#include "../src/gfx/sdlgpu/sdlgpu_device.h"
 #include "../src/gfx/trace/recorder.h"
 
 namespace {
@@ -273,7 +284,9 @@ int main(int argc, char **argv)
     uint32_t tolerance = 0;
     std::vector<std::string> captures;
     bool selfTest = false;
-    std::string d3d8Path;
+    std::string d3d8Path, backend = "d3d8", driver, live = "d3d8";
+    bool debug = false;
+    double minPsnr = 0;             // (the SDL_GPU backend: the least it must reach; 0: report only)
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--selftest"))
             selfTest = true;
@@ -281,6 +294,16 @@ int main(int argc, char **argv)
             tolerance = static_cast<uint32_t>(std::atoi(argv[++i]));
         else if (!std::strcmp(argv[i], "--d3d8") && i + 1 < argc)
             d3d8Path = argv[++i];
+        else if (!std::strcmp(argv[i], "--backend") && i + 1 < argc)
+            backend = argv[++i];
+        else if (!std::strcmp(argv[i], "--driver") && i + 1 < argc)
+            driver = argv[++i];
+        else if (!std::strcmp(argv[i], "--debug"))
+            debug = true;
+        else if (!std::strcmp(argv[i], "--live") && i + 1 < argc)
+            live = argv[++i];
+        else if (!std::strcmp(argv[i], "--min-psnr") && i + 1 < argc)
+            minPsnr = std::atof(argv[++i]);
         else
             captures.push_back(argv[i]);
     }
@@ -293,7 +316,15 @@ int main(int argc, char **argv)
         HWND window = CreateWindowA("LS3DFReplay", "self-test", WS_POPUP, 0, 0, 256, 192, nullptr, nullptr,
                                     GetModuleHandleA(nullptr), nullptr);
         Device *direct = g_pGfx;
-        g_pGfx = FrameRecorder(direct);
+        if (live == "sdlgpu") {
+            S_enhancements e = Enhancements();
+            std::snprintf(e.sdlGpuDriver, sizeof e.sdlGpuDriver, "%s", driver.c_str());
+            SetEnhancements(e);
+            g_pGfx = FrameRecorder(SdlGpuDevice());
+            std::printf("self-test: drawn live on SDL_GPU\n");
+        } else {
+            g_pGfx = FrameRecorder(direct);
+        }
         const std::string path = SelfTestCapture(g_pGfx, window);
         g_pGfx = direct;
         DestroyWindow(window);
@@ -340,6 +371,18 @@ int main(int argc, char **argv)
         std::printf("drawing with Windows' d3d8.dll\n");
     }
 
+    // The backend.
+    Device *device = g_pGfx;
+    const bool sdlGpu = backend == "sdlgpu";
+    if (sdlGpu) {
+        S_enhancements e = Enhancements();
+        std::snprintf(e.sdlGpuDriver, sizeof e.sdlGpuDriver, "%s", driver.c_str());
+        e.sdlGpuDebug = debug;
+        SetEnhancements(e);
+        device = SdlGpuDevice();
+        std::printf("replaying on SDL_GPU%s%s\n", driver.empty() ? "" : " / ", driver.c_str());
+    }
+
     int failures = 0;
     for (const std::string &path : captures) {
         replay::Capture capture;
@@ -351,7 +394,7 @@ int main(int argc, char **argv)
         // A hidden window: Direct3D draws into the back buffer anyway.
         HWND window = CreateWindowA("LS3DFReplay", "replay", WS_POPUP, 0, 0, 64, 64, nullptr, nullptr,
                                     GetModuleHandleA(nullptr), nullptr);
-        replay::Replayer r(g_pGfx, window);
+        replay::Replayer r(device, window);
         const bool ran = r.Run(capture);
         if (!ran) {
             std::printf("%s: %s\n", path.c_str(), r.error.c_str());
@@ -366,7 +409,7 @@ int main(int argc, char **argv)
         } else {
             replay::S_image diff;
             const replay::S_difference d = replay::Compare(r.reference, r.picture, tolerance, &diff);
-            const bool ok = d.pixelsOver == 0;
+            const bool ok = sdlGpu ? d.psnr >= minPsnr : d.pixelsOver == 0;
             std::printf("%s: %ux%u, %llu pixels over %u apart (largest %u), %.1f dB, %d device calls failed%s%s\n",
                         path.c_str(), r.picture.width, r.picture.height,
                         static_cast<unsigned long long>(d.pixelsOver), tolerance, d.maxChannel, d.psnr,
@@ -374,9 +417,9 @@ int main(int argc, char **argv)
                         ok ? "" : "  FAIL");
             if (!ok)
                 ++failures;
-            replay::WritePng((path + ".d3d8.png").c_str(), r.picture);
+            replay::WritePng((path + (sdlGpu ? ".sdlgpu.png" : ".d3d8.png")).c_str(), r.picture);
             replay::WritePng((path + ".game.png").c_str(), r.reference);
-            replay::WritePng((path + ".diff.png").c_str(), diff);
+            replay::WritePng((path + (sdlGpu ? ".sdlgpu.diff.png" : ".diff.png")).c_str(), diff);
         }
         DestroyWindow(window);
     }
