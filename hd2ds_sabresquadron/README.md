@@ -1,8 +1,7 @@
-# HD2DS_SabreSquadron.exe — source port (not started)
+# HD2DS_SabreSquadron.exe — source port (started: it builds, not yet a server)
 
 The Sabre Squadron dedicated server. It links the engine without sound
-([LS3DRF.dll](../ls3drf)) and the data layer [rw_data.dll](../rw_data). How much game code it
-shares with the port in [src/](../src) is not measured yet.
+([LS3DRF.dll](../ls3drf)) and the data layer [rw_data.dll](../rw_data).
 
 | | |
 |---|---|
@@ -13,6 +12,41 @@ shares with the port in [src/](../src) is not measured yet.
 | Image base | `0x00400000` |
 | Imports | `USER32.dll`, `ole32.dll`, `ADVAPI32.dll`, `GDI32.dll`, `OLEAUT32.dll`, `WINMM.dll`, `LS3DRF.dll`, `rw_data.dll`, `MPR.dll`, `imagehlp.dll`, `WSOCK32.dll`, `KERNEL32.dll` |
 
+## How it is built
+
+The server is the client's game code compiled again with server branches, so it is built from the game's
+[src/](../src) with `HD2_DEDICATED` defined. Server code goes into `src/` in `#ifdef HD2_DEDICATED` blocks; this
+folder holds only the build script and the stand-ins for the client files the server does not have.
+
+```
+python hd2ds_sabresquadron/build.py [--all] [--copy DIR]
+```
+
+It uses `_re/tools/build_game.py`'s compiler and linker flags, puts its objects in `%TEMP%\hd2ds_game` (the client
+build's objects stay) and links `HD2DS_Port.exe` against `ls3drf/build/msvc/LS3DRF.lib` (build it first with
+`python ls3drf/build.py dll`) and `rw_data.lib`. `--keep-client` builds every `src/` file and no stand-ins, to see
+what the link needs without them; `--unresolved FILE` lists a failed link's missing symbols.
+
+## Client-only files
+
+`build.py`'s `CLIENT_ONLY` lists 19 `src/game` files that are not built: human poses (body, dead, hold, ragdoll,
+seats, weapon), the weapon pose, stains, the car effects, the vehicle sounds / lamps / effects / damage visuals and the
+in-game interface. None of their mapped functions matches a server function, and none pairs with a changed server
+function (MEDIUM: only about half of the client's functions are mapped to a `src/` file). Three more files with no
+matched function stay built because server code calls their other functions: `human_pose_ik.cpp` (pose math),
+`input_controls.cpp` (`g_controls`, `WideToAnsi`, the render callback) and `speech_slots.cpp` (`LoadMaterialTables`).
+
+[src/](src) has their stand-ins, a `*_ds.cpp` for each of the 13 files the rest of the game still links to:
+122 functions and variables, with the original signature, the client's address where `src/` gives one and an empty
+body (a default return; `true` for `Init` / `Done` / `LoadGame` / `SaveGame`). `isnd_ds.cpp` stands in for
+`ISndGetDriver()`, which LS3DRF.dll does not export: a sound driver that reports no device.
+
 ## Status
 
-Not started.
+- Builds: 265 sources, 0 messages; 0 unresolved symbols. Without the 19 files the link misses 122 symbols, with them
+  only `ISndGetDriver`.
+- Imports from LS3DRF.dll: the original server's 38 plus three `S_matrix` methods (`RotateByMatrix`, `SetDir` with
+  two vectors, `SetRot`), by the same ordinals as the original DLL's.
+- Not a server yet: no `HD2_DEDICATED` branch is in `src/`. The code is the client's, and the window, the input and
+  the rendering still start; LS3DRF's `IGraph` has fewer methods than LS3DF's, so a client call to a missing one
+  would fail at run time. Not run.
