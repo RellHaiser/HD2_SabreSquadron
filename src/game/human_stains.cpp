@@ -88,6 +88,27 @@ void BlendOverlay(uint16_t *buffer, const uint16_t *overlay)
         buffer[i] = BlendTexels(overlay[i], buffer[i]);
 }
 
+// Fix: a buffer (A4R4G4B4) into a locked texture by rows. The original copies height * pitch bytes, right only for
+// a 16-bit texture: a 32-bit one (LS3DF.ini's TrueColorTextures, or a card without A4R4G4B4) read past the
+// buffer's end, so the texels are widened to A8R8G8B8 there. (The texture's format is told by its pitch, as
+// PaintHit's check does.)
+void CopyToTexture(void *pixels, int pitch, const uint16_t *buffer, int width, int height)
+{
+    uint8_t *row = static_cast<uint8_t *>(pixels);
+    for (int y = 0; y < height; ++y, row += pitch, buffer += width) {
+        if (pitch < width * 4) {
+            std::memcpy(row, buffer, static_cast<size_t>(pitch < width * 2 ? pitch : width * 2));
+            continue;
+        }
+        uint32_t *const out = reinterpret_cast<uint32_t *>(row);
+        for (int x = 0; x < width; ++x) {
+            const uint32_t p = buffer[x];
+            out[x] = ((p >> 12) & 0xF) * 0x11u << 24 | ((p >> 8) & 0xF) * 0x11u << 16 | ((p >> 4) & 0xF) * 0x11u << 8 |
+                     (p & 0xF) * 0x11u;
+        }
+    }
+}
+
 float SquaredDistance(const float *position, const float *point)
 {
     return (position[0] - point[0]) * (position[0] - point[0]) + (position[1] - point[1]) * (position[1] - point[1])
@@ -654,7 +675,7 @@ void C_HumanStains::TakeTextures()
         m_textures[g] = lent[g];
         int pitch = 0;
         if (void *const pixels = m_textures[g]->Lock(0, &pitch, 0)) {
-            std::memcpy(pixels, m_buffers[g], static_cast<size_t>(m_height) * static_cast<size_t>(pitch));
+            CopyToTexture(pixels, pitch, m_buffers[g], m_width, m_height);
             m_textures[g]->Unlock();
         }
         SetMaterialImage(faceGroup->material, m_textures[g]);
@@ -696,7 +717,7 @@ void C_HumanStains::ShowBuffer0()
     } else if (m_textures[0]) {
         int pitch = 0;
         if (void *const pixels = m_textures[0]->Lock(0, &pitch, 0)) {
-            std::memcpy(pixels, m_buffers[0], static_cast<size_t>(m_height) * static_cast<size_t>(pitch));
+            CopyToTexture(pixels, pitch, m_buffers[0], m_width, m_height);
             m_textures[0]->Unlock();
         }
     }
@@ -860,17 +881,23 @@ void C_HumanStains::PaintHit(const S_StainVertex &vertex, const S_vector &point,
         TakeTextures();
     IImage *const texture = m_textures[group];
     uint16_t *pixels = nullptr;
+    void *wide = nullptr;                   // a 32-bit texture's pixels (see CopyToTexture)
+    int pitch = 0;
     if (texture) {
-        int pitch = 0;
-        pixels = static_cast<uint16_t *>(texture->Lock(0, &pitch, 0));
-        // (Kept: another pitch leaves it locked and paints nothing.)
-        if (pitch != m_width * 2)
-            return;
+        void *const locked = texture->Lock(0, &pitch, 0);
+        if (pitch == m_width * 2)
+            pixels = static_cast<uint16_t *>(locked);
+        else if (locked && pitch >= m_width * 4)
+            wide = locked;                  // Fix: the original paints nothing on a 32-bit texture
+        else
+            return;                         // (Kept: another pitch leaves it locked and paints nothing.)
     }
     const uint16_t *const splat = STAIN_SPLATS[std::rand() % 11];
     const int16_t y = static_cast<int16_t>(static_cast<int>(static_cast<float>(m_height) * v));
     const int16_t x = static_cast<int16_t>(static_cast<int>(static_cast<float>(m_width) * u));
     PaintSplat(m_buffers[group], pixels, x, y, splat, 16, 16);
+    if (wide)
+        CopyToTexture(wide, pitch, m_buffers[group], m_width, m_height);
     if (group == 0)
         PaintSplat(m_clean, nullptr, x, y, splat, 16, 16);
     if (texture)
