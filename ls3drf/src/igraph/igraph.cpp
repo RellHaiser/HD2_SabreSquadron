@@ -111,7 +111,7 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     std::memset(i3d::g_renderStats, 0, sizeof i3d::g_renderStats);
 
     S_cpuInfo cpu = {};
-    DetectCpu(&cpu);
+    _cpuid(&cpu);
     OSVERSIONINFOA os = {};
     os.dwOSVersionInfoSize = sizeof os;
 #pragma warning(suppress : 4996)  // GetVersionExA is deprecated (and lies about newer Windows)
@@ -132,7 +132,7 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     }
     dbgPrintf("\nDetected OS: %s ver. %i.%i.%i %s", osName, os.dwMajorVersion, os.dwMinorVersion,
               os.dwBuildNumber & 0xffff, os.szCSDVersion);
-    const uint32_t mhz = MeasureCpuMhz();
+    const uint32_t mhz = GetCpuSpeed();
     dbgPrintf("Detected CPU: %s, %s %iMHz, family:%i, model:%i, stepping:%i", cpu.vendor, cpu.name, mhz,
               cpu.family, cpu.model, cpu.stepping);
     g_initialized = true;
