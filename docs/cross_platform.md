@@ -31,7 +31,7 @@ with the original DLL, and each new backend is checked against it before the old
 | Phase | What | Status |
 |---|---|---|
 | 1 | Seams: every API behind an engine-owned interface, still on Direct3D 8 | **done** |
-| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **in progress**: OpenAL Soft done (works in the game); FFmpeg done (works in the game); SDL3 written and tested, to be tried in the game |
+| 2 | SDL3 (window, input, time), OpenAL Soft (sound) and FFmpeg (video) backends, still rendering with Direct3D 8 | **done**: OpenAL Soft, FFmpeg and SDL3 each work in the game, chosen in LS3DF.ini |
 | 3 | SDL_GPU and OpenGL 3.3 render backends on Windows, their output compared pixel by pixel with the Direct3D 8 backend's | |
 | 4 | A 64-bit build, together with the game's port | |
 | 5 | Linux, then macOS | |
@@ -66,7 +66,7 @@ the INI path from the module name, the command line.
 Known escape hatch: Bink plays its own sound through DirectSound, handed the sound device's object
 (`audio::Device::Native`); an FFmpeg backend plays its sound through the sound device instead.
 
-### Phase 2: SDL3, OpenAL Soft, FFmpeg (in progress)
+### Phase 2: SDL3, OpenAL Soft, FFmpeg (done)
 
 Each new backend sits beside the Windows one and is chosen at start-up in LS3DF.ini, so the two can
 be compared in the same tests:
@@ -74,7 +74,7 @@ be compared in the same tests:
 | Part | Status |
 |---|---|
 | **Sound on OpenAL Soft** (`src/audio/openal`) | Written and tested on OpenAL Soft's loopback device (`test_audio_openal`); chosen with `[Sound] OpenAL=1` in LS3DF.ini; tried in the game, where it works (November 2026). Details in [sound_device.md](sound_device.md#the-openal-soft-backend). |
-| **Platform and input on SDL3** (`src/platform/sdl3`, `src/input/sdl3`) | Written and tested against the Win32 implementation (`test_platform_sdl3`); chosen with `[Platform] SDL3=1` in LS3DF.ini; not yet tried in the game. Details in [platform.md](platform.md#the-sdl3-implementation) and [input_device.md](input_device.md#the-sdl3-backend). |
+| **Platform and input on SDL3** (`src/platform/sdl3`, `src/input/sdl3`) | Written and tested against the Win32 implementation (`test_platform_sdl3`); chosen with `[Platform] SDL3=1` in LS3DF.ini; tried in the game, where it works (November 2026: menus, fullscreen with Direct3D 8, Alt-Tab, mouse look, the controls menu's key names). Details in [platform.md](platform.md#the-sdl3-implementation) and [input_device.md](input_device.md#the-sdl3-backend). |
 | **Video on FFmpeg** (`src/video/ffmpeg`) | Written and tested against Bink and DirectShow (`test_video_ffmpeg`); chosen with `[Video] FFmpeg=1` in LS3DF.ini; tried in the game, where it works (November 2026: the intro, a briefing, the credits, skipping a movie). Details in [video_device.md](video_device.md#the-ffmpeg-backend). |
 
 - **Sound on OpenAL Soft:** a buffer is an OpenAL source reading the buffer's bytes through a

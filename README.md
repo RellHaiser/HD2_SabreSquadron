@@ -20,8 +20,9 @@ each with a comment. [docs/porting_notes.md](docs/porting_notes.md) lists them b
 
 The long-term goal is to run on other operating systems than Windows (SDL3, OpenAL Soft, FFmpeg
 and SDL_GPU in place of Win32 and DirectX). [docs/cross_platform.md](docs/cross_platform.md)
-tracks the plan: phase 1, putting every API behind an engine-owned interface while still on
-Direct3D 8, is done.
+tracks the plan. Phase 1, putting every API behind an engine-owned interface while still on
+Direct3D 8, is done. So is phase 2: optional SDL3, OpenAL Soft and FFmpeg backends, chosen in
+[LS3DF.ini](docs/ls3df_ini.md), which work in the game.
 
 The companion port of `rw_data.dll`, the game's data-file layer, is at
 <https://github.com/RellHaiser/rw_data>.
