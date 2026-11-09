@@ -1069,6 +1069,7 @@ void C_HumanMovement::Footstep(bool left)
         }
         if (stance == HUMAN_STANCE_PRONE)
             request.flags |= SOUND_AI_ONLY;
+        request.channel = 3;
         GetSoundModule()->Play(request);
     }
 
