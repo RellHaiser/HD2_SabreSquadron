@@ -97,8 +97,8 @@ void FitTextureSize(uint16_t width, uint16_t height, uint32_t flags, uint16_t *o
 }
 
 // The name of a texture's cache file: the source path without its extension, the opacity map's
-// name (DXT3), the level count, 'L' for ITC_HALF, 'G' for the port's improved mip levels and
-// ".DX<kind>" / ".565" / ".555".
+// name (DXT3), the level count, 'L' for ITC_HALF, 'G' for the port's improved mip levels, 'K' for those
+// of ITC_KEY_MIPS and ".DX<kind>" / ".565" / ".555".
 void CacheFileName(const ITexture *texture, const char *fileName, const char *alphaFileName, int kind,
                    bool dxt, char *out)
 {
@@ -117,6 +117,8 @@ void CacheFileName(const ITexture *texture, const char *fileName, const char *al
     // (Port enhancement: levels from tex::DownsampleMip are cached apart from the original's.)
     if (Enhancements().mipmaps && texture->levels > 1)
         std::strcat(buf, "G");
+    if ((texture->flags & ITC_KEY_MIPS) && texture->levels > 1)
+        std::strcat(buf, "K");
     std::strcat(buf, ".");
     const size_t n = std::strlen(buf);
     if (dxt) {
@@ -1235,7 +1237,11 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
     // a colour-keyed texture, drawn alpha-tested, uploaded with their alpha rescaled to level 0's
     // coverage at IGraph's reference, from a copy: the next level is made from the unscaled one.)
     const bool improvedMips = Enhancements().mipmaps && cur;
-    const int coverageRef = improvedMips && (flags & ITC_ALPHA_1BIT) && g_rs.alphaRef > 0
+    // (LS3DF.ini ColorKeyMipmaps: level 0's alpha is on or off, so any reference gives its coverage, and
+    // the levels stay on or off to do the same: a mission's reference is set after its textures load.)
+    const bool keyMips = improvedMips && (flags & ITC_KEY_MIPS) && (flags & ITC_ALPHA_1BIT);
+    const int coverageRef = keyMips ? 128
+                            : improvedMips && (flags & ITC_ALPHA_1BIT) && g_rs.alphaRef > 0
                                 ? (g_rs.alphaRef < 255 ? g_rs.alphaRef : 255)
                                 : 0;
     const double coverage = coverageRef ? tex::AlphaCoverage(pixels, width, height, coverageRef) : 0.0;
@@ -1286,7 +1292,10 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
                 image = next;
                 if (scaled) {
                     std::memcpy(scaled, next, static_cast<size_t>(levelW) * levelH * 4);
-                    tex::ScaleAlphaToCoverage(scaled, levelW, levelH, coverageRef, coverage);
+                    if (keyMips)
+                        tex::BinaryAlphaToCoverage(scaled, levelW, levelH, coverage);
+                    else
+                        tex::ScaleAlphaToCoverage(scaled, levelW, levelH, coverageRef, coverage);
                     image = scaled;
                 }
             }

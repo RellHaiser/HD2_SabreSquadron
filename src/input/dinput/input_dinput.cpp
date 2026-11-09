@@ -2,6 +2,8 @@
 // unchanged, so the engine makes exactly the DirectInput calls the original made.
 #include "input/dinput/dinput_device.h"
 
+#include "input/backends.h"
+
 namespace ls3d::input {
 
 namespace {
@@ -64,6 +66,9 @@ DeviceDInput s_device;
 
 }  // namespace
 
+// (The default device; ChooseDevice, input/input.cpp, may switch to another backend.)
 Device *g_pInput = &s_device;
+
+Device *DirectInputDevice() { return &s_device; }
 
 }  // namespace ls3d::input

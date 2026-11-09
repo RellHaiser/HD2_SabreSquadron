@@ -30,4 +30,8 @@ void DownsampleMip(const uint8_t *src, int width, int height, uint8_t *dst);
 // is uploaded: the next level is made from the unscaled one, or the scaling compounds.
 void ScaleAlphaToCoverage(uint8_t *bgra, int width, int height, int alphaRef, double coverage);
 
+// Makes an image's alpha 0 or 255 with its coverage as near `coverage` as it can come, so that every
+// reference gives that coverage (LS3DF.ini ColorKeyMipmaps). A texel with alpha 0 stays off.
+void BinaryAlphaToCoverage(uint8_t *bgra, int width, int height, double coverage);
+
 }  // namespace ls3d::tex

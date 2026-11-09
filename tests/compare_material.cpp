@@ -15,7 +15,7 @@
 //
 // Usage: compare_material.exe [original LS3DF.dll] [operations] [seed]
 //
-// test-sources: src/i3d/material.cpp
+// test-sources: src/i3d/material.cpp src/core/enhance.cpp src/core/debug.cpp
 #include <windows.h>
 
 #include <float.h>

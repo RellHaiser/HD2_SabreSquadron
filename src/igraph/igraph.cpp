@@ -797,6 +797,9 @@ void IGraphWindowEvents::OnActivate(bool active, bool minimized)
                 platform::Suspend(g_textureThread);
         }
         g_inactive = true;
+        // Direct3D's exclusive full screen leaves by itself; a window over the display would stay on top.
+        if (gfx::g_pGfx->HasDevice() && gfx::g_pGfx->BorderlessFullScreen())
+            platform::Minimize(g_mainWnd);
     } else if (reactivate) {
         g_pIGraph->SetAppName(g_savedAppName);
         g_inactive = false;
@@ -1103,6 +1106,7 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     }
     platform::Focus(g_mainWnd);
 
+    gfx::ChooseDevice();            // (Port: the frame recorder, LS3DF.ini [Render] CaptureFrames)
     if (!gfx::g_pGfx->Open()) {
         dbgPrintf("IGraph::Init() - Error create D3D8 object !!");
         return I3DERR_GENERIC;
@@ -1436,7 +1440,8 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     dbgPrintf("\n");
     {
         const S_enhancements &e = Enhancements();
-        if (e.anisotropy || e.trilinear || e.mipmaps || e.trueColorTextures || e.trueColorLightmaps) {
+        if (e.anisotropy || e.trilinear || e.mipmaps || e.trueColorTextures || e.trueColorLightmaps ||
+                    e.nearPortalDistance > 0.0f) {
             EnhancementLog("Port enhancements (LS3DF.ini):");
             if (e.anisotropy)
                 EnhancementLog("   Anisotropic filtering: %ix asked, %ix used (device maximum %lu%s)", e.anisotropy,
@@ -1445,11 +1450,14 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
             if (e.trilinear)
                 EnhancementLog("   Trilinear filtering: always");
             if (e.mipmaps)
-                EnhancementLog("   Mip maps: gamma-correct, alpha-weighted, coverage kept");
+                EnhancementLog("   Mip maps: gamma-correct, alpha-weighted, coverage kept%s",
+                               e.colorKeyMipmaps ? ", colour-keyed textures given them too" : "");
             if (e.trueColorTextures)
                 EnhancementLog("   Textures from image files: %s", g_fmtTrueColor ? "A8R8G8B8" : "unchanged (no A8R8G8B8)");
             if (e.trueColorLightmaps)
                 EnhancementLog("   Lightmaps: %s", g_fmtTrueColor ? "32-bit" : "unchanged (no A8R8G8B8)");
+            if (e.nearPortalDistance > 0.0f)
+                EnhancementLog("   Portals behind the camera: looked through within %.2f m", e.nearPortalDistance);
             EnhancementLog("");
         }
     }

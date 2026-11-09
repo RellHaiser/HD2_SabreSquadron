@@ -36,8 +36,26 @@ S_enhancements ReadIni()
     o.anisotropy = aniso < 2 ? 0 : aniso > 16 ? 16 : aniso;
     o.trilinear = get("TrilinearFiltering") != 0;
     o.mipmaps = get("ImprovedMipmaps") != 0;
+    o.colorKeyMipmaps = get("ColorKeyMipmaps") != 0;
     o.trueColorTextures = get("TrueColorTextures") != 0;
     o.trueColorLightmaps = get("TrueColorLightmaps") != 0;
+    const int nearPortal = get("NearPortalDistance");
+    o.nearPortalDistance = nearPortal <= 0 ? 0.0f : (nearPortal > 1000 ? 1000 : nearPortal) * 0.01f;
+    o.openal = GetPrivateProfileIntA("Sound", "OpenAL", 0, path) != 0;
+    o.ffmpeg = GetPrivateProfileIntA("Video", "FFmpeg", 0, path) != 0;
+    o.sdl3 = GetPrivateProfileIntA("Platform", "SDL3", 0, path) != 0;
+    o.captureFrames = GetPrivateProfileIntA("Render", "CaptureFrames", 0, path) != 0;
+    o.sdlGpu = GetPrivateProfileIntA("Render", "SDLGPU", 0, path) != 0;
+    o.openGl = GetPrivateProfileIntA("Render", "OpenGL", 0, path) != 0;
+    GetPrivateProfileStringA("Render", "SDLGPUDriver", "", o.sdlGpuDriver, sizeof o.sdlGpuDriver, path);
+    o.sdlGpuDebug = GetPrivateProfileIntA("Render", "SDLGPUDebug", 0, path) != 0;
+    o.sdlGpuStats = GetPrivateProfileIntA("Render", "SDLGPUStats", 0, path) != 0;
+    GetPrivateProfileStringA("Render", "PresentMode", "", o.presentMode, sizeof o.presentMode, path);
+    o.msaa = GetPrivateProfileIntA("Render", "MSAA", 0, path);
+    o.alphaToCoverage = GetPrivateProfileIntA("Render", "AlphaToCoverage", 0, path) != 0;
+    o.occlusion = GetPrivateProfileIntA("Render", "AmbientOcclusion", 0, path) != 0;
+    o.occlusionStrength = GetPrivateProfileIntA("Render", "AmbientOcclusionStrength", 75, path);
+    o.occlusionRadius = GetPrivateProfileIntA("Render", "AmbientOcclusionRadius", 60, path);
     return o;
 }
 

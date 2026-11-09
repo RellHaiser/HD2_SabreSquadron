@@ -10,6 +10,7 @@
 // test-sources: src/igraph/mip_filter.cpp src/core/enhance.cpp src/core/debug.cpp
 #include <windows.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -114,7 +115,7 @@ void TestIni()
     {
         FILE *f = std::fopen(ini.c_str(), "wt");
         std::fprintf(f, "[Other]\nImprovedMipmaps=0\n[Graphics]\nAnisotropicFiltering=32\nTrilinearFiltering=1\n"
-                        "ImprovedMipmaps=1\nTrueColorLightmaps=5\n");
+                        "ImprovedMipmaps=1\nColorKeyMipmaps=1\nTrueColorLightmaps=5\n");
         std::fclose(f);
     }
     const ls3d::S_enhancements &e = ls3d::Enhancements();
@@ -122,7 +123,7 @@ void TestIni()
     std::printf("ini: anisotropy %d, trilinear %d, mipmaps %d, true colour textures %d, lightmaps %d\n", e.anisotropy,
                 e.trilinear, e.mipmaps, e.trueColorTextures, e.trueColorLightmaps);
     Check(e.anisotropy == 16, "AnisotropicFiltering=32 capped at 16");
-    Check(e.trilinear && e.mipmaps && e.trueColorLightmaps, "keys set");
+    Check(e.trilinear && e.mipmaps && e.colorKeyMipmaps && e.trueColorLightmaps, "keys set");
     Check(!e.trueColorTextures, "missing key off");
     ls3d::S_enhancements off = {};
     off.anisotropy = 1;
@@ -212,6 +213,55 @@ void TestBrightness(std::mt19937 &rng)
     }
     Check(!biased, "levels down to 32 x 32 within 0.1% of level 0's light");
     Check(!offCode, "every level within half an 8-bit step of level 0's light");
+}
+
+void TestBinaryCoverage(std::mt19937 &rng)
+{
+    // A colour key's alpha through levels as ITexture::Create makes them with ColorKeyMipmaps: only 0 or 255,
+    // so every reference gives one coverage, near level 0's (noise is the worst case, reported only).
+    const int size = 256;
+    const char *names[] = {"blobs", "disc", "fronds", "noise 30%"};
+    for (int kind = 0; kind < 4; ++kind) {
+        Image image(size_t(size) * size * 4);
+        for (int y = 0; y < size; ++y) {
+            for (int x = 0; x < size; ++x) {
+                bool on;
+                switch (kind) {
+                case 0: on = std::sin(x * 0.11) * std::cos(y * 0.09) + std::sin((x + y) * 0.04) > 0.6; break;
+                case 1: on = (x - 128) * (x - 128) + (y - 128) * (y - 128) < 80 * 80; break;
+                case 2: on = std::abs(x - 128) < 90 - y / 3 && (y + std::abs(x - 128) / 2) % 9 < 5; break;
+                default: on = std::uniform_real_distribution<double>(0, 1)(rng) < 0.3; break;
+                }
+                uint8_t *p = &image[(size_t(y) * size + x) * 4];
+                p[0] = p[1] = p[2] = 200;
+                p[3] = on ? 255 : 0;
+            }
+        }
+        const double coverage = ls3d::tex::AlphaCoverage(image.data(), size, size, 128);
+        std::vector<S_level> chain = Chain(image, size, false, 0);
+        double worst = 0.0, spread = 0.0;
+        bool twoValues = true;
+        for (size_t l = 1; l < chain.size(); ++l) {
+            S_level &level = chain[l];
+            ls3d::tex::BinaryAlphaToCoverage(level.bgra.data(), level.width, level.height, coverage);
+            for (size_t i = 3; i < level.bgra.size(); i += 4)
+                twoValues &= level.bgra[i] == 0 || level.bgra[i] == 255;
+            const double at1 = ls3d::tex::AlphaCoverage(level.bgra.data(), level.width, level.height, 1);
+            for (const int ref : {32, 128, 254})
+                spread = std::max(spread, std::fabs(ls3d::tex::AlphaCoverage(level.bgra.data(), level.width, level.height, ref) - at1));
+            if (level.width >= 16)
+                worst = std::max(worst, std::fabs(at1 - coverage));
+        }
+        std::printf("on/off levels, %s: level 0's coverage %.3f, worst level down to 16 x 16 %.3f off\n", names[kind], coverage, worst);
+        Check(twoValues, "on/off levels hold only alpha 0 and 255");
+        Check(spread == 0.0, "on/off levels: every reference gives one coverage");
+        if (kind < 3)
+            Check(worst < 0.025, "on/off levels within 2.5% of level 0's coverage");  // (a real palm frond: 0.4%)
+    }
+    // A texel with alpha 0 stays off, whatever the coverage asked for.
+    uint8_t none[16] = {};
+    ls3d::tex::BinaryAlphaToCoverage(none, 2, 2, 1.0);
+    Check(none[3] == 0 && none[7] == 0 && none[11] == 0 && none[15] == 0, "on/off levels: nothing from nothing");
 }
 
 void TestCoverage(std::mt19937 &rng)
@@ -304,6 +354,7 @@ int main()
     TestUniform(rng);
     TestGammaAndKey();
     TestBrightness(rng);
+    TestBinaryCoverage(rng);
     TestCoverage(rng);
     TestSizes(rng);
     std::printf(g_failures ? "test_enhance: %d FAILED\n" : "test_enhance: all passed\n", g_failures);
