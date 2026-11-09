@@ -19,6 +19,7 @@ __pycache__/
 *.dta
 *.DTA
 
+deps/
 mods/
 _re/tools/__pycache__
 _re/tier1_fixups.json
