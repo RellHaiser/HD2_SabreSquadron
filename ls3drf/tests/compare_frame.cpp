@@ -294,7 +294,7 @@ bool SameField(const uint8_t *a, const uint8_t *b)
     uint32_t ua, ub;
     std::memcpy(&ua, a, 4);
     std::memcpy(&ub, b, 4);
-    if (!(ua & 0x7f800000) && !(ub & 0x7f800000) && (ua ^ ub) < 0x80000000u && (ua - ub + 1) <= 2)
+    if (!(ua & 0x7f800000) && !(ub & 0x7f800000) && (ua | ub) >= 0x10000 && (ua ^ ub) < 0x80000000u && (ua - ub + 1) <= 2)
         return true;
     float fa, fb;
     std::memcpy(&fa, a, 4);

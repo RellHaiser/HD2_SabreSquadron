@@ -247,6 +247,7 @@ def build_tests(debug, only=None):
     tdir = os.path.join(ROOT, "tests")
     out = os.path.join(ROOT, "build")
     os.makedirs(out, exist_ok=True)
+    compiled = {}                       # a port source compiled for one test serves the others
     for f in sorted(os.listdir(tdir)) if os.path.isdir(tdir) else []:
         if not f.endswith(".cpp") or (only and only not in f):
             continue
@@ -258,11 +259,12 @@ def build_tests(debug, only=None):
             # Port sources compiled for the test (same flags as the DLL).
             os.makedirs(os.path.join(WORK, "obj"), exist_ok=True)
             with ThreadPoolExecutor(max(2, os.cpu_count() or 4)) as ex:
-                for src, obj, good, text in ex.map(lambda s: compile_one(s, debug), extra):
+                for src, obj, good, text in ex.map(lambda s: compiled.get(s) or compile_one(s, debug), extra):
                     if text:
                         print(text)
                     ok &= good
                     objs.append(obj)
+                    compiled[src] = (src, obj, good, "")
         cmd = [tool("cl"), *flags, "/Fo" + WORK + "\\", "/Fd" + os.path.join(WORK, f[:-4] + ".pdb"), "/Fe" + exe,
                os.path.join(tdir, f), *objs, "/link", "/INCREMENTAL:NO", *LIBS, *import_libs(), *extra_libs]
         r = subprocess.run(cmd, capture_output=True, text=True, env=msvc_env())
