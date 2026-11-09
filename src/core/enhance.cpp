@@ -50,6 +50,8 @@ S_enhancements ReadIni()
     o.sdlGpuDebug = GetPrivateProfileIntA("Render", "SDLGPUDebug", 0, path) != 0;
     o.sdlGpuStats = GetPrivateProfileIntA("Render", "SDLGPUStats", 0, path) != 0;
     GetPrivateProfileStringA("Render", "PresentMode", "", o.presentMode, sizeof o.presentMode, path);
+    o.msaa = GetPrivateProfileIntA("Render", "MSAA", 0, path);
+    o.alphaToCoverage = GetPrivateProfileIntA("Render", "AlphaToCoverage", 0, path) != 0;
     return o;
 }
 

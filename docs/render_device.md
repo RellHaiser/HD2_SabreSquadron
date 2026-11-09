@@ -177,12 +177,25 @@ OpenGL, 40 a second on Direct3D 12). The picture is scaled to fit with its shape
 rest, so a 4:3 mode is not stretched on a wide display. Losing the focus to another program minimizes it, as
 Direct3D's exclusive mode does.
 
+**The gamma ramp** the game sets (its gamma option) changes what is shown, as Direct3D's does: Present
+draws the back buffer through the ramp as a table ([`present.hlsl`](../src/gfx/sdlgpu/shaders/present.hlsl))
+instead of blitting it. So read-backs and screenshots never see it, nor does the desktop, and it goes with
+the window. It applies in full screen only, as Direct3D's, and an identity ramp takes the plain blit. Both this
+backend and OpenGL.
+
+**Multisampling** (`[Render] MSAA`, or the game's setup: both backends). A frame draws into a multisampled
+colour and depth target, kept from pass to pass since a read-back runs a frame in parts, and each pass
+resolves into the back buffer, so what comes after (Present, read-backs) is unchanged. With
+`AlphaToCoverage` an alpha-tested 3D draw that is not blended turns its alpha into how much of the pixel
+passes the test, an edge one pixel wide at any distance, and the samples cover that much. What is wholly on
+the failing side is still discarded, so if a driver ignored the setting the test would only pass a little more.
+The game's captures (made through dgVoodoo with 8 samples) are nearer with 4 samples than without: 31.3 - 41.6
+dB against 31.0 - 38.4 on the 3D frames, and 95 dB against 45 on the two that are nearly all 2D.
+
 **Not yet:**
 - buffers kept on the GPU (each draw's vertices are copied every frame; at about 2 ms a frame it
   has not mattered);
 - display mode changes;
-- the gamma ramp;
-- multisampling;
 - the stencil buffer (the engine does not use it);
 - the w-buffer (drawn as the z-buffer).
 

@@ -4,7 +4,8 @@
 //
 // A draw's fixed state makes a pipeline, cached by it. One copy pass uploads a frame's vertices and
 // indices, then one render pass draws it into the back buffer, a texture of the device's size that
-// Present scales into the window's swapchain.
+// Present scales into the window's swapchain. With multisampling the pass draws into a multisampled
+// target, kept from pass to pass, and resolves into the back buffer at its end.
 #include "gfx/sdlgpu/sdlgpu_device.h"
 
 #include <algorithm>
@@ -142,7 +143,7 @@ public:
         }
         const bool dxil = (api.SDL_GetGPUShaderFormats(gpu) & SDL_GPU_SHADERFORMAT_DXIL) != 0;
         auto shader = [&](const uint8_t *dxilCode, size_t dxilSize, const uint8_t *spirvCode, size_t spirvSize,
-                          const char *entry, SDL_GPUShaderStage stage, Uint32 samplerCount) {
+                          const char *entry, SDL_GPUShaderStage stage, Uint32 samplerCount, Uint32 uniformBuffers = 1) {
             SDL_GPUShaderCreateInfo info = {};
             info.code = dxil ? dxilCode : spirvCode;
             info.code_size = dxil ? dxilSize : spirvSize;
@@ -150,14 +151,18 @@ public:
             info.format = dxil ? SDL_GPU_SHADERFORMAT_DXIL : SDL_GPU_SHADERFORMAT_SPIRV;
             info.stage = stage;
             info.num_samplers = samplerCount;
-            info.num_uniform_buffers = 1;
+            info.num_uniform_buffers = uniformBuffers;
             return api.SDL_CreateGPUShader(gpu, &info);
         };
         vertexShader = shader(kFixedFunctionVSDxil, kFixedFunctionVSDxilSize, kFixedFunctionVSSpirv,
                               kFixedFunctionVSSpirvSize, "VSMain", SDL_GPU_SHADERSTAGE_VERTEX, 0);
         pixelShader = shader(kFixedFunctionPSDxil, kFixedFunctionPSDxilSize, kFixedFunctionPSSpirv,
                              kFixedFunctionPSSpirvSize, "PSMain", SDL_GPU_SHADERSTAGE_FRAGMENT, kSamplerSlots);
-        if (!vertexShader || !pixelShader) {
+        presentVS = shader(kPresentVSDxil, kPresentVSDxilSize, kPresentVSSpirv, kPresentVSSpirvSize, "VSMain",
+                           SDL_GPU_SHADERSTAGE_VERTEX, 0, 0);
+        presentPS = shader(kPresentPSDxil, kPresentPSDxilSize, kPresentPSSpirv, kPresentPSSpirvSize, "PSMain",
+                           SDL_GPU_SHADERSTAGE_FRAGMENT, kSamplerSlots, 0);
+        if (!vertexShader || !pixelShader || !presentVS || !presentPS) {
             EnhancementLog("LS3DF.ini SDLGPU: the shaders do not load (%s)", api.SDL_GetError());
             ReleaseDevice();
             return false;
@@ -181,6 +186,22 @@ public:
             const uint8_t white[4] = {255, 255, 255, 255};
             UploadTexture(whiteTexture, 0, 1, 1, white, 4);
         }
+        // The gamma ramp's table and what reads it and the picture.
+        {
+            SDL_GPUTextureCreateInfo info = {};
+            info.type = SDL_GPU_TEXTURETYPE_2D;
+            info.format = SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM;
+            info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+            info.width = 256;
+            info.height = info.layer_count_or_depth = info.num_levels = 1;
+            rampTexture = api.SDL_CreateGPUTexture(gpu, &info);
+            SDL_GPUSamplerCreateInfo s = {};
+            s.min_filter = s.mag_filter = SDL_GPU_FILTER_LINEAR;
+            s.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
+            s.address_mode_u = s.address_mode_v = s.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+            presentSampler = api.SDL_CreateGPUSampler(gpu, &s);
+            rampLoaded = false;
+        }
         EnhancementLog("LS3DF.ini SDLGPU: drawing with SDL_GPU on %s", api.SDL_GetGPUDeviceDriver(gpu));
         Trace("device: %s", api.SDL_GetGPUDeviceDriver(gpu));
         return true;
@@ -197,6 +218,15 @@ public:
         for (auto &s : samplers)
             api.SDL_ReleaseGPUSampler(gpu, s.second);
         samplers.clear();
+        if (presentPipeline)
+            api.SDL_ReleaseGPUGraphicsPipeline(gpu, presentPipeline);
+        presentPipeline = nullptr;
+        if (presentSampler)
+            api.SDL_ReleaseGPUSampler(gpu, presentSampler);
+        presentSampler = nullptr;
+        if (rampTexture)
+            api.SDL_ReleaseGPUTexture(gpu, rampTexture);
+        rampTexture = nullptr;
         ReleaseTargets();
         for (SDL_GPUBuffer *b : {vertexBuffer, indexBuffer, defaultsBuffer})
             if (b)
@@ -218,10 +248,10 @@ public:
         if (whiteTexture)
             api.SDL_ReleaseGPUTexture(gpu, whiteTexture);
         whiteTexture = nullptr;
-        for (SDL_GPUShader *s : {vertexShader, pixelShader})
+        for (SDL_GPUShader *s : {vertexShader, pixelShader, presentVS, presentPS})
             if (s)
                 api.SDL_ReleaseGPUShader(gpu, s);
-        vertexShader = pixelShader = nullptr;
+        vertexShader = pixelShader = presentVS = presentPS = nullptr;
         if (window)
             api.SDL_ReleaseWindowFromGPUDevice(gpu, window);
         api.SDL_DestroyGPUDevice(gpu);
@@ -244,7 +274,7 @@ public:
         info.height = present.BackBufferHeight;
         info.layer_count_or_depth = info.num_levels = 1;
         backBuffer = api.SDL_CreateGPUTexture(gpu, &info);
-        depth = nullptr;
+        depth = multisampled = nullptr;
         if (present.EnableAutoDepthStencil) {
             for (SDL_GPUTextureFormat f : {SDL_GPU_TEXTUREFORMAT_D24_UNORM_S8_UINT, SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
                                            SDL_GPU_TEXTUREFORMAT_D32_FLOAT, SDL_GPU_TEXTUREFORMAT_D16_UNORM}) {
@@ -253,12 +283,43 @@ public:
                     break;
                 }
             }
+        }
+        // As many samples as were wanted and the GPU can do, the targets made with them or else without.
+        SDL_GPUSampleCount count = SDL_GPU_SAMPLECOUNT_1;
+        for (const auto &c : {std::pair<int, SDL_GPUSampleCount>{8, SDL_GPU_SAMPLECOUNT_8}, std::pair<int, SDL_GPUSampleCount>{4, SDL_GPU_SAMPLECOUNT_4},
+                              std::pair<int, SDL_GPUSampleCount>{2, SDL_GPU_SAMPLECOUNT_2}}) {
+            if (c.first <= SamplesWanted(p) && api.SDL_GPUTextureSupportsSampleCount(gpu, info.format, c.second) &&
+                (!present.EnableAutoDepthStencil || api.SDL_GPUTextureSupportsSampleCount(gpu, depthFormat, c.second))) {
+                count = c.second;
+                break;
+            }
+        }
+        if (count != SDL_GPU_SAMPLECOUNT_1) {
+            info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+            info.sample_count = count;
+            multisampled = api.SDL_CreateGPUTexture(gpu, &info);
+            if (!multisampled) {
+                EnhancementLog("LS3DF.ini MSAA: the multisampled back buffer cannot be made (%s), drawing without", api.SDL_GetError());
+                count = SDL_GPU_SAMPLECOUNT_1;
+            }
+        }
+        if (present.EnableAutoDepthStencil) {
             info.format = depthFormat;
             info.usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
+            info.sample_count = count;
             depth = api.SDL_CreateGPUTexture(gpu, &info);
             if (!depth)
                 return false;
         }
+        // (A pipeline is made for one sample count.)
+        const int settled = count == SDL_GPU_SAMPLECOUNT_8 ? 8 : count == SDL_GPU_SAMPLECOUNT_4 ? 4 : count == SDL_GPU_SAMPLECOUNT_2 ? 2 : 1;
+        if (settled != samples) {
+            for (auto &m : pipelines)
+                if (m.second)
+                    api.SDL_ReleaseGPUGraphicsPipeline(gpu, m.second);
+            pipelines.clear();
+        }
+        samples = settled;
         cleared = false;
         // (What this GPU cannot do falls back to vsync, always there.)
         const E_presentMode asked = ChoosePresentMode(p);
@@ -277,7 +338,9 @@ public:
             api.SDL_ReleaseGPUTexture(gpu, backBuffer);
         if (depth)
             api.SDL_ReleaseGPUTexture(gpu, depth);
-        backBuffer = depth = nullptr;
+        if (multisampled)
+            api.SDL_ReleaseGPUTexture(gpu, multisampled);
+        backBuffer = depth = multisampled = nullptr;
     }
     void WaitIdle() override { api.SDL_WaitForGPUIdle(gpu); }
     bool SupportsFormat(E_gpuFormat f) override
@@ -376,9 +439,14 @@ public:
         }
         // The draws.
         SDL_GPUColorTargetInfo color = {};
-        color.texture = backBuffer;
+        color.texture = multisampled ? multisampled : backBuffer;
         color.load_op = cleared ? SDL_GPU_LOADOP_LOAD : SDL_GPU_LOADOP_CLEAR;
         color.store_op = SDL_GPU_STOREOP_STORE;
+        if (multisampled) {
+            // (Kept: a read-back in the middle of a frame runs it in parts.)
+            color.store_op = SDL_GPU_STOREOP_RESOLVE_AND_STORE;
+            color.resolve_texture = backBuffer;
+        }
         SDL_GPUDepthStencilTargetInfo depthTarget = {};
         depthTarget.texture = depth;
         depthTarget.load_op = cleared ? SDL_GPU_LOADOP_LOAD : SDL_GPU_LOADOP_CLEAR;
@@ -438,20 +506,40 @@ public:
         return true;
     }
 
-    void Present() override
+    void Present(const D3DGAMMARAMP *ramp) override
     {
+        if (ramp)
+            LoadRamp(*ramp);
         const auto start = std::chrono::steady_clock::now();
         SDL_GPUTexture *swapchain = nullptr;
         Uint32 w = 0, h = 0;
         const bool acquired = window && api.SDL_WaitAndAcquireGPUSwapchainTexture(cmd, window, &swapchain, &w, &h);
         stats->acquire += std::chrono::steady_clock::now() - start;
-        if (acquired && swapchain) {
+        SDL_GPUGraphicsPipeline *throughRamp = acquired && swapchain && ramp ? PresentPipeline() : nullptr;
+        const S_rectangle picture = PictureRectangle(static_cast<int>(w), static_cast<int>(h), present.BackBufferWidth,
+                                                     present.BackBufferHeight);
+        if (throughRamp) {
+            SDL_GPUColorTargetInfo target = {};
+            target.texture = swapchain;
+            target.load_op = SDL_GPU_LOADOP_CLEAR;      // (black bars, a picture's shape kept)
+            target.clear_color = {0, 0, 0, 1};
+            target.store_op = SDL_GPU_STOREOP_STORE;
+            SDL_GPURenderPass *pass = api.SDL_BeginGPURenderPass(cmd, &target, 1, nullptr);
+            api.SDL_BindGPUGraphicsPipeline(pass, throughRamp);
+            const SDL_GPUViewport viewport = {static_cast<float>(picture.x), static_cast<float>(picture.y),
+                                              static_cast<float>(picture.w), static_cast<float>(picture.h), 0, 1};
+            api.SDL_SetGPUViewport(pass, &viewport);
+            SDL_GPUTextureSamplerBinding bindings[kSamplerSlots];
+            for (int s = 0; s < kSamplerSlots; ++s)
+                bindings[s] = {s == 1 ? rampTexture : backBuffer, presentSampler};
+            api.SDL_BindGPUFragmentSamplers(pass, 0, bindings, kSamplerSlots);
+            api.SDL_DrawGPUPrimitives(pass, 3, 1, 0, 0);
+            api.SDL_EndGPURenderPass(pass);
+        } else if (acquired && swapchain) {
             SDL_GPUBlitInfo blit = {};
             blit.source.texture = backBuffer;
             blit.source.w = present.BackBufferWidth;
             blit.source.h = present.BackBufferHeight;
-            const S_rectangle picture = PictureRectangle(static_cast<int>(w), static_cast<int>(h), present.BackBufferWidth,
-                                                         present.BackBufferHeight);
             blit.destination.texture = swapchain;
             blit.destination.x = static_cast<Uint32>(picture.x);
             blit.destination.y = static_cast<Uint32>(picture.y);
@@ -498,6 +586,57 @@ public:
     }
 
 private:
+    // The ramp's table for this frame's command buffer, when it has changed.
+    void LoadRamp(const D3DGAMMARAMP &ramp)
+    {
+        uint8_t texels[sizeof rampTexels];
+        RampTexels(ramp, texels);
+        if (rampLoaded && !std::memcmp(texels, rampTexels, sizeof texels))
+            return;
+        SDL_GPUTransferBufferCreateInfo t = {};
+        t.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+        t.size = sizeof texels;
+        SDL_GPUTransferBuffer *transfer = api.SDL_CreateGPUTransferBuffer(gpu, &t);
+        if (!transfer)
+            return;
+        std::memcpy(api.SDL_MapGPUTransferBuffer(gpu, transfer, false), texels, sizeof texels);
+        api.SDL_UnmapGPUTransferBuffer(gpu, transfer);
+        SDL_GPUCopyPass *copy = api.SDL_BeginGPUCopyPass(cmd);
+        SDL_GPUTextureTransferInfo from = {};
+        from.transfer_buffer = transfer;
+        SDL_GPUTextureRegion to = {};
+        to.texture = rampTexture;
+        to.w = 256;
+        to.h = to.d = 1;
+        api.SDL_UploadToGPUTexture(copy, &from, &to, false);
+        api.SDL_EndGPUCopyPass(copy);
+        api.SDL_ReleaseGPUTransferBuffer(gpu, transfer);
+        std::memcpy(rampTexels, texels, sizeof texels);
+        rampLoaded = true;
+    }
+
+    SDL_GPUGraphicsPipeline *PresentPipeline()
+    {
+        if (presentPipeline)
+            return presentPipeline;
+        SDL_GPUColorTargetDescription target = {};
+        target.format = api.SDL_GetGPUSwapchainTextureFormat(gpu, window);
+        SDL_GPUGraphicsPipelineCreateInfo info = {};
+        info.vertex_shader = presentVS;
+        info.fragment_shader = presentPS;
+        info.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+        info.rasterizer_state.fill_mode = SDL_GPU_FILLMODE_FILL;
+        info.rasterizer_state.cull_mode = SDL_GPU_CULLMODE_NONE;
+        info.target_info.color_target_descriptions = &target;
+        info.target_info.num_color_targets = 1;
+        presentPipeline = api.SDL_CreateGPUGraphicsPipeline(gpu, &info);
+        if (!presentPipeline) {
+            EnhancementLog("LS3DF.ini SDLGPU: the gamma ramp's pipeline cannot be made (%s)", api.SDL_GetError());
+            Trace("gamma ramp's pipeline: %s", api.SDL_GetError());
+        }
+        return presentPipeline;
+    }
+
     SDL_GPUSampler *Sampler(const S_samplerKey &key)
     {
         auto s = samplers.find(key);
@@ -507,7 +646,9 @@ private:
         const bool anisotropic = key.minFilter == D3DTEXF_ANISOTROPIC || key.magFilter == D3DTEXF_ANISOTROPIC;
         info.min_filter = key.minFilter >= D3DTEXF_LINEAR ? SDL_GPU_FILTER_LINEAR : SDL_GPU_FILTER_NEAREST;
         info.mag_filter = key.magFilter >= D3DTEXF_LINEAR ? SDL_GPU_FILTER_LINEAR : SDL_GPU_FILTER_NEAREST;
-        info.mipmap_mode = key.mipFilter == D3DTEXF_LINEAR ? SDL_GPU_SAMPLERMIPMAPMODE_LINEAR : SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
+        // (Anisotropic with no mip filter: linear too for Direct3D 12, on level 0 alone by max_lod below.)
+        info.mipmap_mode = key.mipFilter == D3DTEXF_LINEAR || (anisotropic && key.anisotropy > 1) ? SDL_GPU_SAMPLERMIPMAPMODE_LINEAR
+                                                                                                  : SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
         info.address_mode_u = Address(key.addressU);
         info.address_mode_v = Address(key.addressV);
         info.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
@@ -573,6 +714,11 @@ private:
             info.rasterizer_state.depth_bias_constant_factor = -static_cast<float>(key.zbias);
         }
         info.rasterizer_state.enable_depth_clip = true;
+        info.multisample_state.sample_count = samples == 8   ? SDL_GPU_SAMPLECOUNT_8
+                                              : samples == 4 ? SDL_GPU_SAMPLECOUNT_4
+                                              : samples == 2 ? SDL_GPU_SAMPLECOUNT_2
+                                                             : SDL_GPU_SAMPLECOUNT_1;
+        info.multisample_state.enable_alpha_to_coverage = key.alphaToCoverage != 0;
         info.depth_stencil_state.enable_depth_test = key.depthTest != 0;
         info.depth_stencil_state.enable_depth_write = key.depthWrite != 0;
         info.depth_stencil_state.compare_op = static_cast<SDL_GPUCompareOp>(key.depthFunc);
@@ -580,9 +726,9 @@ private:
         info.target_info.num_color_targets = 1;
         info.target_info.has_depth_stencil_target = depth != nullptr;
         info.target_info.depth_stencil_format = depthFormat;
-        Trace("pipeline %zu: stride %u primitive %u blend %u %u/%u mask %u depth %u/%u func %u cull %u fill %u zbias %u%s%s",
+        Trace("pipeline %zu: stride %u primitive %u blend %u %u/%u mask %u depth %u/%u func %u cull %u fill %u zbias %u coverage %u%s%s",
               pipelines.size(), key.stride, key.primitive, key.blend, key.srcBlend, key.dstBlend, key.writeMask,
-              key.depthTest, key.depthWrite, key.depthFunc, key.cull, key.fill, key.zbias,
+              key.depthTest, key.depthWrite, key.depthFunc, key.cull, key.fill, key.zbias, key.alphaToCoverage,
               layout.pretransformed ? " pretransformed" : "", layout.programmable ? " programmable" : "");
         for (const S_layout::S_attribute &a : layout.attributes)
             Trace("    location %u offset %u format %d", a.location, a.offset, static_cast<int>(a.format));
@@ -733,6 +879,13 @@ private:
     D3DPRESENT_PARAMETERS present = {};
     SDL_GPUCommandBuffer *cmd = nullptr;    // Run's, until Present or ReadBack submits it
     SDL_GPUTexture *backBuffer = nullptr, *depth = nullptr, *whiteTexture = nullptr;
+    SDL_GPUTexture *multisampled = nullptr;     // what is drawn into with multisampling, resolved into backBuffer
+    SDL_GPUTexture *rampTexture = nullptr;
+    SDL_GPUSampler *presentSampler = nullptr;
+    SDL_GPUShader *presentVS = nullptr, *presentPS = nullptr;
+    SDL_GPUGraphicsPipeline *presentPipeline = nullptr;
+    uint8_t rampTexels[1024] = {};
+    bool rampLoaded = false;
     SDL_GPUTextureFormat depthFormat = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
     bool cleared = false;
     SDL_GPUShader *vertexShader = nullptr, *pixelShader = nullptr;

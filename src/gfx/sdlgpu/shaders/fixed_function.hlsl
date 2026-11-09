@@ -271,6 +271,7 @@ BLOCK(PixelUniforms, b0, space3)
     float4 textureFactor;
     float4 fogColor;
     int4 pixelFlags;            // x: fog, y: specular, z: alpha test function (1 never ... 8 always, 0 off), w: alpha ref (0-255)
+    int4 coverage;              // x: the alpha test is alpha to coverage
 };
 
 #ifdef GLSL
@@ -406,8 +407,17 @@ float4 PSMain(VSOut i) SEM(SV_Target)
     }
     if (pixelFlags.y != 0)
         current.rgb = saturate(current.rgb + i.specular.rgb);
-    if (pixelFlags.z != 0 && !AlphaPasses(current.a, pixelFlags.z, pixelFlags.w))
+    // Alpha to coverage (LS3DF.ini): the alpha becomes how much of this pixel is on the passing side of
+    // the reference, so the edge is one pixel wide at any distance, and the samples cover that much. What
+    // is wholly on the failing side still goes.
+    const float alphaWidth = fwidth(current.a);
+    if (coverage.x != 0) {
+        current.a = saturate((current.a - float(pixelFlags.w) / 255.0) / max(alphaWidth, 0.0001) + 0.5);
+        if (current.a <= 0.0)
+            discard;
+    } else if (pixelFlags.z != 0 && !AlphaPasses(current.a, pixelFlags.z, pixelFlags.w)) {
         discard;
+    }
     if (pixelFlags.x != 0)
         current.rgb = lerp(fogColor.rgb, current.rgb, saturate(i.specular.a));
     return current;

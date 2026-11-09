@@ -35,6 +35,8 @@
 //   SDLGPUDriver=vulkan        ; SDL_GPU's API: direct3d12 or vulkan (empty: SDL's choice)
 //   PresentMode=vsync          ; how SDL_GPU and OpenGL show frames: vsync, mailbox or immediate
 //                              ; (empty: what the game asks for)
+//   MSAA=4                     ; SDL_GPU and OpenGL: that many samples a pixel (2, 4 or 8), at least
+//   AlphaToCoverage=1          ; SDL_GPU and OpenGL with MSAA: alpha-tested 3D edges smoothed too
 //   OpenGL=1                   ; drawing through OpenGL 3.3 (SDL3.dll next to the DLL; gfx/opengl)
 //                              ; instead of Direct3D 8; Direct3D 8 when SDL3 is missing
 //   SDLGPUDebug=1              ; the API's validation (the Vulkan SDK's layers, Direct3D 12's debug
@@ -62,6 +64,8 @@ struct S_enhancements {
     bool sdlGpuDebug;                       // [Render] SDLGPUDebug
     bool sdlGpuStats;                       // [Render] SDLGPUStats
     char presentMode[16];                   // [Render] PresentMode ("": what the game asks for)
+    int msaa;                               // [Render] MSAA (0: what the game asks for)
+    bool alphaToCoverage;                   // [Render] AlphaToCoverage
 };
 
 // The options (LS3DF.ini is read on the first call).

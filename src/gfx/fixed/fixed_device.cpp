@@ -79,6 +79,23 @@ bool S_pipelineKey::operator<(const S_pipelineKey &o) const { return std::memcmp
 bool S_pipelineKey::operator==(const S_pipelineKey &o) const { return std::memcmp(this, &o, sizeof *this) == 0; }
 bool S_samplerKey::operator<(const S_samplerKey &o) const { return std::memcmp(this, &o, sizeof *this) < 0; }
 
+int SamplesWanted(const D3DPRESENT_PARAMETERS &present)
+{
+    const int wanted = std::max(static_cast<int>(present.MultiSampleType), Enhancements().msaa);
+    return wanted >= 8 ? 8 : wanted >= 4 ? 4 : wanted >= 2 ? 2 : 1;
+}
+
+void RampTexels(const D3DGAMMARAMP &ramp, uint8_t *bgra)
+{
+    const auto byte = [](WORD v) { return static_cast<uint8_t>((v + 128u) / 257u); };
+    for (int i = 0; i < 256; ++i) {
+        bgra[i * 4] = byte(ramp.blue[i]);
+        bgra[i * 4 + 1] = byte(ramp.green[i]);
+        bgra[i * 4 + 2] = byte(ramp.red[i]);
+        bgra[i * 4 + 3] = 255;
+    }
+}
+
 void *EngineWindow(HWND hwnd, bool opengl, bool *own)
 {
     *own = false;
@@ -207,6 +224,15 @@ D3DMATRIX Multiply(const D3DMATRIX &a, const D3DMATRIX &b)
             r.m[i][j] = a.m[i][0] * b.m[0][j] + a.m[i][1] * b.m[1][j] + a.m[i][2] * b.m[2][j] + a.m[i][3] * b.m[3][j];
     return r;
 }
+// What a device starts with: each value as it is, in 16 bits.
+D3DGAMMARAMP IdentityRamp()
+{
+    D3DGAMMARAMP ramp;
+    for (int i = 0; i < 256; ++i)
+        ramp.red[i] = ramp.green[i] = ramp.blue[i] = static_cast<WORD>(i * 257);
+    return ramp;
+}
+
 D3DMATRIX Identity()
 {
     D3DMATRIX m = {};
@@ -575,7 +601,10 @@ public:
     HRESULT CheckDepthStencilMatch(UINT, D3DDEVTYPE, D3DFORMAT, D3DFORMAT, D3DFORMAT) override { return D3D_OK; }
     HRESULT CheckDeviceMultiSampleType(UINT, D3DDEVTYPE, D3DFORMAT, BOOL, D3DMULTISAMPLE_TYPE samples) override
     {
-        return samples == D3DMULTISAMPLE_NONE ? D3D_OK : D3DERR_NOTAVAILABLE;
+        // (A renderer settles on what the GPU can do when the device is made.)
+        return samples == D3DMULTISAMPLE_NONE || samples == D3DMULTISAMPLE_2_SAMPLES || samples == D3DMULTISAMPLE_4_SAMPLES ||
+                       samples == D3DMULTISAMPLE_8_SAMPLES
+                   ? D3D_OK : D3DERR_NOTAVAILABLE;
     }
 
     // ---- the device
@@ -644,7 +673,8 @@ public:
         const auto built = Clock::now();
         stats.build += built - start;
         const auto acquired = stats.acquire;
-        renderer->Present();
+        // (Direct3D has a gamma ramp in full screen only.)
+        renderer->Present(rampActive && !present.Windowed ? &gamma : nullptr);
         // Every 5 seconds, what a frame cost (LS3DF.ini SDLGPUStats).
         const auto now = Clock::now();
         const auto toMs = [](Clock::duration d) { return std::chrono::duration<float, std::milli>(d).count(); };
@@ -680,8 +710,22 @@ public:
         }
         return D3D_OK;
     }
-    void SetGammaRamp(DWORD, const D3DGAMMARAMP *ramp) override { gamma = *ramp; }
-    void GetGammaRamp(D3DGAMMARAMP *ramp) override { *ramp = gamma; }
+    void SetGammaRamp(DWORD, const D3DGAMMARAMP *ramp) override
+    {
+        Guard g(m);
+        gamma = *ramp;
+        // (An identity shows the picture as it is, with no pass through the table.)
+        uint8_t texels[1024];
+        RampTexels(gamma, texels);
+        rampActive = false;
+        for (int i = 0; i < 256; ++i)
+            rampActive = rampActive || texels[i * 4] != i || texels[i * 4 + 1] != i || texels[i * 4 + 2] != i;
+    }
+    void GetGammaRamp(D3DGAMMARAMP *ramp) override
+    {
+        Guard g(m);
+        *ramp = gamma;
+    }
 
     // ---- frame
     HRESULT BeginScene() override { return D3D_OK; }
@@ -1233,7 +1277,11 @@ private:
         depthSurface.width = present.BackBufferWidth;
         depthSurface.height = present.BackBufferHeight;
         depthSurface.format = present.AutoDepthStencilFormat;
-        return renderer->MakeTargets(present);
+        if (!renderer->MakeTargets(present))
+            return false;
+        Trace("back buffer %ux%u, %d samples a pixel, alpha to coverage %s", present.BackBufferWidth, present.BackBufferHeight,
+              renderer->samples, renderer->samples > 1 && Enhancements().alphaToCoverage ? "on" : "off");
+        return true;
     }
 
     void ResetState()
@@ -1444,6 +1492,10 @@ private:
         key.cull = static_cast<uint8_t>(rs[D3DRS_CULLMODE]);
         key.fill = static_cast<uint8_t>(rs[D3DRS_FILLMODE] == D3DFILL_WIREFRAME ? D3DFILL_WIREFRAME : D3DFILL_SOLID);
         key.zbias = static_cast<uint8_t>(std::min<DWORD>(rs[D3DRS_ZBIAS], 16));
+        // (LS3DF.ini AlphaToCoverage: 3D only, so the 2D drawing's edges stay what the game drew. A blended
+        // draw's alpha is its blend's. A test for less than the reference has no edge to smooth this way.)
+        key.alphaToCoverage = renderer->samples > 1 && Enhancements().alphaToCoverage && rs[D3DRS_ALPHATESTENABLE] && !key.blend &&
+                              !layout->pretransformed && (rs[D3DRS_ALPHAFUNC] == D3DCMP_GREATER || rs[D3DRS_ALPHAFUNC] == D3DCMP_GREATEREQUAL);
         c.viewport = {static_cast<float>(viewport.X), static_cast<float>(viewport.Y), static_cast<float>(viewport.Width),
                       static_cast<float>(viewport.Height), viewport.MinZ, viewport.MaxZ};
         c.scissor = {static_cast<int>(viewport.X), static_cast<int>(viewport.Y), static_cast<int>(viewport.Width),
@@ -1558,6 +1610,7 @@ private:
         u.pixelFlags = {rs[D3DRS_FOGENABLE] ? 1 : 0, rs[D3DRS_SPECULARENABLE] ? 1 : 0,
                         rs[D3DRS_ALPHATESTENABLE] ? static_cast<int32_t>(rs[D3DRS_ALPHAFUNC]) : 0,
                         static_cast<int32_t>(rs[D3DRS_ALPHAREF] & 255)};
+        u.coverage = {c.key.alphaToCoverage, 0, 0, 0};
         return u;
     }
 
@@ -1572,6 +1625,14 @@ private:
         key.addressV = static_cast<uint8_t>(t[D3DTSS_ADDRESSV]);
         key.anisotropy = static_cast<uint8_t>(std::min<DWORD>(t[D3DTSS_MAXANISOTROPY], 16));
         key.lodBias = static_cast<int16_t>(AsFloat(t[D3DTSS_MIPMAPLODBIAS]) * 256);
+        // Anisotropic filtering is of all three filters: the only form Direct3D 12 takes on every driver
+        // (with a point mip filter, or a point filter for minification or magnification, CreateSampler
+        // refuses the filter and removes the device). The other APIs draw the same, for the same pictures.
+        if ((key.minFilter == D3DTEXF_ANISOTROPIC || key.magFilter == D3DTEXF_ANISOTROPIC) && key.anisotropy > 1) {
+            key.minFilter = key.magFilter = D3DTEXF_ANISOTROPIC;
+            if (key.mipFilter == D3DTEXF_POINT)
+                key.mipFilter = D3DTEXF_LINEAR;
+        }
         return key;
     }
 
@@ -1616,7 +1677,8 @@ private:
     D3DPRESENT_PARAMETERS present = {};
     S_surface backSurface, depthSurface;
     std::vector<D3DDISPLAYMODE> modes;
-    D3DGAMMARAMP gamma = {};
+    D3DGAMMARAMP gamma = IdentityRamp();
+    bool rampActive = false;
     // The device's state.
     DWORD rs[256] = {};
     DWORD tss[8][32] = {};

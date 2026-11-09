@@ -55,6 +55,7 @@ struct S_pixelUniforms {
     F4 textureFactor;
     F4 fogColor;
     I4 pixelFlags;
+    I4 coverage;                    // x: the alpha test is alpha to coverage
 };
 
 // ---------------------------------------------------------------- resources
@@ -137,7 +138,7 @@ struct S_layout {
 struct S_pipelineKey {
     uint32_t layout, stride;
     uint8_t primitive, blend, srcBlend, dstBlend, writeMask, depthTest, depthWrite, depthFunc, cull, fill,
-        zbias, pad;
+        zbias, alphaToCoverage;
     bool operator<(const S_pipelineKey &o) const;
     bool operator==(const S_pipelineKey &o) const;
 };
@@ -208,12 +209,14 @@ public:
     virtual void ReleaseTexture(void *gpu) = 0;
     // The frame drawn into the back buffer. A Present or a ReadBack follows, once.
     virtual bool Run(const S_frame &frame) = 0;
-    // The back buffer shown in the window, scaled to it.
-    virtual void Present() = 0;
+    // The back buffer shown in the window, scaled to it, through `ramp` if there is one (the ramp changes
+    // only what is shown: ReadBack never sees it).
+    virtual void Present(const D3DGAMMARAMP *ramp) = 0;
     // The back buffer as BGRA8 rows, top first.
     virtual bool ReadBack(std::vector<uint8_t> *rows) = 0;
 
     S_stats *stats = nullptr;       // (the device's: uploads and waits are added here)
+    int samples = 1;                // the samples a pixel MakeTargets settled on (1: no multisampling)
 };
 
 // The render device on a renderer (kept for the process's life).
@@ -232,6 +235,11 @@ enum E_presentMode {
     PRESENT_IMMEDIATE,      // no waiting: shown at once, tearing if need be
 };
 E_presentMode ChoosePresentMode(const D3DPRESENT_PARAMETERS &present);
+// The samples a pixel wanted, 1, 2, 4 or 8: what the game asks for or LS3DF.ini's MSAA, the more of them.
+// (A renderer settles on as many as the GPU can do.)
+int SamplesWanted(const D3DPRESENT_PARAMETERS &present);
+// A gamma ramp as a 256 x 1 BGRA8 texture's 1024 bytes.
+void RampTexels(const D3DGAMMARAMP &ramp, uint8_t *bgra);
 // Where a back buffer goes in a window of that many pixels: as large as fits, its shape kept, centred.
 struct S_rectangle {
     int x, y, w, h;

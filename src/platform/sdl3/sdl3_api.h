@@ -76,6 +76,8 @@ namespace ls3d::sdl3 {
     X(SDL_WindowSupportsGPUPresentMode)                                                                  \
     X(SDL_SetGPUSwapchainParameters)                                                                     \
     X(SDL_GPUTextureSupportsFormat)                                                                      \
+    X(SDL_GPUTextureSupportsSampleCount)                                                                 \
+    X(SDL_GetGPUSwapchainTextureFormat)                                                                  \
     X(SDL_CreateGPUShader)                                                                               \
     X(SDL_ReleaseGPUShader)                                                                              \
     X(SDL_CreateGPUGraphicsPipeline)                                                                     \

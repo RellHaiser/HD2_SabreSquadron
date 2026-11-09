@@ -9,6 +9,8 @@
 //   and scissors are as Direct3D gives them, a read-back's rows are in order, and rasterising ties
 //   fall as Direct3D's do. Turned over, Direct3D's clockwise front faces are counter-clockwise.
 // - Present scales the back buffer into the window, turning it back over.
+// With multisampling a frame draws into a second framebuffer of renderbuffers, kept from run to run, and
+// each run ends by resolving it into the back buffer.
 // Every call is on the render thread: the device only reaches a renderer from there.
 #include "gfx/opengl/opengl_device.h"
 
@@ -92,6 +94,7 @@ using sdl3::api;
     X(PFNGLDELETERENDERBUFFERSPROC, glDeleteRenderbuffers)                                                   \
     X(PFNGLBINDRENDERBUFFERPROC, glBindRenderbuffer)                                                         \
     X(PFNGLRENDERBUFFERSTORAGEPROC, glRenderbufferStorage)                                                   \
+    X(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC, glRenderbufferStorageMultisample)                             \
     X(PFNGLBLITFRAMEBUFFERPROC, glBlitFramebuffer)                                                           \
     X(PFNGLGENSAMPLERSPROC, glGenSamplers)                                                                   \
     X(PFNGLDELETESAMPLERSPROC, glDeleteSamplers)                                                             \
@@ -211,6 +214,23 @@ public:
             ReleaseDevice();
             return false;
         }
+        presentProgram = LinkProgram(kPresentSource);
+        if (!presentProgram) {
+            ReleaseDevice();
+            return false;
+        }
+        gl.glUniform1i(gl.glGetUniformLocation(presentProgram, "picture"), 0);
+        gl.glUniform1i(gl.glGetUniformLocation(presentProgram, "ramp"), 1);
+        gl.glGenTextures(1, &rampTexture);
+        gl.glBindTexture(GL_TEXTURE_2D, rampTexture);
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+        gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 1, 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
+        gl.glGenSamplers(1, &presentSampler);
+        gl.glSamplerParameteri(presentSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl.glSamplerParameteri(presentSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl.glSamplerParameteri(presentSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl.glSamplerParameteri(presentSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        rampLoaded = false;
         gl.glGenVertexArrays(1, &vao);
         gl.glBindVertexArray(vao);
         gl.glGenBuffers(1, &vertexBuffer);
@@ -247,6 +267,12 @@ public:
             for (auto &s : samplers)
                 gl.glDeleteSamplers(1, &s.second);
             samplers.clear();
+            if (presentSampler)
+                gl.glDeleteSamplers(1, &presentSampler), presentSampler = 0;
+            if (rampTexture)
+                gl.glDeleteTextures(1, &rampTexture), rampTexture = 0;
+            if (presentProgram)
+                gl.glDeleteProgram(presentProgram), presentProgram = 0;
             ReleaseTargets();
             for (GLuint *b : {&vertexBuffer, &indexBuffer, &uniformBuffer})
                 if (*b)
@@ -280,7 +306,18 @@ public:
         gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
         gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         gl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTarget, 0);
-        if (p.EnableAutoDepthStencil) {
+        // As many samples as were wanted and the driver can do, the targets made with them or else without.
+        GLint most = 1;
+        gl.glGetIntegerv(GL_MAX_SAMPLES, &most);
+        samples = std::min(SamplesWanted(p), static_cast<int>(most));
+        samples = samples >= 8 ? 8 : samples >= 4 ? 4 : samples >= 2 ? 2 : 1;
+        if (samples > 1 && !MakeMultisampled(w, h, p.EnableAutoDepthStencil != FALSE)) {
+            EnhancementLog("LS3DF.ini MSAA: the multisampled back buffer cannot be made, drawing without");
+            ReleaseMultisampled();
+            samples = 1;
+        }
+        gl.glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        if (samples == 1 && p.EnableAutoDepthStencil) {
             gl.glGenRenderbuffers(1, &depthTarget);
             gl.glBindRenderbuffer(GL_RENDERBUFFER, depthTarget);
             gl.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
@@ -290,12 +327,17 @@ public:
             EnhancementLog("LS3DF.ini OpenGL: the back buffer cannot be made");
             return false;
         }
+        drawFramebuffer = samples > 1 ? multisampledFramebuffer : framebuffer;
         gl.glDisable(GL_SCISSOR_TEST);
         gl.glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         gl.glDepthMask(GL_TRUE);
         gl.glClearColor(0, 0, 0, 0);
         gl.glClearDepth(1);
-        gl.glClear(GL_COLOR_BUFFER_BIT | (p.EnableAutoDepthStencil ? GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT : 0));
+        gl.glClear(samples > 1 ? GL_COLOR_BUFFER_BIT : GL_COLOR_BUFFER_BIT | (p.EnableAutoDepthStencil ? GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT : 0));
+        if (samples > 1) {
+            gl.glBindFramebuffer(GL_FRAMEBUFFER, multisampledFramebuffer);
+            gl.glClear(GL_COLOR_BUFFER_BIT | (p.EnableAutoDepthStencil ? GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT : 0));
+        }
         // (OpenGL has no mailbox: without waiting, the driver and the compositor decide.)
         const E_presentMode mode = ChoosePresentMode(p);
         api.SDL_GL_SetSwapInterval(mode == PRESENT_VSYNC ? 1 : 0);
@@ -310,6 +352,8 @@ public:
             gl.glDeleteTextures(1, &colorTarget), colorTarget = 0;
         if (depthTarget)
             gl.glDeleteRenderbuffers(1, &depthTarget), depthTarget = 0;
+        ReleaseMultisampled();
+        drawFramebuffer = 0;
     }
     void WaitIdle() override { gl.glFinish(); }
     bool SupportsFormat(E_gpuFormat f) override { return (f != GF_BC1 && f != GF_BC2 && f != GF_BC3) || s3tc; }
@@ -365,7 +409,7 @@ public:
 
     bool Run(const S_frame &frame) override
     {
-        gl.glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        gl.glBindFramebuffer(GL_FRAMEBUFFER, drawFramebuffer);
         gl.glUseProgram(program);
         gl.glEnable(GL_SCISSOR_TEST);
         gl.glDepthRange(0, 1);
@@ -436,10 +480,18 @@ public:
             else
                 gl.glDrawArrays(Primitive(c.key.primitive), 0, static_cast<GLsizei>(c.count));
         }
+        if (samples > 1) {
+            gl.glDisable(GL_SCISSOR_TEST);
+            gl.glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, multisampledFramebuffer);
+            gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+            const GLint w = static_cast<GLint>(present.BackBufferWidth), h = static_cast<GLint>(present.BackBufferHeight);
+            gl.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        }
         return true;
     }
 
-    void Present() override
+    void Present(const D3DGAMMARAMP *ramp) override
     {
         int w = 0, h = 0;
         api.SDL_GetWindowSizeInPixels(window, &w, &h);
@@ -450,9 +502,13 @@ public:
         gl.glClearColor(0, 0, 0, 1);            // (black bars, a picture's shape kept)
         gl.glClear(GL_COLOR_BUFFER_BIT);
         const S_rectangle picture = PictureRectangle(w, h, present.BackBufferWidth, present.BackBufferHeight);
-        gl.glBlitFramebuffer(0, 0, static_cast<GLint>(present.BackBufferWidth), static_cast<GLint>(present.BackBufferHeight),
-                             picture.x, h - picture.y, picture.x + picture.w, h - picture.y - picture.h, GL_COLOR_BUFFER_BIT,
-                             GL_LINEAR);
+        if (ramp) {
+            DrawThroughRamp(*ramp, picture, h);
+        } else {
+            gl.glBlitFramebuffer(0, 0, static_cast<GLint>(present.BackBufferWidth), static_cast<GLint>(present.BackBufferHeight),
+                                 picture.x, h - picture.y, picture.x + picture.w, h - picture.y - picture.h, GL_COLOR_BUFFER_BIT,
+                                 GL_LINEAR);
+        }
         const auto start = std::chrono::steady_clock::now();
         api.SDL_GL_SwapWindow(window);
         stats->acquire += std::chrono::steady_clock::now() - start;
@@ -470,11 +526,77 @@ public:
     }
 
 private:
+    bool MakeMultisampled(GLsizei w, GLsizei h, bool withDepth)
+    {
+        gl.glGenFramebuffers(1, &multisampledFramebuffer);
+        gl.glBindFramebuffer(GL_FRAMEBUFFER, multisampledFramebuffer);
+        gl.glGenRenderbuffers(1, &multisampledColor);
+        gl.glBindRenderbuffer(GL_RENDERBUFFER, multisampledColor);
+        gl.glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, w, h);
+        gl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, multisampledColor);
+        if (withDepth) {
+            gl.glGenRenderbuffers(1, &multisampledDepth);
+            gl.glBindRenderbuffer(GL_RENDERBUFFER, multisampledDepth);
+            gl.glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, w, h);
+            gl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, multisampledDepth);
+        }
+        return gl.glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    }
+    void ReleaseMultisampled()
+    {
+        if (multisampledFramebuffer)
+            gl.glDeleteFramebuffers(1, &multisampledFramebuffer), multisampledFramebuffer = 0;
+        for (GLuint *r : {&multisampledColor, &multisampledDepth})
+            if (*r)
+                gl.glDeleteRenderbuffers(1, r), *r = 0;
+    }
+
+    // The back buffer into the window through the ramp's table. (Run sets again all the state this
+    // changes: a frame's caches start empty.)
+    void DrawThroughRamp(const D3DGAMMARAMP &ramp, const S_rectangle &picture, int windowHeight)
+    {
+        uint8_t texels[sizeof rampTexels];
+        RampTexels(ramp, texels);
+        gl.glActiveTexture(GL_TEXTURE1);
+        gl.glBindTexture(GL_TEXTURE_2D, rampTexture);
+        if (!rampLoaded || std::memcmp(texels, rampTexels, sizeof texels) != 0) {
+            gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 1, 0, GL_BGRA, GL_UNSIGNED_BYTE, texels);
+            std::memcpy(rampTexels, texels, sizeof texels);
+            rampLoaded = true;
+        }
+        gl.glActiveTexture(GL_TEXTURE0);
+        gl.glBindTexture(GL_TEXTURE_2D, colorTarget);
+        gl.glBindSampler(0, presentSampler);
+        gl.glBindSampler(1, presentSampler);
+        gl.glDisable(GL_BLEND);
+        gl.glDisable(GL_DEPTH_TEST);
+        gl.glDisable(GL_CULL_FACE);
+        gl.glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+        gl.glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        gl.glUseProgram(presentProgram);
+        gl.glViewport(picture.x, windowHeight - picture.y - picture.h, picture.w, picture.h);
+        gl.glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
+
     bool MakeProgram()
+    {
+        program = LinkProgram(kFixedFunctionSource);
+        if (!program)
+            return false;
+        gl.glUniformBlockBinding(program, gl.glGetUniformBlockIndex(program, "VertexUniforms"), 0);
+        gl.glUniformBlockBinding(program, gl.glGetUniformBlockIndex(program, "PixelUniforms"), 1);
+        gl.glUniform1i(gl.glGetUniformLocation(program, "texture0"), 0);
+        gl.glUniform1i(gl.glGetUniformLocation(program, "texture1"), 1);
+        gl.glUniform1i(gl.glGetUniformLocation(program, "texture2"), 2);
+        return true;
+    }
+
+    // A source's two stages as a program, in use (0: the reason is logged).
+    GLuint LinkProgram(const char *source)
     {
         const auto compile = [&](GLenum stage, const char *defines) -> GLuint {
             const GLuint shader = gl.glCreateShader(stage);
-            const char *sources[2] = {defines, kFixedFunctionSource};
+            const char *sources[2] = {defines, source};
             gl.glShaderSource(shader, 2, sources, nullptr);
             gl.glCompileShader(shader);
             GLint ok = 0;
@@ -492,33 +614,33 @@ private:
         const GLuint vs = compile(GL_VERTEX_SHADER, "#version 330 core\n#define GLSL\n#define VERTEX_STAGE\n");
         const GLuint ps = compile(GL_FRAGMENT_SHADER, "#version 330 core\n#define GLSL\n#define PIXEL_STAGE\n");
         if (!vs || !ps)
-            return false;
-        program = gl.glCreateProgram();
-        gl.glAttachShader(program, vs);
-        gl.glAttachShader(program, ps);
-        gl.glLinkProgram(program);
+            return 0;
+        const GLuint linked = gl.glCreateProgram();
+        gl.glAttachShader(linked, vs);
+        gl.glAttachShader(linked, ps);
+        gl.glLinkProgram(linked);
         gl.glDeleteShader(vs);
         gl.glDeleteShader(ps);
         GLint ok = 0;
-        gl.glGetProgramiv(program, GL_LINK_STATUS, &ok);
+        gl.glGetProgramiv(linked, GL_LINK_STATUS, &ok);
         if (!ok) {
             char log[2048] = {};
-            gl.glGetProgramInfoLog(program, sizeof log, nullptr, log);
+            gl.glGetProgramInfoLog(linked, sizeof log, nullptr, log);
             EnhancementLog("LS3DF.ini OpenGL: the shaders do not link: %s", log);
             Trace("program: %s", log);
-            return false;
+            gl.glDeleteProgram(linked);
+            return 0;
         }
-        gl.glUseProgram(program);
-        gl.glUniformBlockBinding(program, gl.glGetUniformBlockIndex(program, "VertexUniforms"), 0);
-        gl.glUniformBlockBinding(program, gl.glGetUniformBlockIndex(program, "PixelUniforms"), 1);
-        gl.glUniform1i(gl.glGetUniformLocation(program, "texture0"), 0);
-        gl.glUniform1i(gl.glGetUniformLocation(program, "texture1"), 1);
-        gl.glUniform1i(gl.glGetUniformLocation(program, "texture2"), 2);
-        return true;
+        gl.glUseProgram(linked);
+        return linked;
     }
 
     void ApplyKey(const S_pipelineKey &key)
     {
+        if (key.alphaToCoverage)
+            gl.glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+        else
+            gl.glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
         if (key.blend) {
             gl.glEnable(GL_BLEND);
             gl.glBlendFunc(BlendFactor(key.srcBlend), BlendFactor(key.dstBlend));
@@ -608,6 +730,11 @@ private:
     bool s3tc = false, anisotropic = false;
     GLuint program = 0, vao = 0, vertexBuffer = 0, indexBuffer = 0, uniformBuffer = 0, whiteTexture = 0;
     GLuint framebuffer = 0, colorTarget = 0, depthTarget = 0;
+    GLuint multisampledFramebuffer = 0, multisampledColor = 0, multisampledDepth = 0;
+    GLuint drawFramebuffer = 0;         // what a frame draws into: the multisampled one if there is one
+    GLuint presentProgram = 0, rampTexture = 0, presentSampler = 0;
+    uint8_t rampTexels[1024] = {};
+    bool rampLoaded = false;
     GLint uniformAlignment = 256;
     std::vector<uint8_t> uniformBytes;
     std::map<S_samplerKey, GLuint> samplers;

@@ -88,7 +88,9 @@ def sdl3_include():
 GENERATED = os.path.join(WORK, "generated")
 SHADERS = os.path.join(SRC, "gfx", "sdlgpu", "shaders")
 SHADER_ENTRIES = [("fixed_function.hlsl", "VSMain", "vs_6_0", "kFixedFunctionVS"),
-                  ("fixed_function.hlsl", "PSMain", "ps_6_0", "kFixedFunctionPS")]
+                  ("fixed_function.hlsl", "PSMain", "ps_6_0", "kFixedFunctionPS"),
+                  ("present.hlsl", "VSMain", "vs_6_0", "kPresentVS"),
+                  ("present.hlsl", "PSMain", "ps_6_0", "kPresentPS")]
 
 
 def windows_sdk_dxc():
@@ -143,9 +145,10 @@ def build_shaders():
             lines.append("inline const uint8_t %s%s[] = {%s};" % (
                 name, suffix, ", ".join(str(b) for b in data) if data else "0"))
             lines.append("inline const size_t %s%sSize = %d;" % (name, suffix, len(data)))
-    # The source itself, for the OpenGL driver to compile (a terminating 0).
-    text = open(os.path.join(SHADERS, "fixed_function.hlsl"), "rb").read().replace(b"\r\n", b"\n") + b"\0"
-    lines.append("inline const char kFixedFunctionSource[] = {%s};" % ", ".join(str(c) for c in text))
+    # The sources themselves, for the OpenGL driver to compile (a terminating 0).
+    for source, name in (("fixed_function.hlsl", "kFixedFunctionSource"), ("present.hlsl", "kPresentSource")):
+        text = open(os.path.join(SHADERS, source), "rb").read().replace(b"\r\n", b"\n") + b"\0"
+        lines.append("inline const char %s[] = {%s};" % (name, ", ".join(str(c) for c in text)))
     if ok:
         open(header, "w").write("\n".join(lines) + "\n")
     return ok

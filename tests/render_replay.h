@@ -290,6 +290,7 @@ public:
 
     void (*pump)() = nullptr;           // the window's messages, in a repeat (none: Windows' own loop)
     bool fullScreen = false;            // the device in full screen, as the game's (SDL_GPU and OpenGL)
+    int anisotropy = 0;                 // linear minification made anisotropic, as LS3DF.ini's AnisotropicFiltering
     bool noVsync = false;               // presents not waiting for the display (where the device allows)
     std::string error;                  // the first failure that stopped the replay
     int failedCalls = 0;                // device calls that failed (the replay goes on)
@@ -440,7 +441,12 @@ private:
         }
         case OP_STAGE_STATE: {
             const uint32_t stage = in.U(), type = in.U();
-            Check(device->SetTextureStageState(stage, static_cast<D3DTEXTURESTAGESTATETYPE>(type), in.U()));
+            uint32_t value = in.U();
+            if (anisotropy && type == D3DTSS_MINFILTER && value == D3DTEXF_LINEAR) {
+                value = D3DTEXF_ANISOTROPIC;
+                Check(device->SetTextureStageState(stage, D3DTSS_MAXANISOTROPY, static_cast<DWORD>(anisotropy)));
+            }
+            Check(device->SetTextureStageState(stage, static_cast<D3DTEXTURESTAGESTATETYPE>(type), value));
             return true;
         }
         case OP_TEXTURE: {

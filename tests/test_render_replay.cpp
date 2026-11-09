@@ -22,7 +22,15 @@
 //                                              the frames were; each frame first busy for MS, and at
 //                                              least --limit MS apart, as the game's)
 //          [--fullscreen]                      (with --live: the device in full screen: the window must
-//                                              cover the display)
+//                                              cover the display, and a gamma ramp must change what
+//                                              it shows; it reads the display, so nothing may cover it)
+//   --msaa N, --alpha-coverage: LS3DF.ini's MSAA and AlphaToCoverage, for SDL_GPU and OpenGL; the pictures
+//   written are then named <capture>.msaa<N>[.a2c].<backend>.png. (A self-test's capture has no samples
+//   in it and is replayed on Direct3D 8 without any, so its edges differ: a low figure there is expected.)
+//   --gamma: with --repeat, those frames are shown through a ramp like the game's own.
+//   --anisotropy N: anisotropic filtering as IGraph sets it for LS3DF.ini's AnisotropicFiltering. With
+//   --selftest the scene is drawn so, with point and no mip filters; a capture's linear minification
+//   becomes anisotropic, and its pictures are named <capture>[.msaa<N>[.a2c]].aniso.<backend>.png.
 //   The game's frame was drawn by the d3d8.dll of its folder (a wrapper such as dgVoodoo's, or
 //   Windows'); the replay must use the same one to draw the same picture: --d3d8 names it, else a
 //   d3d8.dll in the folder above the capture's (the game's, for LS3DF_frames\) is used, else
@@ -79,6 +87,49 @@ DWORD FloatBits(float f)
 // carry over from before the capture (states, a write-only vertex buffer, a default-pool texture
 // filled by UpdateTexture, lights, fog) and what changes during it (a buffer and a texture written
 // mid-frame, user-memory draws). The capture's path (empty: none).
+// What the display shows of a flat frame, in the middle and in a corner, through ramps.
+bool GammaOnDisplay(Device *d, HWND window)
+{
+    SetWindowPos(window, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    SetForegroundWindow(window);
+    const auto shown = [&](D3DCOLOR colour, POINT at) {
+        for (int i = 0; i < 12; ++i) {
+            d->Clear(0, nullptr, D3DCLEAR_TARGET, colour, 1.0f, 0);
+            d->Present();
+            Sleep(16);
+        }
+        HDC screen = GetDC(nullptr);
+        const COLORREF pixel = GetPixel(screen, at.x, at.y);
+        ReleaseDC(nullptr, screen);
+        return pixel;
+    };
+    const POINT middle = {GetSystemMetrics(SM_CXSCREEN) / 2, GetSystemMetrics(SM_CYSCREEN) / 2};
+    const POINT corner = {0, 0};
+    D3DGAMMARAMP identity, inverted;
+    d->GetGammaRamp(&identity);
+    for (int i = 0; i < 256; ++i) {
+        inverted.red[i] = static_cast<WORD>((255 - i) * 257);
+        inverted.green[i] = static_cast<WORD>(i * 257 / 2);
+        inverted.blue[i] = static_cast<WORD>(255 * 257);
+    }
+    const COLORREF plain = shown(0xff204060, middle);
+    d->SetGammaRamp(D3DSGR_NO_CALIBRATION, &inverted);
+    const COLORREF through = shown(0xff204060, middle);
+    const COLORREF bars = GetSystemMetrics(SM_CXSCREEN) * 3 != GetSystemMetrics(SM_CYSCREEN) * 4 ? shown(0xff204060, corner) : RGB(0, 0, 0);
+    d->SetGammaRamp(D3DSGR_NO_CALIBRATION, &identity);
+    const COLORREF back = shown(0xff204060, middle);
+    const auto isNear = [](COLORREF c, int r, int g, int b) {
+        return std::abs(GetRValue(c) - r) <= 1 && std::abs(GetGValue(c) - g) <= 1 && std::abs(GetBValue(c) - b) <= 1;
+    };
+    const bool ok = isNear(plain, 0x20, 0x40, 0x60) && isNear(through, 0xdf, 0x20, 0xff) && isNear(bars, 0, 0, 0) && isNear(back, 0x20, 0x40, 0x60);
+    std::printf("self-test: on the display: %06lx, through a ramp %06lx, its bars %06lx, back %06lx (as BGR)%s\n",
+                static_cast<unsigned long>(plain), static_cast<unsigned long>(through), static_cast<unsigned long>(bars),
+                static_cast<unsigned long>(back), ok ? "" : "  FAIL");
+    return ok;
+}
+
+int g_anisotropy = 0;
+
 std::string SelfTestCapture(Device *d, HWND window, bool fullscreen)
 {
     if (!d->Open())
@@ -102,6 +153,16 @@ std::string SelfTestCapture(Device *d, HWND window, bool fullscreen)
         FAILED(d->CreateDevice(0, D3DDEVTYPE_HAL, window,
                                D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED, &p)))
         return "";
+    {
+        // A device starts with an identity ramp of 16-bit values, so IGraph does not take it for 8-bit.
+        D3DGAMMARAMP ramp;
+        d->GetGammaRamp(&ramp);
+        if (ramp.red[255] != 0xffff || ramp.green[128] != 128 * 257 || ramp.blue[1] != 257) {
+            std::printf("self-test: the first gamma ramp: red 255 %u, green 128 %u, blue 1 %u  FAIL\n", ramp.red[255], ramp.green[128], ramp.blue[1]);
+            if (fullscreen)
+                return "";
+        }
+    }
     if (fullscreen) {
         // The window covers the display, the picture in it the back buffer's shape.
         RECT r = {};
@@ -230,6 +291,13 @@ std::string SelfTestCapture(Device *d, HWND window, bool fullscreen)
     d->SetStreamSource(0, vb, sizeof(S_litVertex));
     d->SetIndices(ib, 0);
     d->SetVertexShader(0x112);
+    if (g_anisotropy) {
+        for (DWORD stage = 0; stage < 3; ++stage) {
+            d->SetTextureStageState(stage, D3DTSS_MAXANISOTROPY, static_cast<DWORD>(g_anisotropy));
+            d->SetTextureStageState(stage, D3DTSS_MINFILTER, D3DTEXF_ANISOTROPIC);
+            d->SetTextureStageState(stage, D3DTSS_MIPFILTER, D3DTEXF_POINT);
+        }
+    }
 
     for (int frame = 0; frame < 2; ++frame) {
         d->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xff101828, 1.0f, 0);
@@ -265,7 +333,7 @@ std::string SelfTestCapture(Device *d, HWND window, bool fullscreen)
             d->SetTransform(D3DTS_WORLD, &moved);
             d->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_NONE);   // (level 0, rewritten, shows)
             d->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, (n + 1) * (n + 1), 0, n * n * 2);
-            d->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
+            d->SetTextureStageState(0, D3DTSS_MIPFILTER, g_anisotropy ? D3DTEXF_POINT : D3DTEXF_LINEAR);
             d->SetTransform(D3DTS_WORLD, &world);
         }
         // Pre-transformed, blended quads from user memory: the streamed texture, then plain colour.
@@ -298,6 +366,8 @@ std::string SelfTestCapture(Device *d, HWND window, bool fullscreen)
         d->Present();
     }
     std::string path = LastFrameCapture();
+    if (fullscreen && !GammaOnDisplay(d, window))
+        path.clear();
     d->SetTexture(0, nullptr);
     d->SetStreamSource(0, nullptr, 0);
     d->SetIndices(nullptr, 0);
@@ -329,6 +399,8 @@ int main(int argc, char **argv)
     int limitMs = 0;
     const char *sdlWindow = nullptr;
     bool noVsync = false, fullscreen = false;             // (the SDL_GPU backend: the least it must reach; 0: report only)
+    int msaa = 0;
+    bool alphaCoverage = false, gamma = false;
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--selftest"))
             selfTest = true;
@@ -362,9 +434,24 @@ int main(int argc, char **argv)
             limitMs = std::atoi(argv[++i]);
         else if (!std::strcmp(argv[i], "--sdl-window") && i + 1 < argc)
             sdlWindow = argv[++i];
+        else if (!std::strcmp(argv[i], "--msaa") && i + 1 < argc)
+            msaa = std::atoi(argv[++i]);
+        else if (!std::strcmp(argv[i], "--alpha-coverage"))
+            alphaCoverage = true;
+        else if (!std::strcmp(argv[i], "--gamma"))
+            gamma = true;
+        else if (!std::strcmp(argv[i], "--anisotropy") && i + 1 < argc)
+            g_anisotropy = std::atoi(argv[++i]);
         else
             captures.push_back(argv[i]);
     }
+    if (msaa || alphaCoverage) {
+        S_enhancements e = Enhancements();
+        e.msaa = msaa;
+        e.alphaToCoverage = alphaCoverage;
+        SetEnhancements(e);
+    }
+    const std::string tag = (msaa ? ".msaa" + std::to_string(msaa) + (alphaCoverage ? ".a2c" : "") : "") + (g_anisotropy ? ".aniso" : "");
     WNDCLASSA wc = {};
     wc.lpfnWndProc = DefWindowProcA;
     wc.hInstance = GetModuleHandleA(nullptr);
@@ -378,6 +465,7 @@ int main(int argc, char **argv)
             S_enhancements e = Enhancements();
             std::snprintf(e.sdlGpuDriver, sizeof e.sdlGpuDriver, "%s", driver.c_str());
             std::snprintf(e.presentMode, sizeof e.presentMode, "%s", presentMode);
+            e.sdlGpuDebug = debug;
             SetEnhancements(e);
             g_pGfx = FrameRecorder(SdlGpuDevice());
             std::printf("self-test: drawn live on SDL_GPU\n");
@@ -487,6 +575,7 @@ int main(int argc, char **argv)
         }
         replay::Replayer r(device, window);
         r.noVsync = noVsync;
+        r.anisotropy = g_anisotropy;
         if (sdlWindow) {
             r.fullScreen = true;
             if (std::strchr(sdlWindow, 'p')) {
@@ -522,11 +611,18 @@ int main(int argc, char **argv)
                         ok ? "" : "  FAIL");
             if (!ok)
                 ++failures;
-            replay::WritePng((path + (openGl ? ".opengl.png" : sdlGpu ? ".sdlgpu.png" : ".d3d8.png")).c_str(), r.picture);
+            replay::WritePng((path + tag + (openGl ? ".opengl.png" : sdlGpu ? ".sdlgpu.png" : ".d3d8.png")).c_str(), r.picture);
             replay::WritePng((path + ".game.png").c_str(), r.reference);
-            replay::WritePng((path + (openGl ? ".opengl.diff.png" : sdlGpu ? ".sdlgpu.diff.png" : ".diff.png")).c_str(), diff);
+            replay::WritePng((path + tag + (openGl ? ".opengl.diff.png" : sdlGpu ? ".sdlgpu.diff.png" : ".diff.png")).c_str(), diff);
         }
         if (ran && repeat > 0) {
+            if (gamma) {
+                // (C_PlayerProfile::ApplyGamma's ramp at the option's middle: a step of 255.)
+                D3DGAMMARAMP ramp;
+                for (int i = 0; i < 256; ++i)
+                    ramp.red[i] = ramp.green[i] = ramp.blue[i] = static_cast<WORD>(i * 255);
+                device->SetGammaRamp(D3DSGR_NO_CALIBRATION, &ramp);
+            }
             std::vector<double> gaps;
             const double ms = r.Repeat(repeat, show ? &gaps : nullptr, workMs, limitMs);
             std::printf("    %d more frames: %.2f ms a frame\n", repeat, ms);

@@ -22,7 +22,7 @@ Windows' own APIs.
 
 | Key | Values | What it does |
 |---|---|---|
-| `AnisotropicFiltering` | 0, 2–16 | Anisotropic texture filtering, for sharper ground and walls at shallow angles. Capped at what the graphics card supports and reapplied after a device reset. |
+| `AnisotropicFiltering` | 0, 2–16 | Anisotropic texture filtering, for sharper ground and walls at shallow angles. Capped at what the graphics card supports and reapplied after a device reset. On `SDLGPU` and `OpenGL` it also blends mip levels, as Direct3D 12 requires. |
 | `TrilinearFiltering` | 0 / 1 | Mip levels are always blended, even if the game asks for point or no mip filtering. |
 | `ImprovedMipmaps` | 0 / 1 | A new mip-map filter for BMP / TGA textures (details below). |
 | `TrueColorTextures` | 0 / 1 | Textures loaded from image files are 32-bit (A8R8G8B8) instead of 16-bit or DXT. DDS files keep their own format, and textures the engine fills itself (shadow maps, video, lightmaps) are left alone. |
@@ -107,6 +107,8 @@ How it works and what it covers: [platform.md](platform.md#the-sdl3-implementati
 [Render]
 SDLGPU=1
 SDLGPUDriver=vulkan
+MSAA=4
+AlphaToCoverage=1
 CaptureFrames=1
 ```
 
@@ -116,6 +118,8 @@ CaptureFrames=1
 | `OpenGL` | 0 / 1 | Drawing through OpenGL 3.3 instead of Direct3D 8, for GPUs and drivers without Direct3D 12 or Vulkan ([render_device.md](render_device.md#the-opengl-33-backend)). Needs `SDL3.dll` like `SDLGPU`, which wins when both are set. Best with `[Platform] SDL3=1`. |
 | `SDLGPUDriver` | `direct3d12` / `vulkan` | The API SDL_GPU draws with; empty or missing: SDL's choice. |
 | `PresentMode` | `vsync` / `mailbox` / `immediate` | How `SDLGPU` and `OpenGL` show frames: one per refresh with the game waiting for it; the newest whole frame at each refresh, without waiting (on OpenGL, the same as `immediate`); or at once, tearing if need be. Empty or missing: what the game asks for. |
+| `MSAA` | 0, 2, 4, 8 | Antialiasing for `SDLGPU` and `OpenGL`: that many samples a pixel, or as many as the GPU can do. 0 or missing: what the game's setup asks for. 4 is a good choice: on the game's captures 8 is hardly different. Direct3D 8 ignores it (there, the setup or a wrapper such as dgVoodoo decides). |
+| `AlphaToCoverage` | 0 / 1 | With `MSAA`: the edges of 3D alpha-tested textures (leaves, fences, wire) are smoothed too, which MSAA alone leaves stepped. 2D drawing is left as the game drew it. |
 | `SDLGPUStats` | 0 / 1 | Every 5 seconds, what the frames cost (time apart, building, waiting, draws, uploads) in `LS3DF_render.log` next to the DLL. Also for `OpenGL`. |
 | `SDLGPUDebug` | 0 / 1 | The API's validation (Direct3D 12's debug layer, the Vulkan SDK's layers, OpenGL's debug output), and what is asked of it in `LS3DF_render.log`; slow, for finding faults. Also for `OpenGL`. |
 | `CaptureFrames` | 0 / 1 | **Ctrl+Shift+F11** saves the next frame the game draws to `LS3DF_frames\frame_<n>.ls3dframe` next to the DLL: every drawing call, the state and resources it uses, and the picture the game drew. The render tests replay these files on each backend and compare the pictures (the cross-platform plan's phase 3, [render_device.md](render_device.md#frame-captures)). A file can be large (tens of MB), and keeping copies of the vertex buffers costs some memory while the option is on. |
