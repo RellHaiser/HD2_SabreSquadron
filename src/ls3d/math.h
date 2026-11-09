@@ -17,6 +17,9 @@ struct S_quat;
 
 struct S_vector2 {
     float x, y;
+
+    S_vector2 operator-(const S_vector2 &v) const { return {x - v.x, y - v.y}; }    // 0x00562de0 (DS 0x00560bb0)
+    float Square() const { return x * x + y * y; }                                  // 0x00562e00 (DS 0x00560be0)
 };
 
 struct S_vector {
