@@ -42,7 +42,7 @@ inline void NormalizeBy(S_vector &v, float square)
     }
 }
 
-// The game's own dot product (0x00454660): z, then y, then x.
+// The game's own dot product (0x00454660) (DS 0x004b6550): z, then y, then x.
 inline float DotZYX(const S_vector &a, const S_vector &b)
 {
     return (a.z * b.z + a.y * b.y) + a.x * b.x;

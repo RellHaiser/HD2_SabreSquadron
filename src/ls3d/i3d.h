@@ -122,7 +122,7 @@ struct I3D_bbox {
         return {S_vector(1e16f, 1e16f, 1e16f), 0.0f, S_vector(-1e16f, -1e16f, -1e16f), 0.0f};
     }
     bool IsValid() const { return min.x <= max.x; }
-    void Expand(const S_vector &p)
+    void Expand(const S_vector &p)                          // 0x0041d070 (DS 0x0043d7d0)
     {
         if (p.x < min.x) min.x = p.x;
         if (p.x > max.x) max.x = p.x;
@@ -207,19 +207,19 @@ public:
             const_cast<I3D_frame *>(this)->UpdateWMatrixProc();
         return m_worldMatrix;
     }
-    const S_vector &GetWorldPos() const { return GetMatrix()(3); }
+    const S_vector &GetWorldPos() const { return GetMatrix()(3); }     // 0x0041d160 (DS 0x0043d960)
     // Normalized world z axis.
     S_vector GetWorldDir() const { return GetMatrix()(2).Normalized(); }
     const S_vector &GetPos() const { return m_localMatrix(3); }
     // Inline position setter (the virtual SetPos also notifies the scene).
-    void SetPosInline(const S_vector &pos)
+    void SetPosInline(const S_vector &pos)                  // 0x0041d110 (DS 0x0043d8f0)
     {
         if (m_frameFlags & FRMFLAGS_POS_LOCKED)
             return;
         m_localMatrix(3) = pos;
         m_frameFlags = (m_frameFlags & ~FRMFLAGS_SETPOS_CLEAR) | FRMFLAGS_CHANGED;
     }
-    const S_quat &GetRot()
+    const S_quat &GetRot()                                  // 0x0041d1d0 (DS 0x0043da00)
     {
         if (!(m_frameFlags & FRMFLAGS_ROT_DIRTY)) {
             m_frameFlags |= FRMFLAGS_ROT_DIRTY;
@@ -227,7 +227,7 @@ public:
         }
         return m_rot;
     }
-    void SetRot(const S_quat &rot)
+    void SetRot(const S_quat &rot)                          // 0x0041d180 (DS 0x0043d990)
     {
         m_rot = rot;
         m_rot.Normalize();

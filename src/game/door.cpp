@@ -182,7 +182,7 @@ bool BoxTouches(const S_vector corners[8])
     return g_collisionWorld.RayTestDynamic(corners[2], corners[5] - corners[2], &hitPos, &hitNormal, 2, 0) != nullptr;
 }
 
-// I3D_frame::GetWorldDir as it compiles here (0x0041d200): the square summed y, z, x.
+// I3D_frame::GetWorldDir as it compiles here (0x0041d200) (DS 0x0043da40): the square summed y, z, x.
 S_vector WorldDir(const I3D_frame *frame)
 {
     S_vector dir = frame->GetMatrix()(2);

@@ -207,7 +207,7 @@ class C_HumanEvents {
 public:
     void Reset();                                       // 0x005ae450
     // What the enemy AI's morale gains every 5 s (less the enemies in view).
-    int GetMoraleGain() const { return 2; }             // 0x005ae940
+    int GetMoraleGain() const { return 2; }             // 0x005ae940 (DS 0x005bea50)
     bool SaveGame(C_chunk &chunk);                      // 0x005ad040
     bool LoadGame(C_chunk &chunk);                      // 0x005ad390
     // Ages the events; drops those whose time ran out.

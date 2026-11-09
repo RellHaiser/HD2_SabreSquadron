@@ -15,7 +15,7 @@ constexpr float STEP2 = 0.01f;
 constexpr float STEP3 = 0.001f;
 constexpr float RADIUS_UNIT = 0.0625f;                  // S_Checkpoint::radius: 1/16 m
 
-// (0x00581f20.)
+// (0x00581f20.) (DS 0x00587bd0)
 void AddPoint(S_Vector4Array &points, const S_vector4 &point)
 {
     if (points.count >= points.capacity) {

@@ -115,7 +115,7 @@ void CutCorner(S_AIWaypoint &waypoint, const S_vector &prev, const S_vector &nex
 
 }  // namespace
 
-float SegmentDistance2(const S_vector &p, const S_vector &a, const S_vector &b, float *t)   // 0x00581210
+float SegmentDistance2(const S_vector &p, const S_vector &a, const S_vector &b, float *t)   // 0x00581210 (DS 0x00586b50)
 {
     const S_vector ab = b - a;
     *t = 0.0f;
