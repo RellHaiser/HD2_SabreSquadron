@@ -1771,3 +1771,36 @@ void C_AIController::InsertDetours(std::vector<C_Human *> &blockers)
         from = m_waypoints[k]->pos;
     }
 }
+
+bool C_AIController::IsNearSelectedSoldier() const
+{
+    const C_Human *selected = g_teamManager.GetPlayerTeam()->GetSelectedMember();
+    if (!selected)
+        return false;
+    const S_vector &a = selected->GetFrame()->GetWorldPos();
+    const S_vector &b = m_human->GetFrame()->GetWorldPos();
+    const float x = b.x - a.x;
+    const float y = b.y - a.y;
+    const float z = b.z - a.z;
+    return y * y + x * x + z * z < 9.0f;
+}
+
+void C_AIController::ClearRoute()
+{
+    ReleaseWaypoints(m_waypoints);
+    ReleaseWaypoint(m_waypoint);
+    m_waypoint = nullptr;
+}
+
+void C_AIController::SkipPassedWaypoint()
+{
+    if (m_waypoints.size() < 2)
+        return;
+    const S_matrix &m = m_human->GetFrame()->GetMatrix();
+    const float x = m.m[3][0];
+    const float z = m.m[3][2];
+    S_vector4 &first = m_waypoints[0]->pos;
+    const S_vector4 &second = m_waypoints[1]->pos;
+    if ((second.x - x) * (first.x - x) + (second.z - z) * (first.z - z) < 0.0f)
+        first = {x, m.m[3][1], z, m.m[3][3]};
+}

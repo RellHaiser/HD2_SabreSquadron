@@ -312,3 +312,12 @@ bool C_SquadController::AtSpecialPoint()
     default: return false;
     }
 }
+
+void C_SquadController::StepAsideFrom(C_Actor *actor)
+{
+    if (!actor)
+        return;
+    // The view direction is the first three floats of a S_vector4; the original passes it as one.
+    const S_vector4 &dir = reinterpret_cast<const S_vector4 &>(static_cast<C_Human *>(actor)->GetViewDir());
+    StepAside(actor->GetPosition4(), dir, false, true);
+}

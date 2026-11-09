@@ -738,3 +738,60 @@ float C_CheckpointNetwork::GetPathLength(const std::vector<uint16_t> &path) cons
     }
     return total * (1.0f / 256.0f);
 }
+
+namespace {
+
+// The sorted tables' search: the last entry and the first are tried before halving.
+template <class T>
+uint16_t FindEntryOfPoint(const T *entries, uint16_t count, uint16_t index)
+{
+    if (!count)
+        return 0xFFFF;
+    const int last = count - 1;
+    if (index > entries[last].index)
+        return 0xFFFF;
+    if (entries[last].index == index)
+        return static_cast<uint16_t>(last);
+    if (entries[0].index > index)
+        return 0xFFFF;
+    if (entries[0].index == index)
+        return 0;
+    int lo = 0;
+    int hi = last;
+    while (hi - lo > 1) {
+        const int mid = (lo + hi) >> 1;
+        if (entries[mid].index == index)
+            return static_cast<uint16_t>(mid);
+        if (entries[mid].index > index)
+            hi = mid;
+        else
+            lo = mid;
+    }
+    return 0xFFFF;
+}
+
+}  // namespace
+
+uint16_t C_CheckpointNetwork::FindNameEntry(const char *name) const
+{
+    for (uint16_t i = 0; i < m_nameCount; ++i) {
+        if (_strnicmp(m_names[i].name, name, sizeof(m_names[i].name)) == 0)
+            return i;
+    }
+    return 0xFFFF;
+}
+
+uint16_t C_CheckpointNetwork::FindNameEntryOfPoint(uint16_t index) const
+{
+    return FindEntryOfPoint(m_names, m_nameCount, index);
+}
+
+uint16_t C_CheckpointNetwork::FindFrameEntryOfPoint(uint16_t index) const
+{
+    return FindEntryOfPoint(m_frames, m_frameCount, index);
+}
+
+uint16_t C_CheckpointNetwork::FindActorEntryOfPoint(uint16_t index) const
+{
+    return FindEntryOfPoint(m_actors, m_actorCount, index);
+}

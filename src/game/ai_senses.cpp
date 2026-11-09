@@ -670,3 +670,33 @@ S_HumanEvent *S_HumanEvent::Init(const C_Actor *actor, uint32_t eventType, const
     unknown30 = value30;
     return this;
 }
+
+float C_AIController::GetTargetDistance2() const
+{
+    return Distance(m_fire.target->GetFrame()->GetWorldPos(), m_human->GetFrame()->GetWorldPos());
+}
+
+float C_AIController::GetViewDotTo(const C_Actor *target) const
+{
+    const S_vector4 dir = GetAimDirTo(target);
+    return dir.x * m_facingDir.x + dir.y * m_facingDir.y + dir.z * m_facingDir.z;
+}
+
+void C_AIController::GetWeaponPos(S_vector4 *pos) const
+{
+    if (!m_handsItem) {
+        pos->x = 0.0f;
+        pos->y = 0.0f;
+        pos->z = 0.0f;
+        return;
+    }
+    I3D_frame *frame = m_handsItem->GetFrame(0);
+    const E_ItemComponentKind kind = m_handsItem->GetDef()->GetComponentKind();
+    if (kind == ICK_FIREARM || kind == ICK_PROJECTILE_WEAPON)
+        frame = frame->FindChildFrame("shdum", FRAME_MASK_DUMMY);
+    const S_matrix &m = frame->GetMatrix();
+    pos->x = m.m[3][0];
+    pos->y = m.m[3][1];
+    pos->z = m.m[3][2];
+    pos->w = m.m[3][3];
+}

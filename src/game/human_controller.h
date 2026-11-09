@@ -701,6 +701,17 @@ public:
     C_Actor *GetFireTarget() const { return m_fire.target; }   // +0xD0
     // The human is within `radius` of `pos`.
     bool IsHumanWithin(const S_vector *pos, float radius);   // 0x0057fe40
+    // The distance to the fire target (not its square, whatever the original's name says).
+    float GetTargetDistance2() const;                   // 0x00575350 (DS 0x00577e50)
+    // How far the facing direction points at `target`.
+    float GetViewDotTo(const C_Actor *target) const;    // 0x00575410 (DS 0x00577f40)
+    // The muzzle of the hands' weapon, the item's own frame for anything else, zero without one.
+    void GetWeaponPos(S_vector4 *pos) const;            // 0x005715f0 (DS 0x005730c0)
+    // Within 3 m of the player's selected soldier.
+    bool IsNearSelectedSoldier() const;                 // 0x0057ee30 (DS 0x00583de0)
+    void ClearRoute();                                  // 0x0057f7d0 (DS 0x00584a10)
+    // Moves the first waypoint here once the human has passed it towards the second.
+    void SkipPassedWaypoint();                          // 0x0057b1b0 (DS 0x0057f1d0)
 
 protected:
     // --- senses (ai_senses.cpp) ----------------------------------------------------------
@@ -1113,6 +1124,7 @@ private:
     // --- squad_movement.cpp ----------------------------------------------------------------
     void UpdatePace(int timeDelta, bool ordersDone);    // 0x0052d460
     void StepAside(const S_vector4 &pos, const S_vector4 &dir, bool sideways, bool frontOnly);   // 0x0052dc10
+    void StepAsideFrom(C_Actor *actor);                 // 0x005356e0 (DS 0x00527a10)
     void MakeRoomForLeader();                           // 0x0052e310
     // A walking point named "#<target's frame>" to attack `target` from (the map's).
     bool FindAttackPoint(S_vector4 *pos, float *radius, C_Actor *target);   // 0x00532190
