@@ -246,7 +246,7 @@ public:
     // World scale (the local one for root frames).
     S_vector GetWorldScale() const { return m_parent ? GetMatrix().GetScale() : m_scale; }
     // Inline scale setter; the rotation is captured first so it survives.
-    void SetScale(const S_vector &scale)
+    void SetScale(const S_vector &scale)                // 0x005de200 (DS 0x005fb020)
     {
         m_scale = scale;
         if (!(m_frameFlags & FRMFLAGS_ROT_DIRTY))

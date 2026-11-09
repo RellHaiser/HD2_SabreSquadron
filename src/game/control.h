@@ -19,7 +19,7 @@ class C_Control;
 // A message to a control (0x18 bytes): its target (a control's id; in a route, -1: the control
 // itself), its code (CONTROL_MSG_*; a route's carries a notification too, CONTROL_NOTIFY_MASK), its
 // values (the callbacks': the notification, the object and the function, x86 pointers) and a text.
-struct S_ControlMessage {                              // 0x18 bytes (ctors 0x00614da0 (DS 0x0063f7b0), 0x00614dd0 (DS 0x0063f7f0), 0x00614df0 (DS 0x0063f820), 0x00614e20 (DS 0x0063f860), 0x00614e50 (DS 0x0063f8a0), 0x00625ea0 (DS 0x00655170); dtor 0x00615190 (DS 0x0063fcd0), deleting 0x00616b80 (DS 0x00641e10))
+struct S_ControlMessage {                              // 0x18 bytes (ctors 0x00614da0 (DS 0x0063f7b0), 0x00614dd0 (DS 0x0063f7f0), 0x00614df0 (DS 0x0063f820), 0x00614e20 (DS 0x0063f860), 0x00614e50 (DS 0x0063f8a0), 0x00625ea0 (DS 0x00655170); dtor 0x00615190 (DS 0x0063fcd0), deleting 0x00616b80 (DS 0x00641e10), 0x00628f20 (DS 0x00658e50); copy 0x006157d0 (DS 0x006404d0), assignment 0x00616b10 (DS 0x00641d80))
     uint32_t target = 0;                                // +0x00
     uint32_t id = 0;                                    // +0x04
     uint32_t value = 0;                                 // +0x08

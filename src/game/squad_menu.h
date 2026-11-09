@@ -28,7 +28,7 @@ extern bool g_squadInfoShown;                          // 0x008ae692
 const C_str &GetProfileName(const S_SoldierProfile *profile);   // 0x006755d0 (__fastcall)
 
 // One of the squad's places on the screen: the roster soldier in it, his picture, name and rank.
-struct S_SquadSlot {                                    // 0x14 bytes
+struct S_SquadSlot {                                    // 0x14 bytes (its constructor: 0x006c1b80 (DS 0x007075d0))
     // The soldier `profile` (negative: none) put in, removable or not: his face, the picture's index, the
     // texts.
     void SetSoldier(int profile, bool removable);       // 0x00690ef0
@@ -49,6 +49,7 @@ class C_SquadMenu : public C_MenuState {
 public:
     // (Inline in C_GameApp::StartStep; the destructor is the base's: 0x006c1bb0.)
     C_SquadMenu() = default;
+    ~C_SquadMenu() override = default;                  // 0x006c1bd0 (DS 0x00707650)
 
     int GetTypeId() const override { return GAME_STATE_TYPE_SQUAD_MENU; }   // 0x1C 0x006c1ba0
 
