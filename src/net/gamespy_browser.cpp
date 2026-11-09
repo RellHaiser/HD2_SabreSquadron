@@ -1486,3 +1486,37 @@ uint32_t SBServerGetPublicInetAddress(S_SbServer *server)   // 0x0073a6a0
 {
     return server->publicIp;
 }
+
+double SBServerGetFloatValue(S_SbServer *server, const char *key, double fallback)   // 0x0073a470 (DS 0x007979a0)
+{
+    const char *value = SBServerGetStringValue(server, key, nullptr);
+    return value ? atof(value) : fallback;
+}
+
+// Sends to the master server, reconnecting once.
+int ListSendData(S_SbServerList *list, const char *data, int size)  // 0x0073bc60 (DS 0x00799a30)
+{
+    for (int retries = 1;; --retries) {
+        if (send(list->socket, data, size, 0) > 0)
+            return 0;
+        if (retries == 0)
+            return 3;
+        ListDisconnect(list);
+        const int error = ListConnectAndQuery(list, nullptr, nullptr, 2, 0);
+        if (error != 0) {
+            ListError(list);
+            return error;
+        }
+    }
+}
+
+// The index of `server` in the list, -1 if it is not there.
+int ListFindServer(S_SbServerList *list, const S_SbServer *server)  // 0x0073ccf0 (DS 0x0079afa0)
+{
+    const int count = ArrayLength(list->servers);
+    for (int i = 0; i < count; ++i) {
+        if (*static_cast<S_SbServer **>(ArrayNth(list->servers, i)) == server)
+            return i;
+    }
+    return -1;
+}
