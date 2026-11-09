@@ -23,7 +23,7 @@
 //
 // Usage: compare_mesh.exe [original LS3DF.dll] [operations] [seed]
 //
-// test-sources: src/i3d/mesh.cpp src/i3d/material.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp src/i3d/driver_factories.cpp src/i3d/anim.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
+// test-sources: src/i3d/mesh.cpp src/i3d/material.cpp src/core/enhance.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp src/i3d/driver_factories.cpp src/i3d/anim.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
 // test-sources: src/gfx/d3d8/gfx_d3d8.cpp
 #include <float.h>
 

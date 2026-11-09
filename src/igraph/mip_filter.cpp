@@ -130,4 +130,12 @@ void ScaleAlphaToCoverage(uint8_t *bgra, int width, int height, int ref, double 
     }
 }
 
+void BinaryAlphaToCoverage(uint8_t *bgra, int width, int height, double coverage)
+{
+    ScaleAlphaToCoverage(bgra, width, height, 128, coverage);
+    const int n = width * height;
+    for (int i = 0; i < n; ++i)
+        bgra[i * 4 + 3] = bgra[i * 4 + 3] >= 128 ? 255 : 0;
+}
+
 }  // namespace ls3d::tex

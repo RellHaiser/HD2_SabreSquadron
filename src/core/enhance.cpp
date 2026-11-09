@@ -36,6 +36,7 @@ S_enhancements ReadIni()
     o.anisotropy = aniso < 2 ? 0 : aniso > 16 ? 16 : aniso;
     o.trilinear = get("TrilinearFiltering") != 0;
     o.mipmaps = get("ImprovedMipmaps") != 0;
+    o.colorKeyMipmaps = get("ColorKeyMipmaps") != 0;
     o.trueColorTextures = get("TrueColorTextures") != 0;
     o.trueColorLightmaps = get("TrueColorLightmaps") != 0;
     const int nearPortal = get("NearPortalDistance");

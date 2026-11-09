@@ -1450,7 +1450,8 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
             if (e.trilinear)
                 EnhancementLog("   Trilinear filtering: always");
             if (e.mipmaps)
-                EnhancementLog("   Mip maps: gamma-correct, alpha-weighted, coverage kept");
+                EnhancementLog("   Mip maps: gamma-correct, alpha-weighted, coverage kept%s",
+                               e.colorKeyMipmaps ? ", colour-keyed textures given them too" : "");
             if (e.trueColorTextures)
                 EnhancementLog("   Textures from image files: %s", g_fmtTrueColor ? "A8R8G8B8" : "unchanged (no A8R8G8B8)");
             if (e.trueColorLightmaps)

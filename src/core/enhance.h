@@ -51,6 +51,7 @@ struct S_enhancements {
     int anisotropy;                         // AnisotropicFiltering (0: off, else 2 - 16)
     bool trilinear;                         // TrilinearFiltering
     bool mipmaps;                           // ImprovedMipmaps
+    bool colorKeyMipmaps;                   // ColorKeyMipmaps (with ImprovedMipmaps)
     bool trueColorTextures;                 // TrueColorTextures
     bool trueColorLightmaps;                // TrueColorLightmaps
     float nearPortalDistance;               // NearPortalDistance, in metres (0: off)

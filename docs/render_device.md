@@ -195,8 +195,8 @@ dB against 31.0 - 38.4 on the 3D frames, and 95 dB against 45 on the two that ar
 **In the game** (November 2026, Africa1 with a high-resolution texture pack): the gamma option works in full
 screen and the desktop is untouched after Alt-Tab; 4 samples with alpha to coverage stay smooth on both backends
 and leave the HUD as it was, with about 2.6 GB of address space free on Direct3D 12. They do not stop the palm
-leaves shimmering. `AnisotropicFiltering=16` and `ImprovedMipmaps=1` help a little there, and sharpen ground and
-walls at shallow angles.
+leaves shimmering, as those have no mip levels: `ColorKeyMipmaps=1` does ([ls3df_ini.md](ls3df_ini.md#options)).
+`AnisotropicFiltering=16` sharpens ground and walls at shallow angles.
 
 **Not yet:**
 - buffers kept on the GPU (each draw's vertices are copied every frame; at about 2 ms a frame it

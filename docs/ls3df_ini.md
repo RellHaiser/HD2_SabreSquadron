@@ -9,6 +9,7 @@ turn them on, put an `LS3DF.ini` in the same folder as `LS3DF.dll`:
 AnisotropicFiltering=16
 TrilinearFiltering=1
 ImprovedMipmaps=1
+ColorKeyMipmaps=1
 TrueColorTextures=1
 TrueColorLightmaps=1
 NearPortalDistance=100
@@ -25,6 +26,7 @@ Windows' own APIs.
 | `AnisotropicFiltering` | 0, 2–16 | Anisotropic texture filtering, for sharper ground and walls at shallow angles. Capped at what the graphics card supports and reapplied after a device reset. On `SDLGPU` and `OpenGL` it also blends mip levels, as Direct3D 12 requires. |
 | `TrilinearFiltering` | 0 / 1 | Mip levels are always blended, even if the game asks for point or no mip filtering. |
 | `ImprovedMipmaps` | 0 / 1 | A new mip-map filter for BMP / TGA textures (details below). |
+| `ColorKeyMipmaps` | 0 / 1 | With `ImprovedMipmaps`: colour-keyed textures whose material has no mip maps, such as the palm leaves of Africa1, get them, which stops much of their shimmer at a distance (details below). |
 | `TrueColorTextures` | 0 / 1 | Textures loaded from image files are 32-bit (A8R8G8B8) instead of 16-bit or DXT. DDS files keep their own format, and textures the engine fills itself (shadow maps, video, lightmaps) are left alone. |
 | `TrueColorLightmaps` | 0 / 1 | Lightmaps are always 32-bit. |
 | `NearPortalDistance` | 0–1000 (cm) | A camera standing just outside a room's opening (portal), looking away from it, still draws the room. Needed by gun cameras placed past an embrasure (details below). 100 is enough for the game's bunkers. |
@@ -58,6 +60,20 @@ down at every step and averages gamma-encoded values:
   100%.
 - These textures get their own cache files (a `G` before the extension), so old cache files are
   never used for them.
+
+**ColorKeyMipmaps** is for leaves, fences and the like whose material does not ask for mip maps. Each pixel of
+such a texture far away samples a tiny, nearly random spot of it, leaf or gap, that changes as the camera moves.
+
+- They keep their way of drawing, alpha-tested with depth written, where a colour key with mip maps would
+  otherwise be blended, which draws in another order.
+- Each level's alpha stays 0 or 255 with level 0's coverage. A mission sets its alpha reference after its textures
+  load, and missions differ (32 and 128 are both seen), so the levels must not depend on it. Filtering between
+  texels still gives `[Render] AlphaToCoverage` the smooth alpha it needs.
+- Each such texture takes about a third more memory, and DXT1 ones become uncompressed, as any colour key with
+  mip maps is. They get their own cache files (a `K` after the `G`).
+- In the game (November 2026, Africa1 with a high-resolution texture pack, on Direct3D 12 with
+  `AnisotropicFiltering=16`, `MSAA=4` and `AlphaToCoverage=1`): the palms no longer shimmer, keep their density near
+  and far, and draw in the right order, with about 2.6 GB of address space free.
 
 ## Sound
 
