@@ -1,6 +1,6 @@
 // Differential test of the scene's collision queries (src/i3d/collision_ray.cpp,
 // collision_sphere.cpp): PickFrame, TestRay, IntersectFrame, MoveSphere, MoveSphereFrame,
-// MoveSphereVisual and SweepSpheres (I3D_scene slots 0xFC - 0x114) of the original LS3DF.dll and of
+// MoveSphereVisual and SweepSpheres (I3D_scene slots 0xF8 - 0x110) of the original LS3DRF.dll and of
 // the port run on the same scene, made by the original's driver: its primary, omni and near
 // sectors with sectors of their own, dummies, object visuals, lit objects, morphs and billboards
 // (every mode, with a render camera) in a random hierarchy, each with random meshes (1 - 3 levels,
@@ -13,33 +13,29 @@
 // The queries: random starts, directions toward the visuals or anywhere (short, long, unlimited),
 // radii, every flag, frame arguments (skipped, excluded, tested at their level), LOD levels; with
 // the test's hit callback and face filter (each logged, their answers from one random sequence for
-// both sides; the filter tints the colour), the original's transmit filter or none. After each
+// both sides; the filter tints the colour), or none. After each
 // query: the result, every output (but the w components the original leaves unset), the colour,
-// both call logs, and the queries' shared state (the original's 0x100ad9b0 - 0x100adb08 against
+// both call logs, and the queries' shared state (the original's 0x100459f0 - 0x10045b38 against
 // the port's col::q) field by field.
 //
 // The port's code runs on the original's objects: their virtual methods (bounds, meshes, face
 // groups, joints) are the original's; the world matrix and world bound updates and the
 // billboard's facing matrix are forwarded to the original's functions. Each side computes the
-// visuals' cached inverse matrices itself (they are invalidated before each side's query). The
-// scene's special sectors are the exception: the port reads them at its own offsets, where the
-// test puts them for the port's query only (S_portSectors).
+// visuals' cached inverse matrices itself (they are invalidated before each side's query).
 //
 // The port's fixes the test steps around: the original's ray and sphere queries with
 // I3DCOL_SKIP_FRAME keep the previous query's excluded frame, and its sphere queries the previous
 // query's LOD frame (both cleared on the original's side first); a billboard in world space has no
 // facing matrix in the original (not made). Values the original leaves unset are not compared: a
 // filter's texture coordinates without a texture, the normal of a box the ray misses (a hit
-// callback's, and q.normal unless the ray query hit and wanted a normal). The transmit filter
-// always gets a colour (it reads it).
+// callback's, and q.normal unless the ray query hit and wanted a normal).
 //
-// LS3DRF's ray queries have no face filter (they ignore the filter argument and I3DCOL_FILTER):
-// the original's PickFrame, TestRay and IntersectFrame are patched to leave q.filter null
-// (PatchOrigRayFilters), so neither side calls a filter.
+// LS3DRF's ray queries have no face filter (they ignore the filter argument and I3DCOL_FILTER), and
+// it has no transmit filter: neither side may call the filter the test gives them both.
 //
 // Not covered: skinned meshes (joints), mirrors (their geometry comes from model files).
 //
-// Usage: compare_collision.exe [original LS3DF.dll] [operations] [seed] [diagnosis: 1 each visual's
+// Usage: compare_collision.exe [original LS3DRF.dll] [operations] [seed] [diagnosis: 1 each visual's
 //        ray, 2 the targeted rays' hit rate]
 //
 // test-sources: src/i3d/collision_ray.cpp src/i3d/collision_sphere.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
@@ -53,6 +49,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <random>
 #include <string>
 #include <vector>
@@ -68,8 +65,6 @@
 #include "../src/i3d/sector.h"
 #include "../src/igraph/igraph_state.h"
 #include "../src/igraph/itexture.h"
-#include "d3d8/d3d8_device.h"
-#include "fake_d3d8_base.h"
 #include "test_paths.h"
 
 // ---------------------------------------------------------------- engine parts not linked
@@ -105,47 +100,7 @@ void Check(const std::string &what, long a, long b)
         Fail(what, a, b);
 }
 
-// The original's meshes lock their buffers on its Direct3D device: a fake one whose vertex and
-// index buffers keep their bytes.
-struct FakeIB : FakeDirect3DIndexBuffer8Base {
-    std::vector<uint8_t> data;
-    HRESULT __stdcall Lock(UINT, UINT, BYTE **out, DWORD) override
-    {
-        *out = data.data();
-        return S_OK;
-    }
-    HRESULT __stdcall Unlock() override { return S_OK; }
-};
-struct FakeVB : FakeDirect3DVertexBuffer8Base {
-    std::vector<uint8_t> data;
-    HRESULT __stdcall Lock(UINT, UINT, BYTE **out, DWORD) override
-    {
-        *out = data.data();
-        return S_OK;
-    }
-    HRESULT __stdcall Unlock() override { return S_OK; }
-};
-
-struct BufferDevice : FakeDirect3DDevice8Base {
-    HRESULT __stdcall ResourceManagerDiscardBytes(DWORD) override { return S_OK; }
-    HRESULT __stdcall CreateIndexBuffer(UINT length, DWORD, D3DFORMAT, D3DPOOL, IDirect3DIndexBuffer8 **out) override
-    {
-        auto *b = new FakeIB;
-        b->data.resize(length);
-        *out = b;
-        return S_OK;
-    }
-    HRESULT __stdcall CreateVertexBuffer(UINT length, DWORD, DWORD, D3DPOOL, IDirect3DVertexBuffer8 **out) override
-    {
-        auto *b = new FakeVB;
-        b->data.resize(length);
-        *out = b;
-        return S_OK;
-    }
-};
-BufferDevice g_device;
-
-// Loads the original and points it at the fake device. False when it cannot.
+// Loads the original. False when it cannot.
 bool SetUpOriginal(const char *origPath)
 {
     HMODULE dll = LoadLibraryA(origPath);
@@ -154,12 +109,11 @@ bool SetUpOriginal(const char *origPath)
         return false;
     }
     g_base = reinterpret_cast<uint8_t *>(dll);
-    Orig<uint8_t>(0x100d16f2) = 1;              // no log
-    if (!Orig<void *>(0x100d16f8)) {
+    Orig<uint8_t>(0x10058b72) = 1;              // no log
+    if (!Orig<void *>(0x10058b78)) {
         std::printf("the original's driver does not exist\n");
         return false;
     }
-    Orig<IDirect3DDevice8 *>(0x100d216c) = &g_device;
     return true;
 }
 
@@ -173,41 +127,14 @@ LONG WINAPI CrashFilter(EXCEPTION_POINTERS *info)
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
-// Writes `with` over the original's code at `va`, which must hold `expect` (`size` bytes each).
-void PatchCode(uint32_t va, const uint8_t *expect, const uint8_t *with, size_t size)
-{
-    uint8_t *at = &Orig<uint8_t>(va);
-    if (std::memcmp(at, expect, size)) {
-        std::printf("the original's code at %08x is not what it was\n", va);
-        std::exit(2);
-    }
-    DWORD old;
-    VirtualProtect(at, size, PAGE_EXECUTE_READWRITE, &old);
-    std::memcpy(at, with, size);
-    VirtualProtect(at, size, old, &old);
-    FlushInstructionCache(GetCurrentProcess(), at, size);
-}
-
-// LS3DRF's ray queries in the original: q.filter (0x100adafc) always null. PickFrame and TestRay
-// always take their I3DCOL_FILTER test's "not set" branch (its store of edx, 0 there);
-// IntersectFrame's mask of the flag becomes 0 (and so its neg / sbb / and AlphaFilter).
-void PatchOrigRayFilters()
-{
-    static const uint8_t je[] = {0x74, 0x1a}, jmp[] = {0xeb, 0x1a};
-    PatchCode(0x10010df2, je, jmp, sizeof je);              // PickFrame: je 0x10010e0e
-    PatchCode(0x1000c972, je, jmp, sizeof je);              // TestRay: je 0x1000c98e
-    static const uint8_t andFilter[] = {0x25, 0x00, 0x00, 0x02, 0x00}, andZero[] = {0x25, 0x00, 0x00, 0x00, 0x00};
-    PatchCode(0x10011290, andFilter, andZero, sizeof andFilter);   // IntersectFrame: and eax, 0x20000
-}
-
 }  // namespace
 
 // The original's functions for what the port's collision code calls outside it.
-void I3D_frame::UpdateWMatrixProc() { OrigFn<void(__fastcall *)(I3D_frame *, void *)>(0x1001e390)(this, nullptr); }
-void __stdcall I3D_visual::UpdateWBoundProc() { OrigFn<void(__stdcall *)(I3D_visual *)>(0x100571b0)(this); }
+void I3D_frame::UpdateWMatrixProc() { OrigFn<void(__fastcall *)(I3D_frame *, void *)>(0x100142e0)(this, nullptr); }
+void __stdcall I3D_visual::UpdateWBoundProc() { OrigFn<void(__stdcall *)(I3D_visual *)>(0x1002e5c0)(this); }
 void I3D_billboard::ComputeMatrix(const S_vector &camera, S_matrix &out)
 {
-    OrigFn<void(__fastcall *)(I3D_billboard *, void *, const S_vector *, S_matrix *)>(0x10006230)(this, nullptr, &camera,
+    OrigFn<void(__fastcall *)(I3D_billboard *, void *, const S_vector *, S_matrix *)>(0x10002710)(this, nullptr, &camera,
                                                                                                    &out);
 }
 
@@ -396,29 +323,6 @@ void MakeTextures()
 uint8_t *g_scene;
 uint8_t *g_sectors[6];                      // primary, omni, near, sectors in the primary
 
-// The port's scene keeps the special sectors 0x20 below the original's (LS3DRF's layout): for the
-// port's query they are written there, over 16 bytes of the original's +0x1B0 block (none of its
-// scene or collision functions reads them), and put back after.
-struct S_portSectors {
-    I3D_scene *scene;                       // null: the original's query
-    uint8_t saved[16];
-    explicit S_portSectors(I3D_scene *portScene) : scene(portScene)
-    {
-        if (!scene)
-            return;
-        std::memcpy(saved, &scene->primarySector, sizeof saved);
-        scene->primarySector = Field<I3D_sector *>(g_scene, 0x1F8);
-        scene->backdropSector = Field<I3D_sector *>(g_scene, 0x1FC);
-        scene->omniSector = Field<I3D_sector *>(g_scene, 0x200);
-        scene->nearSector = Field<I3D_sector *>(g_scene, 0x204);
-    }
-    ~S_portSectors()
-    {
-        if (scene)
-            std::memcpy(&scene->primarySector, saved, sizeof saved);
-    }
-};
-static_assert(offsetof(I3D_scene, nearSector) == offsetof(I3D_scene, primarySector) + 12, "the special sectors");
 int g_numSectors;
 std::vector<uint8_t *> g_frames;            // every frame (sectors first)
 std::vector<uint8_t *> g_visuals;           // the visuals among them
@@ -429,19 +333,19 @@ bool IsVisual(uint8_t *f) { return Field<uint16_t>(f, 0xF8) == FRAME_VISUAL; }
 
 uint8_t *MakeMesh(int levels)
 {
-    uint8_t *mesh = CallV<uint8_t *>(g_origDriver, 0x6C);
+    uint8_t *mesh = CallV<uint8_t *>(g_origDriver, 0x3C);
     for (int i = 0; i < levels; ++i) {
         std::vector<S_vtx> v;
         std::vector<I3D_triface> f;
         MakeGeometry(v, f);
-        uint8_t *level = CallV<uint8_t *>(g_origDriver, 0x68);
+        uint8_t *level = CallV<uint8_t *>(g_origDriver, 0x38);
         CallV<I3D_RESULT>(level, 0x24, static_cast<const void *>(v.data()), static_cast<int>(v.size()));
         const int groups = std::min(1 + Rand(3), static_cast<int>(f.size()));
         std::vector<std::vector<I3D_triface>> parts(groups);
         for (size_t k = 0; k < f.size(); ++k)
             parts[k < static_cast<size_t>(groups) ? k : Rand(groups)].push_back(f[k]);
         for (int g = 0; g < groups; ++g) {
-            uint8_t *fg = CallV<uint8_t *>(g_origDriver, 0x64);
+            uint8_t *fg = CallV<uint8_t *>(g_origDriver, 0x34);
             if (Rand(8))
                 CallV<void>(fg, 0x00, g_mat[Rand(kMats)]);
             CallV<I3D_triface *>(fg, 0x04, static_cast<const I3D_triface *>(parts[g].data()),
@@ -457,7 +361,7 @@ uint8_t *MakeMesh(int levels)
 void GiveMesh(uint8_t *vis)
 {
     uint8_t *mesh = MakeMesh(1 + Rand(3));
-    CallV<I3D_RESULT>(vis, 0x9C, mesh, 0u);
+    CallV<I3D_RESULT>(vis, 0x94, mesh, 0u);
     CallV<uint32_t>(mesh, 0x00);
 }
 
@@ -496,14 +400,8 @@ void Scale(uint8_t *f)
         Field<uint32_t>(p, 0xE0) &= ~FRMFLAGS_BOUND_VALID;
 }
 
-// The render camera (billboard mode 4 faces it): the render context's, its inverse view matrix its
-// world matrix (the renderer sets both).
-void PlaceCamera()
-{
-    Place(g_camera);
-    Orig<void *>(0x100d11f4) = g_camera;
-    Field<S_matrix>(g_camera, 0x210) = reinterpret_cast<I3D_frame *>(g_camera)->GetMatrix();
-}
+// (LS3DRF's billboards have no render camera; the camera frame is only another frame to find.)
+void PlaceCamera() { Place(g_camera); }
 
 void UpdateScene()
 {
@@ -533,17 +431,17 @@ int FrameId(const void *f)
 
 void BuildScene()
 {
-    g_scene = CallV<uint8_t *>(g_origDriver, 0x54, static_cast<int>(FRAME_SCENE));
-    g_sectors[0] = Field<uint8_t *>(g_scene, 0x1F8);
-    g_sectors[1] = Field<uint8_t *>(g_scene, 0x200);
-    g_sectors[2] = Field<uint8_t *>(g_scene, 0x204);
+    g_scene = CallV<uint8_t *>(g_origDriver, 0x24, static_cast<int>(FRAME_SCENE));
+    g_sectors[0] = Field<uint8_t *>(g_scene, offsetof(I3D_scene, primarySector));
+    g_sectors[1] = Field<uint8_t *>(g_scene, offsetof(I3D_scene, omniSector));
+    g_sectors[2] = Field<uint8_t *>(g_scene, offsetof(I3D_scene, nearSector));
     if (!g_sectors[0] || !g_sectors[1] || !g_sectors[2]) {
         std::printf("the original's scene has no special sectors\n");
         std::exit(2);
     }
     g_numSectors = 3;
     for (int k = 0; k < 3; ++k) {
-        uint8_t *s = CallV<uint8_t *>(g_origDriver, 0x54, static_cast<int>(FRAME_SECTOR));
+        uint8_t *s = CallV<uint8_t *>(g_origDriver, 0x24, static_cast<int>(FRAME_SECTOR));
         CallV<I3D_RESULT>(s, 0x38, g_sectors[0], 0u);
         g_sectors[g_numSectors++] = s;
     }
@@ -551,19 +449,19 @@ void BuildScene()
         g_frames.push_back(g_sectors[k]);
     MakeTextures();
     for (uint8_t *&m : g_mat) {
-        m = CallV<uint8_t *>(g_origDriver, 0x58);
+        m = CallV<uint8_t *>(g_origDriver, 0x28);
         RandomizeMaterial(m);
     }
-    g_camera = CallV<uint8_t *>(g_origDriver, 0x54, static_cast<int>(FRAME_CAMERA));
+    g_camera = CallV<uint8_t *>(g_origDriver, 0x24, static_cast<int>(FRAME_CAMERA));
     CallV<I3D_RESULT>(g_camera, 0x38, g_sectors[0], 0u);
     PlaceCamera();
     static const uint32_t kTypes[] = {FourCC("OBJ_"), FourCC("OBJ_"), FourCC("LMAP"), FourCC("BBRD"), FourCC("MRPH")};
     for (int k = 0; k < 36; ++k) {
         uint8_t *f;
         if (Rand(5) == 0) {
-            f = CallV<uint8_t *>(g_origDriver, 0x54, static_cast<int>(FRAME_DUMMY));
+            f = CallV<uint8_t *>(g_origDriver, 0x24, static_cast<int>(FRAME_DUMMY));
         } else {
-            f = CallV<uint8_t *>(g_origDriver, 0x50, kTypes[Rand(5)]);
+            f = CallV<uint8_t *>(g_origDriver, 0x20, kTypes[Rand(5)]);
             GiveMesh(f);
             if (VisualType(f) == FourCC("BBRD")) {
                 Field<int>(f, 0x210) = Rand(3);
@@ -735,12 +633,22 @@ int __stdcall TestFilter(const void *, float t, I3D_frame *frame, void *user, co
 
 // ---------------------------------------------------------------- comparing
 
+// Survey only (COMPARE_ULPS=n in the environment): a float differing by at most n units in the last
+// place is counted instead of failing, to see what lies past the first rounding difference. Unset,
+// every field must be the same bits.
+int g_ulps = -1;
+std::map<std::string, long> g_ulpCounts;
 void CheckBits(const std::string &what, const void *a, const void *b, size_t n)
 {
     for (size_t i = 0; i < n; i += 4) {
         uint32_t x = 0, y = 0;
         std::memcpy(&x, static_cast<const uint8_t *>(a) + i, 4);
         std::memcpy(&y, static_cast<const uint8_t *>(b) + i, 4);
+        if (x != y && g_ulps >= 0 && ((x ^ y) & 0xff800000) == 0 &&
+            static_cast<int>(x > y ? x - y : y - x) <= g_ulps) {
+            ++g_ulpCounts[what];
+            continue;
+        }
         Check(what + " +" + std::to_string(i), static_cast<long>(x), static_cast<long>(y));
     }
 }
@@ -753,7 +661,7 @@ void CompareCalls()
         const std::string at = "call " + std::to_string(k) + (a.kind ? " (filter)" : " (hit)");
         Check(at + " kind", a.kind, b.kind);
         Check(at + " frame", a.frame, b.frame);
-        Check(at + " distance / t", static_cast<long>(a.a), static_cast<long>(b.a));
+        CheckBits(at + " distance / t", &a.a, &b.a, 4);
         // (A filter's texture coordinates only with a texture, a hit's normal only for a box the ray
         // enters: the original leaves them unset.)
         float distance;
@@ -763,10 +671,10 @@ void CompareCalls()
         if (values && a.kind)
             ++g_seenTexelCalls;
         if (values) {
-            Check(at + " b", static_cast<long>(a.b), static_cast<long>(b.b));
-            Check(at + " c", static_cast<long>(a.c), static_cast<long>(b.c));
+            CheckBits(at + " b", &a.b, &b.b, 4);
+            CheckBits(at + " c", &a.c, &b.c, 4);
             if (!a.kind)
-                Check(at + " d", static_cast<long>(a.d), static_cast<long>(b.d));
+                CheckBits(at + " d", &a.d, &b.d, 4);
         }
         Check(at + " material", a.material == b.material, true);
         CheckBits(at + " colour", a.color, b.color, 12);
@@ -779,32 +687,32 @@ void CompareCalls()
 void CompareQueryState(bool normal)
 {
     auto o = [](uint32_t va) -> const uint8_t * { return &Orig<uint8_t>(va); };
-    CheckBits("q.cbResult", o(0x100ad9b0), &q.cbResult, 4);
+    CheckBits("q.cbResult", o(0x10045a00), &q.cbResult, 4);
     if (normal)
-        CheckBits("q.normal", o(0x100ad9e0), &q.normal, 12);
-    Check("q.done", *o(0x100ad9d0) != 0, q.done);
-    CheckBits("q.lodLevel", o(0x100ada00), &q.lodLevel, 4);
-    CheckBits("q.length2", o(0x100ada04), &q.length2, 4);
-    CheckBits("q.hitFrame", o(0x100ada08), &q.hitFrame, 4);
-    CheckBits("q.hitGroup", o(0x100ada0c), &q.hitGroup, 4);
-    CheckBits("q.flags", o(0x100ada14), &q.flags, 4);
-    CheckBits("q.sweepMin", o(0x100ada20), &q.sweepMin, 12);
-    CheckBits("q.sweepMax", o(0x100ada30), &q.sweepMax, 12);
-    CheckBits("q.hitFace", o(0x100ada40), q.hitFace, 12);
-    CheckBits("q.result", o(0x100ada80), &q.result, 12);
-    CheckBits("q.frameLodLevel", o(0x100ada90), &q.frameLodLevel, 4);
-    CheckBits("q.bestDist2", o(0x100ada94), &q.bestDist2, 4);
-    CheckBits("q.from", o(0x100adaa0), &q.from, 12);
-    CheckBits("q.scene", o(0x100adab0), &q.scene, 4);
-    CheckBits("q.to", o(0x100adac0), &q.to, 12);
-    CheckBits("q.length", o(0x100adad0), &q.length, 4);
-    CheckBits("q.dir", o(0x100adae0), &q.dir, 12);
-    CheckBits("q.radius", o(0x100adaf4), &q.radius, 4);
-    CheckBits("q.hitCb", o(0x100adaf8), &q.hitCb, 4);
-    CheckBits("q.filter", o(0x100adafc), &q.filter, 4);
-    CheckBits("q.excluded", o(0x100adb00), &q.excluded, 4);
-    CheckBits("q.skipped", o(0x100adb04), &q.skipped, 4);
-    CheckBits("q.lodFrame", o(0x100adb08), &q.lodFrame, 4);
+        CheckBits("q.normal", o(0x10045a10), &q.normal, 12);
+    Check("q.done", *o(0x10045a04) != 0, q.done);
+    CheckBits("q.lodLevel", o(0x10045a30), &q.lodLevel, 4);
+    CheckBits("q.length2", o(0x10045a34), &q.length2, 4);
+    CheckBits("q.hitFrame", o(0x10045a38), &q.hitFrame, 4);
+    CheckBits("q.hitGroup", o(0x10045a3c), &q.hitGroup, 4);
+    CheckBits("q.flags", o(0x10045a40), &q.flags, 4);
+    CheckBits("q.sweepMin", o(0x10045a50), &q.sweepMin, 12);
+    CheckBits("q.sweepMax", o(0x10045a60), &q.sweepMax, 12);
+    CheckBits("q.hitFace", o(0x10045a70), q.hitFace, 12);
+    CheckBits("q.result", o(0x10045ab0), &q.result, 12);
+    CheckBits("q.frameLodLevel", o(0x10045ac0), &q.frameLodLevel, 4);
+    CheckBits("q.bestDist2", o(0x10045ac4), &q.bestDist2, 4);
+    CheckBits("q.from", o(0x10045ad0), &q.from, 12);
+    CheckBits("q.scene", o(0x10045ae0), &q.scene, 4);
+    CheckBits("q.to", o(0x10045af0), &q.to, 12);
+    CheckBits("q.length", o(0x10045b00), &q.length, 4);
+    CheckBits("q.dir", o(0x10045b10), &q.dir, 12);
+    CheckBits("q.radius", o(0x10045b24), &q.radius, 4);
+    CheckBits("q.hitCb", o(0x10045b28), &q.hitCb, 4);
+    CheckBits("q.filter", o(0x10045b2c), &q.filter, 4);
+    CheckBits("q.excluded", o(0x10045b30), &q.excluded, 4);
+    CheckBits("q.skipped", o(0x10045b34), &q.skipped, 4);
+    CheckBits("q.lodFrame", o(0x10045b38), &q.lodFrame, 4);
 }
 
 // The cached inverse matrices made again by whichever side queries next.
@@ -959,11 +867,8 @@ void RunQuery()
     const bool withCb = Rand(2) != 0;
     bool withUser = Rand(4) != 0;
     const bool withOuts = Rand(6) != 0;
-    // The filter: none, the test's, the original's transmit filter (0x10064860, which needs a
-    // colour; the port has none), LS3DF's alpha (none given).
-    const int filterKind = Rand(4);
-    if (filterKind == 2)
-        withUser = true;
+    // The filter: none or the test's (neither side may call it, see the top).
+    const int filterKind = Rand(2);
     if (filterKind && Rand(3))
         flags |= I3DCOL_FILTER;
     g_tintInFilter = Rand(2) != 0;
@@ -1013,9 +918,6 @@ void RunQuery()
         if (filterKind == 1) {
             filter = &TestFilter;
             origFilter = reinterpret_cast<void *>(&TestFilter);
-        } else if (filterKind == 2) {
-            origFilter = &Orig<uint8_t>(0x10064860);
-            filter = reinterpret_cast<I3D_COLLISION_FILTER *>(origFilter);
         }
         float *dist = withOuts ? &out[side].distance : nullptr;
         S_vector4 *point = withOuts ? &out[side].point : nullptr;
@@ -1023,49 +925,48 @@ void RunQuery()
         if (side == 0) {
             // (The port clears what the original keeps from the previous query.)
             if ((flags & I3DCOL_SKIP_FRAME) && (kind == 1 || kind == 2 || kind == 3 || kind == 4))
-                Orig<void *>(0x100adb00) = nullptr;
+                Orig<void *>(0x10045b30) = nullptr;
             if (kind >= 3 && kind <= 5)
-                Orig<void *>(0x100adb08) = nullptr;
+                Orig<void *>(0x10045b38) = nullptr;
         }
-        const S_portSectors view(side ? portScene : nullptr);
         switch (kind) {
         case 0:
             result[side] = side ? portScene->I3D_scene::PickFrame(from, dir, flags, point, normal, cb, user, filter, lod)
-                                : CallV<void *>(g_scene, 0xFC, &from, &dir, flags, point, normal, cb, user, origFilter, lod);
+                                : CallV<void *>(g_scene, 0xF8, &from, &dir, flags, point, normal, cb, user, origFilter, lod);
             break;
         case 1:
             result[side] = side ? portScene->I3D_scene::TestRay(from, dir, flags, dist, normal, cb, user, filter,
                                                                  reinterpret_cast<I3D_frame *>(frame), lod)
-                                : CallV<void *>(g_scene, 0x100, &from, &dir, flags, dist, normal, cb, user, origFilter,
+                                : CallV<void *>(g_scene, 0xFC, &from, &dir, flags, dist, normal, cb, user, origFilter,
                                                 frame, lod);
             break;
         case 2:
             result[side] = side ? portScene->I3D_scene::IntersectFrame(from, dir, reinterpret_cast<I3D_frame *>(root),
                                                                         &out[side].info, iflags,
                                                                         reinterpret_cast<I3D_frame *>(queryFrame), lod, cb)
-                                : CallV<void *>(g_scene, 0x104, &from, &dir, root, &out[side].info, iflags, queryFrame,
+                                : CallV<void *>(g_scene, 0x100, &from, &dir, root, &out[side].info, iflags, queryFrame,
                                                 lod, cb);
             break;
         case 3:
             result[side] = side ? portScene->I3D_scene::MoveSphere(from, dir, radius, flags, point,
                                                                     reinterpret_cast<I3D_frame *>(frame), cb)
-                                : CallV<void *>(g_scene, 0x108, &from, &dir, radius, flags, point, frame, cb);
+                                : CallV<void *>(g_scene, 0x104, &from, &dir, radius, flags, point, frame, cb);
             break;
         case 4:
             result[side] = side ? portScene->I3D_scene::MoveSphereFrame(from, dir, radius,
                                                                          reinterpret_cast<I3D_frame *>(root), flags,
                                                                          point, reinterpret_cast<I3D_frame *>(frame), cb)
-                                : CallV<void *>(g_scene, 0x10C, &from, &dir, radius, root, flags, point, frame, cb);
+                                : CallV<void *>(g_scene, 0x108, &from, &dir, radius, root, flags, point, frame, cb);
             break;
         case 5:
             result[side] = side ? portScene->I3D_scene::MoveSphereVisual(from, dir, radius,
                                                                           reinterpret_cast<I3D_frame *>(sphereVisual),
                                                                           flags, point)
-                                : CallV<void *>(g_scene, 0x110, &from, &dir, radius, sphereVisual, flags, point);
+                                : CallV<void *>(g_scene, 0x10C, &from, &dir, radius, sphereVisual, flags, point);
             break;
         default:
             sweep[side] = side ? portScene->I3D_scene::SweepSpheres(radius, from, toA, radiusB, fromB, toB)
-                               : CallV<float>(g_scene, 0x114, radius, &from, &toA, radiusB, &fromB, &toB);
+                               : CallV<float>(g_scene, 0x110, radius, &from, &toA, radiusB, &fromB, &toB);
             break;
         }
     }
@@ -1095,16 +996,17 @@ void RunQuery()
 int main(int argc, char **argv)
 {
     SetUnhandledExceptionFilter(&CrashFilter);
-    const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr);
+    const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr, "LS3DRF.dll");
     const long ops = argc > 2 ? std::atol(argv[2]) : 20000;
     const uint32_t seed = argc > 3 ? static_cast<uint32_t>(std::strtoul(argv[3], nullptr, 0)) : 1;
     if (!SetUpOriginal(origPath))
         return 2;
-    PatchOrigRayFilters();
+    if (const char *u = std::getenv("COMPARE_ULPS"))
+        g_ulps = std::atoi(u);
     g_logDisabled = true;
     _controlfp(_PC_24, _MCW_PC);
     g_rng.seed(seed);
-    g_origDriver = Orig<uint8_t *>(0x100d16f8);
+    g_origDriver = Orig<uint8_t *>(0x10058b78);
     BuildScene();
     if (argc > 4 && std::atoi(argv[4]) == 1) {
         // (diagnosis) each visual: where it is, and an all-sides ray of the original's at it
@@ -1116,7 +1018,7 @@ int main(int argc, char **argv)
             const S_vector from(c.x + 30, c.y + 7, c.z - 11);
             const S_vector dir(c.x - from.x, c.y - from.y, c.z - from.z);
             float dist = -1;
-            void *hit = CallV<void *>(g_scene, 0x100, &from, &dir,
+            void *hit = CallV<void *>(g_scene, 0xFC, &from, &dir,
                                       I3DCOL_TWO_SIDED | I3DCOL_UNLIMITED | I3DCOL_HIDDEN_TOO | I3DCOL_OMNI_SECTOR |
                                           I3DCOL_NEAR_SECTOR,
                                       &dist, static_cast<S_vector4 *>(nullptr), static_cast<void *>(nullptr),
@@ -1148,7 +1050,7 @@ int main(int argc, char **argv)
                 const S_vector u = RandUnit();
                 const S_vector from(target.x + u.x * 8, target.y + u.y * 8, target.z + u.z * 8);
                 const S_vector dir((target.x - from.x) * 1.5f, (target.y - from.y) * 1.5f, (target.z - from.z) * 1.5f);
-                void *hit = CallV<void *>(g_scene, 0x100, &from, &dir, extra | I3DCOL_OMNI_SECTOR | I3DCOL_NEAR_SECTOR,
+                void *hit = CallV<void *>(g_scene, 0xFC, &from, &dir, extra | I3DCOL_OMNI_SECTOR | I3DCOL_NEAR_SECTOR,
                                           static_cast<float *>(nullptr), static_cast<S_vector4 *>(nullptr),
                                           static_cast<void *>(nullptr), static_cast<void *>(nullptr),
                                           static_cast<void *>(nullptr), static_cast<void *>(nullptr), 0);
@@ -1175,6 +1077,8 @@ int main(int argc, char **argv)
                 g_seenQueries, g_seenCalls, g_seenTexelCalls);
     for (int k = 0; k < 7; ++k)
         std::printf(" %s %ld / %ld%s", kNames[k], g_seenKindHits[k], g_seenKind[k], k < 6 ? "," : "\n");
+    for (const auto &c : g_ulpCounts)
+        std::printf("ulp survey: %s %ld\n", c.first.c_str(), c.second);
     std::printf("compare_collision: %ld operations, seed %u: identical\n", ops, seed);
     std::fflush(stdout);
     TerminateProcess(GetCurrentProcess(), 0);
