@@ -1832,3 +1832,14 @@ bool IsPosNearSegment(const S_vector &pos, const S_AIWaypoint &a, const S_AIWayp
     const S_vector offset((dx * t + a.pos2.x) - pos.x, (dy * t + a.pos2.y) - pos.y, (dz * t + a.pos2.z) - pos.z);
     return offset.Magnitude() < (b.radius - a.radius) * t + a.radius;
 }
+
+void C_AIController::SetRoutePoints(const std::vector<uint16_t> &path)
+{
+    ClearRoute();
+    for (const uint16_t index : path) {
+        const S_Checkpoint *point = m_checkpoints->Get(index);
+        const S_vector4 pos = {point->pos.x, point->pos.y, point->pos.z, 0.0f};
+        m_waypoints.push_back(AllocWaypoint(index, pos, point->flags & 0xFB40, point->type,
+                                            static_cast<float>(point->radius) * 0.0625f));
+    }
+}

@@ -714,6 +714,12 @@ public:
     void SkipPassedWaypoint();                          // 0x0057b1b0 (DS 0x0057f1d0)
     // Turns to face from `from` to `to`, level unless the body is in work state 5.
     void FaceTowards(const S_vector4 &from, const S_vector4 &to);   // 0x00570ac0 (DS 0x005722b0)
+    // A ray of 5 m from the chest towards `target`'s body hits something (null: no).
+    bool CanSeeHeadOf(const C_Human *target) const;     // 0x00575150 (DS 0x00577bd0)
+    // The route through the points of `path`, replacing the one there is.
+    void SetRoutePoints(const std::vector<uint16_t> &path);   // 0x0057af70 (DS 0x0057ef00)
+    // Chance (0.05 .. 0.95) of hitting `target`, from the shooting skill, both stances and speeds, and the range.
+    float GetHitChance(const C_Human *target) const;    // 0x00571df0 (DS 0x00573af0)
 
 protected:
     // --- senses (ai_senses.cpp) ----------------------------------------------------------

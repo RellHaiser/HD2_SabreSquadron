@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include "game/ai_parts.h"
+#include "game/collision.h"
 #include "game/controller_internal.h"
 #include "game/controller_messages.h"
 #include "game/game.h"
@@ -709,4 +710,19 @@ void C_AIController::FaceTowards(const S_vector4 &from, const S_vector4 &to)
     m_facingDir.x = dir.x;
     m_facingDir.y = dir.y;
     m_facingDir.z = dir.z;
+}
+
+bool C_AIController::CanSeeHeadOf(const C_Human *target) const
+{
+    if (!target)
+        return false;
+    const S_vector &own = m_human->GetFrame()->GetWorldPos();
+    const S_vector from(own.x, own.y + 0.5f, own.z);
+    const S_vector &body = target->GetBodyFrame()->GetWorldPos();
+    S_vector dir(body.x - from.x, body.y - from.y, body.z - from.z);
+    dir.Normalize();
+    dir *= 5.0f;
+    S_vector hitPos;
+    S_vector hitNormal;
+    return g_collisionWorld.RayTest(from, dir, &hitPos, &hitNormal, 3, 0) != nullptr;
 }

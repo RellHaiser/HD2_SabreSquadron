@@ -153,7 +153,7 @@ S_matrix InverseOf(const I3D_frame *frame)
     return inverse;
 }
 
-// An int / float leaf: read, then left (0x0053b1d0 / 0x00482170).
+// An int / float leaf: read, then left (0x0053b1d0 / 0x00482170). (DS 0x0052eda0)
 int ReadIntLeaf(C_chunk &chunk, int value)
 {
     chunk.Read(value);

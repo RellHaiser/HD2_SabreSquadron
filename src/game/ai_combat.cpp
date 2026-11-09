@@ -690,3 +690,61 @@ void C_AIController::SetStance(int stance)
     if (m_fire.pauseTime < 300)
         m_fire.pauseTime = 300;
 }
+
+namespace {
+
+// What a human's speed class takes off the chance (or, unknown, adds); `fast` is class 5's.
+float SpeedPenalty(int speedClass, float fast)
+{
+    switch (speedClass) {
+    case 0:
+        return -(RandFloat() * 0.05f);
+    case 1:
+        return -(RandFloat() * 0.1f);
+    case 2:
+        return -(RandFloat() * 0.15f);
+    case 5:
+        return -(RandFloat() * fast);
+    default:
+        return RandFloat() * 0.1f;
+    }
+}
+
+}  // namespace
+
+float C_AIController::GetHitChance(const C_Human *target) const
+{
+    float chance = static_cast<float>(m_human->m_stats[STAT_SHOOTING]) * 0.005f;
+    const int targetStance = target->GetStance();
+    if (targetStance == 2)
+        chance -= RandFloat() * 0.1f;
+    else if (targetStance == 1)
+        chance -= RandFloat() * 0.05f;
+    else
+        chance = RandFloat() * 0.1f + chance;
+    chance += SpeedPenalty(target->GetMoveSpeedClass(), 0.25f);
+
+    const float range = (target->GetFrame()->GetWorldPos() - m_human->GetFrame()->GetWorldPos()).Magnitude();
+    if (range > 100.0f)
+        chance -= 0.1f;
+    else if (range != 0.0f)
+        chance -= range * 0.001f;
+
+    const int ownStance = m_human->GetStance();
+    if (ownStance == 2)
+        chance = RandFloat() * 0.1f + chance;
+    else if (ownStance == 1)
+        chance = RandFloat() * 0.05f + chance;
+    chance += SpeedPenalty(m_human->GetMoveSpeedClass(), 0.2f);
+
+    if (static_cast<int>(m_type) == 3)
+        chance = RandFloat() * 0.1f + chance;
+    const int carry = m_handsItem->GetDef()->GetCarryMode();
+    if (carry == 1 || carry == 4)
+        chance -= RandFloat() * 0.1f;
+    if (chance > 0.95f)
+        return 0.95f;
+    if (chance < 0.05f)
+        return 0.05f;
+    return chance;
+}
