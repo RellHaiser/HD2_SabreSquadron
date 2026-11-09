@@ -1445,6 +1445,7 @@ S_ServerBrowser *ServerBrowserNew(const char *queryForGame, const char *queryFro
     browser->callback = callback;
     browser->instance = instance;
     browser->dontUpdate = 0;
+    browser->triggerIp = 0;
     browser->disconnectOnComplete = 0;
     ListInit(&browser->list, queryForGame, queryFromGame, queryFromKey, queryFromVersion, OnListEvent, browser);
     EngineInit(&browser->engine, maxUpdates, queryVersion, OnQueryEvent, browser);
@@ -1475,7 +1476,7 @@ void ServerBrowserUpdate(S_ServerBrowser *browser, int async, int disconnectOnCo
     }
 }
 
-// Thinks until the trigger update is answered, an error comes or (`viaMaster`) the list has lost its master.
+// Thinks until the trigger update is answered, an error comes or (`viaMaster`) the list's state is 0.
 int ServerBrowserWaitForTrigger(S_ServerBrowser *browser, bool viaMaster)  // 0x0073b100 (DS 0x00798af0)
 {
     int error = 0;
