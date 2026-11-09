@@ -22,7 +22,7 @@ public:
         m_free.pop_back();
         return object;
     }
-    void Put(T *object) { m_free.push_back(object); }
+    void Put(T *object) { m_free.push_back(object); }   // (the list's spare cells, 0x00533de0 (DS 0x00525990), 0x0058b3f0 (DS 0x005939b0), 0x0058b420 (DS 0x005939f0), 0x005cb000 (DS 0x005e2860), 0x005ce250 (DS 0x005e6970), are the vector here)
     // Makes `growBy` new objects.
     void Grow()
     {
