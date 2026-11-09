@@ -387,5 +387,5 @@ S_AITask12 *AllocTask12(const S_vector4 &pos, int unknown30);   // 0x00582920
 
 // Writes chunk `id` with the actor's id when there is an actor (0x004752e0 __fastcall);
 // reads one (0x00475470; it does not leave the chunk).
-void WriteActorChunk(C_chunk &chunk, uint16_t id, const C_Actor *actor);   // (DS 0x004914b0)
-C_Actor *ReadActor(C_chunk &chunk);                     // (DS 0x004916b0)
+void WriteActorChunk(C_chunk &chunk, uint16_t id, const C_Actor *actor);   // (DS 0x004914b0), 0x004751d0 (DS 0x00491350)
+C_Actor *ReadActor(C_chunk &chunk);                     // (DS 0x004916b0), 0x004753f0 (DS 0x00491610)

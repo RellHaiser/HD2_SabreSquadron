@@ -232,7 +232,7 @@ protected:
 class C_ControlGroup : public C_Control {               // 0x70 bytes
 public:
     C_ControlGroup(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
-    ~C_ControlGroup() override = default;               // 0x00658f00 (0x00658f20)
+    ~C_ControlGroup() override = default;               // 0x00658f00 (0x00658f20); its members' cleanup 0x0065ed20 (DS 0x00695c80)
 
     // (0x00657150: the base's.)
     void Tick(int time) override;                       // 0x00656e10
@@ -1250,7 +1250,7 @@ class C_chunk;
 struct S_ServerEntry {
     // Not answered yet: the map " ??? ", no players, no flags, game type 4, ping 9999, not listed (the net
     // module's; part 9h-xx).
-    void Reset();                                       // 0x007252c0 (__fastcall)
+    void Reset();                                       // 0x007252c0 (__fastcall); the constructor 0x007252b0 (DS 0x0077ca40) is this
     // Its chunk 2000 (the strings with their lengths, then the fields; part 9h-xxii). True.
     bool Save(C_chunk &chunk) const;                    // 0x007253f0
     // The chunks left in the one entered: 2000 read (the strings 0x32 at most), the others skipped. True.
