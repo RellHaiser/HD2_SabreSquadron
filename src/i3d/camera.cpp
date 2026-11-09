@@ -48,7 +48,7 @@ float Cotangent(float angle, float aspect)
     return static_cast<float>(std::cos(static_cast<double>(h)) / std::sin(static_cast<double>(h)));
 }
 
-void Multiply4(S_matrix &r, const S_matrix &a, const S_matrix &b) { ::Multiply4x4(r.m, a.m, b.m); }
+void Multiply4(S_matrix &r, const S_matrix &a, const S_matrix &b) { ::Make4X4(r.m, a.m, b.m); }
 
 void ZeroMatrix(S_matrix &m)
 {

@@ -91,7 +91,7 @@ bool EdgeTouchSweepB(const S_vector &p, const S_vector &a, const S_vector &b, fl
     en.SetNormalized(b - a);
     const float s = en.Dot(p - a);
     c = a + en * s;
-    return s * s <= (b - a).Square() && (p - c).Square() <= r2;
+    return s * s <= (b - a).Magnitude2() && (p - c).Magnitude2() <= r2;
 }
 
 // 0x10011da0: a visual against the moving sphere.
@@ -221,7 +221,7 @@ done:
         // (A billboard's contact goes through the inverse of its matrix again: the original's.)
         s_contact = s_contact * (type == FourCC("BBRD") ? inv : vis->GetMatrix());
     }
-    const float d2 = (s_contact - q.from).Square();
+    const float d2 = (s_contact - q.from).Magnitude2();
     if (q.hitCb) {
         q.cbResult = q.hitCb(&s_noNormal, std::sqrt(d2), vis, q.user);
         if (q.cbResult >= 2)
@@ -245,7 +245,7 @@ bool SphereNear(const S_vector &center, float radius, bool zxyDot)
         return false;
     const S_vector p(q.from.x + q.dir.x * t, q.from.y + q.dir.y * t, q.dir.z * t + q.from.z);
     const S_vector d(p.x - center.x, p.y - center.y, p.z - center.z);
-    return zxyDot ? SquareZYX(d) < rr * rr : d.Square() < rr * rr;
+    return zxyDot ? SquareZYX(d) < rr * rr : d.Magnitude2() < rr * rr;
 }
 
 bool SphereTestable(I3D_visual *vis)
@@ -292,7 +292,7 @@ void SphereWalk(I3D_frame *f)
                 const S_vector p(q.dir.x * t, q.dir.y * t, q.dir.z * t);
                 const S_vector p2(q.from.x + p.x, p.y + q.from.y, p.z + q.from.z);
                 const S_vector d(p2.x - c.x, p2.y - c.y, p2.z - c.z);
-                if (rr * rr > d.Square() && (!(vis->visualFlags & 0x1000) || !(q.flags & I3DCOL_SKIP_FLAGGED)) &&
+                if (rr * rr > d.Magnitude2() && (!(vis->visualFlags & 0x1000) || !(q.flags & I3DCOL_SKIP_FLAGGED)) &&
                     SphereTestable(vis)) {
                     q.cbResult = 0;
                     SphereVisual(vis);
@@ -337,7 +337,7 @@ void AxialSweepBox(float radius)
     I3D_bbox box;
     box.min = q.sweepMin;
     box.max = q.sweepMax;
-    box.Expand(farEnd);
+    box.Absorb(farEnd);
     q.sweepMin = box.min;
     q.sweepMax = box.max;
 }

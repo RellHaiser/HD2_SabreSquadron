@@ -96,7 +96,7 @@ public:
     virtual I3D_RESULT __stdcall RemoveLight(I3D_light *light);
     // 0x7C / 0x80 0x1004dcb0 / 0x1004de20: a sound plays in the sector (each side's list).
     virtual void __stdcall AddSound(I3D_sound *sound);
-    virtual I3D_RESULT __stdcall RemoveSound(I3D_sound *sound);
+    virtual I3D_RESULT __stdcall DeleteSound(I3D_sound *sound);
     // 0x84 0x1004d8c0: E_I3D_SECTOR_ENV `index`; `value` is the float's / int's bits or, for the
     // vectors, their address. The values are clamped to their ranges.
     virtual I3D_RESULT __stdcall SetEnvironmentParam(int index, uintptr_t value);

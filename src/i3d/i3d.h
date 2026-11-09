@@ -105,7 +105,7 @@ struct I3D_bbox {
     }
     bool IsValid() const { return min.x <= max.x; }
     // Grows the box to hold `p` (0x10015050; NaN coordinates leave it as it is).
-    void Expand(const S_vector &p)
+    void Absorb(const S_vector &p)
     {
         if (p.x < min.x)
             min.x = p.x;

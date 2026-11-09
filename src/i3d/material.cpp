@@ -172,7 +172,7 @@ I3D_RESULT I3D_material::CopyFrom(const I3D_material *source)
     return I3D_OK;
 }
 
-I3D_RESULT I3D_material::SetTwoSided()
+I3D_RESULT I3D_material::Set2Sided()
 {
     matFlags |= MATF_TWO_SIDED;
     return I3D_OK;
