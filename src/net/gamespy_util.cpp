@@ -348,3 +348,299 @@ void SocketStartUp()
     WSADATA data;
     WSAStartup(0x101, &data);
 }
+
+// ---- darray.c and hashtable.c, the parts the game's code does not use ----------------------------------
+
+using ArrayMapFn = void (*)(void *element, void *data);
+using ArrayMapFn2 = int (*)(void *element, void *data);
+
+void ArraySetDataPtr(S_DArray *array, void *list, int count, int capacity)   // 0x00732f30 (DS 0x0078e110)
+{
+    if (array->list) {
+        for (int i = 0; i < array->count; ++i)
+            FreeElement(array, i);
+        free(array->list);
+    }
+    array->list = static_cast<char *>(list);
+    array->count = count;
+    array->capacity = capacity;
+}
+
+void ArrayInsertSorted(S_DArray *array, const void *element, ArrayCompareFn compare)   // 0x00733070 (DS 0x0078e2e0)
+{
+    bool found;
+    const char *place = BinarySearch(element, array->list, array->count, array->elementSize, compare, &found);
+    ArrayInsertAt(array, element, static_cast<int>(place - array->list) / array->elementSize);
+}
+
+void ArraySort(S_DArray *array, ArrayCompareFn compare) // 0x00733140 (DS 0x0078e3f0)
+{
+    qsort(array->list, array->count, array->elementSize, compare);
+}
+
+void ArrayMapForward(S_DArray *array, ArrayMapFn map, void *data)   // 0x007331f0 (DS 0x0078e4e0)
+{
+    for (int i = 0; i < array->count; ++i)
+        map(ArrayNth(array, i), data);
+}
+
+void ArrayMapBackward(S_DArray *array, ArrayMapFn map, void *data)  // 0x00733220 (DS 0x0078e520)
+{
+    for (int i = array->count; --i >= 0;)
+        map(ArrayNth(array, i), data);
+}
+
+// The first element for which `map` returns 0, null if none.
+void *ArrayMapForward2(S_DArray *array, ArrayMapFn2 map, void *data)    // 0x00733250 (DS 0x0078e560)
+{
+    for (int i = 0; i < array->count; ++i) {
+        void *element = ArrayNth(array, i);
+        if (map(element, data) == 0)
+            return element;
+    }
+    return nullptr;
+}
+
+void *ArrayMapBackward2(S_DArray *array, ArrayMapFn2 map, void *data)   // 0x00733290 (DS 0x0078e5b0)
+{
+    for (int i = array->count; --i >= 0;) {
+        void *element = ArrayNth(array, i);
+        if (map(element, data) == 0)
+            return element;
+    }
+    return nullptr;
+}
+
+int TableCount(const S_HashTable *table)                // 0x00736e80 (DS 0x00793390)
+{
+    int count = 0;
+    for (int i = 0; i < table->bucketCount; ++i)
+        count += ArrayLength(table->buckets[i]);
+    return count;
+}
+
+void TableMap(S_HashTable *table, ArrayMapFn map, void *data)   // 0x00736f90 (DS 0x00793500)
+{
+    for (int i = 0; i < table->bucketCount; ++i)
+        ArrayMapForward(table->buckets[i], map, data);
+}
+
+void TableMapSafe(S_HashTable *table, ArrayMapFn map, void *data)   // 0x00736fd0 (DS 0x00793550)
+{
+    for (int i = 0; i < table->bucketCount; ++i)
+        ArrayMapBackward(table->buckets[i], map, data);
+}
+
+void *TableMap2(S_HashTable *table, ArrayMapFn2 map, void *data)    // 0x00737010 (DS 0x007935a0)
+{
+    for (int i = 0; i < table->bucketCount; ++i) {
+        if (void *element = ArrayMapForward2(table->buckets[i], map, data))
+            return element;
+    }
+    return nullptr;
+}
+
+void *TableMapSafe2(S_HashTable *table, ArrayMapFn2 map, void *data)    // 0x00737050 (DS 0x007935f0)
+{
+    for (int i = 0; i < table->bucketCount; ++i) {
+        if (void *element = ArrayMapBackward2(table->buckets[i], map, data))
+            return element;
+    }
+    return nullptr;
+}
+
+void TableClear(S_HashTable *table)                     // 0x00737090 (DS 0x00793640)
+{
+    for (int i = 0; i < table->bucketCount; ++i)
+        ArrayClear(table->buckets[i]);
+}
+
+// ---- gbucket.c: named statistics; the game never makes a bucket set ------------------------------------
+
+enum { BUCKET_INT = 0, BUCKET_DOUBLE = 1, BUCKET_STRING = 2 };
+
+struct S_Bucket {                                       // 0x18 bytes
+    char *name;
+    int type;                                           // +0x04
+    int players;                                        // +0x08 values averaged so far
+    union {
+        int asInt;
+        double asDouble;
+        char *asString;
+    } value;                                            // +0x10
+};
+
+struct S_BucketSet {
+    S_HashTable *buckets;
+};
+
+S_BucketSet *g_bucketSet = nullptr;                     // 0x0098c1a0 the default set
+
+namespace {
+
+int s_bucketInt;                                        // 0x00982108
+double s_bucketDouble;                                  // 0x00982110
+
+}  // namespace
+
+void *BucketData(S_Bucket *bucket)                      // 0x00733a10 (DS 0x0078ef90)
+{
+    if (!bucket)
+        return nullptr;
+    return bucket->type == BUCKET_STRING ? static_cast<void *>(bucket->value.asString) : static_cast<void *>(&bucket->value);
+}
+
+char *BucketFixSlashes(char *text)                      // 0x007339f0 (DS 0x0078ef60)
+{
+    for (char *c = text; *c; ++c) {
+        if (*c == '\\')
+            *c = '/';
+    }
+    return text;
+}
+
+void *BucketDoSet(S_Bucket *bucket, const void *value)  // 0x00733970 (DS 0x0078eec0)
+{
+    if (bucket->type == BUCKET_INT) {
+        bucket->value.asInt = *static_cast<const int *>(value);
+    } else if (bucket->type == BUCKET_DOUBLE) {
+        bucket->value.asDouble = *static_cast<const double *>(value);
+    } else if (bucket->type == BUCKET_STRING) {
+        if (bucket->value.asString)
+            free(bucket->value.asString);
+        bucket->value.asString = value ? BucketFixSlashes(goastrdup(static_cast<const char *>(value))) : nullptr;
+    }
+    return BucketData(bucket);
+}
+
+S_Bucket *BucketFind(S_BucketSet *set, const char *name)    // 0x00733a30 (DS 0x0078efc0)
+{
+    if (!set)
+        set = g_bucketSet;
+    S_Bucket key;
+    key.name = const_cast<char *>(name);
+    return static_cast<S_Bucket *>(TableLookup(set->buckets, &key));
+}
+
+void BucketElementFree(S_Bucket *bucket)                // 0x00733ac0 (DS 0x0078f0a0)
+{
+    free(bucket->name);
+    if (bucket->type == BUCKET_STRING && bucket->value.asString)
+        free(bucket->value.asString);
+}
+
+void *BucketInt(int value)                              // 0x00733840 (DS 0x0078ed30)
+{
+    s_bucketInt = value;
+    return &s_bucketInt;
+}
+
+void *BucketDouble(double value)                        // 0x00733850 (DS 0x0078ed50)
+{
+    s_bucketDouble = value;
+    return &s_bucketDouble;
+}
+
+void FreeBucketSet(S_BucketSet *set)                    // 0x00733400 (DS 0x0078e790)
+{
+    TableFree(set->buckets);
+    free(set);
+}
+
+void *BucketNew(S_BucketSet *set, const char *name, int type, const void *value)    // 0x00733470 (DS 0x0078e830)
+{
+    if (!set)
+        set = g_bucketSet;
+    S_Bucket bucket;
+    bucket.name = goastrdup(name);
+    bucket.type = type;
+    bucket.players = 1;
+    bucket.value.asDouble = 0.0;
+    BucketDoSet(&bucket, value);
+    TableEnter(set->buckets, &bucket);
+    return BucketData(BucketFind(set, name));
+}
+
+void BucketSet(S_BucketSet *set, const char *name, const void *value)   // 0x007334e0 (DS 0x0078e8c0)
+{
+    S_Bucket *bucket = BucketFind(set, name);
+    if (!bucket)
+        return;
+    bucket->players = 0;
+    BucketDoSet(bucket, value);
+}
+
+void *BucketConcat(S_BucketSet *set, const char *name, const char *value)   // 0x00733700, 0x00733710 (DS 0x0078eb90) (DS 0x0078eba0)
+{
+    S_Bucket *bucket = BucketFind(set, name);
+    if (!bucket)
+        return nullptr;
+    const char *old = static_cast<const char *>(BucketData(bucket));
+    char *joined = static_cast<char *>(malloc(strlen(old) + strlen(value) + 1));
+    strcpy(joined, old);
+    strcat(joined, value);
+    BucketDoSet(bucket, joined);
+    free(joined);
+    return BucketData(bucket);
+}
+
+void BucketAdd(S_BucketSet *set, const char *name, const void *value)   // 0x00733520 (DS 0x0078e920)
+{
+    S_Bucket *bucket = BucketFind(set, name);
+    if (!bucket)
+        return;
+    if (bucket->type == BUCKET_INT)
+        BucketDoSet(bucket, BucketInt(*static_cast<const int *>(value) + bucket->value.asInt));
+    else if (bucket->type == BUCKET_DOUBLE)
+        BucketDoSet(bucket, BucketDouble(bucket->value.asDouble + *static_cast<const double *>(value)));
+    else
+        BucketConcat(set, name, static_cast<const char *>(value));
+}
+
+void BucketSub(S_BucketSet *set, const char *name, const void *value)   // 0x007335b0 (DS 0x0078e9e0)
+{
+    S_Bucket *bucket = BucketFind(set, name);
+    if (!bucket)
+        return;
+    if (bucket->type == BUCKET_INT)
+        BucketDoSet(bucket, BucketInt(bucket->value.asInt - *static_cast<const int *>(value)));
+    else if (bucket->type == BUCKET_DOUBLE)
+        BucketDoSet(bucket, BucketDouble(bucket->value.asDouble - *static_cast<const double *>(value)));
+}
+
+void BucketMult(S_BucketSet *set, const char *name, const void *value)  // 0x00733620 (DS 0x0078ea70)
+{
+    S_Bucket *bucket = BucketFind(set, name);
+    if (!bucket)
+        return;
+    if (bucket->type == BUCKET_INT)
+        BucketDoSet(bucket, BucketInt(*static_cast<const int *>(value) * bucket->value.asInt));
+    else if (bucket->type == BUCKET_DOUBLE)
+        BucketDoSet(bucket, BucketDouble(bucket->value.asDouble * *static_cast<const double *>(value)));
+}
+
+void BucketDiv(S_BucketSet *set, const char *name, const void *value)   // 0x00733690 (DS 0x0078eb00)
+{
+    S_Bucket *bucket = BucketFind(set, name);
+    if (!bucket)
+        return;
+    if (bucket->type == BUCKET_INT)
+        BucketDoSet(bucket, BucketInt(bucket->value.asInt / *static_cast<const int *>(value)));
+    else if (bucket->type == BUCKET_DOUBLE)
+        BucketDoSet(bucket, BucketDouble(bucket->value.asDouble / *static_cast<const double *>(value)));
+}
+
+void BucketAvg(S_BucketSet *set, const char *name, const void *value)   // 0x007337a0 (DS 0x0078ec60)
+{
+    S_Bucket *bucket = BucketFind(set, name);
+    if (!bucket)
+        return;
+    if (bucket->type == BUCKET_INT) {
+        ++bucket->players;
+        BucketDoSet(bucket, BucketInt((bucket->value.asInt * bucket->players + *static_cast<const int *>(value)) / bucket->players));
+    } else if (bucket->type == BUCKET_DOUBLE) {
+        ++bucket->players;
+        const double players = static_cast<double>(bucket->players);
+        BucketDoSet(bucket, BucketDouble((bucket->value.asDouble * players + *static_cast<const double *>(value)) / players));
+    }
+}
