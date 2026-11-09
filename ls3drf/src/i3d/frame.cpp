@@ -253,11 +253,11 @@ void I3D_frame::Uninit()
         RemoveName();
     NotifyOwnerRemoved();
     if (frameFlags & FRMFLAGS_TARGETED)
-        RemoveFromTargets(this);
+        DeleteFromAnyTarget(this);
     if (frameFlags & FRMFLAGS_SHADOW_CASTER)
-        RemoveShadowCaster(this);
+        DeleteFromAnyShadow(this);
     if (frameFlags & FRMFLAGS_SCENE_SOUND)
-        g_driver->FrameReleased(this);
+        g_driver->DeleteFromSceneTickList(this);
     if (parent) {
         parent->frameFlags &= ~FRMFLAGS_BOUND_VALID;
         if (RemoveChild(parent, this)) {
@@ -919,7 +919,7 @@ void __stdcall I3D_frame::UpdateBound()
             const S_matrix &m = GetMatrix();
             bound.bbox.min = bound.bbox.max = box.Corner(0) * m;
             for (int i = 1; i < 8; ++i)
-                bound.bbox.Expand(box.Corner(i) * m);
+                bound.bbox.Absorb(box.Corner(i) * m);
             bound.MakeSphere();
         }
         frameFlags |= FRMFLAGS_BOUND_VALID;

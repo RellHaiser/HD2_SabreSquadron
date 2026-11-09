@@ -51,13 +51,20 @@ void BroadcastStopMission(bool server)
     }
 }
 
+// The id is a message's 5-bit type. Fix: the original does not check it. A stream out of step (a message
+// to a temporary actor that is gone stays unread) gives an id past the table: in the original the next
+// static object's fields, in the port other globals.
 bool DispatchMessage(int moduleId, C_BitStream *msg)
 {
+    if (moduleId >= MODULE_COUNT)
+        return false;
     return g_modules[moduleId] ? g_modules[moduleId]->OnMessage(msg) : false;
 }
 
 bool CallUnknown28(int moduleId, C_BitStream *msg)
 {
+    if (moduleId >= MODULE_COUNT)
+        return false;
     return g_modules[moduleId] ? g_modules[moduleId]->Unknown28(msg) : false;
 }
 

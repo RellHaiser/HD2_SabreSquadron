@@ -123,6 +123,6 @@ void __stdcall I3D_visual::UpdateWBoundProc()
     const S_matrix &m = GetMatrix();
     worldBound.bbox.min = worldBound.bbox.max = box.Corner(0) * m;
     for (int i = 1; i < 8; ++i)
-        worldBound.bbox.Expand(box.Corner(i) * m);
+        worldBound.bbox.Absorb(box.Corner(i) * m);
     worldBound.MakeSphere();
 }

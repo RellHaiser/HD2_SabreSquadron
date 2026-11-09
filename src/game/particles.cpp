@@ -1086,6 +1086,9 @@ void C_ParticlesModule::RestartMission(bool server)
 
 void C_ParticlesModule::LoadEffects()
 {
+#ifdef HD2_DEDICATED    // the server has no particles: Create only returns -1 (DS 0x0043dff0)
+    return;
+#endif
     if (!m_effects.empty())
         return;
 
@@ -1238,6 +1241,9 @@ void C_ParticlesModule::AddStaticEmitter(int effect, const S_matrix &matrix, I3D
 
 void C_ParticlesModule::LoadStaticEmitters()
 {
+#ifdef HD2_DEDICATED    // no effects.bin in the server
+    return;
+#endif
     if (m_effects.empty())
         LoadEffects();
 

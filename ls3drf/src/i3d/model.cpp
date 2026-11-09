@@ -52,7 +52,7 @@ I3D_RESULT CloneChildren(I3D_frame *parent, I3D_frame *source)
         if (result < 0)
             return result;
         if (c->frameFlags & FRMFLAGS_TARGETED)
-            s_targetLinks.PushBack({copy, FindTargetOf(c)});
+            s_targetLinks.PushBack({copy, GetTarget(c)});
         if (copy->type == FRAME_SHADOW)
             s_shadows.PushBack(copy);
         parent->AddChildFront(copy);
@@ -347,23 +347,23 @@ I3D_RESULT I3D_model::SetPoseSetWeight(float weight, I3D_pose_set *set)
 {
     if (!animStack)
         return I3DERR_OBJECTNOTFOUND;
-    return animStack->SetPoseWeight(weight, set);
+    return animStack->SetPoseBlend(weight, set);
 }
 
 I3D_RESULT I3D_model::SetPoseWeight(float weight)
 {
     if (!animStack)
         return I3DERR_OBJECTNOTFOUND;
-    animStack->SetPoseWeight(weight);
+    animStack->SetPoseBlend(weight);
     return I3D_OK;
 }
 
-float I3D_model::GetPoseWeight() { return animStack ? animStack->GetPoseWeight() : 0.0f; }
+float I3D_model::GetPoseWeight() { return animStack ? animStack->GetPoseBlend() : 0.0f; }
 
 void I3D_model::ClearPoses()
 {
     if (animStack)
-        animStack->ClearPoses();
+        animStack->ResetAllPoses();
 }
 
 int I3D_model::NumTracks() { return animStack ? animStack->tracks.Size() : 0; }

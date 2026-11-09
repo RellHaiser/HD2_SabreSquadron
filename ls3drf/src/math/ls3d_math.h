@@ -98,8 +98,8 @@ struct S_vector {
     {
         return S_vector(y * v.z - z * v.y, z * v.x - v.z * x, x * v.y - y * v.x);
     }
-    float Square() const { return x * x + y * y + z * z; }                   // 0x10011d80
-    float Magnitude() const { return ls3d::MagnitudeOfSquare(Square()); }    // 0x1002fe90
+    float Magnitude2() const { return x * x + y * y + z * z; }                   // 0x10011d80
+    float Magnitude() const { return ls3d::MagnitudeOfSquare(Magnitude2()); }    // 0x1002fe90
 
     // SDK Normalize: a (nearly) zero vector becomes a unit vector along its first non-zero axis
     // (x, then z, then y).
@@ -303,7 +303,7 @@ LS3D_API bool __stdcall LineLineIntersect(const S_vector &p1, const S_vector &d1
 // LS3DRF 0x1001bdf0 (from LS3DF 0x1002e430)
 // a * b as full 4 x 4 matrices into `r` (0x1002e430; the grouping of S_matrix4::Mult4X4). `r`
 // must not be one of the inputs.
-inline void Multiply4x4(float (&r)[4][4], const float (&a)[4][4], const float (&b)[4][4])
+inline void Make4X4(float (&r)[4][4], const float (&a)[4][4], const float (&b)[4][4])
 {
     for (int i = 0; i < 4; ++i)
         for (int j = 0; j < 4; ++j)

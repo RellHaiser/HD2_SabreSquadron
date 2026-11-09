@@ -181,7 +181,7 @@ void I3D_sector::Uninit()
         light->sectors.RemoveSwap(this);
     lights.Clear();
     for (int n = sounds.Size(); n; --n)
-        RemoveSound(sounds[0]);
+        DeleteSound(sounds[0]);
     sounds.Clear();
     FreeGeometry();
     I3D_frame::Uninit();
@@ -362,7 +362,7 @@ void I3D_sector::AddSound(I3D_sound *sound)
 }
 
 // LS3DRF 0x1002a5e0 (from LS3DF 0x1004de20)
-I3D_RESULT I3D_sector::RemoveSound(I3D_sound *sound)
+I3D_RESULT I3D_sector::DeleteSound(I3D_sound *sound)
 {
     if (!Contains(sounds, sound))
         return I3DERR_OBJECTNOTFOUND;
