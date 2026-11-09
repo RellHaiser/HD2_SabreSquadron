@@ -8,16 +8,16 @@
 #include "game/pending.h"                               // g_carScene, g_carSurfaces
 #include "ls3d/i3d.h"
 
-// Not in the server.
+// The server's copy only returns 1 (DS 0x004dd150).
 bool C_Vehicle::StopEffect(int slot)                                           // 0x004ecfc0
 {
-    return false;
+    return true;
 }
 
-// Not in the server.
+// The server's copy only returns 1 (DS 0x004f5d10): Update's quiet test, so a vehicle at rest can sleep.
 bool C_Vehicle::UpdateEngineSmoke()                                            // 0x00506f00
 {
-    return false;
+    return true;
 }
 
 // Not in the server.
