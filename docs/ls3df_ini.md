@@ -136,8 +136,9 @@ CaptureFrames=1
   this option off first.
 - Very fine alpha detail, such as grass blades one pixel wide and a few pixels apart, still
   disappears at a distance; no per-level filter can keep it. It no longer turns into a solid wall.
-- **Not tested in the game yet.** The texture and loading paths are verified (below); the filter
-  settings on a real Direct3D device are not.
+- **Tried in the game on `SDLGPU` only.** `AnisotropicFiltering` and `ImprovedMipmaps` ran on Direct3D 12
+  through SDL_GPU. The texture and loading paths are verified (below); the filter settings on a real
+  Direct3D 8 device are not.
 
 ## The changes
 

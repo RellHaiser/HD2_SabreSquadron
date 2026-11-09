@@ -192,6 +192,12 @@ the failing side is still discarded, so if a driver ignored the setting the test
 The game's captures (made through dgVoodoo with 8 samples) are nearer with 4 samples than without: 31.3 - 41.6
 dB against 31.0 - 38.4 on the 3D frames, and 95 dB against 45 on the two that are nearly all 2D.
 
+**In the game** (November 2026, Africa1 with a high-resolution texture pack): the gamma option works in full
+screen and the desktop is untouched after Alt-Tab; 4 samples with alpha to coverage stay smooth on both backends
+and leave the HUD as it was, with about 2.6 GB of address space free on Direct3D 12. They do not stop the palm
+leaves shimmering. `AnisotropicFiltering=16` and `ImprovedMipmaps=1` help a little there, and sharpen ground and
+walls at shallow angles.
+
 **Not yet:**
 - buffers kept on the GPU (each draw's vertices are copied every frame; at about 2 ms a frame it
   has not mattered);
