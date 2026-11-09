@@ -444,8 +444,14 @@ void BuildScene()
         CallV<I3D_RESULT>(s, 0x38, g_sectors[0], 0u);
         g_sectors[g_numSectors++] = s;
     }
-    for (int k = 0; k < g_numSectors; ++k)
+    // A sector without geometry keeps its box as the heap left it (LS3DRF's Init does not set it) and
+    // its bound comes from that: give them one, or the bounds reach 1e29, where the x87 and SSE
+    // differ (see compare_frame's note on magnitudes).
+    for (int k = 0; k < g_numSectors; ++k) {
+        const float box[8] = {-300, -300, -300, 0, 300, 300, 300, 0};
+        std::memcpy(g_sectors[k] + 0x170, box, sizeof box);
         g_frames.push_back(g_sectors[k]);
+    }
     MakeTextures();
     for (uint8_t *&m : g_mat) {
         m = CallV<uint8_t *>(g_origDriver, 0x28);
