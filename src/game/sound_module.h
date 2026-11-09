@@ -26,6 +26,7 @@
 class C_Actor;
 class C_Human;
 class I3D_frame;
+class I3D_scene;
 class I3D_sector;
 class I3D_sound;
 class ISND_stream;
@@ -82,6 +83,30 @@ struct S_SectorAcoustics {                              // 12 bytes
     float openArea;                                     // m^2 of open portals to the outside (max 40)
     float outdoorFactor;                                // share of outdoor sound that gets in (0.1 .. 1)
 };
+
+// How many portals apart the sectors are, kept in the sectors' user data (where the acoustics
+// live while a mission runs). None of this is called in the game.
+struct S_SectorHopEntry {                               // 2 bytes
+    S_SectorHopEntry() {}                               // 0x00431f20 (DS 0x00457670)
+    ~S_SectorHopEntry() {}                              // 0x00431f40 (DS 0x004576a0)
+    uint8_t hops = 0xFF;                                // +0x00 0xFF: not counted yet
+    uint8_t unknown1 = 0x80;                            // +0x01
+};
+struct S_SectorHops {                                   // 12 bytes
+    S_SectorHops(I3D_sector *sector, int index);        // 0x00431dd0 (DS 0x004574b0)
+    I3D_sector *sector;                                 // +0x00
+    int index;                                          // +0x04 in the table, and the entries' count
+    S_SectorHopEntry *entries;                          // +0x08 one per sector before this one
+};
+// Distance from `a` to `b`; `factor` falls with the hops between the sectors, by 0.1 a hop
+// when `gradual`, else by 0.25.
+float SectorHopDistance(float &factor, const S_vector &a, const S_vector &b, I3D_sector *sectorA,
+                        I3D_sector *sectorB, bool gradual);   // 0x00431120 (DS 0x00456430)
+// Hops from `from` to `to` (at most 10), counted once and then remembered.
+uint8_t CountSectorHops(I3D_sector *from, I3D_sector *to, std::vector<I3D_sector *> &path,
+                        uint32_t maxPath);              // 0x004312b0 (DS 0x00456630)
+void BuildSectorHopTable(std::vector<S_SectorHops *> &table, I3D_scene *scene);   // 0x004314e0 (DS 0x004568f0)
+uint32_t __stdcall AddSectorHopEntry(I3D_frame *frame, void *table);   // 0x00431630 (DS 0x00456aa0)
 
 // A sound frame of the scene whose volume follows the listener's sector.
 struct S_SoundFrame {                                   // 0x14 bytes
