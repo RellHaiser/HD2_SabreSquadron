@@ -49,7 +49,6 @@ class C_SquadMenu : public C_MenuState {
 public:
     // (Inline in C_GameApp::StartStep; the destructor is the base's: 0x006c1bb0.)
     C_SquadMenu() = default;
-    ~C_SquadMenu() override = default;                  // 0x006c1bd0 (DS 0x00707650)
 
     int GetTypeId() const override { return GAME_STATE_TYPE_SQUAD_MENU; }   // 0x1C 0x006c1ba0
 
