@@ -720,6 +720,8 @@ public:
     void SetRoutePoints(const std::vector<uint16_t> &path);   // 0x0057af70 (DS 0x0057ef00)
     // Chance (0.05 .. 0.95) of hitting `target`, from the shooting skill, both stances and speeds, and the range.
     float GetHitChance(const C_Human *target) const;    // 0x00571df0 (DS 0x00573af0)
+    // The nearest seen enemy: its distance (65535 without one) and the cosine between it and the next waypoint (1).
+    void GetNearestEnemy(float *distance, float *dot) const;   // 0x00573500 (DS 0x00575820)
 
 protected:
     // --- senses (ai_senses.cpp) ----------------------------------------------------------

@@ -795,3 +795,38 @@ uint16_t C_CheckpointNetwork::FindActorEntryOfPoint(uint16_t index) const
 {
     return FindEntryOfPoint(m_actors, m_actorCount, index);
 }
+
+void C_CheckpointNetwork::CollectReachableWithCosts(const S_Checkpoint *from, float radius, std::vector<uint16_t> *out)
+{
+    if (!from || !out || radius < 0.0f)
+        return;
+    struct S_Reached {
+        uint16_t point;
+        float cost;
+    };
+    std::vector<S_Reached> reached;
+    reached.push_back({static_cast<uint16_t>(from - m_points), 0.0f});
+    for (size_t i = 0; i < reached.size(); ++i) {
+        const S_Checkpoint *point = Get(reached[i].point);
+        if (!point || !point->links)
+            continue;
+        const int links = point->flags & 0x3F;
+        for (int j = 0; j < links; ++j) {
+            const S_CheckpointLink &link = point->links[j];
+            const float cost = static_cast<float>(link.cost) * 0.00390625f + reached[i].cost;
+            if (!(cost <= radius))
+                continue;
+            bool known = false;
+            for (const S_Reached &entry : reached) {
+                if (static_cast<int>(entry.point) == static_cast<int>(static_cast<uint16_t>(link.target))) {
+                    known = true;
+                    break;
+                }
+            }
+            if (!known)
+                reached.push_back({static_cast<uint16_t>(link.target), cost});
+        }
+    }
+    for (const S_Reached &entry : reached)
+        out->push_back(entry.point);
+}

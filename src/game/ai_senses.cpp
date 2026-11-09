@@ -726,3 +726,28 @@ bool C_AIController::CanSeeHeadOf(const C_Human *target) const
     S_vector hitNormal;
     return g_collisionWorld.RayTest(from, dir, &hitPos, &hitNormal, 3, 0) != nullptr;
 }
+
+void C_AIController::GetNearestEnemy(float *distance, float *dot) const
+{
+    *distance = 65535.0f;
+    *dot = 1.0f;
+    const std::vector<C_Human *> &enemies = m_human->m_seenEnemies;
+    const S_vector &own = m_human->GetFrame()->GetWorldPos();
+    int nearest = -1;
+    for (int i = static_cast<int>(enemies.size()); i-- > 0;) {
+        const float d = Distance(enemies[i]->GetFrame()->GetWorldPos(), own);
+        if (d < *distance) {
+            *distance = d;
+            nearest = i;
+        }
+    }
+    if (nearest < 0)
+        return;
+    const S_vector &enemy = enemies[nearest]->GetFrame()->GetWorldPos();
+    S_vector toEnemy(enemy.x - own.x, enemy.y - own.y, enemy.z - own.z);
+    toEnemy.Normalize();
+    const S_vector4 &waypoint = m_waypoints[0]->pos;
+    S_vector toWaypoint(waypoint.x - own.x, waypoint.y - own.y, waypoint.z - own.z);
+    toWaypoint.Normalize();
+    *dot = toWaypoint.x * toEnemy.x + toWaypoint.y * toEnemy.y + toWaypoint.z * toEnemy.z;
+}

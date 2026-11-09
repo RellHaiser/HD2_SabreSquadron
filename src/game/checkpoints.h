@@ -187,6 +187,8 @@ public:
     uint16_t FindNameEntryOfPoint(uint16_t index) const;    // 0x0051e2c0 (DS 0x0050a180)
     uint16_t FindFrameEntryOfPoint(uint16_t index) const;   // 0x0051e450 (DS 0x0050a380)
     uint16_t FindActorEntryOfPoint(uint16_t index) const;   // 0x0051e5e0 (DS 0x0050a580)
+    // Appends the points within `radius` of link costs from `from`, breadth first, `from` first.
+    void CollectReachableWithCosts(const S_Checkpoint *from, float radius, std::vector<uint16_t> *out);   // 0x0051ff20 (DS 0x0050c580)
     // The points tied to `actor` (replaces `out`).
     void GetActorPoints(const C_Actor *actor, std::vector<uint16_t> &out) const;   // 0x0051e6d0
 
