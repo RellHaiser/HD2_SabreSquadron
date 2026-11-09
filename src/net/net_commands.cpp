@@ -158,6 +158,25 @@ void C_GameApp::HandleServerCommand(int id, C_BitStream *stream)
             g_netGame.UnlockPlayers();
         }
         stream->ReadString(line, 0x103);
+#ifdef HD2_DEDICATED
+        {
+            // The server's console shows the line (DS 0x00780a41). (The original first builds "<TEAM> %s", then
+            // overwrites it in every case.)
+            // Fix: the original's sprintf can overflow this buffer, and it tests only sender == -1.
+            char shown[0x144];
+            if (sender < 0) {
+                std::snprintf(shown, sizeof shown, "ADMIN : %s", line);
+            } else {
+                const S_NetPlayerState &player = g_netGame.LockPlayers()[sender];
+                if (line[0x10C])
+                    std::snprintf(shown, sizeof shown, player.team ? "%s <TEAM_ALIED>: %s" : "%s <TEAM_AXIS>: %s", player.name, line);
+                else
+                    std::snprintf(shown, sizeof shown, "%s: %s", player.name, line);
+                g_netGame.UnlockPlayers();
+            }
+            GetConsole()->AddLine(shown);
+        }
+#endif
         type = 4;
         a = reinterpret_cast<intptr_t>(line);
         break;
