@@ -37,6 +37,9 @@
 //                              ; (empty: what the game asks for)
 //   MSAA=4                     ; SDL_GPU and OpenGL: that many samples a pixel (2, 4 or 8), at least
 //   AlphaToCoverage=1          ; SDL_GPU and OpenGL with MSAA: alpha-tested 3D edges smoothed too
+//   AmbientOcclusion=1         ; SDL_GPU and OpenGL: darkening where the 3D scene's surfaces meet
+//   AmbientOcclusionStrength=75   ; how dark, in percent (default 75)
+//   AmbientOcclusionRadius=60  ; how far it reaches, in centimetres (default 60)
 //   OpenGL=1                   ; drawing through OpenGL 3.3 (SDL3.dll next to the DLL; gfx/opengl)
 //                              ; instead of Direct3D 8; Direct3D 8 when SDL3 is missing
 //   SDLGPUDebug=1              ; the API's validation (the Vulkan SDK's layers, Direct3D 12's debug
@@ -67,6 +70,9 @@ struct S_enhancements {
     char presentMode[16];                   // [Render] PresentMode ("": what the game asks for)
     int msaa;                               // [Render] MSAA (0: what the game asks for)
     bool alphaToCoverage;                   // [Render] AlphaToCoverage
+    bool occlusion;                         // [Render] AmbientOcclusion
+    int occlusionStrength;                  // [Render] AmbientOcclusionStrength (percent)
+    int occlusionRadius;                    // [Render] AmbientOcclusionRadius (centimetres)
 };
 
 // The options (LS3DF.ini is read on the first call).

@@ -10,7 +10,9 @@
 //   fall as Direct3D's do. Turned over, Direct3D's clockwise front faces are counter-clockwise.
 // - Present scales the back buffer into the window, turning it back over.
 // With multisampling a frame draws into a second framebuffer of renderbuffers, kept from run to run, and
-// each run ends by resolving it into the back buffer.
+// each run ends by resolving it into the back buffer. With ambient occlusion the frame's scene first draws
+// its depth alone into a depth texture (a multisampled one cannot be read), and the occlusion's passes come
+// after the scene.
 // Every call is on the render thread: the device only reaches a renderer from there.
 #include "gfx/opengl/opengl_device.h"
 
@@ -50,7 +52,7 @@ using sdl3::api;
     X(glDepthMask) X(glDepthFunc) X(glDepthRange) X(glColorMask) X(glBlendFunc) X(glCullFace) X(glFrontFace) \
     X(glPolygonMode) X(glPolygonOffset) X(glPixelStorei) X(glReadPixels) X(glReadBuffer) X(glGenTextures)    \
     X(glDeleteTextures) X(glBindTexture) X(glTexImage2D) X(glTexParameteri) X(glDrawArrays) X(glDrawElements) \
-    X(glGetIntegerv) X(glGetString) X(glFinish)
+    X(glGetIntegerv) X(glGetString) X(glFinish) X(glDrawBuffer)
 
 #define LS3D_GL_LATER(X)                                                                                     \
     X(PFNGLACTIVETEXTUREPROC, glActiveTexture)                                                               \
@@ -231,6 +233,23 @@ public:
         gl.glSamplerParameteri(presentSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl.glSamplerParameteri(presentSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         rampLoaded = false;
+        if (Enhancements().occlusion) {
+            const char *const passes[3] = {"#define OCCLUSION_PASS 0\n", "#define OCCLUSION_PASS 1\n", "#define OCCLUSION_PASS 2\n"};
+            for (int i = 0; i < 3; ++i) {
+                occlusionPrograms[i] = LinkProgram(kOcclusionSource, passes[i]);
+                if (!occlusionPrograms[i])
+                    continue;
+                gl.glUniformBlockBinding(occlusionPrograms[i], gl.glGetUniformBlockIndex(occlusionPrograms[i], "OcclusionUniforms"), 2);
+                gl.glUniform1i(gl.glGetUniformLocation(occlusionPrograms[i], "depthTexture"), 0);
+                gl.glUniform1i(gl.glGetUniformLocation(occlusionPrograms[i], "occlusionTexture"), 1);
+            }
+            gl.glGenBuffers(1, &occlusionBuffer);
+            gl.glGenSamplers(1, &nearestSampler);
+            gl.glSamplerParameteri(nearestSampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            gl.glSamplerParameteri(nearestSampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            gl.glSamplerParameteri(nearestSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            gl.glSamplerParameteri(nearestSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        }
         gl.glGenVertexArrays(1, &vao);
         gl.glBindVertexArray(vao);
         gl.glGenBuffers(1, &vertexBuffer);
@@ -273,6 +292,13 @@ public:
                 gl.glDeleteTextures(1, &rampTexture), rampTexture = 0;
             if (presentProgram)
                 gl.glDeleteProgram(presentProgram), presentProgram = 0;
+            for (GLuint &p : occlusionPrograms)
+                if (p)
+                    gl.glDeleteProgram(p), p = 0;
+            if (occlusionBuffer)
+                gl.glDeleteBuffers(1, &occlusionBuffer), occlusionBuffer = 0;
+            if (nearestSampler)
+                gl.glDeleteSamplers(1, &nearestSampler), nearestSampler = 0;
             ReleaseTargets();
             for (GLuint *b : {&vertexBuffer, &indexBuffer, &uniformBuffer})
                 if (*b)
@@ -328,6 +354,8 @@ public:
             return false;
         }
         drawFramebuffer = samples > 1 ? multisampledFramebuffer : framebuffer;
+        MakeOcclusionTargets(w, h, p.EnableAutoDepthStencil != FALSE);
+        gl.glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         gl.glDisable(GL_SCISSOR_TEST);
         gl.glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         gl.glDepthMask(GL_TRUE);
@@ -353,6 +381,7 @@ public:
         if (depthTarget)
             gl.glDeleteRenderbuffers(1, &depthTarget), depthTarget = 0;
         ReleaseMultisampled();
+        ReleaseOcclusionTargets();
         drawFramebuffer = 0;
     }
     void WaitIdle() override { gl.glFinish(); }
@@ -426,6 +455,44 @@ public:
             std::memcpy(uniformBytes.data() + pixelStart + i * pixelStride, &frame.pixelBlocks[i], sizeof(S_pixelUniforms));
         gl.glBufferData(GL_UNIFORM_BUFFER, static_cast<GLsizeiptr>(uniformBytes.size()), uniformBytes.data(), GL_STREAM_DRAW);
 
+        gl.glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+        frameVertexStride = vertexStride;
+        framePixelStride = pixelStride;
+        framePixelStart = pixelStart;
+        const uint32_t count = static_cast<uint32_t>(frame.commands.size());
+        if (frame.occlusion.active && occlusionReady) {
+            const uint32_t split = frame.occlusion.split;
+            gl.glBindFramebuffer(GL_FRAMEBUFFER, occlusionFramebuffers[0]);
+            gl.glDisable(GL_SCISSOR_TEST);
+            gl.glDepthMask(GL_TRUE);
+            gl.glClearDepth(1);
+            gl.glClear(GL_DEPTH_BUFFER_BIT);
+            DrawCommands(frame, 0, split, true);
+            gl.glBindFramebuffer(GL_FRAMEBUFFER, drawFramebuffer);
+            DrawCommands(frame, 0, split, false);
+            RunOcclusionPasses(frame.occlusion);
+            gl.glBindFramebuffer(GL_FRAMEBUFFER, drawFramebuffer);
+            DrawCommands(frame, split, count, false);
+        } else {
+            DrawCommands(frame, 0, count, false);
+        }
+        if (samples > 1) {
+            gl.glDisable(GL_SCISSOR_TEST);
+            gl.glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, multisampledFramebuffer);
+            gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+            const GLint w = static_cast<GLint>(present.BackBufferWidth), h = static_cast<GLint>(present.BackBufferHeight);
+            gl.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        }
+        return true;
+    }
+
+    // Commands [first, last) of a frame into the framebuffer bound; `depthOnly`: those that write depth.
+    void DrawCommands(const S_frame &frame, uint32_t first, uint32_t last, bool depthOnly)
+    {
+        gl.glUseProgram(program);
+        gl.glEnable(GL_SCISSOR_TEST);
+        const size_t vertexStride = frameVertexStride, pixelStride = framePixelStride, pixelStart = framePixelStart;
         bool haveKey = false;
         S_pipelineKey bound = {};
         const S_layout *boundLayout = nullptr;
@@ -433,7 +500,10 @@ public:
         S_scissor boundScissor = {-1, -1, -1, -1};
         uint32_t boundVertexUniforms = ~0u, boundPixelUniforms = ~0u;
         GLuint boundTextures[kStages] = {~0u, ~0u, ~0u}, boundSamplers[kStages] = {~0u, ~0u, ~0u};
-        for (const S_command &c : frame.commands) {
+        for (uint32_t index = first; index < last; ++index) {
+            const S_command &c = frame.commands[index];
+            if (depthOnly && !(c.key.depthTest && c.key.depthWrite))
+                continue;
             if (!haveKey || !(c.key == bound)) {
                 ApplyKey(c.key);
                 bound = c.key;
@@ -480,15 +550,6 @@ public:
             else
                 gl.glDrawArrays(Primitive(c.key.primitive), 0, static_cast<GLsizei>(c.count));
         }
-        if (samples > 1) {
-            gl.glDisable(GL_SCISSOR_TEST);
-            gl.glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-            gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, multisampledFramebuffer);
-            gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
-            const GLint w = static_cast<GLint>(present.BackBufferWidth), h = static_cast<GLint>(present.BackBufferHeight);
-            gl.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        }
-        return true;
     }
 
     void Present(const D3DGAMMARAMP *ramp) override
@@ -526,6 +587,84 @@ public:
     }
 
 private:
+    // ---- ambient occlusion
+    void MakeOcclusionTargets(GLsizei w, GLsizei h, bool withDepth)
+    {
+        occlusionReady = false;
+        if (!occlusionPrograms[0] || !occlusionPrograms[1] || !occlusionPrograms[2] || !withDepth)
+            return;
+        gl.glActiveTexture(GL_TEXTURE0);
+        gl.glGenTextures(4, occlusionTextures);
+        gl.glGenFramebuffers(4, occlusionFramebuffers);
+        for (int i = 0; i < 4; ++i) {
+            gl.glBindTexture(GL_TEXTURE_2D, occlusionTextures[i]);
+            gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+            gl.glBindFramebuffer(GL_FRAMEBUFFER, occlusionFramebuffers[i]);
+            if (i == 0) {
+                gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+                gl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, occlusionTextures[i], 0);
+                gl.glDrawBuffer(GL_NONE);
+                gl.glReadBuffer(GL_NONE);
+            } else {
+                gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+                gl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, occlusionTextures[i], 0);
+            }
+            if (gl.glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+                EnhancementLog("LS3DF.ini AmbientOcclusion: its targets cannot be made, drawing without");
+                ReleaseOcclusionTargets();
+                return;
+            }
+        }
+        occlusionReady = true;
+    }
+    void ReleaseOcclusionTargets()
+    {
+        occlusionReady = false;
+        if (occlusionFramebuffers[0]) {
+            gl.glDeleteFramebuffers(4, occlusionFramebuffers);
+            gl.glDeleteTextures(4, occlusionTextures);
+        }
+        for (int i = 0; i < 4; ++i)
+            occlusionFramebuffers[i] = occlusionTextures[i] = 0;
+    }
+    // The scene's occlusion made and multiplied into the framebuffer that draws the frame. (DrawCommands
+    // sets again all the state this changes: its caches start empty.)
+    void RunOcclusionPasses(const S_occlusion &o)
+    {
+        const GLsizei w = static_cast<GLsizei>(present.BackBufferWidth), h = static_cast<GLsizei>(present.BackBufferHeight);
+        gl.glDisable(GL_SCISSOR_TEST);
+        gl.glDisable(GL_DEPTH_TEST);
+        gl.glDisable(GL_CULL_FACE);
+        gl.glDisable(GL_BLEND);
+        gl.glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+        gl.glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        gl.glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        gl.glViewport(0, 0, w, h);
+        gl.glBindSampler(0, nearestSampler);
+        gl.glBindSampler(1, nearestSampler);
+        gl.glActiveTexture(GL_TEXTURE0);
+        gl.glBindTexture(GL_TEXTURE_2D, occlusionTextures[0]);
+        const auto pass = [&](GLuint target, GLuint program, GLuint source, float stepX, float stepY) {
+            gl.glBindFramebuffer(GL_FRAMEBUFFER, target);
+            gl.glActiveTexture(GL_TEXTURE1);
+            gl.glBindTexture(GL_TEXTURE_2D, source);
+            gl.glUseProgram(program);
+            const S_occlusionUniforms u = OcclusionUniforms(o, present.BackBufferWidth, present.BackBufferHeight, stepX, stepY);
+            gl.glBindBuffer(GL_UNIFORM_BUFFER, occlusionBuffer);
+            gl.glBufferData(GL_UNIFORM_BUFFER, sizeof u, &u, GL_STREAM_DRAW);
+            gl.glBindBufferRange(GL_UNIFORM_BUFFER, 2, occlusionBuffer, 0, sizeof u);
+            gl.glDrawArrays(GL_TRIANGLES, 0, 3);
+        };
+        pass(occlusionFramebuffers[1], occlusionPrograms[0], occlusionTextures[2], 0, 0);
+        pass(occlusionFramebuffers[2], occlusionPrograms[1], occlusionTextures[1], 1, 0);
+        pass(occlusionFramebuffers[3], occlusionPrograms[1], occlusionTextures[2], 0, 1);
+        gl.glEnable(GL_BLEND);
+        gl.glBlendFunc(GL_DST_COLOR, GL_ZERO);
+        pass(drawFramebuffer, occlusionPrograms[2], occlusionTextures[3], 0, 0);
+        gl.glDisable(GL_BLEND);
+        gl.glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+    }
+
     bool MakeMultisampled(GLsizei w, GLsizei h, bool withDepth)
     {
         gl.glGenFramebuffers(1, &multisampledFramebuffer);
@@ -592,12 +731,12 @@ private:
     }
 
     // A source's two stages as a program, in use (0: the reason is logged).
-    GLuint LinkProgram(const char *source)
+    GLuint LinkProgram(const char *source, const char *extraDefines = "")
     {
         const auto compile = [&](GLenum stage, const char *defines) -> GLuint {
             const GLuint shader = gl.glCreateShader(stage);
-            const char *sources[2] = {defines, source};
-            gl.glShaderSource(shader, 2, sources, nullptr);
+            const char *sources[3] = {defines, extraDefines, source};
+            gl.glShaderSource(shader, 3, sources, nullptr);
             gl.glCompileShader(shader);
             GLint ok = 0;
             gl.glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
@@ -733,6 +872,10 @@ private:
     GLuint multisampledFramebuffer = 0, multisampledColor = 0, multisampledDepth = 0;
     GLuint drawFramebuffer = 0;         // what a frame draws into: the multisampled one if there is one
     GLuint presentProgram = 0, rampTexture = 0, presentSampler = 0;
+    GLuint occlusionPrograms[3] = {}, occlusionBuffer = 0, nearestSampler = 0;
+    GLuint occlusionTextures[4] = {}, occlusionFramebuffers[4] = {};    // the depth alone, the raw occlusion, two blurred
+    bool occlusionReady = false;
+    size_t frameVertexStride = 0, framePixelStride = 0, framePixelStart = 0;
     uint8_t rampTexels[1024] = {};
     bool rampLoaded = false;
     GLint uniformAlignment = 256;

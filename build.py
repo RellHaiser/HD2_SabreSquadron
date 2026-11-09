@@ -90,7 +90,11 @@ SHADERS = os.path.join(SRC, "gfx", "sdlgpu", "shaders")
 SHADER_ENTRIES = [("fixed_function.hlsl", "VSMain", "vs_6_0", "kFixedFunctionVS"),
                   ("fixed_function.hlsl", "PSMain", "ps_6_0", "kFixedFunctionPS"),
                   ("present.hlsl", "VSMain", "vs_6_0", "kPresentVS"),
-                  ("present.hlsl", "PSMain", "ps_6_0", "kPresentPS")]
+                  ("present.hlsl", "PSMain", "ps_6_0", "kPresentPS"),
+                  ("occlusion.hlsl", "VSMain", "vs_6_0", "kOcclusionVS"),
+                  ("occlusion.hlsl", "PSOcclusion", "ps_6_0", "kOcclusionPS"),
+                  ("occlusion.hlsl", "PSBlur", "ps_6_0", "kOcclusionBlurPS"),
+                  ("occlusion.hlsl", "PSApply", "ps_6_0", "kOcclusionApplyPS")]
 
 
 def windows_sdk_dxc():
@@ -146,7 +150,7 @@ def build_shaders():
                 name, suffix, ", ".join(str(b) for b in data) if data else "0"))
             lines.append("inline const size_t %s%sSize = %d;" % (name, suffix, len(data)))
     # The sources themselves, for the OpenGL driver to compile (a terminating 0).
-    for source, name in (("fixed_function.hlsl", "kFixedFunctionSource"), ("present.hlsl", "kPresentSource")):
+    for source, name in (("fixed_function.hlsl", "kFixedFunctionSource"), ("present.hlsl", "kPresentSource"), ("occlusion.hlsl", "kOcclusionSource")):
         text = open(os.path.join(SHADERS, source), "rb").read().replace(b"\r\n", b"\n") + b"\0"
         lines.append("inline const char %s[] = {%s};" % (name, ", ".join(str(c) for c in text)))
     if ok:

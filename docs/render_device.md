@@ -192,6 +192,26 @@ the failing side is still discarded, so if a driver ignored the setting the test
 The game's captures (made through dgVoodoo with 8 samples) are nearer with 4 samples than without: 31.3 - 41.6
 dB against 31.0 - 38.4 on the 3D frames, and 95 dB against 45 on the two that are nearly all 2D.
 
+**Ambient occlusion** (`[Render] AmbientOcclusion`: both backends;
+[`occlusion.hlsl`](../src/gfx/sdlgpu/shaders/occlusion.hlsl)). A frame's order is the engine's: the sky, the opaque
+world, what is alpha-tested, what is blended, a depth clear, the weapon in the hand with its own projection, another
+depth clear, the HUD. The device marks the frame's scene as it records it: from the first perspective opaque draw up
+to the first alpha-tested or blended draw or depth clear, once in a frame. A multisampled depth buffer cannot be
+read, so the scene's depth-writing draws run first into a plain depth texture, whatever the sampling. After the
+scene, the render pass ends for the occlusion's passes: the occlusion from that depth, a blur each way that keeps to
+depth edges, and a multiply into the picture. The frame then goes on. What is alpha-tested stays out on purpose:
+trees are flat cards crossing each other, and occlusion draws dark bands where they cross. It fades with the fog,
+and with no scene (menus, movies) nothing of this runs. Samples that fall off the picture are left out and the
+others stand for them (reading the edge's depth there made a wall that is not, flickering at the picture's sides in
+a hallway); the radius on the picture is not narrowed near the camera (it made the occlusion grow and shrink as the
+camera moved); the blur follows a slanted surface's slope (stairs seen at a slant kept their noise).
+
+In the game (November 2026, Africa1, Direct3D 12, Vulkan and OpenGL; 4x MSAA): smooth, no crashes, no halos; the
+hallways no longer flicker; a strength of 75 looks right (the default since). Still left: on the main building's
+stairs and their ramp, and on a jeep's bonnet near the first-person camera, the occlusion changes with small moves of
+the camera, the way screen-space occlusion knows only what the picture shows. Trees need none: their textures
+darken at the foot and the lightmaps shade under them. Replays cost 0.2 - 1.1 ms a frame at 1600x1200 (RX 5700 XT).
+
 **In the game** (November 2026, Africa1 with a high-resolution texture pack): the gamma option works in full
 screen and the desktop is untouched after Alt-Tab; 4 samples with alpha to coverage stay smooth on both backends
 and leave the HUD as it was, with about 2.6 GB of address space free on Direct3D 12. They do not stop the palm

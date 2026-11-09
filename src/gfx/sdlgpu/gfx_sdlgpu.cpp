@@ -5,7 +5,9 @@
 // A draw's fixed state makes a pipeline, cached by it. One copy pass uploads a frame's vertices and
 // indices, then one render pass draws it into the back buffer, a texture of the device's size that
 // Present scales into the window's swapchain. With multisampling the pass draws into a multisampled
-// target, kept from pass to pass, and resolves into the back buffer at its end.
+// target, kept from pass to pass, and resolves into the back buffer at its end. With ambient occlusion
+// the frame's scene first draws its depth alone into a plain depth texture (a multisampled one cannot be
+// read), and the render pass ends after the scene for the occlusion's passes, then goes on.
 #include "gfx/sdlgpu/sdlgpu_device.h"
 
 #include <algorithm>
@@ -162,6 +164,18 @@ public:
                            SDL_GPU_SHADERSTAGE_VERTEX, 0, 0);
         presentPS = shader(kPresentPSDxil, kPresentPSDxilSize, kPresentPSSpirv, kPresentPSSpirvSize, "PSMain",
                            SDL_GPU_SHADERSTAGE_FRAGMENT, kSamplerSlots, 0);
+        if (Enhancements().occlusion) {
+            occlusionVS = shader(kOcclusionVSDxil, kOcclusionVSDxilSize, kOcclusionVSSpirv, kOcclusionVSSpirvSize, "VSMain",
+                                 SDL_GPU_SHADERSTAGE_VERTEX, 0, 0);
+            occlusionPS[0] = shader(kOcclusionPSDxil, kOcclusionPSDxilSize, kOcclusionPSSpirv, kOcclusionPSSpirvSize, "PSOcclusion",
+                                    SDL_GPU_SHADERSTAGE_FRAGMENT, kSamplerSlots, 1);
+            occlusionPS[1] = shader(kOcclusionBlurPSDxil, kOcclusionBlurPSDxilSize, kOcclusionBlurPSSpirv, kOcclusionBlurPSSpirvSize, "PSBlur",
+                                    SDL_GPU_SHADERSTAGE_FRAGMENT, kSamplerSlots, 1);
+            occlusionPS[2] = shader(kOcclusionApplyPSDxil, kOcclusionApplyPSDxilSize, kOcclusionApplyPSSpirv, kOcclusionApplyPSSpirvSize, "PSApply",
+                                    SDL_GPU_SHADERSTAGE_FRAGMENT, kSamplerSlots, 1);
+            if (!occlusionVS || !occlusionPS[0] || !occlusionPS[1] || !occlusionPS[2])
+                EnhancementLog("LS3DF.ini AmbientOcclusion: the shaders do not load (%s), drawing without", api.SDL_GetError());
+        }
         if (!vertexShader || !pixelShader || !presentVS || !presentPS) {
             EnhancementLog("LS3DF.ini SDLGPU: the shaders do not load (%s)", api.SDL_GetError());
             ReleaseDevice();
@@ -200,6 +214,8 @@ public:
             s.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
             s.address_mode_u = s.address_mode_v = s.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
             presentSampler = api.SDL_CreateGPUSampler(gpu, &s);
+            s.min_filter = s.mag_filter = SDL_GPU_FILTER_NEAREST;
+            nearestSampler = api.SDL_CreateGPUSampler(gpu, &s);
             rampLoaded = false;
         }
         EnhancementLog("LS3DF.ini SDLGPU: drawing with SDL_GPU on %s", api.SDL_GetGPUDeviceDriver(gpu));
@@ -218,6 +234,13 @@ public:
         for (auto &s : samplers)
             api.SDL_ReleaseGPUSampler(gpu, s.second);
         samplers.clear();
+        for (auto &p : depthPipelines)
+            if (p.second)
+                api.SDL_ReleaseGPUGraphicsPipeline(gpu, p.second);
+        depthPipelines.clear();
+        if (nearestSampler)
+            api.SDL_ReleaseGPUSampler(gpu, nearestSampler);
+        nearestSampler = nullptr;
         if (presentPipeline)
             api.SDL_ReleaseGPUGraphicsPipeline(gpu, presentPipeline);
         presentPipeline = nullptr;
@@ -248,10 +271,10 @@ public:
         if (whiteTexture)
             api.SDL_ReleaseGPUTexture(gpu, whiteTexture);
         whiteTexture = nullptr;
-        for (SDL_GPUShader *s : {vertexShader, pixelShader, presentVS, presentPS})
+        for (SDL_GPUShader *s : {vertexShader, pixelShader, presentVS, presentPS, occlusionVS, occlusionPS[0], occlusionPS[1], occlusionPS[2]})
             if (s)
                 api.SDL_ReleaseGPUShader(gpu, s);
-        vertexShader = pixelShader = presentVS = presentPS = nullptr;
+        vertexShader = pixelShader = presentVS = presentPS = occlusionVS = occlusionPS[0] = occlusionPS[1] = occlusionPS[2] = nullptr;
         if (window)
             api.SDL_ReleaseWindowFromGPUDevice(gpu, window);
         api.SDL_DestroyGPUDevice(gpu);
@@ -320,6 +343,7 @@ public:
             pipelines.clear();
         }
         samples = settled;
+        MakeOcclusionTargets();
         cleared = false;
         // (What this GPU cannot do falls back to vsync, always there.)
         const E_presentMode asked = ChoosePresentMode(p);
@@ -341,6 +365,7 @@ public:
         if (multisampled)
             api.SDL_ReleaseGPUTexture(gpu, multisampled);
         backBuffer = depth = multisampled = nullptr;
+        ReleaseOcclusionTargets();
     }
     void WaitIdle() override { api.SDL_WaitForGPUIdle(gpu); }
     bool SupportsFormat(E_gpuFormat f) override
@@ -437,6 +462,19 @@ public:
             }
             api.SDL_EndGPUCopyPass(copy);
         }
+        // The scene's depth alone, for the ambient occlusion.
+        const bool occlusion = frame.occlusion.active && OcclusionReady();
+        const uint32_t split = occlusion ? frame.occlusion.split : static_cast<uint32_t>(frame.commands.size());
+        if (occlusion) {
+            SDL_GPUDepthStencilTargetInfo only = {};
+            only.texture = occlusionDepth;
+            only.load_op = SDL_GPU_LOADOP_CLEAR;
+            only.clear_depth = 1;
+            only.store_op = SDL_GPU_STOREOP_STORE;
+            SDL_GPURenderPass *pass = api.SDL_BeginGPURenderPass(cmd, nullptr, 0, &only);
+            DrawCommands(pass, frame, 0, split, true);
+            api.SDL_EndGPURenderPass(pass);
+        }
         // The draws.
         SDL_GPUColorTargetInfo color = {};
         color.texture = multisampled ? multisampled : backBuffer;
@@ -455,14 +493,45 @@ public:
         depthTarget.stencil_load_op = cleared ? SDL_GPU_LOADOP_LOAD : SDL_GPU_LOADOP_CLEAR;
         depthTarget.stencil_store_op = SDL_GPU_STOREOP_STORE;
         cleared = true;
-        SDL_GPURenderPass *pass = api.SDL_BeginGPURenderPass(cmd, &color, 1, depth ? &depthTarget : nullptr);
+        SDL_GPUColorTargetInfo sceneColor = color;
+        if (occlusion)                  // (the pass that ends the frame resolves)
+            sceneColor.store_op = SDL_GPU_STOREOP_STORE, sceneColor.resolve_texture = nullptr;
+        SDL_GPURenderPass *pass = api.SDL_BeginGPURenderPass(cmd, &sceneColor, 1, depth ? &depthTarget : nullptr);
+        DrawCommands(pass, frame, 0, split, false);
+        if (occlusion) {
+            api.SDL_EndGPURenderPass(pass);
+            RunOcclusionPasses(frame.occlusion);
+            color.load_op = SDL_GPU_LOADOP_LOAD;
+            depthTarget.load_op = depthTarget.stencil_load_op = SDL_GPU_LOADOP_LOAD;
+            pass = api.SDL_BeginGPURenderPass(cmd, &color, 1, depth ? &depthTarget : nullptr);
+            const SDL_GPUViewport whole = {0, 0, static_cast<float>(present.BackBufferWidth), static_cast<float>(present.BackBufferHeight), 0, 1};
+            const SDL_Rect wholeRect = {0, 0, static_cast<int>(present.BackBufferWidth), static_cast<int>(present.BackBufferHeight)};
+            api.SDL_SetGPUViewport(pass, &whole);
+            api.SDL_SetGPUScissor(pass, &wholeRect);
+            api.SDL_BindGPUGraphicsPipeline(pass, occlusionApply);
+            const S_occlusionUniforms u = OcclusionUniforms(frame.occlusion, present.BackBufferWidth, present.BackBufferHeight, 0, 0);
+            api.SDL_PushGPUFragmentUniformData(cmd, 0, &u, sizeof u);
+            BindOcclusionSamplers(pass, occlusionBlurred[1]);
+            api.SDL_DrawGPUPrimitives(pass, 3, 1, 0, 0);
+            DrawCommands(pass, frame, split, static_cast<uint32_t>(frame.commands.size()), false);
+        }
+        api.SDL_EndGPURenderPass(pass);
+        return true;
+    }
+
+    // Commands [first, last) of a frame; `depthOnly`: those that write depth, into the plain depth texture.
+    void DrawCommands(SDL_GPURenderPass *pass, const S_frame &frame, uint32_t first, uint32_t last, bool depthOnly)
+    {
         SDL_GPUGraphicsPipeline *boundPipeline = nullptr;
         S_pipelineKey boundKey = {};
         uint32_t boundVertexUniforms = ~0u, boundPixelUniforms = ~0u;
         SDL_GPUTextureSamplerBinding boundSamplers[kSamplerSlots] = {};
-        for (const S_command &c : frame.commands) {
+        for (uint32_t index = first; index < last; ++index) {
+            const S_command &c = frame.commands[index];
+            if (depthOnly && !(c.key.depthTest && c.key.depthWrite))
+                continue;
             if (!boundPipeline || !(c.key == boundKey)) {
-                SDL_GPUGraphicsPipeline *pipeline = Pipeline(c.key, *c.layout);
+                SDL_GPUGraphicsPipeline *pipeline = Pipeline(c.key, *c.layout, depthOnly);
                 if (!pipeline)
                     continue;
                 api.SDL_BindGPUGraphicsPipeline(pass, pipeline);
@@ -502,8 +571,6 @@ public:
                 api.SDL_DrawGPUPrimitives(pass, c.count, 1, 0, 0);
             }
         }
-        api.SDL_EndGPURenderPass(pass);
-        return true;
     }
 
     void Present(const D3DGAMMARAMP *ramp) override
@@ -586,6 +653,110 @@ public:
     }
 
 private:
+    // ---- ambient occlusion
+    void MakeOcclusionTargets()
+    {
+        if (!occlusionVS || !occlusionPS[0] || !occlusionPS[1] || !occlusionPS[2] || !present.EnableAutoDepthStencil)
+            return;
+        const auto fail = [&](const char *what) {
+            EnhancementLog("LS3DF.ini AmbientOcclusion: %s cannot be made (%s), drawing without", what, api.SDL_GetError());
+            ReleaseOcclusionTargets();
+        };
+        SDL_GPUTextureCreateInfo info = {};
+        info.type = SDL_GPU_TEXTURETYPE_2D;
+        info.width = present.BackBufferWidth;
+        info.height = present.BackBufferHeight;
+        info.layer_count_or_depth = info.num_levels = 1;
+        info.format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
+        info.usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        occlusionDepth = api.SDL_CreateGPUTexture(gpu, &info);
+        if (!occlusionDepth)
+            return fail("its depth texture");
+        info.format = SDL_GPU_TEXTUREFORMAT_R8_UNORM;
+        info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        for (SDL_GPUTexture **t : {&occlusionRaw, &occlusionBlurred[0], &occlusionBlurred[1]}) {
+            *t = api.SDL_CreateGPUTexture(gpu, &info);
+            if (!*t)
+                return fail("its target");
+        }
+        const auto pipeline = [&](SDL_GPUShader *ps, SDL_GPUTextureFormat format, SDL_GPUSampleCount count, bool multiply) {
+            SDL_GPUColorTargetDescription target = {};
+            target.format = format;
+            if (multiply) {
+                target.blend_state.enable_blend = true;
+                target.blend_state.src_color_blendfactor = target.blend_state.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_DST_COLOR;
+                target.blend_state.dst_color_blendfactor = target.blend_state.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+                target.blend_state.color_blend_op = target.blend_state.alpha_blend_op = SDL_GPU_BLENDOP_ADD;
+            }
+            SDL_GPUGraphicsPipelineCreateInfo p = {};
+            p.vertex_shader = occlusionVS;
+            p.fragment_shader = ps;
+            p.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+            p.rasterizer_state.fill_mode = SDL_GPU_FILLMODE_FILL;
+            p.rasterizer_state.cull_mode = SDL_GPU_CULLMODE_NONE;
+            p.multisample_state.sample_count = count;
+            p.target_info.color_target_descriptions = &target;
+            p.target_info.num_color_targets = 1;
+            // (Drawn in the frame's pass, which has the depth target: tested against nothing.)
+            if (multiply && depth) {
+                p.target_info.has_depth_stencil_target = true;
+                p.target_info.depth_stencil_format = depthFormat;
+            }
+            return api.SDL_CreateGPUGraphicsPipeline(gpu, &p);
+        };
+        occlusionMake = pipeline(occlusionPS[0], SDL_GPU_TEXTUREFORMAT_R8_UNORM, SDL_GPU_SAMPLECOUNT_1, false);
+        occlusionBlur = pipeline(occlusionPS[1], SDL_GPU_TEXTUREFORMAT_R8_UNORM, SDL_GPU_SAMPLECOUNT_1, false);
+        occlusionApply = pipeline(occlusionPS[2], SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM,
+                                  samples == 8   ? SDL_GPU_SAMPLECOUNT_8
+                                  : samples == 4 ? SDL_GPU_SAMPLECOUNT_4
+                                  : samples == 2 ? SDL_GPU_SAMPLECOUNT_2
+                                                 : SDL_GPU_SAMPLECOUNT_1,
+                                  true);
+        if (!occlusionMake || !occlusionBlur || !occlusionApply)
+            fail("a pipeline");
+    }
+    void ReleaseOcclusionTargets()
+    {
+        for (SDL_GPUGraphicsPipeline **p : {&occlusionMake, &occlusionBlur, &occlusionApply}) {
+            if (*p)
+                api.SDL_ReleaseGPUGraphicsPipeline(gpu, *p);
+            *p = nullptr;
+        }
+        for (SDL_GPUTexture **t : {&occlusionDepth, &occlusionRaw, &occlusionBlurred[0], &occlusionBlurred[1]}) {
+            if (*t)
+                api.SDL_ReleaseGPUTexture(gpu, *t);
+            *t = nullptr;
+        }
+    }
+    bool OcclusionReady() const { return occlusionApply != nullptr; }
+    // Slot 0 the plain depth, slot 1 `occlusion`. (All the slots: kSamplerSlots.)
+    void BindOcclusionSamplers(SDL_GPURenderPass *pass, SDL_GPUTexture *occlusion)
+    {
+        SDL_GPUTextureSamplerBinding bindings[kSamplerSlots];
+        for (int s = 0; s < kSamplerSlots; ++s)
+            bindings[s] = {s == 0 ? occlusionDepth : occlusion ? occlusion : occlusionDepth, nearestSampler};
+        api.SDL_BindGPUFragmentSamplers(pass, 0, bindings, kSamplerSlots);
+    }
+    void RunOcclusionPasses(const S_occlusion &o)
+    {
+        const auto fullPass = [&](SDL_GPUTexture *target, SDL_GPUGraphicsPipeline *pipeline, SDL_GPUTexture *source, float stepX, float stepY) {
+            SDL_GPUColorTargetInfo info = {};
+            info.texture = target;
+            info.load_op = SDL_GPU_LOADOP_DONT_CARE;
+            info.store_op = SDL_GPU_STOREOP_STORE;
+            SDL_GPURenderPass *pass = api.SDL_BeginGPURenderPass(cmd, &info, 1, nullptr);
+            api.SDL_BindGPUGraphicsPipeline(pass, pipeline);
+            const S_occlusionUniforms u = OcclusionUniforms(o, present.BackBufferWidth, present.BackBufferHeight, stepX, stepY);
+            api.SDL_PushGPUFragmentUniformData(cmd, 0, &u, sizeof u);
+            BindOcclusionSamplers(pass, source);
+            api.SDL_DrawGPUPrimitives(pass, 3, 1, 0, 0);
+            api.SDL_EndGPURenderPass(pass);
+        };
+        fullPass(occlusionRaw, occlusionMake, nullptr, 0, 0);
+        fullPass(occlusionBlurred[0], occlusionBlur, occlusionRaw, 1, 0);
+        fullPass(occlusionBlurred[1], occlusionBlur, occlusionBlurred[0], 0, 1);
+    }
+
     // The ramp's table for this frame's command buffer, when it has changed.
     void LoadRamp(const D3DGAMMARAMP &ramp)
     {
@@ -662,10 +833,11 @@ private:
         return made;
     }
 
-    SDL_GPUGraphicsPipeline *Pipeline(const S_pipelineKey &key, const S_layout &layout)
+    SDL_GPUGraphicsPipeline *Pipeline(const S_pipelineKey &key, const S_layout &layout, bool depthOnly = false)
     {
-        auto p = pipelines.find(key);
-        if (p != pipelines.end())
+        std::map<S_pipelineKey, SDL_GPUGraphicsPipeline *> &cache = depthOnly ? depthPipelines : pipelines;
+        auto p = cache.find(key);
+        if (p != cache.end())
             return p->second;
         SDL_GPUVertexBufferDescription buffers[2] = {};
         buffers[0].slot = 0;
@@ -726,6 +898,14 @@ private:
         info.target_info.num_color_targets = 1;
         info.target_info.has_depth_stencil_target = depth != nullptr;
         info.target_info.depth_stencil_format = depthFormat;
+        if (depthOnly) {
+            info.multisample_state.sample_count = SDL_GPU_SAMPLECOUNT_1;
+            info.multisample_state.enable_alpha_to_coverage = false;
+            info.target_info.color_target_descriptions = nullptr;
+            info.target_info.num_color_targets = 0;
+            info.target_info.has_depth_stencil_target = true;
+            info.target_info.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
+        }
         Trace("pipeline %zu: stride %u primitive %u blend %u %u/%u mask %u depth %u/%u func %u cull %u fill %u zbias %u coverage %u%s%s",
               pipelines.size(), key.stride, key.primitive, key.blend, key.srcBlend, key.dstBlend, key.writeMask,
               key.depthTest, key.depthWrite, key.depthFunc, key.cull, key.fill, key.zbias, key.alphaToCoverage,
@@ -736,7 +916,7 @@ private:
         Trace("    -> %s", made ? "made" : api.SDL_GetError());
         if (!made)
             EnhancementLog("LS3DF.ini SDLGPU: a pipeline cannot be made (%s)", api.SDL_GetError());
-        pipelines[key] = made;
+        cache[key] = made;
         return made;
     }
 
@@ -881,7 +1061,11 @@ private:
     SDL_GPUTexture *backBuffer = nullptr, *depth = nullptr, *whiteTexture = nullptr;
     SDL_GPUTexture *multisampled = nullptr;     // what is drawn into with multisampling, resolved into backBuffer
     SDL_GPUTexture *rampTexture = nullptr;
-    SDL_GPUSampler *presentSampler = nullptr;
+    SDL_GPUSampler *presentSampler = nullptr, *nearestSampler = nullptr;
+    SDL_GPUShader *occlusionVS = nullptr, *occlusionPS[3] = {};
+    SDL_GPUTexture *occlusionDepth = nullptr, *occlusionRaw = nullptr, *occlusionBlurred[2] = {};
+    SDL_GPUGraphicsPipeline *occlusionMake = nullptr, *occlusionBlur = nullptr, *occlusionApply = nullptr;
+    std::map<S_pipelineKey, SDL_GPUGraphicsPipeline *> depthPipelines;
     SDL_GPUShader *presentVS = nullptr, *presentPS = nullptr;
     SDL_GPUGraphicsPipeline *presentPipeline = nullptr;
     uint8_t rampTexels[1024] = {};

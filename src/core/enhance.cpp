@@ -53,6 +53,9 @@ S_enhancements ReadIni()
     GetPrivateProfileStringA("Render", "PresentMode", "", o.presentMode, sizeof o.presentMode, path);
     o.msaa = GetPrivateProfileIntA("Render", "MSAA", 0, path);
     o.alphaToCoverage = GetPrivateProfileIntA("Render", "AlphaToCoverage", 0, path) != 0;
+    o.occlusion = GetPrivateProfileIntA("Render", "AmbientOcclusion", 0, path) != 0;
+    o.occlusionStrength = GetPrivateProfileIntA("Render", "AmbientOcclusionStrength", 75, path);
+    o.occlusionRadius = GetPrivateProfileIntA("Render", "AmbientOcclusionRadius", 60, path);
     return o;
 }
 

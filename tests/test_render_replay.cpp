@@ -27,6 +27,8 @@
 //   --msaa N, --alpha-coverage: LS3DF.ini's MSAA and AlphaToCoverage, for SDL_GPU and OpenGL; the pictures
 //   written are then named <capture>.msaa<N>[.a2c].<backend>.png. (A self-test's capture has no samples
 //   in it and is replayed on Direct3D 8 without any, so its edges differ: a low figure there is expected.)
+//   --ao, --ao-strength PERCENT, --ao-radius CM: LS3DF.ini's AmbientOcclusion, for SDL_GPU and OpenGL; the
+//   pictures written are then named <capture>...ao.<backend>.png.
 //   --gamma: with --repeat, those frames are shown through a ramp like the game's own.
 //   --anisotropy N: anisotropic filtering as IGraph sets it for LS3DF.ini's AnisotropicFiltering. With
 //   --selftest the scene is drawn so, with point and no mip filters; a capture's linear minification
@@ -400,7 +402,8 @@ int main(int argc, char **argv)
     const char *sdlWindow = nullptr;
     bool noVsync = false, fullscreen = false;             // (the SDL_GPU backend: the least it must reach; 0: report only)
     int msaa = 0;
-    bool alphaCoverage = false, gamma = false;
+    bool alphaCoverage = false, gamma = false, occlusion = false;
+    int occlusionStrength = 75, occlusionRadius = 60;
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--selftest"))
             selfTest = true;
@@ -440,18 +443,27 @@ int main(int argc, char **argv)
             alphaCoverage = true;
         else if (!std::strcmp(argv[i], "--gamma"))
             gamma = true;
+        else if (!std::strcmp(argv[i], "--ao"))
+            occlusion = true;
+        else if (!std::strcmp(argv[i], "--ao-strength") && i + 1 < argc)
+            occlusionStrength = std::atoi(argv[++i]);
+        else if (!std::strcmp(argv[i], "--ao-radius") && i + 1 < argc)
+            occlusionRadius = std::atoi(argv[++i]);
         else if (!std::strcmp(argv[i], "--anisotropy") && i + 1 < argc)
             g_anisotropy = std::atoi(argv[++i]);
         else
             captures.push_back(argv[i]);
     }
-    if (msaa || alphaCoverage) {
+    if (msaa || alphaCoverage || occlusion) {
         S_enhancements e = Enhancements();
         e.msaa = msaa;
         e.alphaToCoverage = alphaCoverage;
+        e.occlusion = occlusion;
+        e.occlusionStrength = occlusionStrength;
+        e.occlusionRadius = occlusionRadius;
         SetEnhancements(e);
     }
-    const std::string tag = (msaa ? ".msaa" + std::to_string(msaa) + (alphaCoverage ? ".a2c" : "") : "") + (g_anisotropy ? ".aniso" : "");
+    const std::string tag = (msaa ? ".msaa" + std::to_string(msaa) + (alphaCoverage ? ".a2c" : "") : "") + (g_anisotropy ? ".aniso" : "") + (occlusion ? ".ao" : "");
     WNDCLASSA wc = {};
     wc.lpfnWndProc = DefWindowProcA;
     wc.hInstance = GetModuleHandleA(nullptr);

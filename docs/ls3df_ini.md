@@ -125,6 +125,7 @@ SDLGPU=1
 SDLGPUDriver=vulkan
 MSAA=4
 AlphaToCoverage=1
+AmbientOcclusion=1
 CaptureFrames=1
 ```
 
@@ -136,6 +137,9 @@ CaptureFrames=1
 | `PresentMode` | `vsync` / `mailbox` / `immediate` | How `SDLGPU` and `OpenGL` show frames: one per refresh with the game waiting for it; the newest whole frame at each refresh, without waiting (on OpenGL, the same as `immediate`); or at once, tearing if need be. Empty or missing: what the game asks for. |
 | `MSAA` | 0, 2, 4, 8 | Antialiasing for `SDLGPU` and `OpenGL`: that many samples a pixel, or as many as the GPU can do. 0 or missing: what the game's setup asks for. 4 is a good choice: on the game's captures 8 is hardly different. Direct3D 8 ignores it (there, the setup or a wrapper such as dgVoodoo decides). |
 | `AlphaToCoverage` | 0 / 1 | With `MSAA`: the edges of 3D alpha-tested textures (leaves, fences, wire) are smoothed too, which MSAA alone leaves stepped. 2D drawing is left as the game drew it. |
+| `AmbientOcclusion` | 0 / 1 | For `SDLGPU` and `OpenGL`: soft darkening where the opaque 3D scene's surfaces meet, such as the folds of a uniform, under a hat's brim, or where a wall meets the ground. Leaves and the like, what is blended, the weapon in the hand and the HUD are left as they were. Direct3D 8 ignores it. |
+| `AmbientOcclusionStrength` | percent | How dark it gets. Missing: 75. |
+| `AmbientOcclusionRadius` | centimetres | How far it reaches. Missing: 60. |
 | `SDLGPUStats` | 0 / 1 | Every 5 seconds, what the frames cost (time apart, building, waiting, draws, uploads) in `LS3DF_render.log` next to the DLL. Also for `OpenGL`. |
 | `SDLGPUDebug` | 0 / 1 | The API's validation (Direct3D 12's debug layer, the Vulkan SDK's layers, OpenGL's debug output), and what is asked of it in `LS3DF_render.log`; slow, for finding faults. Also for `OpenGL`. |
 | `CaptureFrames` | 0 / 1 | **Ctrl+Shift+F11** saves the next frame the game draws to `LS3DF_frames\frame_<n>.ls3dframe` next to the DLL: every drawing call, the state and resources it uses, and the picture the game drew. The render tests replay these files on each backend and compare the pictures (the cross-platform plan's phase 3, [render_device.md](render_device.md#frame-captures)). A file can be large (tens of MB), and keeping copies of the vertex buffers costs some memory while the option is on. |

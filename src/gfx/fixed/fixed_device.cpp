@@ -79,6 +79,18 @@ bool S_pipelineKey::operator<(const S_pipelineKey &o) const { return std::memcmp
 bool S_pipelineKey::operator==(const S_pipelineKey &o) const { return std::memcmp(this, &o, sizeof *this) == 0; }
 bool S_samplerKey::operator<(const S_samplerKey &o) const { return std::memcmp(this, &o, sizeof *this) < 0; }
 
+S_occlusionUniforms OcclusionUniforms(const S_occlusion &o, UINT width, UINT height, float stepX, float stepY)
+{
+    S_occlusionUniforms u = {};
+    const float w = static_cast<float>(width), h = static_cast<float>(height);
+    u.projection = {o.p11, o.p22, o.p33, o.p43};
+    u.shape = {Enhancements().occlusionRadius * 0.01f, Enhancements().occlusionStrength * 0.01f, o.fogStart,
+               o.fogEnd > o.fogStart ? 1.0f / (o.fogEnd - o.fogStart) : 0.0f};
+    u.pixel = {1.0f / w, 1.0f / h, w, h};
+    u.direction = {stepX / w, stepY / h, 0, 0};
+    return u;
+}
+
 int SamplesWanted(const D3DPRESENT_PARAMETERS &present)
 {
     const int wanted = std::max(static_cast<int>(present.MultiSampleType), Enhancements().msaa);
@@ -675,6 +687,7 @@ public:
         const auto acquired = stats.acquire;
         // (Direct3D has a gamma ramp in full screen only.)
         renderer->Present(rampActive && !present.Windowed ? &gamma : nullptr);
+        occlusionDone = false;
         // Every 5 seconds, what a frame cost (LS3DF.ini SDLGPUStats).
         const auto now = Clock::now();
         const auto toMs = [](Clock::duration d) { return std::chrono::duration<float, std::milli>(d).count(); };
@@ -750,6 +763,8 @@ public:
         const bool target = (flags & D3DCLEAR_TARGET) != 0, depthClear = (flags & D3DCLEAR_ZBUFFER) && depth;
         if (!target && !depthClear)
             return D3D_OK;
+        if (depthClear)
+            SplitForOcclusion();
         for (const D3DRECT &r : areas) {
             struct V {
                 float x, y, z, rhw;
@@ -1269,6 +1284,7 @@ private:
         if (present.BackBufferFormat == D3DFMT_UNKNOWN)
             present.BackBufferFormat = D3DFMT_X8R8G8B8;
         depth = present.EnableAutoDepthStencil != FALSE;
+        occlusionDone = false;
         backSurface.backBuffer = true;
         backSurface.width = present.BackBufferWidth;
         backSurface.height = present.BackBufferHeight;
@@ -1279,8 +1295,8 @@ private:
         depthSurface.format = present.AutoDepthStencilFormat;
         if (!renderer->MakeTargets(present))
             return false;
-        Trace("back buffer %ux%u, %d samples a pixel, alpha to coverage %s", present.BackBufferWidth, present.BackBufferHeight,
-              renderer->samples, renderer->samples > 1 && Enhancements().alphaToCoverage ? "on" : "off");
+        Trace("back buffer %ux%u, %d samples a pixel, alpha to coverage %s, ambient occlusion %s", present.BackBufferWidth, present.BackBufferHeight,
+              renderer->samples, renderer->samples > 1 && Enhancements().alphaToCoverage ? "on" : "off", Enhancements().occlusion ? "on" : "off");
         return true;
     }
 
@@ -1492,6 +1508,24 @@ private:
         key.cull = static_cast<uint8_t>(rs[D3DRS_CULLMODE]);
         key.fill = static_cast<uint8_t>(rs[D3DRS_FILLMODE] == D3DFILL_WIREFRAME ? D3DFILL_WIREFRAME : D3DFILL_SOLID);
         key.zbias = static_cast<uint8_t>(std::min<DWORD>(rs[D3DRS_ZBIAS], 16));
+        // (LS3DF.ini AmbientOcclusion: the opaque scene, then what is alpha-tested or blended. Leaves and the
+        // like are flat cards crossing each other: occlusion would show their shape.)
+        if (key.blend || rs[D3DRS_ALPHATESTENABLE])
+            SplitForOcclusion();
+        else if (Enhancements().occlusion && !occlusionDone && key.depthTest && key.depthWrite && !layout->pretransformed &&
+                 !layout->programmable && projection.m[2][3] == 1.0f && projection.m[3][3] == 0.0f && viewport.Width == present.BackBufferWidth &&
+                 viewport.Height == present.BackBufferHeight) {
+            S_occlusion &o = frame.occlusion;
+            o.seen = true;
+            o.p11 = projection.m[0][0];
+            o.p22 = projection.m[1][1];
+            o.p33 = projection.m[2][2];
+            o.p43 = projection.m[3][2];
+            if (rs[D3DRS_FOGENABLE]) {
+                o.fogStart = AsFloat(rs[D3DRS_FOGSTART]);
+                o.fogEnd = AsFloat(rs[D3DRS_FOGEND]);
+            }
+        }
         // (LS3DF.ini AlphaToCoverage: 3D only, so the 2D drawing's edges stay what the game drew. A blended
         // draw's alpha is its blend's. A test for less than the reference has no edge to smooth this way.)
         key.alphaToCoverage = renderer->samples > 1 && Enhancements().alphaToCoverage && rs[D3DRS_ALPHATESTENABLE] && !key.blend &&
@@ -1638,8 +1672,19 @@ private:
 
     // ---- the frame's run
     // The frame's textures to the GPU and its draws into the back buffer; the frame is then done with.
+    // Ambient occlusion comes before the next command, if a scene was drawn and it has not been done.
+    void SplitForOcclusion()
+    {
+        S_occlusion &o = frame.occlusion;
+        if (!o.seen || o.active || occlusionDone)
+            return;
+        o.active = true;
+        o.split = static_cast<uint32_t>(frame.commands.size());
+        occlusionDone = true;
+    }
     bool RunFrame()
     {
+        SplitForOcclusion();            // (a frame read back before its first blended draw)
         DropDeadTextures();
         for (S_command &c : frame.commands)
             for (S_texture *t : c.textures)
@@ -1662,6 +1707,7 @@ private:
         frame.indices.clear();
         frame.vertexBlocks.clear();
         frame.pixelBlocks.clear();
+        frame.occlusion = {};
     }
     void DropDeadTextures()
     {
@@ -1679,6 +1725,7 @@ private:
     std::vector<D3DDISPLAYMODE> modes;
     D3DGAMMARAMP gamma = IdentityRamp();
     bool rampActive = false;
+    bool occlusionDone = false;         // ambient occlusion has been done in this frame
     // The device's state.
     DWORD rs[256] = {};
     DWORD tss[8][32] = {};

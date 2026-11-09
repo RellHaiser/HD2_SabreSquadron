@@ -171,13 +171,31 @@ struct S_command {
     S_samplerKey samplers[kStages] = {};
 };
 
+// Where a frame takes ambient occlusion (LS3DF.ini AmbientOcclusion): after its opaque scene, before what
+// is alpha-tested or blended and what follows the next depth clear (the weapon in the hand, the HUD).
+struct S_occlusion {
+    bool seen = false;              // a perspective opaque draw has come (the fields below are set)
+    bool active = false;            // `split` is set: the renderer does it
+    uint32_t split = 0;             // the first command after it
+    float p11 = 0, p22 = 0, p33 = 0, p43 = 0;   // the scene's projection
+    float fogStart = 0, fogEnd = 0;             // (equal: no fog)
+};
+
 struct S_frame {
     std::vector<S_command> commands;
+    S_occlusion occlusion;
     std::vector<uint8_t> vertices;
     std::vector<uint16_t> indices;
     std::vector<S_vertexUniforms> vertexBlocks;
     std::vector<S_pixelUniforms> pixelBlocks;
 };
+
+// fixed/occlusion.hlsl's block.
+struct S_occlusionUniforms {
+    F4 projection, shape, pixel, direction;
+};
+// Its values for a frame on a back buffer of that size, and a blur's step in pixels.
+S_occlusionUniforms OcclusionUniforms(const S_occlusion &o, UINT width, UINT height, float stepX, float stepY);
 
 // What the frames cost since the last report (LS3DF.ini SDLGPUStats).
 struct S_stats {
