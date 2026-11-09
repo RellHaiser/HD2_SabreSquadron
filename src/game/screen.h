@@ -35,6 +35,7 @@ struct S_ScreenDesc {                                   // 0x44 bytes, vtable 0x
 // A message added to a screen description's (after the others; the original's arguments by value).
 void AddScreenMessage(S_ScreenDesc *desc, uint32_t target, uint32_t id, uint32_t value, uintptr_t value2,
                       uintptr_t value3);                // 0x00625f60 (__cdecl)
+void AddScreenMessage(S_ScreenDesc *desc, uint32_t target, uint32_t id, uint32_t value, uintptr_t value2);   // 0x00625ed0 (DS 0x006551b0)
 
 // The ids' top 6 bits: a screen's index + 1.
 constexpr int SCREEN_ID_SHIFT = 26;

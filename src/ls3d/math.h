@@ -22,7 +22,7 @@ struct S_vector2 {
     float Square() const { return x * x + y * y; }                                  // 0x00562e00 (DS 0x00560be0)
 };
 
-struct S_vector {
+struct S_vector {                                       // (its copy: 0x006fb7a0 (DS 0x00749f20))
     float x, y, z;
 
     S_vector() = default;

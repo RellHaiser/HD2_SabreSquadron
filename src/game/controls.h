@@ -900,7 +900,7 @@ public:
 // header's edit puts its text in the picked line.
 class C_ComboBox : public C_ControlGroup {              // 0x88 bytes
 public:
-    C_ComboBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    C_ComboBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}   // 0x0065f1b0 (DS 0x00696250)
     ~C_ComboBox() override = default;                   // 0x0065f260 (0x0065f280)
 
     // By the id's last 4 bits: 1 the button, 2 the header, above 3 the list.
