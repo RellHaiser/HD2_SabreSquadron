@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "core/debug.h"
+#include "core/enhance.h"
 #include "i3d/camera.h"
 #include "i3d/i3d_hooks.h"
 #include "i3d/occluder.h"
@@ -485,7 +486,7 @@ static void TraverseSector(I3D_sector *sector, I3D_portal *portal)
 // the portal's opening (the polygon, not its plane).
 static bool NearPortal(const I3D_portal *portal)
 {
-    const float range = 1.0f;
+    const float range = Enhancements().nearPortalDistance;
     if (!(range > 0.0f))
         return false;
     const S_vector &e = g_renderCamera->GetMatrix()(3);
@@ -507,10 +508,10 @@ static bool NearPortal(const I3D_portal *portal)
         const float turn = edge.Cross(foot - a).Dot(portal->plane.normal);
         positive |= turn > 0.0f;
         negative |= turn < 0.0f;
-        const float len2 = edge.Square();
+        const float len2 = edge.Magnitude2();
         float t = len2 > 0.0f ? (e - a).Dot(edge) / len2 : 0.0f;
         t = t < 0.0f ? 0.0f : t > 1.0f ? 1.0f : t;
-        const float sq = (e - (a + edge * t)).Square();
+        const float sq = (e - (a + edge * t)).Magnitude2();
         if (sq < nearest)
             nearest = sq;
     }
@@ -550,7 +551,7 @@ static void ParsePortal(I3D_portal *prev, I3D_portal *portal, bool backwards)
         proj[i] = S_vector4{ inv * p.x, inv * p.y, wv, 0.0f };
     }
     if (portal->renderFlags & PRTR_ALL_BEHIND) {
-        // (Port enhancement) A portal of the camera's own sector:
+        // (Port enhancement, LS3DF.ini NearPortalDistance) A portal of the camera's own sector:
         // when the camera stands just past it, looking away, what sticks out of the sector beyond
         // is still in view - a bunker gun's camera outside its embrasure, the gun's sight in front.
         // That sector is looked into with the whole view (its frames are culled by the frustum;

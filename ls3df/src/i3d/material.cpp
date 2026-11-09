@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "core/enhance.h"
 #include "external/rw_data.h"
 #include "igraph/igraph.h"
 #include "igraph/itexture.h"
@@ -124,7 +125,9 @@ I3D_RESULT I3D_material::SetTexture(ITexture *newTexture)
         if (newTexture->flags & (ITC_SOURCE_ALPHA | ITC_USE_ALPHA))
             matFlags |= MATF_ALPHA;
         if (newTexture->flags & ITC_ALPHA_1BIT)
-            matFlags |= newTexture->flags & ITC_MIPMAP ? (MATF_COLORKEY | MATF_ALPHA) : MATF_COLORKEY;
+            // (LS3DF.ini ColorKeyMipmaps: mip levels without the blending that otherwise comes with them.)
+            matFlags |= (newTexture->flags & ITC_MIPMAP) && !(newTexture->flags & ITC_KEY_MIPS) ? (MATF_COLORKEY | MATF_ALPHA)
+                                                                                                : MATF_COLORKEY;
         matFlags |= MATF_TEXTURE;
     }
     return I3D_OK;
@@ -169,7 +172,7 @@ I3D_RESULT I3D_material::CopyFrom(const I3D_material *source)
     return I3D_OK;
 }
 
-I3D_RESULT I3D_material::SetTwoSided()
+I3D_RESULT I3D_material::Set2Sided()
 {
     matFlags |= MATF_TWO_SIDED;
     return I3D_OK;
@@ -229,6 +232,11 @@ uint32_t I3D_material::TextureFlags()
         tf |= ITC_COMPRESS;
     if ((flags & 0x800000) && g_driverStates[DRVSTATE_TEX_MIPMAP])
         tf |= ITC_MIPMAP;
+    // (Port enhancement, LS3DF.ini ColorKeyMipmaps: a colour key with no mip levels shimmers when far away.
+    // It keeps its way of drawing, alpha-tested with depth written.)
+    else if ((flags & MATF_COLORKEY) && g_driverStates[DRVSTATE_TEX_MIPMAP] &&
+             Enhancements().mipmaps && Enhancements().colorKeyMipmaps)
+        tf |= ITC_MIPMAP | ITC_KEY_MIPS;
     if (g_driverStates[DRVSTATE_TEX_HALF] && !(flags & 0x400000))
         tf |= ITC_HALF;
     if (flags & 0x8000)
@@ -238,7 +246,7 @@ uint32_t I3D_material::TextureFlags()
     else if (flags & MATF_ALPHA)
         tf |= flags & 0x1000000 ? ITC_SOURCE_ALPHA : ITC_USE_ALPHA;
     // (A 1-bit alpha with mip maps blends.)
-    if ((tf & (ITC_MIPMAP | ITC_ALPHA_1BIT)) == (ITC_MIPMAP | ITC_ALPHA_1BIT))
+    if ((tf & (ITC_MIPMAP | ITC_ALPHA_1BIT)) == (ITC_MIPMAP | ITC_ALPHA_1BIT) && !(tf & ITC_KEY_MIPS))
         matFlags |= MATF_ALPHA;
     return tf;
 }
@@ -253,7 +261,7 @@ void I3D_material::Load()
         dtaRead(g_loadFile, &diffuse, 0x4C);
         ReadName(name, g_loadFile);
         if (*name) {
-            const uint32_t envFlags = (g_driverStates[DRVSTATE_TEX_MIPMAP] ? ITC_MIPMAP : 0) | (tf & 0xffffef31) | 0x80000;
+            const uint32_t envFlags = (g_driverStates[DRVSTATE_TEX_MIPMAP] ? ITC_MIPMAP : 0) | (tf & 0xffffef31 & ~ITC_KEY_MIPS) | 0x80000;
             g_pIGraph->LoadTexture(name, nullptr, envFlags, &envTexture);
         }
     }
@@ -491,7 +499,7 @@ void I3D_anim_material::Load()
 
     // The sequences: "name00.ext", "name01.ext" ... (names of under 6 characters: one empty frame).
     if (matFlags & MATF_ENV_TEXTURE) {
-        const uint32_t envFlags = (g_driverStates[DRVSTATE_TEX_MIPMAP] ? ITC_MIPMAP : 0) | (tf & 0xffffef31) | 0x80000;
+        const uint32_t envFlags = (g_driverStates[DRVSTATE_TEX_MIPMAP] ? ITC_MIPMAP : 0) | (tf & 0xffffef31 & ~ITC_KEY_MIPS) | 0x80000;
         if (envFrames < 2) {
             g_pIGraph->LoadTexture(envName, nullptr, envFlags, &envTexture);
         } else {

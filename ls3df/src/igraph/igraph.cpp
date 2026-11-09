@@ -10,6 +10,7 @@
 
 #include "core/cpu.h"
 #include "core/debug.h"
+#include "core/enhance.h"
 #include "dx/dxerr8.h"
 #include "i3d/i3d_links.h"
 #include "i3d/vb_manager.h"
@@ -42,6 +43,7 @@ uint32_t g_caps = 0;
 uint32_t g_quirks = 0;
 int g_maxTextureWidth = 0;
 int g_maxTextureHeight = 0;
+int g_anisotropy = 0;
 
 D3DFORMAT g_fmt16Bit = D3DFMT_UNKNOWN;
 D3DFORMAT g_fmt1BitAlpha = D3DFMT_UNKNOWN;
@@ -795,6 +797,9 @@ void IGraphWindowEvents::OnActivate(bool active, bool minimized)
                 platform::Suspend(g_textureThread);
         }
         g_inactive = true;
+        // Direct3D's exclusive full screen leaves by itself; a window over the display would stay on top.
+        if (gfx::g_pGfx->HasDevice() && gfx::g_pGfx->BorderlessFullScreen())
+            platform::Minimize(g_mainWnd);
     } else if (reactivate) {
         g_pIGraph->SetAppName(g_savedAppName);
         g_inactive = false;
@@ -1101,6 +1106,7 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     }
     platform::Focus(g_mainWnd);
 
+    gfx::ChooseDevice();            // (Port: the frame recorder, LS3DF.ini [Render] CaptureFrames)
     if (!gfx::g_pGfx->Open()) {
         dbgPrintf("IGraph::Init() - Error create D3D8 object !!");
         return I3DERR_GENERIC;
@@ -1135,7 +1141,7 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     std::qsort(g_displayModes.Data(), g_displayModes.Size(), sizeof(D3DDISPLAYMODE), CompareModes);
 
     S_cpuInfo cpu = {};
-    DetectCpu(&cpu);
+    _cpuid(&cpu);
     OSVERSIONINFOA os = {};
     os.dwOSVersionInfoSize = sizeof os;
 #pragma warning(suppress : 4996)  // GetVersionExA is deprecated (and lies about newer Windows)
@@ -1156,7 +1162,7 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     }
     dbgPrintf("\nDetected OS: %s ver. %i.%i.%i %s", osName, os.dwMajorVersion, os.dwMinorVersion,
               os.dwBuildNumber & 0xffff, os.szCSDVersion);
-    const uint32_t mhz = MeasureCpuMhz();
+    const uint32_t mhz = GetCpuSpeed();
     dbgPrintf("Detected CPU: %s, %s %iMHz, family:%i, model:%i, stepping:%i", cpu.vendor, cpu.name, mhz,
               cpu.family, cpu.model, cpu.stepping);
     if (g_init.flags & IG_VERBOSE) {
@@ -1346,6 +1352,21 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     if (!(g_caps & IGCAPS_HW_TNL))
         gfx::g_pGfx->SetRenderState(D3DRS_SOFTWAREVERTEXPROCESSING, TRUE);
     gfx::g_pGfx->SetTextureStageState(0, D3DTSS_MAXANISOTROPY, 0);
+    // (Port enhancement, LS3DF.ini AnisotropicFiltering: linear minification is anisotropic, up to
+    // the option's degree or the device's. I3D_driver::SetState(0) applies it after a reset.)
+    g_anisotropy = 0;
+    if (const int want = Enhancements().anisotropy) {
+        const int most = static_cast<int>(caps.MaxAnisotropy);
+        if ((caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC) && most > 1)
+            g_anisotropy = want < most ? want : most;
+        if (g_anisotropy) {
+            for (DWORD stage = 0; stage < 3; ++stage) {
+                gfx::g_pGfx->SetTextureStageState(stage, D3DTSS_MAXANISOTROPY, static_cast<DWORD>(g_anisotropy));
+                if (stage < 2)
+                    gfx::g_pGfx->SetTextureStageState(stage, D3DTSS_MINFILTER, D3DTEXF_ANISOTROPIC);
+            }
+        }
+    }
     gfx::g_pGfx->SetRenderState(D3DRS_ALPHAREF, g_rs.alphaRef);
     RestoreDevice(false);
 
@@ -1417,6 +1438,29 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     dbgPrintf("   DXT5 textures: %s", nameOrNone(g_fmtDxt5));
     dbgPrintf("   Bump-maps: %s", nameOrNone(g_fmtBump));
     dbgPrintf("\n");
+    {
+        const S_enhancements &e = Enhancements();
+        if (e.anisotropy || e.trilinear || e.mipmaps || e.trueColorTextures || e.trueColorLightmaps ||
+                    e.nearPortalDistance > 0.0f) {
+            EnhancementLog("Port enhancements (LS3DF.ini):");
+            if (e.anisotropy)
+                EnhancementLog("   Anisotropic filtering: %ix asked, %ix used (device maximum %lu%s)", e.anisotropy,
+                               g_anisotropy, caps.MaxAnisotropy,
+                               (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC) ? "" : ", not supported");
+            if (e.trilinear)
+                EnhancementLog("   Trilinear filtering: always");
+            if (e.mipmaps)
+                EnhancementLog("   Mip maps: gamma-correct, alpha-weighted, coverage kept%s",
+                               e.colorKeyMipmaps ? ", colour-keyed textures given them too" : "");
+            if (e.trueColorTextures)
+                EnhancementLog("   Textures from image files: %s", g_fmtTrueColor ? "A8R8G8B8" : "unchanged (no A8R8G8B8)");
+            if (e.trueColorLightmaps)
+                EnhancementLog("   Lightmaps: %s", g_fmtTrueColor ? "32-bit" : "unchanged (no A8R8G8B8)");
+            if (e.nearPortalDistance > 0.0f)
+                EnhancementLog("   Portals behind the camera: looked through within %.2f m", e.nearPortalDistance);
+            EnhancementLog("");
+        }
+    }
 
     hr = InitDirectInput(g_init.instance);
     if (hr < 0) {

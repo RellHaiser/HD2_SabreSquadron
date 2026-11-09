@@ -91,6 +91,9 @@ public:
     virtual void SetVolume(Movie *movie, int32_t volume) = 0;
 
     // ---- graphs (DirectShow)
+    // The graphs rendered from now on play their sound through this sound device API object (null:
+    // none). (DirectShow has a sound renderer of its own: the Windows backend ignores it.)
+    virtual void UseGraphSound(audio::System *system) = 0;
     // Null on failure.
     virtual Graph *CreateGraph() = 0;
     virtual void ReleaseGraph(Graph *graph) = 0;
@@ -113,7 +116,12 @@ public:
     virtual bool VideoSize(Graph *graph, int *width, int *height) = 0;
 };
 
-// The device in use (the Windows backend's, video/win32: Bink and DirectShow).
+// The device in use: the Windows backend's (video/win32: Bink and DirectShow) unless ChooseDevice
+// picked another.
 extern Device *g_pVideo;
+
+// Sets g_pVideo to the backend LS3DF.ini asks for ([Video] FFmpeg: video/ffmpeg), the Windows one
+// otherwise; decided on the first call (IShow::Open), so every movie and graph has one backend.
+void ChooseDevice();
 
 }  // namespace ls3d::video

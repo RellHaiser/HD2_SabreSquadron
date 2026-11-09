@@ -1,6 +1,8 @@
 // The Win32 platform (platform/platform.h): the window class and procedure, the message loop and
-// the other Windows calls IGraph made itself (IGraph.cpp), moved here unchanged.
-#include "platform/platform.h"
+// the other Windows calls IGraph made itself (IGraph.cpp), moved here unchanged. The window, cursor
+// and clock functions are the Win32 implementation of platform/windowing.h; the threads, locks,
+// events and libraries are every implementation's.
+#include "platform/windowing.h"
 
 #include <mmsystem.h>
 
@@ -14,7 +16,6 @@ namespace {
 const char kWindowClass[] = "LS3D";
 const char kWindowTitle[] = "LS3D engine";
 
-WindowEvents *s_events = nullptr;
 C_vector<HWND> s_dialogs(0x20);                 // 0x100d19b0
 
 // Accessibility keys switched off while the engine runs (SPI_GET/SETSTICKYKEYS ...). Only the
@@ -30,13 +31,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_ERASEBKGND:
         return 0;
     case WM_DESTROY:
-        if (!s_events->OnDestroy())
+        if (!Events()->OnDestroy())
             return 1;
         PostQuitMessage(0);
         break;
     case WM_CLOSE:
         // (When the engine is initialised, OnClose closes it and exits.)
-        if (!s_events->OnClose(static_cast<int>(wParam)))
+        if (!Events()->OnClose(static_cast<int>(wParam)))
             return 1;
         break;
     case WM_SYSKEYDOWN:
@@ -50,7 +51,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return 1;
         break;
     case WM_ACTIVATE:
-        s_events->OnActivate(LOWORD(wParam) != WA_INACTIVE, HIWORD(wParam) != 0);
+        Events()->OnActivate(LOWORD(wParam) != WA_INACTIVE, HIWORD(wParam) != 0);
         break;
     }
     return DefWindowProcA(hwnd, msg, wParam, lParam);
@@ -62,41 +63,35 @@ void KeyFromMessage(const MSG &msg)
 {
     if (msg.message == WM_KEYDOWN) {
         switch (msg.wParam) {
-        case VK_LEFT: s_events->OnKeyMessage(DIK_LEFT, 0); break;
-        case VK_UP: s_events->OnKeyMessage(DIK_UP, 0); break;
-        case VK_RIGHT: s_events->OnKeyMessage(DIK_RIGHT, 0); break;
-        case VK_DOWN: s_events->OnKeyMessage(DIK_DOWN, 0); break;
-        case VK_DELETE: s_events->OnKeyMessage(DIK_DELETE, 0); break;
+        case VK_LEFT: Events()->OnKeyMessage(DIK_LEFT, 0); break;
+        case VK_UP: Events()->OnKeyMessage(DIK_UP, 0); break;
+        case VK_RIGHT: Events()->OnKeyMessage(DIK_RIGHT, 0); break;
+        case VK_DOWN: Events()->OnKeyMessage(DIK_DOWN, 0); break;
+        case VK_DELETE: Events()->OnKeyMessage(DIK_DELETE, 0); break;
         }
     } else if (msg.message == WM_CHAR && static_cast<LONG>(msg.lParam) >= 0) {
         switch (msg.wParam) {
         case 8:
-            s_events->OnKeyMessage(DIK_BACK, 8);
+            Events()->OnKeyMessage(DIK_BACK, 8);
             break;
         case 9:
-            s_events->OnKeyMessage(DIK_TAB, 9);
+            Events()->OnKeyMessage(DIK_TAB, 9);
             break;
         case 0x1b:
-            s_events->OnKeyMessage(DIK_ESCAPE, 0x1b);
+            Events()->OnKeyMessage(DIK_ESCAPE, 0x1b);
             break;
         default: {
             const SHORT vk = VkKeyScanA(static_cast<CHAR>(msg.wParam));
             if (vk == -1)
-                s_events->OnKeyMessage(0, 0);
+                Events()->OnKeyMessage(0, 0);
             else
-                s_events->OnKeyMessage(static_cast<int>(MapVirtualKeyA(vk & 0xff, 0)), static_cast<int>(msg.wParam));
+                Events()->OnKeyMessage(static_cast<int>(MapVirtualKeyA(vk & 0xff, 0)), static_cast<int>(msg.wParam));
         }
         }
     }
 }
 
 }  // namespace
-
-// ---------------------------------------------------------------- time
-
-uint32_t Milliseconds() { return timeGetTime(); }
-uint32_t TickCount() { return GetTickCount(); }
-void Pause(uint32_t ms) { Sleep(ms); }
 
 // ---------------------------------------------------------------- threads and locks
 
@@ -139,155 +134,189 @@ bool WaitEvent(Event *event)
     return MsgWaitForMultipleObjects(1, &handle, FALSE, INFINITE, 0xbf) == WAIT_OBJECT_0;
 }
 HANDLE NativeEvent(Event *event) { return reinterpret_cast<HANDLE>(event); }
+Event *EventFromNative(HANDLE handle) { return reinterpret_cast<Event *>(handle); }
 
-// ---------------------------------------------------------------- the window
-
-void SetWindowEvents(WindowEvents *events) { s_events = events; }
-
-bool RegisterWindowClass(HINSTANCE instance)
+Library *OpenLibrary(const char *name) { return reinterpret_cast<Library *>(LoadLibraryA(name)); }
+void *LibrarySymbol(Library *library, const char *name)
 {
-    WNDCLASSEXA wc = {};
-    wc.cbSize = sizeof wc;
-    wc.style = CS_CLASSDC;
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = instance;
-    wc.hCursor = LoadCursorA(nullptr, IDC_ARROW);
-    wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
-    wc.lpszClassName = kWindowClass;
-    return RegisterClassExA(&wc) != 0;
+    return reinterpret_cast<void *>(GetProcAddress(reinterpret_cast<HMODULE>(library), name));
 }
+void CloseLibrary(Library *library) { FreeLibrary(reinterpret_cast<HMODULE>(library)); }
 
-HWND CreateMainWindow(HINSTANCE instance, bool fullscreen, int x, int y, int width, int height, bool withMenu,
-                      HMENU menu)
-{
-    if (fullscreen)
-        return CreateWindowExA(WS_EX_TOPMOST, kWindowClass, kWindowTitle, WS_VISIBLE, x, y, width, height,
-                               GetDesktopWindow(), menu, instance, nullptr);
-    const int frameX = GetSystemMetrics(SM_CXFIXEDFRAME);
-    const int frameY = GetSystemMetrics(SM_CYFIXEDFRAME);
-    const int caption = GetSystemMetrics(SM_CYCAPTION);
-    const int menuHeight = withMenu ? GetSystemMetrics(SM_CYMENU) : 0;
-    const DWORD style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-    return CreateWindowExA(0, kWindowClass, kWindowTitle, style, x - frameX, y - menuHeight - caption - frameY,
-                           width + frameX * 2, height + frameY * 2 + menuHeight + caption, GetDesktopWindow(), menu,
-                           instance, nullptr);
-}
+namespace {
 
-HWND CreateChildWindow(HINSTANCE instance, HWND parent, int x, int y, int width, int height)
-{
-    return CreateWindowExA(0, kWindowClass, kWindowTitle, WS_CHILD | WS_VISIBLE, x, y, width, height, parent, nullptr,
-                           instance, nullptr);
-}
+// The Win32 implementation of the window, cursor and clock functions.
+class WindowingWin32 final : public Windowing {
+public:
+    // ---- time
 
-HMENU LoadDefaultMenu()
-{
-    return LoadMenuA(GetModuleHandleA("LS3D.DLL"), MAKEINTRESOURCEA(123));
-}
+    uint32_t Milliseconds() override { return timeGetTime(); }
+    uint32_t TickCount() override { return GetTickCount(); }
+    void Pause(uint32_t ms) override { Sleep(ms); }
 
-void Refresh(HWND window) { UpdateWindow(window); }
-void Focus(HWND window) { SetFocus(window); }
-bool SetTitle(HWND window, const char *title) { return SetWindowTextA(window, title) != FALSE; }
+    // ---- the window
 
-bool ForegroundIsOwn(HWND window)
-{
-    const HWND foreground = GetForegroundWindow();
-    return IsChild(window, foreground) || window == foreground;
-}
+    bool RegisterWindowClass(HINSTANCE instance) override
+    {
+        WNDCLASSEXA wc = {};
+        wc.cbSize = sizeof wc;
+        wc.style = CS_CLASSDC;
+        wc.lpfnWndProc = WindowProc;
+        wc.hInstance = instance;
+        wc.hCursor = LoadCursorA(nullptr, IDC_ARROW);
+        wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
+        wc.lpszClassName = kWindowClass;
+        return RegisterClassExA(&wc) != 0;
+    }
 
-POINT ClientOrigin(HWND window, bool framed, bool withMenu)
-{
-    RECT rc;
-    GetWindowRect(window, &rc);
-    if (framed) {
+    HWND CreateMainWindow(HINSTANCE instance, bool fullscreen, int x, int y, int width, int height, bool withMenu,
+                          HMENU menu) override
+    {
+        if (fullscreen)
+            return CreateWindowExA(WS_EX_TOPMOST, kWindowClass, kWindowTitle, WS_VISIBLE, x, y, width, height,
+                                   GetDesktopWindow(), menu, instance, nullptr);
         const int frameX = GetSystemMetrics(SM_CXFIXEDFRAME);
         const int frameY = GetSystemMetrics(SM_CYFIXEDFRAME);
         const int caption = GetSystemMetrics(SM_CYCAPTION);
-        const int menu = withMenu ? GetSystemMetrics(SM_CYMENU) : 0;
-        rc.left += frameX;
-        rc.top += menu + caption + frameY;
+        const int menuHeight = withMenu ? GetSystemMetrics(SM_CYMENU) : 0;
+        const DWORD style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+        return CreateWindowExA(0, kWindowClass, kWindowTitle, style, x - frameX, y - menuHeight - caption - frameY,
+                               width + frameX * 2, height + frameY * 2 + menuHeight + caption, GetDesktopWindow(), menu,
+                               instance, nullptr);
     }
-    return {rc.left, rc.top};
-}
 
-bool AddDialog(HWND dialog)
-{
-    if (!dialog)
-        return false;
-    s_dialogs.PushBack(dialog);
-    return true;
-}
+    HWND CreateChildWindow(HINSTANCE instance, HWND parent, int x, int y, int width, int height) override
+    {
+        return CreateWindowExA(0, kWindowClass, kWindowTitle, WS_CHILD | WS_VISIBLE, x, y, width, height, parent, nullptr,
+                               instance, nullptr);
+    }
 
-bool RemoveDialog(HWND dialog)
-{
-    return s_dialogs.RemoveSwap(dialog);
-}
+    HMENU LoadDefaultMenu() override
+    {
+        return LoadMenuA(GetModuleHandleA("LS3D.DLL"), MAKEINTRESOURCEA(123));
+    }
 
-// 0x1006a470 (IGraph::ProcessWinMessages)
-void PumpMessages()
-{
-    for (;;) {
-        MSG msg;
-        while (!PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE | PM_NOYIELD)) {
-            if (!s_events->WaitWhileIdle())
-                return;
-            WaitMessage();
+    void Refresh(HWND window) override { UpdateWindow(window); }
+    void Focus(HWND window) override { SetFocus(window); }
+    void Minimize(HWND window) override { ShowWindow(window, SW_MINIMIZE); }
+    bool SetTitle(HWND window, const char *title) override { return SetWindowTextA(window, title) != FALSE; }
+
+    bool ForegroundIsOwn(HWND window) override
+    {
+        const HWND foreground = GetForegroundWindow();
+        return IsChild(window, foreground) || window == foreground;
+    }
+
+    POINT ClientOrigin(HWND window, bool framed, bool withMenu) override
+    {
+        RECT rc;
+        GetWindowRect(window, &rc);
+        if (framed) {
+            const int frameX = GetSystemMetrics(SM_CXFIXEDFRAME);
+            const int frameY = GetSystemMetrics(SM_CYFIXEDFRAME);
+            const int caption = GetSystemMetrics(SM_CYCAPTION);
+            const int menu = withMenu ? GetSystemMetrics(SM_CYMENU) : 0;
+            rc.left += frameX;
+            rc.top += menu + caption + frameY;
         }
-        int dialog = 0;
-        for (; dialog < s_dialogs.Size(); ++dialog) {
-            if (IsDialogMessageA(s_dialogs[dialog], &msg))
-                break;
-        }
-        // Typed characters (not repeats of a held key) for ReadChar.
-        if (msg.message == WM_CHAR && static_cast<LONG>(msg.lParam) >= 0)
-            s_events->OnChar(static_cast<int>(msg.wParam));
-        if (s_events->KeyboardFromMessages())
-            KeyFromMessage(msg);
-        if (dialog == s_dialogs.Size()) {
-            TranslateMessage(&msg);
-            DispatchMessageA(&msg);
+        return {rc.left, rc.top};
+    }
+
+    bool AddDialog(HWND dialog) override
+    {
+        if (!dialog)
+            return false;
+        s_dialogs.PushBack(dialog);
+        return true;
+    }
+
+    bool RemoveDialog(HWND dialog) override
+    {
+        return s_dialogs.RemoveSwap(dialog);
+    }
+
+    // 0x1006a470 (IGraph::ProcessWinMessages)
+    void PumpMessages() override
+    {
+        for (;;) {
+            MSG msg;
+            while (!PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE | PM_NOYIELD)) {
+                if (!Events()->WaitWhileIdle())
+                    return;
+                WaitMessage();
+            }
+            int dialog = 0;
+            for (; dialog < s_dialogs.Size(); ++dialog) {
+                if (IsDialogMessageA(s_dialogs[dialog], &msg))
+                    break;
+            }
+            // Typed characters (not repeats of a held key) for ReadChar.
+            if (msg.message == WM_CHAR && static_cast<LONG>(msg.lParam) >= 0)
+                Events()->OnChar(static_cast<int>(msg.wParam));
+            if (Events()->KeyboardFromMessages())
+                KeyFromMessage(msg);
+            if (dialog == s_dialogs.Size()) {
+                TranslateMessage(&msg);
+                DispatchMessageA(&msg);
+            }
         }
     }
-}
 
-// ---------------------------------------------------------------- the mouse and keyboard
+    // ---- the mouse and keyboard
 
-bool SetCursorPosition(int x, int y) { return SetCursorPos(x, y) != FALSE; }
-void ReleaseCursorClip() { ClipCursor(nullptr); }
-bool MouseButtonsSwapped() { return GetSystemMetrics(SM_SWAPBUTTON) != 0; }
+    bool SetCursorPosition(int x, int y) override { return SetCursorPos(x, y) != FALSE; }
+    void ReleaseCursorClip() override { ClipCursor(nullptr); }
+    bool MouseButtonsSwapped() override { return GetSystemMetrics(SM_SWAPBUTTON) != 0; }
 
-void DisableAccessibilityKeys()
-{
-    // The original switches filter and toggle keys "off" only when sticky keys had flags, and never
-    // sets their structure sizes, so those calls fail.
-    s_stickyKeys.cbSize = sizeof s_stickyKeys;
-    SystemParametersInfoA(SPI_GETSTICKYKEYS, sizeof s_stickyKeys, &s_stickyKeys, 0);
-    const DWORD stickyFlags = s_stickyKeys.dwFlags;
-    if (stickyFlags) {
-        s_stickyKeys.dwFlags = 0;
+    void DisableAccessibilityKeys() override
+    {
+        // The original switches filter and toggle keys "off" only when sticky keys had flags, and never
+        // sets their structure sizes, so those calls fail.
+        s_stickyKeys.cbSize = sizeof s_stickyKeys;
+        SystemParametersInfoA(SPI_GETSTICKYKEYS, sizeof s_stickyKeys, &s_stickyKeys, 0);
+        const DWORD stickyFlags = s_stickyKeys.dwFlags;
+        if (stickyFlags) {
+            s_stickyKeys.dwFlags = 0;
+            SystemParametersInfoA(SPI_SETSTICKYKEYS, s_stickyKeys.cbSize, &s_stickyKeys, 0);
+            s_stickyKeys.dwFlags = stickyFlags;
+        }
+        SystemParametersInfoA(SPI_GETFILTERKEYS, s_filterKeys.cbSize, &s_filterKeys, 0);
+        if (s_stickyKeys.dwFlags) {
+            const DWORD saved = s_filterKeys.dwFlags;
+            s_filterKeys.dwFlags = 0;
+            SystemParametersInfoA(SPI_SETFILTERKEYS, s_filterKeys.cbSize, &s_filterKeys, 0);
+            s_filterKeys.dwFlags = saved;
+        }
+        SystemParametersInfoA(SPI_GETTOGGLEKEYS, s_toggleKeys.cbSize, &s_toggleKeys, 0);
+        if (s_stickyKeys.dwFlags) {
+            const DWORD saved = s_toggleKeys.dwFlags;
+            s_toggleKeys.dwFlags = 0;
+            SystemParametersInfoA(SPI_SETTOGGLEKEYS, s_toggleKeys.cbSize, &s_toggleKeys, 0);
+            s_toggleKeys.dwFlags = saved;
+        }
+    }
+
+    void RestoreAccessibilityKeys() override
+    {
         SystemParametersInfoA(SPI_SETSTICKYKEYS, s_stickyKeys.cbSize, &s_stickyKeys, 0);
-        s_stickyKeys.dwFlags = stickyFlags;
-    }
-    SystemParametersInfoA(SPI_GETFILTERKEYS, s_filterKeys.cbSize, &s_filterKeys, 0);
-    if (s_stickyKeys.dwFlags) {
-        const DWORD saved = s_filterKeys.dwFlags;
-        s_filterKeys.dwFlags = 0;
         SystemParametersInfoA(SPI_SETFILTERKEYS, s_filterKeys.cbSize, &s_filterKeys, 0);
-        s_filterKeys.dwFlags = saved;
-    }
-    SystemParametersInfoA(SPI_GETTOGGLEKEYS, s_toggleKeys.cbSize, &s_toggleKeys, 0);
-    if (s_stickyKeys.dwFlags) {
-        const DWORD saved = s_toggleKeys.dwFlags;
-        s_toggleKeys.dwFlags = 0;
         SystemParametersInfoA(SPI_SETTOGGLEKEYS, s_toggleKeys.cbSize, &s_toggleKeys, 0);
-        s_toggleKeys.dwFlags = saved;
     }
-}
+};
 
-void RestoreAccessibilityKeys()
+WindowingWin32 s_windowing;
+
+}  // namespace
+
+Windowing *Win32Windowing() { return &s_windowing; }
+
+bool Win32DialogMessage(MSG *msg)
 {
-    SystemParametersInfoA(SPI_SETSTICKYKEYS, s_stickyKeys.cbSize, &s_stickyKeys, 0);
-    SystemParametersInfoA(SPI_SETFILTERKEYS, s_filterKeys.cbSize, &s_filterKeys, 0);
-    SystemParametersInfoA(SPI_SETTOGGLEKEYS, s_toggleKeys.cbSize, &s_toggleKeys, 0);
+    for (int i = 0; i < s_dialogs.Size(); ++i) {
+        if (IsDialogMessageA(s_dialogs[i], msg))
+            return true;
+    }
+    return false;
 }
 
 }  // namespace ls3d::platform

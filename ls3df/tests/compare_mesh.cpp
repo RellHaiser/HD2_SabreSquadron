@@ -23,7 +23,7 @@
 //
 // Usage: compare_mesh.exe [original LS3DF.dll] [operations] [seed]
 //
-// test-sources: src/i3d/mesh.cpp src/i3d/material.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp src/i3d/driver_factories.cpp src/i3d/anim.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
+// test-sources: src/i3d/mesh.cpp src/i3d/material.cpp src/core/enhance.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp src/i3d/driver_factories.cpp src/i3d/anim.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
 // test-sources: src/gfx/d3d8/gfx_d3d8.cpp
 #include <float.h>
 
@@ -84,7 +84,7 @@ I3D_RESULT __stdcall I3D_driver::ResetDevice(I3D_scene *) { return 0; }
 I3D_frame *__stdcall I3D_driver::FindFrame(I3D_scene *, const char *) { return nullptr; }
 void __stdcall I3D_driver::RebalanceNameTree() {}
 I3D_RESULT __stdcall I3D_driver::EnumNamedFrames(I3D_ENUMPROC *, void *) { return 0; }
-void __stdcall I3D_driver::FrameReleased(I3D_frame *) {}
+void __stdcall I3D_driver::DeleteFromSceneTickList(I3D_frame *) {}
 void __stdcall I3D_driver::RemoveShadowCaster(I3D_frame *) {}
 void __stdcall I3D_driver::RemoveTargetFrame(I3D_frame *) {}
 void __stdcall I3D_driver::SetHierarchyLightLevel(I3D_frame *, float) {}

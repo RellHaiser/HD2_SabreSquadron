@@ -11,10 +11,12 @@
 //
 // Usage: compare_window.exe [original LS3DF.dll] [operations] [seed]
 //
-// test-sources: src/igraph/*.cpp src/core/debug.cpp src/core/cpu.cpp src/dx/dxerr8.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp src/dshow/*.cpp
-// test-sources: src/gfx/d3d8/gfx_d3d8.cpp src/audio/dsound/audio_dsound.cpp src/input/dinput/input_dinput.cpp
-// test-sources: src/platform/win32/platform_win32.cpp
+// test-sources: src/igraph/*.cpp src/core/debug.cpp src/core/cpu.cpp src/core/enhance.cpp src/dx/dxerr8.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp src/dshow/*.cpp
+// test-sources: src/gfx/*.cpp src/gfx/d3d8/gfx_d3d8.cpp src/gfx/trace/*.cpp src/gfx/sdlgpu/*.cpp src/gfx/fixed/*.cpp src/gfx/opengl/*.cpp src/audio/dsound/audio_dsound.cpp src/input/dinput/input_dinput.cpp
+// test-sources: src/platform/*.cpp src/platform/win32/*.cpp src/platform/sdl3/*.cpp
 // test-sources: src/video/win32/*.cpp
+// test-sources: src/video/video.cpp src/video/ffmpeg/video_ffmpeg.cpp
+// test-sources: src/input/input.cpp src/input/sdl3/input_sdl3.cpp
 #include <windows.h>
 
 #include <cstdint>

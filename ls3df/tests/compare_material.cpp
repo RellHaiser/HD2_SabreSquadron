@@ -15,7 +15,7 @@
 //
 // Usage: compare_material.exe [original LS3DF.dll] [operations] [seed]
 //
-// test-sources: src/i3d/material.cpp
+// test-sources: src/i3d/material.cpp src/core/enhance.cpp src/core/debug.cpp
 #include <windows.h>
 
 #include <float.h>
@@ -471,8 +471,8 @@ void RunOp()
         break;
     }
     case 10:
-        g_lastOp = "SetTwoSided";
-        Check("SetTwoSided", CallV<I3D_RESULT>(o, 0x24), p->SetTwoSided());
+        g_lastOp = "Set2Sided";
+        Check("Set2Sided", CallV<I3D_RESULT>(o, 0x24), p->Set2Sided());
         break;
     case 11: {
         g_lastOp = "SetEnvironment";

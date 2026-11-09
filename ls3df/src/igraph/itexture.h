@@ -28,10 +28,13 @@ enum : uint32_t {
     ITC_NOCACHE = 0x00200000,           // not shared through IGraph's cached texture list
     ITC_NORESIZE = 0x00400000,          // keep the image size (no power of 2, no maximum)
     ITC_PIXEL_MASK = 0x01000000,        // (internal) pixels is a 1-bit mask of the alpha
+    // (Port enhancement, LS3DF.ini ColorKeyMipmaps) mip levels for a texture still drawn alpha-tested:
+    // with ITC_MIPMAP and ITC_ALPHA_1BIT, each level's alpha 0 or 255 with level 0's coverage.
+    ITC_KEY_MIPS = 0x10000000,
     ITC_QUEUED = 0x40000000,            // (internal) ITC_STREAMED: requested from the thread
     ITC_RESIDENT = 0x80000000,          // (internal) ITC_STREAMED: holds a staging texture
     // Options a .dds file does not take (LoadTexture clears them).
-    ITC_DDS_IGNORED = ITC_DITHER | ITC_MIPMAP | ITC_COMPRESS | ITC_TRUECOLOR | ITC_HALF,
+    ITC_DDS_IGNORED = ITC_DITHER | ITC_MIPMAP | ITC_COMPRESS | ITC_TRUECOLOR | ITC_HALF | ITC_KEY_MIPS,
 };
 
 namespace ls3d::tex {

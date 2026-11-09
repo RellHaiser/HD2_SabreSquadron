@@ -11,6 +11,7 @@
 #include "audio/audio.h"
 #include "core/debug.h"
 #include "external/bink.h"
+#include "video/backends.h"
 #include "video/win32/texture_renderer.h"
 
 namespace ls3d::video {
@@ -201,6 +202,7 @@ public:
     void SetVolume(Movie *movie, int32_t volume) override { BinkSetVolume(B(movie), 0, volume); }
 
     // ---- graphs (DirectShow)
+    void UseGraphSound(audio::System *) override {}
     Graph *CreateGraph() override
     {
         IGraphBuilder *graph = nullptr;
@@ -282,6 +284,9 @@ DeviceWin32 s_device;
 
 }  // namespace
 
+// (The default device; ChooseDevice, video/video.cpp, may switch to another backend.)
 Device *g_pVideo = &s_device;
+
+Device *WindowsVideoDevice() { return &s_device; }
 
 }  // namespace ls3d::video

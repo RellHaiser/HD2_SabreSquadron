@@ -13,7 +13,7 @@ C_vector<I3D_target *> g_targets;                   // 0x100c0570
 
 extern C_vector<I3D_frame *> g_targetUpdates;       // frame.cpp
 
-I3D_target *FindTargetOf(const I3D_frame *frame)
+I3D_target *GetTarget(const I3D_frame *frame)
 {
     for (I3D_target *t : g_targets) {
         for (I3D_frame *f : t->frames) {
@@ -25,9 +25,9 @@ I3D_target *FindTargetOf(const I3D_frame *frame)
 }
 
 // 0x100565f0
-void RemoveFromTargets(I3D_frame *frame)
+void DeleteFromAnyTarget(I3D_frame *frame)
 {
-    if (I3D_target *t = FindTargetOf(frame))
+    if (I3D_target *t = GetTarget(frame))
         t->RemoveFrame(frame);
 }
 
@@ -93,7 +93,7 @@ void __stdcall I3D_target::AddFrame(I3D_frame *frame)
     if (frame == this)
         return;
     if (frame->frameFlags & FRMFLAGS_TARGETED)
-        RemoveFromTargets(frame);
+        DeleteFromAnyTarget(frame);
     frames.PushBack(frame);
     frame->frameFlags |= FRMFLAGS_TARGETED;
 }

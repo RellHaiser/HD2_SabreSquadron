@@ -1,11 +1,18 @@
 # The input device (input)
 
 IGraph reads the keyboard and the mouse through one interface, `input::Device`
-(`input::g_pInput`), declared in [`src/input/input.h`](../src/input/input.h). Its only
-implementation so far is the DirectInput backend in [`src/input/dinput`](../src/input/dinput),
-which passes every call to DirectInput 8 unchanged. This is the third device seam, after the
-[render device](render_device.md) and the [sound device](sound_device.md), and is built the same
-way. SDL3 is the planned successor.
+(`input::g_pInput`), declared in [`src/input/input.h`](../src/input/input.h). It has two
+backends:
+
+- **DirectInput** ([`src/input/dinput`](../src/input/dinput)), the default, which passes every
+  call to DirectInput 8 unchanged;
+- **SDL3** ([`src/input/sdl3`](../src/input/sdl3)), the keyboard and mouse of the SDL3 platform's
+  window ([below](#the-sdl3-backend)). It goes with the platform: it is used whenever the window is
+  SDL's (`[Platform] SDL3=1`).
+
+`input::ChooseDevice()` picks one when IGraph opens DirectInput. This is the third device seam,
+after the [render device](render_device.md) and the [sound device](sound_device.md), and is built
+the same way.
 
 ## Design
 
@@ -32,7 +39,26 @@ position in exclusive mode, swapped buttons and the timer. The window-message ke
 
 **The boundary is checked.** `python build.py` (and `check`) fails when code outside `src/dx` and
 `src/input/dinput` includes `dinput.h` or the backend, or names a DirectInput interface or
-`DirectInput8Create`.
+`DirectInput8Create`, and when code outside the SDL3 backends uses SDL.
+
+## The SDL3 backend
+
+The keyboard and mouse of the SDL3 window, in DirectInput's terms. SDL's state is fed by the
+platform's event loop, which IGraph pumps every frame and while it waits to acquire a device.
+
+- **Acquiring** needs the window to have the keyboard focus, as DirectInput's foreground
+  cooperative level does; otherwise it answers `DIERR_OTHERAPPHASPRIO`. A device whose window lost
+  the focus reports `DIERR_INPUTLOST` once and is then unacquired (`DIERR_NOTACQUIRED`), so
+  IGraph's recovery works as before.
+- **The keyboard** is SDL's key state, each SDL scancode read as its `DIK_*` code. SDL's scancodes
+  come from the same scan codes as DirectInput's, so the table
+  ([`sdl3_api.cpp`](../src/platform/sdl3/sdl3_api.cpp)) follows the real keys, including Pause
+  and NumLock, which share scan code 0x45. Keypad = and keypad , are their scan codes' (0x59, 0x7e),
+  not the NEC keyboard's codes DirectInput names.
+- **The mouse** is SDL's relative motion since the last read (fractions carried to the next), the
+  wheel in DirectInput's units (120 a notch) and five buttons. An exclusive mouse is SDL's
+  relative mode: the cursor hidden and kept in the window, motion read raw, as with DirectInput.
+- **Key names** (`DIPROP_KEYNAME`) are SDL's for the key on the current keyboard layout.
 
 ## Tests
 

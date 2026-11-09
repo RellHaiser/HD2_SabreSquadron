@@ -99,7 +99,11 @@ public:
     virtual HRESULT SetNotificationPositions(Notify *notify, DWORD count, const DSBPOSITIONNOTIFY *positions) = 0;
 };
 
-// The device in use (the DirectSound backend's, audio/dsound).
+// The device in use: the DirectSound backend's (audio/dsound) unless ChooseDevice picked another.
 extern Device *g_pAudio;
+
+// Sets g_pAudio to the backend LS3DF.ini asks for ([Sound] OpenAL: audio/openal), DirectSound
+// otherwise. The sound driver calls it before it opens the device.
+void ChooseDevice();
 
 }  // namespace ls3d::audio

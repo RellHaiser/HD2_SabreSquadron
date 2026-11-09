@@ -79,7 +79,7 @@ public:
     virtual I3D_material *__stdcall CreateMaterial();                   // 0x58 0x10018ae0
     virtual I3D_anim_material *__stdcall CreateAnimMaterial();          // 0x5C 0x10018b60
     // 0x60 0x10018be0: room for `count` faces (operator new).
-    virtual I3D_triface *__stdcall AllocFaces(int count);
+    virtual I3D_triface *__stdcall CreateTrifaceArray(int count);
     virtual I3D_face_group *__stdcall CreateFaceGroup();                // 0x64 0x10018c00
     virtual I3D_mesh_level *__stdcall CreateMeshLevel();                // 0x68 0x10018c60
     virtual I3D_mesh *__stdcall CreateMesh();                           // 0x6C 0x10018cc0
@@ -100,7 +100,7 @@ public:
     virtual I3D_RESULT __stdcall EnumNamedFrames(I3D_ENUMPROC *proc, void *context);
     // 0x94 0x1001a670: tells the scenes (from the last) that a frame they know goes away, until one
     // takes it (scene slot 0xCC returns 0).
-    virtual void __stdcall FrameReleased(I3D_frame *frame);
+    virtual void __stdcall DeleteFromSceneTickList(I3D_frame *frame);
     // 0x98 / 0x9C 0x1001a6b0 / 0x1001a6c0: removes a frame from the shadows' caster lists / the
     // targets' frame lists.
     virtual void __stdcall RemoveShadowCaster(I3D_frame *frame);
@@ -174,6 +174,9 @@ extern bool g_driverInitialized;
 // The driver's time in ms (0x100be394; Tick advances it).
 extern int g_driverTime;
 inline bool NamesEnabled() { return g_driverStates[DRVSTATE_FRAME_NAMES] != 0; }
+// Lightmap atlases in 32-bit (when the device has A8R8G8B8): driver state DRVSTATE_LM_TRUECOLOR,
+// or always with the port's LS3DF.ini TrueColorLightmaps.
+bool LightmapsTrueColor();
 // A state that holds a float's bits.
 inline float DriverStateFloat(int state)
 {

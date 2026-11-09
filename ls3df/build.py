@@ -29,6 +29,143 @@ IMPORT_DEFS = ["binkw32", "d3d8", "rw_data", "vorbisfile"]
 # Where to look for it: %DLLTOOL%, PATH, then common 32-bit MinGW installs (MSYS2, Nim's own).
 DLLTOOL_PATHS = [r"C:\msys64\mingw32\bin\dlltool.exe", r"C:\mingw32\bin\dlltool.exe",
                  r"C:\nim-2.2.6\dist\mingw32\bin\dlltool.exe"]
+# OpenAL Soft, 32-bit (the sound device's OpenAL backend, docs/sound_device.md): %OPENAL_DIR%, else
+# deps\openal-soft-x86 next to the checkout. Its headers are needed to compile; its library
+# (bin\OpenAL32.dll) is copied next to the DLL and the tests as soft_oal.dll, which the backend loads
+# at run time.
+OPENAL_DIR = os.environ.get("OPENAL_DIR") or os.path.join(os.path.dirname(ROOT), "deps", "openal-soft-x86")
+
+
+def openal_include():
+    inc = os.path.join(OPENAL_DIR, "include")
+    if not os.path.exists(os.path.join(inc, "AL", "alext.h")):
+        sys.exit("OpenAL Soft not found in %s: set OPENAL_DIR to an OpenAL Soft (1.23 or later) 32-bit "
+                 "install or binary release (include\\AL, bin\\OpenAL32.dll); see docs/sound_device.md" % OPENAL_DIR)
+    return inc
+
+
+def copy_openal(folder):
+    """soft_oal.dll into `folder` (from a built install, or a binary release's bin\\Win32)."""
+    for dll in (os.path.join(OPENAL_DIR, "bin", "OpenAL32.dll"), os.path.join(OPENAL_DIR, "bin", "Win32", "soft_oal.dll")):
+        if os.path.exists(dll):
+            shutil.copyfile(dll, os.path.join(folder, "soft_oal.dll"))
+            return
+
+
+# FFmpeg 7.1, 32-bit shared (the video device's FFmpeg backend, docs/video_device.md): %FFMPEG_DIR%,
+# else deps\ffmpeg-x86 next to the checkout. Its headers are needed to compile; its DLLs (bin\*.dll)
+# are copied next to the DLL and the tests, and the backend loads them at run time.
+FFMPEG_DIR = os.environ.get("FFMPEG_DIR") or os.path.join(os.path.dirname(ROOT), "deps", "ffmpeg-x86")
+FFMPEG_DLLS = ["avutil-59.dll", "avcodec-61.dll", "avformat-61.dll", "swscale-8.dll", "swresample-5.dll"]
+
+
+def ffmpeg_include():
+    inc = os.path.join(FFMPEG_DIR, "include")
+    if not os.path.exists(os.path.join(inc, "libavformat", "avformat.h")):
+        sys.exit("FFmpeg not found in %s: set FFMPEG_DIR to a 32-bit FFmpeg 7.1 shared build (include\\lib*, "
+                 "bin\\*.dll); see docs/video_device.md" % FFMPEG_DIR)
+    return inc
+
+
+# SDL 3, 32-bit (the platform's and the input device's SDL3 backends, docs/platform.md): %SDL3_DIR%,
+# else deps\sdl3-x86 next to the checkout. Its headers are needed to compile; its library
+# (bin\SDL3.dll) is copied next to the DLL and the tests, and the backends load it at run time.
+SDL3_DIR = os.environ.get("SDL3_DIR") or os.path.join(os.path.dirname(ROOT), "deps", "sdl3-x86")
+
+
+def sdl3_include():
+    inc = os.path.join(SDL3_DIR, "include")
+    if not os.path.exists(os.path.join(inc, "SDL3", "SDL.h")):
+        sys.exit("SDL3 not found in %s: set SDL3_DIR to a 32-bit SDL 3 install or development release "
+                 "(include\\SDL3, bin\\SDL3.dll); see docs/platform.md" % SDL3_DIR)
+    return inc
+
+
+# The SDL_GPU render backend's shaders (src/gfx/sdlgpu/shaders, docs/render_device.md), compiled by
+# dxc into WORK\generated\sdlgpu_shaders.h: DXIL for Direct3D 12 with the Windows SDK's dxc (it
+# signs them with its dxil.dll), SPIR-V for Vulkan with the Vulkan SDK's (%VULKAN_SDK%). A missing
+# compiler leaves that format out (the backend then offers only the other).
+GENERATED = os.path.join(WORK, "generated")
+SHADERS = os.path.join(SRC, "gfx", "sdlgpu", "shaders")
+SHADER_ENTRIES = [("fixed_function.hlsl", "VSMain", "vs_6_0", "kFixedFunctionVS"),
+                  ("fixed_function.hlsl", "PSMain", "ps_6_0", "kFixedFunctionPS"),
+                  ("present.hlsl", "VSMain", "vs_6_0", "kPresentVS"),
+                  ("present.hlsl", "PSMain", "ps_6_0", "kPresentPS"),
+                  ("occlusion.hlsl", "VSMain", "vs_6_0", "kOcclusionVS"),
+                  ("occlusion.hlsl", "PSOcclusion", "ps_6_0", "kOcclusionPS"),
+                  ("occlusion.hlsl", "PSBlur", "ps_6_0", "kOcclusionBlurPS"),
+                  ("occlusion.hlsl", "PSApply", "ps_6_0", "kOcclusionApplyPS")]
+
+
+def windows_sdk_dxc():
+    root = os.path.join(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"), "Windows Kits", "10", "bin")
+    if not os.path.isdir(root):
+        return None
+    for version in sorted(os.listdir(root), reverse=True):
+        exe = os.path.join(root, version, "x64", "dxc.exe")
+        if os.path.exists(exe):
+            return exe
+    return None
+
+
+def vulkan_sdk_dxc():
+    sdk = os.environ.get("VULKAN_SDK")
+    if not sdk:
+        try:                            # (set by its installer for new sessions only)
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                 r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment")
+            sdk = winreg.QueryValueEx(key, "VULKAN_SDK")[0]
+        except OSError:
+            sdk = None
+    exe = os.path.join(sdk, "Bin", "dxc.exe") if sdk else None
+    return exe if exe and os.path.exists(exe) else None
+
+
+def build_shaders():
+    """WORK/generated/sdlgpu_shaders.h (remade when a shader is newer); False on a compile error."""
+    os.makedirs(GENERATED, exist_ok=True)
+    header = os.path.join(GENERATED, "sdlgpu_shaders.h")
+    sources = [os.path.join(SHADERS, f) for f in os.listdir(SHADERS)] if os.path.isdir(SHADERS) else []
+    newest = max([os.path.getmtime(f) for f in sources + [os.path.abspath(__file__)]] or [0])
+    if os.path.exists(header) and os.path.getmtime(header) >= newest:
+        return True
+    compilers = [("Dxil", windows_sdk_dxc(), []), ("Spirv", vulkan_sdk_dxc(), ["-spirv", "-fspv-target-env=vulkan1.0"])]
+    lines = ["// Generated by build.py from src/gfx/sdlgpu/shaders: do not edit.", "#pragma once", "",
+             "#include <cstddef>", "#include <cstdint>", ""]
+    ok = True
+    for suffix, dxc, extra in compilers:
+        for source, entry, profile, name in SHADER_ENTRIES:
+            data = b""
+            if dxc:
+                out = os.path.join(GENERATED, "%s%s.bin" % (name, suffix))
+                r = subprocess.run([dxc, "-nologo", *extra, "-T", profile, "-E", entry, "-O3", "-Fo", out,
+                                    os.path.join(SHADERS, source)], capture_output=True, text=True)
+                if r.returncode != 0:
+                    print("dxc %s %s:\n%s" % (source, entry, r.stdout + r.stderr))
+                    ok = False
+                    continue
+                data = open(out, "rb").read()
+            lines.append("inline const uint8_t %s%s[] = {%s};" % (
+                name, suffix, ", ".join(str(b) for b in data) if data else "0"))
+            lines.append("inline const size_t %s%sSize = %d;" % (name, suffix, len(data)))
+    # The sources themselves, for the OpenGL driver to compile (a terminating 0).
+    for source, name in (("fixed_function.hlsl", "kFixedFunctionSource"), ("present.hlsl", "kPresentSource"), ("occlusion.hlsl", "kOcclusionSource")):
+        text = open(os.path.join(SHADERS, source), "rb").read().replace(b"\r\n", b"\n") + b"\0"
+        lines.append("inline const char %s[] = {%s};" % (name, ", ".join(str(c) for c in text)))
+    if ok:
+        open(header, "w").write("\n".join(lines) + "\n")
+    return ok
+
+
+def copy_libraries(folder):
+    """The run-time libraries of the optional backends (OpenAL Soft, FFmpeg, SDL3) into `folder`."""
+    copy_openal(folder)
+    dlls = [os.path.join(FFMPEG_DIR, "bin", name) for name in FFMPEG_DLLS]
+    dlls += [os.path.join(SDL3_DIR, "bin", "SDL3.dll"), os.path.join(SDL3_DIR, "lib", "x86", "SDL3.dll")]
+    for dll in dlls:
+        if os.path.exists(dll):
+            shutil.copyfile(dll, os.path.join(folder, os.path.basename(dll)))
 
 
 def sources(only=None):
@@ -82,7 +219,8 @@ def cflags(debug):
             "/D_CRT_SECURE_NO_WARNINGS", "/DWIN32_LEAN_AND_MEAN", "/DNOMINMAX", "/DLS3D_API=", "/Zi",
             "/Od" if debug else "/O2", "/DNDEBUG" if not debug else "/D_DEBUG",
             "/wd4100",                      # unreferenced parameters (interface methods)
-            "/I" + SRC, "/I" + os.path.join(ROOT, "include")]
+            "/I" + SRC, "/I" + os.path.join(ROOT, "include"), "/I" + openal_include(), "/I" + ffmpeg_include(),
+            "/I" + sdl3_include(), "/I" + GENERATED]
 
 
 # The device seams (docs/render_device.md, sound_device.md, input_device.md, video_device.md): only a
@@ -95,6 +233,15 @@ SEAMS = [
     ("the DirectSound backend", ("dx/", "audio/dsound/"),
      re.compile(r'#include <dsound\.h>|#include "audio/dsound/|\bIDirectSound\w*|\bIKsPropertySet\b|'
                 r'\bLPDIRECTSOUND\w*|\bDirectSound(Create8|Enumerate\w*)\b')),
+    ("the OpenAL backend", ("audio/openal/",),
+     re.compile(r'#include <AL/|#include "audio/openal/|\balc?[A-Z]\w*\s*\(|\bEAX(Set|Get)\b')),
+    ("the FFmpeg backend", ("video/ffmpeg/",),
+     re.compile(r'#include <lib(avcodec|avformat|avutil|swscale|swresample)/|#include "video/ffmpeg/|'
+                r'\b(av|avcodec|avformat|sws|swr)_\w+\s*\(|\bAV[A-Z][A-Za-z]+\b')),
+    ("the SDL3 backends", ("platform/sdl3/", "input/sdl3/", "gfx/sdlgpu/", "gfx/fixed/", "gfx/opengl/"),
+     re.compile(r'#include <SDL3/|#include "platform/sdl3/|\bSDL_[A-Za-z]\w*\s*\(')),
+    ("the OpenGL backend", ("gfx/opengl/",),
+     re.compile(r'#include "gfx/opengl/gfx|\bgl[A-Z]\w*\s*\(')),
     ("the DirectInput backend", ("dx/", "input/dinput/"),
      re.compile(r'#include <dinput\.h>|#include "input/dinput/|\bIDirectInput\w*|\bLPDIRECTINPUT\w*|'
                 r'\bDirectInput8Create\b')),
@@ -151,6 +298,9 @@ def compile_one(src, debug):
 
 def compile_all(debug, only=None):
     os.makedirs(os.path.join(WORK, "obj"), exist_ok=True)
+    if not build_shaders():
+        print("shaders: ERRORS")
+        return False, []
     srcs = sources(only)
     ok = True
     objs = []
@@ -197,6 +347,7 @@ def link(objs, debug):
     for name in ("LS3DF.dll", "LS3DF.lib", "LS3DF.pdb"):
         if os.path.exists(os.path.join(WORK, name)):
             shutil.copyfile(os.path.join(WORK, name), os.path.join(out, name))
+    copy_libraries(out)
     print("link: ok ->", os.path.join(out, "LS3DF.dll"))
     return True
 
@@ -215,7 +366,7 @@ def test_directives(path):
 
 
 def build_tests(debug, only=None):
-    ok = True
+    ok = build_shaders()
     tdir = os.path.join(ROOT, "tests")
     out = os.path.join(ROOT, "build")
     os.makedirs(out, exist_ok=True)
@@ -245,6 +396,7 @@ def build_tests(debug, only=None):
             shutil.copyfile(exe, os.path.join(out, f[:-4] + ".exe"))
         ok &= r.returncode == 0
         print("test %s: %s" % (f, "ok" if r.returncode == 0 else "FAILED"))
+    copy_libraries(out)
     return ok
 
 
