@@ -41,6 +41,7 @@ public:
     int GetHandle() const { return m_handle; }
     bool Read(void *buffer, int size);             // 0x00405940
     template <typename T> bool Read(T &value) { return Read(&value, sizeof(T)); }
+    template <typename T> T ReadAndAscend() { T value{}; Read(value); Ascend(); return value; }   // 0x0055fe60 (DS 0x0055cec0), for an S_vector
     // Reads the remainder of the current chunk as a string (at most bufferSize-1 chars).
     // (0x00415d00 reads up to 999 chars into a C_str and ascends.)
     bool ReadString(char *buffer, int bufferSize);

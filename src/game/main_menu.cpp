@@ -3415,3 +3415,17 @@ bool C_MainMenu::OnAddServerButton(void *menu, void *, C_Control *control, uint3
     self->m_step = BROWSER_IDLE;
     return true;
 }
+
+// Random letters (`minLength`..`maxLength` of them, both under 100, from 65 up over 57 codes); the text is static.
+const char *RandomLetters(int minLength, int maxLength)     // 0x00636b80 (DS 0x0066a310)
+{
+    static char s_text[100];
+    if (minLength < 100 && maxLength < 100) {
+        const float toUnit = 3.0518509e-05f;              // 1 / RAND_MAX
+        const int count = static_cast<int>(static_cast<double>(std::rand()) * toUnit * (maxLength - minLength) + minLength);
+        for (int i = 0; i < count; ++i)
+            s_text[i] = static_cast<char>(static_cast<int>(static_cast<double>(std::rand()) * toUnit * 57.0f + 65.0f));
+        s_text[count] = 0;
+    }
+    return s_text;
+}
