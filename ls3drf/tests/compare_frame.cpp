@@ -16,7 +16,7 @@
 // as (sector, index), strings by content), and so must the name trees, the target lists and the
 // scene rings.
 //
-// LS3DRF has no portal SetScene or MatrixChanged (ADR-0051): the portals' world values and scenes
+// LS3DRF has no portal SetScene or MatrixChanged: the portals' world values and scenes
 // stay as made, in both.
 //
 // The original's FreeGeometry (0x100293f0) keeps the plane count (the port fixes it): the test clears
