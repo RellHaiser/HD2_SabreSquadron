@@ -712,6 +712,8 @@ public:
     void ClearRoute();                                  // 0x0057f7d0 (DS 0x00584a10)
     // Moves the first waypoint here once the human has passed it towards the second.
     void SkipPassedWaypoint();                          // 0x0057b1b0 (DS 0x0057f1d0)
+    // Turns to face from `from` to `to`, level unless the body is in work state 5.
+    void FaceTowards(const S_vector4 &from, const S_vector4 &to);   // 0x00570ac0 (DS 0x005722b0)
 
 protected:
     // --- senses (ai_senses.cpp) ----------------------------------------------------------

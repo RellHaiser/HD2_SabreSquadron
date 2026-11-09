@@ -700,3 +700,13 @@ void C_AIController::GetWeaponPos(S_vector4 *pos) const
     pos->z = m.m[3][2];
     pos->w = m.m[3][3];
 }
+
+void C_AIController::FaceTowards(const S_vector4 &from, const S_vector4 &to)
+{
+    const bool level = !m_human->IsBodyWorkState5();
+    S_vector dir(to.x - from.x, level ? 0.0f : to.y - from.y, to.z - from.z);
+    dir.Normalize();
+    m_facingDir.x = dir.x;
+    m_facingDir.y = dir.y;
+    m_facingDir.z = dir.z;
+}

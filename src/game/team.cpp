@@ -1099,3 +1099,18 @@ void C_TeamManager::DestroyFormation(C_Formation *formation)   // 0x00461390
         m_formations.pop_back();
     }
 }
+
+bool C_CoopTeam::HasItem(int itemId) const
+{
+    for (int i = GetMemberCount(); i-- > 0;) {
+        const C_Human *member = GetMember(i);
+        if (member->IsAlive() && member->FindItem(itemId))
+            return true;
+    }
+    return false;
+}
+
+void PrintEnemyKilled(const C_Human *killer)            // 0x0045e8a0 (DS 0x00479b80)
+{
+    GetGame()->PrintColored(S_vector(1.0f, 0.0f, 0.0f), "%s killed an enemy soldier!!!", killer->GetFullName());
+}

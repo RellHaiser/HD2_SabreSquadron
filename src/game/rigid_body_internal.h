@@ -48,6 +48,35 @@ inline float DotZYX(const S_vector &a, const S_vector &b)
     return (a.z * b.z + a.y * b.y) + a.x * b.x;
 }
 
+// The other small vector operations the game has out of line.
+inline void MulAssign(S_vector &a, const S_vector &b)   // 0x004cd4f0 (DS 0x004b8fa0)
+{
+    a.x = b.x * a.x;
+    a.y = b.y * a.y;
+    a.z = b.z * a.z;
+}
+
+inline void AddAssign(S_vector &a, const S_vector &b)   // 0x004cd520 (DS 0x004b8fe0)
+{
+    a.x = b.x + a.x;
+    a.y = b.y + a.y;
+    a.z = b.z + a.z;
+}
+
+inline void SubAssign(S_vector &a, const S_vector &b)   // 0x004ce5c0 (DS 0x004ba4d0)
+{
+    a.x = a.x - b.x;
+    a.y = a.y - b.y;
+    a.z = a.z - b.z;
+}
+
+inline void NegateVector(S_vector &a)                   // 0x00454680 (DS 0x00627b10)
+{
+    a.x = -a.x;
+    a.y = -a.y;
+    a.z = -a.z;
+}
+
 inline S_vector4 Row(const S_matrix &m, int row)
 {
     return {m.m[row][0], m.m[row][1], m.m[row][2], m.m[row][3]};

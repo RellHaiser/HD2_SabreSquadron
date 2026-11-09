@@ -29,6 +29,8 @@ public:
     // the seats is killed (an explosion's hit at the weapon).
     void SetState(int state);                           // 0x006059b0
     int GetState() const { return m_state; }            // +0x2F0
+    // The exit point; without one, a metre behind the weapon (`w` left alone).
+    void GetExitPosUnused(S_vector4 *out) const;        // 0x006056d0 (DS 0x0062c810)
 
     int GetHitPoints() override { return 100; }         // 0x10 0x00602f60
     // The messages (network games), the seat weapon; manned, the model's animation and the box.
