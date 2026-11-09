@@ -1,0 +1,5 @@
+; Import library source for DINPUT.dll (DirectInput 7), which the Windows SDK no longer ships an
+; import library for. build.py turns this into build/dinput.lib with MinGW dlltool --kill-at.
+LIBRARY DINPUT.dll
+EXPORTS
+    DirectInputCreateEx@20

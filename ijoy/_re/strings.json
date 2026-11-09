@@ -1,0 +1,638 @@
+{
+ "program": "IJoy.dll",
+ "strings": [
+  {
+   "address": "1000d566",
+   "value": "GAIsProcessorFeaturePresent",
+   "length": 27
+  },
+  {
+   "address": "1000d584",
+   "value": "KERNEL32",
+   "length": 8
+  },
+  {
+   "address": "1000d590",
+   "value": "e+000",
+   "length": 5
+  },
+  {
+   "address": "1000d598",
+   "value": "runtime error ",
+   "length": 14
+  },
+  {
+   "address": "1000d5ac",
+   "value": "TLOSS error\r\n",
+   "length": 13
+  },
+  {
+   "address": "1000d5bc",
+   "value": "SING error\r\n",
+   "length": 12
+  },
+  {
+   "address": "1000d5cc",
+   "value": "DOMAIN error\r\n",
+   "length": 14
+  },
+  {
+   "address": "1000d5dc",
+   "value": "R6028\r\n- unable to initialize heap\r\n",
+   "length": 36
+  },
+  {
+   "address": "1000d604",
+   "value": "R6027\r\n- not enough space for lowio initialization\r\n",
+   "length": 52
+  },
+  {
+   "address": "1000d63c",
+   "value": "R6026\r\n- not enough space for stdio initialization\r\n",
+   "length": 52
+  },
+  {
+   "address": "1000d674",
+   "value": "R6025\r\n- pure virtual function call\r\n",
+   "length": 37
+  },
+  {
+   "address": "1000d69c",
+   "value": "R6024\r\n- not enough space for _onexit/atexit table\r\n",
+   "length": 52
+  },
+  {
+   "address": "1000d6d4",
+   "value": "R6019\r\n- unable to open console device\r\n",
+   "length": 40
+  },
+  {
+   "address": "1000d700",
+   "value": "R6018\r\n- unexpected heap error\r\n",
+   "length": 32
+  },
+  {
+   "address": "1000d724",
+   "value": "R6017\r\n- unexpected multithread lock error\r\n",
+   "length": 44
+  },
+  {
+   "address": "1000d754",
+   "value": "R6016\r\n- not enough space for thread data\r\n",
+   "length": 43
+  },
+  {
+   "address": "1000d780",
+   "value": "\r\nabnormal program termination\r\n",
+   "length": 32
+  },
+  {
+   "address": "1000d7a4",
+   "value": "R6009\r\n- not enough space for environment\r\n",
+   "length": 43
+  },
+  {
+   "address": "1000d7d0",
+   "value": "R6008\r\n- not enough space for arguments\r\n",
+   "length": 41
+  },
+  {
+   "address": "1000d7fc",
+   "value": "R6002\r\n- floating point not loaded\r\n",
+   "length": 36
+  },
+  {
+   "address": "1000d824",
+   "value": "Microsoft Visual C++ Runtime Library",
+   "length": 36
+  },
+  {
+   "address": "1000d850",
+   "value": "Runtime Error!\n\nProgram: ",
+   "length": 25
+  },
+  {
+   "address": "1000d870",
+   "value": "<program name unknown>",
+   "length": 22
+  },
+  {
+   "address": "1000d888",
+   "value": "GetLastActivePopup",
+   "length": 18
+  },
+  {
+   "address": "1000d89c",
+   "value": "GetActiveWindow",
+   "length": 15
+  },
+  {
+   "address": "1000d8ac",
+   "value": "MessageBoxA",
+   "length": 11
+  },
+  {
+   "address": "1000d8b8",
+   "value": "user32.dll",
+   "length": 10
+  },
+  {
+   "address": "1000d8f8",
+   "value": "1#QNAN",
+   "length": 6
+  },
+  {
+   "address": "1000d900",
+   "value": "1#INF",
+   "length": 5
+  },
+  {
+   "address": "1000d908",
+   "value": "1#IND",
+   "length": 5
+  },
+  {
+   "address": "1000d910",
+   "value": "1#SNAN",
+   "length": 6
+  },
+  {
+   "address": "1000d918",
+   "value": "H:mm:ss",
+   "length": 7
+  },
+  {
+   "address": "1000d920",
+   "value": "dddd, MMMM dd, yyyy",
+   "length": 19
+  },
+  {
+   "address": "1000d934",
+   "value": "M/d/yy",
+   "length": 6
+  },
+  {
+   "address": "1000d944",
+   "value": "December",
+   "length": 8
+  },
+  {
+   "address": "1000d950",
+   "value": "November",
+   "length": 8
+  },
+  {
+   "address": "1000d95c",
+   "value": "October",
+   "length": 7
+  },
+  {
+   "address": "1000d964",
+   "value": "September",
+   "length": 9
+  },
+  {
+   "address": "1000d970",
+   "value": "August",
+   "length": 6
+  },
+  {
+   "address": "1000d988",
+   "value": "April",
+   "length": 5
+  },
+  {
+   "address": "1000d990",
+   "value": "March",
+   "length": 5
+  },
+  {
+   "address": "1000d998",
+   "value": "February",
+   "length": 8
+  },
+  {
+   "address": "1000d9a4",
+   "value": "January",
+   "length": 7
+  },
+  {
+   "address": "1000d9dc",
+   "value": "Saturday",
+   "length": 8
+  },
+  {
+   "address": "1000d9e8",
+   "value": "Friday",
+   "length": 6
+  },
+  {
+   "address": "1000d9f0",
+   "value": "Thursday",
+   "length": 8
+  },
+  {
+   "address": "1000d9fc",
+   "value": "Wednesday",
+   "length": 9
+  },
+  {
+   "address": "1000da08",
+   "value": "Tuesday",
+   "length": 7
+  },
+  {
+   "address": "1000da10",
+   "value": "Monday",
+   "length": 6
+  },
+  {
+   "address": "1000da18",
+   "value": "Sunday",
+   "length": 6
+  },
+  {
+   "address": "1000da3c",
+   "value": "SunMonTueWedThuFriSat",
+   "length": 21
+  },
+  {
+   "address": "1000da54",
+   "value": "JanFebMarAprMayJunJulAugSepOctNovDec",
+   "length": 36
+  },
+  {
+   "address": "1000dd1a",
+   "value": "Sleep",
+   "length": 5
+  },
+  {
+   "address": "1000dd22",
+   "value": "OutputDebugStringA",
+   "length": 18
+  },
+  {
+   "address": "1000dd38",
+   "value": "lstrlenA",
+   "length": 8
+  },
+  {
+   "address": "1000dd44",
+   "value": "lstrcatA",
+   "length": 8
+  },
+  {
+   "address": "1000dd4e",
+   "value": "KERNEL32.dll",
+   "length": 12
+  },
+  {
+   "address": "1000dd5e",
+   "value": "MessageBoxA",
+   "length": 11
+  },
+  {
+   "address": "1000dd6c",
+   "value": "MessageBeep",
+   "length": 11
+  },
+  {
+   "address": "1000dd7a",
+   "value": "wsprintfA",
+   "length": 9
+  },
+  {
+   "address": "1000dd84",
+   "value": "USER32.dll",
+   "length": 10
+  },
+  {
+   "address": "1000dd92",
+   "value": "DirectInputCreateEx",
+   "length": 19
+  },
+  {
+   "address": "1000dda6",
+   "value": "DINPUT.dll",
+   "length": 10
+  },
+  {
+   "address": "1000ddb4",
+   "value": "RtlUnwind",
+   "length": 9
+  },
+  {
+   "address": "1000ddc0",
+   "value": "GetCommandLineA",
+   "length": 15
+  },
+  {
+   "address": "1000ddd2",
+   "value": "GetVersion",
+   "length": 10
+  },
+  {
+   "address": "1000dde0",
+   "value": "ExitProcess",
+   "length": 11
+  },
+  {
+   "address": "1000ddee",
+   "value": "TerminateProcess",
+   "length": 16
+  },
+  {
+   "address": "1000de02",
+   "value": "GetCurrentProcess",
+   "length": 17
+  },
+  {
+   "address": "1000de16",
+   "value": "HeapReAlloc",
+   "length": 11
+  },
+  {
+   "address": "1000de24",
+   "value": "HeapAlloc",
+   "length": 9
+  },
+  {
+   "address": "1000de30",
+   "value": "HeapSize",
+   "length": 8
+  },
+  {
+   "address": "1000de3c",
+   "value": "GetCurrentThreadId",
+   "length": 18
+  },
+  {
+   "address": "1000de52",
+   "value": "TlsSetValue",
+   "length": 11
+  },
+  {
+   "address": "1000de60",
+   "value": "TlsAlloc",
+   "length": 8
+  },
+  {
+   "address": "1000de6c",
+   "value": "TlsFree",
+   "length": 7
+  },
+  {
+   "address": "1000de76",
+   "value": "SetLastError",
+   "length": 12
+  },
+  {
+   "address": "1000de86",
+   "value": "TlsGetValue",
+   "length": 11
+  },
+  {
+   "address": "1000de94",
+   "value": "GetLastError",
+   "length": 12
+  },
+  {
+   "address": "1000dea4",
+   "value": "HeapFree",
+   "length": 8
+  },
+  {
+   "address": "1000deb0",
+   "value": "GetProcAddress",
+   "length": 14
+  },
+  {
+   "address": "1000dec2",
+   "value": "GetModuleHandleA",
+   "length": 16
+  },
+  {
+   "address": "1000ded6",
+   "value": "SetHandleCount",
+   "length": 14
+  },
+  {
+   "address": "1000dee8",
+   "value": "GetStdHandle",
+   "length": 12
+  },
+  {
+   "address": "1000def8",
+   "value": "GetFileType",
+   "length": 11
+  },
+  {
+   "address": "1000df06",
+   "value": "GetStartupInfoA",
+   "length": 15
+  },
+  {
+   "address": "1000df18",
+   "value": "DeleteCriticalSection",
+   "length": 21
+  },
+  {
+   "address": "1000df30",
+   "value": "GetModuleFileNameA",
+   "length": 18
+  },
+  {
+   "address": "1000df46",
+   "value": "FreeEnvironmentStringsA",
+   "length": 23
+  },
+  {
+   "address": "1000df60",
+   "value": "FreeEnvironmentStringsW",
+   "length": 23
+  },
+  {
+   "address": "1000df7a",
+   "value": "WideCharToMultiByte",
+   "length": 19
+  },
+  {
+   "address": "1000df90",
+   "value": "GetEnvironmentStrings",
+   "length": 21
+  },
+  {
+   "address": "1000dfa8",
+   "value": "GetEnvironmentStringsW",
+   "length": 22
+  },
+  {
+   "address": "1000dfc2",
+   "value": "HeapDestroy",
+   "length": 11
+  },
+  {
+   "address": "1000dfd0",
+   "value": "HeapCreate",
+   "length": 10
+  },
+  {
+   "address": "1000dfde",
+   "value": "VirtualFree",
+   "length": 11
+  },
+  {
+   "address": "1000dfec",
+   "value": "WriteFile",
+   "length": 9
+  },
+  {
+   "address": "1000dff8",
+   "value": "InitializeCriticalSection",
+   "length": 25
+  },
+  {
+   "address": "1000e014",
+   "value": "EnterCriticalSection",
+   "length": 20
+  },
+  {
+   "address": "1000e02c",
+   "value": "LeaveCriticalSection",
+   "length": 20
+  },
+  {
+   "address": "1000e044",
+   "value": "VirtualAlloc",
+   "length": 12
+  },
+  {
+   "address": "1000e054",
+   "value": "IsBadWritePtr",
+   "length": 13
+  },
+  {
+   "address": "1000e064",
+   "value": "SetUnhandledExceptionFilter",
+   "length": 27
+  },
+  {
+   "address": "1000e082",
+   "value": "IsBadReadPtr",
+   "length": 12
+  },
+  {
+   "address": "1000e092",
+   "value": "IsBadCodePtr",
+   "length": 12
+  },
+  {
+   "address": "1000e0a2",
+   "value": "InterlockedDecrement",
+   "length": 20
+  },
+  {
+   "address": "1000e0ba",
+   "value": "InterlockedIncrement",
+   "length": 20
+  },
+  {
+   "address": "1000e0d2",
+   "value": "GetCPInfo",
+   "length": 9
+  },
+  {
+   "address": "1000e0de",
+   "value": "GetACP",
+   "length": 6
+  },
+  {
+   "address": "1000e0e8",
+   "value": "GetOEMCP",
+   "length": 8
+  },
+  {
+   "address": "1000e0f4",
+   "value": "LoadLibraryA",
+   "length": 12
+  },
+  {
+   "address": "1000e104",
+   "value": "MultiByteToWideChar",
+   "length": 19
+  },
+  {
+   "address": "1000e11a",
+   "value": "GetStringTypeA",
+   "length": 14
+  },
+  {
+   "address": "1000e12c",
+   "value": "GetStringTypeW",
+   "length": 14
+  },
+  {
+   "address": "1000e13e",
+   "value": "LCMapStringA",
+   "length": 12
+  },
+  {
+   "address": "1000e14e",
+   "value": "LCMapStringW",
+   "length": 12
+  },
+  {
+   "address": "1000e192",
+   "value": "IJoy.dll",
+   "length": 8
+  },
+  {
+   "address": "1000e19b",
+   "value": "_CreateJoyBase@20",
+   "length": 17
+  },
+  {
+   "address": "1000f040",
+   "value": "Failed to create device.\n",
+   "length": 25
+  },
+  {
+   "address": "1000f05c",
+   "value": "JoyBase error message",
+   "length": 21
+  },
+  {
+   "address": "1000f074",
+   "value": "Not released:  %d  Effect(s).\n",
+   "length": 30
+  },
+  {
+   "address": "1000f094",
+   "value": "Not released:  %d  reference(s) of Effect.\n",
+   "length": 43
+  },
+  {
+   "address": "1000f0c0",
+   "value": "Not released:  %d  Joy(s).\n",
+   "length": 27
+  },
+  {
+   "address": "1000f0dc",
+   "value": "Not released:  %d  reference(s) of Joy.\n",
+   "length": 40
+  },
+  {
+   "address": "1000f108",
+   "value": "Not released:  %d  JoyBase(s).\n",
+   "length": 31
+  },
+  {
+   "address": "1000f128",
+   "value": "Not released:  %d  reference(s) of JoyBase.\n",
+   "length": 44
+  }
+ ],
+ "count": 126,
+ "offset": 0,
+ "total": 126
+}
