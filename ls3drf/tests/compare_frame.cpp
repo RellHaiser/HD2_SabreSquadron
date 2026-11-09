@@ -19,9 +19,8 @@
 // LS3DRF has no portal SetScene or MatrixChanged (ADR-0051): the portals' world values and scenes
 // stay as made, in both.
 //
-// The original's RebalanceNameTree leaves the left link of the last frame of a run of equal
-// names as it was (frame.cpp fixes it); the test clears those links in the original after each of
-// its rebalances.
+// The original's FreeGeometry (0x100293f0) keeps the plane count (the port fixes it): the test clears
+// the count after each of the original's FreeGeometry calls.
 //
 // Magnitudes stay realistic (local scales 0.1 - 10, hierarchies of at most 5 levels, positions
 // within 1e4): the x87 keeps its 15-bit exponent in registers under the 24-bit precision control,
@@ -797,22 +796,6 @@ void CompareAll()
     }
 }
 
-// After the original's RebalanceNameTree: the left links its build leaves stale (see the top).
-void ClearStaleChainLinks(uint8_t *node)
-{
-    if (!node)
-        return;
-    uint8_t *right = Field<uint8_t *>(node, 0x118);
-    const char *a = Field<const char *>(node, 0xE8);
-    if (right) {
-        const char *b = Field<const char *>(right, 0xE8);
-        if (!std::strcmp(a ? a : "", b ? b : ""))
-            Field<void *>(right, 0x114) = nullptr;
-    }
-    ClearStaleChainLinks(Field<uint8_t *>(node, 0x114));
-    ClearStaleChainLinks(right);
-}
-
 // ---------------------------------------------------------------- random data
 
 std::mt19937 g_rng;
@@ -1368,16 +1351,10 @@ void RunOp()
         const char *n = RandName();
         std::snprintf(text, sizeof text, "SetName %s", n ? n : "(null)");
         g_lastOp = text;
-        const int before = Orig<int>(0x10045eb4);
         const I3D_RESULT ro = CallV<I3D_RESULT>(o, 0x34, n);
         const I3D_RESULT rp = p->SetName(n);
         if (ro != rp)
             Fail("SetName result", i);
-        const int after = Orig<int>(0x10045eb4);
-        for (int c = before + 1; c <= after; ++c) {
-            if ((c & 0x7ff) == 0x400)
-                ClearStaleChainLinks(Orig<uint8_t *>(0x10045c68));
-        }
         break;
     }
     case 17: {
@@ -1550,7 +1527,6 @@ void RunOp()
     case 29:
         g_lastOp = "driver RebalanceNameTree";
         CallV<void>(g_origDriver, 0x5C);
-        ClearStaleChainLinks(Orig<uint8_t *>(0x10045c68));
         g_driver->RebalanceNameTree();
         break;
     case 30:
