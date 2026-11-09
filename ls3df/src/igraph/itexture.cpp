@@ -97,8 +97,8 @@ void FitTextureSize(uint16_t width, uint16_t height, uint32_t flags, uint16_t *o
 }
 
 // The name of a texture's cache file: the source path without its extension, the opacity map's
-// name (DXT3), the level count, 'L' for ITC_HALF, 'G' for the port's improved mip levels, 'K' for those
-// of ITC_KEY_MIPS and ".DX<kind>" / ".565" / ".555".
+// name (DXT3), the level count, 'L' for ITC_HALF, 'A' and 'G' for the port's improved mip levels of a colour
+// key that blends, 'G' for those of any other, 'K' after it for ITC_KEY_MIPS, and ".DX<kind>" / ".565" / ".555".
 void CacheFileName(const ITexture *texture, const char *fileName, const char *alphaFileName, int kind,
                    bool dxt, char *out)
 {
@@ -115,6 +115,11 @@ void CacheFileName(const ITexture *texture, const char *fileName, const char *al
     if (texture->flags & ITC_HALF)
         std::strcat(buf, "L");
     // (Port enhancement: levels from tex::DownsampleMip are cached apart from the original's.)
+    // ('A': such levels once had their alpha scaled down, which made them fade with distance; the old
+    // files are not read.)
+    if (Enhancements().mipmaps && texture->levels > 1 && (texture->flags & ITC_ALPHA_1BIT) &&
+        !(texture->flags & ITC_KEY_MIPS))
+        std::strcat(buf, "A");
     if (Enhancements().mipmaps && texture->levels > 1)
         std::strcat(buf, "G");
     if ((texture->flags & ITC_KEY_MIPS) && texture->levels > 1)
@@ -1233,17 +1238,17 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
         }
         std::memset(next, 0, static_cast<size_t>(width) * height * 2);
     }
-    // (Port enhancement, LS3DF.ini ImprovedMipmaps: the levels from tex::DownsampleMip; those of
-    // a colour-keyed texture, drawn alpha-tested, uploaded with their alpha rescaled to level 0's
-    // coverage at IGraph's reference, from a copy: the next level is made from the unscaled one.)
+    // (Port enhancement, LS3DF.ini ImprovedMipmaps: the levels from tex::DownsampleMip.
+    // A colour key with mip levels is drawn blended (I3D_material::TextureFlags), so its levels keep the
+    // averaged alpha: the alpha is how opaque it is drawn. Scaled to keep the coverage of an alpha test,
+    // they faded as the camera went away: a flag drawn opaque was a quarter opaque one level down.
+    // LS3DF.ini ColorKeyMipmaps: those drawn alpha-tested instead are uploaded on or off with level 0's
+    // coverage, from a copy: the next level is made from the unscaled one. Level 0's alpha is on or off,
+    // so any reference gives its coverage, and the levels do the same: a mission's reference is set
+    // after its textures load.)
     const bool improvedMips = Enhancements().mipmaps && cur;
-    // (LS3DF.ini ColorKeyMipmaps: level 0's alpha is on or off, so any reference gives its coverage, and
-    // the levels stay on or off to do the same: a mission's reference is set after its textures load.)
     const bool keyMips = improvedMips && (flags & ITC_KEY_MIPS) && (flags & ITC_ALPHA_1BIT);
-    const int coverageRef = keyMips ? 128
-                            : improvedMips && (flags & ITC_ALPHA_1BIT) && g_rs.alphaRef > 0
-                                ? (g_rs.alphaRef < 255 ? g_rs.alphaRef : 255)
-                                : 0;
+    const int coverageRef = keyMips ? 128 : 0;
     const double coverage = coverageRef ? tex::AlphaCoverage(pixels, width, height, coverageRef) : 0.0;
     uint8_t *scaled = nullptr;
     if (coverageRef) {
@@ -1292,10 +1297,7 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
                 image = next;
                 if (scaled) {
                     std::memcpy(scaled, next, static_cast<size_t>(levelW) * levelH * 4);
-                    if (keyMips)
-                        tex::BinaryAlphaToCoverage(scaled, levelW, levelH, coverage);
-                    else
-                        tex::ScaleAlphaToCoverage(scaled, levelW, levelH, coverageRef, coverage);
+                    tex::BinaryAlphaToCoverage(scaled, levelW, levelH, coverage);
                     image = scaled;
                 }
             }

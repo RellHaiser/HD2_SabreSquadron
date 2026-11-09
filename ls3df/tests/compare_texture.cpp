@@ -328,15 +328,15 @@ S_result Capture(HRESULT hr, const uint8_t *object)
 }
 
 // The levels below level 0 that the port's ImprovedMipmaps makes of a 32-bit image: the
-// DownsampleMip chain (a colour-keyed texture's uploaded with the alpha rescaled to the image's
-// coverage at IGraph's alpha reference), in `format` as Create writes them (the texture's
-// ITC_DITHER).
+// DownsampleMip chain, its alpha averaged (a colour key with mip levels is drawn blended; only
+// ColorKeyMipmaps' ITC_KEY_MIPS levels are uploaded on or off), in `format` as Create writes them (the
+// texture's ITC_DITHER).
 std::vector<std::vector<uint8_t>> ExpectedMips(const uint8_t *bgra, int width, int height, size_t levels,
                                                uint32_t flags, D3DFORMAT format, const ITexture *texture)
 {
     std::vector<std::vector<uint8_t>> out;
-    const int ref = (flags & ITC_ALPHA_1BIT) ? ls3d::ig::g_rs.alphaRef : 0;
-    const double coverage = ref ? ls3d::tex::AlphaCoverage(bgra, width, height, ref) : 0.0;
+    const bool key = (flags & ITC_ALPHA_1BIT) && (flags & ITC_KEY_MIPS);
+    const double coverage = key ? ls3d::tex::AlphaCoverage(bgra, width, height, 128) : 0.0;
     std::vector<uint8_t> cur(bgra, bgra + size_t(width) * height * 4), next;
     for (size_t l = 1; l < levels; ++l) {
         const int w = width > 1 ? width >> 1 : 1, h = height > 1 ? height >> 1 : 1;
@@ -346,8 +346,8 @@ std::vector<std::vector<uint8_t>> ExpectedMips(const uint8_t *bgra, int width, i
         width = w;
         height = h;
         std::vector<uint8_t> level = cur;
-        if (ref)
-            ls3d::tex::ScaleAlphaToCoverage(level.data(), w, h, ref, coverage);
+        if (key)
+            ls3d::tex::BinaryAlphaToCoverage(level.data(), w, h, coverage);
         if (format == D3DFMT_A8R8G8B8) {
             out.push_back(level);
         } else {

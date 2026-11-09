@@ -55,11 +55,12 @@ down at every step and averages gamma-encoded values:
   first level and 47% at 1 × 1; the new filter stays within half an 8-bit step.
 - Colours are averaged in linear light (gamma-correct) and weighted by alpha, so colour-key
   edges no longer pick up the transparent colour (black fringes around foliage).
-- Colour-keyed (alpha-tested) textures keep their coverage at each level. With the original's filter
-  and the engine's alpha reference (0x20), foliage fattens with distance: 30% leaf coverage became
-  100%.
-- These textures get their own cache files (a `G` before the extension), so old cache files are
-  never used for them.
+- A colour-keyed texture with mip levels is drawn blended, so its levels keep the averaged alpha, which is how
+  opaque they are drawn. (Until November 2026 they were scaled to keep the coverage of an alpha test, and
+  such textures, such as a flag or camouflage netting, faded as the camera went away.) Colour keys drawn
+  alpha-tested get on/off levels with `ColorKeyMipmaps` (below).
+- These textures get their own cache files (a `G` before the extension; `AG` for blended colour keys), so old
+  cache files are never used for them.
 
 **ColorKeyMipmaps** is for leaves, fences and the like whose material does not ask for mip maps. Each pixel of
 such a texture far away samples a tiny, nearly random spot of it, leaf or gap, that changes as the camera moves.
