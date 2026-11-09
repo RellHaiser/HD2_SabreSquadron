@@ -1,48 +1,23 @@
 // Differential test of the I3D_frame base (src/i3d/frame.cpp) and the driver's frame services
 // (driver_frames.cpp) with the simple frame types (user, dummy, target, volume, camera, light,
-// sector and its portals, occluder, area, model): the original
-// LS3DF.dll's frames (made by its driver) and the port's run the same random operations - world /
-// local transform setters, LinkTo with every flag, Update, UpdateBound, names (the name tree,
-// prefixes, FindChildFrame, EnumFrames, the driver's FindFrame / EnumNamedFrames /
-// RebalanceNameTree), user properties, Duplicate, Release and reuse, targets and the frames
-// following them, dummy boxes, volume types, camera projections and frustums, the lights' settings
-// and Direct3D lights (each side on its own fake device, the LightEnable calls compared), the
+// sector and its portals, occluder, area, model): the original LS3DRF.dll's frames (made by its
+// driver) and the port's run the same random operations - world / local transform setters, LinkTo
+// with every flag, Update, UpdateBound, names (the name tree, prefixes, FindChildFrame, EnumFrames,
+// the driver's FindFrame / EnumNamedFrames / RebalanceNameTree), user properties, Duplicate,
+// Release and reuse, targets and the frames following them, dummy boxes, volume types, camera
+// projections and frustums, the lights' settings and the block LS3DRF keeps of them (+0x1F0), the
 // sectors' geometry (hull planes, portals; made in both with each side's allocators), lights,
 // environments, inside tests and their scene rings (two zeroed blocks per side stand in for
-// scenes), the occluders' meshes and their sectors, the areas' meshes, inside tests and
-// scene ring (their sounds wait for the sound frame's port), and the models' animation: each model
-// owns three named frames of its own (frames 40 - 51, not chosen by the other operations), plays
-// animation sets built the same in both (keys, notes) on its stack, with poses and pose sets; the
-// note and end callbacks are recorded and compared. After every operation all frame fields must be identical (pointers compared as frame
-// indices, portals as (sector, index), strings by content), and so must the name trees, the
-// target lists and the scene rings.
+// scenes), the occluders' meshes and their sectors, the areas' meshes, inside tests and scene ring,
+// and the models' animation: each model owns three named frames of its own (frames 40 - 51, not
+// chosen by the other operations), plays animation sets built the same in both (keys, notes) on
+// its stack, with poses and pose sets; the note and end callbacks are recorded and compared. After
+// every operation all frame fields must be identical (pointers compared as frame indices, portals
+// as (sector, index), strings by content), and so must the name trees, the target lists and the
+// scene rings.
 //
-// The port follows LS3DRF, which gives a new scene to fewer frames than LS3DF.dll: its LinkTo has
-// no occluder or area pass after the sector pass, its sector SetScene leaves the portals' scene as
-// it was, its sector MatrixChanged leaves the portals as they were, and its occluder has no LinkTo
-// of its own (the frame's). The test patches the original to match: LinkTo (0x1001d680), SetScene
-// (0x1004cd40) and MatrixChanged (0x1004d1d0) jump over those passes, and the occluder's slot 0x38
-// is the frame's LinkTo. Where the test makes portals it runs their MatrixChanged in both.
-//
-// The original's portal destructor leaves the portal in its scene's ring, and its FreeGeometry keeps
-// the plane count (the port fixes both): the test patches the destructor (0x1003ed60) to leave the
-// ring, and clears the count after the original's FreeGeometry.
-//
-// The port's light Uninit, LS3DRF's, leaves the light in the device light list: the test patches
-// the original's call of 0x10063ca0 out of its Uninit (0x10021765). Its type, color, power, range,
-// attenuation, fog range and cone setters and its Duplicate, LS3DRF's, leave the Direct3D light as
-// it was: the test takes their writes of it out of the original's (0x100217e0 - 0x100223d0,
-// 0x10022cb0). Its Init, LS3DRF's, sets of the Direct3D light only the position and direction and
-// puts the light in no list: the test takes the rest out of the original's (0x1002162f -
-// 0x10021757) before the first create, and clears the bytes neither sets in both after each
-// light's first create.
-//
-// The port's occluder, LS3DRF's, has no occlusion: its MatrixChanged is the frame's (empty) and
-// its Uninit leaves no scene ring. The test points the original's occluder slot 0x68 at the
-// frame's empty one (0x100881e0) and takes the SetScene(nullptr) call out of its Uninit
-// (0x100385f6), a call that changes nothing here: no occluder joins a ring (the original's only
-// other caller left, UpdateOcclusionVolume, is not called). The occluders' world vertices and
-// face planes, allocated and never filled, are not compared.
+// LS3DRF has no portal SetScene or MatrixChanged (ADR-0051): the portals' world values and scenes
+// stay as made, in both.
 //
 // The original's RebalanceNameTree leaves the left link of the last frame of a run of equal
 // names as it was (frame.cpp fixes it); the test clears those links in the original after each of
@@ -53,10 +28,9 @@
 // so where squares or determinants leave the float range (world values of 1e13 and more) the
 // original still gets finite results and the port's float math does not.
 //
-// Usage: compare_frame.exe [original LS3DF.dll] [operations] [seed]
+// Usage: compare_frame.exe [original LS3DRF.dll] [operations] [seed]
 //
 // test-sources: src/i3d/frame.cpp src/i3d/user.cpp src/i3d/dummy.cpp src/i3d/target.cpp src/i3d/volume.cpp src/i3d/camera.cpp src/i3d/light.cpp src/i3d/sector.cpp src/i3d/portal.cpp src/i3d/occluder.cpp src/i3d/render_state.cpp src/i3d/area.cpp src/i3d/model.cpp src/i3d/anim.cpp src/i3d/visual.cpp src/i3d/driver_frames.cpp src/math/math.cpp src/core/debug.cpp
-// test-sources: tests/d3d8/d3d8_device.cpp
 #include <windows.h>
 
 #include <float.h>
@@ -72,7 +46,6 @@
 #include <string>
 #include <vector>
 
-#include "d3d8/d3d8_device.h"
 #include "../src/i3d/driver.h"
 #include "../src/i3d/frame.h"
 #include "../src/i3d/i3d_hooks.h"
@@ -87,7 +60,6 @@
 #include "../src/i3d/render_state.h"
 #include "../src/i3d/scene.h"
 #include "../src/i3d/sector.h"
-#include "fake_d3d8_base.h"
 #include "../src/igraph/igraph.h"
 #include "../src/i3d/target.h"
 #include "../src/i3d/user.h"
@@ -150,17 +122,6 @@ I3D_RESULT __stdcall I3D_driver::EnumVisualTypes(I3D_VISUALTYPEPROC *, bool) { r
 // The camera asks IGraph for the screen size: the original's IGraph serves both sides.
 IGraph *g_pIGraph;
 
-// Each side's device: logs LightEnable.
-struct RecordingDevice : FakeDirect3DDevice8Base {
-    std::vector<uint32_t> calls;
-    HRESULT __stdcall LightEnable(DWORD index, BOOL enable) override
-    {
-        calls.push_back(index << 1 | (enable ? 1 : 0));
-        return S_OK;
-    }
-};
-RecordingDevice g_origDevice, g_portDevice;
-
 using namespace ls3d;
 using namespace ls3d::i3d;
 
@@ -206,9 +167,9 @@ int IndexOf(const void *frame, bool orig)
 template <class T> T &Field(uint8_t *frame, size_t offset) { return *reinterpret_cast<T *>(frame + offset); }
 
 // The original's allocators (its own CRT heap) and the portal constructor.
-void *OrigAlignedAlloc(size_t size) { return OrigFn<void *(__cdecl *)(size_t, size_t)>(0x1008d42a)(size, 16); }
-void *OrigNew(size_t size) { return OrigFn<void *(__cdecl *)(size_t)>(0x1008d41c)(size); }
-void OrigDelete(void *p) { OrigFn<void(__cdecl *)(void *)>(0x1008d310)(p); }
+void *OrigAlignedAlloc(size_t size) { return OrigFn<void *(__cdecl *)(size_t, size_t)>(0x10031519)(size, 16); }
+void *OrigNew(size_t size) { return OrigFn<void *(__cdecl *)(size_t)>(0x1003150b)(size); }
+void OrigDelete(void *p) { OrigFn<void(__cdecl *)(void *)>(0x100314b0)(p); }
 using ThisFn = I3D_RESULT(__fastcall *)(void *self, void *edx);
 using ThisPtrFn = void(__fastcall *)(void *self, void *edx, void *arg);
 // A __thiscall virtual slot of an original object.
@@ -243,7 +204,7 @@ void OrigRemoveSwap(uint8_t *v, void *value)
 }
 
 // The stand-in scenes (zeroed: no camera, no primary sector).
-alignas(16) uint8_t g_origScenes[2][0x450];
+alignas(16) uint8_t g_origScenes[2][0x420];
 alignas(16) uint8_t g_portScenes[2][sizeof(I3D_scene)];
 I3D_scene *PortScene(int k) { return k >= 0 ? reinterpret_cast<I3D_scene *>(g_portScenes[k]) : nullptr; }
 // Their primary sectors (not among the compared frames: no children, out of the rings).
@@ -373,14 +334,12 @@ void ComparePortal(int i, int k, uint8_t *o, I3D_portal *portal)
     const int n = portal->numVertices;
     char what[64];
     std::snprintf(what, sizeof what, "portal %d field", k);
-    std::vector<size_t> raw = {0x10, 0x14, 0x18, 0x1C, 0x20, 0x24, 0x28, 0x130, 0x134, 0x138, 0x13C,
-                               0x180, 0x184, 0x188, 0x190, 0x1AC};
+    // (LS3DRF has no portal MatrixChanged: the world vertices, plane and centre are never set, in
+    // either, and not compared.)
+    std::vector<size_t> raw = {0x10, 0x14, 0x18, 0x1C, 0x20, 0x24, 0x28, 0x1AC};
     for (int j = 0; j < n; ++j) {
         for (size_t c = 0; c < 16; c += 4)
             raw.push_back(0x30 + 16 * j + c);
-        // (the world vertices' fourth dwords: unset)
-        for (size_t c = 0; c < 12; c += 4)
-            raw.push_back(0xB0 + 16 * j + c);
     }
     for (size_t off : raw) {
         if (!SameField(o + off, p + off)) {
@@ -750,26 +709,10 @@ void CompareFrame(int i)
                 continue;
             raw.push_back(off);
         }
-        // The port's d3dLight (LS3DRF's, +0x1F0) against the original's D3DLIGHT8 from Position
-        // (+0x224) on. The port's vector padding (+0x1FC, +0x20C) and last word (+0x22C) have no
-        // counterpart, nor have the original's type and colors (+0x1F0 - +0x223) and light indices
-        // (+0x258 - +0x25D): all stay as ClearLightInitGaps left them.
-        for (size_t k = 0; k < 0x40; k += 4) {
-            if (k == 0x0C || k == 0x1C || k == 0x3C) {
-                if (Field<uint32_t>(p, 0x1F0 + k))
-                    Fail("light d3dLight padding", i, 0x1F0 + k);
-                continue;
-            }
-            const size_t from = 0x224 + k - (k < 0x10 ? 0 : k < 0x20 ? 4 : 8);
-            if (!SameField(o + from, p + 0x1F0 + k))
-                Fail("light d3dLight", i, 0x1F0 + k);
-        }
-        for (size_t off = 0x1F0; off < 0x224; off += 4) {
-            if (Field<uint32_t>(o, off))
-                Fail("light Direct3D type / colors", i, off);
-        }
-        if (Field<uint32_t>(o, 0x258) || Field<uint16_t>(o, 0x25C))
-            Fail("light index", i, 0x258);
+        // The block LS3DRF keeps at +0x1F0 (the port's d3dLight), its vector padding and last words
+        // as ClearLightInitGaps left them.
+        for (size_t off = 0x1F0; off < 0x230; off += 4)
+            raw.push_back(off);
         break;
     case FRAME_SECTOR:
         CompareSector(i, o, static_cast<I3D_sector *>(g_port[i]));
@@ -804,14 +747,9 @@ void CompareAll()
     for (int i = 0; i < kTotal; ++i)
         CompareFrame(i);
     CompareAnimation();
-    if (IndexOf(Orig<void *>(0x100be010), true) != IndexOf(g_nameRoot, false))
+    if (IndexOf(Orig<void *>(0x10045c68), true) != IndexOf(g_nameRoot, false))
         Fail("name root", -1);
-    // (The port keeps no device-light list; with PatchOrigLightInit the original's stays empty.)
-    if (Orig<int>(0x100d13c4) != 0)
-        Fail("light count", -1);
-    if (g_origDevice.calls != g_portDevice.calls)
-        Fail("LightEnable calls", -1);
-    if (Orig<int>(0x100bf350) != g_portalChanges || Orig<int>(0x100bf354) != g_sectorChanges)
+    if (Orig<int>(0x10046a80) != g_portalChanges || Orig<int>(0x10046a84) != g_sectorChanges)
         Fail("portal / sector change counts", -1);
     for (int k = 0; k < 2; ++k) {
         uint8_t *os = g_origScenes[k];
@@ -819,8 +757,8 @@ void CompareAll()
         // Each side's portal ring: its count of live portals, linked both ways.
         for (int side = 0; side < 2; ++side) {
             const bool orig = side == 0;
-            uint8_t *first = orig ? Field<uint8_t *>(os, 0x260) : reinterpret_cast<uint8_t *>(ps->firstPortal);
-            const int count = orig ? Field<int>(os, 0x25C) : ps->portalCount;
+            uint8_t *first = orig ? Field<uint8_t *>(os, offsetof(I3D_scene, firstPortal)) : reinterpret_cast<uint8_t *>(ps->firstPortal);
+            const int count = orig ? Field<int>(os, offsetof(I3D_scene, portalCount)) : ps->portalCount;
             uint8_t *q = first;
             for (int m = 0; m < count; ++m) {
                 if (!q || PortalId(q, orig) < 0 || Field<uint8_t *>(Field<uint8_t *>(q, 0x1A8), 0x1A4) != q ||
@@ -834,27 +772,27 @@ void CompareAll()
             if (q != first)
                 Fail("scene portal ring length", -1);
         }
-        if (Field<int>(os, 0x25C) != ps->portalCount || Field<int>(os, 0x264) != ps->portalChangesSeen ||
-            Field<int>(os, 0x268) != ps->sectorCount)
+        if (Field<int>(os, offsetof(I3D_scene, portalCount)) != ps->portalCount || Field<int>(os, offsetof(I3D_scene, portalChangesSeen)) != ps->portalChangesSeen ||
+            Field<int>(os, offsetof(I3D_scene, sectorCount)) != ps->sectorCount)
             Fail("scene counts", -1);
-        if (PortalId(Field<void *>(os, 0x260), true) != PortalId(ps->firstPortal, false) ||
-            IndexOf(Field<void *>(os, 0x26C), true) != IndexOf(ps->firstSector, false) ||
-            IndexOf(Field<void *>(os, 0x278), true) != IndexOf(ps->firstOccluder, false))
+        if (PortalId(Field<void *>(os, offsetof(I3D_scene, firstPortal)), true) != PortalId(ps->firstPortal, false) ||
+            IndexOf(Field<void *>(os, offsetof(I3D_scene, firstSector)), true) != IndexOf(ps->firstSector, false) ||
+            IndexOf(Field<void *>(os, offsetof(I3D_scene, firstOccluder)), true) != IndexOf(ps->firstOccluder, false))
             Fail("scene rings", -1);
-        if (Field<int>(os, 0x274) != ps->occluderCount || os[0x27C] != uint8_t(ps->occludersChanged) ||
-            os[0x27D] != uint8_t(ps->occluderListsStale))
+        if (Field<int>(os, offsetof(I3D_scene, occluderCount)) != ps->occluderCount || os[offsetof(I3D_scene, occludersChanged)] != uint8_t(ps->occludersChanged) ||
+            os[offsetof(I3D_scene, occluderListsStale)] != uint8_t(ps->occluderListsStale))
             Fail("scene occluder state", -1);
-        if (Field<int>(os, 0x280) != ps->areaCount || IndexOf(Field<void *>(os, 0x284), true) != IndexOf(ps->firstArea, false) ||
-            os[0x288] != uint8_t(ps->areasChanged))
+        if (Field<int>(os, offsetof(I3D_scene, areaCount)) != ps->areaCount || IndexOf(Field<void *>(os, offsetof(I3D_scene, firstArea)), true) != IndexOf(ps->firstArea, false) ||
+            os[offsetof(I3D_scene, areasChanged)] != uint8_t(ps->areasChanged))
             Fail("scene areas", -1);
         if (IndexOf(Field<void *>(g_origPrimary[k], 0x280), true) != IndexOf(g_portPrimary[k]->occluders, false))
             Fail("primary sector occluders", -1);
     }
-    const int n = Orig<int>(0x100c0578);
+    const int n = Orig<int>(0x10047c68);
     if (n != g_targets.Size())
         Fail("target count", -1);
     for (int k = 0; k < n; ++k) {
-        if (IndexOf(Orig<void **>(0x100c0570)[k], true) != IndexOf(g_targets[k], false))
+        if (IndexOf(Orig<void **>(0x10047c60)[k], true) != IndexOf(g_targets[k], false))
             Fail("target list", -1);
     }
 }
@@ -964,7 +902,7 @@ uint32_t RandEnumFlags()
 
 // ---------------------------------------------------------------- frames
 
-uint8_t *OrigCreate(uint16_t type) { return CallV<uint8_t *>(g_origDriver, 0x54, static_cast<int>(type)); }
+uint8_t *OrigCreate(uint16_t type) { return CallV<uint8_t *>(g_origDriver, 0x24, static_cast<int>(type)); }
 
 I3D_frame *PortCreate(uint16_t type, I3D_frame *reuse)
 {
@@ -991,17 +929,6 @@ I3D_frame *PortCreate(uint16_t type, I3D_frame *reuse)
 }
 
 using NamePrefixFn = I3D_RESULT(__fastcall *)(void *self, void *edx, const char *prefix);
-
-// Portal MatrixChanged (0x1003ef70) for each portal of sector i, in both: their world values and
-// scene, which the sector's MatrixChanged leaves as they were.
-void PortalsMatrixChanged(int i)
-{
-    uint8_t *o = g_orig[i];
-    for (int k = 0; k < Field<int>(o, 0x254); ++k)
-        OrigFn<void(__fastcall *)(void *, void *)>(0x1003ef70)(Field<void **>(o, 0x24C)[k], nullptr);
-    for (I3D_portal *portal : static_cast<I3D_sector *>(g_port[i])->portals)
-        portal->MatrixChanged();
-}
 
 // A sector's geometry, made the same in both: a box hull (sometimes with a degenerate and a
 // repeated face) and up to three portals on its faces; then MatrixChanged in both, the sector's
@@ -1093,7 +1020,7 @@ void MakeGeometry(int i)
         portal->owner = sector;
         sector->portals.PushBack(portal);
         auto *op = static_cast<uint8_t *>(OrigAlignedAlloc(0x1C0));
-        OrigFn<void *(__fastcall *)(void *, void *)>(0x1003ed10)(op, nullptr);
+        OrigFn<void *(__fastcall *)(void *, void *)>(0x100244b0)(op, nullptr);
         Field<int>(op, 0x1AC) = pt.n;
         std::memcpy(op + 0x30, pt.v, 16 * pt.n);
         std::memcpy(op + 0x10, pt.head, 0x1C);
@@ -1102,7 +1029,6 @@ void MakeGeometry(int i)
     }
     CallThisV(o, 0x68);
     sector->MatrixChanged();
-    PortalsMatrixChanged(i);
 }
 
 // An occluder's mesh (Build in both from the same arrays: a box, a tetrahedron or a soup with
@@ -1434,7 +1360,7 @@ void RunOp()
         break;
     case 14:
         g_lastOp = "UpdateWMatrixProc";
-        OrigFn<ThisFn>(0x1001e390)(o, nullptr);
+        OrigFn<ThisFn>(0x100142e0)(o, nullptr);
         p->UpdateWMatrix();
         break;
     case 15:
@@ -1442,15 +1368,15 @@ void RunOp()
         const char *n = RandName();
         std::snprintf(text, sizeof text, "SetName %s", n ? n : "(null)");
         g_lastOp = text;
-        const int before = Orig<int>(0x100be474);
+        const int before = Orig<int>(0x10045eb4);
         const I3D_RESULT ro = CallV<I3D_RESULT>(o, 0x34, n);
         const I3D_RESULT rp = p->SetName(n);
         if (ro != rp)
             Fail("SetName result", i);
-        const int after = Orig<int>(0x100be474);
+        const int after = Orig<int>(0x10045eb4);
         for (int c = before + 1; c <= after; ++c) {
             if ((c & 0x7ff) == 0x400)
-                ClearStaleChainLinks(Orig<uint8_t *>(0x100be010));
+                ClearStaleChainLinks(Orig<uint8_t *>(0x10045c68));
         }
         break;
     }
@@ -1458,7 +1384,7 @@ void RunOp()
         const char *pre = kPrefixes[Rand(4)];
         std::snprintf(text, sizeof text, "SetNamePrefix %s", pre);
         g_lastOp = text;
-        const I3D_RESULT ro = OrigFn<NamePrefixFn>(0x1001d470)(o, nullptr, pre);
+        const I3D_RESULT ro = OrigFn<NamePrefixFn>(0x10013440)(o, nullptr, pre);
         const I3D_RESULT rp = p->SetNamePrefix(pre);
         if (ro != rp)
             Fail("SetNamePrefix result", i);
@@ -1466,7 +1392,7 @@ void RunOp()
     }
     case 18:
         g_lastOp = "RemoveNamePrefix";
-        OrigFn<ThisFn>(0x1001d5d0)(o, nullptr);
+        OrigFn<ThisFn>(0x100135a0)(o, nullptr);
         p->RemoveNamePrefix();
         break;
     case 19: {
@@ -1520,7 +1446,6 @@ void RunOp()
             // sector's and its portals'.
             CallThisV(o, 0x68);
             p->MatrixChanged();
-            PortalsMatrixChanged(i);
         }
         if (ro != rp)
             Fail("Duplicate result", i);
@@ -1600,7 +1525,7 @@ void RunOp()
         g_lastOp = text;
         if (!n)
             break;
-        const int ro = IndexOf(CallV<void *>(g_origDriver, 0x88, nullptr, n), true);
+        const int ro = IndexOf(CallV<void *>(g_origDriver, 0x58, nullptr, n), true);
         const int rp = IndexOf(g_driver->FindFrame(nullptr, n), false);
         if (ro != rp)
             Fail("driver FindFrame result", -1);
@@ -1613,7 +1538,7 @@ void RunOp()
             g_answers.push_back(Rand(20) == 0 ? 1 : 0);
         g_visits.clear();
         g_visitOrig = true;
-        const I3D_RESULT ro = CallV<I3D_RESULT>(g_origDriver, 0x90, &RecordProc, reinterpret_cast<void *>(0x1234));
+        const I3D_RESULT ro = CallV<I3D_RESULT>(g_origDriver, 0x60, &RecordProc, reinterpret_cast<void *>(0x1234));
         const std::vector<int> visitsOrig = g_visits;
         g_visits.clear();
         g_visitOrig = false;
@@ -1624,8 +1549,8 @@ void RunOp()
     }
     case 29:
         g_lastOp = "driver RebalanceNameTree";
-        CallV<void>(g_origDriver, 0x8C);
-        ClearStaleChainLinks(Orig<uint8_t *>(0x100be010));
+        CallV<void>(g_origDriver, 0x5C);
+        ClearStaleChainLinks(Orig<uint8_t *>(0x10045c68));
         g_driver->RebalanceNameTree();
         break;
     case 30:
@@ -1926,7 +1851,7 @@ void RunOp()
         const int k = Rand(3) - 1;
         std::snprintf(text, sizeof text, "sector %d SetScene %d", sIdx, k);
         g_lastOp = text;
-        OrigFn<ThisPtrFn>(0x1004cd40)(g_orig[sIdx], nullptr, k >= 0 ? g_origScenes[k] : nullptr);
+        OrigFn<ThisPtrFn>(0x10029570)(g_orig[sIdx], nullptr, k >= 0 ? g_origScenes[k] : nullptr);
         static_cast<I3D_sector *>(g_port[sIdx])->SetScene(PortScene(k));
         break;
     }
@@ -1935,7 +1860,7 @@ void RunOp()
         const int sIdx = Rand(kFrames / 10) * 10 + 6;
         std::snprintf(text, sizeof text, "sector %d new geometry", sIdx);
         g_lastOp = text;
-        OrigFn<ThisFn>(0x1004cbc0)(g_orig[sIdx], nullptr);
+        OrigFn<ThisFn>(0x100293f0)(g_orig[sIdx], nullptr);
         Field<int>(g_orig[sIdx], 0x270) = 0;    // (as the port's FreeGeometry)
         static_cast<I3D_sector *>(g_port[sIdx])->FreeGeometry();
         MakeGeometry(sIdx);
@@ -2269,167 +2194,15 @@ LONG WINAPI CrashFilter(EXCEPTION_POINTERS *info)
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
-// Writes `with` over the original's code at `va`, which must hold `expect` (`size` bytes each).
-void PatchCode(uint32_t va, const uint8_t *expect, const uint8_t *with, size_t size)
-{
-    uint8_t *at = &Orig<uint8_t>(va);
-    if (std::memcmp(at, expect, size)) {
-        std::printf("the original's code at %08x is not what it was\n", va);
-        std::exit(2);
-    }
-    DWORD old;
-    VirtualProtect(at, size, PAGE_EXECUTE_READWRITE, &old);
-    std::memcpy(at, with, size);
-    VirtualProtect(at, size, old, &old);
-    FlushInstructionCache(GetCurrentProcess(), at, size);
-}
-// A jump from `va` to `to` over the instruction `expect` names (5 bytes or more).
-void PatchJump(uint32_t va, uint32_t to, const uint8_t *expect, size_t size)
-{
-    uint8_t with[16];
-    std::memcpy(with, expect, size);
-    with[0] = 0xe9;
-    const int32_t rel = static_cast<int32_t>(to - (va + 5));
-    std::memcpy(with + 1, &rel, 4);
-    PatchCode(va, expect, with, size);
-}
-
-// Fills the original's code at `va`, which must hold `expect` (at most 16 bytes), with nops.
-void PatchNops(uint32_t va, const uint8_t *expect, size_t size)
-{
-    uint8_t nops[16];
-    std::memset(nops, 0x90, sizeof nops);
-    PatchCode(va, expect, nops, size);
-}
-
-// LS3DRF's light setters and Duplicate in the original: no writes of the Direct3D light (+0x1f0).
-void PatchOrigLightSetters()
-{
-    static const uint8_t fldRange[] = {0xd9, 0x44, 0x24, 0x08};                     // fld [esp+8]
-    static const uint8_t fmulScale[] = {0xd8, 0x89, 0xfc, 0x00, 0x00, 0x00};        // fmul [ecx+0xfc]
-    static const uint8_t fstpRange[] = {0xd9, 0x99, 0x3c, 0x02, 0x00, 0x00};        // fstp [ecx+0x23c]
-    PatchNops(0x10022244, fldRange, sizeof fldRange);
-    PatchNops(0x1002224e, fmulScale, sizeof fmulScale);
-    PatchNops(0x10022261, fstpRange, sizeof fstpRange);
-    static const uint8_t scaleAtt1[] = {0xd9, 0x44, 0x24, 0x0c, 0xd8, 0xb0, 0xfc, 0x00, 0x00, 0x00};
-    PatchJump(0x100222d4, 0x100222de, scaleAtt1, sizeof scaleAtt1);  // over fld a1, fdiv
-    static const uint8_t storeAtt[] = {0x8b, 0x54, 0x24, 0x08, 0x89, 0x90, 0x44, 0x02, 0x00, 0x00};
-    PatchJump(0x10022313, 0x10022339, storeAtt, sizeof storeAtt);  // over the stores at +0x244..+0x24c
-    // (SetFogRange's scale is a constant at 0x1009b544, relocated with the DLL.)
-    const uint32_t hundredth = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&Orig<uint8_t>(0x1009b544)));
-    uint8_t fmulHundredth[6] = {0xd8, 0x0d};                                        // fmul [0x1009b544]
-    std::memcpy(fmulHundredth + 2, &hundredth, 4);
-    static const uint8_t fldNear[] = {0xd9, 0x44, 0x24, 0x08};                      // fld [esp+8]
-    static const uint8_t fstpNear[] = {0xd9, 0x98, 0x44, 0x02, 0x00, 0x00};         // fstp [eax+0x244]
-    static const uint8_t fldFar[] = {0xd9, 0x44, 0x24, 0x0c};                       // fld [esp+0xc]
-    static const uint8_t fstpFar[] = {0xd9, 0x98, 0x3c, 0x02, 0x00, 0x00};          // fstp [eax+0x23c]
-    PatchNops(0x10022389, fldNear, sizeof fldNear);
-    PatchNops(0x10022393, fmulHundredth, sizeof fmulHundredth);
-    PatchNops(0x100223aa, fstpNear, sizeof fstpNear);
-    PatchNops(0x100223b0, fldFar, sizeof fldFar);
-    PatchNops(0x100223ba, fmulHundredth, sizeof fmulHundredth);
-    PatchNops(0x100223c6, fstpFar, sizeof fstpFar);
-    // SetLightType's Type, the color and power setters' Diffuse / Specular / Ambient r, b, g, and
-    // SetCone's Phi and Theta.
-    static const struct {
-        uint32_t va;
-        uint8_t code[10];
-        size_t size;
-    } stores[] = {
-        {0x10021813, {0xc7, 0x86, 0xf0, 0x01, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00}, 10},  // mov [esi+0x1f0], 3
-        {0x1002181f, {0xc7, 0x86, 0xf0, 0x01, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00}, 10},  // mov [esi+0x1f0], 2
-        {0x1002182b, {0xc7, 0x86, 0xf0, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00}, 10},  // mov [esi+0x1f0], 1
-        {0x10021a83, {0x89, 0x88, 0xf4, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1f4], ecx
-        {0x10021a8f, {0x89, 0x88, 0xfc, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1fc], ecx
-        {0x10021aa2, {0x89, 0x90, 0xf8, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1f8], edx
-        {0x10021bbf, {0x89, 0x88, 0xf4, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1f4], ecx
-        {0x10021bcb, {0x89, 0x88, 0xfc, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1fc], ecx
-        {0x10021bde, {0x89, 0x90, 0xf8, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1f8], edx
-        {0x10021cf3, {0x89, 0x88, 0x04, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x204], ecx
-        {0x10021cff, {0x89, 0x88, 0x0c, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x20c], ecx
-        {0x10021d12, {0x89, 0x90, 0x08, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x208], edx
-        {0x10021e53, {0x89, 0x88, 0x14, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x214], ecx
-        {0x10021e5f, {0x89, 0x88, 0x1c, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x21c], ecx
-        {0x10021e72, {0x89, 0x90, 0x18, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x218], edx
-        {0x10021f7d, {0x89, 0x88, 0xf4, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1f4], ecx
-        {0x10021f89, {0x89, 0x88, 0xfc, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1fc], ecx
-        {0x10021f9c, {0x89, 0x90, 0xf8, 0x01, 0x00, 0x00}, 6},  // mov [eax+0x1f8], edx
-        {0x1002209d, {0x89, 0x88, 0x04, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x204], ecx
-        {0x100220a9, {0x89, 0x88, 0x0c, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x20c], ecx
-        {0x100220bc, {0x89, 0x90, 0x08, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x208], edx
-        {0x100221bd, {0x89, 0x88, 0x14, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x214], ecx
-        {0x100221c9, {0x89, 0x88, 0x1c, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x21c], ecx
-        {0x100221dc, {0x89, 0x90, 0x18, 0x02, 0x00, 0x00}, 6},  // mov [eax+0x218], edx
-        {0x1002244b, {0x89, 0x81, 0x54, 0x02, 0x00, 0x00}, 6},  // mov [ecx+0x254], eax
-        {0x10022451, {0x89, 0x91, 0x50, 0x02, 0x00, 0x00}, 6},  // mov [ecx+0x250], edx
-    };
-    for (const auto &s : stores)
-        PatchNops(s.va, s.code, s.size);
-    static const uint8_t copyLight[] = {0xf3, 0xa5};                                 // rep movsd
-    PatchNops(0x10022e4d, copyLight, sizeof copyLight);                           // Duplicate
-}
-
-// LS3DRF's light Init in the original: of the Direct3D light only the position and direction, no
-// light list. Range's fld / fmul go, then a jump from its fstp over the other stores (+0x1f0 -
-// +0x220, +0x23c - +0x25a, +0x190) and the call of 0x10063c20 to the pop edi; the index store goes.
-void PatchOrigLightInit()
-{
-    static const uint8_t fldRange[] = {0xd9, 0x86, 0x74, 0x01, 0x00, 0x00};         // fld [esi+0x174]
-    static const uint8_t fmulScale[] = {0xd8, 0x8e, 0xfc, 0x00, 0x00, 0x00};        // fmul [esi+0xfc]
-    static const uint8_t fstpRange[] = {0xd9, 0x9e, 0x3c, 0x02, 0x00, 0x00};        // fstp [esi+0x23c]
-    static const uint8_t storeIndex[] = {0x66, 0x89, 0x86, 0x5c, 0x02, 0x00, 0x00}; // mov [esi+0x25c], ax
-    PatchNops(0x1002162f, fldRange, sizeof fldRange);
-    PatchNops(0x10021639, fmulScale, sizeof fmulScale);
-    PatchJump(0x10021651, 0x1002174f, fstpRange, sizeof fstpRange);
-    PatchNops(0x10021750, storeIndex, sizeof storeIndex);
-}
-
-// The light bytes neither Init sets now, cleared in both after a light's first create: the flags,
-// and of the Direct3D light all but the position and direction (the original's type and colors and
-// its range up to the light indices; the port's vector padding and its range to the end). From
-// then on both hold the same. A light made again from the free list keeps its own.
+// The light bytes neither Init sets, cleared in both after a light's first create: the flags, and of
+// the block at +0x1F0 the vector padding and all from the range on. A light made again from the
+// free list keeps its own.
 void ClearLightInitGaps(int i)
 {
-    uint8_t *const o = g_orig[i];
-    auto *const p = reinterpret_cast<uint8_t *>(g_port[i]);
-    std::memset(o + 0x190, 0, 4);
-    std::memset(o + 0x1F0, 0, 0x34);
-    std::memset(o + 0x23C, 0, 0x22);
-    std::memset(p + 0x190, 0, 4);
-    std::memset(p + 0x1FC, 0, 4);
-    std::memset(p + 0x20C, 0, 0x24);
-}
-
-// LS3DRF's LinkTo, sector SetScene and MatrixChanged and occluder LinkTo, MatrixChanged and Uninit
-// in the original, and the port's portal destructor (`occluder`: one of its occluders).
-void PatchOrigScenePasses(uint8_t *occluder)
-{
-    static const uint8_t linkTail[] = {0x83, 0xbe, 0xf8, 0x00, 0x00, 0x00, 0x0c};    // cmp [esi+0xf8], 0xc
-    PatchJump(0x1001da9e, 0x1001dae6, linkTail, sizeof linkTail);
-    static const uint8_t portalLoop[] = {0x8b, 0xbe, 0x4c, 0x02, 0x00, 0x00};        // mov edi, [esi+0x24c]
-    PatchJump(0x1004ce6d, 0x1004cea6, portalLoop, sizeof portalLoop);
-    static const uint8_t matrixLoop[] = {0x8b, 0x86, 0x54, 0x02, 0x00, 0x00};        // mov eax, [esi+0x254]
-    PatchJump(0x1004d1da, 0x1004d205, matrixLoop, sizeof matrixLoop);
-    static const uint8_t ownScene[] = {0x8b, 0x86, 0xa0, 0x01, 0x00, 0x00};          // mov eax, [esi+0x1a0]
-    static const uint8_t noScene[] = {0x31, 0xc0, 0x90, 0x90, 0x90, 0x90};           // xor eax, eax
-    PatchCode(0x1003ed6f, ownScene, noScene, sizeof ownScene);
-    static const uint8_t leaveScene[] = {0x6a, 0x00, 0x8b, 0xce, 0xe8, 0x11, 0x00, 0x00, 0x00};    // SetScene(nullptr)
-    PatchNops(0x100385f6, leaveScene, sizeof leaveScene);
-    void **const vtable = *reinterpret_cast<void ***>(occluder);
-    const struct {
-        int offset;
-        uint32_t was, now;
-    } slots[] = {{0x38, 0x10038730, 0x1001d680}, {0x68, 0x100387c0, 0x100881e0}};    // LinkTo, MatrixChanged
-    for (const auto &s : slots) {
-        void **slot = vtable + s.offset / 4;
-        if (*slot != &Orig<uint8_t>(s.was)) {
-            std::printf("the original's occluder slot 0x%x is not where it was\n", s.offset);
-            std::exit(2);
-        }
-        DWORD old;
-        VirtualProtect(slot, 4, PAGE_READWRITE, &old);
-        *slot = &Orig<uint8_t>(s.now);
-        VirtualProtect(slot, 4, old, &old);
+    for (uint8_t *const m : {g_orig[i], reinterpret_cast<uint8_t *>(g_port[i])}) {
+        std::memset(m + 0x190, 0, 4);
+        std::memset(m + 0x1FC, 0, 4);
+        std::memset(m + 0x20C, 0, 0x24);
     }
 }
 
@@ -2438,7 +2211,7 @@ void PatchOrigScenePasses(uint8_t *occluder)
 int main(int argc, char **argv)
 {
     SetUnhandledExceptionFilter(&CrashFilter);
-    const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr);
+    const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr, "LS3DRF.dll");
     const long ops = argc > 2 ? std::atol(argv[2]) : 200000;
     const uint32_t seed = argc > 3 ? static_cast<uint32_t>(std::strtoul(argv[3], nullptr, 0)) : 1;
     HMODULE dll = LoadLibraryA(origPath);
@@ -2447,28 +2220,25 @@ int main(int argc, char **argv)
         return 2;
     }
     g_base = reinterpret_cast<uint8_t *>(dll);
-    Orig<uint8_t>(0x100d16f2) = 1;              // no log
-    g_origDriver = Orig<uint8_t *>(0x100d16f8);
+    Orig<uint8_t>(0x10058b72) = 1;              // no log
+    g_origDriver = Orig<uint8_t *>(0x10058b78);
     if (!g_origDriver) {
         std::printf("the original's driver does not exist\n");
         return 2;
     }
     _controlfp(_PC_24, _MCW_PC);
     // Named frames enter the name tree on both sides.
-    Orig<uint32_t>(0x100be058 + 4 * DRVSTATE_FRAME_NAMES) = 1;
+    Orig<uint32_t>(0x10045ca8 + 4 * DRVSTATE_FRAME_NAMES) = 1;
     g_driverStates[DRVSTATE_FRAME_NAMES] = 1;
     g_driver = new I3D_driver;
-    g_pIGraph = Orig<IGraph *>(0x100d16f4);
-    Orig<IDirect3DDevice8 *>(0x100d216c) = &g_origDevice;
-    ls3d::ig::g_pDevice = &g_portDevice;
+    g_pIGraph = Orig<IGraph *>(0x10058b74);
     if (!g_pIGraph) {
         std::printf("the original's IGraph does not exist\n");
         return 2;
     }
 
-    g_portalChanges = Orig<int>(0x100bf350);
-    g_sectorChanges = Orig<int>(0x100bf354);
-    PatchOrigLightInit();
+    g_portalChanges = Orig<int>(0x10046a80);
+    g_sectorChanges = Orig<int>(0x10046a84);
     g_rng.seed(seed);
     for (int i = 0; i < kFrames; ++i) {
         g_orig[i] = OrigCreate(TypeOf(i));
@@ -2488,11 +2258,6 @@ int main(int argc, char **argv)
         if (TypeOf(i) == FRAME_LIGHT)
             ClearLightInitGaps(i);
     }
-    PatchOrigScenePasses(g_orig[7]);
-    static const uint8_t unregisterLight[] = {0xe8, 0x36, 0x25, 0x04, 0x00};    // call 0x10063ca0
-    static const uint8_t nops[] = {0x90, 0x90, 0x90, 0x90, 0x90};
-    PatchCode(0x10021765, unregisterLight, nops, sizeof unregisterLight);
-    PatchOrigLightSetters();
     // The models' own frames (named after the tracks, with the recording callback), the
     // animation sets, poses and the pose set.
     for (int i = kFrames; i < kTotal; ++i) {
@@ -2507,15 +2272,15 @@ int main(int argc, char **argv)
     for (int m = 9; m < kFrames; m += 10)
         SetUpModel(m);
     for (int k = 0; k < kSets; ++k) {
-        g_origSets[k] = CallV<uint8_t *>(g_origDriver, 0x70);
+        g_origSets[k] = CallV<uint8_t *>(g_origDriver, 0x40);
         g_portSets[k] = new I3D_animation_set;
         MakeSet(k);
     }
     for (int k = 0; k < kPoses; ++k) {
-        g_origPoses[k] = CallV<uint8_t *>(g_origDriver, 0x74);
+        g_origPoses[k] = CallV<uint8_t *>(g_origDriver, 0x44);
         g_portPoses[k] = new I3D_pose;
     }
-    g_origPoseSet = CallV<uint8_t *>(g_origDriver, 0x78);
+    g_origPoseSet = CallV<uint8_t *>(g_origDriver, 0x48);
     g_portPoseSet = new I3D_pose_set;
     // The stand-in scenes' primary sectors; frame 4 renders.
     for (int k = 0; k < 2; ++k) {
@@ -2523,10 +2288,10 @@ int main(int argc, char **argv)
         g_portPrimary[k] = static_cast<I3D_sector *>(PortCreate(FRAME_SECTOR, nullptr));
         Field<void *>(g_origPrimary[k], 0x26C) = g_origScenes[k];
         g_portPrimary[k]->scene = PortScene(k);
-        Field<void *>(g_origScenes[k], 0x1F8) = g_origPrimary[k];
+        Field<void *>(g_origScenes[k], offsetof(I3D_scene, primarySector)) = g_origPrimary[k];
         PortScene(k)->primarySector = g_portPrimary[k];
     }
-    Orig<void *>(0x100d127c) = g_orig[4];
+    Orig<void *>(0x10058874) = g_orig[4];
     g_renderCamera = static_cast<I3D_camera *>(g_port[4]);
     g_lastOp = "create";
     CompareAll();
