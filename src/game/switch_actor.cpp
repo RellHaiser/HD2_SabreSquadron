@@ -172,7 +172,7 @@ void C_Switch::SetState(int state)                      // 0x006136f0
     GetSoundModule()->Play(request);
 }
 
-void C_Switch::StartMission(bool server)                // 0x00613920
+void C_Switch::StartMission(bool server)                // 0x00613920 (DS 0x0063dd90)
 {
     Activate(server);
     if (!(server || !IsServer()) || !m_frame)

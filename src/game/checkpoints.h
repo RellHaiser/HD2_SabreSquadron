@@ -82,6 +82,9 @@ struct S_Checkpoint {                                   // 0x24 bytes
     // Cost of a link to `to` in metres.
     float GetLinkCost(const S_Checkpoint &to) const;    // 0x005247e0
 
+    // Zeroes the flags, the type and the links. Not called.
+    void Clear();                                       // 0x00524600 (DS 0x00512010)
+
     // Reads a point of checkpoint data (0x20 bytes, then the links); its links go into the
     // network's link storage at `storage`, which moves past them. Returns the data after it.
     const uint8_t *Read(const uint8_t *data, S_CheckpointLink *&storage);   // 0x00524620
@@ -126,7 +129,7 @@ struct S_CheckpointFrame {                              // 8 bytes
     uint16_t index = 0xFFFF;
 
     // Reads {uint16 index, char frameName[]} and looks the frame up.
-    const uint8_t *Read(const uint8_t *data);           // 0x0051c870
+    const uint8_t *Read(const uint8_t *data);           // 0x0051c870 (DS 0x00508000)
 };
 
 // A point tied to an actor (the doors' sides); the table is sorted by point.
@@ -135,7 +138,7 @@ struct S_CheckpointActor {                              // 8 bytes
     uint16_t index = 0xFFFF;
 
     // Reads {uint16 index, char frameName[]} and takes the actor of that frame.
-    const uint8_t *Read(const uint8_t *data);           // 0x0051c910
+    const uint8_t *Read(const uint8_t *data);           // 0x0051c910 (DS 0x005080e0)
 };
 
 // The positions FindEscapePath flees from: the AI controller's growable aligned array.

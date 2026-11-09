@@ -129,7 +129,7 @@ private:
     void Reset();                                       // 0x005f98e0
     // The parachute's morph animated ("ammobox"), the box volume made, the parts, shown as the
     // property says (the volume added), opening if shown.
-    void InitBox();                                     // 0x005f9a60
+    void InitBox();                                     // 0x005f9a60 (DS 0x0061d8e0)
     // The crate 85 m over the drop point (in network games under the scene's top), the parachute
     // and the cratedummy (3 m higher) there, the crate and parachute under "letibedna", shown.
     void StartDrop();                                   // 0x005f9f00

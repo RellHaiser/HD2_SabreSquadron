@@ -1069,7 +1069,7 @@ enum : uint32_t {
 
 class alignas(16) C_HumanMovement {
 public:
-    C_HumanMovement();                                  // 0x00785a20
+    C_HumanMovement();                                  // 0x00785a20 (DS 0x007f43b0)
     ~C_HumanMovement();                                 // 0x00785db0
     C_HumanMovement(const C_HumanMovement &) = delete;
     C_HumanMovement &operator=(const C_HumanMovement &) = delete;

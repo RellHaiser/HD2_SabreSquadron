@@ -1657,6 +1657,12 @@ void C_HitZones::Place(I3D_frame *human)
     }
 }
 
+void C_HitZones::SetOn(bool on)
+{
+    if (m_model)
+        m_model->SetOn(on);
+}
+
 int C_HitZones::GetHitZone(C_Human *human, const S_vector &pos, const S_vector &dir)
 {
     if (!m_model)

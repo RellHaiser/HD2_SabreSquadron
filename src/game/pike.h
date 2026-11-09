@@ -62,9 +62,9 @@ private:
     void SendState(uint32_t kind);                      // 0x005b9e70
     // The frame turned to the angle; true (the rotation back) when the box would hit something
     // (`time` is not used).
-    bool Turn(int time);                                // 0x005b8f00
+    bool Turn(int time);                                // 0x005b8f00 (DS 0x005cc0d0)
     // The volume made again around the frame (added to the world with `add`) and moved.
-    void UpdateVolume(bool add);                        // 0x005b97b0
+    void UpdateVolume(bool add);                        // 0x005b97b0 (DS 0x005ccba0)
 
     S_vector4 m_axis = {0.0f, 1.0f, 0.0f, 0.0f};        // +0x90 (w: a stale local in the original)
     S_quat m_startRot = {1.0f, 0.0f, 0.0f, 0.0f};       // +0xA0 the frame's rotation at StartMission

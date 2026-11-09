@@ -213,7 +213,7 @@ void C_Barrel::CopyFrom(const C_Actor *source)          // 0x00606520
     m_exitHoles = barrel->m_exitHoles;
 }
 
-void C_Barrel::StartMission(bool server)                // 0x00606650
+void C_Barrel::StartMission(bool server)                // 0x00606650 (DS 0x0062dc30)
 {
     Activate(server);
     if (server) {

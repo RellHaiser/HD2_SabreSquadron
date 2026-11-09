@@ -23,7 +23,7 @@ struct S_WaveVictim {                                   // 0x20 bytes
 class C_ExplosionWave {                                 // 0x40 bytes
 public:
     C_ExplosionWave() = default;                        // 0x006de370
-    explicit C_ExplosionWave(const S_Explosion &explosion);   // 0x006de390
+    explicit C_ExplosionWave(const S_Explosion &explosion);   // 0x006de390 (DS 0x007270c0)
     ~C_ExplosionWave();                                 // 0x006de2b0
     C_ExplosionWave(const C_ExplosionWave &) = delete;
     C_ExplosionWave &operator=(const C_ExplosionWave &) = delete;

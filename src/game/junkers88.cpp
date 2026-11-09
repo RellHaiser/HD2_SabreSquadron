@@ -1177,7 +1177,7 @@ C_Junkers88::S_Debris::S_Debris(I3D_frame *piece, const S_vector4 &throwVelocity
     spin = {c, b, a, 0.0f};
 }
 
-C_Junkers88::S_Debris::S_Debris(C_chunk &chunk)         // 0x005f57c0
+C_Junkers88::S_Debris::S_Debris(C_chunk &chunk)         // 0x005f57c0 (DS 0x006184e0)
 {
     chunk.Read(&velocity, 12);
     chunk.Read(&spin, 12);
@@ -1787,7 +1787,7 @@ void C_Junkers88::S_Fighter::LoadSounds()               // 0x005f4740
     }
 }
 
-void C_Junkers88::S_Fighter::InitVolume()               // 0x005f4e50
+void C_Junkers88::S_Fighter::InitVolume()               // 0x005f4e50 (DS 0x00617910)
 {
     fall.Init(model, 2.0f);
     // A sphere around the model's hierarchy, of the bomber's.

@@ -142,7 +142,7 @@ private:
     // photo, selector or list frame: false); the panel's group, its scroll bar and its two hiding
     // lists of the profiles' pictures (the first 30, then up to 60; their faces, picked:
     // OnSoldierPicked); not co-op: the allies' and axis' marks (OnSide). The template hidden; true.
-    bool BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x006838e0
+    bool BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x006838e0 (DS 0x006c1a20)
     // The equipment panel (the model's dummy "equippanel" renamed "P_Equipment"; none, or a group's
     // dummy not made: false): the holsters' and backpack's groups (dummies under it, kept in the
     // models), the soldier's places' visuals given meshes of their own, the scroll bars and their

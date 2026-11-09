@@ -177,7 +177,7 @@ bool C_Ladder::ReadProperties(C_chunk &chunk)           // 0x005ebbd0
     return true;
 }
 
-void C_Ladder::StartMission(bool server)                // 0x005ead20
+void C_Ladder::StartMission(bool server)                // 0x005ead20 (DS 0x0060b270)
 {
     I3D_frame *parent = m_frame->GetParent();
     Activate(server);

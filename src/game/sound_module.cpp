@@ -483,6 +483,82 @@ void C_SoundModule::StopAll(bool releaseTableSounds, bool keepMusic)
 // ---------------------------------------------------------------------------
 // sector acoustics
 
+S_SectorHops::S_SectorHops(I3D_sector *sector_, int index_)
+    : sector(sector_), index(index_), entries(index_ ? new S_SectorHopEntry[index_] : nullptr)
+{
+    sector->SetUserData(this);
+}
+
+// The entry for two sectors is in the table of the one that comes later.
+static uint8_t &SectorHopsBetween(I3D_sector *sectorA, I3D_sector *sectorB)
+{
+    auto *a = static_cast<S_SectorHops *>(sectorA->GetUserData());
+    auto *b = static_cast<S_SectorHops *>(sectorB->GetUserData());
+    return b->index < a->index ? a->entries[b->index].hops : b->entries[a->index].hops;
+}
+
+float SectorHopDistance(float &factor, const S_vector &a, const S_vector &b, I3D_sector *sectorA,
+                        I3D_sector *sectorB, bool gradual)
+{
+    if (sectorA == sectorB || !sectorA || !sectorB) {
+        factor = 1.0f;
+    } else {
+        const uint8_t hops = SectorHopsBetween(sectorA, sectorB);
+        if (gradual)
+            factor = hops < 10 ? 1.0f - hops * 0.1f : 0.0f;
+        else
+            factor = hops < 4 ? 1.0f - hops * 0.25f : 0.0f;
+    }
+    return (a - b).Magnitude();
+}
+
+uint8_t CountSectorHops(I3D_sector *from, I3D_sector *to, std::vector<I3D_sector *> &path, uint32_t maxPath)
+{
+    if (from == to)
+        return 0;
+    uint8_t &hops = SectorHopsBetween(from, to);
+    if (hops != 0xFF)
+        return hops;
+    uint8_t best = 10;
+    if (path.size() <= maxPath) {
+        // (The original looks the next sector up in `path`, then ignores the result: only
+        // maxPath ends the walk.)
+        const auto walk = [&](I3D_sector *next) {
+            path.push_back(next);
+            const uint32_t count = CountSectorHops(next, to, path, maxPath) + 1u;
+            if (count < best)
+                best = static_cast<uint8_t>(count);
+            path.pop_back();
+        };
+        for (int i = from->NumPortals(); i-- > 0;)
+            walk(from->GetPortal(i)->GetConnected());
+        for (int i = from->NumIncomingPortals(); i-- > 0;)
+            walk(from->GetIncomingPortal(i)->GetOwner());
+    }
+    hops = best;
+    return best;
+}
+
+void BuildSectorHopTable(std::vector<S_SectorHops *> &table, I3D_scene *scene)
+{
+    I3D_sector *primary = scene->GetPrimarySector();
+    table.push_back(new S_SectorHops(primary, 0));
+    primary->EnumFrames(AddSectorHopEntry, &table, ENUMF_SECTOR, 0);
+    std::vector<I3D_sector *> path;
+    const int count = static_cast<int>(table.size());
+    for (int i = 0; i < count; ++i) {
+        for (int j = 0; j < i; ++j)
+            table[i]->entries[j].hops = CountSectorHops(table[i]->sector, table[j]->sector, path, 10);
+    }
+}
+
+uint32_t __stdcall AddSectorHopEntry(I3D_frame *frame, void *context)
+{
+    auto &table = *static_cast<std::vector<S_SectorHops *> *>(context);
+    table.push_back(new S_SectorHops(static_cast<I3D_sector *>(frame), static_cast<int>(table.size())));
+    return 0;
+}
+
 void C_SoundModule::InitSectorAcoustics()
 {
     GetGame()->GetScene()->GetPrimarySector()->EnumFrames(AddSectorAcoustics, this, ENUMF_SECTOR, 0);

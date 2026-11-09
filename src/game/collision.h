@@ -330,7 +330,7 @@ public:
 
     // Loads the level collision (a "GifC" file: frame references, then the mesh block);
     // `buildGrid` also makes the dynamic grid over the level.
-    void Load(const char *fileName, bool buildGrid);       // 0x006ee940
+    void Load(const char *fileName, bool buildGrid);       // 0x006ee940 (DS 0x0073a280)
     // Frees the level collision (unless `keepMesh` and it was loaded into the caller's
     // buffer) and the dynamic grid.
     void Free(bool keepMesh);                               // 0x006ee4f0

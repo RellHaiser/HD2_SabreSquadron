@@ -169,7 +169,7 @@ protected:
     // OnCinematicsHidden, shown: OnCinematicsShown; the title, the picture, the movie, play (off; OnMoviePlay),
     // back, the scroll bar, the movies' list (a line per movie: copies of blong "Anim%02d", its text, picked:
     // OnMoviePick), the list's label, the version; load the last save and load hidden. True.
-    bool DescribeCinematicsScreen(S_ScreenDesc *desc, I3D_frame *model);         // 0x00614140
+    bool DescribeCinematicsScreen(S_ScreenDesc *desc, I3D_frame *model);         // 0x00614140 (DS 0x0063e830)
     // The cinematics screen hidden: the movie closed, none picked. True.
     static bool OnCinematicsHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
                                    uint32_t value);     // 0x00615660

@@ -60,7 +60,7 @@ const uint8_t *S_CheckpointName::Read(const uint8_t *data)   // 0x0051c7b0
     return data + 0x12;
 }
 
-const uint8_t *S_CheckpointFrame::Read(const uint8_t *data)   // 0x0051c870
+const uint8_t *S_CheckpointFrame::Read(const uint8_t *data)   // 0x0051c870 (DS 0x00508000)
 {
     index = ReadU16(data);
     frame = nullptr;
@@ -70,7 +70,7 @@ const uint8_t *S_CheckpointFrame::Read(const uint8_t *data)   // 0x0051c870
     return reinterpret_cast<const uint8_t *>(SkipName(name));
 }
 
-const uint8_t *S_CheckpointActor::Read(const uint8_t *data)   // 0x0051c910
+const uint8_t *S_CheckpointActor::Read(const uint8_t *data)   // 0x0051c910 (DS 0x005080e0)
 {
     index = ReadU16(data);
     actor = nullptr;

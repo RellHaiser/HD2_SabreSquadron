@@ -334,7 +334,7 @@ public:
     // handle, -1 if the effect does not exist or is incomplete. `transient` effects
     // are left out of saved games.
     int Create(int effect, const S_matrix &matrix, I3D_frame *parent, bool faceCamera,
-               bool transient);                             // 0x004451b0
+               bool transient);                             // 0x004451b0 (DS 0x0043dff0)
     int CreateAt(int effect, const S_vector &pos, const S_vector &dir, I3D_frame *parent,
                  bool faceCamera, bool transient);          // 0x00445150
     // Removes an effect immediately.

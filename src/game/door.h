@@ -135,8 +135,8 @@ private:
     // about the axis) to m_opened; true when something dynamic touches the box's edges or two of
     // its diagonals there (a turned door: its rotation back). Neither while opening. (The binary
     // passes Animate's time too, unused.)
-    bool TurnTo();                                      // 0x005ff700
-    bool SlideTo();                                     // 0x005ffbd0
+    bool TurnTo();                                      // 0x005ff700 (DS 0x00624f80)
+    bool SlideTo();                                     // 0x005ffbd0 (DS 0x00625590)
     // The portals open (not `closed`).
     void SetPortalsClosed(bool closed);                 // 0x006007b0
     // The box follows the frame (a turning, opening door's type lets cars through).

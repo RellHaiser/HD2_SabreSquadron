@@ -198,7 +198,7 @@ public:
     // The move/collision step (ground following, slopes, sphere stepping).
     void Move(int timeDelta);                           // 0x005c3420
     // Advances the model's animations and events for the frame.
-    void UpdateAnimation(int timeDelta);                // 0x005c18c0
+    void UpdateAnimation(int timeDelta);                // 0x005c18c0 (DS 0x005d69f0)
     // Builds the animation-sequence queue for the current mode / sub-modes (driven by the actor).
     void BuildSequence();                               // 0x005c5030
     // Plays the next animation of the sequence through the mixer (driven by the actor each frame).

@@ -201,7 +201,7 @@ void C_LightMapGroupsModule::SetFrameLightmap(I3D_frame *frame, int lightmap)   
     frame->Update();
 }
 
-void C_LightMapGroupsModule::SetGroupLightmap(const S_LightmapGroup *group, int lightmap)   // 0x0048d4e0
+void C_LightMapGroupsModule::SetGroupLightmap(const S_LightmapGroup *group, int lightmap)   // 0x0048d4e0 (DS 0x004a3330)
 {
     if (!group || !GetGame()->GetScene())
         return;

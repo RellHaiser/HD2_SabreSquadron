@@ -110,7 +110,7 @@ public:
     void StopMission(bool server) override;                              // 0x00401f40
     void RestartMission(bool server) override;                           // 0x00401140
     bool SaveGame(C_chunk &chunk) override;                              // 0x00401160
-    bool LoadGame(C_chunk &chunk) override;                              // 0x00401440
+    bool LoadGame(C_chunk &chunk) override;                              // 0x00401440 (DS 0x0041a5c0)
 
     bool AddTrack(const char *name);                                     // 0x00401d40
     C_Track *FindTrack(const char *name, int *outIndex = nullptr) const; // 0x00401ed0

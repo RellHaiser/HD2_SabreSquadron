@@ -50,7 +50,7 @@ private:
     // The sound module's listener: a footstep or a shot heard loud enough sets them off.
     static void __stdcall OnSoundHeard(const S_HeardSound *sound);   // 0x005ba860
     // Mode 1 and 2: the birds made.
-    void CreateBirds();                                 // 0x005ba8b0
+    void CreateBirds();                                 // 0x005ba8b0 (DS 0x005ce1a0)
 
     std::vector<C_Bird *> m_birds;                      // +0x90
     int m_mode = 0;                                     // +0xA0

@@ -114,7 +114,7 @@ C_AnimationActor::S_Collision::~S_Collision()           // 0x005b4dc0
         g_collisionWorld.RemoveVolume(&volume);
 }
 
-void C_AnimationActor::S_Collision::Refresh(bool add)   // 0x005b48b0
+void C_AnimationActor::S_Collision::Refresh(bool add)   // 0x005b48b0 (DS 0x005c6670)
 {
     I3D_frame *frame = volume.frame;
     if (!frame)

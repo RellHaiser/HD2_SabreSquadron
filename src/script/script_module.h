@@ -103,7 +103,7 @@ public:
     void RestartMission(bool server) override;                 // 0x00424900
     bool OnMessage(C_BitStream *msg) override;                 // 0x00424590
     bool SaveGame(C_chunk &chunk) override;                    // 0x00424970
-    bool LoadGame(C_chunk &chunk) override;                    // 0x004257b0
+    bool LoadGame(C_chunk &chunk) override;                    // 0x004257b0 (DS 0x00448610)
     void WriteState(C_BitStream *msg) override;                // 0x0042aff0
     void ReadState(C_BitStream *msg) override;                 // 0x0042b330
 
@@ -144,7 +144,7 @@ private:
         C_str scriptName;
     };
 
-    void LoadScriptList(bool multiplayer);                         // 0x00428600
+    void LoadScriptList(bool multiplayer);                         // 0x00428600 (DS 0x0044c070)
     void ClearScriptList();                                        // 0x00428a70
     void BackupSaveGameValues();                                   // 0x00428c80
     void RestoreSaveGameValues();                                  // 0x00428ca0

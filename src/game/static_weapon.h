@@ -85,7 +85,7 @@ public:
     float UnknownAC(int) override { return m_weapon.UnknownAC(); }            // 0xAC 0x00604d60
     int GetSeatWeaponText(int) override { return m_weapon.GetItemText(); }    // 0xB0 0x00604d90
     C_ItemDef *GetSeatWeaponDef(int) override { return m_weapon.GetItemDef(); }   // 0xB4 0x00604da0
-    void GetSeatWeaponLimits(int, float *up, float *down, float *left, float *right) override   // 0xB8 0x00604dd0
+    void GetSeatWeaponLimits(int, float *up, float *down, float *left, float *right) override   // 0xB8 0x00604dd0 (DS 0x0062bc80)
     {
         m_weapon.GetLimits(up, down, left, right);
     }
