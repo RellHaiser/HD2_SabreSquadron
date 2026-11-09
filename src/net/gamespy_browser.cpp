@@ -146,12 +146,22 @@ void FreeSharedString(void *element)                    // 0x0073a2c0
 
 }  // namespace
 
+static thread_local S_HashTable *t_sharedStrings;
+
 S_HashTable *SbSharedStrings()                          // 0x0073a240
 {
-    static thread_local S_HashTable *table;
-    if (!table)
-        table = TableNew2(sizeof(S_SharedString), 500, 4, HashFirstField, CompareFirstField, FreeSharedString);
-    return table;
+    if (!t_sharedStrings)
+        t_sharedStrings = TableNew2(sizeof(S_SharedString), 500, 4, HashFirstField, CompareFirstField, FreeSharedString);
+    return t_sharedStrings;
+}
+
+// The table goes once nothing is left in it.
+void SbFreeSharedStrings()                              // 0x0073a2d0 (DS 0x00797770)
+{
+    if (t_sharedStrings && TableCount(t_sharedStrings) == 0) {
+        TableFree(t_sharedStrings);
+        t_sharedStrings = nullptr;
+    }
 }
 
 namespace {
@@ -643,6 +653,23 @@ uint8_t CipherDecryptByte(S_SbCipher *cipher, uint8_t in)   // 0x00739a50
     cipher->lastCipher = in;
     cipher->lastPlain = static_cast<uint8_t>(first ^ second ^ in);
     return cipher->lastPlain;
+}
+
+uint8_t CipherEncryptByte(S_SbCipher *cipher, uint8_t in)   // 0x00739910 (DS 0x00796a70)
+{
+    uint8_t *const c = cipher->cards;
+    cipher->ratchet = static_cast<uint8_t>(cipher->ratchet + c[cipher->rotor++]);
+    const uint8_t swap = c[cipher->lastCipher];
+    c[cipher->lastCipher] = c[cipher->ratchet];
+    c[cipher->ratchet] = c[cipher->lastPlain];
+    c[cipher->lastPlain] = c[cipher->rotor];
+    c[cipher->rotor] = swap;
+    cipher->avalanche = static_cast<uint8_t>(cipher->avalanche + c[swap]);
+    const uint8_t first = c[c[(c[cipher->lastPlain] + c[cipher->ratchet] + c[cipher->lastCipher]) & 0xFF]];
+    const uint8_t second = c[(c[cipher->avalanche] + c[cipher->rotor]) & 0xFF];
+    cipher->lastPlain = in;
+    cipher->lastCipher = static_cast<uint8_t>(first ^ second ^ in);
+    return cipher->lastCipher;
 }
 
 void CipherDecrypt(S_SbCipher *cipher, char *data, int size)   // 0x00739b60
@@ -1446,6 +1473,19 @@ void ServerBrowserUpdate(S_ServerBrowser *browser, int async, int disconnectOnCo
         Sleep(10);
         result = ServerBrowserThink(browser);
     }
+}
+
+// Thinks until the trigger update is answered, an error comes or (`viaMaster`) the list has lost its master.
+int ServerBrowserWaitForTrigger(S_ServerBrowser *browser, bool viaMaster)  // 0x0073b100 (DS 0x00798af0)
+{
+    int error = 0;
+    while (browser->triggerIp != 0 && error == 0) {
+        Sleep(10);
+        error = ServerBrowserThink(browser);
+        if (viaMaster && browser->list.state == 0)
+            break;
+    }
+    return error;
 }
 
 int ServerBrowserThink(S_ServerBrowser *browser)        // 0x0073b240

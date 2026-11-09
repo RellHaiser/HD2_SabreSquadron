@@ -644,3 +644,167 @@ void BucketAvg(S_BucketSet *set, const char *name, const void *value)   // 0x007
         BucketDoSet(bucket, BucketDouble((bucket->value.asDouble * players + *static_cast<const double *>(value)) / players));
     }
 }
+
+// ---- gstats: the persistent storage service's replies ----------------------------------------------------------------------
+
+namespace {
+
+enum E_PersistKind { PERSIST_AUTH, PERSIST_GET, PERSIST_SET, PERSIST_SAVE };
+
+struct S_PersistRequest {
+    int kind;
+    int localId;
+    int key;                                            // the player's id (the auth reply fills it in)
+    int profile, dataType;                              // passed back by the get and set callbacks
+    void *instance;
+    void *callback;
+};
+
+using PersistAuthFn = void (*)(int result, const char *error, void *instance);
+using PersistGetFn = void (*)(int profile, int dataType, int result, const char *data, int size, void *instance);
+using PersistSetFn = void (*)(int profile, int dataType, int result, void *instance);
+using PersistSaveFn = void (*)(int result, void *instance);
+
+S_DArray *g_persistRequests;                            // 0x00982bb4
+
+// A key's value in a "\key\value" reply; the result stays valid for one more call.
+const char *ValueForKey(const char *reply, const char *key)     // 0x00736080 (DS 0x00792110)
+{
+    static int index;
+    static char values[2][256];
+    char spec[256] = "\\";
+    index ^= 1;
+    strcat(spec, key);
+    strcat(spec, "\\");
+    const char *at = strstr(reply, spec);
+    if (!at)
+        return nullptr;
+    at += strlen(spec);
+    char *out = values[index];
+    while (*at && *at != '\\')
+        *out++ = *at++;
+    *out = '\0';
+    return values[index];
+}
+
+const char *ValueForKeySafe(const char *reply, const char *key)  // 0x00736700 (DS 0x00792970)
+{
+    const char *value = ValueForKey(reply, key);
+    return value ? value : "";
+}
+
+int FindPersistRequest(int kind, int localId, int key)  // 0x00736710 (DS 0x00792990)
+{
+    if (g_persistRequests) {
+        for (int i = 0; i < ArrayLength(g_persistRequests); ++i) {
+            const auto *request = static_cast<const S_PersistRequest *>(ArrayNth(g_persistRequests, i));
+            if (request->kind == kind && request->localId == localId && request->key == key)
+                return i;
+        }
+    }
+    return -1;
+}
+
+void FinishPersistRequest(int index, int result, const char *text, int size)    // 0x00736900 (DS 0x00792c10)
+{
+    if (index < 0 || index >= ArrayLength(g_persistRequests))
+        return;
+    const auto *r = static_cast<const S_PersistRequest *>(ArrayNth(g_persistRequests, index));
+    if (r->callback) {
+        switch (r->kind) {
+        case PERSIST_AUTH:
+            reinterpret_cast<PersistAuthFn>(r->callback)(result, text, r->instance);
+            break;
+        case PERSIST_GET:
+            reinterpret_cast<PersistGetFn>(r->callback)(r->profile, r->dataType, result, text, size, r->instance);
+            break;
+        case PERSIST_SET:
+            reinterpret_cast<PersistSetFn>(r->callback)(r->profile, r->dataType, result, r->instance);
+            break;
+        case PERSIST_SAVE:
+            reinterpret_cast<PersistSaveFn>(r->callback)(result, r->instance);
+            break;
+        }
+    }
+    ArrayDeleteAt(g_persistRequests, index);
+}
+
+}  // namespace
+
+void PersistAuthReply(const char *reply)                // 0x00736680 (DS 0x007928d0)
+{
+    const int result = atoi(ValueForKeySafe(reply, "pauthr"));
+    const int localId = atoi(ValueForKeySafe(reply, "lid"));
+    const char *error = ValueForKeySafe(reply, "errmsg");
+    const int index = FindPersistRequest(PERSIST_AUTH, localId, 0);
+    if (index != -1) {
+        static_cast<S_PersistRequest *>(ArrayNth(g_persistRequests, index))->key = result;
+        FinishPersistRequest(index, result > 0, error, 0);
+    }
+}
+
+void PersistGetReply(const char *reply)                 // 0x007367e0 (DS 0x00792aa0)
+{
+    const int result = atoi(ValueForKeySafe(reply, "getpdr"));
+    const int localId = atoi(ValueForKeySafe(reply, "lid"));
+    const int key = atoi(ValueForKeySafe(reply, "pid"));
+    const int index = FindPersistRequest(PERSIST_GET, localId, key);
+    if (index == -1)
+        return;
+    const int size = atoi(ValueForKeySafe(reply, "length"));
+    const char *data = strstr(reply, "\\data\\");
+    if (data)
+        FinishPersistRequest(index, result, data + 6, size);
+    else
+        FinishPersistRequest(index, result, "", 0);
+}
+
+void PersistSetReply(const char *reply)                 // 0x00736890 (DS 0x00792b80)
+{
+    const int result = atoi(ValueForKeySafe(reply, "setpdr"));
+    const int key = atoi(ValueForKeySafe(reply, "pid"));
+    const int localId = atoi(ValueForKeySafe(reply, "lid"));
+    const int index = FindPersistRequest(PERSIST_SET, localId, key);
+    if (index != -1)
+        FinishPersistRequest(index, result, nullptr, 0);
+}
+
+// ---- gstats: a stats game's buckets; a bucket that does not exist is made with the value --------------------------------------
+
+struct S_StatsGame {
+    int reserved[3];
+    S_BucketSet *buckets;                               // +0x0C
+};
+
+S_StatsGame *g_statsGame;                               // 0x00982b98 the game given by default
+using BucketOpFn = void *(*)(S_BucketSet *set, const char *name, const void *value);
+
+int StatsBucketInt(S_StatsGame *game, const char *name, BucketOpFn op, int value)   // 0x00736ad0 (DS 0x00792e70)
+{
+    if (!game && !(game = g_statsGame))
+        return value;
+    void *result = op(game->buckets, name, &value);
+    if (!result)
+        result = BucketNew(game->buckets, name, 0, &value);
+    return *static_cast<int *>(result);
+}
+
+double StatsBucketDouble(S_StatsGame *game, const char *name, BucketOpFn op, double value)  // 0x00736b20 (DS 0x00792ee0)
+{
+    if (!game && !(game = g_statsGame))
+        return value;
+    void *result = op(game->buckets, name, &value);
+    if (!result)
+        result = BucketNew(game->buckets, name, 1, &value);
+    return *static_cast<double *>(result);
+}
+
+char *StatsBucketString(S_StatsGame *game, const char *name, BucketOpFn op, char *value)    // 0x00736b70 (DS 0x00792f50)
+{
+    if (!game && !(game = g_statsGame))
+        return value;
+    void *result = op(game->buckets, name, value);
+    if (!result)
+        result = BucketNew(game->buckets, name, 2, value);
+    return static_cast<char *>(result);
+}
