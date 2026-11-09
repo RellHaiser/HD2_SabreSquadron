@@ -280,7 +280,9 @@ def build_tests(debug, only=None):
 
 # Arguments of the tests that take no operation count and seed (after the original's path, "" = found
 # by %HD2_DIR% or PATH). compare_math's count is the rounds; without it "--pc24" is read as 0 rounds.
-RUN_ARGS = {"compare_math": ["{ops}", "--pc24"], "compare_dxerr8": []}
+RUN_ARGS = {"compare_math": ["{ops}", "--pc24"], "compare_dxerr8": [],
+            # every model file and mission scene the game ships (not an operation count)
+            "compare_load": ["0", "1", "1"]}
 
 
 def run_tests(only=None, ops="20000", seeds=("1",)):
@@ -288,6 +290,10 @@ def run_tests(only=None, ops="20000", seeds=("1",)):
     logs = os.path.join(WORK, "logs")
     os.makedirs(logs, exist_ok=True)
     env = dict(os.environ)
+    # The unpacked game files' names (research/ is local to the checkout that has it).
+    unpacked = os.path.join(os.path.dirname(ROOT), "research", "out", "HD2_Unpacked")
+    if not env.get("HD2_UNPACKED") and os.path.isdir(unpacked):
+        env["HD2_UNPACKED"] = unpacked
     if env.get("HD2_DIR"):
         # The originals import rw_data.dll and others from the game folder.
         env["PATH"] = env["HD2_DIR"] + os.pathsep + env.get("PATH", "")

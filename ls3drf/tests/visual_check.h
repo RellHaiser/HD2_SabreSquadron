@@ -157,10 +157,16 @@ inline std::map<unsigned, int> g_seen;
 
 // All fields of a class; `skip`: offsets (of dwords) not compared.
 template <size_t N>
-void Compare(const char *cls, Pair x, const S_layoutRow (&rows)[N], std::initializer_list<unsigned> skip = {})
+void Compare(const char *cls, Pair x, const S_layoutRow (&rows)[N], std::initializer_list<unsigned> skip = {},
+             std::initializer_list<const char *> skipFields = {})
 {
     for (const S_layoutRow &r : rows) {
         if (!std::strcmp(r.name, "{vfptr}") || !std::strncmp(r.name, "padding", 7) || !std::strcmp(r.name, "<pad>"))
+            continue;
+        bool skippedField = false;
+        for (const char *f : skipFields)
+            skippedField |= !std::strcmp(f, r.name);
+        if (skippedField)
             continue;
         if (!std::strcmp(r.name, "name") || !std::strcmp(r.name, "userProps")) {
             // (Strings by content.)
