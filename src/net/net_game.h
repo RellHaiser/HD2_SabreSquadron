@@ -82,7 +82,7 @@ public:
 };
 
 // A player's or a team's stats (9 ints, NET_STAT_*; read as an int array).
-struct S_NetStats {
+struct S_NetStats {                                     // (copied by 0x00749fa0 (DS 0x007ac360))
     int values[9] = {};
 
     operator int *() { return values; }

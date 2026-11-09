@@ -327,7 +327,7 @@ public:
     }
 
     // Local matrix, rebuilt from rotation and scale when needed (SDK inline 0x0041d370).
-    const S_matrix &GetLocalMatrix()
+    const S_matrix &GetLocalMatrix()                    // 0x004c8140 (DS 0x004b2740)
     {
         if (!(m_frameFlags & FRMFLAGS_LMATRIX_VALID)) {
             m_frameFlags |= FRMFLAGS_LMATRIX_VALID | FRMFLAGS_ROT_VALID;

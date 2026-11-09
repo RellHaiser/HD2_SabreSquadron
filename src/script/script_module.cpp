@@ -19,7 +19,7 @@
 
 int g_scriptMessageTypeBits = 9;                                 // 0x00838874
 std::vector<S_PendingSound *> g_pendingSounds;                   // 0x008693d0
-C_ScriptModule g_scriptModule(MODULE_SCRIPT, "Script");          // 0x00868b18, constructed by 0x00428f60
+C_ScriptModule g_scriptModule(MODULE_SCRIPT, "Script");          // 0x00868b18, constructed by 0x00428f60 (DS 0x0044cc80)
 
 namespace {
 
