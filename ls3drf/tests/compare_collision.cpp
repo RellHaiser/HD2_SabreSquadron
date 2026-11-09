@@ -49,7 +49,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <map>
 #include <random>
 #include <string>
 #include <vector>
@@ -633,22 +632,12 @@ int __stdcall TestFilter(const void *, float t, I3D_frame *frame, void *user, co
 
 // ---------------------------------------------------------------- comparing
 
-// Survey only (COMPARE_ULPS=n in the environment): a float differing by at most n units in the last
-// place is counted instead of failing, to see what lies past the first rounding difference. Unset,
-// every field must be the same bits.
-int g_ulps = -1;
-std::map<std::string, long> g_ulpCounts;
 void CheckBits(const std::string &what, const void *a, const void *b, size_t n)
 {
     for (size_t i = 0; i < n; i += 4) {
         uint32_t x = 0, y = 0;
         std::memcpy(&x, static_cast<const uint8_t *>(a) + i, 4);
         std::memcpy(&y, static_cast<const uint8_t *>(b) + i, 4);
-        if (x != y && g_ulps >= 0 && ((x ^ y) & 0xff800000) == 0 &&
-            static_cast<int>(x > y ? x - y : y - x) <= g_ulps) {
-            ++g_ulpCounts[what];
-            continue;
-        }
         Check(what + " +" + std::to_string(i), static_cast<long>(x), static_cast<long>(y));
     }
 }
@@ -1001,8 +990,6 @@ int main(int argc, char **argv)
     const uint32_t seed = argc > 3 ? static_cast<uint32_t>(std::strtoul(argv[3], nullptr, 0)) : 1;
     if (!SetUpOriginal(origPath))
         return 2;
-    if (const char *u = std::getenv("COMPARE_ULPS"))
-        g_ulps = std::atoi(u);
     g_logDisabled = true;
     _controlfp(_PC_24, _MCW_PC);
     g_rng.seed(seed);
@@ -1077,8 +1064,6 @@ int main(int argc, char **argv)
                 g_seenQueries, g_seenCalls, g_seenTexelCalls);
     for (int k = 0; k < 7; ++k)
         std::printf(" %s %ld / %ld%s", kNames[k], g_seenKindHits[k], g_seenKind[k], k < 6 ? "," : "\n");
-    for (const auto &c : g_ulpCounts)
-        std::printf("ulp survey: %s %ld\n", c.first.c_str(), c.second);
     std::printf("compare_collision: %ld operations, seed %u: identical\n", ops, seed);
     std::fflush(stdout);
     TerminateProcess(GetCurrentProcess(), 0);

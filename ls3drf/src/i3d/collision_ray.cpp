@@ -101,7 +101,10 @@ float RayBox(const S_vector &min, const S_vector &max, const S_vector &o, const 
 
 // A ray against a triangle (v0, v1, v2) from `o` along `d`: one-sided (the faces' winding seen from
 // the ray, determinant at least 1e-6) or two-sided (the inverse determinant in `inv`); false when
-// it misses, else the parameter in `t`.
+// it misses, else the parameter in `t`. LS3DRF inlines these three times and each copy adds its dot
+// products in its own order, which the results round by: the mirror's faces (0x10008860) are
+// RayTriangleOneSided, a mesh's (0x10008f61) RayTriangleOneSidedMesh, its two-sided faces
+// (0x100094fb) RayTriangleTwoSided.
 bool RayTriangleOneSided(const S_vector &v0, const S_vector &v1, const S_vector &v2, const S_vector &o,
                          const S_vector &d, float &t)
 {
@@ -129,6 +132,33 @@ bool RayTriangleOneSided(const S_vector &v0, const S_vector &v1, const S_vector 
     t = tt * (1.0f / det);
     return true;
 }
+bool RayTriangleOneSidedMesh(const S_vector &v0, const S_vector &v1, const S_vector &v2, const S_vector &o,
+                             const S_vector &d, float &t)
+{
+    const S_vector e1(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z);
+    const S_vector e2(v2.x - v0.x, v2.y - v0.y, v2.z - v0.z);
+    const float px = e2.z * d.y - e2.y * d.z;
+    const float py = e2.x * d.z - d.x * e2.z;
+    const float pz = d.x * e2.y - e2.x * d.y;
+    const float det = (px * e1.x + py * e1.y) + pz * e1.z;
+    if (det < 1e-6)
+        return false;
+    const S_vector tv(o.x - v0.x, o.y - v0.y, o.z - v0.z);
+    const float u = (tv.z * pz + tv.x * px) + tv.y * py;
+    if (u < 0.0 || u > det)
+        return false;
+    const float qx = tv.y * e1.z - tv.z * e1.y;
+    const float qy = e1.x * tv.z - tv.x * e1.z;
+    const float qz = tv.x * e1.y - e1.x * tv.y;
+    const float v = (qz * d.z + qy * d.y) + qx * d.x;
+    if (v < 0.0 || u + v > det)
+        return false;
+    const float tt = (qz * e2.z + qx * e2.x) + qy * e2.y;
+    if (tt < 0.0f)
+        return false;
+    t = tt * (1.0f / det);
+    return true;
+}
 bool RayTriangleTwoSided(const S_vector &v0, const S_vector &v1, const S_vector &v2, const S_vector &o,
                          const S_vector &d, float &t, float &inv)
 {
@@ -137,21 +167,21 @@ bool RayTriangleTwoSided(const S_vector &v0, const S_vector &v1, const S_vector 
     const float px = e2.z * d.y - e2.y * d.z;
     const float py = d.z * e2.x - d.x * e2.z;
     const float pz = d.x * e2.y - d.y * e2.x;
-    const float det = (e1.z * pz + py * e1.y) + px * e1.x;
+    const float det = (e1.z * pz + px * e1.x) + py * e1.y;
     if (det > -1e-6 && det < 1e-6)
         return false;
     inv = 1.0f / det;
     const S_vector tv(o.x - v0.x, o.y - v0.y, o.z - v0.z);
-    const float u = ((tv.z * pz + tv.y * py) + tv.x * px) * inv;
+    const float u = ((tv.z * pz + tv.x * px) + tv.y * py) * inv;
     if (u < 0.0 || u > 1.0)
         return false;
     const float qx = tv.y * e1.z - tv.z * e1.y;
     const float qy = tv.z * e1.x - e1.z * tv.x;
     const float qz = e1.y * tv.x - tv.y * e1.x;
-    const float v = ((qy * d.y + qz * d.z) + d.x * qx) * inv;
+    const float v = ((qz * d.z + d.x * qx) + qy * d.y) * inv;
     if (v < 0.0 || u + v > 1.0)
         return false;
-    const float tt = ((qz * e2.z + qy * e2.y) + qx * e2.x) * inv;
+    const float tt = ((qz * e2.z + qx * e2.x) + qy * e2.y) * inv;
     if (tt < 0.0f)
         return false;
     t = tt;
@@ -413,7 +443,7 @@ void RayVisual(I3D_visual *vis)
             const S_vector &v0 = vertex(f->v[0]), &v1 = vertex(f->v[1]), &v2 = vertex(f->v[2]);
             float tt, inv = 1.0f;
             if (twoSided ? !RayTriangleTwoSided(v0, v1, v2, lfrom, ldir, tt, inv)
-                         : !RayTriangleOneSided(v0, v1, v2, lfrom, ldir, tt))
+                         : !RayTriangleOneSidedMesh(v0, v1, v2, lfrom, ldir, tt))
                 continue;
             const S_vector r = HitOffset(lfrom, ldir, tt).RotateByMatrix(drawMatrix);
             const float dist2 = SquareYZX(r);
