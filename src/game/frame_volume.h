@@ -19,7 +19,7 @@ struct alignas(16) S_FrameVolume {
     // The box around `frame` (a dummy: its own box, the radius half its height; else its
     // hierarchy's), under the frame's world matrix; the radius scaled by the largest world scale.
     // Added to the world and moved there.
-    void Init(I3D_frame *frame, uint32_t flags, uint32_t type, C_Actor *actor)   // 0x005df710
+    void Init(I3D_frame *frame, uint32_t flags, uint32_t type, C_Actor *actor)   // 0x005df710 (DS 0x005fcb50)
     {
         volume = S_CollisionVolume();
         if (!frame)

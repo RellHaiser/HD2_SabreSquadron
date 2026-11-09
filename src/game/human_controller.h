@@ -1065,7 +1065,7 @@ private:
     void QueueWatchOrder(const S_vector4 &pos, const S_vector4 &dir, S_HumanOrder *model);   // 0x00531f60
     bool ExecuteAction(int timeDelta);                  // 0x00528950
     bool IsActionNeeded();                              // 0x005387c0 (__fastcall)
-    bool IsAtTarget(C_Actor *actor);                    // 0x00535e70
+    bool IsAtTarget(C_Actor *actor);                    // 0x00535e70 (DS 0x005283d0)
     void ShowActionIcon(int type);                      // 0x005374a0
     bool SearchBodyItems(C_Human *body);                // 0x00537300
     bool TakeItems(C_Actor *from, int behaviour);       // 0x00537350

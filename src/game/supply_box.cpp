@@ -195,7 +195,7 @@ void C_SupplyBox::Reset()                               // 0x005f98e0
     m_textId = DEFAULT_TEXT;
 }
 
-void C_SupplyBox::InitBox()                             // 0x005f9a60
+void C_SupplyBox::InitBox()                             // 0x005f9a60 (DS 0x0061d8e0)
 {
     S_VertexAnimation *animation = g_vertexAnimModule.FindAnimation(C_str("ammobox"));
     I3D_frame *morph = m_parachute->FindChildFrame("morph", FIND_PART_MASK);
@@ -316,7 +316,7 @@ void C_SupplyBox::UpdateBoxVolume()                     // 0x005fa530
     g_collisionWorld.MoveVolume(m_volume);
 }
 
-bool C_SupplyBox::SetFrame(I3D_frame *frame)            // 0x005fa6a0
+bool C_SupplyBox::SetFrame(I3D_frame *frame)            // 0x005fa6a0 (DS 0x0061e850)
 {
     m_dropPos = WorldPos4(frame);
     S_quat rot;

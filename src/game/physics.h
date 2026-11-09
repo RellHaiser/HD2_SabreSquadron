@@ -184,7 +184,7 @@ public:
 // Type 1: ball (0x180 bytes; not created by the game).
 class C_PhysSphere : public C_PhysObject {                  // vtable 0x0080f624
 public:
-    C_PhysSphere(I3D_frame *frame, float radius, S_PhysicsHandle *handle);   // 0x0040f6a0
+    C_PhysSphere(I3D_frame *frame, float radius, S_PhysicsHandle *handle);   // 0x0040f6a0 (DS 0x0042c620)
     bool Tick(float dt) override;                           // 0x0040edd0
     // Seventh virtual slot (only in this class).
     virtual bool Unknown18() { return true; }               // 0x0040fa10
@@ -196,7 +196,7 @@ private:
 // Type 2: can (0x180 bytes).
 class C_PhysCan : public C_PhysObject {                     // vtable 0x0080f608
 public:
-    C_PhysCan(I3D_frame *frame, float radius, S_PhysicsHandle *handle);   // 0x0040e810
+    C_PhysCan(I3D_frame *frame, float radius, S_PhysicsHandle *handle);   // 0x0040e810 (DS 0x0042b3a0)
     bool Tick(float dt) override;                           // 0x0040e3b0
     // Kicks the can (fixed strength) and spins it.
     void ApplyImpulse(const S_vector &impulse, const S_vector &point, float factor) override;   // 0x0040eb10
@@ -216,7 +216,7 @@ enum E_BoxState {
 // Type 3: tumbling box (0x1D0 bytes; not created by the game).
 class C_PhysBox : public C_PhysObject {                     // vtable 0x0080f5d8
 public:
-    C_PhysBox(I3D_frame *frame, S_PhysicsHandle *handle);   // 0x0040daa0
+    C_PhysBox(I3D_frame *frame, S_PhysicsHandle *handle);   // 0x0040daa0 (DS 0x0042a270)
     bool Tick(float dt) override;                           // 0x0040bee0
     void ApplyGravity(float dt) override;                   // 0x0040bea0
     void Rotate(float dt) override;                         // 0x0040bec0
@@ -259,12 +259,12 @@ private:
 // Type 5: door, gate, fence or tree (0x240 bytes).
 class C_PhysDoor : public C_PhysObject {                    // vtable 0x0080f578
 public:
-    C_PhysDoor(const S_PhysicsObjectDesc &desc, S_PhysicsHandle *handle);   // 0x00407390
+    C_PhysDoor(const S_PhysicsObjectDesc &desc, S_PhysicsHandle *handle);   // 0x00407390 (DS 0x00421fc0)
     ~C_PhysDoor() override;                                 // 0x004079f0
 
     bool Tick(float dt) override;                           // 0x004070c0
     void ApplyImpulse(const S_vector &, const S_vector &, float) override {}   // 0x004094d0
-    bool Hit(int kind, const S_vector *dir, void *extra) override;   // 0x00408780
+    bool Hit(int kind, const S_vector *dir, void *extra) override;   // 0x00408780 (DS 0x00423860)
 
     // Hides the piece that fell out of a broken fence (wire cutters).
     void HideBrokenPart();                                  // 0x00408750
@@ -277,9 +277,9 @@ private:
     // Turns the leaf to the current phase; false (and backs off) when its edges hit
     // something.
     bool MoveLeaf();                                        // 0x00406d10
-    void Break(const S_vector *dir);                        // 0x00407bd0
+    void Break(const S_vector *dir);                        // 0x00407bd0 (DS 0x00422a20)
     // Collision boxes of the break model's "VOLB0<n>" frames.
-    void AddBreakVolumes(I3D_frame *model);                 // 0x00406740
+    void AddBreakVolumes(I3D_frame *model);                 // 0x00406740 (DS 0x00420f90)
     enum E_TreeResult {
         TREE_NOT_SWAPPED,           // no damaged model: opens like a door
         TREE_SWAPPED,               // replaced; this object is deleted
@@ -324,7 +324,7 @@ private:
 // Type 6: swings back and forth on its parent when hit ("cross"; 0x2A0 bytes).
 class C_PhysSwingingObject : public C_PhysObject {          // vtable 0x0080f55c
 public:
-    C_PhysSwingingObject(I3D_frame *frame, S_PhysicsHandle *handle, I3D_frame *parent);   // 0x00405ea0
+    C_PhysSwingingObject(I3D_frame *frame, S_PhysicsHandle *handle, I3D_frame *parent);   // 0x00405ea0 (DS 0x00420490)
     ~C_PhysSwingingObject() override;                       // 0x00406300
 
     bool Tick(float dt) override;                           // 0x00405ca0

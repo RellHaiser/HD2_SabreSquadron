@@ -152,7 +152,7 @@ void __stdcall C_FowlGenerator::OnSoundHeard(const S_HeardSound *sound)   // 0x0
         static_cast<C_FowlGenerator *>(data->actor)->Start(true, 0);
 }
 
-void C_FowlGenerator::CreateBirds()                     // 0x005ba8b0
+void C_FowlGenerator::CreateBirds()                     // 0x005ba8b0 (DS 0x005ce1a0)
 {
     if (m_mode == FOWL_MISSION_BIRDS)
         return;

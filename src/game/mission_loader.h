@@ -42,7 +42,7 @@ public:
     // the scene's camera set up (made at (10, 5, 10) without one; perspective, 0.1 .. 500 m, 80
     // degrees), then its object chunk (the loading screen's stage 1). 0 when it loaded (or holds
     // another chunk), 1 when the chunk failed, 3 without the file.
-    int LoadScene2();                                   // 0x006cc280
+    int LoadScene2();                                   // 0x006cc280 (DS 0x00710dd0)
     // actors.bin / sounds.bin: their object chunk (the loading screen's stages 2 / 3).
     void LoadActors();                                  // 0x006d4910
     void LoadSounds();                                  // 0x006d4bd0

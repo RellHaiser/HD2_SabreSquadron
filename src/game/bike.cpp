@@ -209,7 +209,7 @@ bool C_Bike::LoadGame(C_chunk &chunk)                   // 0x005d8b90
     return true;
 }
 
-void C_Bike::StartMission(bool server)                  // 0x005db0e0
+void C_Bike::StartMission(bool server)                  // 0x005db0e0 (DS 0x005f7200)
 {
     Activate(server);
     if (m_started)

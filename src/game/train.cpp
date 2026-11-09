@@ -294,7 +294,7 @@ bool C_Train::ReadProperties(C_chunk &chunk)            // 0x005be360
     return true;
 }
 
-void C_Train::StartMission(bool server)                 // 0x005bd820
+void C_Train::StartMission(bool server)                 // 0x005bd820 (DS 0x005d17f0)
 {
     Activate(server);
     if (m_started)

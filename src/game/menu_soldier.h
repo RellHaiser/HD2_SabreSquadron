@@ -34,7 +34,7 @@ public:
 
     // The scene in the screen rectangle (pixels), its lights and camera before the game's camera,
     // the animations and the naked model "mp_Na01".
-    void Setup(float left, float top, float right, float bottom);   // 0x007d02c0
+    void Setup(float left, float top, float right, float bottom);   // 0x007d02c0 (DS 0x008084a0)
     // The model (with a fresh pose, the joints, the face, the holsters and the items again);
     // null: the items, the holsters and the model released.
     void SetModel(I3D_model *model);                    // 0x007d1bf0

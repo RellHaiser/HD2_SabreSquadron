@@ -120,7 +120,7 @@ void C_Pike::SetState(int state)                        // 0x005b8ea0
     }
 }
 
-bool C_Pike::Turn(int)                                  // 0x005b8f00
+bool C_Pike::Turn(int)                                  // 0x005b8f00 (DS 0x005cc0d0)
 {
     // The angle about the axis, from the rotation the frame had when activated.
     const S_quat previous = m_frame->GetRot();
@@ -294,7 +294,7 @@ void C_Pike::StartMission(bool server)                  // 0x005b9670
     m_loopSound = -1;
 }
 
-void C_Pike::UpdateVolume(bool add)                     // 0x005b97b0
+void C_Pike::UpdateVolume(bool add)                     // 0x005b97b0 (DS 0x005ccba0)
 {
     I3D_frame *frame = m_volume.frame;
     if (!frame)

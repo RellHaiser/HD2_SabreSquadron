@@ -126,7 +126,7 @@ struct S_CheckpointFrame {                              // 8 bytes
     uint16_t index = 0xFFFF;
 
     // Reads {uint16 index, char frameName[]} and looks the frame up.
-    const uint8_t *Read(const uint8_t *data);           // 0x0051c870
+    const uint8_t *Read(const uint8_t *data);           // 0x0051c870 (DS 0x00508000)
 };
 
 // A point tied to an actor (the doors' sides); the table is sorted by point.
@@ -135,7 +135,7 @@ struct S_CheckpointActor {                              // 8 bytes
     uint16_t index = 0xFFFF;
 
     // Reads {uint16 index, char frameName[]} and takes the actor of that frame.
-    const uint8_t *Read(const uint8_t *data);           // 0x0051c910
+    const uint8_t *Read(const uint8_t *data);           // 0x0051c910 (DS 0x005080e0)
 };
 
 // The positions FindEscapePath flees from: the AI controller's growable aligned array.

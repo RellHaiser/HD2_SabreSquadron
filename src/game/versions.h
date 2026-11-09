@@ -37,7 +37,7 @@ enum E_VersionEffects {
 
 // Collision box of a damageable model.
 struct alignas(16) S_VersionCollision {
-    S_VersionCollision(I3D_frame *frame, bool transparent);  // 0x0043ddb0
+    S_VersionCollision(I3D_frame *frame, bool transparent);  // 0x0043ddb0 (DS 0x00462710)
     ~S_VersionCollision();                                  // 0x0043e1f0
 
     S_matrix invMatrix;                                     // +0x00
@@ -113,7 +113,7 @@ public:
     // After a stage change: notifies the model's script, deletes a used-up part,
     // refits the collision box and removes the model when no part is left. Returns
     // false if `keeper` was deleted.
-    bool OnKeeperDamaged(C_VersionKeeper *keeper);          // 0x0043c710
+    bool OnKeeperDamaged(C_VersionKeeper *keeper);          // 0x0043c710 (DS 0x004609f0)
     // Reads the stages of `keeper` from the versions model.
     bool LoadVersions(C_VersionKeeper *keeper);             // 0x0043cca0
 

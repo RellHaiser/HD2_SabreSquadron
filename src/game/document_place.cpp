@@ -64,7 +64,7 @@ void C_DocumentPlace::CopyFrom(const C_Actor *source)   // 0x0060dc10
     m_textId = other->m_textId;
 }
 
-void C_DocumentPlace::StartMission(bool server)         // 0x0060dc70
+void C_DocumentPlace::StartMission(bool server)         // 0x0060dc70 (DS 0x00636f60)
 {
     Activate(server);
     if (m_started)

@@ -386,7 +386,7 @@ public:
     // A drop of blood flying from `pos` (3 m/s along `dir`, randomised) that leaves a
     // stain where it lands.
     void SprayBlood(const S_vector &pos, const S_vector &dir);   // 0x0044f4d0
-    void SprayBloodRandom(const S_vector &pos, const S_vector &dir);   // 0x0044f4f0
+    void SprayBloodRandom(const S_vector &pos, const S_vector &dir);   // 0x0044f4f0 (DS 0x0046a770)
     // A blood stain on the wall 3 m from `pos` along the horizontal part of `dir`. Not called.
     void AddBloodSplat(const S_vector &pos, const S_vector &dir);   // 0x0044f740
 

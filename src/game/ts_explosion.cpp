@@ -291,7 +291,7 @@ void C_TSExplosion::ServerStep()                        // 0x0060fd90
     explosion.Execute();
 }
 
-void C_TSExplosion::MakeScorch()                        // 0x0060fe50
+void C_TSExplosion::MakeScorch()                        // 0x0060fe50 (DS 0x00639910)
 {
     const S_vector &at = m_frame->GetWorldPos();
     const S_vector pos(at.x, at.y + SCORCH_HEIGHT, at.z);
