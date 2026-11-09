@@ -303,6 +303,8 @@ public:
     void Free();                                            // 0x00455520
     // Places the boxes on `human` (the human's frame) without testing anything. Not called.
     void Place(I3D_frame *human);                           // 0x00455540
+    // Shows or hides the model. Not called.
+    void SetOn(bool on);                                    // 0x00455630 (DS 0x0046e130)
     // Zone the ray from `pos` along `dir` (its length is the reach) hits, HIT_ZONE_NONE if
     // none. A helmet (headgear type 0) in front of the head stops the ray: HIT_ZONE_HELMET.
     int GetHitZone(C_Human *human, const S_vector &pos, const S_vector &dir);   // 0x00455670
@@ -358,19 +360,19 @@ public:
     // weapon); see C_ProjectileShot::Init.
     void FireProjectile(C_Actor *shooter, C_Item *weapon, const S_vector &pos, const S_vector &dir,
                         I3D_frame *projectile, int trailEffect, bool flySound, bool cameraFollow,
-                        uint32_t flags);                    // 0x00451670
+                        uint32_t flags);                    // 0x00451670 (DS 0x0046c260)
     // Throws `item` (a grenade): the shot owns the flight, the item leaves the thrower's
     // inventory. In single player the thrower's team mates are warned.
     void ThrowItem(C_Actor *thrower, C_Item *item, const S_vector &pos, const S_vector &dir,
-                   bool fake);                              // 0x00450400
+                   bool fake);                              // 0x00450400 (DS 0x0046ad10)
 
     // --- effects -----------------------------------------------------------------------
     // Area damage (both > 0) by `source`; in single player the AI hears it (sound group
     // `soundGroup`, nothing is played).
-    void Explode(C_Actor *source, const S_vector &pos, float range, float damage, int soundGroup);   // 0x00451990
+    void Explode(C_Actor *source, const S_vector &pos, float range, float damage, int soundGroup);   // 0x00451990 (DS 0x0046c670)
     // Sound, particle effect, scorch mark and material effect of an explosion (clients).
     void PlayExplosion(const S_vector &pos, const S_vector &dir, int effect, int material,
-                       int soundGroup);                     // 0x00451a80
+                       int soundGroup);                     // 0x00451a80 (DS 0x0046c790)
     // Hit sound of `material` (clients); `alternate` picks the material's second sound.
     void PlayHitSound(C_Actor *source, int material, const S_vector &pos, bool alternate,
                       bool silentToAI);                     // 0x00451b00

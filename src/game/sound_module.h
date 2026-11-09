@@ -102,7 +102,7 @@ struct S_SoundFrame {                                   // 0x14 bytes
 class C_SoundModule : public C_Module {                 // "Sound", vtable 0x0080f7b8, 0x104 bytes
 public:
     C_SoundModule(int id, const char *name);            // 0x004336d0
-    ~C_SoundModule() override;                          // 0x004335d0
+    ~C_SoundModule() override;                          // 0x004335d0 (DS 0x00459340)
 
     void Update(int timeDelta) override;                // 0x004368d0
     void LoadMissionData(bool server) override;         // 0x004338d0
@@ -190,7 +190,7 @@ private:
     void ReleaseSlotSound(S_SoundSlot *slot);           // 0x004361b0
     void NotifyListeners(int slot, bool occluded);      // 0x00435b00
     void InitSectorAcoustics();                         // 0x004328d0
-    void FreeSectorAcoustics();                         // 0x00432860
+    void FreeSectorAcoustics();                         // 0x00432860 (DS 0x00458280)
     static uint32_t __stdcall AddSectorAcoustics(I3D_frame *sector, void *module);   // 0x00432900
     bool IsMusicPlaying() const;                        // 0x004323e0
     bool IsOverlayPlaying() const;                      // 0x00432400

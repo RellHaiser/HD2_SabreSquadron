@@ -79,7 +79,7 @@ void BroadcastInit();                                        // 0x0048da60
 void BroadcastDone();                                        // 0x0048da80
 void BroadcastTick(int timeDelta);                 // 0x0048daa0
 void BroadcastUpdate(int timeDelta);                         // 0x0048dad0
-void BroadcastLoadMissionData(bool server);                  // 0x0048dbf0
+void BroadcastLoadMissionData(bool server);                  // 0x0048dbf0 (DS 0x004a3cd0)
 void BroadcastFreeMissionData(bool server);                  // 0x0048dc20
 void BroadcastStartMission(bool server);                     // 0x0048db00
 void BroadcastStopMission(bool server);                      // 0x0048db90 (reverse order)

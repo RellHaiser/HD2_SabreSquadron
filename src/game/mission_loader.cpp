@@ -41,12 +41,14 @@ struct S_ModuleMissionData {
     S_ModuleMissionData() = default;
     S_ModuleMissionData(const S_ModuleMissionData &) = delete;
     S_ModuleMissionData &operator=(const S_ModuleMissionData &) = delete;
-    ~S_ModuleMissionData()                              // 0x006cb130
+    ~S_ModuleMissionData()                              // 0x006cb130 (DS 0x0070f780)
     {
         if (g_gameRole & GAME_ROLE_SERVER)
             ModuleManager::BroadcastLoadMissionData(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
         if (g_gameRole & GAME_ROLE_CLIENT)
             ModuleManager::BroadcastLoadMissionData(false);
+#endif
     }
 };
 

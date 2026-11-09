@@ -110,7 +110,7 @@ private:
     friend class C_Junkers88Test;
 
     // A group of the crew's radio chatter: speech sounds "<id>.wav", one at a time, then a pause.
-    struct S_Chatter {                                  // 0x20 bytes (ctor 0x005ef400, dtor 0x005ef450)
+    struct S_Chatter {                                  // 0x20 bytes (ctor 0x005ef400 (DS 0x006108a0), dtor 0x005ef450)
         int minDelay = 0;                               // +0x00 ms
         int delay = 0;                                  // +0x04 ms until another may play
         int range = 0;                                  // +0x08 ms (the random part of the pause)

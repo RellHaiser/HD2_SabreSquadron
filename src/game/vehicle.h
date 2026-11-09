@@ -663,7 +663,7 @@ public:
     // parts and lights, then applies the default parameters (their result is returned). Fails
     // without BODY / CENTRE, without a seat or wheels (unless +0xF74 bit 1), or with misnamed
     // wheels.
-    bool Setup(I3D_frame *model);                       // 0x004e2e30
+    bool Setup(I3D_frame *model);                       // 0x004e2e30 (DS 0x004d2da0)
     // Frees what Setup built (and releases the model).
     void Release();                                     // 0x004e81a0
 

@@ -94,7 +94,7 @@ public:
     void RemoveFromHolster(int typeId, int count);      // 0x00791d70
 
     // Animation events of the body (take / put away models at the right frame).
-    void OnAnimationEvent(int event);                   // 0x00791830
+    void OnAnimationEvent(int event);                   // 0x00791830 (DS 0x007ffa20)
     // Links the model of `place` where it belongs / takes it off.
     void AttachModel(int place);                        // 0x0078e3c0
     void DetachModel(int place);                        // 0x00790980
