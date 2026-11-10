@@ -509,8 +509,12 @@ void C_HumanEquipment::AttachModel(int place)
         m_headModel->Update();
         // Light head gear (caps) does not change the weapon pose.
         const C_Item *item = m_headUid >= 0 ? m_owner->FindItemByUid(m_headUid) : nullptr;
+#ifndef HD2_DEDICATED   // the server looks the item up but has no stains to show
         if (!item || item->GetDef()->GetWeight() > 0.1f)
             movement->GetWeaponPose()->SetStainsVisible(true);
+#else
+        (void)item;
+#endif
         SetLightLevel(m_headModel);
         UpdateModelNames();
         return;
@@ -804,7 +808,9 @@ void C_HumanEquipment::DetachModel(int place)
             return;
         m_headModel->LinkTo(nullptr, 0);
         m_headModel = nullptr;
+#ifndef HD2_DEDICATED   // no stains on the server
         movement->GetWeaponPose()->SetStainsVisible(false);
+#endif
         UpdateModelNames();
         return;
     case EQUIPMENT_PLACE_BACKPACK:
