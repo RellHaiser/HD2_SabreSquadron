@@ -390,7 +390,7 @@ void C_StaticWeapon::Update(int frameTime)              // 0x006034d0
     }
 }
 
-void C_StaticWeapon::Tick(int timeDelta)                // 0x00603070
+void C_StaticWeapon::Tick(int timeDelta)                // 0x00603070 (DS 0x00629770)
 {
     if (!IsClient())
         ReadMessages();
@@ -428,7 +428,7 @@ void C_StaticWeapon::Tick(int timeDelta)                // 0x00603070
 
 // --- the network ----------------------------------------------------------------------------------
 
-void C_StaticWeapon::ReadMessages()                     // 0x00603290
+void C_StaticWeapon::ReadMessages()                     // 0x00603290 (DS 0x00629a10)
 {
     // A client's player sitting at `seat` (its own shots and reloads come back to it).
     const auto ownSeat = [this](int seat) {

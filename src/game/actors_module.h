@@ -36,7 +36,7 @@ public:
     C_ActorsModule(int id, const char *name);                       // 0x00475690
     ~C_ActorsModule() override;                                     // 0x00475790
 
-    void Tick(int timeDelta) override;                              // 0x00476080
+    void Tick(int timeDelta) override;                              // 0x00476080 (DS 0x00492670)
     void Update(int frameTime) override;                            // 0x00476160
     void FreeMissionData(bool server) override { Clear(); }         // 0x00475760
     void StartMission(bool server) override;                        // 0x00476210
@@ -88,7 +88,7 @@ public:
 
 private:
     void ScheduleRemoval(C_Actor *actor, int delay);                // 0x00476680
-    void TickRemovals(int timeDelta);                               // 0x00476860
+    void TickRemovals(int timeDelta);                               // 0x00476860 (DS 0x00493080)
     void ApplyPendingActivations();
     void CountEnemies();                                            // 0x00476a50
 
@@ -131,7 +131,7 @@ public:
     void ReadState(C_BitStream *msg) override;                      // 0x00478520
 
     // Creates a temporary actor of `type` on `frame`; id < 0 takes the next free id.
-    C_Actor *CreateActor(E_ActorType type, I3D_frame *frame, int id = -1);    // 0x004770b0
+    C_Actor *CreateActor(E_ActorType type, I3D_frame *frame, int id = -1);    // 0x004770b0 (DS 0x00493b80)
     void DestroyActor(C_Actor *actor);                              // 0x00477190 (DS 0x00493c90)
     // The mines `owner` laid go (a player left the game).
     void DestroyMinesOf(C_Human *owner);                            // 0x00479700
