@@ -280,8 +280,34 @@ expectations come from the original's assembly (0x0044b3b0, 0x0044b910, 0x004483
   in the file. The rest is effects code for part 2c.
 
   shots.cpp: 733 of 1,482 lines (49 %), 558 of 1,075 branch outcomes.
-- **Part 2c:** thrown items (rigid body), shells, muzzle lights, blood, explosion decals, the fly
-  sound, `MeleeAttack`.
+- **Part 2c (done):** the effects. Tested:
+  - thrown items: `OnContact` with the squad rule (<= 200 ms), penetration and destructible
+    parts, plus fuses, impacts, the 15 s loss and the first-bounce sound;
+  - shells: the velocity formula, bounces, getting stuck, three bounces, the first-person copy,
+    reuse from the pool;
+  - muzzle lights: the portals within 4 m, the fade, the flash at 50 ms, out at 100 ms;
+  - blood: pools growing every 100 ms, drops landing or giving up after 1 s, splats;
+  - the mission's start, stop and restart, and the blood save placeholders;
+  - `MeleeAttack`: backstab, humans, dogs, static weapons, other actors;
+  - `SendExplosionMessage`, the fly sound, the explosion decal;
+  - `IsSegmentInView` (coarse cases only), `FireBullet`'s dummies, `ThrowItem`.
+
+  Fakes: a vtable per kind of engine object, because the light, sound, sector and projector
+  reuse the same slot offsets with different arguments, which breaks stdcall.
+
+  934 → 967 checks. Mutations:
+  - `mutate_shots2c.py`: 524, 455 killed, 41 don't build, 28 survived (all equivalent,
+    unreachable or not observable);
+  - `mutate_shots2d.py`: 57, 25 killed, 7 don't build, 25 survived, all in `IsSegmentInView`,
+    whose clipping and projection arithmetic still needs a reference written from its assembly
+    (0x00450620).
+
+  shots.cpp in all: **1,419 of 1,482 lines (96 %), 96 of 101 functions, 941 of 1,075 branch
+  outcomes (88 %)**. Not run:
+  - the trace and flare models' creation (`CreateTrace`, which needs a fake mesh chain);
+  - `C_HitZones::Place` / `SetOn` (no callers in the port);
+  - the manager's destructor;
+  - the unreachable paths named in `mutate_shots2c.py`.
 
 `_re/harness/mutrun.py` now takes its repository root from its own path. It used to name the
 G: checkout, which has been out of date since the move to T:.
