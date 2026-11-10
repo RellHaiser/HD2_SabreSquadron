@@ -109,6 +109,7 @@ SUITES = [
     T("quick_messages", "script_module/build_quick_messages.bat", TMP + r"\quick_messages_test.exe"),
     T("speech", "script_module/build_speech.bat", TMP + r"\speech_test.exe", tree_copy="script_module/speech_test.exe"),
     T("stains", "script_module/build_stains.bat", TMP + r"\stains_test.exe"),
+    T("shots", "shots/build.bat", TMP + r"\shots_test.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

@@ -7,7 +7,8 @@ machine out of memory through capture_output), or after TIMEOUT. Results print a
 compiled once. Env MUT_DEFS: extra -D options, space separated (-DGAMESPY_BROWSER_ONLY skips the slower earlier tests)."""
 import concurrent.futures, importlib.util, os, queue, re, shutil, subprocess, sys, threading
 
-ROOT = r"G:\Programming\HD2 Source Port\C++"
+# (This repository: the G: checkout it named before is out of date since the move to T:.)
+ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 MUT, WORK = sys.argv[1], sys.argv[2]
 JOBS = int(sys.argv[3]) if len(sys.argv) > 3 else 6
 want = set(sys.argv[4:])

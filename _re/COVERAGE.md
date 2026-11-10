@@ -215,3 +215,35 @@ client_coverage.py uses it to count original functions as well. In the menu run:
   inline in their callers).
 - The 2,331 unnamed `hand` rows overlap the ledger's rows without an address comment, and its
   sections of code marked done without a port.
+
+## New harness: shots (part 1, 2026-11-10)
+
+`src/game/shots.cpp` was in no suite; it is the largest uncovered file that doesn't need a
+`C_Human`. `_re/harness/shots`: `build.bat` builds `shots_test.cpp` with `shots_globals.cpp` and
+the real `shots.cpp`. The engine and the game are faked:
+
+- the collision query hands back scripted hits;
+- the scene's `IntersectFrame` gives scripted answers;
+- actors are zeroed bytes with a vtable that logs `Hit` and `GetMaterialId`;
+- sounds, scripts' frame hits, impulses and version-keeper damage are logged.
+
+The suite runs as `shots` in run_suites.py: 155 checks.
+
+Part 1 is the bullet: `C_BulletShot::Init`, `GetDamageAt`, `CheckNearMiss` and `Tick`. The
+expectations come from the original's assembly (0x0044b3b0, 0x0044b910, 0x00448380).
+
+- **Tested:** free flight and gravity; the flare's half time; the 600 m end, and the extra tick a
+  client keeps; PASS / STOP / no material; sorting; hit sounds and effects by role; penetration
+  costs; power over distance; the ricochet (`RandFloat()*0.1 + 1.1`, velocity × 0.2, damage ×
+  0.3, head-on at −0.95); level meshes drawn in the last frame; doors, physics objects and
+  destructible parts; cars and the shooter's own vehicle; static weapons (hit with the step,
+  before the visual test); the one-hit-per-actor rule; fake shots; near misses within 3 m.
+- **Coverage:** `Tick` runs 125 of its 138 lines. shots.cpp as a whole: 257 of 1,482 lines.
+- **Mutations:** `mutations/mutate_shots1.py` (146 mutants, from `gen_mutations.py`). 56 killed,
+  10 don't build, 80 survived. The survivors are equivalent ones, listed with reasons in the
+  file, and code part 2 will test.
+- **Part 2:** humans and hit zones, the trace and flare visuals (`Update`), decals, projectiles,
+  thrown items, and the manager's save / load and network messages.
+
+`_re/harness/mutrun.py` now takes its repository root from its own path. It used to name the
+G: checkout, which has been out of date since the move to T:.
