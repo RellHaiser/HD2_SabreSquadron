@@ -1,0 +1,246 @@
+[
+ {
+  "name": "lstrcatA",
+  "address": "EXTERNAL:00000001"
+ },
+ {
+  "name": "lstrlenA",
+  "address": "EXTERNAL:00000002"
+ },
+ {
+  "name": "OutputDebugStringA",
+  "address": "EXTERNAL:00000003"
+ },
+ {
+  "name": "WideCharToMultiByte",
+  "address": "EXTERNAL:00000004"
+ },
+ {
+  "name": "HeapCreate",
+  "address": "EXTERNAL:00000005"
+ },
+ {
+  "name": "HeapDestroy",
+  "address": "EXTERNAL:00000006"
+ },
+ {
+  "name": "RtlUnwind",
+  "address": "EXTERNAL:00000007"
+ },
+ {
+  "name": "GetCommandLineA",
+  "address": "EXTERNAL:00000008"
+ },
+ {
+  "name": "GetVersion",
+  "address": "EXTERNAL:00000009"
+ },
+ {
+  "name": "ExitProcess",
+  "address": "EXTERNAL:0000000a"
+ },
+ {
+  "name": "TerminateProcess",
+  "address": "EXTERNAL:0000000b"
+ },
+ {
+  "name": "GetCurrentProcess",
+  "address": "EXTERNAL:0000000c"
+ },
+ {
+  "name": "HeapReAlloc",
+  "address": "EXTERNAL:0000000d"
+ },
+ {
+  "name": "HeapAlloc",
+  "address": "EXTERNAL:0000000e"
+ },
+ {
+  "name": "HeapSize",
+  "address": "EXTERNAL:0000000f"
+ },
+ {
+  "name": "GetCurrentThreadId",
+  "address": "EXTERNAL:00000010"
+ },
+ {
+  "name": "TlsSetValue",
+  "address": "EXTERNAL:00000011"
+ },
+ {
+  "name": "TlsAlloc",
+  "address": "EXTERNAL:00000012"
+ },
+ {
+  "name": "TlsFree",
+  "address": "EXTERNAL:00000013"
+ },
+ {
+  "name": "SetLastError",
+  "address": "EXTERNAL:00000014"
+ },
+ {
+  "name": "TlsGetValue",
+  "address": "EXTERNAL:00000015"
+ },
+ {
+  "name": "GetLastError",
+  "address": "EXTERNAL:00000016"
+ },
+ {
+  "name": "HeapFree",
+  "address": "EXTERNAL:00000017"
+ },
+ {
+  "name": "GetProcAddress",
+  "address": "EXTERNAL:00000018"
+ },
+ {
+  "name": "GetModuleHandleA",
+  "address": "EXTERNAL:00000019"
+ },
+ {
+  "name": "SetHandleCount",
+  "address": "EXTERNAL:0000001a"
+ },
+ {
+  "name": "GetStdHandle",
+  "address": "EXTERNAL:0000001b"
+ },
+ {
+  "name": "GetFileType",
+  "address": "EXTERNAL:0000001c"
+ },
+ {
+  "name": "GetStartupInfoA",
+  "address": "EXTERNAL:0000001d"
+ },
+ {
+  "name": "DeleteCriticalSection",
+  "address": "EXTERNAL:0000001e"
+ },
+ {
+  "name": "GetModuleFileNameA",
+  "address": "EXTERNAL:0000001f"
+ },
+ {
+  "name": "FreeEnvironmentStringsA",
+  "address": "EXTERNAL:00000020"
+ },
+ {
+  "name": "FreeEnvironmentStringsW",
+  "address": "EXTERNAL:00000021"
+ },
+ {
+  "name": "Sleep",
+  "address": "EXTERNAL:00000022"
+ },
+ {
+  "name": "GetEnvironmentStrings",
+  "address": "EXTERNAL:00000023"
+ },
+ {
+  "name": "GetEnvironmentStringsW",
+  "address": "EXTERNAL:00000024"
+ },
+ {
+  "name": "VirtualFree",
+  "address": "EXTERNAL:00000025"
+ },
+ {
+  "name": "WriteFile",
+  "address": "EXTERNAL:00000026"
+ },
+ {
+  "name": "InitializeCriticalSection",
+  "address": "EXTERNAL:00000027"
+ },
+ {
+  "name": "EnterCriticalSection",
+  "address": "EXTERNAL:00000028"
+ },
+ {
+  "name": "LeaveCriticalSection",
+  "address": "EXTERNAL:00000029"
+ },
+ {
+  "name": "VirtualAlloc",
+  "address": "EXTERNAL:0000002a"
+ },
+ {
+  "name": "IsBadWritePtr",
+  "address": "EXTERNAL:0000002b"
+ },
+ {
+  "name": "SetUnhandledExceptionFilter",
+  "address": "EXTERNAL:0000002c"
+ },
+ {
+  "name": "IsBadReadPtr",
+  "address": "EXTERNAL:0000002d"
+ },
+ {
+  "name": "IsBadCodePtr",
+  "address": "EXTERNAL:0000002e"
+ },
+ {
+  "name": "InterlockedDecrement",
+  "address": "EXTERNAL:0000002f"
+ },
+ {
+  "name": "InterlockedIncrement",
+  "address": "EXTERNAL:00000030"
+ },
+ {
+  "name": "GetCPInfo",
+  "address": "EXTERNAL:00000031"
+ },
+ {
+  "name": "GetACP",
+  "address": "EXTERNAL:00000032"
+ },
+ {
+  "name": "GetOEMCP",
+  "address": "EXTERNAL:00000033"
+ },
+ {
+  "name": "LoadLibraryA",
+  "address": "EXTERNAL:00000034"
+ },
+ {
+  "name": "MultiByteToWideChar",
+  "address": "EXTERNAL:00000035"
+ },
+ {
+  "name": "GetStringTypeA",
+  "address": "EXTERNAL:00000036"
+ },
+ {
+  "name": "GetStringTypeW",
+  "address": "EXTERNAL:00000037"
+ },
+ {
+  "name": "LCMapStringA",
+  "address": "EXTERNAL:00000038"
+ },
+ {
+  "name": "LCMapStringW",
+  "address": "EXTERNAL:00000039"
+ },
+ {
+  "name": "MessageBoxA",
+  "address": "EXTERNAL:0000003a"
+ },
+ {
+  "name": "MessageBeep",
+  "address": "EXTERNAL:0000003b"
+ },
+ {
+  "name": "wsprintfA",
+  "address": "EXTERNAL:0000003c"
+ },
+ {
+  "name": "DirectInputCreateEx",
+  "address": "EXTERNAL:0000003d"
+ }
+]

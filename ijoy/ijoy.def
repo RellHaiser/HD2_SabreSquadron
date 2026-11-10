@@ -1,0 +1,4 @@
+; Export of IJoy.dll: the decorated __stdcall name with the original ordinal.
+LIBRARY IJoy
+EXPORTS
+    _CreateJoyBase@20 @1
