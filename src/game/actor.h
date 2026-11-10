@@ -235,7 +235,7 @@ public:
     void Deactivate(bool server);                                               // 0x00610510
     // Deactivate + activate on every side the game runs (`server`, passed by the human's
     // RestartMission, is not used).
-    void Reactivate(bool server);                                               // 0x00610710
+    void Reactivate(bool server);                                               // 0x00610710 (DS 0x0063a460)
 
 protected:
     explicit C_Actor(E_ActorType type);                                         // 0x00610070

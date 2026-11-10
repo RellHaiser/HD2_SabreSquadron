@@ -136,7 +136,9 @@ void C_Human::RestartSinglePlayer(bool server)
         m_fadedOut = false;
         GetGEffects()->FadeHuman(this, 0, true);
         m_body.SetModelVisible(true);
+#ifndef HD2_DEDICATED   // no surface marks on the server
         SurfaceMarks_SetHumanVisible(this, true);
+#endif
     }
     m_faceTexture = "";
     SetLeader(nullptr);
