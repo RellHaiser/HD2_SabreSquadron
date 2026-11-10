@@ -265,7 +265,9 @@ void C_HumanMovement::Reset()
     m_visual.Reset();
     m_idle.Reset();
     m_morph.Reset();
+#ifndef HD2_DEDICATED   // the server's resets no weapon pose
     m_weaponPose->Reset();
+#endif
     C_HumanLighting &lighting = m_visual.m_lighting;
     lighting.SetSector(m_visual.m_sector);
     RemoveCollision(false);
@@ -882,7 +884,9 @@ void C_HumanMovement::UpdatePhysicsParts(int time)
     if (m_flags & MOVE_FLAG_FROZEN)
         return;
     UpdatePhysicsRest(time);
+#ifndef HD2_DEDICATED   // the server's has no weapon pose update here
     m_weaponPose->Update(time);
+#endif
 }
 
 void C_HumanMovement::UpdatePhysicsRest(int time)

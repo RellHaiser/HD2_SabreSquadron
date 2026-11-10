@@ -913,7 +913,7 @@ private:
     // The tracks: the body animation, the carry animation, the activity.
     void UpdateAnimTrack();                             // 0x00777f30
     void UpdateCarryTrack();                            // 0x00778f80
-    void UpdateActivityTrack();                         // 0x00779850
+    void UpdateActivityTrack();                         // 0x00779850 (DS 0x007e56f0)
     // What starting an animation means for the body; sets the request that follows it.
     void OnAnimStarted(const S_HumanAnimRef &anim, const S_HumanAnimRef &old, bool singleStage);   // 0x0077a2c0
     void OnCarryStarted(const int *carry, const int *old);   // 0x0077bcd0
@@ -1075,9 +1075,9 @@ public:
     C_HumanMovement &operator=(const C_HumanMovement &) = delete;
 
     void SetOwner(C_Human *owner);                      // 0x00785f80
-    void Init();                                        // 0x00786040
+    void Init();                                        // 0x00786040 (DS 0x007f4b80)
     void Done();                                        // 0x00786490
-    void Reset();                                       // 0x00784db0
+    void Reset();                                       // 0x00784db0 (DS 0x007f3770)
     bool SaveGame(C_chunk &chunk);                      // 0x00784430
     bool LoadGame(C_chunk &chunk);                      // 0x00784770
     // Re-synchronises the movement with the actor's frame after a teleport.
@@ -1211,7 +1211,7 @@ public:
     // the AI's hearing of it), dust particles on remote humans and the footprint.
     void Footstep(bool left);                           // 0x0075d670
     // Starts / ends carrying `body` (the equipment's place 9 model; null: only this side).
-    void OnPickUpBody(C_Human *body);                   // 0x0075e3d0
+    void OnPickUpBody(C_Human *body);                   // 0x0075e3d0 (DS 0x007c40a0)
     void OnDropBody(C_Human *body);                     // 0x0075e6f0
     // m_unknown1AC (and m_unknown1B0 with `both`); 0 stops the physics of the body.
     void SetPushState(int state, bool both);            // 0x0075e6b0
@@ -1242,7 +1242,7 @@ public:
     // The morph values 1..3 (C_HumanMorph::SetUnknown1..3).
     void SetMorph(int which, uint32_t value);           // 0x0075d160
     void AddBloodPool(const S_vector &pos, const S_vector &normal, int unused);   // 0x00787570 (callers pass 0)
-    void UpdatePhysicsParts(int time);                  // 0x00788630
+    void UpdatePhysicsParts(int time);                  // 0x00788630 (DS 0x007f7470)
     // The body is lowered: lying, seated, carried (the work's mode 2 / 3 or such an animation).
     bool IsLowered() const;                             // 0x00784d60
     bool GetHeadWater(bool *underWater, float *surface) const;   // 0x00786510

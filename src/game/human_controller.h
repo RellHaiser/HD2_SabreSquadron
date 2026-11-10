@@ -498,7 +498,7 @@ public:
     // Network clients: the HUD's indicator of the sound's direction.
     void OnSoundHeard(S_RememberedSound *sound) override;   // 0x005449b0
     void OnHit(int type, int zone, int health, C_Actor *attacker, const S_vector &pos,
-               const S_vector &dir) override;           // 0x0053db90
+               const S_vector &dir) override;           // 0x0053db90 (DS 0x005321f0)
     // The server's messages about the human (a client) / a client's (the server).
     void OnMessage(C_BitStream *msg) override;          // 0x005406c0
     void OnMessage2(C_BitStream *msg) override;         // 0x00540db0

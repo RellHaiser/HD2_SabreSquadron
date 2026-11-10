@@ -852,7 +852,9 @@ void C_HumanAnimPlayer::UpdateActivityTrack()
 
     if (g_activitySet) {
         if (g_curActivity[0] < 8) {
+#ifndef HD2_DEDICATED   // the server's plays no weapon pose activity
             m_movement->m_weaponPose2->PlayActivity(g_activitySet);
+#endif
         } else {
             m_movement->m_animState.activity = g_curActivity[0];
             m_movement->m_animState.activityVariant = g_curActivity[1];

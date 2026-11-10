@@ -1201,7 +1201,9 @@ void C_HumanMovement::OnPickUpBody(C_Human *body)
                 break;
             }
         }
+#ifndef HD2_DEDICATED   // the server's weapon pose picks up nothing
         bodyMovement->m_weaponPose->PickUpBody();
+#endif
         for (int stage = 0; stage < 8; ++stage)
             bodyMovement->m_mixer.m_model->SetAnimation(nullptr, stage, 1.0f, 0);
         bodyMovement->m_carried = true;

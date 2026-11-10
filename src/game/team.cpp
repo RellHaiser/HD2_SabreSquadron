@@ -624,14 +624,16 @@ I3D_frame *C_Team::GetRandomVolume(int index) const     // 0x0045d6d0
     return list[static_cast<unsigned>(std::rand()) % list.size()];
 }
 
-void C_Team::OnMemberDied(C_Human *human)               // 0x0045e790
+void C_Team::OnMemberDied(C_Human *human)               // 0x0045e790 (DS 0x00479a40)
 {
     if (!IsMember(human))
         return;
     const std::vector<C_Human *> &seen = human->GetSeenEnemies();
     for (size_t i = seen.size(); i-- > 0;)
         m_enemyRecords.Remove(seen[i]);
+#ifndef HD2_DEDICATED   // the server has no map
     GetGame()->GetInterface()->RemoveFromMap(human);
+#endif
     if (human == GetCommandedMember())
         SetCommandedIndex(-1);
     GetGame()->Print("%s is dead !!!", human->GetFullName());

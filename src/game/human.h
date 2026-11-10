@@ -575,7 +575,7 @@ public:
     void Freeze(bool on);                               // 0x005a5d50
     // Fades the model out / in over `time` ms (effects module).
     void FadeOut(int time);                             // 0x005a86f0 (DS 0x005b6c70)
-    void FadeIn(int time);                              // 0x005a8740
+    void FadeIn(int time);                              // 0x005a8740 (DS 0x005b6cc0)
     // Leaves the vehicle and drops sight and hearing registrations before the human is
     // removed.
     void DetachFromWorld();                             // 0x005a7fe0
