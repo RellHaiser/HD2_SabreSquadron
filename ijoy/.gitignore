@@ -1,0 +1,4 @@
+build/
+__pycache__/
+# The original binary (copyrighted game file); copy it from the game folder.
+_re/IJoy.dll

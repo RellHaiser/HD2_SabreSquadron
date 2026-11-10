@@ -82,7 +82,7 @@ public:
 };
 
 // A player's or a team's stats (9 ints, NET_STAT_*; read as an int array).
-struct S_NetStats {
+struct S_NetStats {                                     // (copied by 0x00749fa0 (DS 0x007ac360))
     int values[9] = {};
 
     operator int *() { return values; }
@@ -174,7 +174,7 @@ void PostVote(int kind, int arg);                   // 0x0072dd50
 
 // A server's status (the net module's answer to QueryServerStatus; read by the main menu's game info screen,
 // part 9h-xii): its players, its rules, the teams' scores.
-struct S_StatusPlayer {                                 // 0x5C bytes
+struct S_StatusPlayer {                                 // 0x5C bytes (its copy: 0x00632060 (DS 0x00664380))
     // In a message: the stats (S_NetStats'), the team (32 bits), the name.
     void Write(C_BitStream *stream);                    // 0x00726260
     void Read(C_BitStream *stream);                     // 0x00726230
@@ -352,7 +352,7 @@ public:
     void SendPlayerScore(int slot, bool lock);      // 0x00730130
     // Server: the players' and teams' scores, the round's times and the co-op lives written (game message 2, part
     // 10d-iv); a client reads them (the server's stream read into a scratch block).
-    void WriteScores(C_BitStream *stream);          // 0x0072fc50
+    void WriteScores(C_BitStream *stream);          // 0x0072fc50 (DS 0x00789f90)
     void ReadScores(C_BitStream *stream);           // 0x0072fa50
     // The player named `name` kicked (`reason` as KickPlayer).
     void KickPlayerByName(const char *name, int reason);   // 0x0072f5e0
@@ -370,7 +370,7 @@ public:
     void ResetReplication(bool all);                // 0x007319e0
     // Sends and receives for `timeDelta` ms now (1000: everything pending; `replicate`: the replication's data
     // written for the players).
-    void Process(int timeDelta, bool replicate);    // 0x0072c9a0
+    void Process(int timeDelta, bool replicate);    // 0x0072c9a0 (DS 0x00786230)
     // Every 3 s: the connections' resend times and the objects' lags from the pings (the server kicks players
     // pinging over its limit three times or idle too long).
     void UpdateLags(int timeDelta);                 // 0x0072cde0 (the time unused)
@@ -386,7 +386,7 @@ public:
     // or the server's) or a module's message (DispatchMessage or CallUnknown28 of the module manager).
     static bool DispatchNetMessage(C_BitStream *stream, bool toClient);   // 0x0072c480
     // Ends the session (`now` false: at the next frame).
-    void Close(bool now);                           // 0x0072e8b0
+    void Close(bool now);                           // 0x0072e8b0 (DS 0x007886e0)
     // A server's status asked for on a thread of its own; `callback` gets it there (part 9h-xii).
     int QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *status), S_ServerEntry *server);   // 0x007240d0
     // A server pinged (`callback`, the net thread's, gets it when it answers; part 9h-xix).
@@ -434,7 +434,7 @@ public:
     int GetConnectionState();                       // 0x00731ac0
     // The server made (the session closed first; the name, the service provider and the password of `desc`;
     // `firewall`: Windows XP's firewall opened for its port): < 0 failed (m_lastError / m_lastErrorText).
-    int Host(const S_NetSessionDesc &desc, bool firewall);   // 0x00722b60
+    int Host(const S_NetSessionDesc &desc, bool firewall);   // 0x00722b60 (DS 0x00779880)
     // A client connecting to `server` (S_MultiplayerSettings +0x17C; its port 31567 without GameSpy's listing;
     // the CD key checked first with it): < 0 failed.
     int Connect(S_ServerEntry *server);             // 0x007240f0
@@ -449,7 +449,7 @@ public:
     // The server accepted the client: joined, its voice, the replication.
     void OnConnected();                             // 0x007244e0 (__fastcall)
     // The voice chat's server (the settings' codec) / client (on the server's DirectPlay object or the client's).
-    void StartVoiceServer();                        // 0x00724520 (__fastcall)
+    void StartVoiceServer();                        // 0x00724520 (DS 0x0077b9c0) (__fastcall)
     void StartVoiceClient(bool onServer);           // 0x00724740
     // The voice of the player in `slot` given a 3D buffer (5 m to 20 m; not called).
     void MakeVoiceBuffer(int slot);                 // 0x00724840
@@ -458,9 +458,9 @@ public:
     // The client's DirectPlay messages (the session's; `net` g_netGame): the connection, a host's answer, data, the
     // end. HandleServerMessage: the server's (part 10d-v).
     static long __stdcall HandleClientMessage(C_NetGame *net, void *context, uint32_t type, void *message);   // 0x00722550
-    static long __stdcall HandleServerMessage(C_NetGame *net, void *context, uint32_t type, void *message);   // 0x00726470
+    static long __stdcall HandleServerMessage(C_NetGame *net, void *context, uint32_t type, void *message);   // 0x00726470 (DS 0x0077e120)
     // Windows XP's firewall: `port` opened (`open`; the server's or the client's) or the game's ports closed.
-    void ConfigureFirewall(int port, bool open);    // 0x00732730
+    void ConfigureFirewall(int port, bool open);    // 0x00732730 (DS 0x0078d600)
     // The client's joining (+0x5044; NET_JOIN_*).
     int GetJoinStatus() const { return m_joinStatus; }   // 0x007244c0
     // Server: the vote's timeout (15 s: failed, message 0x17).

@@ -353,6 +353,7 @@ private:
 class C_CoopTeam : public C_TeamBase {
 public:
     C_CoopTeam();                                       // 0x0045fb90
+    bool HasItem(int itemId) const;                     // 0x0045fef0 (DS 0x0047b850)
     ~C_CoopTeam() override;                             // 0x0045fbf0 (0x0045fc10)
     // Also the records (the server's StopMission inlines it).
     void Clear() override;                              // 0x0045fc80

@@ -29,6 +29,8 @@ public:
     // the seats is killed (an explosion's hit at the weapon).
     void SetState(int state);                           // 0x006059b0
     int GetState() const { return m_state; }            // +0x2F0
+    // The exit point; without one, a metre behind the weapon (`w` left alone).
+    void GetExitPosUnused(S_vector4 *out) const;        // 0x006056d0 (DS 0x0062c810)
 
     int GetHitPoints() override { return 100; }         // 0x10 0x00602f60
     // The messages (network games), the seat weapon; manned, the model's animation and the box.
@@ -85,7 +87,7 @@ public:
     float UnknownAC(int) override { return m_weapon.UnknownAC(); }            // 0xAC 0x00604d60
     int GetSeatWeaponText(int) override { return m_weapon.GetItemText(); }    // 0xB0 0x00604d90
     C_ItemDef *GetSeatWeaponDef(int) override { return m_weapon.GetItemDef(); }   // 0xB4 0x00604da0
-    void GetSeatWeaponLimits(int, float *up, float *down, float *left, float *right) override   // 0xB8 0x00604dd0
+    void GetSeatWeaponLimits(int, float *up, float *down, float *left, float *right) override   // 0xB8 0x00604dd0 (DS 0x0062bc80)
     {
         m_weapon.GetLimits(up, down, left, right);
     }

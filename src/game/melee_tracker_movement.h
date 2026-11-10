@@ -124,7 +124,7 @@ private:
     // Resets the tracks and stages and hooks the note callback. (0x005c6d10)
     void ResetTracks();
 
-    void *m_vtable = nullptr;                           // +0x00 (0x008121d0; dispatched directly in the port)
+    void *m_vtable = nullptr;                           // (set by 0x005d4ce0 (DS 0x005ef320)) +0x00 (0x008121d0; dispatched directly in the port)
     uint8_t m_unknown04[0x0C] = {};                     // +0x04
     I3D_model *m_model = nullptr;                        // +0x10
     S_MeleeTrackerMixerTrack m_tracks[MELEE_TRACKER_MIXER_TRACKS];          // +0x14
@@ -198,7 +198,7 @@ public:
     // The move/collision step (ground following, slopes, sphere stepping).
     void Move(int timeDelta);                           // 0x005c3420
     // Advances the model's animations and events for the frame.
-    void UpdateAnimation(int timeDelta);                // 0x005c18c0
+    void UpdateAnimation(int timeDelta);                // 0x005c18c0 (DS 0x005d69f0)
     // Builds the animation-sequence queue for the current mode / sub-modes (driven by the actor).
     void BuildSequence();                               // 0x005c5030
     // Plays the next animation of the sequence through the mixer (driven by the actor each frame).

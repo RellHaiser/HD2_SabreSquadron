@@ -937,7 +937,7 @@ bool C_AirAttack::SaveGame(C_chunk &chunk)              // 0x005e30b0
     return true;
 }
 
-bool C_AirAttack::LoadGame(C_chunk &chunk)              // 0x005e3420
+bool C_AirAttack::LoadGame(C_chunk &chunk)              // 0x005e3420 (DS 0x00601ab0)
 {
     C_Actor::LoadGame(chunk);
     const auto floatLeaf = [&](float &value) {

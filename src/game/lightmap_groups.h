@@ -60,7 +60,7 @@ public:
     // Switches the visual's lightmap (a switch back to its original one forgets it).
     void SetFrameLightmap(I3D_frame *frame, int lightmap);   // 0x0048d270
     // Switches the lightmap of every lightmapped visual of the group.
-    void SetGroupLightmap(const S_LightmapGroup *group, int lightmap);   // 0x0048d4e0
+    void SetGroupLightmap(const S_LightmapGroup *group, int lightmap);   // 0x0048d4e0 (DS 0x004a3330)
 
 private:
     void DeleteGroups();

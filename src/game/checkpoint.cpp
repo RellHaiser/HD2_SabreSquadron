@@ -52,6 +52,13 @@ float S_Checkpoint::GetLinkCost(const S_Checkpoint &to) const   // 0x005247e0
     return (1.0f - (to.preference + preference) * (1.0f / 1024.0f)) * std::sqrt(dz * dz + dy * dy + dx * dx);
 }
 
+void S_Checkpoint::Clear()
+{
+    flags = 0;
+    type = 0;
+    links = nullptr;
+}
+
 const uint8_t *S_Checkpoint::Read(const uint8_t *data, S_CheckpointLink *&storage)   // 0x00524620
 {
     std::memcpy(&pos, data, 12);
@@ -220,4 +227,12 @@ const S_vector4 *S_Checkpoint::GetDirectionVector(uint8_t bits)   // 0x005245c0 
         bits >>= 1;
     }
     return &DIRECTION_VECTORS[0];
+}
+
+void S_Checkpoint::ClearLinks()
+{
+    this->~S_Checkpoint();
+    links = nullptr;
+    flags = 0;
+    type = 0;
 }

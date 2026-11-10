@@ -82,6 +82,12 @@ struct S_Checkpoint {                                   // 0x24 bytes
     // Cost of a link to `to` in metres.
     float GetLinkCost(const S_Checkpoint &to) const;    // 0x005247e0
 
+    // Zeroes the flags, the type and the links. Not called.
+    void Clear();                                       // 0x00524600 (DS 0x00512010)
+    // The destructor's work, then no links, flags or type.
+    void ClearLinks();                                  // 0x005245e0 (DS 0x00511fe0)
+    S_vector GetPos() const { return pos; }             // 0x0041d7c0 (DS 0x0043e330)
+
     // Reads a point of checkpoint data (0x20 bytes, then the links); its links go into the
     // network's link storage at `storage`, which moves past them. Returns the data after it.
     const uint8_t *Read(const uint8_t *data, S_CheckpointLink *&storage);   // 0x00524620
@@ -126,7 +132,7 @@ struct S_CheckpointFrame {                              // 8 bytes
     uint16_t index = 0xFFFF;
 
     // Reads {uint16 index, char frameName[]} and looks the frame up.
-    const uint8_t *Read(const uint8_t *data);           // 0x0051c870
+    const uint8_t *Read(const uint8_t *data);           // 0x0051c870 (DS 0x00508000)
 };
 
 // A point tied to an actor (the doors' sides); the table is sorted by point.
@@ -135,11 +141,11 @@ struct S_CheckpointActor {                              // 8 bytes
     uint16_t index = 0xFFFF;
 
     // Reads {uint16 index, char frameName[]} and takes the actor of that frame.
-    const uint8_t *Read(const uint8_t *data);           // 0x0051c910
+    const uint8_t *Read(const uint8_t *data);           // 0x0051c910 (DS 0x005080e0)
 };
 
 // The positions FindEscapePath flees from: the AI controller's growable aligned array.
-struct S_Vector4Array {                                 // 0x10 bytes
+struct S_Vector4Array {                                 // 0x10 bytes (its free: 0x00559760 (DS 0x00554b40); other modules' copies of its free: 0x0045c440 (DS 0x00476d60), 0x005cafa0 (DS 0x005e27d0))
     S_vector4 *data = nullptr;                          // _aligned_malloc'd
     int capacity = 0;
     int count = 0;
@@ -176,6 +182,13 @@ public:
     C_Actor *GetActor(int index) const;                 // 0x0051e520
     // A point tied to `actor` (the last in the table), CHECKPOINT_NONE if none.
     int FindActorPoint(const C_Actor *actor) const;     // 0x0051e690
+    // Entries of the tables, 0xFFFF if there is none: by name, and by point in the sorted tables.
+    uint16_t FindNameEntry(const char *name) const;     // 0x0051e150 (DS 0x00509fa0)
+    uint16_t FindNameEntryOfPoint(uint16_t index) const;    // 0x0051e2c0 (DS 0x0050a180)
+    uint16_t FindFrameEntryOfPoint(uint16_t index) const;   // 0x0051e450 (DS 0x0050a380)
+    uint16_t FindActorEntryOfPoint(uint16_t index) const;   // 0x0051e5e0 (DS 0x0050a580)
+    // Appends the points within `radius` of link costs from `from`, breadth first, `from` first.
+    void CollectReachableWithCosts(const S_Checkpoint *from, float radius, std::vector<uint16_t> *out);   // 0x0051ff20 (DS 0x0050c580)
     // The points tied to `actor` (replaces `out`).
     void GetActorPoints(const C_Actor *actor, std::vector<uint16_t> &out) const;   // 0x0051e6d0
 

@@ -171,7 +171,7 @@ public:
     // Simulated bullet. `traceModel`: tracer (a billboard stretched along each step);
     // `flare`: a signal pistol flare (model "m_w_flare", flies at half speed).
     void Init(C_Actor *shooter, const S_vector &pos, const S_vector &dir, C_FirearmComp *weapon,
-              I3D_frame *traceModel, bool fake, bool flare); // 0x0044b030
+              I3D_frame *traceModel, bool fake, bool flare); // 0x0044b030 (DS 0x004670c0)
     // Client bullet: casts a 500 m ray to find where it ends (`flare` is passed, false,
     // and not used).
     void InitClient(C_Actor *shooter, const S_vector &pos, const S_vector &dir, C_FirearmComp *weapon,
@@ -180,8 +180,8 @@ public:
     bool TickClient(int timeDelta);                         // 0x0044ccb0
 
     void Release() override;                                // 0x0044b380
-    bool Tick(int timeDelta) override;                      // 0x0044b910
-    void Update(int timeDelta) override;                    // 0x0044b400
+    bool Tick(int timeDelta) override;                      // 0x0044b910 (DS 0x00467a20)
+    void Update(int timeDelta) override;                    // 0x0044b400 (DS 0x004673e0)
     void Recycle() override;                                // 0x0044b350
     void SaveGame(C_chunk &) override {}                    // 0x0044db60
     void LoadGame(C_chunk &) override {}                    // 0x0044db70
@@ -216,7 +216,7 @@ public:
               I3D_frame *model, int trailEffect, bool flySound, bool cameraFollow, bool fake);   // 0x00448ce0
 
     void Release() override;                                // 0x00448fc0
-    bool Tick(int timeDelta) override;                      // 0x00449290
+    bool Tick(int timeDelta) override;                      // 0x00449290 (DS 0x004655a0)
     void Update(int timeDelta) override;                    // 0x00449030
     void Recycle() override {}                              // 0x00451870
     virtual bool Unknown1C(int) { return true; }            // 0x1C 0x00451860 (not called)
@@ -244,7 +244,7 @@ public:
     void Init(C_Actor *thrower, const S_vector &pos, const S_vector &dir, C_Item *item, bool fake);   // 0x0044cff0
 
     void Release() override;                                // 0x0044d210
-    bool Tick(int timeDelta) override;                      // 0x0044d260
+    bool Tick(int timeDelta) override;                      // 0x0044d260 (DS 0x00469910)
     void Update(int timeDelta) override;                    // 0x0044d240
     void Recycle() override {}                              // 0x00450560
     void SaveGame(C_chunk &) override {}                    // 0x00450570
@@ -258,12 +258,12 @@ private:
         STATE_IMPACT = 2,                                   // an impact grenade touched something
     };
 
-    void Simulate(int timeDelta);                           // 0x0044d290
+    void Simulate(int timeDelta);                           // 0x0044d290 (DS 0x00469950)
     void PlayBounceSound();                                 // 0x0044d4c0
     // Rigid body contact callback (`context`: the shot): RIGID_BODY_REFUSE to pass through what it
     // touched, 2 for a bounce, 3 for an impact (or a stopping material).
     static int __fastcall OnContact(int event, int unused, void *context,
-                                     const S_RigidBodyContact *contact);   // 0x0044d570
+                                     const S_RigidBodyContact *contact);   // 0x0044d570 (DS 0x00469c30)
 
     C_RigidBody m_body;                                     // +0x70
     int m_time = 0;                                         // +0x670 ms since the throw
@@ -303,6 +303,8 @@ public:
     void Free();                                            // 0x00455520
     // Places the boxes on `human` (the human's frame) without testing anything. Not called.
     void Place(I3D_frame *human);                           // 0x00455540
+    // Shows or hides the model. Not called.
+    void SetOn(bool on);                                    // 0x00455630 (DS 0x0046e130)
     // Zone the ray from `pos` along `dir` (its length is the reach) hits, HIT_ZONE_NONE if
     // none. A helmet (headgear type 0) in front of the head stops the ray: HIT_ZONE_HELMET.
     int GetHitZone(C_Human *human, const S_vector &pos, const S_vector &dir);   // 0x00455670
@@ -353,24 +355,24 @@ public:
     // The same with explicit muzzle and shell dummies (vehicle guns call it directly).
     void FireBulletFrom(C_Human *shooter, C_WeaponItem *weapon, const S_vector &pos, const S_vector &dir,
                         I3D_frame *muzzle, I3D_frame *ejectDummy, bool tracer, uint32_t flags,
-                        int shellSound);                    // 0x00450d30
+                        int shellSound);                    // 0x00450d30 (DS 0x0046b8e0)
     // Launches the projectile of a projectile weapon (`projectile`: its frame in the
     // weapon); see C_ProjectileShot::Init.
     void FireProjectile(C_Actor *shooter, C_Item *weapon, const S_vector &pos, const S_vector &dir,
                         I3D_frame *projectile, int trailEffect, bool flySound, bool cameraFollow,
-                        uint32_t flags);                    // 0x00451670
+                        uint32_t flags);                    // 0x00451670 (DS 0x0046c260)
     // Throws `item` (a grenade): the shot owns the flight, the item leaves the thrower's
     // inventory. In single player the thrower's team mates are warned.
     void ThrowItem(C_Actor *thrower, C_Item *item, const S_vector &pos, const S_vector &dir,
-                   bool fake);                              // 0x00450400
+                   bool fake);                              // 0x00450400 (DS 0x0046ad10)
 
     // --- effects -----------------------------------------------------------------------
     // Area damage (both > 0) by `source`; in single player the AI hears it (sound group
     // `soundGroup`, nothing is played).
-    void Explode(C_Actor *source, const S_vector &pos, float range, float damage, int soundGroup);   // 0x00451990
+    void Explode(C_Actor *source, const S_vector &pos, float range, float damage, int soundGroup);   // 0x00451990 (DS 0x0046c670)
     // Sound, particle effect, scorch mark and material effect of an explosion (clients).
     void PlayExplosion(const S_vector &pos, const S_vector &dir, int effect, int material,
-                       int soundGroup);                     // 0x00451a80
+                       int soundGroup);                     // 0x00451a80 (DS 0x0046c790)
     // Hit sound of `material` (clients); `alternate` picks the material's second sound.
     void PlayHitSound(C_Actor *source, int material, const S_vector &pos, bool alternate,
                       bool silentToAI);                     // 0x00451b00
@@ -378,7 +380,7 @@ public:
     void OnBulletHit(C_Actor *shooter, I3D_frame *frame, int material, const S_vector &pos,
                      const S_vector &normal);               // 0x00451bc0
     // Particle effect of a hit, if it is in front of the camera.
-    void PlayHitEffect(int material, const S_vector &pos, const S_vector &normal);   // 0x00451c00
+    void PlayHitEffect(int material, const S_vector &pos, const S_vector &normal);   // 0x00451c00 (DS 0x0046c870)
     // Whiz of a bullet passing the local player.
     void PlayNearMissSound(const S_vector &pos);            // 0x00451e40
     // A pool of blood growing on the ground (dying humans).
@@ -386,7 +388,7 @@ public:
     // A drop of blood flying from `pos` (3 m/s along `dir`, randomised) that leaves a
     // stain where it lands.
     void SprayBlood(const S_vector &pos, const S_vector &dir);   // 0x0044f4d0
-    void SprayBloodRandom(const S_vector &pos, const S_vector &dir);   // 0x0044f4f0
+    void SprayBloodRandom(const S_vector &pos, const S_vector &dir);   // 0x0044f4f0 (DS 0x0046a770)
     // A blood stain on the wall 3 m from `pos` along the horizontal part of `dir`. Not called.
     void AddBloodSplat(const S_vector &pos, const S_vector &dir);   // 0x0044f740
 
@@ -438,7 +440,7 @@ extern C_ShotManager g_shotManager;                         // 0x0089aac0
 // Melee hit of `weapon` along `dir` (server side). `backstab`: a knife attack from behind
 // (the target must face away) that kills.
 void MeleeAttack(C_Actor *attacker, C_Item *weapon, bool backstab, const S_vector &pos,
-                 const S_vector &dir);                      // 0x00451230
+                 const S_vector &dir);                      // 0x00451230 (DS 0x0046bd30)
 // Explosion with area damage at `pos`, also shown on the clients (with `material`'s
 // scorch mark and a random explosion effect).
 void SendExplosionMessage(const S_vector &pos, int material);   // 0x00451900

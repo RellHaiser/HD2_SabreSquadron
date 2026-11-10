@@ -26,7 +26,7 @@ class I3D_scene;
 class I3D_sound;
 
 // A text the menus show where they ask (the main menu's hints): its box on a frame of theirs.
-struct S_MenuHint {                                     // 0xB0 bytes (C_MenuState +0x40)
+struct S_MenuHint {                                     // 0xB0 bytes (C_MenuState +0x40; its destructor: 0x0067efb0 (DS 0x006bc1b0))
     S_MenuHint() { Reset(); }
     // Not shown, no text, no frame, the box emptied.
     void Reset();                                       // 0x0066e480 (__fastcall)
@@ -90,7 +90,7 @@ extern class C_MenuState *g_menuState;                  // 0x008ae5f8
 class C_MenuState : public C_GameState {                // 0x1B0 bytes, vtable 0x00815850
 public:
     C_MenuState();                                      // 0x0067edd0
-    ~C_MenuState() override;                            // 0x0067f080 (0x0067f060)
+    ~C_MenuState() override;                            // 0x0067f080 (0x0067f060), 0x006c1bd0 (DS 0x00707650)
     C_MenuState(const C_MenuState &) = delete;
     C_MenuState &operator=(const C_MenuState &) = delete;
 

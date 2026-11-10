@@ -110,7 +110,7 @@ private:
     friend class C_Junkers88Test;
 
     // A group of the crew's radio chatter: speech sounds "<id>.wav", one at a time, then a pause.
-    struct S_Chatter {                                  // 0x20 bytes (ctor 0x005ef400, dtor 0x005ef450)
+    struct S_Chatter {                                  // 0x20 bytes (ctor 0x005ef400 (DS 0x006108a0), dtor 0x005ef450)
         int minDelay = 0;                               // +0x00 ms
         int delay = 0;                                  // +0x04 ms until another may play
         int range = 0;                                  // +0x08 ms (the random part of the pause)
@@ -182,7 +182,7 @@ private:
     // A piece thrown off the bomber (a frame falling, spinning).
     struct alignas(16) S_Debris {                       // 0x30 bytes
         S_Debris(I3D_frame *piece, const S_vector4 &throwVelocity);   // 0x005f5960
-        explicit S_Debris(C_chunk &chunk);              // 0x005f57c0
+        explicit S_Debris(C_chunk &chunk);              // 0x005f57c0 (DS 0x006184e0)
         S_vector4 velocity = {};                        // +0x00
         S_vector4 spin = {};                            // +0x10 rad a second about x, y, z
         float floor = 0.0f;                             // +0x20 (its height at the start)
@@ -211,7 +211,7 @@ private:
         S_Fighter &operator=(const S_Fighter &) = delete;
         bool CreateModel(int index, const char *modelFile);   // 0x005f4910
         void LoadSounds();                              // 0x005f4740
-        void InitVolume();                              // 0x005f4e50
+        void InitVolume();                              // 0x005f4e50 (DS 0x00617910)
         void InitGuns();                                // 0x005f5100
         // False when gone (shot down and landed, or its fall's animation over).
         bool Update(int frameTime);                     // 0x005f3a70

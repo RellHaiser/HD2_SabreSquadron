@@ -63,7 +63,7 @@ private:
     // the explosion's sound and the decal.
     void ClientStep();                                  // 0x0060fb60
     // The scorch decal 0.5 m above the frame, projected down.
-    void MakeScorch();                                  // 0x0060fe50
+    void MakeScorch();                                  // 0x0060fe50 (DS 0x00639910)
     // The decal out of the scene (Fix: and released; the original leaks it).
     void RemoveScorch();
     // The particle effect `effect` at the frame (upward).

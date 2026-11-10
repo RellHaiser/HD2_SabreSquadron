@@ -37,7 +37,7 @@ enum E_VersionEffects {
 
 // Collision box of a damageable model.
 struct alignas(16) S_VersionCollision {
-    S_VersionCollision(I3D_frame *frame, bool transparent);  // 0x0043ddb0
+    S_VersionCollision(I3D_frame *frame, bool transparent);  // 0x0043ddb0 (DS 0x00462710)
     ~S_VersionCollision();                                  // 0x0043e1f0
 
     S_matrix invMatrix;                                     // +0x00
@@ -57,7 +57,7 @@ public:
     // Applies `damage` hit points; `outFrame` receives the part's (possibly new)
     // frame. Returns false when the part was used up — it may then have been
     // deleted, and its master too (check C_VersionsModule::GetMaster()).
-    bool Damage(int damage, I3D_frame **outFrame, E_VersionEffects effects);   // 0x0043b000
+    bool Damage(int damage, I3D_frame **outFrame, E_VersionEffects effects);   // 0x0043b000 (DS 0x0045ed20)
     // Jumps to damage stage `version` (-1: the last one) unless the part is already
     // further; `effects` plays particles, sound and physics debris.
     void SetVersion(int version, bool effects);             // 0x0043c040
@@ -113,7 +113,7 @@ public:
     // After a stage change: notifies the model's script, deletes a used-up part,
     // refits the collision box and removes the model when no part is left. Returns
     // false if `keeper` was deleted.
-    bool OnKeeperDamaged(C_VersionKeeper *keeper);          // 0x0043c710
+    bool OnKeeperDamaged(C_VersionKeeper *keeper);          // 0x0043c710 (DS 0x004609f0)
     // Reads the stages of `keeper` from the versions model.
     bool LoadVersions(C_VersionKeeper *keeper);             // 0x0043cca0
 

@@ -194,7 +194,7 @@ void StopFrameSpeech(I3D_frame *owner);                 // 0x0071e830
 // Binds slot `slot` to a speaker (its frame and morph visual; the mouth neutral).
 void AttachSpeechSlot(int slot, C_Human *owner);        // 0x0071e300
 // A slot plays speech (state 2) at the human's frame.
-bool IsHumanSpeaking(const C_Human *human);             // 0x0071f090
+bool IsHumanSpeaking(const C_Human *human);             // 0x0071f090 (DS 0x007758c0)
 // Neutral mouth, frees and empties the slots of the human's frame (before a uniform change
 // replaces the model and its morph visual).
 void ReleaseHumanSpeech(const C_Human *human);          // 0x0071ea20

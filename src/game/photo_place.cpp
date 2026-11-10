@@ -23,7 +23,7 @@ void C_PhotoPlace::CopyFrom(const C_Actor *source)      // 0x0060b7e0
     m_textId = static_cast<const C_PhotoPlace *>(source)->m_textId;
 }
 
-void C_PhotoPlace::StartMission(bool server)            // 0x0060b820
+void C_PhotoPlace::StartMission(bool server)            // 0x0060b820 (DS 0x006340a0)
 {
     Activate(server);
     if (m_started)

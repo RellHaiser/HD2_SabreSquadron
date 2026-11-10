@@ -795,7 +795,9 @@ void C_HumanIdle::UpdateInteraction(int time)
         work->SetStance(asked.stance, false);
         movement->m_weaponPose2->SetSeatStance(asked.stance);
         work->m_forced = false;
+#ifndef HD2_DEDICATED   // no weapon pose seats on the server
         movement->m_weaponPose2->SetSeat(static_cast<uint32_t>(movement->m_seatMode), movement->m_vehicle, movement->m_seat);
+#endif
         // (The same either way in the original.)
         movement->m_hitVolumeScale[0] = 0.0f;
         movement->m_hitVolumeScale[1] = 0.0f;
@@ -832,7 +834,9 @@ void C_HumanIdle::UpdateInteraction(int time)
                     if (pose)
                         removeShadow = false;
                 }
+#ifndef HD2_DEDICATED   // no weapon pose seats on the server
                 movement->m_weaponPose2->SetSeatWeaponPose(pose);
+#endif
             }
             playActivity();
             equipment->PutAwayHandsItem(true);
@@ -906,7 +910,9 @@ void C_HumanIdle::UpdateInteraction(int time)
                 return;
             }
             AddHumanModel(movement->m_owner->GetFrame());
+#ifndef HD2_DEDICATED   // no weapon pose seats on the server
             movement->m_weaponPose2->SetSeat(static_cast<uint32_t>(movement->m_seatMode), nullptr, movement->m_seat);
+#endif
             movement->m_owner->ClearVehicle();
             m_locomotion->m_volumesTime = 0;
             if (vehicle->GetSeatFlags(movement->m_seat) & SEAT_FLAG_HIDDEN)

@@ -507,7 +507,7 @@ void C_Vehicle::SetupStruts()                                                   
     }
 }
 
-bool C_Vehicle::Setup(I3D_frame *model)                                         // 0x004e2e30
+bool C_Vehicle::Setup(I3D_frame *model)                                         // 0x004e2e30 (DS 0x004d2da0)
 {
     m_model = model;
     if (!model)

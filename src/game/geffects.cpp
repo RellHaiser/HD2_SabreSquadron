@@ -25,10 +25,17 @@
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 
-C_GEffectsModule g_geffectsModule(MODULE_GEFFECTS, "GEffects");   // 0x0089b880
+C_GEffectsModule g_geffectsModule(MODULE_GEFFECTS, "GEffects");   // 0x0089b880 (server: construction, atexit (DS 0x004a1a10), (DS 0x004a1fc0), (DS 0x004a1fe0))
 float g_waterLevel = 0.0f;                              // 0x0089b760
 int g_rainTime = 0;                                     // 0x0089bbb4
 int g_rainTeamSteps = 3;                                // 0x008396e8
+
+C_GEffectsModule *GetGEffects()
+{
+    return &g_geffectsModule;
+}
+
+#ifndef HD2_DEDICATED   // the server's module is a shell (the end of the file)
 
 namespace {
 
@@ -319,11 +326,6 @@ void ShatterFace(const S_vector &p0, const S_vector &p1, const S_vector &p2, flo
 }
 
 }  // namespace
-
-C_GEffectsModule *GetGEffects()
-{
-    return &g_geffectsModule;
-}
 
 // 0x00485fd0
 void S_CameraAnimation::Restore()
@@ -1494,3 +1496,55 @@ void C_GEffectsModule::ShatterGlass(I3D_frame *frame, float maxArea)
         ShatterFace(a.pos, b.pos, c.pos, a.u, a.v, b.u, b.v, c.u, c.v, frame, material, maxArea);
     }
 }
+
+#else   // HD2_DEDICATED
+
+// ---- the server's module -----------------------------------------------------------------------
+// Each slot a stub; the members are not touched (the server's object has none). Slots marked with
+// no server address are a lone `ret` there.
+
+C_GEffectsModule::C_GEffectsModule(int id, const char *name) : C_GEffectsBase(id, name) {}   // 0x004860b0 (DS 0x004a1a40)
+C_GEffectsModule::~C_GEffectsModule() {}                // 0x00486f00 (DS 0x004a1fa0), deleting (DS 0x004a1f70)
+
+void C_GEffectsModule::Update(int) {}                   // 0x00487240
+void C_GEffectsModule::LoadMissionData(bool) {}         // 0x00488560
+void C_GEffectsModule::FreeMissionData(bool) {}         // 0x004885a0
+void C_GEffectsModule::StartMission(bool) {}            // 0x004885d0
+void C_GEffectsModule::StopMission(bool) {}             // 0x004888c0
+void C_GEffectsModule::RestartMission(bool) {}          // 0x004863f0
+bool C_GEffectsModule::LoadGame(C_chunk &) { return true; }   // 0x00486470 (DS 0x004a1e10)
+
+void C_GEffectsModule::SetRain(bool) {}                 // 0x004863e0
+void C_GEffectsModule::SetThunderstorm(bool, I3D_light *, bool) {}   // 0x004870a0
+void C_GEffectsModule::StartMpLightning(int) {}         // 0x004871a0
+bool C_GEffectsModule::SetModelAlpha(I3D_frame *, float) { return false; }   // 0x00486e60 (DS 0x004a1ad0)
+bool C_GEffectsModule::SetModelTransparency(I3D_frame *, float) { return false; }   // 0x00486d30 (DS 0x004a1af0)
+bool C_GEffectsModule::SetModelLightLevel(I3D_frame *, float) { return false; }   // 0x00486df0 (DS 0x004a1b50)
+void C_GEffectsModule::SetHierarchyOn(I3D_frame *, bool, uint32_t) {}   // 0x004865e0
+void C_GEffectsModule::HideVisual(I3D_frame *, bool) {}   // 0x004866f0
+bool C_GEffectsModule::ClearModelTransparency(I3D_frame *) { return false; }   // 0x00486e90 (DS 0x004a1b70)
+void C_GEffectsModule::FadeOutModel(I3D_frame *, int, bool) {}   // 0x00488d60
+void C_GEffectsModule::FadeIn(I3D_frame *, int, bool) {}   // 0x00488ee0
+void C_GEffectsModule::FadeInModel(I3D_frame *, int, bool) {}   // 0x00489060
+void C_GEffectsModule::FadeOutHierarchy(I3D_frame *, int, bool) {}   // 0x004890f0
+void C_GEffectsModule::FadeHuman(C_Human *, int, bool) {}   // 0x00489180
+I3D_frame *C_GEffectsModule::CreateShadow(I3D_frame *) { return nullptr; }   // 0x004894e0 (DS 0x004a1c10)
+I3D_frame *C_GEffectsModule::GetShadow(I3D_frame *) { return nullptr; }   // 0x00489470 (DS 0x004a1c30)
+void C_GEffectsModule::SetShadowParams(const S_ShadowParams *) {}   // 0x00489bd0
+S_ShadowParams *C_GEffectsModule::GetShadowParams() { return nullptr; }   // 0x00489be0 (DS 0x004a1c70)
+void C_GEffectsModule::SetFadeLevel(float, const S_vector *) {}   // 0x004867f0
+void C_GEffectsModule::Fade(int, int, const S_vector *) {}   // 0x00486b30
+void C_GEffectsModule::SetWeatherOn(bool) {}            // 0x004867b0
+float C_GEffectsModule::GetGroundCover(int) { return 1.0f; }   // 0x004867e0 (DS 0x004a1d10)
+void C_GEffectsModule::SetTimeScale(float, float) {}    // 0x00486480
+float C_GEffectsModule::GetTimeScale() { return 1.0f; }   // 0x004864a0 (DS 0x004a1e50)
+void C_GEffectsModule::RenderFade() {}                  // 0x00486c10
+void C_GEffectsModule::RenderVolumetrics() {}           // 0x00486bf0
+bool C_GEffectsModule::DressUniform(C_Human *, int) { return false; }   // 0x0048a780 (DS 0x004a1eb0)
+bool C_GEffectsModule::SwitchFaceTexture(I3D_frame *, const char *) { return false; }   // 0x0048a5c0 (DS 0x004a1ed0)
+void C_GEffectsModule::SetCameraAnimation(I3D_frame *, const char *) {}   // 0x00485c70
+void C_GEffectsModule::ShatterGlass(I3D_frame *, float) {}   // 0x00485ba0
+void C_GEffectsModule::SetCloudsOn(bool) {}             // 0x00485b50
+void C_GEffectsModule::SetLensFlareOn(bool) {}          // 0x00485b70
+
+#endif  // HD2_DEDICATED

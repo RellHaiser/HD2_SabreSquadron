@@ -182,7 +182,7 @@ bool BoxTouches(const S_vector corners[8])
     return g_collisionWorld.RayTestDynamic(corners[2], corners[5] - corners[2], &hitPos, &hitNormal, 2, 0) != nullptr;
 }
 
-// I3D_frame::GetWorldDir as it compiles here (0x0041d200): the square summed y, z, x.
+// I3D_frame::GetWorldDir as it compiles here (0x0041d200) (DS 0x0043da40): the square summed y, z, x.
 S_vector WorldDir(const I3D_frame *frame)
 {
     S_vector dir = frame->GetMatrix()(2);
@@ -456,7 +456,7 @@ void C_Door::Animate(int time)                          // 0x005fffe0
     UpdateVolume();
 }
 
-bool C_Door::TurnTo()                                   // 0x005ff700
+bool C_Door::TurnTo()                                   // 0x005ff700 (DS 0x00624f80)
 {
     const S_quat previous = m_frame->GetRot();
     S_quat turn;
@@ -485,7 +485,7 @@ bool C_Door::TurnTo()                                   // 0x005ff700
     return blocked;
 }
 
-bool C_Door::SlideTo()                                  // 0x005ffbd0
+bool C_Door::SlideTo()                                  // 0x005ffbd0 (DS 0x00625590)
 {
     S_quat turn;
     turn.Make(S_vector(m_axis.x, m_axis.y, m_axis.z), SLIDE_TURN);

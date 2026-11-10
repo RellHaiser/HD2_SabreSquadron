@@ -17,7 +17,7 @@ namespace {
 template <class T, int GROW>
 class C_NodePool {
 public:
-    C_NodePool() = default;
+    C_NodePool() = default;                             // (made full at start-up in the original, 0x0051ea70 (DS 0x0050ab50))
     ~C_NodePool()                                       // (0x005204b0 / 0x00520fc0 at exit)
     {
         for (T *node : m_free)
@@ -36,7 +36,7 @@ public:
         m_free.pop_back();
         return node;
     }
-    void Free(T *node) { m_free.push_back(node); }
+    void Free(T *node) { m_free.push_back(node); }      // (the list's cells: get 0x00523700 (DS 0x00510c70), release 0x00523400 (DS 0x00510870), add 0x00523420 (DS 0x005108a0))
 
 private:
     std::vector<T *> m_free;

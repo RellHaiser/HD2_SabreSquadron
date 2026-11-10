@@ -42,10 +42,39 @@ inline void NormalizeBy(S_vector &v, float square)
     }
 }
 
-// The game's own dot product (0x00454660): z, then y, then x.
+// The game's own dot product (0x00454660) (DS 0x004b6550): z, then y, then x.
 inline float DotZYX(const S_vector &a, const S_vector &b)
 {
     return (a.z * b.z + a.y * b.y) + a.x * b.x;
+}
+
+// The other small vector operations the game has out of line.
+inline void MulAssign(S_vector &a, const S_vector &b)   // 0x004cd4f0 (DS 0x004b8fa0)
+{
+    a.x = b.x * a.x;
+    a.y = b.y * a.y;
+    a.z = b.z * a.z;
+}
+
+inline void AddAssign(S_vector &a, const S_vector &b)   // 0x004cd520 (DS 0x004b8fe0)
+{
+    a.x = b.x + a.x;
+    a.y = b.y + a.y;
+    a.z = b.z + a.z;
+}
+
+inline void SubAssign(S_vector &a, const S_vector &b)   // 0x004ce5c0 (DS 0x004ba4d0)
+{
+    a.x = a.x - b.x;
+    a.y = a.y - b.y;
+    a.z = a.z - b.z;
+}
+
+inline void NegateVector(S_vector &a)                   // 0x00454680 (DS 0x00627b10)
+{
+    a.x = -a.x;
+    a.y = -a.y;
+    a.z = -a.z;
 }
 
 inline S_vector4 Row(const S_matrix &m, int row)

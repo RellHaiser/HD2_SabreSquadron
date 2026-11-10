@@ -663,7 +663,7 @@ public:
     // parts and lights, then applies the default parameters (their result is returned). Fails
     // without BODY / CENTRE, without a seat or wheels (unless +0xF74 bit 1), or with misnamed
     // wheels.
-    bool Setup(I3D_frame *model);                       // 0x004e2e30
+    bool Setup(I3D_frame *model);                       // 0x004e2e30 (DS 0x004d2da0)
     // Frees what Setup built (and releases the model).
     void Release();                                     // 0x004e81a0
 
@@ -1264,7 +1264,7 @@ private:
     float m_unknown738;                                 // +0x738
     float m_drivenWheels;                               // +0x73C the number of WHEEL_DRIVEN wheels (not WHEEL_DUMMY)
     float m_handbrake;                                  // +0x740 0..1
-    std::vector<S_VehicleExhaust> m_exhausts;           // +0x744
+    std::vector<S_VehicleExhaust> m_exhausts;           // +0x744 (free 0x004fb6d0 (DS 0x004ee320))
     int m_unknown754;                                   // +0x754 the exhausts' car effect (0: none)
     float m_unknown758;                                 // +0x758 m/s the exhausts blow below it
     float m_unknown75C;                                 // +0x75C the exhaust's blow at idle (x its direction, m/s)
@@ -1282,7 +1282,7 @@ private:
     float m_unknown78C;                                 // +0x78C (Start: 0) the engine's load eased, 0..1 (the engine layers' mix)
     float m_unknown790;                                 // +0x790 SetUnknown4f2630
     S_BodyCollisionBox *m_bodyCollision;                // +0x794 owned tree
-    std::vector<S_VehicleBodyContact> m_bodyContacts;   // +0x798 this tick's
+    std::vector<S_VehicleBodyContact> m_bodyContacts;   // +0x798 this tick's (free 0x004fb6f0 (DS 0x004ee350))
     int m_bodyContactEffects[3] = {-1, -1, -1};         // +0x7A8 car effect slots of the first three (unset until Start in the original)
     std::string m_modelName;                            // +0x7B4 the model frame's name
     std::string m_modelFileName;                        // +0x7B8 the model's +0x134 string (inferred: the file it came from)
@@ -1405,21 +1405,21 @@ private:
     void *m_callbackContext;                            // +0xF78 (the car)
     int m_unknownF7C;                                   // +0xF7C
     uint32_t m_unknownF80[10];                          // +0xF80 (Start: 0)
-    std::vector<S_VehicleSeat> m_seats;                 // +0xFA8
-    std::vector<S_VehicleDoor> m_doors;                 // +0xFB8
-    std::vector<S_VehicleBallast> m_ballasts;           // +0xFC8
+    std::vector<S_VehicleSeat> m_seats;                 // +0xFA8 (free 0x004fb710 (DS 0x004ee380))
+    std::vector<S_VehicleDoor> m_doors;                 // +0xFB8 (free 0x004fb730 (DS 0x004ee3b0))
+    std::vector<S_VehicleBallast> m_ballasts;           // +0xFC8 (free 0x004fb750 (DS 0x004ee3e0))
     I3D_frame *m_body;                                  // +0xFD8 the "BODY" frame
     S_VehicleParams m_params;                           // +0xFDC the stored block
     float m_revLimit;                                   // +0x221C revolutions per second (inferred)
     float m_tankSize;                                   // +0x2220 litres
     float m_unknown2224;                                // +0x2224 (Start: 0)
     std::vector<S_vector4> m_specialCollisionCorners;   // +0x2228 two per special volume (its box's min and max)
-    std::vector<S_VehicleSpecialCollision> m_specialCollisions;   // +0x2238
+    std::vector<S_VehicleSpecialCollision> m_specialCollisions;   // +0x2238 (free 0x004fb770 (DS 0x004ee410))
     std::vector<S_VehicleCollisionDesc> m_specialCollisionDescs;  // +0x2248
     // Pointers to m_specialVolumes (Start; Stop empties it).
     std::vector<S_CollisionVolume *> m_specialVolumeList;   // +0x2258
     // The special volumes (Start; not moved once added to the world).
-    std::vector<S_CollisionVolume> m_specialVolumes;    // +0x2268
+    std::vector<S_CollisionVolume> m_specialVolumes;    // +0x2268 (free 0x004fb7d0 (DS 0x004ee4a0))
     S_VehicleCollisionDesc m_bodyCollisionDesc;         // +0x2278 the CENTRE box's
     uint16_t m_substeps;                                // +0x2280 Integrate: the solver steps of this step
     uint16_t m_unknown2282;                             // +0x2282 (Integrate: 0)

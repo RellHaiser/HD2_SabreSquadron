@@ -93,7 +93,7 @@ struct S_SoldierProgress {                              // 0x24 bytes
 };
 
 // Item of a soldier state.
-struct S_SoldierItem {                                  // 6 bytes
+struct S_SoldierItem {                                  // 6 bytes (its constructor: 0x005aa0d0 (DS 0x005b8c90))
     // Chunk `id` with the item's 6 bytes (the squad soldiers' saved games).
     bool WriteChunk(int id, C_chunk &chunk) const;      // 0x006a4fd0
     // Reads the current chunk's 6 bytes and leaves it.
@@ -127,7 +127,7 @@ static_assert(sizeof(S_SoldierLoad) == 0x20, "saved as is");
 // What a human is and carries: kept between missions for the campaign squad (S_SquadSoldier,
 // profile.h), sent to joining network clients (C_NetMessage: 0x00727850 write, 0x00727a30
 // read).
-struct S_SoldierState {                                 // 0xAC bytes
+struct S_SoldierState {                                 // 0xAC bytes (its destructor: 0x005aa0f0 (DS 0x005b8cc0))
     C_str name;
     int spawnZone = 0;                                  // +0x04 multiplayer: the net id of the zone to
                                                         //       spawn at (-1: the respawn screen picks it)

@@ -181,7 +181,9 @@ void C_HumanMovement::SetOwner(C_Human *owner)
     m_locomotion.Init(this, &m_specialMoves, &m_animPlayer, m_owner);
     m_specialMoves.Init(this, &m_locomotion, &m_animPlayer, &m_idle, m_owner);
     m_animPlayer.Init(this, &m_specialMoves, &m_locomotion, m_owner);
+#ifndef HD2_DEDICATED   // the server attaches no weapon pose
     m_weaponPose->Attach(owner->GetFrame(), owner, false);
+#endif
 }
 
 void C_HumanMovement::Init()
@@ -241,8 +243,10 @@ void C_HumanMovement::Init()
 
 void C_HumanMovement::Done()
 {
+#ifndef HD2_DEDICATED   // no surface marks on the server
     if (g_humansInMission == 1)
         SurfaceMarks_Done();
+#endif
     GetGame()->GetScene()->RemoveHumanModel(m_owner->GetFrame());
     --g_humansInMission;
     DoneBase();
@@ -265,7 +269,9 @@ void C_HumanMovement::Reset()
     m_visual.Reset();
     m_idle.Reset();
     m_morph.Reset();
+#ifndef HD2_DEDICATED   // the server's resets no weapon pose
     m_weaponPose->Reset();
+#endif
     C_HumanLighting &lighting = m_visual.m_lighting;
     lighting.SetSector(m_visual.m_sector);
     RemoveCollision(false);
@@ -312,7 +318,9 @@ bool C_HumanMovement::SaveGame(C_chunk &chunk)
         chunk.Ascend();
         return false;
     }
+#ifndef HD2_DEDICATED   // the server's saves have no weapon pose
     m_weaponPose->SaveGame(chunk);
+#endif
     chunk.Ascend();
     return true;
 }
@@ -335,8 +343,10 @@ bool C_HumanMovement::LoadGame(C_chunk &chunk)
         ok = m_locomotion.LoadGame(chunk) && m_animPlayer.LoadGame(chunk) && m_idle.LoadGame(chunk) &&
              m_visual.LoadGame(chunk) && m_mixer.LoadGame(chunk) && m_morph.LoadGame(chunk);
         if (ok) {
+#ifndef HD2_DEDICATED   // the server's saves have no weapon pose
             m_weaponPose->LoadGame(chunk);
             m_weaponPose->Attach(m_owner->GetFrame(), m_owner, true);
+#endif
             chunk.Ascend();
             AfterLoad();
             return true;
@@ -832,7 +842,9 @@ void C_HumanMovement::UpdatePhysics(int time)
         return;
     if (m_unknown1AC == 0 && m_unknown9C0 == 0) {
         m_physicsProfileTime = 0;
+#ifndef HD2_DEDICATED   // no weapon pose on the server
         m_weaponPose->Update(time);
+#endif
         return;
     }
     if (!IsLocalGame() && !m_owner->GetFrame()->IsOn()) {
@@ -868,7 +880,9 @@ void C_HumanMovement::UpdatePhysics(int time)
     }
     UpdatePhysicsRest(time);
     m_physicsProfileTime += ProfileClock();
+#ifndef HD2_DEDICATED   // no weapon pose on the server
     m_weaponPose->Update(time);
+#endif
 }
 
 void C_HumanMovement::UpdatePhysicsParts(int time)
@@ -882,7 +896,9 @@ void C_HumanMovement::UpdatePhysicsParts(int time)
     if (m_flags & MOVE_FLAG_FROZEN)
         return;
     UpdatePhysicsRest(time);
+#ifndef HD2_DEDICATED   // the server's has no weapon pose update here
     m_weaponPose->Update(time);
+#endif
 }
 
 void C_HumanMovement::UpdatePhysicsRest(int time)

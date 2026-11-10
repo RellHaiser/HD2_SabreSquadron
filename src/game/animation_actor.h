@@ -73,7 +73,7 @@ private:
         // The box from the frame's bound (a dummy's box), its place from the frame's world matrix
         // without the scale; `add` also takes the material from the frame's "matid" property and
         // adds the volume to the world.
-        void Refresh(bool add);                         // 0x005b48b0
+        void Refresh(bool add);                         // 0x005b48b0 (DS 0x005c6670)
 
         S_matrix invMatrix;                             // +0x00
         S_matrix matrix;                                // +0x40

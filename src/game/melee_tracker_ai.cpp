@@ -45,7 +45,7 @@ C_Actor *HumanOfFrame(I3D_frame *frame)
 
 // The meleeTracker's waypoint pool (0x008ac920; the original co-locates a second 0x20-byte pool for the
 // path-following geometry, ported with that code). Filled with 16 nodes at a time.
-C_ObjectPool<S_AIWaypoint> g_meleeTrackerWaypoints{16};
+C_ObjectPool<S_AIWaypoint> g_meleeTrackerWaypoints{16};  // constructed by 0x005ce2c0 (DS 0x005e6a20)
 
 }  // namespace
 
@@ -415,7 +415,7 @@ C_MeleeTrackerScriptedAI::C_MeleeTrackerScriptedAI()    // (SetController's case
     m_script = nullptr;
 }
 
-C_MeleeTrackerScriptedAI::~C_MeleeTrackerScriptedAI() = default;   // 0x005d5bd0
+C_MeleeTrackerScriptedAI::~C_MeleeTrackerScriptedAI() = default;   // 0x005d5bd0 (DS 0x005f0640)
 
 bool C_MeleeTrackerScriptedAI::Attach(C_MeleeTracker *meleeTracker)   // 0x005cf6c0
 {
@@ -1571,7 +1571,7 @@ C_MeleeTrackerRemote::C_MeleeTrackerRemote()            // (SetController's case
 {
 }
 
-C_MeleeTrackerRemote::~C_MeleeTrackerRemote() = default;   // 0x005d5c40
+C_MeleeTrackerRemote::~C_MeleeTrackerRemote() = default;   // 0x005d5c40 (DS 0x005f06f0)
 
 bool C_MeleeTrackerRemote::Attach(C_MeleeTracker *meleeTracker)   // 0x005cfc10
 {

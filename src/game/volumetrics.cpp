@@ -12,7 +12,7 @@
 #include "ls3d/igraph.h"
 
 // (0x00482df0..0x00482e30: the clouds' static initialization; 0x00482140 the file's.)
-S_Clouds g_clouds;                                      // 0x0089b74c
+S_Clouds g_clouds;                                      // 0x0089b74c (server: construction, atexit (DS 0x004a14e0), (DS 0x004a1500), (DS 0x004a1520))
 S_LitVertex *g_cloudVertices[2];                        // 0x0089b754, 0x0089b758
 
 namespace {
@@ -593,22 +593,24 @@ void C_Volumetrics::Render(int time)
 
 // ---- the clouds --------------------------------------------------------------------------------
 
-// 0x00483de0
+// 0x00483de0 (DS 0x004a15a0)
 void FreeClouds()
 {
+#ifndef HD2_DEDICATED   // no textures on the server: its FreeClouds frees the vertices only
     for (IImage *&image : g_clouds.images) {
         if (image) {
             image->Release();
             image = nullptr;
         }
     }
+#endif
     for (S_LitVertex *&vertices : g_cloudVertices) {
         delete[] vertices;
         vertices = nullptr;
     }
 }
 
-// 0x00483e50
+// 0x00483e50 (DS 0x004a15f0)
 void LoadClouds()
 {
     FreeClouds();

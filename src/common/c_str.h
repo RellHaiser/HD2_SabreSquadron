@@ -36,7 +36,7 @@ public:
     bool operator!=(const C_str &other) const { return !(*this == other); }
     // Appends (builds a new buffer, like the SDK's operator+, whose buffer setup is 0x00414550).
     C_str &operator+=(const C_str &other);
-    C_str &operator+=(const char *text);
+    C_str &operator+=(const char *text);                     // 0x005d7070 (DS 0x005f2070)
 
     // Case-insensitive comparison.
     bool EqualsNoCase(const char *text) const;
@@ -53,7 +53,7 @@ protected:
 
     void Assign(const char *text, std::size_t length);
     void AddRef() { if (m_rep) ++m_rep->refCount; }
-    void Release();
+    void Release();                                          // 0x00435220 (DS 0x007115a0)
     void MakeUnique();
     static Rep *CreateRep(const char *text, std::size_t length);   // 0x004050a0
 

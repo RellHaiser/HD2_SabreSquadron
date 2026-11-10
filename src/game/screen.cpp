@@ -35,6 +35,11 @@ void AddScreenMessage(S_ScreenDesc *desc, uint32_t target, uint32_t id, uint32_t
     desc->messages.push_back(message);
 }
 
+void AddScreenMessage(S_ScreenDesc *desc, uint32_t target, uint32_t id, uint32_t value, uintptr_t value2)    // 0x00625ed0 (DS 0x006551b0)
+{
+    AddScreenMessage(desc, target, id, value, value2, 0);
+}
+
 S_MenuDesc::~S_MenuDesc()
 {
     while (!screens.empty()) {

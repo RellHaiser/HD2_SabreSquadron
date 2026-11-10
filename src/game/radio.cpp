@@ -45,7 +45,7 @@ void C_Radio::CopyFrom(const C_Actor *source)           // 0x0060a8d0
     m_side = other->m_side;
 }
 
-void C_Radio::StartMission(bool server)                 // 0x0060a930
+void C_Radio::StartMission(bool server)                 // 0x0060a930 (DS 0x00632d00)
 {
     Activate(server);
     if (m_started)

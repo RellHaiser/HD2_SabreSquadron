@@ -247,6 +247,7 @@ def build_tests(debug, only=None):
     tdir = os.path.join(ROOT, "tests")
     out = os.path.join(ROOT, "build")
     os.makedirs(out, exist_ok=True)
+    compiled = {}                       # a port source compiled for one test serves the others
     for f in sorted(os.listdir(tdir)) if os.path.isdir(tdir) else []:
         if not f.endswith(".cpp") or (only and only not in f):
             continue
@@ -258,11 +259,12 @@ def build_tests(debug, only=None):
             # Port sources compiled for the test (same flags as the DLL).
             os.makedirs(os.path.join(WORK, "obj"), exist_ok=True)
             with ThreadPoolExecutor(max(2, os.cpu_count() or 4)) as ex:
-                for src, obj, good, text in ex.map(lambda s: compile_one(s, debug), extra):
+                for src, obj, good, text in ex.map(lambda s: compiled.get(s) or compile_one(s, debug), extra):
                     if text:
                         print(text)
                     ok &= good
                     objs.append(obj)
+                    compiled[src] = (src, obj, good, "")
         cmd = [tool("cl"), *flags, "/Fo" + WORK + "\\", "/Fd" + os.path.join(WORK, f[:-4] + ".pdb"), "/Fe" + exe,
                os.path.join(tdir, f), *objs, "/link", "/INCREMENTAL:NO", *LIBS, *import_libs(), *extra_libs]
         r = subprocess.run(cmd, capture_output=True, text=True, env=msvc_env())
@@ -278,7 +280,9 @@ def build_tests(debug, only=None):
 
 # Arguments of the tests that take no operation count and seed (after the original's path, "" = found
 # by %HD2_DIR% or PATH). compare_math's count is the rounds; without it "--pc24" is read as 0 rounds.
-RUN_ARGS = {"compare_math": ["{ops}", "--pc24"], "compare_dxerr8": []}
+RUN_ARGS = {"compare_math": ["{ops}", "--pc24"], "compare_dxerr8": [],
+            # every model file and mission scene the game ships (not an operation count)
+            "compare_load": ["0", "1", "1"]}
 
 
 def run_tests(only=None, ops="20000", seeds=("1",)):
@@ -286,6 +290,10 @@ def run_tests(only=None, ops="20000", seeds=("1",)):
     logs = os.path.join(WORK, "logs")
     os.makedirs(logs, exist_ok=True)
     env = dict(os.environ)
+    # The unpacked game files' names (research/ is local to the checkout that has it).
+    unpacked = os.path.join(os.path.dirname(ROOT), "research", "out", "HD2_Unpacked")
+    if not env.get("HD2_UNPACKED") and os.path.isdir(unpacked):
+        env["HD2_UNPACKED"] = unpacked
     if env.get("HD2_DIR"):
         # The originals import rw_data.dll and others from the game folder.
         env["PATH"] = env["HD2_DIR"] + os.pathsep + env.get("PATH", "")

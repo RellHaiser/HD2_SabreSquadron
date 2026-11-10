@@ -283,10 +283,14 @@ void ResetSpeechSlots()
 
 void StopFrameSpeech(I3D_frame *owner)
 {
+#ifdef HD2_DEDICATED   // the server's copy is empty
+    (void)owner;
+#else
     for (int i = 0; i < SPEECH_SLOTS; ++i) {
         if (g_slots[i].state == STATE_PLAYING && g_slots[i].frame == owner)
             StopSpeechSlot(i);
     }
+#endif
 }
 
 void AttachSpeechSlot(int index, I3D_frame *frame)
@@ -366,10 +370,14 @@ void PlaySpeechSlot(int index, int dubbing, float nearRange, float farRange, boo
 
 bool IsHumanSpeaking(const C_Human *human)
 {
+#ifdef HD2_DEDICATED   // the server's copy: nobody speaks
+    (void)human;
+#else
     for (const S_SpeechSlot &slot : g_slots) {
         if (slot.state == STATE_PLAYING && slot.frame == human->GetFrame())
             return true;
     }
+#endif
     return false;
 }
 

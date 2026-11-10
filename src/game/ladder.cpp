@@ -94,7 +94,7 @@ C_Ladder::C_Ladder() : C_Actor(ACTOR_LADDER)           // 0x005ea3d0
     m_name = g_texts.Get(TEXT_LADDER);
 }
 
-C_Ladder::~C_Ladder()                                   // 0x005ea590
+C_Ladder::~C_Ladder()                                   // 0x005ea590 (DS 0x0060a8f0)
 {
     FreeVolumes();
 }
@@ -177,7 +177,7 @@ bool C_Ladder::ReadProperties(C_chunk &chunk)           // 0x005ebbd0
     return true;
 }
 
-void C_Ladder::StartMission(bool server)                // 0x005ead20
+void C_Ladder::StartMission(bool server)                // 0x005ead20 (DS 0x0060b270)
 {
     I3D_frame *parent = m_frame->GetParent();
     Activate(server);

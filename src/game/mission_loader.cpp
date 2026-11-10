@@ -41,12 +41,14 @@ struct S_ModuleMissionData {
     S_ModuleMissionData() = default;
     S_ModuleMissionData(const S_ModuleMissionData &) = delete;
     S_ModuleMissionData &operator=(const S_ModuleMissionData &) = delete;
-    ~S_ModuleMissionData()                              // 0x006cb130
+    ~S_ModuleMissionData()                              // 0x006cb130 (DS 0x0070f780)
     {
         if (g_gameRole & GAME_ROLE_SERVER)
             ModuleManager::BroadcastLoadMissionData(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
         if (g_gameRole & GAME_ROLE_CLIENT)
             ModuleManager::BroadcastLoadMissionData(false);
+#endif
     }
 };
 
@@ -569,7 +571,7 @@ bool LoadConvexMesh(C_chunk &chunk, T *frame, uint16_t vertices, uint16_t faces)
             chunk.Read(file.data(), static_cast<int>(file.size() * sizeof(S_vector)));
             chunk.Ascend();
             verts.assign(file.size(), S_vector4{0.0f, 0.0f, 0.0f, 0.0f});
-            for (size_t i = 0; i < file.size(); ++i) {   // (0x006d1ed0)
+            for (size_t i = 0; i < file.size(); ++i) {   // (0x006d1ed0 (DS 0x00717e10))
                 verts[i].x = file[i].x;
                 verts[i].y = file[i].y;
                 verts[i].z = file[i].z;

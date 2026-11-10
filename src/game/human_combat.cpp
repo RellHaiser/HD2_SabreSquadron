@@ -279,13 +279,16 @@ void C_Human::Hit(E_HitType hitType, float amount, const S_vector &pos, const S_
         // Spawn protection.
         if (m_role == HUMAN_ROLE_PLAYER && m_aliveTime < g_mpSettings->spawnProtection * 1000 && type != HIT_SUICIDE)
             return;
-    } else if (attacker && attacker->IsLocalPlayer() && !CopyProtectionIntact() &&
-               static_cast<float>(std::rand()) < 327.67f) {
+    }
+#ifndef HD2_DEDICATED   // the server has no integrity check here
+    else if (attacker && attacker->IsLocalPlayer() && !CopyProtectionIntact() &&
+             static_cast<float>(std::rand()) < 327.67f) {
         // A failed integrity check (copy protection, inferred): now and then (1%) the
         // player's own shots hurt him.
         const S_vector back = -attacker->GetViewDir();
         attacker->Hit(hitType, amount, attacker->GetRandomBonePos(), back, attacker, zone);
     }
+#endif
     if ((IsLocalGame() || g_gameProfile.IsCooperativeGame()) && amount != -1.0f && type == HIT_BULLET) {
         const int difficulty = g_gameProfile.GetDifficulty();
         if (m_role == HUMAN_ROLE_PLAYER || m_role == HUMAN_ROLE_NPC_TEAM) {

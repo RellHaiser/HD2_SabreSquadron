@@ -794,3 +794,15 @@ static const bool g_staticWeaponCreatorRegistered = [] {
     g_actorCreators[ACTOR_STATIC_WEAPON] = &g_staticWeaponCreator;
     return true;
 }();
+
+void C_StaticWeapon::GetExitPosUnused(S_vector4 *out) const
+{
+    if (m_exit.z * m_exit.z + m_exit.y * m_exit.y + m_exit.x * m_exit.x < 1e-16f) {
+        const S_matrix &m = GetFrame()->GetMatrix();
+        out->x = m.m[2][0] * -1.0f + m.m[3][0];
+        out->y = m.m[2][1] * -1.0f + m.m[3][1];
+        out->z = m.m[2][2] * -1.0f + m.m[3][2];
+        return;
+    }
+    *out = m_exit;
+}

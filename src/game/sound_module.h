@@ -26,6 +26,7 @@
 class C_Actor;
 class C_Human;
 class I3D_frame;
+class I3D_scene;
 class I3D_sector;
 class I3D_sound;
 class ISND_stream;
@@ -83,6 +84,30 @@ struct S_SectorAcoustics {                              // 12 bytes
     float outdoorFactor;                                // share of outdoor sound that gets in (0.1 .. 1)
 };
 
+// How many portals apart the sectors are, kept in the sectors' user data (where the acoustics
+// live while a mission runs). None of this is called in the game.
+struct S_SectorHopEntry {                               // 2 bytes
+    S_SectorHopEntry() {}                               // 0x00431f20 (DS 0x00457670)
+    ~S_SectorHopEntry() {}                              // 0x00431f40 (DS 0x004576a0)
+    uint8_t hops = 0xFF;                                // +0x00 0xFF: not counted yet
+    uint8_t unknown1 = 0x80;                            // +0x01
+};
+struct S_SectorHops {                                   // 12 bytes
+    S_SectorHops(I3D_sector *sector, int index);        // 0x00431dd0 (DS 0x004574b0)
+    I3D_sector *sector;                                 // +0x00
+    int index;                                          // +0x04 in the table, and the entries' count
+    S_SectorHopEntry *entries;                          // +0x08 one per sector before this one
+};
+// Distance from `a` to `b`; `factor` falls with the hops between the sectors, by 0.1 a hop
+// when `gradual`, else by 0.25.
+float SectorHopDistance(float &factor, const S_vector &a, const S_vector &b, I3D_sector *sectorA,
+                        I3D_sector *sectorB, bool gradual);   // 0x00431120 (DS 0x00456430)
+// Hops from `from` to `to` (at most 10), counted once and then remembered.
+uint8_t CountSectorHops(I3D_sector *from, I3D_sector *to, std::vector<I3D_sector *> &path,
+                        uint32_t maxPath);              // 0x004312b0 (DS 0x00456630)
+void BuildSectorHopTable(std::vector<S_SectorHops *> &table, I3D_scene *scene);   // 0x004314e0 (DS 0x004568f0)
+uint32_t __stdcall AddSectorHopEntry(I3D_frame *frame, void *table);   // 0x00431630 (DS 0x00456aa0)
+
 // A sound frame of the scene whose volume follows the listener's sector.
 struct S_SoundFrame {                                   // 0x14 bytes
     S_SoundFrame(I3D_sound *sound, bool trackSector);   // 0x00432420
@@ -102,7 +127,7 @@ struct S_SoundFrame {                                   // 0x14 bytes
 class C_SoundModule : public C_Module {                 // "Sound", vtable 0x0080f7b8, 0x104 bytes
 public:
     C_SoundModule(int id, const char *name);            // 0x004336d0
-    ~C_SoundModule() override;                          // 0x004335d0
+    ~C_SoundModule() override;                          // 0x004335d0 (DS 0x00459340)
 
     void Update(int timeDelta) override;                // 0x004368d0
     void LoadMissionData(bool server) override;         // 0x004338d0
@@ -189,8 +214,9 @@ private:
     int AllocSlot();
     void ReleaseSlotSound(S_SoundSlot *slot);           // 0x004361b0
     void NotifyListeners(int slot, bool occluded);      // 0x00435b00
+    bool NotifyListenersForRequest(const S_SoundRequest &request);   // 0x00435dc0 (DS 0x0045a8a0)
     void InitSectorAcoustics();                         // 0x004328d0
-    void FreeSectorAcoustics();                         // 0x00432860
+    void FreeSectorAcoustics();                         // 0x00432860 (DS 0x00458280)
     static uint32_t __stdcall AddSectorAcoustics(I3D_frame *sector, void *module);   // 0x00432900
     bool IsMusicPlaying() const;                        // 0x004323e0
     bool IsOverlayPlaying() const;                      // 0x00432400
@@ -199,8 +225,8 @@ private:
     static bool OpenStream(ISND_stream *&stream, const char *fileName, float volume, bool loop);   // 0x00437210
 
     std::vector<S_Listener> m_listeners;                // +0x0C
-    std::vector<S_SoundSlot *> m_slots;                 // +0x1C
-    std::vector<int> m_freeSlots;                       // +0x2C
+    std::vector<S_SoundSlot *> m_slots;                 // +0x1C (free 0x00437680 (DS 0x0045b6c0))
+    std::vector<int> m_freeSlots;                       // +0x2C (free 0x004376a0 (DS 0x0045b6f0))
     float m_masterVolume = 0.0f;                        // +0x3C
     bool m_masterVolumeApplied = false;                 // +0x40
     float m_musicVolume = 1.0f;                         // +0x44

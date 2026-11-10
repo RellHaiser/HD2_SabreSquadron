@@ -483,6 +483,82 @@ void C_SoundModule::StopAll(bool releaseTableSounds, bool keepMusic)
 // ---------------------------------------------------------------------------
 // sector acoustics
 
+S_SectorHops::S_SectorHops(I3D_sector *sector_, int index_)
+    : sector(sector_), index(index_), entries(index_ ? new S_SectorHopEntry[index_] : nullptr)
+{
+    sector->SetUserData(this);
+}
+
+// The entry for two sectors is in the table of the one that comes later.
+static uint8_t &SectorHopsBetween(I3D_sector *sectorA, I3D_sector *sectorB)
+{
+    auto *a = static_cast<S_SectorHops *>(sectorA->GetUserData());
+    auto *b = static_cast<S_SectorHops *>(sectorB->GetUserData());
+    return b->index < a->index ? a->entries[b->index].hops : b->entries[a->index].hops;
+}
+
+float SectorHopDistance(float &factor, const S_vector &a, const S_vector &b, I3D_sector *sectorA,
+                        I3D_sector *sectorB, bool gradual)
+{
+    if (sectorA == sectorB || !sectorA || !sectorB) {
+        factor = 1.0f;
+    } else {
+        const uint8_t hops = SectorHopsBetween(sectorA, sectorB);
+        if (gradual)
+            factor = hops < 10 ? 1.0f - hops * 0.1f : 0.0f;
+        else
+            factor = hops < 4 ? 1.0f - hops * 0.25f : 0.0f;
+    }
+    return (a - b).Magnitude();
+}
+
+uint8_t CountSectorHops(I3D_sector *from, I3D_sector *to, std::vector<I3D_sector *> &path, uint32_t maxPath)
+{
+    if (from == to)
+        return 0;
+    uint8_t &hops = SectorHopsBetween(from, to);
+    if (hops != 0xFF)
+        return hops;
+    uint8_t best = 10;
+    if (path.size() <= maxPath) {
+        // (The original looks the next sector up in `path`, then ignores the result: only
+        // maxPath ends the walk.)
+        const auto walk = [&](I3D_sector *next) {
+            path.push_back(next);
+            const uint32_t count = CountSectorHops(next, to, path, maxPath) + 1u;
+            if (count < best)
+                best = static_cast<uint8_t>(count);
+            path.pop_back();
+        };
+        for (int i = from->NumPortals(); i-- > 0;)
+            walk(from->GetPortal(i)->GetConnected());
+        for (int i = from->NumIncomingPortals(); i-- > 0;)
+            walk(from->GetIncomingPortal(i)->GetOwner());
+    }
+    hops = best;
+    return best;
+}
+
+void BuildSectorHopTable(std::vector<S_SectorHops *> &table, I3D_scene *scene)
+{
+    I3D_sector *primary = scene->GetPrimarySector();
+    table.push_back(new S_SectorHops(primary, 0));
+    primary->EnumFrames(AddSectorHopEntry, &table, ENUMF_SECTOR, 0);
+    std::vector<I3D_sector *> path;
+    const int count = static_cast<int>(table.size());
+    for (int i = 0; i < count; ++i) {
+        for (int j = 0; j < i; ++j)
+            table[i]->entries[j].hops = CountSectorHops(table[i]->sector, table[j]->sector, path, 10);
+    }
+}
+
+uint32_t __stdcall AddSectorHopEntry(I3D_frame *frame, void *context)
+{
+    auto &table = *static_cast<std::vector<S_SectorHops *> *>(context);
+    table.push_back(new S_SectorHops(static_cast<I3D_sector *>(frame), static_cast<int>(table.size())));
+    return 0;
+}
+
 void C_SoundModule::InitSectorAcoustics()
 {
     GetGame()->GetScene()->GetPrimarySector()->EnumFrames(AddSectorAcoustics, this, ENUMF_SECTOR, 0);
@@ -925,6 +1001,62 @@ void C_SoundModule::NotifyListeners(int index, bool occluded)
     }
 }
 
+// What the listeners would hear of a request that is not played: a human's sound, with the ranges of its group's
+// first sample (or its own).
+bool C_SoundModule::NotifyListenersForRequest(const S_SoundRequest &request)    // 0x00435dc0 (DS 0x0045a8a0)
+{
+    if (!request.source || request.source->GetType() != ACTOR_HUMAN)
+        return false;
+    float nearRange, farRange;
+    if (!request.fileName) {
+        const S_SoundGroup *group = g_soundTable.GetChapter(request.chapter)->groups[request.group];
+        if (group->samples.empty())
+            return false;
+        farRange = group->samples[0]->farRange * request.farScale;
+        nearRange = group->samples[0]->nearRange * request.nearScale;
+    } else {
+        farRange = request.farScale * request.farRange;
+        nearRange = request.nearScale * request.nearRange;
+    }
+    S_vector pos = request.pos;
+    if (request.attachTo) {
+        const S_matrix &matrix = request.attachTo->GetMatrix();
+        pos.x += matrix.m[3][0];
+        pos.y += matrix.m[3][1];
+        pos.z += matrix.m[3][2];
+    }
+
+    S_HeardSound heard = {};
+    heard.pos = pos;
+    heard.posW = request.posW;
+    heard.chapter = request.chapter;
+    heard.source = request.source;
+    I3D_sector *sourceSector = request.source->GetSector();
+
+    for (std::size_t i = m_listeners.size(); i-- > 0;) {
+        const S_Listener &listener = m_listeners[i];
+        if (!listener.callback || !listener.frame)
+            continue;
+        const S_vector ear = EarPosition(listener.frame);
+        float distance = (pos - ear).Magnitude();
+        if (distance > farRange)
+            continue;
+        heard.listener = listener.frame;
+        if (!(request.flags & SOUND_AI_OCCLUSION)) {
+            heard.intensity = Intensity(distance, nearRange, farRange);
+        } else {
+            float factor = 1.0f;
+            if (listener.human)
+                distance = PortalDistance(factor, pos, ear, sourceSector, listener.human->GetSector());
+            if (distance > farRange)
+                continue;
+            heard.intensity = distance > nearRange ? Intensity(distance, nearRange, farRange) * factor : 1.0f;
+        }
+        listener.callback(&heard);
+    }
+    return true;
+}
+
 bool C_SoundModule::PlayDubbing(C_Human *owner, I3D_frame *frame, int dubbing, float nearRange, float farRange,
                                 bool showSubtitle)
 {
@@ -1042,6 +1174,10 @@ bool C_SoundModule::OpenStream(ISND_stream *&stream, const char *fileName, float
 
 void C_SoundModule::SetBackgroundMusic(int track, int position)
 {
+#ifdef HD2_DEDICATED   // the server's copy is empty
+    (void)track;
+    (void)position;
+#else
     g_soundTable.Load();
     OpenStream(m_music, nullptr, 0.0f, true);
     m_crossfadePending = false;
@@ -1055,6 +1191,7 @@ void C_SoundModule::SetBackgroundMusic(int track, int position)
     OpenStream(m_music, group->samples[pick]->fileName, m_musicVolume * m_musicFade, true);
     if (position && m_music && m_music->IsPlaying())
         m_music->SetPosition(position);
+#endif
 }
 
 void C_SoundModule::FadeBackgroundMusic(float volume, int time)
