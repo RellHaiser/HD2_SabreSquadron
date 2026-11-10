@@ -11,6 +11,7 @@
 #include "core/cpu.h"
 #include "core/debug.h"
 #include "core/enhance.h"
+#include "diag/events.h"
 #include "dx/dxerr8.h"
 #include "i3d/i3d_links.h"
 #include "i3d/vb_manager.h"
@@ -643,6 +644,13 @@ HRESULT __stdcall IGraph::EndScene()
 // 0x1006b3e0
 HRESULT __stdcall IGraph::Flip()
 {
+    // (Diagnostics: the flip's begin and end, whichever way it returns.)
+    static uint32_t flips;
+    struct S_marks {
+        uint32_t id;
+        explicit S_marks(uint32_t flip) : id(flip) { diag::Mark(diag::EV_FLIP_BEGIN, id); }
+        ~S_marks() { diag::Mark(diag::EV_FLIP_END, id); }
+    } marks(++flips);
     snd::UpdateVoices();
     if (g_showFps) {
         ++g_fpsFrames;
@@ -1491,6 +1499,8 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
         g_textureThread = platform::StartThread(tex::StreamThread, nullptr);
         platform::SetPriority(g_textureThread, THREAD_PRIORITY_NORMAL);
     }
+    // LS3DF.ini [Diagnostics] Events: the engine's markers from here on, on this (the window's) thread.
+    diag::Start(diag::ConfiguredCapacity());
     Clear(0, 1.0f, 3);
     Flip();
     Clear(0, 1.0f, 3);
@@ -1521,6 +1531,12 @@ const S_IGraphInit *__stdcall IGraph::GetInitData()
 // 0x1006da40
 HRESULT __stdcall IGraph::Close()
 {
+    if (diag::Enabled()) {
+        char path[MAX_PATH];
+        if (diag::ModuleFilePath("LS3DF_events.csv", path, sizeof path))
+            diag::WriteCsv(path, "engine");
+        diag::Stop();
+    }
     if (g_defaultTexture) {
         g_defaultTexture->Release();
         g_defaultTexture = nullptr;

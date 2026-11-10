@@ -46,6 +46,10 @@
 //                              ; layer, OpenGL's debug output), and what is asked of it in
 //                              ; LS3DF_render.log
 //   SDLGPUStats=1              ; what the frames cost, every 5 seconds, in LS3DF_render.log
+//
+//   [Diagnostics]              ; (read by src/diag/events.h, in the DLL and in HD2_Port.exe, not here)
+//   Events=1                   ; timestamped frame-stage markers: LS3DF_events.csv / HD2_events.csv
+//   EventBuffer=65536          ; events kept in each file
 #pragma once
 
 namespace ls3d {

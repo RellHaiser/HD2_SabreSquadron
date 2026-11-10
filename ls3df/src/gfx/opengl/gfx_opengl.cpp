@@ -26,6 +26,7 @@
 #include <SDL3/SDL_opengl.h>
 
 #include "core/enhance.h"
+#include "diag/events.h"
 #include "gfx/fixed/fixed_device.h"
 #include "platform/sdl3/sdl3_api.h"
 #include "sdlgpu_shaders.h"
@@ -571,7 +572,9 @@ public:
                                  GL_LINEAR);
         }
         const auto start = std::chrono::steady_clock::now();
+        diag::Mark(diag::EV_GL_SWAP_BEGIN);
         api.SDL_GL_SwapWindow(window);
+        diag::Mark(diag::EV_GL_SWAP_END);
         stats->acquire += std::chrono::steady_clock::now() - start;
         gl.glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     }

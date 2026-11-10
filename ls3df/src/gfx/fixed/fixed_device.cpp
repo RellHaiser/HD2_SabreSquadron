@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "core/enhance.h"
+#include "diag/events.h"
 #include "gfx/trace/trace_format.h"
 #include "platform/sdl3/sdl3_api.h"
 
@@ -687,6 +688,12 @@ public:
         Guard g(m);
         if (!made)
             return D3DERR_INVALIDCALL;
+        // (Diagnostics: the present's begin and end, whichever way it returns.)
+        struct S_marks {
+            uint32_t id;
+            explicit S_marks(uint32_t present) : id(present) { diag::Mark(diag::EV_PRESENT_BEGIN, id); }
+            ~S_marks() { diag::Mark(diag::EV_PRESENT_END, id); }
+        } marks(++presents);
         using Clock = std::chrono::steady_clock;
         const auto start = Clock::now();
         stats.draws += frame.commands.size();
@@ -1104,7 +1111,10 @@ public:
         const std::vector<uint8_t> *from = SurfaceBytes(s);
         D3DFORMAT fromFormat = s->format;
         if (s->backBuffer) {
-            if (!RunFrame() || !renderer->ReadBack(&backRows))
+            diag::Mark(diag::EV_READBACK_BEGIN);
+            const bool read = RunFrame(true) && renderer->ReadBack(&backRows);
+            diag::Mark(diag::EV_READBACK_END);
+            if (!read)
                 return D3DERR_DRIVERINTERNALERROR;
             from = &backRows;
             fromFormat = D3DFMT_A8R8G8B8;
@@ -1693,20 +1703,31 @@ private:
         o.split = static_cast<uint32_t>(frame.commands.size());
         occlusionDone = true;
     }
-    bool RunFrame()
+    // `readBack`: run for a back-buffer read, not a present (only the diagnostic markers tell them apart).
+    bool RunFrame(bool readBack = false)
     {
+        const uint32_t job = ++renderJobs;
+        const uint32_t commands = static_cast<uint32_t>(frame.commands.size());
+        diag::Mark(diag::EV_RUN_FRAME_BEGIN, job, readBack ? 1 : 0);
         SplitForOcclusion();            // (a frame read back before its first blended draw)
         DropDeadTextures();
+        diag::Mark(diag::EV_TEXTURE_UPLOAD_BEGIN, job);
+        uint32_t uploaded = 0;
         for (S_command &c : frame.commands)
             for (S_texture *t : c.textures)
                 if (t && (t->dirty || !t->gpu)) {
                     renderer->UploadTexture(t);
                     t->dirty = false;
+                    ++uploaded;
                 }
+        diag::Mark(diag::EV_TEXTURE_UPLOAD_END, job, uploaded);
         if (g_frameObserver)
             g_frameObserver(frame, g_frameObserverContext);
+        diag::Mark(diag::EV_RENDERER_RUN_BEGIN, job);
         const bool ok = renderer->Run(frame);
+        diag::Mark(diag::EV_RENDERER_RUN_END, job);
         DropFrame();
+        diag::Mark(diag::EV_RUN_FRAME_END, job, commands);
         return ok;
     }
     void DropFrame()
@@ -1739,6 +1760,7 @@ private:
     D3DGAMMARAMP gamma = IdentityRamp();
     bool rampActive = false;
     bool occlusionDone = false;         // ambient occlusion has been done in this frame
+    uint32_t presents = 0, renderJobs = 0;      // (the diagnostic markers' ids)
     // The device's state.
     DWORD rs[256] = {};
     DWORD tss[8][32] = {};

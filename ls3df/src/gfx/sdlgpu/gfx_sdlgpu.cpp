@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "core/enhance.h"
+#include "diag/events.h"
 #include "gfx/fixed/fixed_device.h"
 #include "platform/sdl3/sdl3_api.h"
 #include "sdlgpu_shaders.h"
@@ -580,7 +581,9 @@ public:
         const auto start = std::chrono::steady_clock::now();
         SDL_GPUTexture *swapchain = nullptr;
         Uint32 w = 0, h = 0;
+        diag::Mark(diag::EV_ACQUIRE_BEGIN);
         const bool acquired = window && api.SDL_WaitAndAcquireGPUSwapchainTexture(cmd, window, &swapchain, &w, &h);
+        diag::Mark(diag::EV_ACQUIRE_END);
         stats->acquire += std::chrono::steady_clock::now() - start;
         SDL_GPUGraphicsPipeline *throughRamp = acquired && swapchain && ramp ? PresentPipeline() : nullptr;
         const S_rectangle picture = PictureRectangle(static_cast<int>(w), static_cast<int>(h), present.BackBufferWidth,
@@ -617,7 +620,9 @@ public:
             blit.filter = SDL_GPU_FILTER_LINEAR;
             api.SDL_BlitGPUTexture(cmd, &blit);
         }
+        diag::Mark(diag::EV_SUBMIT_BEGIN);
         api.SDL_SubmitGPUCommandBuffer(cmd);
+        diag::Mark(diag::EV_SUBMIT_END);
         cmd = nullptr;
     }
 
@@ -915,7 +920,9 @@ private:
               layout.pretransformed ? " pretransformed" : "", layout.programmable ? " programmable" : "");
         for (const S_layout::S_attribute &a : layout.attributes)
             Trace("    location %u offset %u format %d", a.location, a.offset, static_cast<int>(a.format));
+        diag::Mark(diag::EV_PIPELINE_CREATE_BEGIN);
         SDL_GPUGraphicsPipeline *made = api.SDL_CreateGPUGraphicsPipeline(gpu, &info);
+        diag::Mark(diag::EV_PIPELINE_CREATE_END);
         Trace("    -> %s", made ? "made" : api.SDL_GetError());
         if (!made)
             EnhancementLog("LS3DF.ini SDLGPU: a pipeline cannot be made (%s)", api.SDL_GetError());
@@ -1043,7 +1050,9 @@ private:
         while (stagingFences.size() > kStagingInFlight) {
             const auto start = std::chrono::steady_clock::now();
             SDL_GPUFence *oldest = stagingFences.front();
+            diag::Mark(diag::EV_UPLOAD_WAIT_BEGIN);
             api.SDL_WaitForGPUFences(gpu, true, &oldest, 1);
+            diag::Mark(diag::EV_UPLOAD_WAIT_END);
             api.SDL_ReleaseGPUFence(gpu, oldest);
             stagingFences.pop_front();
             stats->uploadWait += std::chrono::steady_clock::now() - start;

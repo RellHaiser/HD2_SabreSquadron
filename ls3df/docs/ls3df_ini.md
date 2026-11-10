@@ -145,6 +145,21 @@ CaptureFrames=1
 | `SDLGPUDebug` | 0 / 1 | The API's validation (Direct3D 12's debug layer, the Vulkan SDK's layers, OpenGL's debug output), and what is asked of it in `LS3DF_render.log`; slow, for finding faults. Also for `OpenGL`. |
 | `CaptureFrames` | 0 / 1 | **Ctrl+Shift+F11** saves the next frame the game draws to `LS3DF_frames\frame_<n>.ls3dframe` next to the DLL: every drawing call, the state and resources it uses, and the picture the game drew. The render tests replay these files on each backend and compare the pictures (the cross-platform plan's phase 3, [render_device.md](render_device.md#frame-captures)). A file can be large (tens of MB), and keeping copies of the vertex buffers costs some memory while the option is on. |
 
+## Diagnostics
+
+```ini
+[Diagnostics]
+Events=1
+EventBuffer=65536
+```
+
+| Key | Values | What it does |
+|---|---|---|
+| `Events` | 0 / 1 | Timestamped markers of each frame's stages, in two files: the engine's in `LS3DF_events.csv` next to the DLL (flips, presents, the fixed renderer's runs and read-backs, texture uploads, SDL_GPU's swapchain acquire, submit, upload waits and pipeline creation, OpenGL's swap), written when the engine closes; and `HD2_Port.exe`'s main loop in `HD2_events.csv` next to the EXE (input, the frame floor, the engine tick, drawing, network, the server's and the client's updates, the flip), written when the loop ends. Both stamp `QueryPerformanceCounter`, so the two files line up by time. Only the main thread's markers are recorded. Off: nothing is recorded and nothing is written. |
+| `EventBuffer` | events | How many of the latest events each file keeps (24 bytes each; 1,024 - 4,194,304, rounded up to a power of two). Missing: 65,536, about 20 seconds of play at 100 frames a second. |
+
+The schema is `src/diag/events.h`. A mark costs about 30 ns (most of it the clock); off, one test.
+
 ## Things to know
 
 - **Trilinear filtering and 32-bit lightmaps are already the engine's defaults.** Those two

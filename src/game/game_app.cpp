@@ -26,6 +26,11 @@
 #include "ls3d/igraph.h"
 #include "script/script_module.h"
 
+// The engine's diagnostic event schema (header only: this module keeps its own stream; nothing
+// crosses the DLL boundary). Off unless LS3DF.ini [Diagnostics] Events=1.
+#include "../../ls3df/src/diag/events.h"
+namespace diag = ls3d::diag;
+
 namespace {
 
 constexpr int SERVER_TICK = 100;                    // ms
@@ -352,6 +357,7 @@ void C_GameApp::HandleInput()                           // 0x006c34f0
     float *pressed = nullptr;
     const int heldCount = g_controls.GetValues(&held, false);
     const int pressedCount = g_controls.GetValues(&pressed, true);
+    diag::Mark(diag::EV_INPUT_CONSUMED, 0, pressedCount >= 0 && heldCount >= 0 ? 1 : 0);
     if (pressedCount >= 0 && heldCount >= 0)
         m_state->HandleInput(held, pressed);
 }

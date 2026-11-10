@@ -25,6 +25,11 @@
 #include "net/net_autorestart.h"
 #include "script/script_module.h"
 
+// The engine's diagnostic event schema (header only: this module keeps its own stream; nothing
+// crosses the DLL boundary). Off unless LS3DF.ini [Diagnostics] Events=1.
+#include "../../ls3df/src/diag/events.h"
+namespace diag = ls3d::diag;
+
 static void LoadStringResource(HINSTANCE module, UINT id, LPSTR buffer, int size)    // 0x006ed840 (DS 0x00738bd0)
 {
     LoadStringA(module, id, buffer, size);
@@ -537,7 +542,11 @@ int RunGame()
         SetWindowLongA(window, GWL_WNDPROC, reinterpret_cast<LONG>(GameWindowProc));
 #endif
 
+    // The loop's markers (LS3DF.ini [Diagnostics] Events), on this thread: timestamps only, no effect on the loop.
+    diag::Start(diag::ConfiguredCapacity());
+    uint32_t iteration = 0;
     for (;;) {
+        diag::Mark(diag::EV_LOOP_BEGIN, ++iteration);
 #ifdef HD2_DEDICATED
         // (DS 0x00725d8c) The server's own message loop, for its console: LS3DRF.dll's ProcessWinMessages does
         // nothing. The frame is at most net rate `maxfreq` a second.
@@ -547,35 +556,46 @@ int RunGame()
             TranslateMessage(&message);
             DispatchMessageA(&message);
         }
+        diag::Mark(diag::EV_FRAME_FLOOR_BEGIN);
         int timeDelta = static_cast<int>(LimitFrameTime(1000 / g_netMaxFreq, 100));
+        diag::Mark(diag::EV_FRAME_FLOOR_END, 0, static_cast<uint32_t>(timeDelta));
 #else
         UpdateThreadPriority();
 
         char key = 0;
         if (g_pollKeyboard) {
+            diag::Mark(diag::EV_INPUT_POLL_BEGIN);
             IGraph *graph = GetIGraph();
             graph->ProcessWinMessages();
             graph->ReadKeyboard();
             key = graph->GetAsciiKey();
+            diag::Mark(diag::EV_INPUT_POLL_END);
         }
 
+        diag::Mark(diag::EV_FRAME_FLOOR_BEGIN);
         int timeDelta = static_cast<int>(LimitFrameTime(10, 100));
+        diag::Mark(diag::EV_FRAME_FLOOR_END, 0, static_cast<uint32_t>(timeDelta));
 #endif
         if (app->IsStateActive())
             timeDelta = ScaleFrameTime(timeDelta);
 
 #ifndef HD2_DEDICATED   // no input in LS3DRF.dll; the server's loop has no frame listeners or controls
+        diag::Mark(diag::EV_CONTROLS_BEGIN);
         GetIGraph()->BeginFrame();
         if (g_frameListenersBegin) {
             for (C_FrameListener **it = g_frameListenersEnd; it != g_frameListenersBegin;)
                 (*--it)->OnFrame(true);
         }
         g_controls.Update(false);
+        diag::Mark(diag::EV_CONTROLS_END);
 #endif
+        diag::Mark(diag::EV_ENGINE_TICK_BEGIN);
         I3DGetDriver()->Tick(timeDelta);
+        diag::Mark(diag::EV_ENGINE_TICK_END);
 
 #ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll; (DS 0x00725e71) the server goes on to the messages
         if (g_gameRole & GAME_ROLE_CLIENT) {
+            diag::Mark(diag::EV_RENDER_RECORD_BEGIN);
             if (g_scriptModule.IsCutsceneRunning()) {
                 // Full-screen pass (the cutscene's letterbox bars): temporarily widen the viewport
                 // and clear it.
@@ -589,27 +609,42 @@ int RunGame()
                 graph->Clear(0, 1.0f, 3);
             }
             app->RenderState();
+            diag::Mark(diag::EV_RENDER_RECORD_END);
         }
 #endif
 
+        diag::Mark(diag::EV_NET_RECEIVE_BEGIN, 0, 1);
         g_netGame.ReceiveMessages(timeDelta, true);
+        diag::Mark(diag::EV_NET_RECEIVE_END, 0, 1);
         bool keepRunning = true;
-        if ((g_gameRole & GAME_ROLE_SERVER) || g_gameRole == 0x12)
+        if ((g_gameRole & GAME_ROLE_SERVER) || g_gameRole == 0x12) {
+            diag::Mark(diag::EV_UPDATE_SERVER_BEGIN);
             keepRunning = app->UpdateServer(timeDelta);
+            diag::Mark(diag::EV_UPDATE_SERVER_END);
+        }
         if (keepRunning) {
+            diag::Mark(diag::EV_NET_RECEIVE_BEGIN);
             g_netGame.ReceiveMessages(timeDelta, false);
+            diag::Mark(diag::EV_NET_RECEIVE_END);
 #ifdef HD2_DEDICATED
+            diag::Mark(diag::EV_UPDATE_CLIENT_BEGIN);
             keepRunning = app->UpdateClient(timeDelta);     // (DS 0x00725eab) whatever the role
+            diag::Mark(diag::EV_UPDATE_CLIENT_END);
 #else
             const bool runClient = (g_gameRole & GAME_ROLE_CLIENT) ||
                                    ((g_gameRole & GAME_ROLE_LOCAL) != GAME_ROLE_LOCAL && g_mpSettings->dedicated);
-            if (runClient)
+            if (runClient) {
+                diag::Mark(diag::EV_UPDATE_CLIENT_BEGIN);
                 keepRunning = app->UpdateClient(timeDelta);
+                diag::Mark(diag::EV_UPDATE_CLIENT_END);
+            }
 #endif
         }
         if (!keepRunning)
             break;
+        diag::Mark(diag::EV_NET_SEND_BEGIN);
         g_netGame.SendMessages(timeDelta);
+        diag::Mark(diag::EV_NET_SEND_END);
 
         if (app->IsStateActive() && key == 'W')
             SaveScreenshot();
@@ -627,10 +662,20 @@ int RunGame()
         }
 
 #ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
-        if (g_gameRole & GAME_ROLE_CLIENT)
+        if (g_gameRole & GAME_ROLE_CLIENT) {
+            diag::Mark(diag::EV_FLIP_CALL_BEGIN, iteration);
             GetIGraph()->Flip();
+            diag::Mark(diag::EV_FLIP_CALL_END, iteration);
+        }
 #endif
+        diag::Mark(diag::EV_LOOP_END, iteration);
         _controlfp(_PC_53, _MCW_PC);
+    }
+    if (diag::Enabled()) {
+        char path[MAX_PATH];
+        if (diag::ModuleFilePath("HD2_events.csv", path, sizeof path))
+            diag::WriteCsv(path, "game");
+        diag::Stop();
     }
 
 #ifndef HD2_DEDICATED   // no window
