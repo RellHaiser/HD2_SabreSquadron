@@ -427,10 +427,12 @@ C_ItemDef::~C_ItemDef()
     m_secondaryComponent = nullptr;
     delete[] m_fpvModelName;
     m_fpvModelName = nullptr;
+#ifndef HD2_DEDICATED   // the server makes no item images
     if (m_image) {
         m_image->Release();
         m_image = nullptr;
     }
+#endif
     delete[] m_imageName;
     m_imageName = nullptr;
     if (m_modelFrame) {

@@ -350,7 +350,7 @@ public:
     C_ItemDef(E_ItemRecordType recordType, int id);     // 0x007df7e0
     C_ItemDef(const C_ItemDef &) = delete;
     C_ItemDef &operator=(const C_ItemDef &) = delete;
-    virtual ~C_ItemDef();                               // 0x00 0x007df890
+    virtual ~C_ItemDef();                               // 0x00 0x007df890 (DS 0x0081b380)
     // Writes the record stream (layout at Load); *ioSize == 0: only reports its size.
     virtual void Save(int *ioSize, void *buffer);       // 0x04 0x007dff10
     // Reads the record stream; *outSize receives the bytes used by C_ItemDef (the
@@ -468,7 +468,7 @@ private:
 
 class C_StaticItemDef : public C_ItemDef {              // vtable 0x0081742c, 0x68 bytes
 public:
-    explicit C_StaticItemDef(int id) : C_ItemDef(ITEM_STATIC, id) {}   // 0x007e0ac0
+    explicit C_StaticItemDef(int id) : C_ItemDef(ITEM_STATIC, id) {}   // 0x007e0ac0 (DS 0x0081cae0)
     void Save(int *ioSize, void *buffer) override;      // 0x007e0b50
     void Load(int *outSize, const void *data) override; // 0x007e0bb0
     int GetCarryMode() override { return m_carryMode; } // 0x007e0ae0
