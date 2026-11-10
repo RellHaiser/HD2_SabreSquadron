@@ -356,7 +356,7 @@ struct S_HumanBody {                                    // 0x18 bytes
     // (Always succeed.)
     static bool StartMission(bool server) { (void)server; return true; }   // 0x005aba70 / 0x005aba80
     static void StopMission(bool server) { (void)server; }                 // 0x005abb10 / 0x005abb20
-    void Update(int frameTime);                         // 0x005abc20
+    void Update(int frameTime);                         // 0x005abc20 (DS 0x005bb070)
     void Tick(int timeDelta);                           // 0x005abc70
 
     // Where the human faces / looks / aims (from its controller, every frame).
@@ -736,7 +736,7 @@ public:
         m_vehicle = nullptr;
         m_seat = -1;
     }
-    void DropCarried();                                 // 0x005a97c0
+    void DropCarried();                                 // 0x005a97c0 (DS 0x005b81f0)
 
     // --- damage ------------------------------------------------------------------------------
     // Network client: a hit the server reports (new `health`; `pos` relative to the human).
@@ -793,7 +793,7 @@ public:
     // Fills the equipment fields of `state`.
     void GetEquipmentState(S_SoldierState &state) const;   // 0x005a8b50
     // Creates the items of `state` (and stores the new uids in it on network games).
-    void CreateEquipment(S_SoldierState *state);        // 0x0059eb60
+    void CreateEquipment(S_SoldierState *state);        // 0x0059eb60 (DS 0x005aa8c0)
     // Inventory requests to the controller (they go to the server).
     bool RequestMoveItem(C_Item *item, C_Actor *other, int fromContainer, int toContainer, int slot);   // 0x005a2b40
     bool RequestTransferItem(C_Item *item, int arg, C_Human *other, C_Item *otherItem, int container);   // 0x005a2bb0
@@ -941,7 +941,7 @@ private:
     // Multiplayer messages about hits and kills.
     void ShowHitMessage(int type, int zone, int killerId);   // 0x005a0da0
     void TickBleeding(int timeDelta);                   // 0x005a0420
-    void UpdateBleeding(int frameTime);                 // 0x005a0480
+    void UpdateBleeding(int frameTime);                 // 0x005a0480 (DS 0x005ac6e0)
     void UpdateVelocity(int timeDelta);                 // 0x005a0660
     void ClearContainers();                             // 0x005a29c0
     void ForgetOldSounds();                             // 0x005a5380

@@ -899,7 +899,9 @@ void C_Human::DropCarried()
     command.param1 = -1;
     command.param2 = 0;
     IssueCommand(command);
+#ifndef HD2_DEDICATED   // the server has no interface
     GetGame()->GetInterface()->OnActorEvent(INTERFACE_ACTOR_DROPPED, m_carried);
+#endif
 }
 
 bool C_Human::GetActionProgress(int *time, int *total, int *textId) const
