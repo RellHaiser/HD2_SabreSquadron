@@ -146,13 +146,14 @@ void HotKeyTest(I3D_scene *scene)
         WM(r.hkParts, h.OnClick(7) == 0 && g_controlMessages.empty());
         edit->editing = false;
         g_gfLog.clear();
-        WM(r.hkParts, h.OnClick(7) == CONTROL_HANDLED && GfLogIs({"ed click 7"}) && ScMessages() == "0 20000c2 0 0|");
+        // (Value 1: the menu's keys off while the key is waited for, 0x0064eec0.)
+        WM(r.hkParts, h.OnClick(7) == CONTROL_HANDLED && GfLogIs({"ed click 7"}) && ScMessages() == "0 20000c2 1 0|");
         g_controlMessages.clear();
         g_hkResult = 5;
         WM(r.hkParts, h.OnClick(7) == 0 && g_controlMessages.empty());
         WM(r.hkParts, h.OnKeyClick(8) == 0 && g_controlMessages.empty());
         g_hkResult = 1;
-        WM(r.hkParts, h.OnKeyClick(8) == CONTROL_HANDLED && ScMessages() == "0 20000c2 0 0|");
+        WM(r.hkParts, h.OnKeyClick(8) == CONTROL_HANDLED && ScMessages() == "0 20000c2 1 0|");   // (OnClick's)
         // Input 02: the edit box's, handled: DONE posted (editing or not).
         g_controlMessages.clear();
         g_gfLog.clear();

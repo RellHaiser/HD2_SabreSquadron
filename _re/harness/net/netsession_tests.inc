@@ -457,8 +457,9 @@ void TestHost()
           Logged("address 1 sp tcpip") && Logged("address 1 device 07060504"));
     char line[128];
     std::snprintf(line, sizeof line, "address 1 add port %d 4", TestPort(70));
+    // (Flags 0x41: client-server and, the port's fix (38a422a7), DPNSESSION_NODPNSVR; the original's were 1.)
     CHECK(Logged(line) && Logged("server caps 20 0 2000 -1 4000 0") && Logged("app print Creating H&D2 Server v1.02") &&
-          Logged("server host 72 1 game Srv 1 1 0 0 0 0") && Logged("address 1 release"));
+          Logged("server host 72 65 game Srv 1 1 0 0 0 0") && Logged("address 1 release"));
     std::snprintf(line, sizeof line, "firewall %d 1", TestPort(70));
     CHECK(Logged(line) && net.m_string501C == "pw" && g_localPlayerSlot == 0 &&
           std::strcmp(net.m_players[0].name, "Hoster") == 0 && net.m_players[0].left && net.m_joinStatus == NET_JOIN_CONNECTED);

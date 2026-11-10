@@ -3,7 +3,7 @@ import json
 import os
 import re
 
-RE = r"G:\Programming\HD2 Source Port\C++\_re"
+RE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "_re")
 GAME_LO, GAME_HI = 0x401000, 0x7E2000
 
 idx = {int(a, 16): r for a, r in json.load(open(os.path.join(RE, "index.json"))).items()}

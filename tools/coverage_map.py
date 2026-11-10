@@ -17,12 +17,14 @@ import json
 import os
 import re
 
-BASE = r"G:\Programming\HD2 Source Port"
-EXE_RE = os.path.join(BASE, "C++", "_re")
-EXE_SRC = os.path.join(BASE, "C++", "src")
-LS3DF_RE = os.path.join(BASE, "LS3DF", "_re")
-LS3DF_SRC = os.path.join(BASE, "LS3DF_Github", "src")
-RW_README = os.path.join(BASE, "RW_DATA", "README.md")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EXE_RE = os.path.join(ROOT, "_re")
+EXE_SRC = os.path.join(ROOT, "src")
+# LS3DF's function index is not in this repository (the old LS3DF analysis folder has it):
+# --ls3df-re or env LS3DF_RE; without it the LS3DF rows are left out.
+LS3DF_RE = os.environ.get("LS3DF_RE", r"G:\Programming\HD2 Source Port\LS3DF\_re")
+LS3DF_SRC = os.path.join(ROOT, "ls3df", "src")
+RW_README = os.path.join(ROOT, "rw_data", "README.md")
 GAME_LO, GAME_HI = 0x401000, 0x7E2000
 
 EXE, LS3DF, RW = "HD2_SabreSquadron.exe", "LS3DF.dll", "rw_data.dll"
@@ -351,9 +353,20 @@ def pct(a, b):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", default=os.path.join(EXE_RE, "coverage"), help="folder for the three JSON files")
+    ap.add_argument("--exe-only", action="store_true", help="only the exe's rows (no DLL index needed)")
+    ap.add_argument("--ls3df-re", help="LS3DF's analysis folder with index.json (default env LS3DF_RE)")
     args = ap.parse_args()
+    global LS3DF_RE
+    if args.ls3df_re:
+        LS3DF_RE = args.ls3df_re
 
-    rows = exe_rows() + ls3df_rows() + rw_rows()
+    rows = exe_rows()
+    if not args.exe_only:
+        if os.path.exists(os.path.join(LS3DF_RE, "index.json")):
+            rows += ls3df_rows()
+        else:
+            print("LS3DF rows left out: no index.json in", LS3DF_RE)
+        rows += rw_rows()
     order = {s: i for i, s in enumerate(STATES)}
     rows.sort(key=lambda r: ([b["binary"] for b in BINARIES].index(r["binary"]), r["group"], order[r["state"]]))
     formats = [{"group": g, "item": i, "weight": w, "state": s, "evidence": e} for g, i, w, s, e in FORMATS]

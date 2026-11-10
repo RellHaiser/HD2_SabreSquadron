@@ -2,6 +2,8 @@
 // list), in the text build, run by ControlsTest after ListTest (its fonts, its screen; ScMessages,
 // ScFloat, CbRuns, C_CsBox, C_LsItem). Prints "bar:" with 1 per check met.
 
+#include "game/mp_game_setup.h"
+
 namespace {
 
 struct S_BarResults {
@@ -449,8 +451,9 @@ void BarTest(I3D_scene *scene)
         S_ControlMessage m = CsMessage(CONTROL_MSG_ADD_ENTRY, 5);
         WM(r.plAdd, !l->HandleMessage(&m) && l->m_children.empty());
         C_str name("Bridge");
-        alignas(8) unsigned char entry[16] = {};
-        std::memcpy(entry + 1, &name, sizeof name);
+        // (value2: a C_MpMap of the picked maps' list; the port reads its name field.)
+        const C_MpMap map(name, C_str());
+        const void *entry = &map;
         // An entry: the first hidden named (style 0xd), indexed, shown.
         g_gfLog.clear();
         m = CsMessage(CONTROL_MSG_ADD_ENTRY, 5, reinterpret_cast<uintptr_t>(entry));
