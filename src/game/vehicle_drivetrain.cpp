@@ -337,7 +337,7 @@ void C_Vehicle::Integrate(float timeDelta, float torqueLeft, float torqueRight) 
         m_unknown7C4 = 0.0001f;
 }
 
-void C_Vehicle::Step(uint32_t ms)                                               // 0x00509aa0
+void C_Vehicle::Step(uint32_t ms)                                               // 0x00509aa0 (DS 0x004f7110)
 {
     if (ms == 0)
         ms = 1;
@@ -519,7 +519,9 @@ void C_Vehicle::Step(uint32_t ms)                                               
                                     m_unknown22C6 = 0;
                                     m_unknown904 = 0.0f;
                                     m_gear = 1;
+#ifndef HD2_DEDICATED   // no sounds on the server
                                     PlayGearSound();
+#endif
                                 }
                             }
                         }
@@ -718,10 +720,17 @@ void C_Vehicle::Step(uint32_t ms)                                               
                             if (c > 2) {
                                 const float inverse = 1.0f / m_gearRatios[next];
                                 for (; c > 2; --c) {
+#ifdef HD2_DEDICATED   // the server multiplies by the gear's ratio first
+                                    if (inverse * m_gearRatios[c] * wheelRevs < m_shiftDownRevs[c - 1])
+                                        continue;
+                                    if (inverse * m_gearRatios[c] * m_engineRevs < m_shiftUpRevs[c - 1])
+                                        break;
+#else
                                     if (inverse * wheelRevs * m_gearRatios[c] < m_shiftDownRevs[c - 1])
                                         continue;
                                     if (inverse * m_engineRevs * m_gearRatios[c] < m_shiftUpRevs[c - 1])
                                         break;
+#endif
                                 }
                             }
                             SetGear(c - 1);
@@ -807,8 +816,10 @@ void C_Vehicle::Step(uint32_t ms)                                               
         m_unknown600 |= VEHICLE_PHYSICS_BRAKE_HELD;
     if (!(m_unknown600 & VEHICLE_PHYSICS_FROZEN))
         Integrate(dt, torqueLeft, torqueRight);
+#ifndef HD2_DEDICATED   // the server has no SwitchEngine: the engine flag stays as it was
     if (m_unknown22A0)
         SwitchEngine(false);
+#endif
 
     // Airborne: no wheel on the ground; down again: all on it and none with WHEEL_SLIDING.
     const uint32_t now = m_unknown600;

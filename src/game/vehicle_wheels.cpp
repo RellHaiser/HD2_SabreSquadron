@@ -98,7 +98,7 @@ int FindSurface(const S_VehicleWheel &w, int material)
 }  // namespace
 
 void C_Vehicle::UpdateWheelContacts(S_vector4 *headingSum, float timeDelta, const S_vector4 *down,
-                                    bool bumps)                                         // 0x00512390
+                                    bool bumps)                                         // 0x00512390 (DS 0x00501b20)
 {
     const S_vector y = XYZ(m_modelAxisY);
     const S_vector downward = XYZ(*down);
@@ -254,7 +254,11 @@ void C_Vehicle::UpdateWheelContacts(S_vector4 *headingSum, float timeDelta, cons
             w->groundPlaneVolume = ground;
             w->groundPlane.d = -DotZYX(hit, normal);
             reach = TiltedReach(*w, normal);
+#ifdef HD2_DEDICATED   // the server sums the squares z, y, x
+            const float distance = LengthOf(SquareZYX(hit - start));
+#else
             const float distance = LengthOf(SquareXZY(hit - start));
+#endif
             if ((((reach + w->unknown25C[2]) + w->unknown1E0) + w->unknown164) + 0.2f < distance)
                 ground = nullptr;
         }
@@ -380,9 +384,11 @@ void C_Vehicle::UpdateWheelContacts(S_vector4 *headingSum, float timeDelta, cons
                 }
             }
             w->unknown090 = w->unknown080;
+#ifndef HD2_DEDICATED   // no sounds on the server
             // Quirk kept: once loud enough, the sound plays again for each later wheel of the pass.
             if (bumpVolume > 0.2f)
                 PlayBumpSound(bumpVolume);
+#endif
             const float spring = (w->unknown164 - extension) * w->unknown160;
             if (rate < 0.0f) {
                 w->unknown168 = rate * w->unknown174 + spring;

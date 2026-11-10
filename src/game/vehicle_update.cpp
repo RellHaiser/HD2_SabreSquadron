@@ -33,7 +33,7 @@ S_quat ProductZYX(const S_quat &a, const S_quat &b) { return Product(a, b, DotZY
 
 }  // namespace
 
-int C_Vehicle::Update(uint32_t ms)                                              // 0x0050b180
+int C_Vehicle::Update(uint32_t ms)                                              // 0x0050b180 (DS 0x004f8d80)
 {
     if (m_unknown22C1)
         m_engineOn = m_unknown22C2;
@@ -46,6 +46,7 @@ int C_Vehicle::Update(uint32_t ms)                                              
     g_carScene->UpdateFrameSector(m_model, XYZ(m_unknown1B0));
 
     // The sounds.
+#ifndef HD2_DEDICATED   // no sounds on the server (nor its SwitchEngine)
     if (m_engineOn) {
         if (m_soundsOn)
             UpdateEngineSound(dt);
@@ -54,17 +55,22 @@ int C_Vehicle::Update(uint32_t ms)                                              
     } else if (m_unknown22A2) {
         SwitchEngine(true);
     }
+#endif
     if (m_unknownF6C & VEHICLE_SIM_DETAIL_SOUNDS) {
         if (!(m_handbrake > 0.0f))
             m_unknown228E = 0;
+#ifndef HD2_DEDICATED   // no sounds on the server
         else if (m_soundsOn)
             PlayHandbrakeSound();
+#endif
     }
     if (m_soundsOn) {
+#ifndef HD2_DEDICATED   // no sounds on the server
         SwitchLoopSoundA(m_unknown2294 != 0);
         SwitchLoopSoundB(m_unknown2295 != 0);
         UpdateTyreSqueal(dt);
         UpdateRollingSound();
+#endif
         // The rim scraping: a wheel on its rim on the ground restarts the 1 s count.
         m_sinceRimScrape = static_cast<uint16_t>(m_sinceRimScrape + ms);
         for (int i = m_wheelCount; i-- > 0;) {
@@ -75,12 +81,17 @@ int C_Vehicle::Update(uint32_t ms)                                              
                 break;
             }
         }
+#ifdef HD2_DEDICATED   // no rim sound on the server: the count only
+        if (!(m_sinceRimScrape < 1000))
+            m_sinceRimScrape = 1000;
+#else
         if (m_sinceRimScrape < 1000) {
             UpdateRimSound(true);
         } else {
             UpdateRimSound(false);
             m_sinceRimScrape = 1000;
         }
+#endif
     }
 
     // The light level at the centre of mass every 100 ms (+0x2292): the occluded intensity over

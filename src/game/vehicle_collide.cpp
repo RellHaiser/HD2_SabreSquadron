@@ -69,7 +69,7 @@ void InsertByDistance(std::vector<std::pair<T *, float>> &list, T *item, float d
 }  // namespace
 
 bool C_Vehicle::CollideBody(S_BodyCollisionBox *boxes, S_vector *push, S_vector *push2, float *maxImpulse,
-                            S_vector *maxImpulseVector, const S_vector4 *up, int ms)
+                            S_vector *maxImpulseVector, const S_vector4 *up, int ms)   // 0x00514d70 (DS 0x00504f40)
 {
     if (!boxes)
         return false;
@@ -249,8 +249,10 @@ bool C_Vehicle::BodyContact(const S_BodyCollisionPoint &point, S_CollisionVolume
         }
         if (auto callback = reinterpret_cast<T_VehicleImpactCallback>(m_callbacks[VEHICLE_CALLBACK_IMPACT]))
             callback(m_callbackContext, &impulse, maxImpulseVector, &contact4, radius, &velocity, with, on, 0);
+#ifndef HD2_DEDICATED   // no sounds on the server
         if (m_soundsOn)
             PlayImpactSound(size, m_unknown2293 != 0);
+#endif
     };
     const S_vector lever = turnFor(arm.Cross(normal)).Cross(arm);
 

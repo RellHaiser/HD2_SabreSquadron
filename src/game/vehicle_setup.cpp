@@ -339,12 +339,12 @@ C_Vehicle::C_Vehicle()                                                          
     m_model = nullptr;
 }
 
-C_Vehicle::~C_Vehicle()                                                         // 0x004e7f10
+C_Vehicle::~C_Vehicle()                                                         // 0x004e7f10 (DS 0x004d8570)
 {
     Release();
 }
 
-void C_Vehicle::Release()                                                       // 0x004e81a0
+void C_Vehicle::Release()                                                       // 0x004e81a0 (DS 0x004d8840)
 {
     m_modelName.clear();
     m_modelFileName.clear();
@@ -357,6 +357,7 @@ void C_Vehicle::Release()                                                       
     delete[] m_wheels;
     m_wheels = nullptr;
 
+#ifndef HD2_DEDICATED   // the server has no lamps, projectors or light sectors
     // A lamp's own projector and light (a shared one is the projector record's).
     for (size_t i = m_lamps.size(); i-- > 0;) {
         S_VehicleLamp &lamp = m_lamps[i];
@@ -384,11 +385,14 @@ void C_Vehicle::Release()                                                       
         }
     }
     m_projectors.clear();
+#endif
     for (size_t i = m_parts.size(); i-- > 0;) {
         S_VehiclePart &part = m_parts[i];
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (part.glassTexture)
             part.glassTexture->Release();
         part.glassTexture = nullptr;
+#endif
         delete[] part.name;
         delete part.frames;
     }
