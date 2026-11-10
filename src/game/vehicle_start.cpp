@@ -863,20 +863,24 @@ void C_Vehicle::ResetCondition()                                                
 #endif
 }
 
-bool C_Vehicle::LoadGlassTextures(const char *name, const char *alphaName)      // 0x004fe850
+bool C_Vehicle::LoadGlassTextures(const char *name, const char *alphaName)      // 0x004fe850 (DS 0x004f1a50)
 {
+#ifdef HD2_DEDICATED   // no textures in LS3DRF.dll: the server's only returns true
+    (void)name;
+    (void)alphaName;
+    return true;
+#else
     if (!name || !alphaName)
         return true;
     for (S_VehiclePart &part : m_parts) {
         if (part.type != VEHICLE_PART_GLASS || part.glassTexture || !*name)
             continue;
         IImage *image = nullptr;
-#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(name, alphaName, 4, &image) == 0)
             part.glassTexture = reinterpret_cast<I3D_texture *>(image);
-#endif
     }
     return true;
+#endif
 }
 
 // --- the lights ---------------------------------------------------------------------------------
