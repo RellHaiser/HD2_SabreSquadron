@@ -234,7 +234,7 @@ void C_game::SendToPlayers(int type)                // 0x00699560
 // ---------------------------------------------------------------------------
 // Ticks and frames
 
-void C_game::Tick(int timeDelta)                    // 0x0069b1e0
+void C_game::Tick(int timeDelta)                    // 0x0069b1e0 (DS 0x006dc050)
 {
     if (IsClient()) {
         m_interface->FilterInput(nullptr, nullptr);
@@ -480,7 +480,7 @@ int C_game::GetAttackingTeam() const
     return GetMpObjective(m_mission, 0)->team;
 }
 
-void C_game::SetObjectiveStatus(int objective, int status)   // 0x0069bd30
+void C_game::SetObjectiveStatus(int objective, int status)   // 0x0069bd30 (DS 0x006dcaa0)
 {
     if (!IsLocalGame()) {
         S_MpObjective *target = GetMpObjective(m_mission, objective - 1);
@@ -514,7 +514,7 @@ void C_game::SetObjectiveStatus(int objective, int status)   // 0x0069bd30
     ApplyObjectiveStatus(objective, status);
 }
 
-void C_game::ApplyObjectiveStatus(int objective, int status)   // 0x0069bf10
+void C_game::ApplyObjectiveStatus(int objective, int status)   // 0x0069bf10 (DS 0x006dcc80)
 {
     if (m_mission) {
         S_MissionObjective *target = m_mission->GetObjective(objective - 1);
@@ -535,8 +535,10 @@ void C_game::ApplyObjectiveStatus(int objective, int status)   // 0x0069bf10
         // All decided: the mission ends. (The message follows this objective's status.)
         m_roundState = ROUND_OVER;
         m_roundStateTime = m_missionTime;
+#ifndef HD2_DEDICATED   // the server shows no message
         const bool completed = status == OBJECTIVE_COMPLETED && !m_missionFailed;
         m_interface->ShowMessage(completed ? TEXT_MISSION_COMPLETED : TEXT_MISSION_FAILED);
+#endif
         return;
     }
     if (!IsClient())
@@ -551,12 +553,16 @@ void C_game::ApplyObjectiveStatus(int objective, int status)   // 0x0069bf10
         m_interface->SetObjectiveIcon(objective - 1, OtherTeam(target->team));
 }
 
-void C_game::FailMission(bool deadlyArea)           // 0x0069c1a0
+void C_game::FailMission(bool deadlyArea)           // 0x0069c1a0 (DS 0x006dcf30)
 {
     m_missionFailed = true;
     m_roundState = ROUND_OVER;
     m_roundStateTime = m_missionTime;
+#ifdef HD2_DEDICATED   // the server shows no message
+    (void)deadlyArea;
+#else
     m_interface->ShowMessage(deadlyArea ? TEXT_DEADLY_AREA : TEXT_MISSION_FAILED);
+#endif
     // Fix: the original reads the objectives of a missing mission.
     if (!m_mission)
         return;
@@ -734,7 +740,7 @@ void C_game::CheckRoundEnd(int timeDelta)           // 0x00699e20
         g_roundCheckTimer = 0;
 }
 
-void C_game::AnnounceRoundEnd(int winner)           // 0x00699630
+void C_game::AnnounceRoundEnd(int winner)           // 0x00699630 (DS 0x006da370)
 {
     if (!IsClient()) {
         // The dedicated server's console.
@@ -1211,7 +1217,7 @@ void C_game::SetCameraMode(int mode)                // 0x0069ad20
     }
 }
 
-void C_game::UpdateSpectatorCamera(float *, float *pressed)   // 0x0069ad80
+void C_game::UpdateSpectatorCamera(float *, float *pressed)   // 0x0069ad80 (DS 0x006dbdd0)
 {
     C_Human *local = g_netGame.GetLocalHuman();
     C_HumanController *controller = local ? local->GetController() : nullptr;
