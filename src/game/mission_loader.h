@@ -56,7 +56,7 @@ public:
     // fails).
     bool LoadObjects(C_chunk &chunk, int stage);        // 0x006ccab0
     // An object (chunk 0x4010; part 8f-iv).
-    bool LoadObject(C_chunk &chunk);                    // 0x006cdc90
+    bool LoadObject(C_chunk &chunk);                    // 0x006cdc90 (DS 0x00712e50)
 
 private:
     // The scene's EnumFrames callback: `context`'s m_frames gets the frame by its name.
