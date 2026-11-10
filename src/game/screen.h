@@ -79,7 +79,7 @@ public:
     // The frame hidden: the enter (`id`), the frame on, CONTROL_NOTIFY_SHOWN.
     virtual void Open(int id);                          // +0x84 0x00668700
     // A popup of its own shown (the menu state draws the screen again under it; the base: none).
-    virtual bool HasPopup() const { return false; }     // +0x88 0x00668510
+    virtual bool HasPopup() const { return false; }     // +0x88 0x00668510 (DS 0x006a1910)
     // The description's controls made (on the screen's frame), its name and id taken; true.
     virtual bool Build(const S_ScreenDesc *desc);       // +0x8C 0x00668770
 

@@ -38,7 +38,7 @@ public:
 
     void Tick(int timeDelta) override;                              // 0x00476080 (DS 0x00492670)
     void Update(int frameTime) override;                            // 0x00476160
-    void FreeMissionData(bool server) override { Clear(); }         // 0x00475760
+    void FreeMissionData(bool server) override { Clear(); }         // 0x00475760 (DS 0x00491ab0)
     void StartMission(bool server) override;                        // 0x00476210
     void StopMission(bool server) override;                         // 0x00476260
     bool OnMessage(C_BitStream *msg) override;                      // 0x00475630

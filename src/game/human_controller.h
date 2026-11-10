@@ -1681,7 +1681,7 @@ public:
     void OnShotAt(C_Actor * /*shooter*/, const S_vector & /*velocity*/) override {}   // 0x005a43a0
     void OnHit(int /*type*/, int /*zone*/, int /*health*/, C_Actor * /*attacker*/, const S_vector & /*pos*/,
                const S_vector & /*dir*/) override {}    // 0x005a43b0
-    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a42e0
+    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a42e0 (DS 0x005b12e0)
 };
 
 // A network client's copy of another player's human (vtable 0x008112d8, 0x2D0 bytes;
@@ -1744,7 +1744,7 @@ public:
     void SaveGame(C_chunk &chunk) override;             // 0x0055c820
     void LoadGame(C_chunk &chunk) override;             // 0x0055cb50
     S_HumanEvent *HandleEvent(S_HumanEvent *event) override;   // 0x00559f60
-    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a4510
+    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a4510 (DS 0x005b1690)
 
     // The task's states (S_AITask::unknown08; names inferred). SNIPER_TO_POINT and
     // SNIPER_AT_POINT are not reached from the others.

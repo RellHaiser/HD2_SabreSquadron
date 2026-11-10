@@ -68,7 +68,7 @@ public:
     C_MainMenu(const C_MainMenu &) = delete;
     C_MainMenu &operator=(const C_MainMenu &) = delete;
 
-    int GetTypeId() const override { return GAME_STATE_TYPE_MAIN_MENU; }   // 0x1C 0x006c1970
+    int GetTypeId() const override { return GAME_STATE_TYPE_MAIN_MENU; }   // 0x1C 0x006c1970 (DS 0x00707320)
 
     // In turn to the profile screens', the network screens', the missions', the options' and the
     // connection's handlers (one taking it: done). Then Escape: on the profile screen the profile picked

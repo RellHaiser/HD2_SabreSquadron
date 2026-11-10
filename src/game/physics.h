@@ -187,7 +187,7 @@ public:
     C_PhysSphere(I3D_frame *frame, float radius, S_PhysicsHandle *handle);   // 0x0040f6a0 (DS 0x0042c620)
     bool Tick(float dt) override;                           // 0x0040edd0
     // Seventh virtual slot (only in this class).
-    virtual bool Unknown18() { return true; }               // 0x0040fa10
+    virtual bool Unknown18() { return true; }               // 0x0040fa10 (DS 0x0042ca70)
 
 private:
     float m_radius = 0.0f;                                  // +0x170

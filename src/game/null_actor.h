@@ -17,8 +17,8 @@ public:
         if (source)
             C_Actor::CopyFrom(source);
     }
-    void StartMission(bool server) override { Activate(server); }    // 0x3C 0x005e2b90
-    void StopMission(bool server) override { Deactivate(server); }   // 0x40 0x005e2ba0
+    void StartMission(bool server) override { Activate(server); }    // 0x3C 0x005e2b90 (DS 0x00600f70)
+    void StopMission(bool server) override { Deactivate(server); }   // 0x40 0x005e2ba0 (DS 0x00600f90)
     void RestartMission(bool server) override;          // 0x44 0x005e2ad0
     bool SaveGame(C_chunk &chunk) override;             // 0x48 0x005e2af0
     bool LoadGame(C_chunk &chunk) override;             // 0x4C 0x005e2b00

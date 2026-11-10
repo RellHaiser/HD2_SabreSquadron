@@ -816,7 +816,7 @@ public:
     // The cursor taken; the frame turned to (0, 0, -1), the select frame to (0, 0, 1) (off, linked
     // to the root); the box placed (false: none).
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065c040
-    int OnEnter(int) override { return CONTROL_HANDLED; }   // 0x0065c690
+    int OnEnter(int) override { return CONTROL_HANDLED; }   // 0x0065c690 (DS 0x00692b40)
     // The box's hover cleared, the edit control's.
     int OnLeave(int id) override;                       // 0x0065c6a0
     // Not editing: the hovered line selected, the scroll posted, notified (CLICK / PRESS).
@@ -1326,7 +1326,7 @@ public:
     ~C_ServerList() override = default;                 // 0x00661230 (DS 0x00698c20) (0x00661210)
 
     void Tick(int) override {}                          // 0x00667b20
-    bool Unknown20(int) override { return false; }      // 0x00667b10
+    bool Unknown20(int) override { return false; }      // 0x00667b10 (DS 0x006a1110)
     // The list group's (its result dropped); the rows made (false: a frame missing), laid out from
     // the last one's place.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006666f0
@@ -1391,9 +1391,9 @@ public:
     int OnClick(int id) override;                        // 0x0064eec0
     // The edit box's (handled: HOT_KEY_DONE posted; else 0).
     int OnInput02(int id) override;                      // 0x0064edb0
-    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064eea0
+    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064eea0 (DS 0x00682340)
     // The click.
-    int OnKeyClick(int id) override { return OnClick(id); }   // 0x0064eeb0
+    int OnKeyClick(int id) override { return OnClick(id); }   // 0x0064eeb0 (DS 0x00682360)
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0064eac0
     // Both parts' too.
     void SetInactive(bool inactive) override;            // 0x0064efd0
@@ -1424,10 +1424,10 @@ public:
     // Both parts' (handled).
     int OnLeave(int id) override;                        // 0x0064f470
     // The edit box's.
-    int OnClick(int id) override;                        // 0x0064f440
-    int OnInput02(int id) override;                      // 0x0064f430
-    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064f450
-    int OnKeyClick(int id) override;                     // 0x0064f460
+    int OnClick(int id) override;                        // 0x0064f440 (DS 0x00682aa0)
+    int OnInput02(int id) override;                      // 0x0064f430 (DS 0x00682a80)
+    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064f450 (DS 0x00682ac0)
+    int OnKeyClick(int id) override;                     // 0x0064f460 (DS 0x00682ae0)
     // The text messages the title's; the edit ones (callbacks, length, digits, number, range,
     // forbidden, text) the edit box's; REFRESH both.
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0064f300

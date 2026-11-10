@@ -177,7 +177,7 @@ private:
 class C_MineComp : public C_WeaponComp {                // vtable 0x0081737c
 public:
     C_MineComp() : C_WeaponComp(ICK_MINE) {}
-    int GetUnknownVf00() override { return m_unknown24; }   // 0x007e0760
+    int GetUnknownVf00() override { return m_unknown24; }   // 0x007e0760 (DS 0x0081c570)
     void Save(int *ioSize, void *buffer) override;      // 0x007df3a0
     void Load(int size, const void *data) override;     // 0x007df3e0
 
@@ -193,7 +193,7 @@ public:
     C_ProjectileWeaponComp() : C_WeaponComp(ICK_PROJECTILE_WEAPON) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df410
     void Load(int size, const void *data) override;     // 0x007df490
-    int GetProjectileType() override { return m_projectileType; }       // 0x007e07b0
+    int GetProjectileType() override { return m_projectileType; }       // 0x007e07b0 (DS 0x0081c610)
     float GetAimedDispersion() override { return m_aimedDispersion; }   // 0x007e0770
     float GetMuzzleVelocity() override { return m_muzzleVelocity; }     // 0x007e0780
     int GetReloadSound() override { return m_reloadSound; }             // 0x007e0790
@@ -361,9 +361,9 @@ public:
     // Rounds in one item of an ammo type (-1 for other definitions).
     virtual float GetAmmoAmount() { return -1.0f; }     // 0x14 0x007df830 (DS 0x0081b2d0)
     // Ammo item type a weapon loads, -1 if it has none.
-    virtual int GetAmmoItemId() { return -1; }          // 0x18 0x007df840
-    virtual int GetHeadgearItemId() { return -1; }      // 0x1C 0x007df850
-    virtual int GetUnknown64() { return -1; }           // 0x20 0x007df860
+    virtual int GetAmmoItemId() { return -1; }          // 0x18 0x007df840 (DS 0x0081b2f0)
+    virtual int GetHeadgearItemId() { return -1; }      // 0x1C 0x007df850 (DS 0x0081b310)
+    virtual int GetUnknown64() { return -1; }           // 0x20 0x007df860 (DS 0x0081b330)
 
     E_ItemRecordType GetRecordType() const { return m_recordType; }
     int GetUnknown0C() const { return m_unknown0c; }
@@ -448,9 +448,9 @@ public:
     ~C_AnimatedItemDef() override;                      // 0x007e09c0
     void Save(int *ioSize, void *buffer) override;      // 0x007e0a20
     void Load(int *outSize, const void *data) override; // 0x007e0a80
-    int GetCarryMode() override { return m_carryMode; } // 0x007e0980
-    int GetBehaviour() override { return m_behaviour; } // 0x007e0990
-    int GetAmmoItemId() override { return m_ammoItemId; }   // 0x007e0970
+    int GetCarryMode() override { return m_carryMode; } // 0x007e0980 (DS 0x0081c920)
+    int GetBehaviour() override { return m_behaviour; } // 0x007e0990 (DS 0x0081c940)
+    int GetAmmoItemId() override { return m_ammoItemId; }   // 0x007e0970 (DS 0x0081c900)
 
     int GetAttachment() const { return m_attachment; }
     // The first-person model's magazine (GetFpvModel keeps it).

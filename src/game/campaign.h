@@ -154,7 +154,7 @@ public:
     ~C_CampaignPlay() override;                         // 0x006b9fd0 (0x006b9ff0)
     bool LoadDefinition(C_chunk &) override { return true; }   // 0x006b9fa0
     bool Load(C_chunk &) override { return true; }             // 0x006b9fb0
-    bool Save(C_chunk &) override { return true; }             // 0x006b9fc0
+    bool Save(C_chunk &) override { return true; }             // 0x006b9fc0 (DS 0x006fdd70)
 };
 
 // An objective of a mission (vtable 0x00815a48, type 4; 0x18 bytes).

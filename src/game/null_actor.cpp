@@ -7,13 +7,13 @@ void C_NullActor::RestartMission(bool)                  // 0x005e2ad0 (DS 0x0060
     StartMission(true);
 }
 
-bool C_NullActor::SaveGame(C_chunk &chunk)              // 0x005e2af0
+bool C_NullActor::SaveGame(C_chunk &chunk)              // 0x005e2af0 (DS 0x00600e60)
 {
     C_Actor::SaveGame(chunk);
     return true;
 }
 
-bool C_NullActor::LoadGame(C_chunk &chunk)              // 0x005e2b00
+bool C_NullActor::LoadGame(C_chunk &chunk)              // 0x005e2b00 (DS 0x00600e80)
 {
     C_Actor::LoadGame(chunk);
     return true;
