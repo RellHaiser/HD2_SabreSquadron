@@ -7,6 +7,7 @@ Run without arguments for the window; with arguments it packs from the command l
     python dta_pack.py MyMod PatchX02.dta --key PatchX02.dta
     python dta_pack.py MyMod Test.dta --key 0x12345678:0x9ABCDEF0 --store
     python dta_pack.py MyMod Plain.dta --key blank
+    python dta_pack.py MyMod PatchX02.dta --compression lz4
 
 Every file under the folder is stored under its path relative to the folder, with
 backslashes ("Tables\\items.sav"), which is the name the game asks rw_data.dll for.
@@ -27,8 +28,12 @@ its own start.
              (stored size | Checksum16 of the stored block << 16, not encrypted), u8 per
              block its type (encrypted), and the blocks (encrypted).
     blocks   each decodes to 32 KB (the last one to the rest). Type 1 is an LZSS stream
-             whose first byte is the type, type 0 stores the bytes as they are. An empty
-             file has one empty stored block.
+             whose first byte is the type, type 2 an LZ4 block (LZ4_compress_default's
+             format, no size header), type 0 stores the bytes as they are. A block that
+             does not get smaller is stored. An empty file has one empty stored block.
+
+LZ4 blocks are read only by the rw_data port: the original rw_data.dll takes type 2 for
+stored data, so an archive packed with LZ4 needs the port. LZSS (the default) works with both.
     table    0x1C bytes per file, sorted by hash, encrypted as one piece: hash (name length
              << 16 | 16-bit sum of the upper-case name), header offset, offset of the first
              block, the last 16 characters of the upper-case name (zero padded).
@@ -61,6 +66,16 @@ NAME_ENCRYPTED_BLOCKS = 0x8000
 FILETIME_UNIX_EPOCH = 116444736000000000   # 1970-01-01 in 100 ns units since 1601
 ATTRIBUTE_MASK = 0x27          # read-only, hidden, system, archive
 ATTRIBUTE_NORMAL = 0x80
+BLOCK_STORED = 0
+BLOCK_LZSS = 1
+BLOCK_LZ4 = 2                  # read only by the rw_data port
+
+# Compression methods: name -> description (the window's list and --compression).
+COMPRESSION_METHODS = {
+    "lzss": "LZSS, like the game's archives (any rw_data.dll)",
+    "lz4": "LZ4 (needs the rw_data.dll port)",
+    "none": "None (stored)",
+}
 
 # The keys of MountDataArchives (game 0x006dba30), in the order the game searches the
 # archives. PatchX02, PatchX03 and Maps_C are mounted when present but are not part of the
@@ -228,9 +243,142 @@ def lzss_compress(data: bytes) -> bytes | None:
     return bytes(out)
 
 
+# LZ4 -----------------------------------------------------------------------------------
+#
+# An LZ4 block (https://github.com/lz4/lz4, doc/lz4_Block_format.md), no frame and no size
+# header: sequences of a token (high nibble = literal count, low nibble = match length - 4,
+# 15 continued by bytes up to the first one below 255), the literals, a little-endian u16
+# offset (1..65535) and the match. The last sequence is literals only. As the format asks
+# (and LZ4_compress_default does), the last 5 bytes are literals and no match starts in the
+# last 12 bytes, so the reference decoder reads these blocks too.
+
+LZ4_MIN_MATCH = 4
+LZ4_LAST_LITERALS = 5
+LZ4_MF_LIMIT = 12
+LZ4_MAX_OFFSET = 0xFFFF
+LZ4_SKIP_TRIGGER = 6           # like the reference: the step grows on incompressible data
+
+try:   # the python-lz4 package, if installed, is the reference encoder and much faster
+    import lz4.block as _lz4_block
+except ImportError:
+    _lz4_block = None
+
+
+def _lz4_length(n: int) -> bytes:
+    """The continuation bytes of a length whose nibble is 15 (n = length - 15)."""
+    return b"\xff" * (n // 255) + bytes((n % 255,))
+
+
+def _common_length(data: bytes, a: int, b: int, limit: int) -> int:
+    """How many bytes data[a:] and data[b:] have in common, up to `limit`."""
+    n = 0
+    step = 16
+    while n < limit:
+        k = min(step, limit - n)
+        x = data[a + n:a + n + k]
+        y = data[b + n:b + n + k]
+        if x == y:
+            n += k
+            step *= 4
+            continue
+        diff = int.from_bytes(x, "big") ^ int.from_bytes(y, "big")
+        return n + k - (diff.bit_length() + 7) // 8
+    return n
+
+
+def lz4_compress(data: bytes) -> bytes | None:
+    """Compresses one block like LZ4_compress_default (greedy, one candidate per 4-byte
+    key). Returns the LZ4 block, or None when it would not be smaller than the data."""
+    size = len(data)
+    if size < 8 or len(zlib.compress(data, 1)) > size - size // 32:
+        return None   # (almost) incompressible: not worth the search
+    if _lz4_block is not None:
+        out = _lz4_block.compress(data, mode="default", store_size=False)
+        return out if len(out) < size else None
+
+    out = bytearray()
+    anchor = 0
+    if size > LZ4_MF_LIMIT:
+        last_start = size - LZ4_MF_LIMIT        # no match starts after this
+        match_end = size - LZ4_LAST_LITERALS    # nor runs past this
+        table: dict = {}
+        pos = 0
+        while True:
+            # Find a match, stepping faster the longer none is found.
+            attempts = 1 << LZ4_SKIP_TRIGGER
+            ref = -1
+            while pos <= last_start:
+                key = data[pos:pos + 4]
+                candidate = table.get(key)
+                table[key] = pos
+                if candidate is not None and pos - candidate <= LZ4_MAX_OFFSET:
+                    ref = candidate
+                    break
+                pos += attempts >> LZ4_SKIP_TRIGGER
+                attempts += 1
+            if ref < 0:
+                break
+            # Extend it backwards over the pending literals, then forwards.
+            while pos > anchor and ref > 0 and data[pos - 1] == data[ref - 1]:
+                pos -= 1
+                ref -= 1
+            length = LZ4_MIN_MATCH + _common_length(data, pos + LZ4_MIN_MATCH, ref + LZ4_MIN_MATCH,
+                                                    match_end - pos - LZ4_MIN_MATCH)
+            literals = pos - anchor
+            code = length - LZ4_MIN_MATCH
+            out.append(min(literals, 15) << 4 | min(code, 15))
+            if literals >= 15:
+                out += _lz4_length(literals - 15)
+            out += data[anchor:pos]
+            out += (pos - ref).to_bytes(2, "little")
+            if code >= 15:
+                out += _lz4_length(code - 15)
+            pos += length
+            anchor = pos
+            if len(out) >= size:
+                return None
+            if pos > last_start:
+                break
+            table[data[pos - 2:pos + 2]] = pos - 2
+
+    literals = size - anchor
+    out.append(min(literals, 15) << 4)
+    if literals >= 15:
+        out += _lz4_length(literals - 15)
+    out += data[anchor:]
+    if len(out) >= size:
+        return None
+    return bytes(out)
+
+
 # Blocks (run in the worker processes) --------------------------------------------------
 
-def encode_chunk(path: str, offset: int, length: int, key: int, compress: bool) -> list:
+def _normalize_method(compress) -> str:
+    """pack_files' `compress`: a COMPRESSION_METHODS name, or True (LZSS) / False (none)."""
+    if compress is True:
+        return "lzss"
+    if compress is False or compress is None:
+        return "none"
+    method = str(compress).lower()
+    if method not in COMPRESSION_METHODS:
+        raise PackError(f"unknown compression {compress!r}: use one of {', '.join(COMPRESSION_METHODS)}")
+    return method
+
+
+def encode_block(raw: bytes, method: str) -> tuple:
+    """(type, stored bytes without the type) of one block, before encryption."""
+    if method == "lzss":
+        stream = lzss_compress(raw)
+        if stream is not None:
+            return stream[0], stream[1:]
+    elif method == "lz4":
+        stream = lz4_compress(raw)
+        if stream is not None:
+            return BLOCK_LZ4, stream
+    return BLOCK_STORED, raw
+
+
+def encode_chunk(path: str, offset: int, length: int, key: int, method: str) -> list:
     """Reads `length` bytes of a file and turns them into stored blocks.
     Returns [(type, encrypted data, checksum of the encrypted data), ...].
     Raises OSError only: the worker processes send their errors back by pickling them."""
@@ -241,12 +389,7 @@ def encode_chunk(path: str, offset: int, length: int, key: int, compress: bool) 
         raise OSError(f"{path} changed while it was being packed")
     blocks = []
     for start in range(0, length, BLOCK_SIZE) or [0]:
-        raw = data[start:start + BLOCK_SIZE]
-        stream = lzss_compress(raw) if compress else None
-        if stream is None:
-            kind, stored = 0, raw
-        else:
-            kind, stored = stream[0], stream[1:]
+        kind, stored = encode_block(data[start:start + BLOCK_SIZE], method)
         stored = xor_key(stored, key)
         blocks.append((kind, stored, checksum16(stored)))
     return blocks
@@ -409,9 +552,12 @@ class _ArchiveWriter:
         self.f.seek(0, os.SEEK_END)
 
 
-def pack_files(files: list, output: str, key: int, compress: bool = True, workers: int = 0,
+def pack_files(files: list, output: str, key: int, compress: bool | str = True, workers: int = 0,
                progress=None, cancel: threading.Event | None = None) -> dict:
     """Packs `files` (from collect_files) into the archive `output`.
+
+    `compress` is a COMPRESSION_METHODS name ("lzss", "lz4", "none"), or True for LZSS and
+    False for none.
 
     progress(done_bytes, total_bytes, name) is called as files are packed (from this
     thread). Setting `cancel` stops packing (PackCancelled). The archive is written to
@@ -419,16 +565,17 @@ def pack_files(files: list, output: str, key: int, compress: bool = True, worker
     """
     if not files:
         raise PackError("There are no files to pack.")
+    method = _normalize_method(compress)
     total = sum(f.size for f in files)
     workers = workers or os.cpu_count() or 1
     if total < 2 * 1024 * 1024:
         workers = 1   # starting the processes would take longer than the work
 
-    jobs = []   # (file index, (path, offset, length, key, compress))
+    jobs = []   # (file index, (path, offset, length, key, method))
     for index, source in enumerate(files):
         for offset in range(0, source.size, CHUNK_BLOCKS * BLOCK_SIZE) or [0]:
             length = min(CHUNK_BLOCKS * BLOCK_SIZE, source.size - offset)
-            jobs.append((index, (source.path, offset, length, key, compress)))
+            jobs.append((index, (source.path, offset, length, key, method)))
 
     started = time.monotonic()
     temp = output + ".part"
@@ -556,7 +703,7 @@ class PackerWindow:
         self.low_var = tk.StringVar()
         self.high_var = tk.StringVar()
         self.key_info = tk.StringVar()
-        self.compress_var = tk.BooleanVar(value=True)
+        self.compress_var = tk.StringVar(value=COMPRESSION_METHODS["lzss"])
         self.workers_var = tk.IntVar(value=os.cpu_count() or 1)
         self.summary_var = tk.StringVar()
         self.status_var = tk.StringVar()
@@ -604,9 +751,11 @@ class PackerWindow:
 
         options = ttk.Frame(frame)
         options.grid(row=5, column=1, columnspan=2, sticky="w", padx=6, pady=6)
-        self.compress_check = ttk.Checkbutton(options, text="Compress (LZSS, like the game's archives)",
-                                              variable=self.compress_var)
-        self.compress_check.pack(side="left")
+        ttk.Label(options, text="Compression").pack(side="left")
+        methods = list(COMPRESSION_METHODS.values())
+        self.compress_check = ttk.Combobox(options, textvariable=self.compress_var, values=methods,
+                                           state="readonly", width=max(len(m) for m in methods))
+        self.compress_check.pack(side="left", padx=4)
         ttk.Label(options, text="     Processes").pack(side="left")
         self.workers_spin = ttk.Spinbox(options, from_=1, to=max(1, os.cpu_count() or 1),
                                         textvariable=self.workers_var, width=4)
@@ -754,6 +903,7 @@ class PackerWindow:
                 widget.configure(state="disabled")
         else:
             self.key_box.configure(state="readonly")
+            self.compress_check.configure(state="readonly")
             self.on_key_choice()
 
     def start_pack(self):
@@ -785,7 +935,8 @@ class PackerWindow:
         self.set_busy(True)
         self.progress["value"] = 0
         self.status_var.set("Starting...")
-        compress = self.compress_var.get()
+        choice = self.compress_var.get()
+        compress = next((name for name, text in COMPRESSION_METHODS.items() if text == choice), "lzss")
 
         def report(done, total, name):
             self.messages.put(("progress", done, total, name))
@@ -878,7 +1029,10 @@ def main(argv=None):
     parser.add_argument("--key", default="PatchX02.dta",
                         help="a game archive's name (PatchX02.dta, Patch.dta, ...), 'blank', "
                              "or LOW:HIGH as two 32-bit hex values (default: PatchX02.dta)")
-    parser.add_argument("--store", action="store_true", help="do not compress")
+    parser.add_argument("--compression", choices=list(COMPRESSION_METHODS), default="lzss",
+                        help="lzss (default: read by every rw_data.dll), lz4 (fast to decode, but "
+                             "only the rw_data.dll port reads it) or none")
+    parser.add_argument("--store", action="store_true", help="do not compress (same as --compression none)")
     parser.add_argument("--workers", type=int, default=0, help="compression processes (default: all CPUs)")
     args = parser.parse_args(argv)
     try:
@@ -896,7 +1050,8 @@ def main(argv=None):
                 last[0] = now
                 print(f"\r{100 * done / total if total else 100:5.1f}%  {name[:60]:<60}", end="", flush=True)
 
-        result = pack_files(files, output, key, not args.store, args.workers, report)
+        method = "none" if args.store else args.compression
+        result = pack_files(files, output, key, method, args.workers, report)
     except PackError as error:
         print(f"\nerror: {error}", file=sys.stderr)
         return 1

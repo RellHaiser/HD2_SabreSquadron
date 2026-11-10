@@ -14,7 +14,7 @@ Addresses (`0x1000xxxx`) are those of the original DLL; the C++ names are those 
 1. [Overview](#1-overview)
 2. [Concepts](#2-concepts): handles, archives and the search order, the key, locking, errors
 3. [Archive format](#3-archive-format)
-4. [Algorithms](#4-algorithms): name hash, cipher, checksum, LZSS, WAV, reading blocks
+4. [Algorithms](#4-algorithms): name hash, cipher, checksum, LZSS, WAV, LZ4 (port only), reading blocks
 5. [Function reference](#5-function-reference)
    - [Archives](#51-archives)
    - [Opening and closing files](#52-opening-and-closing-files)
@@ -35,7 +35,8 @@ The DLL is a small virtual file system:
 
 - **Archives.** `dtaCreate` mounts a `.dta` archive and appends it to a search order. An
   archive holds many files, each encrypted with the archive's 64-bit key, split into 32 KB
-  blocks and compressed (LZSS, or a lossy DPCM scheme for 16-bit WAV sound).
+  blocks and compressed (LZSS, or a lossy DPCM scheme for 16-bit WAV sound; the port also
+  reads LZ4 blocks).
 - **Files.** `dtaOpen` looks a name up on disk and in the archives, in an order chosen by the
   caller, and returns a small integer handle. `dtaRead` / `dtaSeek` then work the same way
   for a plain disk file and an archived one; decryption and decompression are transparent.
@@ -212,7 +213,8 @@ block is its **type**:
 | Type | Encoding |
 |---|---|
 | 1 | LZSS ([4.4](#44-lzss)) |
-| 0, 2–7 | stored: the bytes after the type are the data |
+| 2 | **port only:** LZ4 ([4.6](#46-lz4-port-only)); the original treats it as stored |
+| 0, 3–7 | stored: the bytes after the type are the data (2 too, in the original) |
 | 8 and up | compressed 16-bit WAV ([4.5](#45-compressed-wav)); the type selects the delta table |
 
 **ISD0** blocks are chained. At `dataOffset`, then after every block:
@@ -322,7 +324,30 @@ differences are coded precisely and large ones coarsely. This is lossy.
 
 For other sample formats an LZSS stream follows the (optional) header copy instead.
 
-### 4.6 Reading an archived file
+### 4.6 LZ4 (port only)
+
+An addition of the port, not in the original DLL: a block of type 2 holds one LZ4 **block**
+in the reference format (<https://github.com/lz4/lz4>, `doc/lz4_Block_format.md`), as
+`LZ4_compress_default` writes it, with no frame and no size header (the decoded size is known:
+32 KB, or the rest of the file). The stream is a list of sequences:
+
+| Field | Content |
+|---|---|
+| token | high nibble: literal count; low nibble: match length − 4. A nibble of 15 is continued by bytes added to it, up to and including the first byte below 255 |
+| literals | the literal bytes |
+| offset | u16 little endian, 1–65535: the match starts this many bytes back in the output |
+| match | length + 4 bytes copied byte by byte (it may overlap its own output) |
+
+The last sequence ends after its literals. `Lz4Decompress` (`dta_lz4.cpp`) decodes valid
+blocks exactly like `LZ4_decompress_safe`; on damaged ones (a length past the input, an offset
+of 0 or before the start of the output) it stops there, and it never writes past the 32 KB
+room. Like the other block types the result is not compared with the expected size.
+
+LZ4 is designed for fast decoding and is what `tools/dta_pack.py
+--compression lz4` writes, but archives that use it can only be read by the port: the original
+DLL would hand the compressed bytes to the game as they are.
+
+### 4.7 Reading an archived file
 
 `dtaRead` keeps, per open file, the current block, its offset, its stored size and how much
 of the decoded block has been consumed. A read:
@@ -341,7 +366,7 @@ of the decoded block has been consumed. A read:
 Moving to another block (a seek, or reaching the end of one) marks the buffer invalid; it is
 only filled on the next read.
 
-### 4.7 Reading a disk file
+### 4.8 Reading a disk file
 
 Disk files use the same 32 KB buffer as a plain read cache aligned to 32 KB. A read that
 extends past the buffer copies its rest, then refills the buffer if the remainder is
@@ -421,8 +446,8 @@ a slot that is already closed.
 
 Reads up to `size` bytes from the current position and advances it. The count is limited to
 the bytes left in the file, so a read at the end returns 0. Archived files are read as
-described in [4.6](#46-reading-an-archived-file), disk files as in
-[4.7](#47-reading-a-disk-file).
+described in [4.7](#47-reading-an-archived-file), disk files as in
+[4.8](#48-reading-a-disk-file).
 
 For an ISD1 file marked for FQL, the data comes from the FQL file during playback, and is
 recorded into it during recording.
@@ -686,6 +711,7 @@ The other functions of the original, with their port names:
 | 0x1000ea20 | `LzssDecompress` | LZSS decoder ([4.4](#44-lzss)) |
 | 0x1000ecd0 / 0x1000f030 | `LzssCompress` / `FindMatch` | LZSS encoder and its match finder |
 | 0x100097f7 | `WavDecompress` | WAV DPCM decoder ([4.5](#45-compressed-wav)) |
+| — (port only) | `Lz4Decompress` | LZ4 block decoder ([4.6](#46-lz4-port-only)) |
 | 0x10009bf3 / 0x10009d24 | `DecryptBuffer` / `EncryptBuffer` | the cipher ([4.2](#42-cipher)) |
 | 0x10009e97 | `Checksum16` | the checksum ([4.3](#43-checksum)) |
 | 0x1000e3d0 | `FileLogRecord` | writes an opened name to the matching file log |

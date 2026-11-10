@@ -2,7 +2,7 @@
 
 Clean C++17 rewrite of `rw_data.dll`, the data-file layer of Hidden & Dangerous 2: the
 virtual file system over the `.dta` archives (lookup, decryption, LZSS / WAV block
-decompression), plain file writing, file logs and FQL load recordings. It builds into a
+decompression, and, as an addition, LZ4 blocks), plain file writing, file logs and FQL load recordings. It builds into a
 drop-in replacement DLL: same 26 exports (`_dtaOpen@8`, … decorated `__stdcall` names,
 same ordinals), and the archive object keeps the MSVC 6 virtual-table layout, so the game,
 `LS3DF.dll`, `LS3DRF.dll` and the dedicated server can use it unchanged.
@@ -19,7 +19,7 @@ in [docs/rw_data_functions.md](docs/rw_data_functions.md).
 
 `tools/dta_pack.py` (Python 3.9+, standard library only) packs a folder into an ISD1
 archive that the original DLL and the port read: every file is stored under its path
-relative to the folder (`Tables\items.sav`), LZSS-compressed in 32 KB blocks on all CPU
+relative to the folder (`Tables\items.sav`), LZSS- or LZ4-compressed in 32 KB blocks on all CPU
 cores, and encrypted with the key of one of the game's archives, a custom key or none.
 `PatchX02.dta` and `PatchX03.dta` are mounted by the game before all its own archives but
 are not part of the retail game, so they hold mods without replacing anything.
@@ -30,4 +30,9 @@ python tools/dta_pack.py MyMod PatchX02.dta --key PatchX02.dta
 ```
 
 The first opens the window; the second packs from the command line (`--key` also takes
-`blank` or `LOW:HIGH` in hex, `--store` turns compression off).
+`blank` or `LOW:HIGH` in hex, `--compression lzss|lz4|none` picks the compression, `--store`
+turns it off).
+
+LZ4 (block type 2, see section 4.6 of the docs) is designed for fast decoding but is an addition of
+this port: the original `rw_data.dll` reads type 2 as stored data, so archives packed with
+`--compression lz4` need the port's DLL. LZSS stays the default.

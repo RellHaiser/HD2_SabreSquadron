@@ -28,8 +28,9 @@ class C_DtaRead;
 //                previous block) and the block (first byte = type, see below)
 //          ISD1: u32[blockCount] (low 16 bits = stored size, high 16 = checksum),
 //                u8[blockCount] block types (encrypted), then the blocks without the type byte
-//   Every file is split in 32 KB blocks. Block types: 1 = LZSS, 0 and 2..7 = stored,
-//   >= 8 = compressed 16-bit WAV (the first block starts with the 0x2C-byte RIFF header).
+//   Every file is split in 32 KB blocks. Block types: 1 = LZSS, 2 = LZ4 (an addition of the
+//   port; the original stores those bytes as they are), 0 and 3..7 = stored, >= 8 =
+//   compressed 16-bit WAV (the first block starts with the 0x2C-byte RIFF header).
 //   The key is a 64-bit XOR key (see DecryptBuffer); a header flag says whether the
 //   blocks are encrypted too or only the WAV header.
 
@@ -37,6 +38,10 @@ constexpr uint32_t DTA_MAGIC_ISD0 = 0x30445349;   // "ISD0"
 constexpr uint32_t DTA_MAGIC_ISD1 = 0x31445349;   // "ISD1"
 constexpr uint32_t DTA_BLOCK_SIZE = 0x8000;       // decoded size of a block
 constexpr uint32_t DTA_WAV_HEADER_SIZE = 0x2C;
+constexpr uint8_t DTA_BLOCK_STORED = 0;
+constexpr uint8_t DTA_BLOCK_LZSS = 1;
+constexpr uint8_t DTA_BLOCK_LZ4 = 2;              // port only (see dta_lz4.cpp)
+constexpr uint8_t DTA_BLOCK_WAV = 8;              // and up
 constexpr uint16_t DTA_NAME_ENCRYPTED_BLOCKS = 0x8000;  // S_DtaFileHeader::nameLength flag
 
 // Entry of an archive's file table (0x1C bytes in the archive).
@@ -234,6 +239,10 @@ uint32_t LzssCompress(const uint8_t *src, uint8_t *dst, uint32_t size);      // 
 constexpr uint32_t DTA_DECODE_PAD = 0x40;
 uint32_t LzssDecompressRetail(const uint8_t *src, uint32_t srcSize, uint8_t *dst, uint32_t out,
                               uint32_t capacity);                            // 0x1000ea20
+
+// dta_lz4.cpp (port only). Decodes one LZ4 block (LZ4_compress_default's format) into `dst`;
+// returns the decoded size, at most `dstCapacity`. Damaged data ends the output early.
+uint32_t Lz4Decompress(const uint8_t *src, uint32_t srcSize, uint8_t *dst, uint32_t dstCapacity);
 
 // dta_wav.cpp
 uint32_t WavDecompress(const uint8_t *src, uint8_t *dst, uint32_t srcSize,

@@ -137,9 +137,11 @@ bool ReadBlock(const S_ReadContext &ctx, uint8_t *raw, uint32_t &blockSize, uint
 int DecodeBlock(const S_ReadContext &ctx, uint8_t *raw, uint32_t blockSize, uint32_t block,
                 uint8_t *dst, uint32_t capacity)
 {
-    if (raw[0] == 1)
+    if (raw[0] == DTA_BLOCK_LZSS)
         return static_cast<int>(std::min(LzssDecompressRetail(raw, blockSize, dst, 0, capacity), capacity));
-    if (raw[0] < 8) {
+    if (raw[0] == DTA_BLOCK_LZ4)
+        return static_cast<int>(Lz4Decompress(raw + 1, blockSize - 1, dst, capacity));
+    if (raw[0] < DTA_BLOCK_WAV) {
         if (blockSize - 1 > capacity)
             return -1;
         std::memcpy(dst, raw + 1, blockSize - 1);
