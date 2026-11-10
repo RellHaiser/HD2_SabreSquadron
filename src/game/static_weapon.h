@@ -32,7 +32,7 @@ public:
     // The exit point; without one, a metre behind the weapon (`w` left alone).
     void GetExitPosUnused(S_vector4 *out) const;        // 0x006056d0 (DS 0x0062c810)
 
-    int GetHitPoints() override { return 100; }         // 0x10 0x00602f60
+    int GetHitPoints() override { return 100; }         // 0x10 0x00602f60 (DS 0x006295f0)
     // The messages (network games), the seat weapon; manned, the model's animation and the box.
     void Update(int frameTime) override;                // 0x14 0x006034d0
     // The messages (not a pure client), the seat weapon; network games: the store sent when it
@@ -43,8 +43,8 @@ public:
     void Unknown20(C_BitStream *) override {}           // 0x20 0x006050a0
     // A frame only (null: false), then the base's.
     bool SetFrame(I3D_frame *frame) override { return frame && C_Actor::SetFrame(frame); }   // 0x2C 0x00603040
-    bool WriteProperties(C_chunk &) override { return true; }   // 0x30 0x00604cd0
-    bool ReadProperties(C_chunk &) override { return true; }    // 0x34 0x00604ce0
+    bool WriteProperties(C_chunk &) override { return true; }   // 0x30 0x00604cd0 (DS 0x0062bad0)
+    bool ReadProperties(C_chunk &) override { return true; }    // 0x34 0x00604ce0 (DS 0x0062baf0)
     void CopyFrom(const C_Actor *source) override { C_Actor::CopyFrom(source); }   // 0x38 0x00603060
     // Once until StopMission: the net object, the seats, the seat weapon (its text becomes the
     // actor's name), the box, the way out, the model of the destroyed state; usable.
@@ -81,12 +81,12 @@ public:
     int GetSeatText(int seat) override;                 // 0x94 0x00604b10
     bool HasSeatWeapon(int seat) override { return seat == 0; }   // 0x98 0x00604d20
     // (The rest ask the seat weapon whatever the seat.)
-    int GetSeatWeaponRounds(int) override { return m_weapon.GetRounds(); }   // 0x9C 0x00604d30
+    int GetSeatWeaponRounds(int) override { return m_weapon.GetRounds(); }   // 0x9C 0x00604d30 (DS 0x0062bb70)
     S_vector GetSeatWeaponAim(int) override { return m_weapon.GetAim(); }     // 0xA4 0x00604d70
     S_vector GetSeatWeaponOrigin(int) override { return m_weapon.GetOrigin(); }   // 0xA8 0x00604d40
-    float UnknownAC(int) override { return m_weapon.UnknownAC(); }            // 0xAC 0x00604d60
-    int GetSeatWeaponText(int) override { return m_weapon.GetItemText(); }    // 0xB0 0x00604d90
-    C_ItemDef *GetSeatWeaponDef(int) override { return m_weapon.GetItemDef(); }   // 0xB4 0x00604da0
+    float UnknownAC(int) override { return m_weapon.UnknownAC(); }            // 0xAC 0x00604d60 (DS 0x0062bbc0)
+    int GetSeatWeaponText(int) override { return m_weapon.GetItemText(); }    // 0xB0 0x00604d90 (DS 0x0062bc10)
+    C_ItemDef *GetSeatWeaponDef(int) override { return m_weapon.GetItemDef(); }   // 0xB4 0x00604da0 (DS 0x0062bc30)
     void GetSeatWeaponLimits(int, float *up, float *down, float *left, float *right) override   // 0xB8 0x00604dd0 (DS 0x0062bc80)
     {
         m_weapon.GetLimits(up, down, left, right);

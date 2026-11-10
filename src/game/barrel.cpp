@@ -290,7 +290,7 @@ void C_Barrel::RestartMission(bool)                     // 0x00606340 (DS 0x0062
     StartMission(false);
 }
 
-void C_Barrel::Animate(int time)                        // 0x00606da0
+void C_Barrel::Animate(int time)                        // 0x00606da0 (DS 0x0062e560)
 {
     // The body tips over 400 ms and back over 400 ms.
     if (m_bodyTipping) {
@@ -341,7 +341,9 @@ void C_Barrel::Animate(int time)                        // 0x00606da0
     if (!m_empty || !m_holes.empty()) {
         for (size_t i = m_holes.size(); i-- > 0;) {
             if (m_level - HOLE_STOP_BELOW < m_holes[i]->height) {
+#ifndef HD2_DEDICATED   // no particles on the server
                 g_particlesModule.Finish(m_holes[i]->particle);
+#endif
                 delete m_holes[i];
                 m_holes.erase(m_holes.begin() + static_cast<std::ptrdiff_t>(i));
             }
@@ -397,12 +399,14 @@ void C_Barrel::Slosh(const S_vector &pos, const S_vector &dir, bool tipBody)   /
     m_sloshDamped = false;
 }
 
-void C_Barrel::Destroy(bool loading)                    // 0x00607930
+void C_Barrel::Destroy(bool loading)                    // 0x00607930 (DS 0x0062f3c0)
 {
     m_health = 0.0f;
     m_empty = true;
+#ifndef HD2_DEDICATED   // no particles on the server
     for (size_t i = m_holes.size(); i-- > 0;)
         g_particlesModule.Destroy(m_holes[i]->particle);
+#endif
     for (size_t i = m_holes.size(); i-- > 0;)
         delete m_holes[i];
     m_holes.clear();
@@ -445,13 +449,21 @@ void C_Barrel::Destroy(bool loading)                    // 0x00607930
     }
 }
 
-void C_Barrel::AddHole(const S_vector &pos, float height)   // 0x00608150
+void C_Barrel::AddHole(const S_vector &pos, float height)   // 0x00608150 (DS 0x0062fd50)
 {
     const S_vector &at = m_frame->GetWorldPos();
+#ifdef HD2_DEDICATED   // the server makes no leak (the id is -1)
+    (void)pos;
+    (void)at;
+    auto *hole = new S_Hole;
+    hole->height = height;
+    hole->particle = -1;
+#else
     const S_vector out(pos.x - at.x, 0.0f, pos.z - at.z);
     auto *hole = new S_Hole;
     hole->height = height;
     hole->particle = g_particlesModule.CreateAt(m_leakEffect, pos, out, m_frame, true, false);
+#endif
     for (size_t i = 0; i < m_holes.size(); ++i) {
         if (height < m_holes[i]->height) {
             m_holes.insert(m_holes.begin() + static_cast<std::ptrdiff_t>(i), hole);
@@ -610,7 +622,7 @@ int C_Barrel::GetMaterialId(I3D_frame *part)            // 0x006094f0
     return id == -1 ? 11 : id;
 }
 
-bool C_Barrel::OnCollisionEx(C_Actor *other, const S_vector *, int, int, int, int, int)   // 0x00609510
+bool C_Barrel::OnCollisionEx(C_Actor *other, const S_vector *, int, int, int, int, int)   // 0x00609510 (DS 0x00631420)
 {
     if (!m_body || m_bodyTipping)
         return false;

@@ -385,7 +385,7 @@ void C_Train::StopMission(bool server)                  // 0x005be1b0
     ClearPath();
 }
 
-void C_Train::RestartMission(bool)                      // 0x005befe0
+void C_Train::RestartMission(bool)                      // 0x005befe0 (DS 0x005d3650)
 {
     StopMission(true);
     StartMission(true);

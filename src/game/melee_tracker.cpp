@@ -1069,7 +1069,7 @@ bool C_MeleeTracker::ReadProperties(C_chunk &chunk)     // 0x005d6630
 
 // --- damage ----------------------------------------------------------------------------------------
 
-float C_MeleeTracker::HitDamage(const S_vector &pos, float amount) const   // 0x005d73b0
+float C_MeleeTracker::HitDamage(const S_vector &pos, float amount) const   // 0x005d73b0 (DS 0x005f2490)
 {
     // The nearest bone wins (the first of equally near ones).
     const struct {

@@ -74,11 +74,11 @@ public:
     virtual void TestSight(C_Actor *target, int *status, float *visibility);   // +0x1C 0x005ce740
     virtual void Unknown20(int /*unused*/) {}           // +0x20 0x005cb260 (empty in every variant)
     // The current target (none here).
-    virtual C_Actor *GetTarget() const { return nullptr; }   // +0x24 0x005cb270
+    virtual C_Actor *GetTarget() const { return nullptr; }   // +0x24 0x005cb270 (DS 0x005e2be0)
     // How far the target is: 0 on top of it, FLT_MAX without one (always FLT_MAX here).
-    virtual float DistanceToTarget() { return 3.4028235e+38f; }   // +0x28 0x005cb280
+    virtual float DistanceToTarget() { return 3.4028235e+38f; }   // +0x28 0x005cb280 (DS 0x005e2c00)
     // Reads and clears the "changed" flag (none here).
-    virtual bool TakeChanged() { return false; }        // +0x2C 0x005cb290
+    virtual bool TakeChanged() { return false; }        // +0x2C 0x005cb290 (DS 0x005e2c20)
     // The owner the tracker keeps to (and the "has owner" order bit 0x10).
     virtual void SetOwnerActor(C_Actor *owner);         // +0x30 0x005cb2a0
     C_Actor *GetOwner() const { return m_owner; }       // +0x34 0x005cb2c0 (the same in every variant)

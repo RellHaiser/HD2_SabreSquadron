@@ -19,7 +19,7 @@ public:
     C_Ladder();                                         // 0x005ea3d0
     // Fix: the volumes of a ladder destroyed while its mission runs are taken out of the world and
     // let go (the original leaves them, their actor gone).
-    ~C_Ladder() override;                               // 0x005ea590 (scalar deleting 0x005ea570)
+    ~C_Ladder() override;                               // 0x005ea590 (scalar deleting 0x005ea570, DS 0x0060a8c0)
 
     // The world positions of its ends ("up*" and "down*") and the way a climber faces it (level).
     const S_vector4 &GetTop() const { return m_top; }   // +0xA0
@@ -55,8 +55,8 @@ public:
     void StopMission(bool server) override;             // 0x40 0x005eb120
     // Nobody on it.
     void RestartMission(bool) override { m_climbers.clear(); }   // 0x44 0x005ea4d0
-    bool SaveGame(C_chunk &) override { return true; }  // 0x48 0x005ea500 (not the base's)
-    bool LoadGame(C_chunk &) override { return true; }  // 0x4C 0x005ea510
+    bool SaveGame(C_chunk &) override { return true; }  // 0x48 0x005ea500 (not the base's) (DS 0x0060a7e0)
+    bool LoadGame(C_chunk &) override { return true; }  // 0x4C 0x005ea510 (DS 0x0060a800)
     int GetMaterialId(I3D_frame *) override { return m_materialId; }   // 0xD8 0x005ea560
 
 private:

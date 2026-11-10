@@ -109,7 +109,7 @@ public:
     C_PhysObject &operator=(const C_PhysObject &) = delete;
 
     // Moves the object by `dt` seconds; false once it has come to rest.
-    virtual bool Tick(float dt) { return true; }            // 0x0040b890
+    virtual bool Tick(float dt) { return true; }            // 0x0040b890 (DS 0x00427720)
     // Adds a push of `impulse` (direction and strength) at the world position
     // `point`; `factor` scales the effect.
     virtual void ApplyImpulse(const S_vector &impulse, const S_vector &point, float factor);   // 0x0040b030
@@ -117,7 +117,7 @@ public:
     // Turns the object by its angular velocity (which dies down over a second).
     virtual void Rotate(float dt);                          // 0x0040ade0
     // E_PhysicsHitKind; false if the object ignores it.
-    virtual bool Hit(int kind, const S_vector *dir, void *extra) { return false; }   // 0x0040b790
+    virtual bool Hit(int kind, const S_vector *dir, void *extra) { return false; }   // 0x0040b790 (DS 0x004275c0)
 
     // Writes the position and rotation into the frame and moves the collision volume.
     void SyncFrame();                                       // 0x0040ab80
@@ -187,7 +187,7 @@ public:
     C_PhysSphere(I3D_frame *frame, float radius, S_PhysicsHandle *handle);   // 0x0040f6a0 (DS 0x0042c620)
     bool Tick(float dt) override;                           // 0x0040edd0
     // Seventh virtual slot (only in this class).
-    virtual bool Unknown18() { return true; }               // 0x0040fa10
+    virtual bool Unknown18() { return true; }               // 0x0040fa10 (DS 0x0042ca70)
 
 private:
     float m_radius = 0.0f;                                  // +0x170
@@ -200,7 +200,7 @@ public:
     bool Tick(float dt) override;                           // 0x0040e3b0
     // Kicks the can (fixed strength) and spins it.
     void ApplyImpulse(const S_vector &impulse, const S_vector &point, float factor) override;   // 0x0040eb10
-    bool Hit(int kind, const S_vector *dir, void *extra) override { return true; }   // 0x0040eb00
+    bool Hit(int kind, const S_vector *dir, void *extra) override { return true; }   // 0x0040eb00 (DS 0x0042b760)
 
 private:
     float m_radius = 0.0f;                                  // +0x170
@@ -377,8 +377,8 @@ public:
     void StartMission(bool server) override;                // 0x00410a40
     void StopMission(bool server) override;                 // 0x00410a70
     void RestartMission(bool server) override;              // 0x00410a90
-    bool SaveGame(C_chunk &chunk) override { return true; } // 0x00410700
-    bool LoadGame(C_chunk &chunk) override { return true; } // 0x00410710
+    bool SaveGame(C_chunk &chunk) override { return true; } // 0x00410700 (DS 0x0042dad0)
+    bool LoadGame(C_chunk &chunk) override { return true; } // 0x00410710 (DS 0x0042daf0)
     // Opening doors (sent to joining clients as hits).
     void WriteState(C_BitStream *msg) override;             // 0x00410ef0
     void ReadState(C_BitStream *msg) override;              // 0x00410f70

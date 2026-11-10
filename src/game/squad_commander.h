@@ -49,7 +49,7 @@ public:
     // The HUD's command (S_ActionCommand::action, E_SquadCommand): to the member it names or
     // the idle ones.
     virtual void ExecuteActionCommand(const S_ActionCommand &command);   // 0x00 0x00456020
-    virtual int GetUnknown38() { return m_unknown38; }  // 0x04 0x00456850 (not set anywhere)
+    virtual int GetUnknown38() { return m_unknown38; }  // 0x04 0x00456850 (not set anywhere) (DS 0x0046f8f0)
     // `out` gets the members of `group` (GROUP_*).
     virtual void CollectGroup(std::vector<C_Human *> &out, int group);   // 0x08 0x004568d0
     virtual bool HasGroupMembers(int group);            // 0x0C 0x00456b80
@@ -74,7 +74,7 @@ public:
     virtual void ExecuteCommand(int command, C_Actor *actor, C_Human *member, bool quiet, int value);   // 0x28 0x00458e50
     // The squad whispers (single player: the player's quiet commands).
     virtual void SetWhispering(bool on) { m_whispering = on; }   // 0x2C 0x00459470
-    virtual bool IsWhispering() { return m_whispering; }         // 0x30 0x00459480
+    virtual bool IsWhispering() { return m_whispering; }         // 0x30 0x00459480 (DS 0x004730b0)
     // The squad members following `leader` stop following it.
     virtual void ReleaseFollowers(C_Human *leader);     // 0x34 0x004593e0
     // `member` has nothing to do: it says so after a while (staggered, 300..500 ms apart).
@@ -84,20 +84,20 @@ public:
     virtual bool IsSpacingMin() { return m_spacing == 0; }             // 0x40 0x004595d0
     // The interface's other slots (no-ops and constants).
     virtual void Unknown44(C_Human * /*human*/) {}      // 0x44 0x0045b750
-    virtual int Unknown48(C_Human * /*human*/) { return -1; }     // 0x48 0x0045b760
-    virtual bool Unknown4C(C_Human * /*human*/) { return false; }   // 0x4C 0x0045b770
-    virtual int Unknown50(C_Human * /*human*/) { return -1; }     // 0x50 0x0045b780
-    virtual bool Unknown54(C_Human * /*human*/) { return true; }  // 0x54 0x0045b790
+    virtual int Unknown48(C_Human * /*human*/) { return -1; }     // 0x48 0x0045b760 (DS 0x00475cd0)
+    virtual bool Unknown4C(C_Human * /*human*/) { return false; }   // 0x4C 0x0045b770 (DS 0x00475cf0)
+    virtual int Unknown50(C_Human * /*human*/) { return -1; }     // 0x50 0x0045b780 (DS 0x00475d10)
+    virtual bool Unknown54(C_Human * /*human*/) { return true; }  // 0x54 0x0045b790 (DS 0x00475d30)
     virtual void Unknown58(C_Human * /*human*/, void * /*out*/) {}   // 0x58 0x0045b7a0
     virtual void Unknown5C(C_Human * /*human*/, void * /*out*/) {}   // 0x5C 0x0045b7b0
     // Flags the HUD reads (only Reset and the timers of Tick clear them; nothing sets them).
-    virtual bool GetFlag41() { return m_flag41; }       // 0x60 0x004567e0
-    virtual bool GetFlag42() { return m_flag42; }       // 0x64 0x004567f0
-    virtual bool GetFlag3D() { return m_flag3D; }       // 0x68 0x00456800
-    virtual bool GetFlag3E() { return m_flag3E; }       // 0x6C 0x00456810
-    virtual bool GetFlag3F() { return m_flag3F; }       // 0x70 0x00456820
-    virtual bool GetFlag3C() { return m_flag3C; }       // 0x74 0x00456830
-    virtual bool GetFlag40() { return m_flag40; }       // 0x78 0x00456840
+    virtual bool GetFlag41() { return m_flag41; }       // 0x60 0x004567e0 (DS 0x0046f810)
+    virtual bool GetFlag42() { return m_flag42; }       // 0x64 0x004567f0 (DS 0x0046f830)
+    virtual bool GetFlag3D() { return m_flag3D; }       // 0x68 0x00456800 (DS 0x0046f850)
+    virtual bool GetFlag3E() { return m_flag3E; }       // 0x6C 0x00456810 (DS 0x0046f870)
+    virtual bool GetFlag3F() { return m_flag3F; }       // 0x70 0x00456820 (DS 0x0046f890)
+    virtual bool GetFlag3C() { return m_flag3C; }       // 0x74 0x00456830 (DS 0x0046f8b0)
+    virtual bool GetFlag40() { return m_flag40; }       // 0x78 0x00456840 (DS 0x0046f8d0)
     // Mission start / restart.
     virtual void Reset();                               // 0x7C 0x00456440
     // Every game tick (the team manager's): the timers, the groups, the idle reports.

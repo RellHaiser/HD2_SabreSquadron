@@ -32,7 +32,7 @@ C_QuickMessages::~C_QuickMessages()
     Done();
 }
 
-// (0x0048f420)
+// 0x0048f420 (DS 0x004a5b80)
 static bool LoadDialog(C_chunk &chunk, std::vector<S_QuickDialog *> &dialogs)
 {
     uint16_t id = 0;

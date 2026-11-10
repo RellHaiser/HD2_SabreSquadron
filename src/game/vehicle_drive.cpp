@@ -142,18 +142,24 @@ bool C_Vehicle::SetEngine(bool on, bool instant)                                
             m_engineRevs = 0.0f;
             m_engineOn = false;
             m_unknown22A2 = 0;
+#ifndef HD2_DEDICATED   // no sounds on the server
             StopSounds();
+#endif
         }
         return true;
     }
     if (on == m_engineOn)
         return true;
     if (on && (!(m_fuel > 0.02f) || ((m_unknownF6C & 0x4000) && !(m_unknown610 > 0.0f)))) {
+#ifndef HD2_DEDICATED   // no sounds on the server
         if (m_soundsOn)
             PlayEngineFail();
+#endif
         return true;
     }
+#ifndef HD2_DEDICATED   // the server's has no SwitchEngine: the engine flag stays as it was
     SwitchEngine(on);
+#endif
     if (!m_engineOn) {
         m_throttle = 0.0f;
         m_unknown700 = 0.0f;
@@ -312,7 +318,7 @@ void C_Vehicle::EndSkidMark(int wheel)                                          
         w->skidMark = 0;
 }
 
-void C_Vehicle::Reset(uint8_t flags)                                            // 0x004e95b0
+void C_Vehicle::Reset(uint8_t flags)                                            // 0x004e95b0 (DS 0x004d8e00)
 {
     // Fix (all three wheel loops): a missing wheel is skipped; the original crashes (see Setup).
     if (flags & VEHICLE_RESET_HIDE_SKID_MARKS) {
@@ -344,6 +350,7 @@ void C_Vehicle::Reset(uint8_t flags)                                            
     velocity *= m_unknown350;
     SetXYZ(m_velocity, velocity);
 
+#ifndef HD2_DEDICATED   // the server has no lamps or projectors
     // The lamps' and projectors' objects out of the scene.
     for (size_t i = m_lamps.size(); i-- > 0;) {
         const S_VehicleLamp &lamp = m_lamps[i];
@@ -358,6 +365,7 @@ void C_Vehicle::Reset(uint8_t flags)                                            
         if (m_projectors[i].light)
             m_projectors[i].light->LinkTo(nullptr, 0);
     }
+#endif
 
     // The effects.
     for (int i = 0; i < m_wheelCount; ++i) {
@@ -387,7 +395,9 @@ void C_Vehicle::Reset(uint8_t flags)                                            
             m_bodyContactEffects[i] = -1;
         }
     }
+#ifndef HD2_DEDICATED   // no sounds on the server
     StopSounds();
+#endif
 }
 
 // --- the collision volumes -------------------------------------------------------------------

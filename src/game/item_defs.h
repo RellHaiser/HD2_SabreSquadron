@@ -93,11 +93,11 @@ public:
     C_ItemComponent(const C_ItemComponent &) = delete;
     C_ItemComponent &operator=(const C_ItemComponent &) = delete;
 
-    virtual int GetUnknownVf00() { return 0x7FFFFFFF; }      // 0x00 0x007e06b0
+    virtual int GetUnknownVf00() { return 0x7FFFFFFF; }      // 0x00 0x007e06b0 (DS 0x0081c410)
     // *ioSize == 0: only reports the stream size; otherwise writes the stream.
     virtual void Save(int *ioSize, void *buffer) = 0;       // 0x04
     virtual void Load(int size, const void *data) = 0;      // 0x08
-    virtual int GetProjectileType() { return 3; }           // 0x0C 0x007e06c0
+    virtual int GetProjectileType() { return 3; }           // 0x0C 0x007e06c0 (DS 0x0081c430)
     // (Not in the original vtable: components were freed with a plain operator delete.)
     virtual ~C_ItemComponent() = default;
 
@@ -124,20 +124,20 @@ class C_WeaponComp : public C_ItemComponent {
 public:
     explicit C_WeaponComp(E_ItemComponentKind kind) : C_ItemComponent(kind) {}
 
-    virtual float GetAimedDispersion() { return 0.0f; }     // 0x10 0x007e06d0
-    virtual float GetMuzzleVelocity() { return 0.0f; }      // 0x14 0x007e06e0
+    virtual float GetAimedDispersion() { return 0.0f; }     // 0x10 0x007e06d0 (DS 0x0081c450)
+    virtual float GetMuzzleVelocity() { return 0.0f; }      // 0x14 0x007e06e0 (DS 0x0081c470)
     // Sound groups: shots in SOUND_CHAPTER_WEAPON_SHOOTING, the others in
     // SOUND_CHAPTER_WEAPON_MANIPULATION; -1 = none.
-    virtual int GetShotSound() { return m_shotSound; }      // 0x18 0x007e06f0
-    virtual int GetReloadSound() { return -1; }             // 0x1C 0x007e0700
-    virtual int GetReloadTimeMs() { return 0; }             // 0x20 0x007e0710
+    virtual int GetShotSound() { return m_shotSound; }      // 0x18 0x007e06f0 (DS 0x0081c490)
+    virtual int GetReloadSound() { return -1; }             // 0x1C 0x007e0700 (DS 0x0081c4b0)
+    virtual int GetReloadTimeMs() { return 0; }             // 0x20 0x007e0710 (DS 0x0081c4d0)
     // Played with the last round.
-    virtual int GetLastShotSound() { return -1; }           // 0x24 0x007e0720
+    virtual int GetLastShotSound() { return -1; }           // 0x24 0x007e0720 (DS 0x0081c4f0)
     // Played with every shot.
-    virtual int GetBoltSound() { return -1; }               // 0x28 0x007e0730
-    virtual float GetUnknownVf2C() { return 0.0f; }         // 0x2C 0x007e0740
+    virtual int GetBoltSound() { return -1; }               // 0x28 0x007e0730 (DS 0x0081c510)
+    virtual float GetUnknownVf2C() { return 0.0f; }         // 0x2C 0x007e0740 (DS 0x0081c530)
     // False: the weapon cannot be topped up while rounds are left.
-    virtual bool CanReload() { return m_canReload; }        // 0x30 0x007e0750
+    virtual bool CanReload() { return m_canReload; }        // 0x30 0x007e0750 (DS 0x0081c550)
 
     // Particle effect: muzzle flash of guns (at the weapon's "blsdum"), launch blast of
     // projectile weapons, explosion of mines.
@@ -177,7 +177,7 @@ private:
 class C_MineComp : public C_WeaponComp {                // vtable 0x0081737c
 public:
     C_MineComp() : C_WeaponComp(ICK_MINE) {}
-    int GetUnknownVf00() override { return m_unknown24; }   // 0x007e0760
+    int GetUnknownVf00() override { return m_unknown24; }   // 0x007e0760 (DS 0x0081c570)
     void Save(int *ioSize, void *buffer) override;      // 0x007df3a0
     void Load(int size, const void *data) override;     // 0x007df3e0
 
@@ -193,7 +193,7 @@ public:
     C_ProjectileWeaponComp() : C_WeaponComp(ICK_PROJECTILE_WEAPON) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df410
     void Load(int size, const void *data) override;     // 0x007df490
-    int GetProjectileType() override { return m_projectileType; }       // 0x007e07b0
+    int GetProjectileType() override { return m_projectileType; }       // 0x007e07b0 (DS 0x0081c610)
     float GetAimedDispersion() override { return m_aimedDispersion; }   // 0x007e0770
     float GetMuzzleVelocity() override { return m_muzzleVelocity; }     // 0x007e0780
     int GetReloadSound() override { return m_reloadSound; }             // 0x007e0790
@@ -234,7 +234,7 @@ public:
     C_FirearmComp() : C_WeaponComp(ICK_FIREARM) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df4b0
     void Load(int size, const void *data) override;     // 0x007df540
-    int GetProjectileType() override { return m_projectileType; }       // 0x007e0810
+    int GetProjectileType() override { return m_projectileType; }       // 0x007e0810 (DS 0x0081c6d0)
     float GetAimedDispersion() override { return m_aimedDispersion; }   // 0x007e07d0
     float GetMuzzleVelocity() override { return m_muzzleVelocity; }     // 0x007e07e0
     int GetReloadSound() override { return m_reloadSound; }             // 0x007e07f0
@@ -267,7 +267,7 @@ private:
 class C_ScopeComp : public C_ItemComponent {            // vtable 0x00817304
 public:
     C_ScopeComp() : C_ItemComponent(ICK_SCOPE) {}
-    void Save(int *ioSize, void *buffer) override;      // 0x007df560
+    void Save(int *ioSize, void *buffer) override;      // 0x007df560 (DS 0x0081af00)
     void Load(int size, const void *data) override;     // 0x007df5a0
 
     int GetAimMode() const { return m_aimMode; }
@@ -281,7 +281,7 @@ private:
 class C_UniformComp : public C_ItemComponent {          // vtable 0x008172f4
 public:
     C_UniformComp() : C_ItemComponent(ICK_UNIFORM) {}
-    void Save(int *ioSize, void *buffer) override;      // 0x007df5d0
+    void Save(int *ioSize, void *buffer) override;      // 0x007df5d0 (DS 0x0081af90)
     void Load(int size, const void *data) override;     // 0x007df610
 
     int GetDisguiseSide() const { return m_disguiseSide; }
@@ -293,7 +293,7 @@ private:
 class C_MedkitComp : public C_ItemComponent {           // vtable 0x008172e4
 public:
     C_MedkitComp() : C_ItemComponent(ICK_MEDKIT) {}
-    void Save(int *ioSize, void *buffer) override;      // 0x007df640
+    void Save(int *ioSize, void *buffer) override;      // 0x007df640 (DS 0x0081b020)
     void Load(int size, const void *data) override;     // 0x007df680
 
     float GetHealingCapacity() const { return m_healingCapacity; }
@@ -326,7 +326,7 @@ private:
 class C_HeadgearComp : public C_ItemComponent {         // vtable 0x008172c4
 public:
     C_HeadgearComp() : C_ItemComponent(ICK_HEADGEAR) {}
-    void Save(int *ioSize, void *buffer) override;      // 0x007df720
+    void Save(int *ioSize, void *buffer) override;      // 0x007df720 (DS 0x0081b140)
     void Load(int size, const void *data) override;     // 0x007df760
 
     int GetHeadgearType() const { return m_headgearType; }
@@ -350,7 +350,7 @@ public:
     C_ItemDef(E_ItemRecordType recordType, int id);     // 0x007df7e0
     C_ItemDef(const C_ItemDef &) = delete;
     C_ItemDef &operator=(const C_ItemDef &) = delete;
-    virtual ~C_ItemDef();                               // 0x00 0x007df890
+    virtual ~C_ItemDef();                               // 0x00 0x007df890 (DS 0x0081b380)
     // Writes the record stream (layout at Load); *ioSize == 0: only reports its size.
     virtual void Save(int *ioSize, void *buffer);       // 0x04 0x007dff10
     // Reads the record stream; *outSize receives the bytes used by C_ItemDef (the
@@ -359,11 +359,11 @@ public:
     virtual int GetCarryMode() = 0;                     // 0x0C
     virtual int GetBehaviour() = 0;                     // 0x10 ITEM_BEHAVIOUR_*
     // Rounds in one item of an ammo type (-1 for other definitions).
-    virtual float GetAmmoAmount() { return -1.0f; }     // 0x14 0x007df830
+    virtual float GetAmmoAmount() { return -1.0f; }     // 0x14 0x007df830 (DS 0x0081b2d0)
     // Ammo item type a weapon loads, -1 if it has none.
-    virtual int GetAmmoItemId() { return -1; }          // 0x18 0x007df840
-    virtual int GetHeadgearItemId() { return -1; }      // 0x1C 0x007df850
-    virtual int GetUnknown64() { return -1; }           // 0x20 0x007df860
+    virtual int GetAmmoItemId() { return -1; }          // 0x18 0x007df840 (DS 0x0081b2f0)
+    virtual int GetHeadgearItemId() { return -1; }      // 0x1C 0x007df850 (DS 0x0081b310)
+    virtual int GetUnknown64() { return -1; }           // 0x20 0x007df860 (DS 0x0081b330)
 
     E_ItemRecordType GetRecordType() const { return m_recordType; }
     int GetUnknown0C() const { return m_unknown0c; }
@@ -431,7 +431,7 @@ protected:
 
 class C_AmmoItemDef : public C_ItemDef {                // vtable 0x008173e4, 0x58 bytes
 public:
-    explicit C_AmmoItemDef(int id) : C_ItemDef(ITEM_AMMO, id) {}   // 0x007e0850
+    explicit C_AmmoItemDef(int id) : C_ItemDef(ITEM_AMMO, id) {}   // 0x007e0850 (DS 0x0081c750)
     void Save(int *ioSize, void *buffer) override;      // 0x007e08d0
     void Load(int *outSize, const void *data) override; // 0x007e0910
     int GetCarryMode() override { return ITEM_CARRY_AMMO; }   // 0x007e0880
@@ -448,9 +448,9 @@ public:
     ~C_AnimatedItemDef() override;                      // 0x007e09c0
     void Save(int *ioSize, void *buffer) override;      // 0x007e0a20
     void Load(int *outSize, const void *data) override; // 0x007e0a80
-    int GetCarryMode() override { return m_carryMode; } // 0x007e0980
-    int GetBehaviour() override { return m_behaviour; } // 0x007e0990
-    int GetAmmoItemId() override { return m_ammoItemId; }   // 0x007e0970
+    int GetCarryMode() override { return m_carryMode; } // 0x007e0980 (DS 0x0081c920)
+    int GetBehaviour() override { return m_behaviour; } // 0x007e0990 (DS 0x0081c940)
+    int GetAmmoItemId() override { return m_ammoItemId; }   // 0x007e0970 (DS 0x0081c900)
 
     int GetAttachment() const { return m_attachment; }
     // The first-person model's magazine (GetFpvModel keeps it).
@@ -468,7 +468,7 @@ private:
 
 class C_StaticItemDef : public C_ItemDef {              // vtable 0x0081742c, 0x68 bytes
 public:
-    explicit C_StaticItemDef(int id) : C_ItemDef(ITEM_STATIC, id) {}   // 0x007e0ac0
+    explicit C_StaticItemDef(int id) : C_ItemDef(ITEM_STATIC, id) {}   // 0x007e0ac0 (DS 0x0081cae0)
     void Save(int *ioSize, void *buffer) override;      // 0x007e0b50
     void Load(int *outSize, const void *data) override; // 0x007e0bb0
     int GetCarryMode() override { return m_carryMode; } // 0x007e0ae0

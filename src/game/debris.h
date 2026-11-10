@@ -27,16 +27,16 @@ public:
     void OnMessage(C_BitStream *) override {}           // 0x1C 0x005fdce0
     void Unknown20(C_BitStream *) override {}           // 0x20 0x005fdcf0
     bool SetFrame(I3D_frame *frame) override;           // 0x2C 0x005fdba0
-    bool WriteProperties(C_chunk &) override { return false; }   // 0x30 0x005fdb00
-    bool ReadProperties(C_chunk &) override { return false; }    // 0x34 0x005fdb10
+    bool WriteProperties(C_chunk &) override { return false; }   // 0x30 0x005fdb00 (DS 0x00622ab0)
+    bool ReadProperties(C_chunk &) override { return false; }    // 0x34 0x005fdb10 (DS 0x00622ad0)
     void CopyFrom(const C_Actor *) override {}          // 0x38 0x005fdb20
     void StartMission(bool server) override;            // 0x3C 0x005fdbb0
     void StopMission(bool server) override;             // 0x40 0x005fdbd0
     void RestartMission(bool) override {}               // 0x44 0x005fdcb0
     // (Debris is not saved.)
-    bool SaveGame(C_chunk &) override { return false; } // 0x48 0x005fdcc0
-    bool LoadGame(C_chunk &) override { return false; } // 0x4C 0x005fdcd0
-    int GetMaterialId(I3D_frame *) override { return 11; }   // 0xD8 0x005fddc0 (the default's value)
+    bool SaveGame(C_chunk &) override { return false; } // 0x48 0x005fdcc0 (DS 0x00622d50)
+    bool LoadGame(C_chunk &) override { return false; } // 0x4C 0x005fdcd0 (DS 0x00622d70)
+    int GetMaterialId(I3D_frame *) override { return 11; }   // 0xD8 0x005fddc0 (the default's value) (DS 0x00622ed0)
 
 private:
     C_RigidBody m_body;                                 // +0x90

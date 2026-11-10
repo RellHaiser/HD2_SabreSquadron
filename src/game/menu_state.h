@@ -109,7 +109,7 @@ public:
     // MENU_MSG_ESCAPE; Ctrl + Alt + Shift + N: MENU_MSG_SECRET_KEY. True.
     bool HandleInput(float *held, float *pressed) override;   // 0x0C 0x0066b6e0
     // The menu's OnTick.
-    void Tick(int timeDelta) override { OnTick(timeDelta); }   // 0x10 0x0066c190
+    void Tick(int timeDelta) override { OnTick(timeDelta); }   // 0x10 0x0066c190 (DS 0x006a4650)
     // OnUpdate and the sound module's update (twice: the first not in the network game's menu),
     // the timer, the queue; with a screen: the cursor's input, the ticks (the control editing,
     // the top, the popup, the ticked controls, the last first).
@@ -125,12 +125,12 @@ public:
     // Called by Stop, Start (the argument; its result dropped), HandleInput, Update (twice),
     // Tick, Render (true: the menu drew) and DrawScreens (its result dropped).
     virtual void OnStop() {}                            // 0x3C 0x0067ed60
-    virtual bool OnStart(void *) { return true; }       // 0x40 0x0067ed70
-    virtual bool OnInput(float *, float *) { return true; }   // 0x44 0x0067ed80
+    virtual bool OnStart(void *) { return true; }       // 0x40 0x0067ed70 (DS 0x006bbcf0)
+    virtual bool OnInput(float *, float *) { return true; }   // 0x44 0x0067ed80 (DS 0x006bbd10)
     virtual void OnUpdate(int) {}                       // 0x48 0x0067ed90
     virtual void OnTick(int) {}                         // 0x4C 0x0067eda0
-    virtual bool OnRender() { return false; }           // 0x50 0x0067edb0
-    virtual bool OnDrawScreens() { return false; }      // 0x54 0x0067edc0
+    virtual bool OnRender() { return false; }           // 0x50 0x0067edb0 (DS 0x006bbd70)
+    virtual bool OnDrawScreens() { return false; }      // 0x54 0x0067edc0 (DS 0x006bbd90)
     // The top screen and the one under its popup drawn, the menu's, the popup, the hint (9d-ii-b).
     virtual void DrawScreens();                         // 0x58 0x0066e300
 

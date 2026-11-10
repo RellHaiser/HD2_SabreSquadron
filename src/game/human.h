@@ -462,8 +462,8 @@ public:
     int GetHitPoints() override { return GetStat(STAT_STRENGTH); }   // 0x0059c2b0
     void Update(int frameTime) override;                // 0x0059fe30
     void Tick(int timeDelta) override;                  // 0x0059ffd0
-    void OnMessage(C_BitStream *msg) override;          // 0x005a5f60
-    void Unknown20(C_BitStream *msg) override;          // 0x005a5f70
+    void OnMessage(C_BitStream *msg) override;          // 0x005a5f60 (DS 0x005b3900)
+    void Unknown20(C_BitStream *msg) override;          // 0x005a5f70 (DS 0x005b3920)
     bool SetFrame(I3D_frame *frame) override;           // 0x0059e5e0
     bool WriteProperties(C_chunk &chunk) override;      // 0x0059e6c0
     bool ReadProperties(C_chunk &chunk) override;       // 0x0059e800
@@ -479,7 +479,7 @@ public:
     bool OnCollisionEx(C_Actor *other, const S_vector *pos, int a3, int a4, int a5, int a6, int a7) override;   // 0x005a07c0
     void Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *attacker,
              int zone) override;                        // 0x005a1c90 (DS 0x005ae520)
-    int GetMaterialId(I3D_frame *) override { return 66; }   // 0x0059c2a0
+    int GetMaterialId(I3D_frame *) override { return 66; }   // 0x0059c2a0 (DS 0x005a7550)
     void GetBoxCorners(S_vector4 corners[8]) override;  // 0x005a85f0
 
     // --- identity ----------------------------------------------------------------------

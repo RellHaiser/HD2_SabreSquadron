@@ -33,14 +33,45 @@ void C_HumanWeaponPose::RaiseWeapon(int time)
 {
 }
 
-// 0x007b96c0: not in the server.
+// The server's own small copy (DS 0x00805df0): the hand bits and the grip flag only, nothing linked
+// (mode 2: the other hand, as on the client).
 void C_HumanWeaponPose::SetMode(int mode)
 {
+    if (!m_weapon)
+        return;
+    if (mode == 2) {
+        const uint32_t side = m_hand & 0xFF;
+        if (side == 0)
+            mode = 1;
+        else if (side == 1)
+            mode = 0;
+        else
+            mode = -1;
+    }
+    if (mode == 1)
+        m_hand = (m_hand & 0xFFFFFFF1u) | 1;
+    else if (mode == 0)
+        m_hand &= 0x7FFFFFF0u;
+    m_flags |= POSE_FLAG_GRIP;
 }
 
-// 0x007b9510: not in the server.
-void C_HumanWeaponPose::SetModel(I3D_frame *model, int behaviour)
+// The server's own small copy (DS 0x00805d10): the weapon referenced, no grips, behaviour or kind.
+void C_HumanWeaponPose::SetModel(I3D_frame *model, int /*behaviour*/)
 {
+    if (m_weapon == model)
+        return;
+    if (m_weapon)
+        m_weapon->Release();
+    if (!model) {
+        m_weapon = nullptr;
+        m_flags &= 0x03FFFFFCu;
+        m_hand &= 0x7FFFFFFFu;
+        m_raised = false;
+        return;
+    }
+    m_weapon = model;
+    model->AddRef();
+    SetMode(1);
 }
 
 // 0x007b9b20: not in the server.

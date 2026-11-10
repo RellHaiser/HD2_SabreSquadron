@@ -181,7 +181,7 @@ bool C_SightObserver::SetRelation(int target, int relation)   // 0x0046d600
     return true;
 }
 
-C_HumanSightObserver::C_HumanSightObserver(C_Human *human_, uint32_t mask_, int index_)   // 0x0046d730
+C_HumanSightObserver::C_HumanSightObserver(C_Human *human_, uint32_t mask_, int index_)   // 0x0046d730 (DS 0x00488be0)
     : C_SightObserver(human_->GetFrame(), mask_, index_), human(human_)
 {
 }
@@ -388,7 +388,7 @@ void C_HumanSightObserver::Update(uint32_t, int target, int timeDelta)   // 0x00
     }
 }
 
-C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver(C_MeleeTracker *meleeTracker_, uint32_t mask_, int index_)   // 0x0046d760
+C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver(C_MeleeTracker *meleeTracker_, uint32_t mask_, int index_)   // 0x0046d760 (DS 0x00488c20)
     : C_SightObserver(meleeTracker_->GetFrame(), mask_, index_), meleeTracker(meleeTracker_)
 {
 }
@@ -514,13 +514,13 @@ void C_SightModule::Clear()                             // 0x0046ffb0
     m_targets.clear();
 }
 
-void C_SightModule::LoadMissionData(bool server)        // 0x0046eee0
+void C_SightModule::LoadMissionData(bool server)        // 0x0046eee0 (DS 0x0048aad0)
 {
     if (server)
         Clear();
 }
 
-void C_SightModule::FreeMissionData(bool server)        // 0x0046eef0
+void C_SightModule::FreeMissionData(bool server)        // 0x0046eef0 (DS 0x0048aaf0)
 {
     if (server)
         Clear();
@@ -535,7 +535,7 @@ void C_SightModule::StartMission(bool server)           // 0x0046efd0
     }
 }
 
-void C_SightModule::StopMission(bool server)            // 0x0046eff0
+void C_SightModule::StopMission(bool server)            // 0x0046eff0 (DS 0x0048ac80)
 {
     if (server)
         Clear();

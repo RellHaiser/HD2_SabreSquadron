@@ -95,8 +95,8 @@ public:
     // Deletes the players (the mission's Vertanim.bin is not read again).
     void StopMission(bool server) override;             // 0x00474c10
     void RestartMission(bool server) override;          // 0x00474c90
-    bool SaveGame(C_chunk &) override { return true; }  // 0x00473db0
-    bool LoadGame(C_chunk &) override { return true; }  // 0x00473dc0
+    bool SaveGame(C_chunk &) override { return true; }  // 0x00473db0 (DS 0x0048fe60)
+    bool LoadGame(C_chunk &) override { return true; }  // 0x00473dc0 (DS 0x0048fe80)
 
     // The loaded animation of that name (case sensitive), or null.
     S_VertexAnimation *FindAnimation(const C_str &name);   // 0x00473e30

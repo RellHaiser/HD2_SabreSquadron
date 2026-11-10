@@ -109,7 +109,7 @@ C_game::C_game()                                    // 0x006987e0
     m_hasQuickSave = false;
 }
 
-C_game::~C_game()                                   // 0x00698b00
+C_game::~C_game()                                   // 0x00698b00 (DS 0x006d9810)
 {
     ClearCarSurfaces();
     FreeTyres();
@@ -302,7 +302,7 @@ void C_game::ReleaseScene()                         // 0x00699540
     m_scene = nullptr;
 }
 
-void C_game::FreeMission()                          // 0x0069a6a0
+void C_game::FreeMission()                          // 0x0069a6a0 (DS 0x006db660)
 {
     if (m_state == GAME_STATE_RUNNING)
         Stop();
@@ -379,7 +379,7 @@ void C_game::Render()                               // 0x0069bb40
 #endif
 }
 
-bool C_game::HandleInput(float *held, float *pressed)   // 0x0069a830
+bool C_game::HandleInput(float *held, float *pressed)   // 0x0069a830 (DS 0x006db860)
 {
     if (m_fadeTime > 0 || m_inputDelay != 0)
         return true;
@@ -407,7 +407,11 @@ bool C_game::HandleInput(float *held, float *pressed)   // 0x0069a830
             }
         }
     }
+#ifdef HD2_DEDICATED   // the server has no respawn screen to test
+    if (!IsLocalGame())
+#else
     if (!IsLocalGame() && !m_interface->IsRespawnScreenShown())
+#endif
         UpdateSpectatorCamera(held, pressed);
 
     if (!m_playerInputEnabled || !held || !pressed) {
@@ -426,8 +430,10 @@ bool C_game::HandleInput(float *held, float *pressed)   // 0x0069a830
         if (m_state == GAME_STATE_RUNNING) {
             // Once the objectives are decided the soldier takes no more orders.
             if (!AreObjectivesDecided()) {
+#ifndef HD2_DEDICATED   // no interface on the server
                 if (held && pressed)
                     m_interface->HandleInput(held, pressed);
+#endif
                 C_Human *player = g_teamManager.GetPlayerTeam()->GetSelectedMember();
                 if (!player || m_paused) {
                     if (!pressed)
@@ -438,7 +444,11 @@ bool C_game::HandleInput(float *held, float *pressed)   // 0x0069a830
                     }
                 } else {
                     float *playerPressed = pressed;
+#ifdef HD2_DEDICATED   // no interface capturing the input on the server
+                    if (m_roundState != ROUND_PLAYING) {
+#else
                     if (m_interface->IsCapturingInput() || m_roundState != ROUND_PLAYING) {
+#endif
                         held = nullptr;
                         playerPressed = nullptr;
                     }
@@ -557,7 +567,7 @@ void C_game::PrintColored(const S_vector &, const char *, ...)   // 0x0069c2a0
     // Empty in the release build.
 }
 
-void C_game::PrintMessage(const S_vector &color, const char *format, ...)   // 0x0069c240
+void C_game::PrintMessage(const S_vector &color, const char *format, ...)   // 0x0069c240 (DS 0x006dcfd0)
 {
     char line[512];
     va_list args;

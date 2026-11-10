@@ -653,7 +653,7 @@ uint32_t __stdcall AddVehiclePart(I3D_frame *frame, void *parts);              /
 
 class C_Vehicle {                                       // car physics/driving state (C_Car +0x90)
 public:
-    C_Vehicle();                                        // 0x004e2900
+    C_Vehicle();                                        // 0x004e2900 (DS 0x004d2770)
     ~C_Vehicle();                                       // 0x004e7f10
     C_Vehicle(const C_Vehicle &) = delete;
     C_Vehicle &operator=(const C_Vehicle &) = delete;
@@ -676,7 +676,7 @@ public:
     // Ends a run (0x004d25c0): the volumes out of the world and freed, the sounds released, the
     // steered holders straightened, the wheels back in place without skid marks, the parts
     // repaired, one last 0.1 s tick, the lights out of the scene, the effects stopped.
-    void Stop();                                        // 0x004ec5c0
+    void Stop();                                        // 0x004ec5c0 (DS 0x004dc6a0)
     // The physics: one step of `ms` milliseconds (the drivetrain: fuel, clutch, automatic gears,
     // traction easing, the engine's torque; then the solver unless asleep). The car runs it with
     // 83 ms (0x53) steps.
@@ -731,7 +731,7 @@ public:
     // the engine). Else through the engine sounds (0x00518710), and starting needs more than
     // 0.02 l of fuel (and +0x610 above 0 with +0xF6C bit 0x4000) or plays the failed start.
     // True.
-    bool SetEngine(bool on, bool instant);              // 0x004f2530
+    bool SetEngine(bool on, bool instant);              // 0x004f2530 (DS 0x004e3a40)
     bool SetFuel(float litres);                         // 0x004f2670 (at most the tank size; true)
     bool IsEngineOn() const { return m_engineOn; }      // byte +0x22BF
     // The engine's revolutions per minute (+0x864 per second × 60; 0 with the engine off).
@@ -876,7 +876,7 @@ private:
     // Per damage part: unless `healthOnly`, the deformed meshes back from m_meshOriginals, the
     // broken glass whole again, the door's frame given back to its seat, a group's main visual
     // shown and the others hidden; then unknown24 = unknown1C. Then VEHICLE_CALLBACK_REPAIRED.
-    void RepairParts(bool healthOnly);                  // 0x004fe910
+    void RepairParts(bool healthOnly);                  // 0x004fe910 (DS 0x004f1a70)
     // +0x63C / +0x610 back to +0x640 / +0x614, the wheels' +0x230, the lamps' +0x14 and the
     // projectors (state 3, texture 0, power 2).
     void ResetCondition();                              // 0x004feea0
@@ -914,7 +914,7 @@ private:
     // A moving door (DOOR_MOVING) swings towards its target angle at +0x30 per second about its
     // y axis (the side and DOOR_BACKWARD give the sense); the door sound as it starts to open and
     // when it closes.
-    void UpdateDoors(float timeDelta);                  // 0x00501750
+    void UpdateDoors(float timeDelta);                  // 0x00501750 (DS 0x004f4c60)
     // A moving window slides up or down at +0x60 per second between its place and +0x5C, 0.1
     // inwards when down (hidden there); stopped when its glass part is broken.
     void UpdateWindows(float timeDelta);                // 0x00501ab0
@@ -989,7 +989,7 @@ private:
     float DriveTorque(float timeDelta, float throttle); // 0x0050d2c0
     // The engine's revs through the clutch +0x904 and the gear change (+0x910 bits 1 / 2), from the
     // drive's torque and the driven wheels' brake torque.
-    void UpdateEngineRevs(float timeDelta, float torque, float brakeTorque);   // 0x0050d760
+    void UpdateEngineRevs(float timeDelta, float torque, float brakeTorque);   // 0x0050d760 (DS 0x004fbc10)
     // The aerodynamic drag terms and the solver in steps of at most +0xF54 s.
     void Integrate(float timeDelta, float torqueLeft, float torqueRight);   // 0x0050db90
     // --- the solver (game/vehicle_solve.cpp) ----------------------------------------------

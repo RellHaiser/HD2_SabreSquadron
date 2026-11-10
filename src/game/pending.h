@@ -39,7 +39,7 @@ public:
     void ShowBanner();                              // 0x007443a0
     bool IsShown() const { return m_shown; }        // byte +0x210
     bool Start(void *arg) override;                 // 0x00744360
-    bool Stop() override { return true; }           // 0x00744390
+    bool Stop() override { return true; }           // 0x00744390 (DS 0x007a4960)
     // The console's commands, the first command (failed: the game ends), hosting or joining asked for.
     void Update(int timeDelta) override;            // 0x007443d0
     int GetTypeId() const override { return GAME_STATE_TYPE_CONSOLE; }   // 0x00744320

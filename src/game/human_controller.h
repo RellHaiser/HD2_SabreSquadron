@@ -213,7 +213,7 @@ public:
     virtual void ControlVehicle();                                          // 0x00 0x00583bc0
     // Adjusts the direction a shot is fired in (the AI scatters it by its aim; base: true,
     // nothing changes).
-    virtual bool AdjustAim(S_vector *dir);                                  // 0x04 0x00583090
+    virtual bool AdjustAim(S_vector *dir);                                  // 0x04 0x00583090 (DS 0x00589270)
     // Asks the server for a body action (E_ControllerAction; the player and remote controllers
     // send it): from `pos` along `dir`, a throw's `strength`; a reload passes the magazine used
     // up and the rounds loaded, the others -1. Base: nothing.
@@ -249,27 +249,27 @@ public:
     virtual void OnActorGone(C_Actor * /*actor*/, float /*distance*/) {}    // 0x40 0x005830e0
     // Issues the command to leave the vehicle (HUMAN_COMMAND_LEAVE_VEHICLE).
     virtual void RequestLeaveVehicle();                                     // 0x44 0x00588c20
-    virtual const S_vector &GetFacingDir();                                 // 0x48 0x005830f0
-    virtual const S_vector &GetViewDir();                                   // 0x4C 0x00584b50
+    virtual const S_vector &GetFacingDir();                                 // 0x48 0x005830f0 (DS 0x00589330)
+    virtual const S_vector &GetViewDir();                                   // 0x4C 0x00584b50 (DS 0x0058b590)
     virtual void SetFacingDir(const S_vector4 &dir);                        // 0x50 0x00583100
     virtual void SetViewDir(const S_vector4 &dir);                          // 0x54 0x00583120
     // Puts the height of `pos` (where the locomotion moves the human) on the AI's path:
     // interpolated along the segment walked (true; the locomotion then limits the climb), or
     // the waypoint's height while the human is within its radius (false). Base: false.
-    virtual bool AdjustToPathHeight(S_vector *pos);                         // 0x58 0x00583140
+    virtual bool AdjustToPathHeight(S_vector *pos);                         // 0x58 0x00583140 (DS 0x005893b0)
     // The light at the body measured by the controller (`intensity`, `reference`; false:
     // measure it).
-    virtual bool Unknown5C(float *intensity, float *reference);             // 0x5C 0x00583150
+    virtual bool Unknown5C(float *intensity, float *reference);             // 0x5C 0x00583150 (DS 0x005893d0)
     // Multiplayer: the player's human is waiting (dead or between rounds) and the player
     // watches the others.
-    virtual void SetSpectating(bool on);                                    // 0x60 0x00524d30
-    virtual bool IsSpectating();                                            // 0x64 0x00524d40
-    virtual void OnUniformChanged(int uid);                                 // 0x68 0x00588160
+    virtual void SetSpectating(bool on);                                    // 0x60 0x00524d30 (DS 0x00512990)
+    virtual bool IsSpectating();                                            // 0x64 0x00524d40 (DS 0x005129b0)
+    virtual void OnUniformChanged(int uid);                                 // 0x68 0x00588160 (DS 0x0058f760)
     // Inventory requests (the player's controller sends them to the server, the others carry
     // them out; containers are ITEM_CONTAINER_*).
     // The item lying in the world as temporary actor `actorId`.
     virtual void RequestPickUpItem(int actorId, int container);             // 0x6C 0x00587bc0
-    virtual void RequestThrowItem(int uid, const S_vector &velocity);       // 0x70 0x00587be0
+    virtual void RequestThrowItem(int uid, const S_vector &velocity);       // 0x70 0x00587be0 (DS 0x0058f050)
     virtual bool RequestMoveItem(int uid, int otherId, int fromContainer, int toContainer, int slot);   // 0x74 0x00587bf0
     virtual bool RequestTransferItem(int uid, int arg, int otherId, int otherUid, int container);      // 0x78 0x00587e00
     // Item `index` of supply box `boxId`.
@@ -278,16 +278,16 @@ public:
     virtual void OnBodyFlags(uint32_t flags);                               // 0x80 0x005839d0
     virtual void OnDeath();                                                 // 0x84 0x005836e0
     virtual void OnKilled();                                                // 0x88 0x00583940
-    virtual void OnKnockedOut();                                            // 0x8C 0x00524d50
+    virtual void OnKnockedOut();                                            // 0x8C 0x00524d50 (DS 0x005129d0)
     // Sets MOVE_UNCONSCIOUS like OnKnockedOut (no controller overrides either; the client
     // side of a knock-out, C_Human::SetUnconscious).
-    virtual void SetUnconscious();                                          // 0x90 0x00524d60
+    virtual void SetUnconscious();                                          // 0x90 0x00524d60 (DS 0x005129f0)
     virtual void OnKilledEnemy(C_Human * /*victim*/) {}                     // 0x94 0x00583160
     virtual void OnEnemySeen(C_Human * /*human*/) {}                        // 0x98 0x00583170
     virtual void OnEnemyLost(C_Human * /*human*/) {}                        // 0x9C 0x00583180
     virtual void OnBodySeen(C_Human * /*human*/) {}                         // 0xA0 0x00583190
     // The actor the AI fired at last (base: null).
-    virtual C_Actor *GetLastTarget() { return nullptr; }                    // 0xA4 0x005831a0
+    virtual C_Actor *GetLastTarget() { return nullptr; }                    // 0xA4 0x005831a0 (DS 0x00589470)
     virtual void OnBodyHeard(C_Actor * /*source*/) {}                       // 0xA8 0x005831b0
     virtual void OnFriendHeard(C_Actor * /*source*/) {}                     // 0xAC 0x005831c0
     virtual void OnLoudSound(C_Actor * /*source*/) {}                       // 0xB0 0x005831d0
@@ -299,14 +299,14 @@ public:
     virtual void OnMessage(C_BitStream * /*msg*/) {}                        // 0xC0 0x00583210
     virtual void OnMessage2(C_BitStream * /*msg*/) {}                       // 0xC4 0x00583220
     virtual bool OnCollisionEx(C_Actor *other, const S_vector *pos, int a3, int a4, int a5, int a6,
-                               int a7);                                     // 0xC8 0x00583230
+                               int a7);                                     // 0xC8 0x00583230 (DS 0x00589590)
     // AI behaviour (0x100 aggressive, 0x200 defensive, 0x400 zombie).
     virtual void SetAIMode(int mode);                                       // 0xCC 0x00524d70
     // Sets the groups of move flags present in `flags` (stance, directions, paces, speed,
     // leaning); 0 clears the directions and the leaning.
     virtual void SetMoveFlags(uint32_t flags);                              // 0xD0 0x00584b60
     // The AI's route (base: null).
-    virtual std::vector<S_AIWaypoint *> *GetWaypoints() { return nullptr; } // 0xD4 0x00583240
+    virtual std::vector<S_AIWaypoint *> *GetWaypoints() { return nullptr; } // 0xD4 0x00583240 (DS 0x005895b0)
     virtual void IssueCommand(const S_HumanCommand &command);               // 0xD8 0x00587540
     // Carries out a command (E_HumanCommand: the interactions with doors and other actors,
     // the vehicle seats; the command's actor network id in param1). False when it could not
@@ -317,9 +317,9 @@ public:
     virtual bool UseActor(const S_HumanCommand &command);                   // 0xE0 0x00585d10 (DS 0x0058cbf0)
     // Leaves the vehicle (else drops a carried body, or ends the interaction).
     virtual void LeaveVehicle();                                            // 0xE4 0x00585a60
-    virtual int UnknownE8();                                                // 0xE8 0x00524d90
+    virtual int UnknownE8();                                                // 0xE8 0x00524d90 (DS 0x00512a40)
     // Accuracy bonus of the human's aim (added to the weapon's, in %).
-    virtual float GetAimBonus();                                            // 0xEC 0x00524da0
+    virtual float GetAimBonus();                                            // 0xEC 0x00524da0 (DS 0x00512a60)
     virtual void Freeze(bool /*on*/) {}                                     // 0xF0 0x00583250
     // Handles an event of the human's queue; returns the event to release.
     virtual struct S_HumanEvent *HandleEvent(struct S_HumanEvent *event) { return event; }   // 0xF4 0x0056f0b0
@@ -329,11 +329,11 @@ public:
     // Sends the queued messages to the clients (`toClients`) or to the server (the AI
     // controllers; C_Human::DetachFromWorld flushes with IsServer()). Base: nothing.
     virtual void FlushMessages(bool /*toClients*/) {}                       // 0xFC 0x00583260
-    virtual bool IsSurrendered();                                           // 0x100 0x00524db0
+    virtual bool IsSurrendered();                                           // 0x100 0x00524db0 (DS 0x00512a80)
     // Base: not lying (MOVE_LYING clear); the scripted and remote controllers: false.
     virtual bool Unknown104();                                              // 0x104 0x00589290
     // The AI: its move order's flags 0x30 (0x10: a ladder; base: false).
-    virtual bool Unknown108() { return false; }                             // 0x108 0x00583270
+    virtual bool Unknown108() { return false; }                             // 0x108 0x00583270 (DS 0x00589610)
 
     E_HumanController GetType() const { return m_type; }
     uint32_t GetMoveFlags() const { return m_moveFlags; }
@@ -480,8 +480,8 @@ public:
     // Within sight range (the target's visibility and the camera's view distance) and inside
     // a 120-degree triangle ahead of the body.
     void TestSightOfHuman(C_Human *target, int *status, float *visibility) override;    // 0x00542320
-    void SetSpectating(bool on) override { m_spectating = on; }   // 0x005a4230
-    bool IsSpectating() override { return m_spectating; }         // 0x005a4240
+    void SetSpectating(bool on) override { m_spectating = on; }   // 0x005a4230 (DS 0x005b11a0)
+    bool IsSpectating() override { return m_spectating; }         // 0x005a4240 (DS 0x005b11c0)
     // The requests go to the server (CTRL_MSG_*).
     void OnUniformChanged(int uid) override;            // 0x0053e0b0
     void RequestPickUpItem(int actorId, int container) override;   // 0x0053e440
@@ -510,7 +510,7 @@ public:
     // By the stance, the pace and the shooting skill (spread and recoil).
     float GetAimBonus() override;                       // 0x00542b10
     void FlushMessages(bool toClients) override;        // 0x0053f370
-    bool Unknown104() override { return false; }        // 0x005a4250
+    bool Unknown104() override { return false; }        // 0x005a4250 (DS 0x005b11e0)
 
     // Reads and drops the messages of a human that does not exist (yet) on this side.
     static void HandleMessage(C_BitStream *msg);        // 0x005418e0 __fastcall
@@ -646,8 +646,8 @@ public:
     void TestSightOfHuman(C_Human *target, int *status, float *visibility) override;    // 0x00570280
     const S_vector &GetFacingDir() override;            // 0x0056fbf0
     const S_vector &GetViewDir() override;              // 0x0056fc00
-    void SetFacingDir(const S_vector4 &dir) override;   // 0x0056fc10
-    void SetViewDir(const S_vector4 &dir) override;     // 0x0056fc20
+    void SetFacingDir(const S_vector4 &dir) override;   // 0x0056fc10 (DS 0x00571020)
+    void SetViewDir(const S_vector4 &dir) override;     // 0x0056fc20 (DS 0x00571040)
     bool AdjustToPathHeight(S_vector *pos) override;    // 0x0057fbc0
     // The light values of the walking points around the human (S_Checkpoint::GetValuePair;
     // set 0 lying, 1 standing or moving), interpolated along the segment walked.
@@ -673,7 +673,7 @@ public:
     void Freeze(bool on) override;                      // 0x005786c0
     void FlushMessages(bool toClients) override;        // 0x00577b30
     // The fire order's target (S_AIFire::orderTarget).
-    C_Actor *GetLastTarget() override { return m_fire.orderTarget; }   // 0x00524dd0
+    C_Actor *GetLastTarget() override { return m_fire.orderTarget; }   // 0x00524dd0 (DS 0x00512ac0)
     std::vector<S_AIWaypoint *> *GetWaypoints() override { return &m_waypoints; }   // 0x00524dc0
     bool Unknown108() override;                         // 0x00524de0
 
@@ -946,7 +946,7 @@ public:
     void Tick(int timeDelta) override;                  // 0x00526550
     void SaveGame(C_chunk &chunk) override;             // 0x00538cb0
     void LoadGame(C_chunk &chunk) override;             // 0x00539990
-    void OnUniformChanged(int uid) override;            // 0x0052f6f0
+    void OnUniformChanged(int uid) override;            // 0x0052f6f0 (DS 0x0051ffe0)
     // (The base's OnDeath twice, the orders cancelled between.)
     void OnDeath() override;                            // 0x00525130
     void OnEnemySeen(C_Human *human) override;          // 0x0052e5b0
@@ -1681,7 +1681,7 @@ public:
     void OnShotAt(C_Actor * /*shooter*/, const S_vector & /*velocity*/) override {}   // 0x005a43a0
     void OnHit(int /*type*/, int /*zone*/, int /*health*/, C_Actor * /*attacker*/, const S_vector & /*pos*/,
                const S_vector & /*dir*/) override {}    // 0x005a43b0
-    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a42e0
+    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a42e0 (DS 0x005b12e0)
 };
 
 // A network client's copy of another player's human (vtable 0x008112d8, 0x2D0 bytes;
@@ -1704,11 +1704,11 @@ public:
     // The body's weapon state from its flags (raised: bit 6, bit 8 to +0xAC).
     void OnBodyFlags(uint32_t flags) override;          // 0x005941b0
     void FlushMessages(bool toClients) override;        // 0x00592220
-    void SetSpectating(bool on) override { m_spectating = on; }   // 0x005a43f0
-    bool IsSpectating() override { return m_spectating; }         // 0x005a4400
+    void SetSpectating(bool on) override { m_spectating = on; }   // 0x005a43f0 (DS 0x005b14d0)
+    bool IsSpectating() override { return m_spectating; }         // 0x005a4400 (DS 0x005b14f0)
     // The server's state (CTRL_MSG_23).
     bool IsSurrendered() override { return m_surrendered; }      // 0x005a4410
-    bool Unknown104() override { return false; }        // 0x005a4420
+    bool Unknown104() override { return false; }        // 0x005a4420 (DS 0x005b1530)
     // Objectives games: the VIP.
     void SetVip(bool vip) { m_vip = vip; }
     bool IsVip() const { return m_vip; }
@@ -1744,7 +1744,7 @@ public:
     void SaveGame(C_chunk &chunk) override;             // 0x0055c820
     void LoadGame(C_chunk &chunk) override;             // 0x0055cb50
     S_HumanEvent *HandleEvent(S_HumanEvent *event) override;   // 0x00559f60
-    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a4510
+    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a4510 (DS 0x005b1690)
 
     // The task's states (S_AITask::unknown08; names inferred). SNIPER_TO_POINT and
     // SNIPER_AT_POINT are not reached from the others.

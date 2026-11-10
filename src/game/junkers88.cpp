@@ -139,9 +139,20 @@ float Time(int ms) { return static_cast<float>(static_cast<uint32_t>(ms)); }
 // `loop`, full volume, a random pitch, `on`, played from `playAt` ms; null when the sound driver
 // is off or the file does not load.
 void LoadSound(I3D_sound *&sound, const C_str &file, I3D_frame *parent, const S_vector &pos, float nearRange,
-               float farRange, bool loop, bool on, int playAt)   // 0x005f45e0
+               float farRange, bool loop, bool on, int playAt)   // 0x005f45e0 (DS 0x00617080)
 {
     sound = nullptr;
+#ifdef HD2_DEDICATED   // the server loads no sounds
+    (void)file;
+    (void)parent;
+    (void)pos;
+    (void)nearRange;
+    (void)farRange;
+    (void)loop;
+    (void)on;
+    (void)playAt;
+    return;
+#else
     if (!ISndGetDriver()->IsInitialized())
         return;
     sound = static_cast<I3D_sound *>(I3DGetDriver()->CreateFrame(FRAME_SOUND));
@@ -163,6 +174,7 @@ void LoadSound(I3D_sound *&sound, const C_str &file, I3D_frame *parent, const S_
     sound->SetOn(on);
     sound->SetActive(on, false);
     sound->Update();
+#endif
 }
 
 // `name` on `model`'s animation stage (the cached animation set, its loop mode set; 0x005f6f80).
@@ -498,13 +510,15 @@ void C_Junkers88::TurnPropellers()                      // 0x005f7bb0
     }
 }
 
-void C_Junkers88::EngineFire(bool right, bool sounds)   // 0x005f6ca0
+void C_Junkers88::EngineFire(bool right, bool sounds)   // 0x005f6ca0 (DS 0x00619f70)
 {
     I3D_frame *frame = right ? m_propeller[1] : m_propeller[0];
     I3D_sound *damage = right ? m_sounds[2] : m_sounds[3];
     I3D_sound *explosion = right ? m_sounds[4] : m_sounds[5];
     if (frame) {
+#ifndef HD2_DEDICATED   // the server makes no smoke
         g_particlesModule.CreateAt(EFFECT_SMOKE, frame->GetWorldPos(), S_vector(0.0f, 0.0f, -1.0f), frame, true, false);
+#endif
         if (!sounds)
             return;
         for (I3D_sound *sound : {damage, explosion}) {
@@ -1070,7 +1084,7 @@ void C_Junkers88::BreakPart(int index, std::vector<S_Part *> &from, std::vector<
     from.pop_back();
 }
 
-void C_Junkers88::UpdateDamage(int frameTime)           // 0x005f71e0
+void C_Junkers88::UpdateDamage(int frameTime)           // 0x005f71e0 (DS 0x0061a5c0)
 {
     if (m_health == 0.0f)
         return;
@@ -1732,14 +1746,16 @@ C_Junkers88::S_Fighter::S_Fighter(C_chunk &chunk, const char *modelFile)   // 0x
     path = flight;
 }
 
-C_Junkers88::S_Fighter::~S_Fighter()                    // 0x005f5540
+C_Junkers88::S_Fighter::~S_Fighter()                    // 0x005f5540 (DS 0x006181e0)
 {
     if (inWorld)
         g_collisionWorld.RemoveVolume(&volume);
+#ifndef HD2_DEDICATED   // no particles on the server
     for (int particle : smoke) {
         if (particle != -1)
             g_particlesModule.Finish(particle);
     }
+#endif
     delete path;
     if (model)
         model->Release();
@@ -1768,7 +1784,7 @@ bool C_Junkers88::S_Fighter::CreateModel(int index, const char *modelFile)   // 
     return false;
 }
 
-void C_Junkers88::S_Fighter::LoadSounds()               // 0x005f4740
+void C_Junkers88::S_Fighter::LoadSounds()               // 0x005f4740 (DS 0x006170a0)
 {
     const S_vector origin(0.0f, 0.0f, 0.0f);
     gun = nullptr;
@@ -1809,7 +1825,7 @@ void C_Junkers88::S_Fighter::InitGuns()                 // 0x005f5100
     }
 }
 
-bool C_Junkers88::S_Fighter::Update(int frameTime)      // 0x005f3a70
+bool C_Junkers88::S_Fighter::Update(int frameTime)      // 0x005f3a70 (DS 0x006162c0)
 {
     S_vector before(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f);
     bool moved = false;
@@ -1850,7 +1866,9 @@ bool C_Junkers88::S_Fighter::Update(int frameTime)      // 0x005f3a70
                 model->SetAnimation(nullptr, 1, 1.0f, 0);
                 for (int &particle : smoke) {
                     if (particle != -1) {
+#ifndef HD2_DEDICATED   // no particles on the server (the ids are still cleared)
                         g_particlesModule.Finish(particle);
+#endif
                         particle = -1;
                     }
                 }
@@ -1858,8 +1876,10 @@ bool C_Junkers88::S_Fighter::Update(int frameTime)      // 0x005f3a70
             }
         }
         if (!fall.Update()) {
+#ifndef HD2_DEDICATED   // the server shows no crash
             g_particlesModule.CreateAt(EFFECT_CRASH_A, Vec(fall.pos), S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
             g_particlesModule.CreateAt(EFFECT_CRASH_B, Vec(fall.pos), S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
+#endif
             return false;
         }
     }
@@ -1920,7 +1940,7 @@ void C_Junkers88::S_Fighter::Damage(float amount)       // 0x005f34e0
     }
 }
 
-void C_Junkers88::S_Fighter::ShootDown()                // 0x005f3510
+void C_Junkers88::S_Fighter::ShootDown()                // 0x005f3510 (DS 0x00615c70)
 {
     if (down)
         return;
@@ -1933,8 +1953,13 @@ void C_Junkers88::S_Fighter::ShootDown()                // 0x005f3510
                            model->FindChildFrame("right_wing", FRAME_MASK_ANY)};
     for (int i = 0; i < 2; ++i) {
         if (wings[i]) {
+#ifdef HD2_DEDICATED   // the server still updates the wing's matrix but makes no smoke (the id is -1)
+            (void)wings[i]->GetWorldPos();
+            smoke[i] = -1;
+#else
             smoke[i] = g_particlesModule.CreateAt(EFFECT_SMOKE, wings[i]->GetWorldPos(), S_vector(0.0f, 0.0f, -1.0f),
                                                   wings[i], true, false);
+#endif
         }
     }
     down = true;
@@ -2006,7 +2031,7 @@ void C_Junkers88::Tick(int timeDelta)                   // 0x005f76a0
         g_junkers88->Chatter(5);
 }
 
-void C_Junkers88::Update(int frameTime)                 // 0x005f7710
+void C_Junkers88::Update(int frameTime)                 // 0x005f7710 (DS 0x0061ac00)
 {
     if (g_scriptModule.IsCutsceneRunning() && g_scriptModule.GetCutscene() != JUNKERS_CUTSCENE)
         return;
@@ -2077,8 +2102,10 @@ void C_Junkers88::Update(int frameTime)                 // 0x005f7710
     if (m_fall.Update())
         return;
     // On the ground: the crash, the camera slowing.
+#ifndef HD2_DEDICATED   // the server shows no crash
     g_particlesModule.CreateAt(EFFECT_CRASH_A, Vec(m_fall.pos), S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
     g_particlesModule.CreateAt(EFFECT_CRASH_B, Vec(m_fall.pos), S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
+#endif
     PlayTableSound(6, 5, {0.0f, 0.0f, 0.0f, 0.0f}, Scene()->GetActiveCamera(), 4);
     static_cast<I3D_model *>(m_frame)->SetAnimation(nullptr, 1, 1.0f, 0);
     m_camera->follow = false;

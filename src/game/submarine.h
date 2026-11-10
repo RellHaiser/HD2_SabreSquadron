@@ -65,7 +65,7 @@ public:
     C_Actor *LeaveSeat(int seat) override;              // 0x80 0x005e0460
     // Out to a free spot beside a seat (PutOutside), then LeaveSeat.
     bool ExitSeat(int seat) override;                   // 0x84 0x005e04f0
-    int GetSeatCount() override { return SEAT_COUNT; }  // 0x88 0x005e0c90
+    int GetSeatCount() override { return SEAT_COUNT; }  // 0x88 0x005e0c90 (DS 0x005fe700)
     uint32_t GetSeatFlags(int seat) override;           // 0x8C 0x005e0ca0
     // The seat's camera dummy ("cameraFPV*" / "camera3RD*", else the seat's parent's), looked for
     // with the occupant unlinked.

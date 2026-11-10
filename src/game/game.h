@@ -87,7 +87,7 @@ class C_game : public C_GameState {                 // vtable 0x008159ac, 0xEC b
     friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
 public:
     C_game();                                       // 0x006987e0
-    ~C_game() override;                             // 0x00698b00 (0x00698ae0 deleting)
+    ~C_game() override;                             // 0x00698b00 (0x00698ae0 deleting, DS 0x006d97e0)
     C_game(const C_game &) = delete;
     C_game &operator=(const C_game &) = delete;
 

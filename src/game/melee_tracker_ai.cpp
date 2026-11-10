@@ -340,7 +340,7 @@ void C_MeleeTrackerController::Reset()                  // 0x005ce5d0
     m_actionB = nullptr;
 }
 
-bool C_MeleeTrackerController::Detach()                 // 0x005cb230
+bool C_MeleeTrackerController::Detach()                 // 0x005cb230 (DS 0x005e2b60)
 {
     m_meleeTracker = nullptr;
     return true;
@@ -431,7 +431,7 @@ void C_MeleeTrackerScriptedAI::Reset()                  // 0x005d5b80
     m_barkTimer = -1;                                   // no idle barks
 }
 
-bool C_MeleeTrackerScriptedAI::Detach()                 // 0x005d5bb0
+bool C_MeleeTrackerScriptedAI::Detach()                 // 0x005d5bb0 (DS 0x005f0600)
 {
     m_meleeTracker = nullptr;
     ResetPath();
@@ -476,7 +476,7 @@ C_MeleeTrackerAutoAI::C_MeleeTrackerAutoAI()            // (SetController's case
 
 C_MeleeTrackerAutoAI::~C_MeleeTrackerAutoAI() = default;   // 0x005d5b30
 
-bool C_MeleeTrackerAutoAI::Attach(C_MeleeTracker *meleeTracker)   // 0x005cf0a0
+bool C_MeleeTrackerAutoAI::Attach(C_MeleeTracker *meleeTracker)   // 0x005cf0a0 (DS 0x005e7c10)
 {
     SetMeleeTracker(meleeTracker);
     return true;
@@ -487,7 +487,7 @@ void C_MeleeTrackerAutoAI::Reset()                      // 0x005d5b00
     C_MeleeTrackerController::Reset();
 }
 
-bool C_MeleeTrackerAutoAI::Detach()                     // 0x005d5b20
+bool C_MeleeTrackerAutoAI::Detach()                     // 0x005d5b20 (DS 0x005f0520)
 {
     m_meleeTracker = nullptr;
     ResetPath();
@@ -1573,7 +1573,7 @@ C_MeleeTrackerRemote::C_MeleeTrackerRemote()            // (SetController's case
 
 C_MeleeTrackerRemote::~C_MeleeTrackerRemote() = default;   // 0x005d5c40 (DS 0x005f06f0)
 
-bool C_MeleeTrackerRemote::Attach(C_MeleeTracker *meleeTracker)   // 0x005cfc10
+bool C_MeleeTrackerRemote::Attach(C_MeleeTracker *meleeTracker)   // 0x005cfc10 (DS 0x005e8c00)
 {
     SetMeleeTracker(meleeTracker);
     return true;
@@ -1584,7 +1584,7 @@ void C_MeleeTrackerRemote::Reset()                      // 0x005d5c20
     C_MeleeTrackerController::Reset();
 }
 
-bool C_MeleeTrackerRemote::Detach()                     // 0x005d5c30
+bool C_MeleeTrackerRemote::Detach()                     // 0x005d5c30 (DS 0x005f06d0)
 {
     m_meleeTracker = nullptr;
     return true;
@@ -1645,7 +1645,7 @@ bool C_MeleeTrackerPlayerControl::Attach(C_MeleeTracker *meleeTracker)   // 0x00
     return true;
 }
 
-bool C_MeleeTrackerPlayerControl::Detach()              // 0x005d5ac0
+bool C_MeleeTrackerPlayerControl::Detach()              // 0x005d5ac0 (DS 0x005f0470)
 {
     m_meleeTracker = nullptr;
     return true;

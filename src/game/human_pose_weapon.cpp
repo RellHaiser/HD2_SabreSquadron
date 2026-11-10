@@ -335,7 +335,7 @@ void C_HumanWeaponPose::SetModel(I3D_frame *model, int behaviour)
     SetMode(1);
 }
 
-// 0x007b96c0: the weapon into the right hand (1), the left one (0) or the one it is in (2),
+// 0x007b96c0: the weapon into the right hand (1), the left one (0) or the other hand (2),
 // its grip at the hand's dummy.
 void C_HumanWeaponPose::SetMode(int mode)
 {
@@ -349,9 +349,9 @@ void C_HumanWeaponPose::SetMode(int mode)
     if (mode == 2) {
         const uint32_t side = m_hand & 0xFF;
         if (side == 0)
-            mode = 0;
-        else if (side == 1)
             mode = 1;
+        else if (side == 1)
+            mode = 0;
         else
             mode = -1;
     }

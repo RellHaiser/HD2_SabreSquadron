@@ -1,4 +1,4 @@
-# HD2DS_SabreSquadron.exe — source port (started: it hosts a map; no client has joined yet)
+# HD2DS_SabreSquadron.exe — source port (runs: it hosts a map and a client has played on it)
 
 The Sabre Squadron dedicated server. It links the engine without sound
 ([LS3DRF.dll](../ls3drf)) and the data layer [rw_data.dll](../rw_data).
@@ -43,7 +43,7 @@ body (a default return; `true` for `Init` / `Done` / `LoadGame` / `SaveGame`). `
 
 ## Status
 
-- Builds: 265 sources, 0 messages; 0 unresolved symbols. Without the 19 files the link misses 122 symbols, with them
+- Builds: 266 sources, 0 messages; 0 unresolved symbols. Without the 19 files the link misses 122 symbols, with them
   only `ISndGetDriver`.
 - Imports from LS3DRF.dll: the original server's 38 plus three `S_matrix` methods (`RotateByMatrix`, `SetDir` with
   two vectors, `SetRot`), by the same ordinals as the original DLL's.
@@ -52,8 +52,15 @@ body (a default return; `true` for `Init` / `Done` / `LoadGame` / `SaveGame`). `
   offsets. The game's calls to the removed methods are guarded in `src/`: the server gets no-ops, zero input and
   null textures, streams and windows. Without the define the client's code is unchanged.
 - Runs: `HD2DS_Port.exe -cmd -exec ServerConfigs\NAME.cfg` hosts a local deathmatch on Africa1, with the same console
-  output and UDP ports as the original server; 2 minutes with nobody connected, and closing the console ends it. With no
-  command line it waits at an empty console, as the original does. A client has not joined it yet.
-- Server code in `src/` so far: WinMain (no instance mutex or CD key check), the main loop's message pump and `maxfreq` frame limit, and the console-only start.
-  Known missing: `-autorestart` and `XDServer_<port>.txt` (not written or deleted). Other client paths (fonts, movie controls, faces and
-  decals with null textures, a message box with no window) may still fail or block at run time.
+  output and UDP ports as the original server, on the port's own [LS3DRF.dll](../ls3drf).
+  Closing the console ends it. With no command line it waits at an empty console, as the original does. A client on
+  another PC has joined and played on it (November 2026, after hosting was made to work on IPv4 without DPNSVR).
+- Server code in `src/`: WinMain (no instance mutex or CD key check), the main loop's message pump and `maxfreq` frame
+  limit, the console-only start, `-autorestart` and `XDServer_<port>.txt`, and the server's own variants (in
+  `HD2_DEDICATED` blocks) of the human, shots, items and equipment, vehicles and the car, the Junkers 88, the game's
+  tick, input, objectives and round end, the cutscenes, the net game and the controllers, among others.
+- Each function of `src/` that the server also has carries the server's address as `(DS 0x...)` after the client's.
+  By that count about 87% of the server's own game functions are ported (compiler library code and static
+  initialisers left out). Menus and UI controls are not ported for the server: it reads cursor data it never sets up.
+- Other client paths (fonts, movie controls, faces and decals with null textures, a message box with no window) may
+  still fail or block at run time. The server exits with code 1 on WM_CLOSE.

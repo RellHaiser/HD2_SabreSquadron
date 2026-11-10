@@ -40,8 +40,8 @@ public:
     void StopMission(bool server) override;             // 0x40 0x00611990
     // Used and spawned: the frame's script told again.
     void RestartMission(bool server) override;          // 0x44 0x006117f0
-    bool SaveGame(C_chunk &) override { return true; }  // 0x48 0x006118b0 (not the base's)
-    bool LoadGame(C_chunk &) override { return true; }  // 0x4C 0x006118c0
+    bool SaveGame(C_chunk &) override { return true; }  // 0x48 0x006118b0 (not the base's) (DS 0x0063ba50)
+    bool LoadGame(C_chunk &) override { return true; }  // 0x4C 0x006118c0 (DS 0x0063ba70)
 
 private:
     // The spawned soldier set up: made on a client, found on the server; the local player's camera

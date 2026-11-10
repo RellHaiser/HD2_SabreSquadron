@@ -39,8 +39,8 @@ public:
     // (Slot 0x20 0x005feba0 is empty, as the base's.)
     // The frame is named "Actor_mine".
     bool SetFrame(I3D_frame *frame) override;           // 0x2C 0x005fdf90
-    bool WriteProperties(C_chunk &) override { return false; }   // 0x30 0x005fdf10
-    bool ReadProperties(C_chunk &) override { return false; }    // 0x34 0x005fdf20
+    bool WriteProperties(C_chunk &) override { return false; }   // 0x30 0x005fdf10 (DS 0x006230d0)
+    bool ReadProperties(C_chunk &) override { return false; }    // 0x34 0x005fdf20 (DS 0x006230f0)
     void CopyFrom(const C_Actor *) override {}          // 0x38 0x005fdf30 (not even the base's)
     void StartMission(bool server) override;            // 0x3C 0x005fdfb0
     void StopMission(bool server) override;             // 0x40 0x005fdfd0

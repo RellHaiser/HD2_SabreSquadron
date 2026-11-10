@@ -118,9 +118,9 @@ public:
     int CanAddItemToInventory(C_Actor *actor, int itemId);  // 0x007db5d0
     int CanPutItemInSlot(C_Actor *actor, int container, int itemId);   // 0x007db780
     // Takes `item` out of `container` of `owner` and drops its model in front of him.
-    void DropItem(C_Item *item, C_Actor *owner, int container);   // 0x007dc1e0
+    void DropItem(C_Item *item, C_Actor *owner, int container);   // 0x007dc1e0 (DS 0x00816e10)
     // Takes `item` out of `container` of `owner` (owner and weight updated).
-    void RemoveFromContainer(C_Item *item, C_Actor *owner, int container);   // 0x007dc700
+    void RemoveFromContainer(C_Item *item, C_Actor *owner, int container);   // 0x007dc700 (DS 0x00817440)
 
     // --- saved games / mission files ------------------------------------------------
     // One item (chunk 0xAD2C) with three caller-defined numbers, and the contents of

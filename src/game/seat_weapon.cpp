@@ -577,7 +577,7 @@ void C_SeatWeapon::Update(int time)                     // 0x004c56a0
         m_idleTime = 0;
 }
 
-void C_SeatWeapon::Tick(int time)                       // 0x004c55e0
+void C_SeatWeapon::Tick(int time)                       // 0x004c55e0 (DS 0x004ad470)
 {
     if (m_failed || !m_gunner)
         return;
@@ -825,7 +825,7 @@ void C_SeatWeapon::ApplyControls(float *axes, float *buttons)   // 0x004c3b60
 
 // --- firing (part 3b) -------------------------------------------------------------------------------
 
-void C_SeatWeapon::Fire()                               // 0x004c4780 (__fastcall)
+void C_SeatWeapon::Fire()                               // 0x004c4780 (__fastcall) (DS 0x004ac320)
 {
     if (m_delay > 0 || m_item->GetAmount() == 0.0f || !m_gunner)
         return;
@@ -886,7 +886,7 @@ void C_SeatWeapon::Fire()                               // 0x004c4780 (__fastcal
     m_gunner->MakeNoise();
 }
 
-bool C_SeatWeapon::FireShot(const S_vector4 *pos, const S_vector4 *dir, int barrel, int unused)   // 0x004c3dc0
+bool C_SeatWeapon::FireShot(const S_vector4 *pos, const S_vector4 *dir, int barrel, int unused)   // 0x004c3dc0 (DS 0x004ab810)
 {
     (void)unused;
     if (m_item->GetAmount() == 0.0f || !m_gunner)
@@ -903,7 +903,7 @@ bool C_SeatWeapon::FireShot(const S_vector4 *pos, const S_vector4 *dir, int barr
     return true;
 }
 
-void C_SeatWeapon::PlayShot(int barrel)                 // 0x004c4010
+void C_SeatWeapon::PlayShot(int barrel)                 // 0x004c4010 (DS 0x004aba70)
 {
     (void)barrel;                                       // (Quirk kept: the client fires its own next barrel)
     if (!m_gunner)
@@ -940,7 +940,11 @@ void C_SeatWeapon::Shoot(int barrel, const S_vector &pos, const S_vector &dir, b
 void C_SeatWeapon::ShowFlash(int barrel)
 {
     I3D_frame *muzzle = m_barrels[barrel].muzzle;
+#ifdef HD2_DEDICATED   // no particles on the server; it still reads the matrix
+    (void)muzzle->GetMatrix();
+#else
     g_particlesModule.Create(m_flashEffect, muzzle->GetMatrix(), muzzle, true, false);
+#endif
 }
 
 void C_SeatWeapon::Recoil(const S_vector &dir, float factor)
@@ -993,7 +997,7 @@ void C_SeatWeapon::Reload(C_ItemContainer *store)       // 0x004c6270
     m_delay = static_cast<C_WeaponComp *>(m_item->GetDef()->GetComponent())->GetReloadTimeMs();
 }
 
-void C_SeatWeapon::ShowReload(C_ItemContainer *store)   // 0x004c62e0
+void C_SeatWeapon::ShowReload(C_ItemContainer *store)   // 0x004c62e0 (DS 0x004ae4e0)
 {
     (void)store;
     if (m_flags & SEAT_WEAPON_RELOADING)

@@ -79,7 +79,7 @@ public:
     // The frame hidden: the enter (`id`), the frame on, CONTROL_NOTIFY_SHOWN.
     virtual void Open(int id);                          // +0x84 0x00668700
     // A popup of its own shown (the menu state draws the screen again under it; the base: none).
-    virtual bool HasPopup() const { return false; }     // +0x88 0x00668510
+    virtual bool HasPopup() const { return false; }     // +0x88 0x00668510 (DS 0x006a1910)
     // The description's controls made (on the screen's frame), its name and id taken; true.
     virtual bool Build(const S_ScreenDesc *desc);       // +0x8C 0x00668770
 
@@ -106,7 +106,7 @@ public:
     ~C_DescriptionScreen() override;                    // 0x00676040 (0x00676020)
 
     // The text's.
-    void Refresh() override;                            // +0x18 0x00669bf0
+    void Refresh() override;                            // +0x18 0x00669bf0 (DS 0x006a3200)
     // Shown and the cursor still (500 ms, button 0 up): the box on at the cursor (+0.15, +0.015;
     // its own depth kept), placed, the text refreshed; else the box off (when it was shown or on).
     // (Not the screen's: no tick notification.)

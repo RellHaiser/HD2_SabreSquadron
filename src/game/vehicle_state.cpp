@@ -240,9 +240,13 @@ int C_Vehicle::FindMeshOriginal(const S_VehiclePart &part) const
 
 // --- saving --------------------------------------------------------------------------------------
 
-uint32_t C_Vehicle::StateSize() const                                         // 0x004f7300
+uint32_t C_Vehicle::StateSize() const                                         // 0x004f7300 (DS 0x004e9080)
 {
+#ifdef HD2_DEDICATED   // the server has no lamps: no lamp records
+    uint32_t size = sizeof(S_VehicleState);
+#else
     uint32_t size = sizeof(S_VehicleState) + static_cast<uint32_t>(m_lamps.size()) * sizeof(S_VehicleLampState);
+#endif
     uint32_t records = 0;
     for (size_t index = m_parts.size(); index-- > 0;) {
         const S_VehiclePart &part = m_parts[index];
@@ -259,7 +263,7 @@ uint32_t C_Vehicle::StateSize() const                                         //
     return size + (static_cast<uint32_t>(m_wheelCount) * 5 + static_cast<uint32_t>(m_seats.size()) + records) * 0x14;
 }
 
-bool C_Vehicle::SaveState(void *buffer) const                                 // 0x004f7650
+bool C_Vehicle::SaveState(void *buffer) const                                 // 0x004f7650 (DS 0x004e9480)
 {
     auto &s = *static_cast<S_VehicleState *>(buffer);
     // (The bytes the original leaves unwritten are zero here.)
@@ -354,6 +358,9 @@ bool C_Vehicle::SaveState(void *buffer) const                                 //
     s.specialVolumesOn = m_specialVolumesOn;
     s.volumesOut = !m_mainVolumesInWorld;
 
+#ifdef HD2_DEDICATED   // the server has no lamps: no lamp records, the parts follow the header
+    auto *cursor = reinterpret_cast<uint8_t *>(&s + 1);
+#else
     // The lamps: their place in the model, flags and health.
     s.lamps = static_cast<uint32_t>(m_lamps.size());
     auto *lamps = reinterpret_cast<S_VehicleLampState *>(&s + 1);
@@ -363,10 +370,11 @@ bool C_Vehicle::SaveState(void *buffer) const                                 //
         lamps[i].flags = lamp.flags;
         lamps[i].health = lamp.health;
     }
+    auto *cursor = reinterpret_cast<uint8_t *>(lamps + m_lamps.size());
+#endif
 
     // The dented parts: per part and kept original of its name, its key, state and health and the
     // vertices moved from the original (both levels).
-    auto *cursor = reinterpret_cast<uint8_t *>(lamps + m_lamps.size());
     for (size_t index = 0; index < m_parts.size(); ++index) {
         const S_VehiclePart &part = m_parts[index];
         for (size_t k = m_meshOriginals.size(); k-- > 0;) {
@@ -452,7 +460,7 @@ bool C_Vehicle::SaveState(void *buffer) const                                 //
 
 // --- loading -------------------------------------------------------------------------------------
 
-void C_Vehicle::Replace()                                                     // 0x004e98c0
+void C_Vehicle::Replace()                                                     // 0x004e98c0 (DS 0x004d90d0)
 {
     m_model->Update();
     ReadModelPlace();
@@ -489,6 +497,7 @@ void C_Vehicle::Replace()                                                     //
     m_unknown2294 = 0;
     m_unknown2295 = 0;
 
+#ifndef HD2_DEDICATED   // the server has no lamps or projectors
     // The lamps' own and the projectors' objects back in the model's parent.
     for (size_t i = m_lamps.size(); i-- > 0;) {
         const S_VehicleLamp &lamp = m_lamps[i];
@@ -503,6 +512,7 @@ void C_Vehicle::Replace()                                                     //
         if (m_projectors[i].light)
             m_projectors[i].light->LinkTo(m_unknown544, 0);
     }
+#endif
     UpdateWheelSpin(1.0f);
     SetVolumesInWorld(true, true);
     m_brake = 0.0f;
@@ -515,7 +525,7 @@ void C_Vehicle::Replace()                                                     //
     m_unknown22C0 = 1;
 }
 
-bool C_Vehicle::LoadState(const void *buffer)                                 // 0x004f8510
+bool C_Vehicle::LoadState(const void *buffer)                                 // 0x004f8510 (DS 0x004ea620)
 {
     const auto &s = *static_cast<const S_VehicleState *>(buffer);
     if (s.version != STATE_VERSION)
@@ -633,6 +643,9 @@ bool C_Vehicle::LoadState(const void *buffer)                                 //
     m_specialVolumesOn = s.specialVolumesOn;
     SetVolumesInWorld(s.volumesOut == 0, m_volume490InWorld);
 
+#ifdef HD2_DEDICATED   // the server has no lamps: it reads the parts right after the header
+    const auto *cursor = reinterpret_cast<const uint8_t *>(&s + 1);
+#else
     // The lamps: each record to the lamp nearest its place. Quirk kept: the search keeps the
     // record's own index, not the nearest lamp's (so record i goes to lamp i, as saved).
     const auto *lamps = reinterpret_cast<const S_VehicleLampState *>(&s + 1);
@@ -654,10 +667,12 @@ bool C_Vehicle::LoadState(const void *buffer)                                 //
         }
     }
 
+    const auto *cursor = reinterpret_cast<const uint8_t *>(lamps + s.lamps);
+#endif
+
     // The dented parts: found by key, their original (kept anew from the part's mesh when there is
     // none), health, state (glass: cracked by its health instead), damage shown, and the vertices
     // moved from the original.
-    const auto *cursor = reinterpret_cast<const uint8_t *>(lamps + s.lamps);
     for (int r = 0; r < static_cast<int>(s.parts); ++r) {
         const auto &record = *reinterpret_cast<const S_VehiclePartState *>(cursor);
         const auto *offsets = reinterpret_cast<const uint32_t *>(&record + 1);

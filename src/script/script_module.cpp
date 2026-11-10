@@ -645,12 +645,16 @@ void C_ScriptModule::SetPauseSoundsPaused(bool paused)
 // ---------------------------------------------------------------------------
 // cutscenes
 
-void C_ScriptModule::RunCutscene(int cutscene)
+void C_ScriptModule::RunCutscene(int cutscene)          // 0x00423c70 (DS 0x00446480)
 {
     m_cutsceneRunning = true;
+#ifdef HD2_DEDICATED   // no command map on the server
+    m_commandMapWasOpen = false;
+#else
     C_Interface *ui = GetGame()->GetInterface();
     m_commandMapWasOpen = ui->IsCommandMapOpen();
     ui->OpenCommandMap(false);
+#endif
 
     I3D_scene *scene = GetGame()->GetScene();
     m_cutsceneCamera = scene->GetActiveCamera();
@@ -679,7 +683,7 @@ void C_ScriptModule::RunCutscene(int cutscene)
     ResetSpeechSlots();
 }
 
-void C_ScriptModule::EndCutscene()
+void C_ScriptModule::EndCutscene()                      // 0x00423eb0 (DS 0x004466d0)
 {
     if (!m_cutsceneRunning)
         return;
@@ -742,6 +746,8 @@ void C_ScriptModule::EndCutscene()
         m_animatedInCutscene.pop_back();
     }
     ResetSpeechSlots();
+#ifndef HD2_DEDICATED   // no command map on the server
     GetGame()->GetInterface()->OpenCommandMap(m_commandMapWasOpen);
+#endif
     m_commandMapWasOpen = false;
 }

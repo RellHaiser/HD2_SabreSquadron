@@ -35,8 +35,8 @@ public:
     void OnMessage(C_BitStream *msg) override;          // 0x1C 0x005b7110
     void Unknown20(C_BitStream *) override {}           // 0x20 0x005b7300
     bool SetFrame(I3D_frame *frame) override;           // 0x2C 0x005b68d0
-    bool WriteProperties(C_chunk &) override { return false; }   // 0x30 0x005b6830
-    bool ReadProperties(C_chunk &) override { return false; }    // 0x34 0x005b6840
+    bool WriteProperties(C_chunk &) override { return false; }   // 0x30 0x005b6830 (DS 0x005c8e10)
+    bool ReadProperties(C_chunk &) override { return false; }    // 0x34 0x005b6840 (DS 0x005c8e30)
     void CopyFrom(const C_Actor *) override {}          // 0x38 0x005b6850
     void StartMission(bool server) override;            // 0x3C 0x005b6900
     // Stops the body and destroys the frame and the item with the actor.
@@ -49,7 +49,7 @@ public:
     // A hit pushes the item (not the pick-ups, nor in its first 300 ms).
     void Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *attacker,
              int flags) override;                       // 0xD4 0x005b74d0
-    int GetMaterialId(I3D_frame *) override { return 11; }   // 0xD8 0x005b74c0 (the default's value)
+    int GetMaterialId(I3D_frame *) override { return 11; }   // 0xD8 0x005b74c0 (the default's value) (DS 0x005c9e60)
 
 private:
     // The kinds of the item's messages (3 bits).

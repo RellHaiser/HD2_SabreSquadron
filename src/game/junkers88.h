@@ -52,7 +52,7 @@ public:
     bool SaveGame(C_chunk &chunk) override;             // 0x48 0x005ee1e0
     bool LoadGame(C_chunk &chunk) override;             // 0x4C 0x005ee830
 
-    bool IsSeatBlocked(int) override { return false; }  // 0x6C 0x005f2e60
+    bool IsSeatBlocked(int) override { return false; }  // 0x6C 0x005f2e60 (DS 0x006153a0)
     bool SetSeatBlocked(int seat, bool blocked) override;   // 0x70 0x005f2e70
     // Into the seat (nothing without an occupant): linked to its dummy, facing along it; the seat
     // weapon's gunner.
@@ -63,7 +63,7 @@ public:
     C_Actor *LeaveSeat(int seat) override;              // 0x80 0x005f3000
     // The same, true (no way out to find).
     bool ExitSeat(int seat) override;                   // 0x84 0x005f30c0
-    int GetSeatCount() override { return SEATS; }       // 0x88 0x005ef420
+    int GetSeatCount() override { return SEATS; }       // 0x88 0x005ef420 (DS 0x006108d0)
     // The seats' flags as the last StartMission found them (a table shared by every Junkers).
     uint32_t GetSeatFlags(int seat) override;           // 0x8C 0x005f2e30
     // First person: "cameraFPV*" under the seat's dummy; else the camera path's camera dummy.

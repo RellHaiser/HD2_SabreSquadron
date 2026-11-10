@@ -93,12 +93,16 @@ void S_VertexAnimPlayer::Blend(int from, int to, float t)
     object->RefreshLevels();
 }
 
-void S_VertexAnimPlayer::Reset()                        // 0x004737c0
+void S_VertexAnimPlayer::Reset()                        // 0x004737c0 (DS 0x0048f760)
 {
     if (!visual || !animation)
         return;
     auto *object = static_cast<I3D_object_visual *>(visual);
+#ifdef HD2_DEDICATED   // the server reads the level without testing the texture-LOD flag
+    const int level = object->GetTextureLevel();
+#else
     const int level = (object->VisualFlags() & VISFLAGS_TEXTURE_LOD) ? 0 : object->GetTextureLevel();
+#endif
     if (level > maxLevel)
         return;
     // (The original blends frame 0 with itself: v * 0 + v.)

@@ -119,8 +119,10 @@ void S_CarParts::Clear()                                // 0x004e0dc0 (__fastcal
     seatFrames.clear();
     while (!explosives.empty()) {
         S_CarExplosive *part = explosives.back();
+#ifndef HD2_DEDICATED   // no particles on the server
         if (part->effect >= 0)
             g_particlesModule.Destroy(part->effect);
+#endif
         _aligned_free(part);
         explosives.pop_back();
     }
@@ -133,10 +135,12 @@ void S_CarParts::Reset()                                // 0x004e0ea0 (__fastcal
     Gather();
     fuse = 0;
     wrecked = false;
+#ifndef HD2_DEDICATED   // no particles on the server
     if (fireHandle != -1)
         g_particlesModule.Destroy(fireHandle);
     if (smokeHandle != -1)
         g_particlesModule.Destroy(smokeHandle);
+#endif
 }
 
 void S_CarParts::Release()                              // 0x004e0ee0
@@ -416,8 +420,13 @@ void S_CarParts::StartPartEffect(int part)              // 0x004e1f70
     if (explosive->effectId == -1)
         return;
     Place();
+#ifdef HD2_DEDICATED   // the server creates no particles (the id is -1); it still reads the matrix
+    (void)explosive->frame->GetMatrix();
+    explosive->effect = -1;
+#else
     explosive->effect = g_particlesModule.Create(explosive->effectId, explosive->frame->GetMatrix(), car->GetFrame(), true,
                                                  false);
+#endif
 }
 
 void S_CarParts::StartWreckEffects()                    // 0x004e2000 (__fastcall)
@@ -425,15 +434,24 @@ void S_CarParts::StartWreckEffects()                    // 0x004e2000 (__fastcal
     for (size_t i = explosives.size(); i-- > 0;) {
         S_CarExplosive *part = explosives[i];
         if (part->effect >= 0) {
+#ifndef HD2_DEDICATED   // no particles on the server
             g_particlesModule.Destroy(part->effect);
+#endif
             part->effect = -1;
         }
     }
     Place();
     I3D_frame *carFrame = car->GetFrame();
     I3D_frame *at = particleFrame ? particleFrame : carFrame;
+#ifdef HD2_DEDICATED   // the server creates no particles (the ids are -1); it still reads the matrix twice
+    (void)at->GetMatrix();
+    fireHandle = -1;
+    (void)at->GetMatrix();
+    smokeHandle = -1;
+#else
     fireHandle = g_particlesModule.Create(fireEffect, at->GetMatrix(), carFrame, true, false);
     smokeHandle = g_particlesModule.Create(smokeEffect, at->GetMatrix(), carFrame, true, false);
+#endif
     if (wreckSound < 1)
         return;
     S_SoundRequest request;

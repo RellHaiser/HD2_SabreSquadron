@@ -133,7 +133,7 @@ void C_Vehicle::ReadModelState()                                                
     m_speed = XYZ(m_velocity).Magnitude();
 }
 
-void C_Vehicle::Start()                                                         // 0x004ea780
+void C_Vehicle::Start()                                                         // 0x004ea780 (DS 0x004da0f0)
 {
     m_previousSpeed = 0.0f;
     m_unknown7C4 = 0.02f;
@@ -447,8 +447,10 @@ void C_Vehicle::Start()                                                         
     SetSeatLoad(0, 0.0f);
     m_unknown228E = 0;
     m_unknownF68 = 0.0f;
+#ifndef HD2_DEDICATED   // no sounds on the server
     LoadSounds(m_params);
     AddSoundsToSectors();
+#endif
     ResetCondition();
     RepairParts(true);
     LoadGlassTextures(m_params.glassTexture, m_params.glassTextureAlpha);
@@ -794,6 +796,7 @@ void C_Vehicle::RepairParts(bool healthOnly)                                    
             }
             // A broken glass part shows its intact texture again (the cracked one kept).
             if (part.type == VEHICLE_PART_GLASS && (part.state & VEHICLE_PART_GLASS_BROKEN)) {
+#ifndef HD2_DEDICATED   // the server's glass has no texture to swap back: the state only
                 I3D_material *material = part.mesh->GetLevel(0)->GetFaceGroup(0)->material;
                 I3D_texture *shown = material->GetTexture();
                 if (shown && part.glassTexture) {
@@ -803,6 +806,7 @@ void C_Vehicle::RepairParts(bool healthOnly)                                    
                     part.glassTexture = shown;
                     part.frame->Update();
                 }
+#endif
                 part.state &= ~VEHICLE_PART_GLASS_BROKEN;
             }
             // The door whose part this is gets the part's main visual back.
@@ -832,7 +836,7 @@ void C_Vehicle::RepairParts(bool healthOnly)                                    
         callback(m_callbackContext);
 }
 
-void C_Vehicle::ResetCondition()                                                // 0x004feea0
+void C_Vehicle::ResetCondition()                                                // 0x004feea0 (DS 0x004f20b0)
 {
     m_unknown63C = m_unknown640;
     m_unknown610 = m_unknown614;
@@ -844,6 +848,7 @@ void C_Vehicle::ResetCondition()                                                
         wheel->bend = 0.0f;
         wheel->health = wheel->fullHealth;
     }
+#ifndef HD2_DEDICATED   // the server has no lamps or projectors
     for (size_t i = m_lamps.size(); i-- > 0;) {
         m_lamps[i].health = m_lampFullHealth;
         m_lamps[i].flags &= ~0x1u;
@@ -855,22 +860,27 @@ void C_Vehicle::ResetCondition()                                                
         if (projector.light)                            // Fix: the original crashes without a spot light
             projector.light->SetPower(2.0f);
     }
+#endif
 }
 
-bool C_Vehicle::LoadGlassTextures(const char *name, const char *alphaName)      // 0x004fe850
+bool C_Vehicle::LoadGlassTextures(const char *name, const char *alphaName)      // 0x004fe850 (DS 0x004f1a50)
 {
+#ifdef HD2_DEDICATED   // no textures in LS3DRF.dll: the server's only returns true
+    (void)name;
+    (void)alphaName;
+    return true;
+#else
     if (!name || !alphaName)
         return true;
     for (S_VehiclePart &part : m_parts) {
         if (part.type != VEHICLE_PART_GLASS || part.glassTexture || !*name)
             continue;
         IImage *image = nullptr;
-#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
         if (GetIGraph()->LoadTexture(name, alphaName, 4, &image) == 0)
             part.glassTexture = reinterpret_cast<I3D_texture *>(image);
-#endif
     }
     return true;
+#endif
 }
 
 // --- the lights ---------------------------------------------------------------------------------
