@@ -17,12 +17,18 @@
 //    recorded, and what a mark costs with the recorder on.
 //
 // Usage: test_diag_events.exe   (writes and deletes LS3DF.ini and a CSV next to itself)
+//        test_diag_events.exe --bench <capture> [--backend sdlgpu|opengl] [--driver direct3d12|vulkan]
+//                             [--frames N] [--trials T]
+//   A3's on/off benchmark: the capture replayed, then presented N more times (no vsync), T trials with
+//   the markers and the hitch recorder off and T on, alternating; the time a frame took in each, and
+//   the drawn picture's hash, which must be the same on and off.
 //
 // test-sources: src/gfx/d3d8/gfx_d3d8.cpp src/gfx/trace/*.cpp src/gfx/sdlgpu/*.cpp src/gfx/fixed/*.cpp src/gfx/opengl/*.cpp
 // test-sources: src/core/enhance.cpp src/core/debug.cpp
 // test-sources: src/platform/*.cpp src/platform/win32/*.cpp src/platform/sdl3/*.cpp
 #include <windows.h>
 
+#include <algorithm>
 #include <chrono>
 #include <fstream>
 #include <cstdint>
@@ -531,11 +537,109 @@ void HitchTests()
     }
 }
 
+// ---------------------------------------------------------------- the A3 benchmark
+
+int Bench(int argc, char **argv)
+{
+    std::string capturePath, backend = "sdlgpu", driver = "direct3d12";
+    int frames = 300, trials = 6;
+    for (int i = 1; i < argc; ++i) {
+        const bool more = i + 1 < argc;
+        if (!std::strcmp(argv[i], "--bench") && more)
+            capturePath = argv[++i];
+        else if (!std::strcmp(argv[i], "--backend") && more)
+            backend = argv[++i];
+        else if (!std::strcmp(argv[i], "--driver") && more)
+            driver = argv[++i];
+        else if (!std::strcmp(argv[i], "--frames") && more)
+            frames = std::atoi(argv[++i]);
+        else if (!std::strcmp(argv[i], "--trials") && more)
+            trials = std::atoi(argv[++i]);
+    }
+    S_enhancements e = Enhancements();
+    std::snprintf(e.sdlGpuDriver, sizeof e.sdlGpuDriver, "%s", backend == "sdlgpu" ? driver.c_str() : "");
+    std::snprintf(e.presentMode, sizeof e.presentMode, "%s", "immediate");
+    SetEnhancements(e);
+    Device *device = backend == "sdlgpu" ? SdlGpuDevice() : OpenGlDevice();
+    if (!device) {
+        std::printf("bench: no %s device: NOT RUN\n", backend.c_str());
+        return 2;
+    }
+    std::printf("bench: %s on %s%s, %d frames a trial, %d trials off and %d on, alternating, no vsync\n", capturePath.c_str(),
+                backend.c_str(), backend == "sdlgpu" ? (" / " + driver).c_str() : "", frames, trials, trials);
+    std::vector<double> off, on;
+    uint64_t hashOff = 0, hashOn = 0;
+    bool same = true;
+    uint32_t hitchRecords = 0;
+    for (int t = 0; t < 2 * trials; ++t) {
+        const bool markers = t % 2 == 1;
+        replay::Capture capture;
+        if (!capture.Open(capturePath.c_str())) {
+            std::printf("bench: cannot open %s\n", capturePath.c_str());
+            return 2;
+        }
+        HWND window = CreateWindowA("LS3DFDiagEvents", "bench", WS_POPUP | WS_VISIBLE, 0, 0, 640, 480, nullptr, nullptr,
+                                    GetModuleHandleA(nullptr), nullptr);
+        if (markers) {
+            diag::Start(65536);
+            diag::StartHitches(diag::S_hitchConfig(), "engine", diag::EV_PRESENT_BEGIN, "test_bench_hitches.jsonl", "\"bench\":true");
+        }
+        double ms = 0;
+        uint64_t hash = 0;
+        {
+            replay::Replayer r(device, window);
+            r.noVsync = true;
+            if (!r.Run(capture)) {
+                std::printf("bench: the replay failed: %s\n", r.error.c_str());
+                DestroyWindow(window);
+                return 2;
+            }
+            hash = Hash(r.picture);
+            ms = r.Repeat(frames);
+        }
+        if (markers) {
+            hitchRecords += diag::StopHitchesWithTotals().records;
+            diag::Stop();
+            DeleteFileA(NextTo("test_bench_hitches.jsonl").c_str());
+        }
+        DestroyWindow(window);
+        (markers ? on : off).push_back(ms);
+        uint64_t &first = markers ? hashOn : hashOff;
+        if (!first)
+            first = hash;
+        same = same && hash == first;
+        std::printf("    trial %2d %-4s %.3f ms a frame, picture %016llx\n", t / 2 + 1, markers ? "on" : "off", ms,
+                    static_cast<unsigned long long>(hash));
+    }
+    auto median = [](std::vector<double> v) {
+        std::sort(v.begin(), v.end());
+        return v.size() % 2 ? v[v.size() / 2] : (v[v.size() / 2 - 1] + v[v.size() / 2]) / 2;
+    };
+    auto spread = [](const std::vector<double> &v) {
+        return *std::max_element(v.begin(), v.end()) - *std::min_element(v.begin(), v.end());
+    };
+    const double mOff = median(off), mOn = median(on);
+    std::printf("bench: off median %.3f ms (spread %.3f), on median %.3f ms (spread %.3f): on - off = %+.3f ms a frame (%+.2f%%)\n",
+                mOff, spread(off), mOn, spread(on), mOn - mOff, 100.0 * (mOn - mOff) / mOff);
+    std::printf("bench: picture %s on and off (%016llx / %016llx); hitch records while on: %u\n", same && hashOn == hashOff ? "identical" : "DIFFERENT",
+                static_cast<unsigned long long>(hashOff), static_cast<unsigned long long>(hashOn), hitchRecords);
+    return same && hashOn == hashOff ? 0 : 1;
+}
+
 }  // namespace
 
-int main()
+int main(int argc, char **argv)
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
+    for (int i = 1; i < argc; ++i)
+        if (!std::strcmp(argv[i], "--bench")) {
+            WNDCLASSA wc = {};
+            wc.lpfnWndProc = DefWindowProcA;
+            wc.hInstance = GetModuleHandleA(nullptr);
+            wc.lpszClassName = "LS3DFDiagEvents";
+            RegisterClassA(&wc);
+            return Bench(argc, argv);
+        }
     RingTests();
     CostTests();
     HitchTests();
