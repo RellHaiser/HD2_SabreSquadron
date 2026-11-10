@@ -696,7 +696,7 @@ public:
     bool SaveGame(C_chunk &chunk);                      // 0x00771570
     bool LoadGame(C_chunk &chunk);                      // 0x00771b00
     // Moves the body for `time` ms (the mixer is updated here).
-    void Update(int time);                              // 0x00763c30
+    void Update(int time);                              // 0x00763c30 (DS 0x007caa10)
     // The detail of the body by its size on the screen (MOVE_FLAG_* 0x10..0x2000).
     void UpdateDetail();                                // 0x00770560
     // The direction the work asks the body to face (x / z): the turn towards it starts (the
@@ -912,12 +912,12 @@ public:
 private:
     // The tracks: the body animation, the carry animation, the activity.
     void UpdateAnimTrack();                             // 0x00777f30
-    void UpdateCarryTrack();                            // 0x00778f80
+    void UpdateCarryTrack();                            // 0x00778f80 (DS 0x007e4c30)
     void UpdateActivityTrack();                         // 0x00779850 (DS 0x007e56f0)
     // What starting an animation means for the body; sets the request that follows it.
     void OnAnimStarted(const S_HumanAnimRef &anim, const S_HumanAnimRef &old, bool singleStage);   // 0x0077a2c0
     void OnCarryStarted(const int *carry, const int *old);   // 0x0077bcd0
-    void OnActivityStarted(const int *activity, const int *old);   // 0x0077c5a0
+    void OnActivityStarted(const int *activity, const int *old);   // 0x0077c5a0 (DS 0x007e8e70)
     // Turn the requests into what the hands item and the carrying state allow.
     void AdjustAnimRequest(const S_HumanAnimRef &current, S_HumanAnimRef *next);   // 0x0077caf0
     void AdjustCarryRequest(const S_HumanAnimRef &current, const int *activity);   // 0x0077cd30
@@ -1016,7 +1016,7 @@ public:
     // Puts the model there at once (with its volumes) / turns it (remote humans; on a ladder
     // facing the ladder).
     void SetPosition(const S_vector4 &pos);             // 0x0075a280
-    void SetDirection(const S_vector4 &dir, float roll);   // 0x0075a520
+    void SetDirection(const S_vector4 &dir, float roll);   // 0x0075a520 (DS 0x007c0230)
 
     C_HumanMovement *m_movement = nullptr;              // +0x00
     C_HumanLocomotion *m_locomotion = nullptr;          // +0x04
@@ -1074,12 +1074,12 @@ public:
     C_HumanMovement(const C_HumanMovement &) = delete;
     C_HumanMovement &operator=(const C_HumanMovement &) = delete;
 
-    void SetOwner(C_Human *owner);                      // 0x00785f80
+    void SetOwner(C_Human *owner);                      // 0x00785f80 (DS 0x007f4ab0)
     void Init();                                        // 0x00786040 (DS 0x007f4b80)
-    void Done();                                        // 0x00786490
+    void Done();                                        // 0x00786490 (DS 0x007f50f0)
     void Reset();                                       // 0x00784db0 (DS 0x007f3770)
-    bool SaveGame(C_chunk &chunk);                      // 0x00784430
-    bool LoadGame(C_chunk &chunk);                      // 0x00784770
+    bool SaveGame(C_chunk &chunk);                      // 0x00784430 (DS 0x007f2bc0)
+    bool LoadGame(C_chunk &chunk);                      // 0x00784770 (DS 0x007f2fb0)
     // Re-synchronises the movement with the actor's frame after a teleport.
     void ResetToFrame();                                // 0x0041d800
     // Animation of the model (also on clients) and its physics (server).
@@ -1212,11 +1212,11 @@ public:
     void Footstep(bool left);                           // 0x0075d670
     // Starts / ends carrying `body` (the equipment's place 9 model; null: only this side).
     void OnPickUpBody(C_Human *body);                   // 0x0075e3d0 (DS 0x007c40a0)
-    void OnDropBody(C_Human *body);                     // 0x0075e6f0
+    void OnDropBody(C_Human *body);                     // 0x0075e6f0 (DS 0x007c4480)
     // m_unknown1AC (and m_unknown1B0 with `both`); 0 stops the physics of the body.
     void SetPushState(int state, bool both);            // 0x0075e6b0
     // Moves the model and the human to `pos` (the hit volumes back to full size).
-    void SetPosition(const S_vector4 &pos);             // 0x0075e9c0
+    void SetPosition(const S_vector4 &pos);             // 0x0075e9c0 (DS 0x007c47e0)
     // A movement sound (E_MovementSound 4..19) at the mouth of the local player's active human.
     void PlaySound(int group);                          // 0x0075ebd0
     // Takes back the finished movement sounds (all of them with `stopAll` or when the human is
@@ -1224,7 +1224,7 @@ public:
     void UpdateSounds(bool stopAll);                    // 0x0075ef00
     // Breath under water: gasps after 7.5 s, drowning after 30 s (an aqualung on the back
     // helps).
-    void UpdateBreath(int time, bool underWater);       // 0x0075f040
+    void UpdateBreath(int time, bool underWater);       // 0x0075f040 (DS 0x007c4a80)
     // The sound of using m_useObject (a ladder's) at the pelvis.
     void StartUseSound();                               // 0x0075f240
     void StopUseSound();                                // 0x0075f310
@@ -1238,7 +1238,7 @@ public:
     bool SaveBase(C_chunk &chunk);                      // 0x00760920
     bool LoadBase(C_chunk &chunk);                      // 0x00761af0
     // Back to the initial state (mission restart): sounds, morphs, footprints, volumes.
-    void RestartBase();                                 // 0x00763650
+    void RestartBase();                                 // 0x00763650 (DS 0x007ca260)
     // The morph values 1..3 (C_HumanMorph::SetUnknown1..3).
     void SetMorph(int which, uint32_t value);           // 0x0075d160
     void AddBloodPool(const S_vector &pos, const S_vector &normal, int unused);   // 0x00787570 (callers pass 0)

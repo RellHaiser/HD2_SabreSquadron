@@ -461,8 +461,10 @@ void C_HumanVisual::SetDirection(const S_vector4 &dir, float roll)
     m_owner->SetDirection(XYZ(direction), direction.w);
     work->SetUnknownB0(false);
     model->Update();
+#ifndef HD2_DEDICATED   // no weapon pose on the server
     if (work->GetStance() == HUMAN_STANCE_PRONE)
         movement->m_weaponPose2->FitProneBody();
+#endif
 }
 
 // ------------------------------------------------------------------ the shadow

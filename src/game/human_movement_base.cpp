@@ -499,7 +499,9 @@ void C_HumanMovement::RestartBase()
     m_morph.Done();
     m_morph.Init(m_owner);
     m_morph.SetBlinking(true);
+#ifndef HD2_DEDICATED   // no surface marks on the server
     SurfaceMarks_Clear();
+#endif
     m_stanceVolumeScale = 0.8f;
     m_hitVolumeScale[0] = 1.0f;
     m_hitVolumeScale[1] = 1.0f;
@@ -938,8 +940,10 @@ void C_HumanMovement::SetPosition(const S_vector4 &pos)
     m_owner->SetPosition(XYZ(pos), pos.w);
     m_hitVolumeScale[0] = 1.0f;
     m_hitVolumeScale[1] = 1.0f;
+#ifndef HD2_DEDICATED   // no weapon pose on the server
     const float zero[3] = {0.0f, 0.0f, 0.0f};
     m_owner->GetMovement()->m_weaponPose->StartDeath(8, zero, 0, 0, nullptr);
+#endif
     model->Update();
 }
 
@@ -1263,8 +1267,10 @@ void C_HumanMovement::OnDropBody(C_Human *body)
             volume->type = VOLUME_TYPE_DEAD | VOLUME_TYPE_HIT_PLAIN;
             g_collisionWorld.MoveVolume(volume);
         }
+#ifndef HD2_DEDICATED   // no weapon pose on the server
         const float zero[3] = {0.0f, 0.0f, 0.0f};
         bodyMovement->m_weaponPose->StartDeath(8, zero, 0, 4, m_owner);
+#endif
         body->GetFrame()->SetOn(true);
         GetGEffects()->SetModelTransparency(body->GetFrame(), 0.0f);
     }

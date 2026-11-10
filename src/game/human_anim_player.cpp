@@ -696,7 +696,9 @@ void C_HumanAnimPlayer::UpdateCarryTrack()
 
     if (g_carrySet) {
         if (g_curCarry[0] == 0x27) {
+#ifndef HD2_DEDICATED   // the server's has no recoil
             pose->StartRecoil(g_carrySet);
+#endif
             return;
         }
         m_movement->m_animState.carryVariant = g_curCarry[1];
@@ -1560,7 +1562,9 @@ void C_HumanAnimPlayer::OnActivityStarted(const int *activity, const int *old)
         work->PlayWorkAnimation(ACTIVITY_NONE, true);
         mixer.SetTrackTag(2, 0x53);
         const int length = GetActivityAnimLength(0x49, work->m_request.stance);
+#ifndef HD2_DEDICATED   // no weapon pose on the server
         m_owner->GetMovement()->m_weaponPose->PauseWeapon(static_cast<int>(static_cast<float>(length) * 0.625f), false);
+#endif
         break;
     }
     default:
