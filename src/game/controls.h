@@ -1213,7 +1213,7 @@ protected:
 class C_HidingList : public C_ListGroup {               // 0xB4 bytes
 public:
     C_HidingList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ListGroup(scene, id, parent) {}
-    ~C_HidingList() override;                           // 0x0065eb60 (0x0065eb40): the hidden deleted
+    ~C_HidingList() override;                           // 0x0065eb60 (DS 0x00695a60) (0x0065eb40): the hidden deleted
 
     bool HandleMessage(S_ControlMessage *message) override;   // 0x00659d50
 
@@ -1230,7 +1230,7 @@ protected:
 class C_PoolList : public C_HidingList {                // 0xB8 bytes
 public:
     C_PoolList(I3D_scene *scene, uint32_t id, C_Control *parent);
-    ~C_PoolList() override = default;                   // 0x0065ee20 (0x0065ee00)
+    ~C_PoolList() override = default;                   // 0x0065ee20 (DS 0x00695dd0) (0x0065ee00)
 
     // The held item's (none: 0).
     int OnInput08(int id) override;                     // 0x0065a510
@@ -1323,7 +1323,7 @@ protected:
 class C_ServerList : public C_ListGroup {               // 0xC8 bytes
 public:
     C_ServerList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ListGroup(scene, id, parent) {}
-    ~C_ServerList() override = default;                 // 0x00661230 (0x00661210)
+    ~C_ServerList() override = default;                 // 0x00661230 (DS 0x00698c20) (0x00661210)
 
     void Tick(int) override {}                          // 0x00667b20
     bool Unknown20(int) override { return false; }      // 0x00667b10

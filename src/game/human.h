@@ -546,8 +546,8 @@ public:
     void AddUnknownProgress(float amount);              // 0x005a92f0 (not called)
     void AddEndurance(float amount);                    // 0x005a93a0
     void AddMorale(float amount);                       // 0x005a9410 (not called)
-    void AddShooting(float amount);                     // 0x005a9480
-    void AddStealth(float amount);                      // 0x005a94f0
+    void AddShooting(float amount);                     // 0x005a9480 (DS 0x005b7db0)
+    void AddStealth(float amount);                      // 0x005a94f0 (DS 0x005b7e40)
     void AddFirstAid(float amount);                     // 0x005a9560
     void AddLockpick(float amount);                     // 0x005a95d0
     void AddExperience(int amount);                     // 0x005a9640
@@ -574,7 +574,7 @@ public:
     // Leaves / joins the world while the actor stays: freezes the body and turns the frame off.
     void Freeze(bool on);                               // 0x005a5d50
     // Fades the model out / in over `time` ms (effects module).
-    void FadeOut(int time);                             // 0x005a86f0
+    void FadeOut(int time);                             // 0x005a86f0 (DS 0x005b6c70)
     void FadeIn(int time);                              // 0x005a8740
     // Leaves the vehicle and drops sight and hearing registrations before the human is
     // removed.

@@ -14,7 +14,7 @@ class C_MeleeTracker;
 
 class C_HumanScript : public C_Script {                     // vtable 0x0080f714, 0x110 bytes
 public:
-    C_HumanScript(I3D_frame *frame, C_Human *human);        // 0x00421bc0
+    C_HumanScript(I3D_frame *frame, C_Human *human);        // 0x00421bc0 (DS 0x00443af0)
     bool ExecuteCommand(const S_ScriptCommand &cmd) override;   // 0x00421c00
     int GetKind() const override { return SCRIPT_KIND_HUMAN; }  // 0x00421bf0
 

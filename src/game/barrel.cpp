@@ -284,7 +284,7 @@ void C_Barrel::StopMission(bool server)                 // 0x00606bb0
     m_holes.clear();
 }
 
-void C_Barrel::RestartMission(bool)                     // 0x00606340
+void C_Barrel::RestartMission(bool)                     // 0x00606340 (DS 0x0062d820)
 {
     StopMission(false);
     StartMission(false);

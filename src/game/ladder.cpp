@@ -94,7 +94,7 @@ C_Ladder::C_Ladder() : C_Actor(ACTOR_LADDER)           // 0x005ea3d0
     m_name = g_texts.Get(TEXT_LADDER);
 }
 
-C_Ladder::~C_Ladder()                                   // 0x005ea590
+C_Ladder::~C_Ladder()                                   // 0x005ea590 (DS 0x0060a8f0)
 {
     FreeVolumes();
 }
