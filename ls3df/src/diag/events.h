@@ -93,6 +93,13 @@ enum E_event : uint16_t {
     EV_PIPELINE_CREATE_END = 83,
     EV_READBACK_BEGIN = 84,         // a back-buffer read (CopyRects: screenshots, captures), no present
     EV_READBACK_END = 85,
+    EV_GPU_FRAME = 86,              // OpenGL: the GPU's time for a render job, from its first command to the
+                                    // present's end (GL_TIMESTAMP queries, read when ready, frames later: this
+                                    // event's own time is when it was read); id: the render job; value: ns
+    EV_GPU_TIMER_LOST = 87,         // OpenGL: a render job's GPU time not ready in time, given up; id: the job
+    EV_GPU_LAG = 88,                // OpenGL: how long after the CPU handed the job over (its present's end
+                                    // stamped) the GPU finished it; about 0: the GPU was waiting for the CPU;
+                                    // large: work queued ahead of it (GPU-bound); id: the job; value: ns
 };
 
 inline const char *EventName(uint16_t type)
@@ -143,6 +150,9 @@ inline const char *EventName(uint16_t type)
     case EV_PIPELINE_CREATE_END: return "pipeline_create_end";
     case EV_READBACK_BEGIN: return "readback_begin";
     case EV_READBACK_END: return "readback_end";
+    case EV_GPU_FRAME: return "gpu_frame";
+    case EV_GPU_TIMER_LOST: return "gpu_timer_lost";
+    case EV_GPU_LAG: return "gpu_lag";
     default: return "unknown";
     }
 }
@@ -168,6 +178,7 @@ struct S_stream {
     bool on = false;
 };
 inline S_stream g_stream;           // (one per module)
+inline uint32_t g_renderJob = 0;    // the fixed renderer's render job being run (its GPU timer's id)
 
 inline bool Enabled() { return g_stream.on; }
 inline void HitchStep(uint16_t type, uint32_t id, int64_t qpc);
@@ -465,7 +476,18 @@ inline void WriteSlowFrames(FILE *f, const S_hitches &h, const S_hitchSlot &slot
                              static_cast<long long>(previous), ms, a.rows[0].name);
                 for (int r = 0; r < a.count && r < 3; ++r)
                     std::fprintf(f, "%s{\"stage\":\"%s\",\"own_ms\":%.3f}", r ? "," : "", a.rows[r].name, a.rows[r].own);
-                std::fprintf(f, "]}");
+                std::fprintf(f, "]");
+                // OpenGL's GPU time for the frame's presented render job, if it came in within the window.
+                uint32_t job = 0;
+                for (uint32_t j = 0; j < slot.count && !job; ++j)
+                    if (slot.events[j].qpc >= previous && slot.events[j].qpc <= e.qpc && slot.events[j].type == EV_RUN_FRAME_BEGIN &&
+                        slot.events[j].value == 0)
+                        job = slot.events[j].id;
+                for (uint32_t j = 0; j < slot.count && job; ++j)
+                    if (slot.events[j].id == job && (slot.events[j].type == EV_GPU_FRAME || slot.events[j].type == EV_GPU_LAG))
+                        std::fprintf(f, ",\"%s\":%.3f", slot.events[j].type == EV_GPU_FRAME ? "gpu_ms" : "gpu_lag_ms",
+                                     static_cast<double>(slot.events[j].value) / 1e6);
+                std::fprintf(f, "}");
                 ++written;
             }
         }

@@ -114,6 +114,13 @@ struct S_gl {
     LS3D_GL_LATER(LS3D_GL_MEMBER)
 #undef LS3D_GL_MEMBER
     PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;   // (4.3: only for SDLGPUDebug, when there)
+    // (3.3's timer queries, for the diagnostic GPU times only: none, and there are none.)
+    PFNGLGENQUERIESPROC glGenQueries;
+    PFNGLDELETEQUERIESPROC glDeleteQueries;
+    PFNGLQUERYCOUNTERPROC glQueryCounter;
+    PFNGLGETQUERYOBJECTIVPROC glGetQueryObjectiv;
+    PFNGLGETQUERYOBJECTUI64VPROC glGetQueryObjectui64v;
+    PFNGLGETINTEGER64VPROC glGetInteger64v;
 } gl;
 
 GLuint Id(const void *handle) { return static_cast<GLuint>(reinterpret_cast<uintptr_t>(handle)); }
@@ -199,6 +206,12 @@ public:
             return false;
         }
         gl.glDebugMessageCallback = reinterpret_cast<PFNGLDEBUGMESSAGECALLBACKPROC>(api.SDL_GL_GetProcAddress("glDebugMessageCallback"));
+        gl.glGenQueries = reinterpret_cast<PFNGLGENQUERIESPROC>(api.SDL_GL_GetProcAddress("glGenQueries"));
+        gl.glDeleteQueries = reinterpret_cast<PFNGLDELETEQUERIESPROC>(api.SDL_GL_GetProcAddress("glDeleteQueries"));
+        gl.glQueryCounter = reinterpret_cast<PFNGLQUERYCOUNTERPROC>(api.SDL_GL_GetProcAddress("glQueryCounter"));
+        gl.glGetQueryObjectiv = reinterpret_cast<PFNGLGETQUERYOBJECTIVPROC>(api.SDL_GL_GetProcAddress("glGetQueryObjectiv"));
+        gl.glGetQueryObjectui64v = reinterpret_cast<PFNGLGETQUERYOBJECTUI64VPROC>(api.SDL_GL_GetProcAddress("glGetQueryObjectui64v"));
+        gl.glGetInteger64v = reinterpret_cast<PFNGLGETINTEGER64VPROC>(api.SDL_GL_GetProcAddress("glGetInteger64v"));
         if (Enhancements().sdlGpuDebug && gl.glDebugMessageCallback) {
             gl.glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
             gl.glDebugMessageCallback(DebugMessage, nullptr);
@@ -284,6 +297,12 @@ public:
     void ReleaseDevice() override
     {
         if (context) {
+            for (S_gpuTimer &t : gpuTimers) {
+                if (t.queries[0])
+                    gl.glDeleteQueries(2, t.queries);
+                t = S_gpuTimer();
+            }
+            gpuOpen = nullptr;
             for (auto &s : samplers)
                 gl.glDeleteSamplers(1, &s.second);
             samplers.clear();
@@ -437,8 +456,102 @@ public:
         stats->uploadBatches += 1;
     }
 
+    // ---- the diagnostic GPU times ([Diagnostics] Events): two GL_TIMESTAMP queries a render job, its
+    // first command and the end of its present (or read-back), read only when the driver has them, a
+    // few jobs later: nothing here waits for the GPU. A job whose times are not in by the time its slot
+    // comes round again is given up (EV_GPU_TIMER_LOST).
+    struct S_gpuTimer {
+        GLuint queries[2] = {};
+        int64_t handedOver = 0;     // QueryPerformanceCounter when the end was stamped
+        uint32_t job = 0;
+        bool ended = false;         // both stamped, waiting for the results
+    };
+    static constexpr int kGpuTimers = 8;
+    S_gpuTimer gpuTimers[kGpuTimers];
+    S_gpuTimer *gpuOpen = nullptr;  // begun, its end not yet stamped
+    int gpuNext = 0;
+    // The GPU's clock less QueryPerformanceCounter's, in ns: glGetInteger64v(GL_TIMESTAMP) between two
+    // QPC reads, their middle. That read costs a frame some 0.85 ms on this driver (it waits), so it is
+    // done once every kGpuCalibration jobs, not every job (measured: A3's benchmark).
+    static constexpr uint32_t kGpuCalibration = 64;
+    int64_t gpuOffset = 0;
+    uint32_t gpuSinceCalibration = kGpuCalibration;
+    static int64_t QpcNs(int64_t qpc)
+    {
+        static const int64_t frequency = [] {
+            LARGE_INTEGER f;
+            QueryPerformanceFrequency(&f);
+            return static_cast<int64_t>(f.QuadPart);
+        }();
+        return qpc / frequency * 1000000000 + qpc % frequency * 1000000000 / frequency;
+    }
+    bool GpuTiming() const
+    {
+        return diag::Enabled() && gl.glQueryCounter && gl.glGetQueryObjectui64v && gl.glGetQueryObjectiv && gl.glGenQueries &&
+               gl.glGetInteger64v;
+    }
+    void GpuCollect()
+    {
+        for (S_gpuTimer &t : gpuTimers) {
+            if (!t.ended)
+                continue;
+            GLint ready = 0;
+            gl.glGetQueryObjectiv(t.queries[1], GL_QUERY_RESULT_AVAILABLE, &ready);
+            if (!ready)
+                continue;
+            GLuint64 begin = 0, end = 0;
+            gl.glGetQueryObjectui64v(t.queries[0], GL_QUERY_RESULT, &begin);
+            gl.glGetQueryObjectui64v(t.queries[1], GL_QUERY_RESULT, &end);
+            diag::Mark(diag::EV_GPU_FRAME, t.job, end > begin ? end - begin : 0);
+            const int64_t handed = QpcNs(t.handedOver) + gpuOffset;      // (on the GPU's clock)
+            const int64_t lag = static_cast<int64_t>(end) - handed;
+            diag::Mark(diag::EV_GPU_LAG, t.job, lag > 0 ? static_cast<uint64_t>(lag) : 0);
+            t.ended = false;
+        }
+    }
+    void GpuBegin()
+    {
+        if (!GpuTiming())
+            return;
+        GpuCollect();
+        if (!gpuOpen) {
+            S_gpuTimer &t = gpuTimers[gpuNext];
+            gpuNext = (gpuNext + 1) % kGpuTimers;
+            if (t.ended) {
+                diag::Mark(diag::EV_GPU_TIMER_LOST, t.job);
+                t.ended = false;
+            }
+            if (!t.queries[0])
+                gl.glGenQueries(2, t.queries);
+            gpuOpen = &t;
+        }
+        gpuOpen->job = diag::g_renderJob;
+        gl.glQueryCounter(gpuOpen->queries[0], GL_TIMESTAMP);
+    }
+    void GpuEnd()
+    {
+        if (!gpuOpen || !GpuTiming())
+            return;
+        gl.glQueryCounter(gpuOpen->queries[1], GL_TIMESTAMP);
+        LARGE_INTEGER now;
+        QueryPerformanceCounter(&now);
+        gpuOpen->handedOver = now.QuadPart;
+        if (++gpuSinceCalibration >= kGpuCalibration) {
+            gpuSinceCalibration = 0;
+            LARGE_INTEGER before, after;
+            GLint64 gpuNow = 0;
+            QueryPerformanceCounter(&before);
+            gl.glGetInteger64v(GL_TIMESTAMP, &gpuNow);
+            QueryPerformanceCounter(&after);
+            gpuOffset = static_cast<int64_t>(gpuNow) - QpcNs((before.QuadPart + after.QuadPart) / 2);
+        }
+        gpuOpen->ended = true;
+        gpuOpen = nullptr;
+    }
+
     bool Run(const S_frame &frame) override
     {
+        GpuBegin();
         gl.glBindFramebuffer(GL_FRAMEBUFFER, drawFramebuffer);
         gl.glUseProgram(program);
         gl.glEnable(GL_SCISSOR_TEST);
@@ -571,6 +684,7 @@ public:
                                  picture.x, h - picture.y, picture.x + picture.w, h - picture.y - picture.h, GL_COLOR_BUFFER_BIT,
                                  GL_LINEAR);
         }
+        GpuEnd();
         const auto start = std::chrono::steady_clock::now();
         diag::Mark(diag::EV_GL_SWAP_BEGIN);
         api.SDL_GL_SwapWindow(window);
@@ -581,6 +695,7 @@ public:
 
     bool ReadBack(std::vector<uint8_t> *rows) override
     {
+        GpuEnd();
         rows->resize(static_cast<size_t>(present.BackBufferWidth) * present.BackBufferHeight * 4);
         gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
         gl.glReadBuffer(GL_COLOR_ATTACHMENT0);

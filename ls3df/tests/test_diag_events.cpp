@@ -15,10 +15,12 @@
 //    record whose cause is that stage. Also: no record for 300 frames that vary under the thresholds,
 //    the record limit (the rest counted), a capture asked for once and its own slow frames not
 //    recorded, and what a mark costs with the recorder on.
+// 5. OpenGL's GPU times: the scene presented 30 more times with the markers on; gpu_frame and gpu_lag
+//    come in for presented render jobs, each with a run_frame's id, and nothing waits for them.
 //
 // Usage: test_diag_events.exe   (writes and deletes LS3DF.ini and a CSV next to itself)
 //        test_diag_events.exe --bench <capture> [--backend sdlgpu|opengl] [--driver direct3d12|vulkan]
-//                             [--frames N] [--trials T]
+//                             [--frames N] [--trials T] [--msaa N] [--occlusion] [--a2c]
 //   A3's on/off benchmark: the capture replayed, then presented N more times (no vsync), T trials with
 //   the markers and the hitch recorder off and T on, alternating; the time a frame took in each, and
 //   the drawn picture's hash, which must be the same on and off.
@@ -433,6 +435,90 @@ void EngineFrame(int i, diag::E_event where, double stallMs)
     SpinMs(2.0 + (where == 0 ? stallMs : 0.0));        // the game's part of the frame
 }
 
+// The GPU times of `events`: gpu_frame and gpu_lag values in ms, of jobs that have a run_frame (ids checked).
+struct S_gpuTimes {
+    std::vector<double> frame, lag;
+    int lost = 0, unmatched = 0;
+};
+S_gpuTimes GpuTimes(const std::vector<diag::S_event> &events)
+{
+    S_gpuTimes g;
+    for (const diag::S_event &e : events) {
+        if (e.type != diag::EV_GPU_FRAME && e.type != diag::EV_GPU_LAG && e.type != diag::EV_GPU_TIMER_LOST)
+            continue;
+        if (e.type == diag::EV_GPU_TIMER_LOST) {
+            ++g.lost;
+            continue;
+        }
+        bool known = false;
+        for (const diag::S_event &r : events)
+            known = known || (r.type == diag::EV_RUN_FRAME_BEGIN && r.id == e.id);
+        if (!known)
+            ++g.unmatched;
+        (e.type == diag::EV_GPU_FRAME ? g.frame : g.lag).push_back(static_cast<double>(e.value) / 1e6);
+    }
+    return g;
+}
+
+double Median(std::vector<double> v)
+{
+    if (v.empty())
+        return 0.0;
+    std::sort(v.begin(), v.end());
+    return v[v.size() / 2];
+}
+
+void GpuTimerTest()
+{
+    S_enhancements e = Enhancements();
+    e.sdlGpuDriver[0] = 0;
+    SetEnhancements(e);
+    Device *device = OpenGlDevice();
+    const std::string path = NextTo("test_diag_gpu.ls3dframe");
+    {
+        const std::vector<uint8_t> scene = Scene();
+        FILE *f = std::fopen(path.c_str(), "wb");
+        std::fwrite(scene.data(), scene.size(), 1, f);
+        std::fclose(f);
+    }
+    replay::Capture capture;
+    if (!device || !capture.Open(path.c_str())) {
+        std::printf("OpenGL GPU times: no device: NOT RUN\n");
+        ++g_notRun;
+        DeleteFileA(path.c_str());
+        return;
+    }
+    HWND window = CreateWindowA("LS3DFDiagEvents", "gpu", WS_POPUP, 0, 0, 64, 64, nullptr, nullptr, GetModuleHandleA(nullptr), nullptr);
+    diag::Start(65536);
+    bool ran;
+    {
+        replay::Replayer r(device, window);
+        ran = r.Run(capture);
+        for (int i = 0; ran && i < 30; ++i) {
+            r.Repeat(1);
+            Sleep(2);
+        }
+    }
+    const std::vector<diag::S_event> events = Recorded();
+    diag::Stop();
+    DestroyWindow(window);
+    capture.Close();
+    DeleteFileA(path.c_str());
+    if (!ran) {
+        std::printf("OpenGL GPU times: the device cannot be made here: NOT RUN\n");
+        ++g_notRun;
+        return;
+    }
+    const S_gpuTimes g = GpuTimes(events);
+    bool sane = !g.frame.empty() && g.frame.size() == g.lag.size();
+    for (double ms : g.frame)
+        sane = sane && ms > 0.0 && ms < 1000.0;
+    std::printf("OpenGL GPU times: %zu frames timed, %d given up; gpu_frame median %.3f ms, gpu_lag median %.3f ms\n", g.frame.size(),
+                g.lost, Median(g.frame), Median(g.lag));
+    Check(sane && g.frame.size() >= 20 && g.unmatched == 0,
+          "OpenGL GPU times: gpu_frame and gpu_lag for at least 20 of the 61 jobs, each a run_frame's, 0 < frame < 1 s");
+}
+
 int g_captures = 0;
 void CountCapture() { ++g_captures; }
 
@@ -542,7 +628,8 @@ void HitchTests()
 int Bench(int argc, char **argv)
 {
     std::string capturePath, backend = "sdlgpu", driver = "direct3d12";
-    int frames = 300, trials = 6;
+    int frames = 300, trials = 6, msaa = 0;
+    bool occlusion = false, alphaToCoverage = false;
     for (int i = 1; i < argc; ++i) {
         const bool more = i + 1 < argc;
         if (!std::strcmp(argv[i], "--bench") && more)
@@ -555,19 +642,33 @@ int Bench(int argc, char **argv)
             frames = std::atoi(argv[++i]);
         else if (!std::strcmp(argv[i], "--trials") && more)
             trials = std::atoi(argv[++i]);
+        else if (!std::strcmp(argv[i], "--msaa") && more)
+            msaa = std::atoi(argv[++i]);
+        else if (!std::strcmp(argv[i], "--occlusion"))
+            occlusion = true;
+        else if (!std::strcmp(argv[i], "--a2c"))
+            alphaToCoverage = true;
     }
     S_enhancements e = Enhancements();
     std::snprintf(e.sdlGpuDriver, sizeof e.sdlGpuDriver, "%s", backend == "sdlgpu" ? driver.c_str() : "");
     std::snprintf(e.presentMode, sizeof e.presentMode, "%s", "immediate");
+    e.msaa = msaa;
+    e.occlusion = occlusion;
+    e.alphaToCoverage = alphaToCoverage;
+    if (occlusion) {
+        e.occlusionStrength = 75;
+        e.occlusionRadius = 60;
+    }
     SetEnhancements(e);
     Device *device = backend == "sdlgpu" ? SdlGpuDevice() : OpenGlDevice();
     if (!device) {
         std::printf("bench: no %s device: NOT RUN\n", backend.c_str());
         return 2;
     }
-    std::printf("bench: %s on %s%s, %d frames a trial, %d trials off and %d on, alternating, no vsync\n", capturePath.c_str(),
-                backend.c_str(), backend == "sdlgpu" ? (" / " + driver).c_str() : "", frames, trials, trials);
-    std::vector<double> off, on;
+    std::printf("bench: %s on %s%s, %d frames a trial, %d trials off and %d on, alternating, no vsync; MSAA %d, AO %s, A2C %s\n",
+                capturePath.c_str(), backend.c_str(), backend == "sdlgpu" ? (" / " + driver).c_str() : "", frames, trials, trials, msaa,
+                occlusion ? "on" : "off", alphaToCoverage ? "on" : "off");
+    std::vector<double> off, on, gpuFrame, gpuLag;
     uint64_t hashOff = 0, hashOn = 0;
     bool same = true;
     uint32_t hitchRecords = 0;
@@ -598,6 +699,11 @@ int Bench(int argc, char **argv)
             ms = r.Repeat(frames);
         }
         if (markers) {
+            const S_gpuTimes g = GpuTimes(Recorded());
+            if (!g.frame.empty()) {
+                gpuFrame.push_back(Median(g.frame));
+                gpuLag.push_back(Median(g.lag));
+            }
             hitchRecords += diag::StopHitchesWithTotals().records;
             diag::Stop();
             DeleteFileA(NextTo("test_bench_hitches.jsonl").c_str());
@@ -621,6 +727,9 @@ int Bench(int argc, char **argv)
     const double mOff = median(off), mOn = median(on);
     std::printf("bench: off median %.3f ms (spread %.3f), on median %.3f ms (spread %.3f): on - off = %+.3f ms a frame (%+.2f%%)\n",
                 mOff, spread(off), mOn, spread(on), mOn - mOff, 100.0 * (mOn - mOff) / mOff);
+    if (!gpuFrame.empty())
+        std::printf("bench: GPU (OpenGL timer queries), median of the on trials' medians: frame %.3f ms, lag %.3f ms\n", Median(gpuFrame),
+                    Median(gpuLag));
     std::printf("bench: picture %s on and off (%016llx / %016llx); hitch records while on: %u\n", same && hashOn == hashOff ? "identical" : "DIFFERENT",
                 static_cast<unsigned long long>(hashOff), static_cast<unsigned long long>(hashOn), hitchRecords);
     return same && hashOn == hashOff ? 0 : 1;
@@ -650,6 +759,7 @@ int main(int argc, char **argv)
     RegisterClassA(&wc);
     BackendTest("SDL_GPU (Direct3D 12)", true);
     BackendTest("OpenGL", false);
+    GpuTimerTest();
     std::printf("test_diag_events: %d failed, %d not run\n", g_failures, g_notRun);
     return g_failures ? 1 : 0;
 }

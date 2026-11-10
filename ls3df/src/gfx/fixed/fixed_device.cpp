@@ -1707,6 +1707,7 @@ private:
     bool RunFrame(bool readBack = false)
     {
         const uint32_t job = ++renderJobs;
+        diag::g_renderJob = job;
         const uint32_t commands = static_cast<uint32_t>(frame.commands.size());
         diag::Mark(diag::EV_RUN_FRAME_BEGIN, job, readBack ? 1 : 0);
         SplitForOcclusion();            // (a frame read back before its first blended draw)
