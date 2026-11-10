@@ -105,6 +105,7 @@ S_HumanOrder::~S_HumanOrder()
     _aligned_free(path.data);
 }
 
+// 0x0058c5a0 (DS 0x00594ff0)
 void S_HumanOrder::Init(C_Human *human_, int kind_, int arg_, const S_vector4 &pos_, const S_vector4 &data_,
                         uint32_t pace, uint32_t stance, uint32_t mode, C_Actor *actor_, int unknown70_)
 {
@@ -124,6 +125,11 @@ void S_HumanOrder::Init(C_Human *human_, int kind_, int arg_, const S_vector4 &p
     selected = false;
     if (marker)
         RemoveMarker();
+#ifdef HD2_DEDICATED
+    // The server gets no marker. (Fix: its copy then writes through the null one, sets it up
+    // and adds its box to the collision world, which would fault.)
+    marker = nullptr;
+#else
     marker = GetGame()->GetInterface()->AcquireOrderMarker(this);
     marker->SetData(reinterpret_cast<S_FrameData *>(this));
     marker->SetPos(XYZ(pos));
@@ -143,6 +149,7 @@ void S_HumanOrder::Init(C_Human *human_, int kind_, int arg_, const S_vector4 &p
     volume.frame = marker;
     volume.type = ORDER_VOLUME_TYPE;
     g_collisionWorld.AddVolume(&volume);
+#endif
 }
 
 void S_HumanOrder::InitPlain(C_Human *human_, const S_vector4 &pos_, const S_vector4 &data_, uint32_t pace,
@@ -167,18 +174,20 @@ void S_HumanOrder::Release()
         FreePath(path);
 }
 
-void S_HumanOrder::RemoveMarker()
+void S_HumanOrder::RemoveMarker()                       // 0x0058d6c0 (DS 0x00596570)
 {
     if (!marker)
         return;
     g_collisionWorld.RemoveVolume(&volume);
     marker->SetData(nullptr);
+#ifndef HD2_DEDICATED   // the server's interface keeps no markers
     GetGame()->GetInterface()->ReleaseOrderMarker(marker);
+#endif
     marker = nullptr;
     volume = S_CollisionVolume();
 }
 
-void S_HumanOrder::CopyFrom(const S_HumanOrder &other)
+void S_HumanOrder::CopyFrom(const S_HumanOrder &other)  // 0x0058d720 (DS 0x005965e0)
 {
     if (XYZ(other.data).Square() >= 1e-16f)
         data = other.data;
@@ -186,7 +195,9 @@ void S_HumanOrder::CopyFrom(const S_HumanOrder &other)
         pos = other.pos;
     if (other.flags != 0)
         flags = other.flags;
+#ifndef HD2_DEDICATED   // the server's interface keeps no markers
     GetGame()->GetInterface()->UpdateOrderMarker(this, marker);
+#endif
 }
 
 S_vector4 S_HumanOrder::GetActorPoint(const C_Actor *target) const
