@@ -794,6 +794,7 @@ void C_Vehicle::RepairParts(bool healthOnly)                                    
             }
             // A broken glass part shows its intact texture again (the cracked one kept).
             if (part.type == VEHICLE_PART_GLASS && (part.state & VEHICLE_PART_GLASS_BROKEN)) {
+#ifndef HD2_DEDICATED   // the server's glass has no texture to swap back: the state only
                 I3D_material *material = part.mesh->GetLevel(0)->GetFaceGroup(0)->material;
                 I3D_texture *shown = material->GetTexture();
                 if (shown && part.glassTexture) {
@@ -803,6 +804,7 @@ void C_Vehicle::RepairParts(bool healthOnly)                                    
                     part.glassTexture = shown;
                     part.frame->Update();
                 }
+#endif
                 part.state &= ~VEHICLE_PART_GLASS_BROKEN;
             }
             // The door whose part this is gets the part's main visual back.

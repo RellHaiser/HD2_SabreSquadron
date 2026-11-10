@@ -142,18 +142,24 @@ bool C_Vehicle::SetEngine(bool on, bool instant)                                
             m_engineRevs = 0.0f;
             m_engineOn = false;
             m_unknown22A2 = 0;
+#ifndef HD2_DEDICATED   // no sounds on the server
             StopSounds();
+#endif
         }
         return true;
     }
     if (on == m_engineOn)
         return true;
     if (on && (!(m_fuel > 0.02f) || ((m_unknownF6C & 0x4000) && !(m_unknown610 > 0.0f)))) {
+#ifndef HD2_DEDICATED   // no sounds on the server
         if (m_soundsOn)
             PlayEngineFail();
+#endif
         return true;
     }
+#ifndef HD2_DEDICATED   // the server's has no SwitchEngine: the engine flag stays as it was
     SwitchEngine(on);
+#endif
     if (!m_engineOn) {
         m_throttle = 0.0f;
         m_unknown700 = 0.0f;

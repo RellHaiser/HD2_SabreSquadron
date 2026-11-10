@@ -295,9 +295,12 @@ void C_Vehicle::UpdateDoors(float timeDelta)                                    
         if (!door || !(door->flags & DOOR_MOVING))
             continue;
         const int seat = static_cast<int>(i);
+        (void)seat;                                     // (the sounds' only, not on the server)
         if (door->angle < door->targetAngle) {
+#ifndef HD2_DEDICATED   // no sounds on the server
             if (door->angle < 0.0001f)
                 PlayDoorSound(seat, true);
+#endif
             door->angle = timeDelta * door->speed + door->angle;
             if (door->angle > door->targetAngle) {
                 door->angle = door->targetAngle;
@@ -308,7 +311,9 @@ void C_Vehicle::UpdateDoors(float timeDelta)                                    
             if (door->angle <= door->targetAngle) {
                 door->angle = door->targetAngle;
                 door->flags &= ~DOOR_MOVING;
+#ifndef HD2_DEDICATED   // no sounds on the server
                 PlayDoorSound(seat, false);
+#endif
             }
         }
         // About the y axis, the sense by the side (and DOOR_FLAG_4 without DOOR_BACKWARD).

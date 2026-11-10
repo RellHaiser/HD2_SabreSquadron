@@ -173,8 +173,10 @@ void C_Vehicle::UpdateEngineRevs(float timeDelta, float torque, float brakeTorqu
             // Out: the requested gear goes in.
             m_unknown910 = (clutch & ~VEHICLE_CLUTCH_RELEASING) | VEHICLE_CLUTCH_ENGAGING;
             m_unknown904 = 0.0f;
+#ifndef HD2_DEDICATED   // no sounds on the server
             if (m_soundsOn)
                 PlayGearSound();
+#endif
             m_gear = m_requestedGear;
         }
         return;
