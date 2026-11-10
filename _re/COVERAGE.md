@@ -201,8 +201,8 @@ line of its first instruction. The original address is then looked for in three 
 
 Results:
 
-- 7,456 port functions (definition 3,262, declaration 4,194) name addresses: 8,008 distinct game-range
-  addresses.
+- 7,456 port functions (definition 3,262, declaration 4,194) name an address. Over all symbols,
+  8,008 distinct game-range addresses are named.
 - Without an address: 4,600 port functions. Most are the port's own helpers (lambdas,
   anonymous-namespace functions) or functions the original only had inline.
 - A comment that mentions another function's address (a caller, a variant) can link the wrong
