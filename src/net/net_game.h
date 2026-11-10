@@ -174,7 +174,7 @@ void PostVote(int kind, int arg);                   // 0x0072dd50
 
 // A server's status (the net module's answer to QueryServerStatus; read by the main menu's game info screen,
 // part 9h-xii): its players, its rules, the teams' scores.
-struct S_StatusPlayer {                                 // 0x5C bytes
+struct S_StatusPlayer {                                 // 0x5C bytes (its copy: 0x00632060 (DS 0x00664380))
     // In a message: the stats (S_NetStats'), the team (32 bits), the name.
     void Write(C_BitStream *stream);                    // 0x00726260
     void Read(C_BitStream *stream);                     // 0x00726230

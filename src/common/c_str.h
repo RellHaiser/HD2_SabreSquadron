@@ -53,7 +53,7 @@ protected:
 
     void Assign(const char *text, std::size_t length);
     void AddRef() { if (m_rep) ++m_rep->refCount; }
-    void Release();
+    void Release();                                          // 0x00435220 (DS 0x007115a0)
     void MakeUnique();
     static Rep *CreateRep(const char *text, std::size_t length);   // 0x004050a0
 
