@@ -121,6 +121,13 @@ struct S_gl {
     PFNGLGETQUERYOBJECTIVPROC glGetQueryObjectiv;
     PFNGLGETQUERYOBJECTUI64VPROC glGetQueryObjectui64v;
     PFNGLGETINTEGER64VPROC glGetInteger64v;
+    // (LS3DF.ini OpenGLStreaming: 3.0's mapping and 3.2's fences; none, and the buffers are made anew a frame.)
+    PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
+    PFNGLUNMAPBUFFERPROC glUnmapBuffer;
+    PFNGLBUFFERSUBDATAPROC glBufferSubData;
+    PFNGLFENCESYNCPROC glFenceSync;
+    PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
+    PFNGLDELETESYNCPROC glDeleteSync;
 } gl;
 
 GLuint Id(const void *handle) { return static_cast<GLuint>(reinterpret_cast<uintptr_t>(handle)); }
@@ -212,6 +219,17 @@ public:
         gl.glGetQueryObjectiv = reinterpret_cast<PFNGLGETQUERYOBJECTIVPROC>(api.SDL_GL_GetProcAddress("glGetQueryObjectiv"));
         gl.glGetQueryObjectui64v = reinterpret_cast<PFNGLGETQUERYOBJECTUI64VPROC>(api.SDL_GL_GetProcAddress("glGetQueryObjectui64v"));
         gl.glGetInteger64v = reinterpret_cast<PFNGLGETINTEGER64VPROC>(api.SDL_GL_GetProcAddress("glGetInteger64v"));
+        gl.glMapBufferRange = reinterpret_cast<PFNGLMAPBUFFERRANGEPROC>(api.SDL_GL_GetProcAddress("glMapBufferRange"));
+        gl.glUnmapBuffer = reinterpret_cast<PFNGLUNMAPBUFFERPROC>(api.SDL_GL_GetProcAddress("glUnmapBuffer"));
+        gl.glBufferSubData = reinterpret_cast<PFNGLBUFFERSUBDATAPROC>(api.SDL_GL_GetProcAddress("glBufferSubData"));
+        gl.glFenceSync = reinterpret_cast<PFNGLFENCESYNCPROC>(api.SDL_GL_GetProcAddress("glFenceSync"));
+        gl.glClientWaitSync = reinterpret_cast<PFNGLCLIENTWAITSYNCPROC>(api.SDL_GL_GetProcAddress("glClientWaitSync"));
+        gl.glDeleteSync = reinterpret_cast<PFNGLDELETESYNCPROC>(api.SDL_GL_GetProcAddress("glDeleteSync"));
+        streaming = Enhancements().openGlStreaming && gl.glMapBufferRange && gl.glUnmapBuffer && gl.glBufferSubData &&
+                    gl.glFenceSync && gl.glClientWaitSync && gl.glDeleteSync;
+        if (Enhancements().openGlStreaming)
+            EnhancementLog(streaming ? "LS3DF.ini OpenGLStreaming: each frame's vertices, indices and uniforms through fixed, fenced buffers"
+                                     : "LS3DF.ini OpenGLStreaming: the driver lacks glMapBufferRange or fences, buffers made anew a frame");
         if (Enhancements().sdlGpuDebug && gl.glDebugMessageCallback) {
             gl.glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
             gl.glDebugMessageCallback(DebugMessage, nullptr);
@@ -273,6 +291,13 @@ public:
         gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
         gl.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformAlignment);
+        if (streaming) {
+            // (Made now, while the game starts: made the first time a frame needed it, mid-mission, a region of
+            // 10 - 16 MB cost a frame 230 - 300 ms in the game. These hold the busiest scenes seen, 15.6 MB.)
+            StreamReserve(0, GL_ARRAY_BUFFER, vertexBuffer, kStreamReserve[0]);
+            StreamReserve(1, GL_ELEMENT_ARRAY_BUFFER, indexBuffer, kStreamReserve[1]);
+            StreamReserve(2, GL_UNIFORM_BUFFER, uniformBuffer, kStreamReserve[2]);
+        }
         // The vertex inputs a format lacks: normal 0, diffuse white, specular 0, coordinates 0.
         gl.glVertexAttrib4f(1, 0, 0, 0, 1);
         gl.glVertexAttrib4f(2, 1, 1, 1, 1);
@@ -320,6 +345,11 @@ public:
             if (nearestSampler)
                 gl.glDeleteSamplers(1, &nearestSampler), nearestSampler = 0;
             ReleaseTargets();
+            for (GLsync &f : streamFences)
+                if (f)
+                    gl.glDeleteSync(f), f = nullptr;
+            for (size_t &c : streamCapacity)
+                c = 0;
             for (GLuint *b : {&vertexBuffer, &indexBuffer, &uniformBuffer})
                 if (*b)
                     gl.glDeleteBuffers(1, b), *b = 0;
@@ -558,9 +588,17 @@ public:
         gl.glDepthRange(0, 1);
         // The frame's vertices, indices and uniform blocks (each its own range of one buffer).
         const uint32_t job = diag::g_renderJob;
+        if (streaming)
+            StreamNextRegion();
         diag::Mark(diag::EV_GL_GEOMETRY_BEGIN, job);
-        gl.glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(frame.vertices.size()), frame.vertices.data(), GL_STREAM_DRAW);
-        gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(frame.indices.size() * 2), frame.indices.data(), GL_STREAM_DRAW);
+        if (streaming) {
+            vertexBase = StreamWrite(0, GL_ARRAY_BUFFER, vertexBuffer, frame.vertices.data(), frame.vertices.size());
+            indexBase = StreamWrite(1, GL_ELEMENT_ARRAY_BUFFER, indexBuffer, frame.indices.data(), frame.indices.size() * 2);
+        } else {
+            gl.glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(frame.vertices.size()), frame.vertices.data(), GL_STREAM_DRAW);
+            gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(frame.indices.size() * 2), frame.indices.data(), GL_STREAM_DRAW);
+            vertexBase = indexBase = 0;
+        }
         diag::Mark(diag::EV_GL_GEOMETRY_END, job, frame.vertices.size() + frame.indices.size() * 2);
         diag::Mark(diag::EV_GL_UNIFORMS_BEGIN, job);
         const auto align = [&](size_t n) { return (n + uniformAlignment - 1) / uniformAlignment * uniformAlignment; };
@@ -571,7 +609,12 @@ public:
             std::memcpy(uniformBytes.data() + i * vertexStride, &frame.vertexBlocks[i], sizeof(S_vertexUniforms));
         for (size_t i = 0; i < frame.pixelBlocks.size(); ++i)
             std::memcpy(uniformBytes.data() + pixelStart + i * pixelStride, &frame.pixelBlocks[i], sizeof(S_pixelUniforms));
-        gl.glBufferData(GL_UNIFORM_BUFFER, static_cast<GLsizeiptr>(uniformBytes.size()), uniformBytes.data(), GL_STREAM_DRAW);
+        if (streaming) {
+            uniformBase = StreamWrite(2, GL_UNIFORM_BUFFER, uniformBuffer, uniformBytes.data(), uniformBytes.size());
+        } else {
+            gl.glBufferData(GL_UNIFORM_BUFFER, static_cast<GLsizeiptr>(uniformBytes.size()), uniformBytes.data(), GL_STREAM_DRAW);
+            uniformBase = 0;
+        }
         diag::Mark(diag::EV_GL_UNIFORMS_END, job, uniformBytes.size());
 
         gl.glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
@@ -607,7 +650,66 @@ public:
             gl.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
             diag::Mark(diag::EV_GL_RESOLVE_END, job);
         }
+        if (streaming)
+            streamFences[streamRegion] = gl.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
         return true;
+    }
+
+    // ---- LS3DF.ini OpenGLStreaming: the frame's vertices, indices and uniform blocks written into buffers made
+    // once, each of kStreamRegions regions of a capacity; a render job writes the next region (mapped
+    // unsynchronized: nothing waits there) and fences it when its commands are in. Before a region is written
+    // again, its fence must have signalled: normally long since (it is three jobs old); if not, the wait is the
+    // GPU being that far behind, and is marked (gl_stream_wait). A frame bigger than a region makes the buffer
+    // anew, larger (rare: the capacity only grows).
+    static constexpr int kStreamRegions = 3;
+    void StreamNextRegion()
+    {
+        streamRegion = (streamRegion + 1) % kStreamRegions;
+        GLsync &fence = streamFences[streamRegion];
+        if (!fence)
+            return;
+        if (gl.glClientWaitSync(fence, 0, 0) == GL_TIMEOUT_EXPIRED) {
+            diag::Mark(diag::EV_GL_STREAM_WAIT_BEGIN, diag::g_renderJob);
+            while (gl.glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, 1000000000ull) == GL_TIMEOUT_EXPIRED) {
+            }
+            diag::Mark(diag::EV_GL_STREAM_WAIT_END, diag::g_renderJob);
+        }
+        gl.glDeleteSync(fence);
+        fence = nullptr;
+    }
+    // Regions of at least `bytes` for stream `s`, rounded to 1 MB (whole regions, the uniform blocks' alignment
+    // kept): the buffer made anew, three regions long; the old storage is the driver's to keep until the GPU is done.
+    static constexpr size_t kStreamReserve[3] = {16u << 20, 4u << 20, 2u << 20};     // vertices, indices, uniform blocks
+    void StreamReserve(int s, GLenum target, GLuint buffer, size_t bytes)
+    {
+        const size_t mb = size_t(1) << 20;
+        streamCapacity[s] = (bytes + mb - 1) / mb * mb;
+        gl.glBindBuffer(target, buffer);
+        gl.glBufferData(target, static_cast<GLsizeiptr>(streamCapacity[s] * kStreamRegions), nullptr, GL_STREAM_DRAW);
+        for (GLsync &f : streamFences)
+            if (f)
+                gl.glDeleteSync(f), f = nullptr;
+    }
+    // `bytes` of `data` into this job's region of stream `s` (bound to `target`); its offset in the buffer.
+    size_t StreamWrite(int s, GLenum target, GLuint buffer, const void *data, size_t bytes)
+    {
+        gl.glBindBuffer(target, buffer);
+        if (bytes > streamCapacity[s]) {
+            // (Rare: a frame bigger than any region so far. At least half again, so it happens seldom.)
+            StreamReserve(s, target, buffer, std::max(bytes + bytes / 4, streamCapacity[s] + streamCapacity[s] / 2));
+        }
+        const size_t base = streamCapacity[s] * static_cast<size_t>(streamRegion);
+        if (!bytes)
+            return base;
+        void *to = gl.glMapBufferRange(target, static_cast<GLintptr>(base), static_cast<GLsizeiptr>(bytes),
+                                       GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+        if (to) {
+            std::memcpy(to, data, bytes);
+            gl.glUnmapBuffer(target);
+        } else {
+            gl.glBufferSubData(target, static_cast<GLintptr>(base), static_cast<GLsizeiptr>(bytes), data);
+        }
+        return base;
     }
 
     // Commands [first, last) of a frame into the framebuffer bound; `depthOnly`: those that write depth.
@@ -662,20 +764,21 @@ public:
                 }
             }
             if (c.vertexUniforms != boundVertexUniforms) {
-                gl.glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniformBuffer, static_cast<GLintptr>(c.vertexUniforms * vertexStride),
+                gl.glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniformBuffer, static_cast<GLintptr>(uniformBase + c.vertexUniforms * vertexStride),
                                      sizeof(S_vertexUniforms));
                 boundVertexUniforms = c.vertexUniforms;
             }
             if (c.pixelUniforms != boundPixelUniforms) {
-                gl.glBindBufferRange(GL_UNIFORM_BUFFER, 1, uniformBuffer, static_cast<GLintptr>(pixelStart + c.pixelUniforms * pixelStride),
+                gl.glBindBufferRange(GL_UNIFORM_BUFFER, 1, uniformBuffer,
+                                     static_cast<GLintptr>(uniformBase + pixelStart + c.pixelUniforms * pixelStride),
                                      sizeof(S_pixelUniforms));
                 boundPixelUniforms = c.pixelUniforms;
             }
-            SetAttributes(*c.layout, c.key.stride, c.vertexOffset, c.layout != boundLayout);
+            SetAttributes(*c.layout, c.key.stride, static_cast<uint32_t>(vertexBase + c.vertexOffset), c.layout != boundLayout);
             boundLayout = c.layout;
             if (c.indexed)
                 gl.glDrawElements(Primitive(c.key.primitive), static_cast<GLsizei>(c.count), GL_UNSIGNED_SHORT,
-                                  reinterpret_cast<const void *>(static_cast<uintptr_t>(c.indexOffset) * 2));
+                                  reinterpret_cast<const void *>(indexBase + static_cast<uintptr_t>(c.indexOffset) * 2));
             else
                 gl.glDrawArrays(Primitive(c.key.primitive), 0, static_cast<GLsizei>(c.count));
         }
@@ -1004,6 +1107,11 @@ private:
     D3DPRESENT_PARAMETERS present = {};
     bool s3tc = false, anisotropic = false;
     GLuint program = 0, vao = 0, vertexBuffer = 0, indexBuffer = 0, uniformBuffer = 0, whiteTexture = 0;
+    bool streaming = false;                 // LS3DF.ini OpenGLStreaming, and the driver has what it needs
+    size_t streamCapacity[3] = {};          // a region's bytes: vertices, indices, uniform blocks
+    GLsync streamFences[kStreamRegions] = {};
+    int streamRegion = 0;
+    size_t vertexBase = 0, indexBase = 0, uniformBase = 0;  // this job's region in each buffer
     GLuint framebuffer = 0, colorTarget = 0, depthTarget = 0;
     GLuint multisampledFramebuffer = 0, multisampledColor = 0, multisampledDepth = 0;
     GLuint drawFramebuffer = 0;         // what a frame draws into: the multisampled one if there is one

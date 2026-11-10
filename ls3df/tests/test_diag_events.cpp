@@ -20,7 +20,9 @@
 //
 // Usage: test_diag_events.exe   (writes and deletes LS3DF.ini and a CSV next to itself)
 //        test_diag_events.exe --bench <capture> [--backend sdlgpu|opengl] [--driver direct3d12|vulkan]
-//                             [--frames N] [--trials T] [--msaa N] [--occlusion] [--a2c]
+//                             [--frames N] [--trials T] [--msaa N] [--occlusion] [--a2c] [--ab-streaming]
+//   --ab-streaming: OpenGL, the trials alternate LS3DF.ini OpenGLStreaming off and on instead (the markers on in
+//   both, for the phases' times); the pictures must be the same.
 //   A3's on/off benchmark: the capture replayed, then presented N more times (no vsync), T trials with
 //   the markers and the hitch recorder off and T on, alternating; the time a frame took in each, and
 //   the drawn picture's hash, which must be the same on and off.
@@ -532,6 +534,61 @@ void GpuTimerTest()
           "OpenGL GPU times: gpu_frame and gpu_lag for at least 20 of the 61 jobs, each a run_frame's, 0 < frame < 1 s");
 }
 
+// OpenGLStreaming: the scene replayed and repeated 30 times with it off and on; every picture read back
+// the same, the ring turned (more than three jobs) and its fences waited for without error.
+void StreamingTest()
+{
+    const std::string path = NextTo("test_diag_stream.ls3dframe");
+    {
+        const std::vector<uint8_t> scene = Scene();
+        FILE *f = std::fopen(path.c_str(), "wb");
+        std::fwrite(scene.data(), scene.size(), 1, f);
+        std::fclose(f);
+    }
+    uint64_t hashes[2] = {};
+    bool ran[2] = {};
+    size_t jobs[2] = {};
+    for (int streaming = 0; streaming < 2; ++streaming) {
+        S_enhancements e = Enhancements();
+        e.sdlGpuDriver[0] = 0;
+        e.openGlStreaming = streaming != 0;
+        SetEnhancements(e);
+        Device *device = OpenGlDevice();
+        replay::Capture capture;
+        if (!device || !capture.Open(path.c_str()))
+            break;
+        HWND window = CreateWindowA("LS3DFDiagEvents", "stream", WS_POPUP, 0, 0, 64, 64, nullptr, nullptr, GetModuleHandleA(nullptr), nullptr);
+        diag::Start(65536);
+        {
+            replay::Replayer r(device, window);
+            ran[streaming] = r.Run(capture);
+            uint64_t h = Hash(r.picture);
+            for (int i = 0; ran[streaming] && i < 30; ++i) {
+                r.Repeat(1);
+                // (Repeat reads back each time: the same picture every time.)
+                h = h * 31 + Hash(r.picture);
+            }
+            hashes[streaming] = h;
+        }
+        for (const diag::S_event &ev : Recorded())
+            jobs[streaming] += ev.type == diag::EV_RUN_FRAME_BEGIN;
+        diag::Stop();
+        DestroyWindow(window);
+    }
+    DeleteFileA(path.c_str());
+    S_enhancements e = Enhancements();
+    e.openGlStreaming = false;
+    SetEnhancements(e);
+    if (!ran[0] || !ran[1]) {
+        std::printf("OpenGLStreaming: no OpenGL device here: NOT RUN\n");
+        ++g_notRun;
+        return;
+    }
+    std::printf("OpenGLStreaming: %zu / %zu render jobs, pictures %016llx / %016llx\n", jobs[0], jobs[1],
+                static_cast<unsigned long long>(hashes[0]), static_cast<unsigned long long>(hashes[1]));
+    Check(hashes[0] == hashes[1] && jobs[1] > 6, "OpenGLStreaming: the same pictures as without it over 31 frames, the ring turned");
+}
+
 int g_captures = 0;
 void CountCapture() { ++g_captures; }
 
@@ -642,7 +699,7 @@ int Bench(int argc, char **argv)
 {
     std::string capturePath, backend = "sdlgpu", driver = "direct3d12";
     int frames = 300, trials = 6, msaa = 0;
-    bool occlusion = false, alphaToCoverage = false;
+    bool occlusion = false, alphaToCoverage = false, abStreaming = false;
     for (int i = 1; i < argc; ++i) {
         const bool more = i + 1 < argc;
         if (!std::strcmp(argv[i], "--bench") && more)
@@ -661,6 +718,8 @@ int Bench(int argc, char **argv)
             occlusion = true;
         else if (!std::strcmp(argv[i], "--a2c"))
             alphaToCoverage = true;
+        else if (!std::strcmp(argv[i], "--ab-streaming"))
+            abStreaming = true;
     }
     S_enhancements e = Enhancements();
     std::snprintf(e.sdlGpuDriver, sizeof e.sdlGpuDriver, "%s", backend == "sdlgpu" ? driver.c_str() : "");
@@ -686,8 +745,15 @@ int Bench(int argc, char **argv)
     uint64_t hashOff = 0, hashOn = 0;
     bool same = true;
     uint32_t hitchRecords = 0;
+    std::map<uint16_t, std::vector<double>> phaseMsOff;       // (--ab-streaming: the streaming-off trials' phases)
     for (int t = 0; t < 2 * trials; ++t) {
-        const bool markers = t % 2 == 1;
+        const bool second = t % 2 == 1;
+        const bool markers = abStreaming || second;
+        if (abStreaming) {
+            S_enhancements o = Enhancements();
+            o.openGlStreaming = second;
+            SetEnhancements(o);
+        }
         replay::Capture capture;
         if (!capture.Open(capturePath.c_str())) {
             std::printf("bench: cannot open %s\n", capturePath.c_str());
@@ -724,7 +790,7 @@ int Bench(int argc, char **argv)
                         trial[static_cast<uint16_t>(ev.type - 1)].push_back(static_cast<double>(ev.qpc - open[ev.type - 1][ev.id]) * 1000.0 / 1e7);
                 }
             for (auto &phase : trial)
-                phaseMs[phase.first].push_back(Median(phase.second));
+                (abStreaming && !second ? phaseMsOff : phaseMs)[phase.first].push_back(Median(phase.second));
             const S_gpuTimes g = GpuTimes(recorded);
             if (!g.frame.empty()) {
                 gpuFrame.push_back(Median(g.frame));
@@ -735,12 +801,12 @@ int Bench(int argc, char **argv)
             DeleteFileA(NextTo("test_bench_hitches.jsonl").c_str());
         }
         DestroyWindow(window);
-        (markers ? on : off).push_back(ms);
-        uint64_t &first = markers ? hashOn : hashOff;
+        (second ? on : off).push_back(ms);
+        uint64_t &first = second ? hashOn : hashOff;
         if (!first)
             first = hash;
         same = same && hash == first;
-        std::printf("    trial %2d %-4s %.3f ms a frame, picture %016llx\n", t / 2 + 1, markers ? "on" : "off", ms,
+        std::printf("    trial %2d %-4s %.3f ms a frame, picture %016llx\n", t / 2 + 1, second ? "on" : "off", ms,
                     static_cast<unsigned long long>(hash));
     }
     auto median = [](std::vector<double> v) {
@@ -753,6 +819,16 @@ int Bench(int argc, char **argv)
     const double mOff = median(off), mOn = median(on);
     std::printf("bench: off median %.3f ms (spread %.3f), on median %.3f ms (spread %.3f): on - off = %+.3f ms a frame (%+.2f%%)\n",
                 mOff, spread(off), mOn, spread(on), mOn - mOff, 100.0 * (mOn - mOff) / mOff);
+    if (abStreaming)
+        std::printf("bench: (--ab-streaming: \"off\" and \"on\" are OpenGLStreaming, the markers on in both)\n");
+    if (!phaseMsOff.empty()) {
+        std::printf("bench: OpenGL Run's phases, streaming off (CPU, ms a job, median of the trials' medians):");
+        for (auto &p : phaseMsOff) {
+            std::string name = diag::EventName(p.first);
+            std::printf(" %s %.3f", name.substr(3, name.size() - 9).c_str(), Median(p.second));
+        }
+        std::printf("\n");
+    }
     if (!phaseMs.empty()) {
         std::printf("bench: OpenGL Run's phases (CPU, ms a job, median of the on trials' medians):");
         for (auto &p : phaseMs) {
@@ -794,6 +870,7 @@ int main(int argc, char **argv)
     BackendTest("SDL_GPU (Direct3D 12)", true);
     BackendTest("OpenGL", false);
     GpuTimerTest();
+    StreamingTest();
     std::printf("test_diag_events: %d failed, %d not run\n", g_failures, g_notRun);
     return g_failures ? 1 : 0;
 }

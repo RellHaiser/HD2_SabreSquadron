@@ -111,6 +111,8 @@ enum E_event : uint16_t {
     EV_GL_OCCLUSION_END = 97,
     EV_GL_RESOLVE_BEGIN = 98,       // the multisampled picture resolved (glBlitFramebuffer)
     EV_GL_RESOLVE_END = 99,
+    EV_GL_STREAM_WAIT_BEGIN = 100,  // OpenGLStreaming: waiting for the GPU to finish with the ring region this
+    EV_GL_STREAM_WAIT_END = 101,    // job writes (its fence not yet signalled: the GPU three jobs behind)
 };
 
 inline const char *EventName(uint16_t type)
@@ -174,6 +176,8 @@ inline const char *EventName(uint16_t type)
     case EV_GL_OCCLUSION_END: return "gl_occlusion_end";
     case EV_GL_RESOLVE_BEGIN: return "gl_resolve_begin";
     case EV_GL_RESOLVE_END: return "gl_resolve_end";
+    case EV_GL_STREAM_WAIT_BEGIN: return "gl_stream_wait_begin";
+    case EV_GL_STREAM_WAIT_END: return "gl_stream_wait_end";
     default: return "unknown";
     }
 }
@@ -710,7 +714,7 @@ inline bool StartHitches(const S_hitchConfig &config, const char *stream, E_even
                                       EV_UPDATE_SERVER_END, EV_UPDATE_CLIENT_END, EV_NET_SEND_END, EV_FLIP_CALL_END, EV_PRESENT_END,
                                       EV_RUN_FRAME_END, EV_RENDERER_RUN_END};
     static const uint16_t waits[] = {EV_TEXTURE_UPLOAD_END, EV_ACQUIRE_END, EV_GL_SWAP_END, EV_SUBMIT_END, EV_UPLOAD_WAIT_END,
-                                     EV_PIPELINE_CREATE_END};
+                                     EV_PIPELINE_CREATE_END, EV_GL_STREAM_WAIT_END};
     for (uint16_t t : stages)
         h->kind[t] = 2;
     for (uint16_t t : waits)

@@ -42,6 +42,9 @@
 //   AmbientOcclusionRadius=60  ; how far it reaches, in centimetres (default 60)
 //   OpenGL=1                   ; drawing through OpenGL 3.3 (SDL3.dll next to the DLL; gfx/opengl)
 //                              ; instead of Direct3D 8; Direct3D 8 when SDL3 is missing
+//   OpenGLStreaming=1          ; OpenGL: each frame's vertices, indices and uniforms written into fixed buffers
+//                              ; made once (a ring of three, fenced) instead of new buffer storage every frame,
+//                              ; which the driver at times takes tens of ms to give (docs: GPU_TIMING.md)
 //   SDLGPUDebug=1              ; the API's validation (the Vulkan SDK's layers, Direct3D 12's debug
 //                              ; layer, OpenGL's debug output), and what is asked of it in
 //                              ; LS3DF_render.log
@@ -68,6 +71,7 @@ struct S_enhancements {
     bool captureFrames;                     // [Render] CaptureFrames
     bool sdlGpu;                            // [Render] SDLGPU
     bool openGl;                            // [Render] OpenGL
+    bool openGlStreaming;                   // [Render] OpenGLStreaming
     char sdlGpuDriver[16];                  // [Render] SDLGPUDriver ("": SDL's choice)
     bool sdlGpuDebug;                       // [Render] SDLGPUDebug
     bool sdlGpuStats;                       // [Render] SDLGPUStats
