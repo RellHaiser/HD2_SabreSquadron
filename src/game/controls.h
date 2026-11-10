@@ -292,7 +292,7 @@ class C_TextButton : public C_TextControl {             // 0x78 bytes
 public:
     C_TextButton(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextControl(scene, id, parent) {}
     ~C_TextButton() override = default;                 // 0x00660050 (0x00660070)
-    I3D_frame *GetHighlightFrame() const override { return m_activeFrame; }   // 0x00655630
+    I3D_frame *GetHighlightFrame() const override { return m_activeFrame; }   // 0x00655630 (DS 0x0068a2f0)
     // The frames found (false: not both), the box on the normal one.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00655400
     // The active frame (not while inactive: not handled).
@@ -493,7 +493,7 @@ public:
     // The box's hover; the input to the arrow with the id.
     int OnEnter(int id) override;                       // 0x0064fc80
     int OnLeave(int id) override;                       // 0x0064fcd0
-    int OnClick(int) override { return CONTROL_HANDLED; }   // 0x0064fd20
+    int OnClick(int) override { return CONTROL_HANDLED; }   // 0x0064fd20 (DS 0x00683600)
     int OnInput05(int id) override;                     // 0x0064fc20
     int OnPress(int id) override;                       // 0x0064fd30
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0064f870
@@ -525,7 +525,7 @@ public:
     int OnEnter(int id) override;                       // 0x00654060
     // (Its notification CONTROL_NOTIFY_ENTER too: the original's.)
     int OnLeave(int id) override;                       // 0x006540a0
-    int OnClick(int id) override;                       // 0x00654110
+    int OnClick(int id) override;                       // 0x00654110 (DS 0x00688790)
     // The id's last bits: 1 (a no frame) unchecks, 2 (a yes frame) checks.
     int OnKeyClick(int id) override;                    // 0x006540d0
     // GET_CHECKED, SET_CHECKED, SET_CHECKED_QUIET.
@@ -555,8 +555,8 @@ public:
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00654f80
     int OnEnter(int id) override;                       // 0x00655320
     int OnLeave(int id) override;                       // 0x00655390
-    int OnClick(int id) override;                       // 0x00655300
-    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x00655310
+    int OnClick(int id) override;                       // 0x00655300 (DS 0x00689eb0)
+    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x00655310 (DS 0x00689ed0)
     // GET_CHECKED (down), SET_CHECKED.
     bool HandleMessage(S_ControlMessage *message) override;   // 0x006551a0
 
@@ -631,7 +631,7 @@ public:
     // The box's hover, the half with the id's (inactive: not handled).
     int OnEnter(int id) override;                       // 0x00654b60
     int OnLeave(int id) override;                       // 0x00654bd0
-    int OnClick(int id) override;                       // 0x00654c40
+    int OnClick(int id) override;                       // 0x00654c40 (DS 0x00689610)
     // To another half: the leave, the enter (nothing before an enter).
     int OnInput05(int id) override;                     // 0x00654c50
     int OnKeyClick(int id) override;                    // 0x00654c30
@@ -693,7 +693,7 @@ public:
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006525f0
     // Handled unless inactive.
     int OnEnter(int) override { return m_inactive ? 0 : CONTROL_HANDLED; }   // 0x00652490
-    int OnLeave(int) override { return CONTROL_HANDLED; }   // 0x006524a0
+    int OnLeave(int) override { return CONTROL_HANDLED; }   // 0x006524a0 (DS 0x006863f0)
     // CONTROL_NOTIFY_0E (its value).
     int OnClick(int id) override;                       // 0x006524e0
     int OnKeyClick(int id) override;                    // 0x006524b0
@@ -735,7 +735,7 @@ public:
     // While editing: the character (8 Backspace, 0xd Enter, 0x1b Escape; full-width digits as
     // ASCII; above 0x7f with the Unicode font as UTF-8), true when taken.
     bool OnChar(int key) override;                      // 0x006627b0
-    bool IsEditing() override { return m_editing; }     // 0x0064e510
+    bool IsEditing() override { return m_editing; }     // 0x0064e510 (DS 0x006819a0)
     // The buffer made, then the text control's.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006624d0
     // Its notification, not handled.
@@ -877,7 +877,7 @@ protected:
 class C_ComboEdit : public C_EditControl {              // 0x88 bytes
 public:
     C_ComboEdit(I3D_scene *scene, uint32_t id, C_Control *parent) : C_EditControl(scene, id, parent) {}
-    ~C_ComboEdit() override = default;                  // 0x006592c0 (0x006592e0)
+    ~C_ComboEdit() override = default;                  // 0x006592c0 (DS 0x0068e9d0) (0x006592e0 (DS 0x0068ea00))
 
     // The box placed on the frame (false: none).
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065aec0
@@ -885,7 +885,7 @@ public:
     int OnEnter(int id) override;                       // 0x0065afd0
     // The box's hover cleared (not: 0): CONTROL_NOTIFY_LEAVE, then the edit control's (twice).
     int OnLeave(int id) override;                       // 0x0065aff0
-    int OnClick(int) override { return CONTROL_NOT_HANDLED; }   // 0x0065b020
+    int OnClick(int) override { return CONTROL_NOT_HANDLED; }   // 0x0065b020 (DS 0x00690ee0)
     // The edit control's; the box's hover cleared and selected.
     int OnInput02(int id) override;                     // 0x0065b070
     // Its own id, active: the editing stopped (editing) or asked for (C_EditBox's).

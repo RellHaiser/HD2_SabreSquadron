@@ -22,7 +22,7 @@ enum : int {
 class alignas(16) C_Pike : public C_Actor {             // "Pike", vtable 0x00811c90
 public:
     C_Pike();                                           // 0x005b8d00
-    ~C_Pike() override = default;                       // 0x005b8df0 (scalar deleting 0x005b8dd0)
+    ~C_Pike() override = default;                       // 0x005b8df0 (DS 0x005cbf60) (scalar deleting 0x005b8dd0 (DS 0x005cbf30))
 
     // The script: the frame's script told, then 2 raises it, 3 lowers it (the clients told);
     // others only go to the script.

@@ -106,7 +106,7 @@ public:
     ~C_DescriptionScreen() override;                    // 0x00676040 (0x00676020)
 
     // The text's.
-    void Refresh() override;                            // +0x18 0x00669bf0
+    void Refresh() override;                            // +0x18 0x00669bf0 (DS 0x006a3200)
     // Shown and the cursor still (500 ms, button 0 up): the box on at the cursor (+0.15, +0.015;
     // its own depth kept), placed, the text refreshed; else the box off (when it was shown or on).
     // (Not the screen's: no tick notification.)

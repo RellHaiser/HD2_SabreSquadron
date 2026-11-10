@@ -44,7 +44,7 @@ enum : uint32_t {
 class alignas(16) C_NetTrack : public C_NetQuantized {
 public:
     C_NetTrack();                                                 // 0x0073fbe0
-    ~C_NetTrack() override = default;                             // 0x0073fe40
+    ~C_NetTrack() override = default;                             // 0x0073fe40 (DS 0x0079f140)
 
     // The defaults (the flags 7, the vectors' x, y, z 0, the speed 40, the lag 0.035, the snap 3; the
     // quantisations dropped); also the update period g_netUpdatePeriod back to 0.1.
@@ -129,7 +129,7 @@ public:
     // The direction (yaw atan2(z, x), pitch asin(y)) and the angle; the angles before it kept.
     virtual void SetDirection(const S_vector4 &dir, float angle); // 0x007409f0 (slot 20)
     virtual void SetAngle(float angle) { m_current.z = angle; }   // 0x00740a90
-    virtual float GetAngle() { return m_current.z; }              // 0x00740ab0
+    virtual float GetAngle() { return m_current.z; }              // 0x00740ab0 (DS 0x007a0170)
 
     const S_vector4 &GetPrevious() const { return m_previous; }
     int GetTurnSign() const { return m_turnSign; }

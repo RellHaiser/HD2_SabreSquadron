@@ -480,8 +480,8 @@ public:
     // Within sight range (the target's visibility and the camera's view distance) and inside
     // a 120-degree triangle ahead of the body.
     void TestSightOfHuman(C_Human *target, int *status, float *visibility) override;    // 0x00542320
-    void SetSpectating(bool on) override { m_spectating = on; }   // 0x005a4230
-    bool IsSpectating() override { return m_spectating; }         // 0x005a4240
+    void SetSpectating(bool on) override { m_spectating = on; }   // 0x005a4230 (DS 0x005b11a0)
+    bool IsSpectating() override { return m_spectating; }         // 0x005a4240 (DS 0x005b11c0)
     // The requests go to the server (CTRL_MSG_*).
     void OnUniformChanged(int uid) override;            // 0x0053e0b0
     void RequestPickUpItem(int actorId, int container) override;   // 0x0053e440
@@ -510,7 +510,7 @@ public:
     // By the stance, the pace and the shooting skill (spread and recoil).
     float GetAimBonus() override;                       // 0x00542b10
     void FlushMessages(bool toClients) override;        // 0x0053f370
-    bool Unknown104() override { return false; }        // 0x005a4250
+    bool Unknown104() override { return false; }        // 0x005a4250 (DS 0x005b11e0)
 
     // Reads and drops the messages of a human that does not exist (yet) on this side.
     static void HandleMessage(C_BitStream *msg);        // 0x005418e0 __fastcall
@@ -1704,11 +1704,11 @@ public:
     // The body's weapon state from its flags (raised: bit 6, bit 8 to +0xAC).
     void OnBodyFlags(uint32_t flags) override;          // 0x005941b0
     void FlushMessages(bool toClients) override;        // 0x00592220
-    void SetSpectating(bool on) override { m_spectating = on; }   // 0x005a43f0
-    bool IsSpectating() override { return m_spectating; }         // 0x005a4400
+    void SetSpectating(bool on) override { m_spectating = on; }   // 0x005a43f0 (DS 0x005b14d0)
+    bool IsSpectating() override { return m_spectating; }         // 0x005a4400 (DS 0x005b14f0)
     // The server's state (CTRL_MSG_23).
     bool IsSurrendered() override { return m_surrendered; }      // 0x005a4410
-    bool Unknown104() override { return false; }        // 0x005a4420
+    bool Unknown104() override { return false; }        // 0x005a4420 (DS 0x005b1530)
     // Objectives games: the VIP.
     void SetVip(bool vip) { m_vip = vip; }
     bool IsVip() const { return m_vip; }
