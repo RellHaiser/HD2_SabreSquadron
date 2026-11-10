@@ -295,7 +295,7 @@ expectations come from the original's assembly (0x0044b3b0, 0x0044b910, 0x004483
   Fakes: a vtable per kind of engine object, because the light, sound, sector and projector
   reuse the same slot offsets with different arguments, which breaks stdcall.
 
-  934 → 967 checks. Mutations:
+  690 → 967 checks. Mutations:
   - `mutate_shots2c.py`: 524, 455 killed, 41 don't build, 28 survived (all equivalent,
     unreachable or not observable);
   - `mutate_shots2d.py`: 57, 25 killed, 7 don't build, 25 survived, all in `IsSegmentInView`,
