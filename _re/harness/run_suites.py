@@ -5,6 +5,12 @@
 NAME: suite names or fnmatch patterns (default: all). --work: the inputs, logs and report
 (default %TEMP%\\hd2_suites). --data: the unpacked game (default H:\\HD2_Unpacked; env HD2_UNPACKED).
 --mp-data: mp_setup's map lists and profiles (not part of the game data; skipped without it).
+--coverage: also measure the production sources' lines, functions and branches with gcov (MinGW
+suites; crash.msvc is MSVC and not measured). Each build script runs from a temporary copy whose g++
+line has `--coverage -dumpdir <notes>` added; every run (each vehicle chunk apart) writes its .gcda
+to its own folder through GCOV_PREFIX; gcov reads each folder, and the counts of every source under
+src/ (not the tests' own files) are added up per suite and over all suites: coverage/coverage.md,
+coverage/coverage.json.gz in the work folder.
 
 Each suite ends in one status:
   pass                  built from the current sources, ran, and every check passed
@@ -107,7 +113,8 @@ SUITES = [
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
     T("profile", "profile/build.bat", "profile/harness.exe", summary=r"^(\d+) failures", runs=6,
-      needs=("mingw", "data"), hardcoded_data=True),
+      needs=("mingw", "data"), hardcoded_data=True,
+      restores=["profile/run/profile1.sav", "profile/run/PlayersProfiles/Tester/profile.sav"]),
     # Build only here; run by this script.
     suite("net_quantization", "net_quantization/build.bat", "net_quantization/quant_test.exe", "run",
           ["mingw"], args=[], summary=r"(\d+) cases, (\d+) failures", timeout=600),
@@ -169,6 +176,161 @@ def bat_cmd(bat, *args):
     return ["cmd", "/d", "/c", "call", expand(bat), *args]
 
 
+# ---------------------------------------------------------------- gcov
+
+def covered(s):
+    return "msvc" not in s["needs"]
+
+
+def bat_for(s, ctx):
+    """The build script to call: the suite's own, or with --coverage a copy beside it (its %~dp0 must
+    stay the same) whose g++ line building the suite's executable has the coverage options."""
+    bat = expand(s["bat"])
+    cov = ctx and ctx.get("cov")
+    if not cov or not covered(s):
+        return bat
+    if cov.get("bat"):
+        return cov["bat"]
+    text = open(bat, encoding="latin-1").read()
+    joined = re.sub(r"\^[ \t]*\r?\n[ \t]*", " ", text)      # (continuation lines joined)
+    exe = os.path.basename(s["exe"])
+    lines, done = [], 0
+    for line in joined.splitlines():
+        m = re.match(r"(\s*)g\+\+ ", line)
+        if m and exe in line:
+            line = '%sg++ --coverage -dumpdir "%s\\\\" %s' % (m.group(1), cov["notes"], line[m.end():])
+            done += 1
+        lines.append(line)
+    if not done:
+        raise RuntimeError("no g++ line building %s in %s" % (exe, s["bat"]))
+    path = os.path.join(os.path.dirname(bat), "zz_cov_%s.bat" % s["name"].replace(".", "_"))
+    open(path, "w", encoding="latin-1", newline="\r\n").write("\n".join(lines) + "\n")
+    cov["bat"] = path
+    return path
+
+
+def cov_env(ctx, tag):
+    """With --coverage: the environment sending a run's .gcda files to its own folder."""
+    cov = ctx and ctx.get("cov")
+    if not cov or not cov.get("bat"):
+        return None
+    d = os.path.join(cov["dir"], "runs", tag)
+    os.makedirs(d, exist_ok=True)
+    notes = os.path.normpath(cov["notes"])
+    strip = len([p for p in notes.split(os.sep) if p])
+    return dict(os.environ, GCOV_PREFIX=d, GCOV_PREFIX_STRIP=str(strip))
+
+
+def production_path(path, cwd):
+    """A gcov source path as a repository path when it is a production source (src/, not tier1), else None."""
+    full = os.path.normcase(os.path.normpath(os.path.join(cwd, path)))
+    src = os.path.normcase(os.path.join(ROOT, "src")) + os.sep
+    if not full.startswith(src) or (os.sep + "tier1" + os.sep) in full:
+        return None
+    return os.path.relpath(full, os.path.normcase(ROOT)).replace(os.sep, "/")
+
+
+def gather_coverage(s, ctx):
+    """gcov over every run folder of the suite; the production sources' counts added up:
+    {file: {"lines": {n: count}, "functions": {name: [line, count, demangled]}, "branches": {"n:i": count}}}."""
+    import gzip
+    cov = ctx["cov"]
+    notes = glob.glob(os.path.join(cov["notes"], "*.gcno"))
+    runs = sorted(glob.glob(os.path.join(cov["dir"], "runs", "*")))
+    cwd = os.path.dirname(expand(s["bat"]))
+    gcov = os.path.join(os.path.dirname(MINGW), "gcov.exe")
+    total = {}
+    for run in runs:
+        for n in notes:
+            shutil.copy2(n, run)
+        subprocess.run([gcov, "--json-format", "-b", "-o", run] + [os.path.basename(n) for n in notes],
+                       cwd=run, capture_output=True)
+        for j in glob.glob(os.path.join(run, "*.gcov.json.gz")):
+            for f in json.load(gzip.open(j))["files"]:
+                rel = production_path(f["file"], cwd)
+                if not rel:
+                    continue
+                t = total.setdefault(rel, {"lines": {}, "functions": {}, "branches": {}})
+                for ln in f["lines"]:
+                    no = str(ln["line_number"])
+                    t["lines"][no] = t["lines"].get(no, 0) + ln["count"]
+                    for i, b in enumerate(x for x in ln["branches"] if not x.get("throw")):
+                        key = "%s:%d" % (no, i)
+                        t["branches"][key] = t["branches"].get(key, 0) + b["count"]
+                for fn in f["functions"]:
+                    e = t["functions"].setdefault(fn["name"], [fn["start_line"], 0, fn.get("demangled_name", "")])
+                    e[1] += fn["execution_count"]
+    return total
+
+
+def merge_coverage(into, part):
+    for rel, t in part.items():
+        m = into.setdefault(rel, {"lines": {}, "functions": {}, "branches": {}})
+        for k in ("lines", "branches"):
+            for key, c in t[k].items():
+                m[k][key] = m[k].get(key, 0) + c
+        for name, (line, c, dem) in t["functions"].items():
+            e = m["functions"].setdefault(name, [line, 0, dem])
+            e[1] += c
+
+
+def coverage_counts(t):
+    lines = t["lines"].values()
+    fns = [c for _, c, _ in t["functions"].values()]
+    br = t["branches"].values()
+    return (sum(1 for c in lines if c), len(lines), sum(1 for c in fns if c), len(fns),
+            sum(1 for c in br if c), len(br))
+
+
+def write_coverage(ctx, ident, per_suite, merged):
+    import gzip
+    d = os.path.join(ctx["work"], "coverage")
+    with gzip.open(os.path.join(d, "coverage.json.gz"), "wt") as f:
+        json.dump(dict(identity=ident, suites={k: sorted(v) for k, v in per_suite.items()}, files=merged), f)
+
+    def pct(a, b):
+        return "%.1f" % (100.0 * a / b) if b else "-"
+
+    tot = [0] * 6
+    rows = []
+    for rel in sorted(merged):
+        c = coverage_counts(merged[rel])
+        tot = [a + b for a, b in zip(tot, c)]
+        rows.append("| %s | %d / %d | %d / %d | %d / %d (%s %%) |" % (rel, c[0], c[1], c[2], c[3], c[4], c[5],
+                                                                      pct(c[4], c[5])))
+    lines = ["# Harness coverage (gcov)", "",
+             "- Revision: `%s`%s" % (ident["revision"], " plus %d uncommitted changes" % len(ident["uncommitted"])
+                                      if ident["uncommitted"] else ""),
+             "- Suites measured: %d (%s)" % (len(per_suite), ", ".join(sorted(per_suite))),
+             "- Production sources: those under src/ that a measured suite compiles (its .gcno); the suites' own "
+             "files and fakes are left out. Files no suite compiles are not in this table.",
+             "- Branches: gcov's branch outcomes, exception edges left out; a header's inline code counts once per "
+             "line however many objects include it.", "",
+             "| | Lines | Functions | Branch outcomes taken |", "|---|---:|---:|---:|",
+             "| **all %d files** | %d / %d (%s %%) | %d / %d (%s %%) | %d / %d (%s %%) |" % (
+                 len(merged), tot[0], tot[1], pct(tot[0], tot[1]), tot[2], tot[3], pct(tot[2], tot[3]), tot[4],
+                 tot[5], pct(tot[4], tot[5])), "",
+             "| Source | Lines | Functions | Branch outcomes taken |", "|---|---:|---:|---:|"] + rows
+    # The client's sources no measured suite compiles: outside the table above, not 0 % inside it.
+    unmeasured = []
+    for dp, dirs, fns in os.walk(os.path.join(ROOT, "src")):
+        dirs[:] = [x for x in dirs if x != "tier1"]
+        for f in fns:
+            if f.endswith(".cpp"):
+                rel = os.path.relpath(os.path.join(dp, f), ROOT).replace(os.sep, "/")
+                if rel not in merged:
+                    n = sum(1 for _ in open(os.path.join(dp, f), encoding="utf-8", errors="replace"))
+                    unmeasured.append((rel, n))
+    total_cpp = len(unmeasured) + sum(1 for r in merged if r.endswith(".cpp"))
+    lines[4:4] = ["- Client .cpp files no suite compiles: %d of %d (%d source lines): listed at the end. The "
+                  "percentages are of the measured files only." % (len(unmeasured), total_cpp,
+                                                                  sum(n for _, n in unmeasured))]
+    lines += ["", "## Client sources no suite compiles", "", "| Source | Source lines |", "|---|---:|"]
+    lines += ["| %s | %d |" % u for u in sorted(unmeasured, key=lambda u: -u[1])]
+    open(os.path.join(d, "coverage.md"), "w").write("\n".join(lines) + "\n")
+    return tot
+
+
 # ---------------------------------------------------------------- inputs
 
 def prepare_cars(work, data):
@@ -215,7 +377,8 @@ def judge_summary(text, pattern, runs=1):
 
 
 def run_selfrun(s, ctx, log):
-    code, text = run_bounded(bat_cmd(s["bat"]), log, cwd=os.path.dirname(expand(s["bat"])), timeout=s["timeout"])
+    code, text = run_bounded(bat_cmd(bat_for(s, ctx)), log, cwd=os.path.dirname(expand(s["bat"])), timeout=s["timeout"],
+                             env=cov_env(ctx, "run"))
     if not os.path.exists(expand(s["exe"])):
         return "build-failed", {}, code
     if code == "timeout":
@@ -226,13 +389,13 @@ def run_selfrun(s, ctx, log):
     return ("pass" if ok and code == 0 else "fail"), counts, code
 
 
-def build(s, log):
-    code, _ = run_bounded(bat_cmd(s["bat"]), log, cwd=os.path.dirname(expand(s["bat"])), timeout=1800)
+def build(s, log, ctx=None):
+    code, _ = run_bounded(bat_cmd(bat_for(s, ctx)), log, cwd=os.path.dirname(expand(s["bat"])), timeout=1800)
     return code, os.path.exists(expand(s["exe"]))
 
 
 def run_inputs(s, ctx, log):
-    code, built = build(s, log)
+    code, built = build(s, log, ctx)
     if not built:
         return "build-failed", {}, code
     exe = expand(s["exe"])
@@ -248,7 +411,8 @@ def run_inputs(s, ctx, log):
         cwd = "%s.cwd%02d" % (stem, k)
         shutil.rmtree(cwd, ignore_errors=True)
         os.makedirs(cwd)
-        result = run_bounded([exe, *chunks[k]], "%s.out%02d.txt" % (stem, k), cwd=cwd, timeout=s["timeout"])
+        result = run_bounded([exe, *chunks[k]], "%s.out%02d.txt" % (stem, k), cwd=cwd, timeout=s["timeout"],
+                             env=cov_env(ctx, "c%02d" % k))
         shutil.rmtree(cwd, ignore_errors=True)
         return (k, *result)
 
@@ -284,11 +448,12 @@ def run_inputs(s, ctx, log):
 
 
 def run_plain(s, ctx, log):
-    code, built = build(s, log)
+    code, built = build(s, log, ctx)
     if not built:
         return "build-failed", {}, code
     exe = expand(s["exe"])
-    code, text = run_bounded([exe, *s["args"]], log + ".run.txt", cwd=os.path.dirname(exe), timeout=s["timeout"])
+    code, text = run_bounded([exe, *s["args"]], log + ".run.txt", cwd=os.path.dirname(exe), timeout=s["timeout"],
+                             env=cov_env(ctx, "run"))
     if code == "timeout":
         return "timeout", {}, code
     ok, counts = judge_summary(text, s["summary"])
@@ -298,7 +463,7 @@ def run_plain(s, ctx, log):
 
 
 def run_car_tables(s, ctx, log):
-    code, built = build(s, log)
+    code, built = build(s, log, ctx)
     if not built:
         return "build-failed", {}, code
     exe = expand(s["exe"])
@@ -306,7 +471,8 @@ def run_car_tables(s, ctx, log):
     shutil.rmtree(scratch, ignore_errors=True)
     os.makedirs(scratch)
     out = log + ".run.txt"
-    code, _ = run_bounded([exe, ctx["data"], scratch], out, cwd=os.path.dirname(exe), timeout=s["timeout"])
+    code, _ = run_bounded([exe, ctx["data"], scratch], out, cwd=os.path.dirname(exe), timeout=s["timeout"],
+                          env=cov_env(ctx, "run"))
     if code == "timeout":
         return "timeout", {}, code
     r = subprocess.run([sys.executable, os.path.join(HERE, "car_tables", "check.py"), ctx["data"], out],
@@ -321,7 +487,7 @@ def run_car_tables(s, ctx, log):
 
 
 def run_vehicle_params(s, ctx, log):
-    code, built = build(s, log)
+    code, built = build(s, log, ctx)
     if not built or not all(os.path.exists(expand(e)) for e in s["also_built"]):
         return "build-failed", {}, code
     base = os.path.join(ctx["work"], "inputs")
@@ -337,7 +503,7 @@ def run_vehicle_params(s, ctx, log):
         return "fail", {"carparams.py": "failed"}, r.returncode
     exe = expand(s["exe"])
     code, text = run_bounded([exe, props, os.path.join(HERE, "vehicle_params", "params_map.txt")], log + ".run.txt",
-                             cwd=os.path.dirname(exe), timeout=s["timeout"])
+                             cwd=os.path.dirname(exe), timeout=s["timeout"], env=cov_env(ctx, "run"))
     if code == "timeout":
         return "timeout", {}, code
     m = re.search(r"cars (\d+): repacked identical (\d+), read\+write identical (\d+), read\(write\(read\)\) same (\d+)",
@@ -350,12 +516,13 @@ def run_vehicle_params(s, ctx, log):
 
 
 def run_mp_setup(s, ctx, log):
-    code, built = build(s, log)
+    code, built = build(s, log, ctx)
     if not built:
         return "build-failed", {}, code
     exe = expand(s["exe"])
     code, text = run_bounded([sys.executable, os.path.join(HERE, "mp_setup", "run_tests.py"), exe, ctx["mp_data"]],
-                             log + ".run.txt", cwd=os.path.join(HERE, "mp_setup"), timeout=s["timeout"])
+                             log + ".run.txt", cwd=os.path.join(HERE, "mp_setup"), timeout=s["timeout"],
+                             env=cov_env(ctx, "run"))
     if code == "timeout":
         return "timeout", {}, code
     return ("pass" if code == 0 else "fail"), {}, code
@@ -428,6 +595,7 @@ def main():
     p.add_argument("--mp-data")
     p.add_argument("--jobs", type=int, default=12)
     p.add_argument("--list", action="store_true")
+    p.add_argument("--coverage", action="store_true")
     a = p.parse_args()
 
     chosen = [s for s in SUITES if not a.names or any(fnmatch.fnmatch(s["name"], n) for n in a.names)]
@@ -450,6 +618,10 @@ def main():
         except Exception as e:  # an input set that cannot be made: its suites report it
             print("input preparation failed:", e)
     results = []
+    per_suite, merged = {}, {}
+    if a.coverage:
+        shutil.rmtree(os.path.join(a.work, "coverage"), ignore_errors=True)
+        os.makedirs(os.path.join(a.work, "coverage"))
     for s in chosen:
         r = dict(name=s["name"], bat=s["bat"], note=s.get("note"))
         lost = missing(s, ctx)
@@ -461,18 +633,43 @@ def main():
                     os.remove(expand(stale))
             log = os.path.join(a.work, "logs", s["name"] + ".log")
             start = time.time()
+            if a.coverage and covered(s):
+                d = os.path.join(a.work, "coverage", s["name"])
+                ctx["cov"] = dict(dir=d, notes=os.path.join(d, "notes"))
+                os.makedirs(ctx["cov"]["notes"])
+            # (Tracked files a suite rewrites: put back afterwards.)
+            kept = {f: open(expand(f), "rb").read() for f in s.get("restores", []) if os.path.exists(expand(f))}
             try:
                 status, counts, code = RUNNERS[s["kind"]](s, ctx, log)
             except Exception as e:
                 status, counts, code = "crashed", {}, None
                 r["error"] = "runner: %r" % e
+            for f, data in kept.items():
+                open(expand(f), "wb").write(data)
+            if ctx.get("cov"):
+                if ctx["cov"].get("bat") and os.path.exists(ctx["cov"]["bat"]):
+                    os.remove(ctx["cov"]["bat"])
+                try:
+                    part = gather_coverage(s, ctx)
+                    per_suite[s["name"]] = part
+                    merge_coverage(merged, part)
+                    c = [sum(x) for x in zip(*(coverage_counts(v) for v in part.values()))] or [0] * 6
+                    r["coverage"] = "lines %d/%d, functions %d/%d, branches %d/%d" % tuple(c)
+                except Exception as e:
+                    r["coverage"] = "gcov failed: %r" % e
+                ctx["cov"] = None
             r.update(status=status, counts=counts, exit=code, seconds=time.time() - start, log=log)
             if os.path.exists(expand(s["exe"])):
                 r["exe_sha256"] = sha256(expand(s["exe"]))
         results.append(r)
-        print("%-22s %-20s %s" % (r["name"], r["status"], json.dumps(r.get("counts") or r.get("missing") or "")),
-              flush=True)
+        print("%-22s %-20s %s%s" % (r["name"], r["status"], json.dumps(r.get("counts") or r.get("missing") or ""),
+                                    ("  [%s]" % r["coverage"]) if r.get("coverage") else ""), flush=True)
         write_report(ctx, ident, results)
+    if a.coverage:
+        tot = write_coverage(ctx, ident, per_suite, merged)
+        print("coverage: lines %d/%d, functions %d/%d, branch outcomes %d/%d over %d production files" % (
+            *tot, len(merged)))
+        print("coverage report:", os.path.join(a.work, "coverage", "coverage.md"))
     print("report:", os.path.join(a.work, "report.md"))
     return 0 if all(r["status"] == "pass" for r in results) else 1
 

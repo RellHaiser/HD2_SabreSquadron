@@ -134,6 +134,37 @@ def main():
     starts = {rva + 5 for rva in funcs}
     stray = [i for i, b in enumerate(hits) if b and i not in starts]
 
+    # The original addresses each function ports (port_symbols.py: the PDB's line, the address comments).
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import port_symbols
+    psym = port_symbols.port_symbols(a.exe, pe["base"])
+    for r in rows:
+        p = psym.get(int(r["rva"], 16))
+        r["originals"] = ["%08x" % x for x in p["addresses"]] if p else []
+        r["found_by"] = p["how"] if p else None
+    # Per original function of the ledger: a port function names it, and one of them was entered.
+    ledger_path = os.path.join(ROOT, "_re", "coverage", "ledger.csv")
+    original = {}
+    for r in rows:
+        if r["instrumented"]:
+            for x in r["originals"]:
+                original[x] = original.get(x, False) or r["entered"]
+    ledger_lines = []
+    if os.path.exists(ledger_path):
+        import csv
+        led = list(csv.DictReader(open(ledger_path, encoding="utf-8")))
+        ledger_lines = ["", "## Original functions (address ledger)", "",
+                        "A ledger row counts as reached when a port function whose definition or declaration names "
+                        "its address was entered. Inline-only ports and unnamed helpers cannot be reached this way.", "",
+                        "| Disposition | Functions | Named by a port function | Reached |", "|---|---:|---:|---:|"]
+        for disp in ("hand", "absorbed"):
+            sel = [x for x in led if x["disposition"] == disp]
+            named = [x for x in sel if x["address"] in original]
+            reached = [x for x in named if original[x["address"]]]
+            ledger_lines.append("| %s | %d | %d | %d |" % (disp, len(sel), len(named), len(reached)))
+            print("ledger %s: %d functions, %d named by a port function, %d reached" % (disp, len(sel), len(named),
+                                                                                     len(reached)))
+
     out = a.out or os.path.dirname(os.path.abspath(a.cov[0]))
     os.makedirs(out, exist_ok=True)
     json.dump(dict(exe=a.exe, stamp="%08x" % pe["stamp"], cov=a.cov, stray_hits=len(stray), functions=rows),
@@ -153,6 +184,7 @@ def main():
     n, i, e = tally(rows)
     lines.append("| all | %d | %d | %d | %.1f |" % (n, i, e, 100 * e / i if i else 0))
     print("\n".join(lines[5:]))
+    lines += ledger_lines
     lines += ["", "## Port functions by source", "", "| Source | Functions | Entered | Not instrumented |",
               "|---|---:|---:|---:|"]
     by = collections.defaultdict(list)

@@ -125,8 +125,28 @@ the formation suite (`src/game/formation.cpp`):
 - The harness's own files are measured too but kept apart: only the production object counts.
 - This is the MinGW/SSE build, not the shipping client's ABI or x87 code, as the plan notes.
 
-Not done yet: wiring `--coverage` into run_suites.py for every suite, and merging the per-suite
-results.
+Since then wired into the runner: `python _re/harness/run_suites.py --coverage`. Each build script
+runs from a temporary copy whose g++ line gets `--coverage -dumpdir <notes>`. Each run, and each
+vehicle chunk on its own, writes its `.gcda` to its own folder through `GCOV_PREFIX`. gcov reads
+every folder, and the counts of sources under `src/` (not tier1, not the tests' files) are added up
+per suite and over all suites: `coverage/coverage.md` and `coverage.json.gz` in the work folder.
+
+**First full measurement** (revision 15d91609, 35 MinGW suites; mp_setup has no data, crash.msvc is
+MSVC). The report is `_re/coverage/harness_coverage.md`.
+
+| Measured files | Lines | Functions | Branch outcomes taken |
+|---|---:|---:|---:|
+| 273 (154 `.cpp`, the rest headers) | 53,050 / 55,743 (95.2 %) | 4,698 / 5,174 (90.8 %) | 37,873 / 45,754 (82.8 %) |
+
+The percentages cover only what the harnesses compile:
+
+- 117 of the client's 271 `.cpp` files (104,813 of about 197,000 source lines) are in no suite at
+  all. The largest are the humans (locomotion, equipment, movement, animation), shots, the AI,
+  squad actions and the interface's commands: the plan's P1 packages. They are listed at the end
+  of the report.
+- Inside the measured files, the vehicle, menu and net sources are almost fully run (controls.cpp
+  3,456 of 3,476 lines, main_menu.cpp 2,023 of 2,030). That fits tests that were strengthened
+  until mutations failed.
 
 ### Client: function entry with MSVC `/Gh`
 
@@ -163,8 +183,35 @@ Limits:
   source coverage (its codegen isn't MSVC's), or a breakpoint-based line tracer on the PDB such
   as OpenCppCoverage (lines, no branches). Neither is installed.
 - **Inlining.** Functions inlined everywhere have no symbol; their bodies count as the callers'.
-- **Units.** The 11,736 port symbols aren't the ledger's original functions. Matching them up
-  is step 2's address ledger.
+- **Units.** The 11,736 port symbols aren't the ledger's original functions. Matching them up:
+  see below.
 - **Not run.** The game wasn't run in a mission, in multiplayer, or killed by a real crash. The
   kill test is the small program.
 - **Timing.** The `/Gh` build is slower (a call per function entry), so it isn't a timing reference.
+
+### Port functions to original addresses: `_re/tools/port_symbols.py`
+
+For each function symbol of the port's own objects, the PDB (dbghelp, offline) gives the file and
+line of its first instruction. The original address is then looked for in three places:
+
+- **definition:** the head line, walking back to the line naming the function, and the comment
+  lines right above it;
+- **declaration:** a header line naming it inside its class's body, read through to its `;`;
+- otherwise none.
+
+Results:
+
+- 7,456 port functions (definition 3,262, declaration 4,194) name addresses: 8,008 distinct game-range
+  addresses.
+- Without an address: 4,600 port functions. Most are the port's own helpers (lambdas,
+  anonymous-namespace functions) or functions the original only had inline.
+- A comment that mentions another function's address (a caller, a variant) can link the wrong
+  one. The `found_by` field says where the address came from.
+
+client_coverage.py uses it to count original functions as well. In the menu run:
+
+- 7,278 of the ledger's 9,609 `hand` rows are named by a port function, and 450 were reached.
+- 57 of the 1,168 `absorbed` rows are named, and none were reached (absorbed helpers are mostly
+  inline in their callers).
+- The 2,331 unnamed `hand` rows overlap the ledger's rows without an address comment, and its
+  sections of code marked done without a port.
