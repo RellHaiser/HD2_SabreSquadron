@@ -3,9 +3,12 @@
 Unlike build_check.py (default SSE2, only diagnostics) this is the build that is run. Objects and outputs are in %TEMP%\\hd2_game[_checked]
 (G: is synced; see the Google Drive build locks). Only sources newer than their object, or all after a header change (--all), are compiled.
 
-Usage: python build_game.py [--checked] [--all] [--link-only] [--no-laa] [--copy DIR]
+Usage: python build_game.py [--checked] [--coverage] [--all] [--link-only] [--no-laa] [--copy DIR]
     --no-laa    links without large address awareness (2 GB, as the original).
     --checked   /Od /MTd /RTC1: slower, finds more (a call with the wrong arguments shows as a stack check, memory is filled, the heap is checked).
+    --coverage  function-entry coverage: every source with /Gh, linked with _re/coverage/penter.cpp (built without it), which
+                records each function entered in HD2_Port.cov beside the exe (_re/tools/client_coverage.py reads it). Its own
+                folder (%TEMP%\\hd2_game_cov[_checked]); the code is the same build's but for the _penter call in each prologue.
     --copy DIR  copies the exe and the PDB to DIR when the link worked.
 """
 import argparse
@@ -129,19 +132,29 @@ def main():
     ap.add_argument("--copy")
     ap.add_argument("--stack", default="0x100000")
     ap.add_argument("--no-laa", action="store_true")
+    ap.add_argument("--coverage", action="store_true")
     args = ap.parse_args()
 
-    out = os.path.join(tempfile.gettempdir(), "hd2_game_checked" if args.checked else "hd2_game")
+    name = "hd2_game" + ("_cov" if args.coverage else "") + ("_checked" if args.checked else "")
+    out = os.path.join(tempfile.gettempdir(), name)
     os.makedirs(out, exist_ok=True)
     files = collect([])
     objname = lambda f: os.path.join(out, os.path.splitext(os.path.basename(f))[0] + ".obj")
+    penter = os.path.join(ROOT, "_re", "coverage", "penter.cpp")
+    if args.coverage and not args.link_only:
+        flags = COMMON + (CHECKED if args.checked else RELEASE)
+        r = run_bat(os.path.join(out, "penter.bat"), ['cl %s /Fo"%s" "%s"' % (" ".join(flags), objname(penter), penter)])
+        if r.returncode:
+            print((r.stdout + r.stderr)[-3000:])
+            print("compile failed (penter.cpp)")
+            return 1
     if not args.link_only:
         stale = [f for f in files if args.all or not os.path.exists(objname(f)) or os.path.getmtime(f) > os.path.getmtime(objname(f))]
         if stale:
             rsp = os.path.join(out, "files.rsp")
             with open(rsp, "w") as fh:
                 fh.write("\n".join('"%s"' % f for f in stale))
-            flags = COMMON + (CHECKED if args.checked else RELEASE)
+            flags = COMMON + (CHECKED if args.checked else RELEASE) + (["/Gh"] if args.coverage else [])
             r = run_bat(os.path.join(out, "build.bat"), ['cl %s /Fo"%s\\\\" @"%s"' % (" ".join(flags), out, rsp)])
             lines = [l for l in (r.stdout + r.stderr).splitlines() if ": error" in l or "fatal error" in l or ": warning" in l]
             for l in lines[:60]:
@@ -150,7 +163,7 @@ def main():
             if r.returncode:
                 print("compile failed")
                 return 1
-    known = {objname(f) for f in files}
+    known = {objname(f) for f in files + ([penter] if args.coverage else [])}
     for stale_obj in glob.glob(os.path.join(out, "*.obj")):
         if stale_obj not in known:
             os.remove(stale_obj)

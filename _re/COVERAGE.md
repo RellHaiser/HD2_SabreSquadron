@@ -107,3 +107,64 @@ Findings for step 2:
 `--ls3df-re` or set the env `LS3DF_RE`. Without it, the LS3DF rows are left out with a note.
 `coverage_map.py`'s "verified" state is still based on source-name regexes. The plan replaces it
 with the ledger plus measured results (step 6).
+
+## Step 3 trial: measuring execution (2026-11-10)
+
+No clang, llvm-cov or OpenCppCoverage is installed. The tools at hand are MinGW's gcov (the
+harnesses) and MSVC (the client). The trial used both.
+
+### Harnesses: gcov (lines, branches, functions)
+
+A production source compiled with `--coverage`, and the harness linked with it. The run writes
+`.gcda`; `gcov --json-format -b` gives lines, functions and branch outcomes per source. Tried on
+the formation suite (`src/game/formation.cpp`):
+
+- 605 of 607 lines; 37 of 37 functions; 481 of 531 branch outcomes taken.
+- The two lines never run are both early returns: an empty saved chunk (formation.cpp:151) and a
+  squad member without a controller (:393).
+- The harness's own files are measured too but kept apart: only the production object counts.
+- This is the MinGW/SSE build, not the shipping client's ABI or x87 code, as the plan notes.
+
+Not done yet: wiring `--coverage` into run_suites.py for every suite, and merging the per-suite
+results.
+
+### Client: function entry with MSVC `/Gh`
+
+- `python _re/tools/build_game.py --coverage` builds into `%TEMP%\hd2_game_cov`.
+  - Every source gets `/Gh`: each function's first instruction becomes `call _penter`. The rest of
+    the code is the release build's.
+  - The hook is `_re/coverage/penter.cpp`, compiled without `/Gh`.
+  - It marks the function in `HD2_Port.cov` beside the exe (or `%HD2_COVERAGE_FILE%`). The file
+    is memory-mapped, one byte per image byte, and stamped with the build.
+- `python _re/tools/client_coverage.py FILE.cov [...]` maps hits to the map file's functions and
+  checks each function's first bytes for the call. Several runs of one build are ORed together.
+- The port's switch `-nowait` keeps the game running without the focus. Without it, LS3DF pauses
+  an inactive window (" ..zzZZ"), so a scripted run stalls when something else takes the focus.
+
+Checks:
+
+- **Instrumentation.** All 11,736 of the port's function symbols carry the call. The rest:
+  - 4,318 exception funclets: never instrumented, reported apart.
+  - 1 compiler-made adjustor thunk.
+- **Mapping.** Every hit is exactly a function start + 5 (0 stray hits).
+- **Execution changes the report.** One unattended run (`-window -nowait`), read three times:
+  - during the videos: 208 port functions entered;
+  - at the main menu: 502, with the menu code (controls, main_menu, text_box) now entered;
+  - after a clean exit: 526.
+  Earlier runs that lost the focus stayed at the videos' count.
+- **Killed process.** A small MSVC test with the same hook ended by `TerminateProcess` kept its
+  hits; its never-called function stayed unmarked.
+- **x87 behaviour.** That test's x87 sum printed the same digits with and without `/Gh`.
+  `_penter` saves EAX/ECX/EDX and the flags and never touches the FPU.
+
+Limits:
+
+- **Function level only.** Lines and branches of the MSVC client need another tool: clang-cl's
+  source coverage (its codegen isn't MSVC's), or a breakpoint-based line tracer on the PDB such
+  as OpenCppCoverage (lines, no branches). Neither is installed.
+- **Inlining.** Functions inlined everywhere have no symbol; their bodies count as the callers'.
+- **Units.** The 11,736 port symbols aren't the ledger's original functions. Matching them up
+  is step 2's address ledger.
+- **Not run.** The game wasn't run in a mission, in multiplayer, or killed by a real crash. The
+  kill test is the small program.
+- **Timing.** The `/Gh` build is slower (a call per function entry), so it isn't a timing reference.

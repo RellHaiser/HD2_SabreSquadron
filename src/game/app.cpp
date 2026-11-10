@@ -142,7 +142,8 @@ bool InitGraphics()
             init.refreshRate = static_cast<uint8_t>(g_setup.refreshRate);
         }
     }
-    if (g_setup.waitInactive)
+    // (The port's own switch " -nowait": keeps running without the focus, for unattended runs such as coverage.)
+    if (g_setup.waitInactive && !std::strstr(GetCommandLineA(), " -nowait"))
         flags |= IG_INIT_WAIT_INACTIVE;
     init.flags = flags;
 
