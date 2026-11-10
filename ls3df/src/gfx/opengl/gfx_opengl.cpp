@@ -802,10 +802,13 @@ private:
         }
         gl.glPolygonMode(GL_FRONT_AND_BACK, key.fill == D3DFILL_WIREFRAME ? GL_LINE : GL_FILL);
         if (key.zbias) {
-            // Direct3D 8's ZBIAS (0 - 16): nearer by that many depth-buffer steps.
+            // Direct3D 8's ZBIAS n (0 - 16), as its runtime draws it (Windows' d3d8.dll and dgVoodoo's,
+            // measured): nearer by (n + 2) / 8 of the triangle's depth slope, which keeps a decal on sloping
+            // ground in front of it, and by about 2n steps of 2^-24. (OpenGL's step is the driver's own: n
+            // of them already measure 2n of those or more, so n stays.)
             gl.glEnable(GL_POLYGON_OFFSET_FILL);
             gl.glEnable(GL_POLYGON_OFFSET_LINE);
-            gl.glPolygonOffset(0, -static_cast<float>(key.zbias));
+            gl.glPolygonOffset(-(static_cast<float>(key.zbias) + 2.0f) / 8.0f, -static_cast<float>(key.zbias));
         } else {
             gl.glDisable(GL_POLYGON_OFFSET_FILL);
             gl.glDisable(GL_POLYGON_OFFSET_LINE);

@@ -881,9 +881,12 @@ private:
                                                                    : SDL_GPU_CULLMODE_NONE;
         info.rasterizer_state.front_face = SDL_GPU_FRONTFACE_CLOCKWISE;
         if (key.zbias) {
-            // Direct3D 8's ZBIAS (0 - 16): nearer by that many depth-buffer steps.
+            // Direct3D 8's ZBIAS n (0 - 16), as its runtime draws it (Windows' d3d8.dll and dgVoodoo's,
+            // measured): nearer by 2n depth-buffer steps and (n + 2) / 8 of the triangle's depth slope.
+            // The slope's part is what keeps a decal on sloping ground in front of it.
             info.rasterizer_state.enable_depth_bias = true;
-            info.rasterizer_state.depth_bias_constant_factor = -static_cast<float>(key.zbias);
+            info.rasterizer_state.depth_bias_constant_factor = -2.0f * static_cast<float>(key.zbias);
+            info.rasterizer_state.depth_bias_slope_factor = -(static_cast<float>(key.zbias) + 2.0f) / 8.0f;
         }
         info.rasterizer_state.enable_depth_clip = true;
         info.multisample_state.sample_count = samples == 8   ? SDL_GPU_SAMPLECOUNT_8
