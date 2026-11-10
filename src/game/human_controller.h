@@ -312,9 +312,9 @@ public:
     // the vehicle seats; the command's actor network id in param1). False when it could not
     // start (no such actor, a seat taken ...; the server then does not pass it on); commands
     // it does not know count as carried out.
-    virtual bool ExecuteCommand(const S_HumanCommand &command);             // 0xDC 0x00586200
+    virtual bool ExecuteCommand(const S_HumanCommand &command);             // 0xDC 0x00586200 (DS 0x0058d110)
     // Enters a vehicle's seat (param2), or uses a radio, switch or photo place (false: not).
-    virtual bool UseActor(const S_HumanCommand &command);                   // 0xE0 0x00585d10
+    virtual bool UseActor(const S_HumanCommand &command);                   // 0xE0 0x00585d10 (DS 0x0058cbf0)
     // Leaves the vehicle (else drops a carried body, or ends the interaction).
     virtual void LeaveVehicle();                                            // 0xE4 0x00585a60
     virtual int UnknownE8();                                                // 0xE8 0x00524d90
@@ -356,7 +356,7 @@ public:
     // second; `delay` ms, `flags` sound flags. A server queues it for the clients near enough.
     // The sample's length in ms (0: not said; the original's callers mostly test only its low
     // byte).
-    int Say(int sentence, int delay, uint32_t flags, bool force);           // 0x005882f0
+    int Say(int sentence, int delay, uint32_t flags, bool force);           // 0x005882f0 (DS 0x0058f960)
     // Plays a sample of `sentence` (the player's soldiers also show it as a quick message);
     // `silent`: no sound (Say passes its `force`).
     void SayNow(int sentence, bool silent);                                 // 0x00588170
@@ -469,7 +469,7 @@ public:
                        int rounds) override;            // 0x00542920
     // Uses the medkit on the human (Heal; network games: the clients are told, and the medic
     // scores).
-    bool UseMedkit(int humanId, int itemUid) override;  // 0x00546dc0
+    bool UseMedkit(int humanId, int itemUid) override;  // 0x00546dc0 (DS 0x0053d3a0)
     void Attach(C_Human *human, C_HumanController *previous) override;   // 0x0053b9a0
     // (Also forgets the human.)
     void Detach() override;                             // 0x0053bc50
@@ -490,7 +490,7 @@ public:
     bool RequestTransferItem(int uid, int arg, int otherId, int otherUid, int container) override;      // 0x0053e7f0
     void RequestTakeFromBox(int boxId, int index) override;   // 0x0053e270
     void OnDeath() override;                            // 0x0053bd00
-    void OnKilled() override;                           // 0x0053be10
+    void OnKilled() override;                           // 0x0053be10 (DS 0x0052fd20)
     // The soldier comments (single player).
     void OnKilledEnemy(C_Human *victim) override;       // 0x00542300
     void OnEnemySeen(C_Human *human) override;          // 0x005421c0
@@ -525,7 +525,7 @@ public:
     // The human took damage (the local player's view kicks; the hit's zone is not used).
     void OnDamaged(int type, int zone, const S_vector &dir);   // 0x00545dd0
     // VIEW_*: the binoculars and the scopes (their HUD and animations).
-    void SetViewMode(int mode);                         // 0x005469e0
+    void SetViewMode(int mode);                         // 0x005469e0 (DS 0x0053cf20)
     // A hit for the server to apply (fall damage): C_Human::Hit(type, damage, 0, 0, the actor
     // `attackerId`, zone).
     void RequestDamage(int type, int damage, int attackerId, int zone);   // 0x00547270
@@ -565,8 +565,8 @@ private:
     // The throw being charged: released, it goes (true: the charge is going on or ended).
     bool UpdateCharge(int timeDelta);                   // 0x00542e20
     void MeleeStrike();                                 // 0x00542b80 (__fastcall)
-    void ApplySpread(S_vector &dir);                    // 0x00545140
-    void ApplyRecoil(S_vector4 &view);                  // 0x005454d0
+    void ApplySpread(S_vector &dir);                    // 0x00545140 (DS 0x0053b090)
+    void ApplyRecoil(S_vector4 &view);                  // 0x005454d0 (DS 0x0053b4d0)
     // --- player_net.cpp ----------------------------------------------------------------------
     // The server's copy of a client's human: the replicated state replayed.
     void UpdateRemote(int frameTime);                   // 0x0053f520

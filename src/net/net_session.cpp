@@ -15,6 +15,7 @@
 
 #include "game/actor.h"
 #include "game/actors_module.h"
+#include "game/console.h"
 #include "game/controller_net.h"
 #include "game/car.h"
 #include "game/controls.h"
@@ -25,6 +26,7 @@
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/seat_weapon.h"
+#include "game/sound_module.h"
 #include "game/text_box.h"
 #include "ls3d/igraph.h"
 #include "net/net_channel.h"
@@ -178,6 +180,7 @@ int C_NetGame::Host(const S_NetSessionDesc &desc, bool firewall)
 {
     Close(true);
 #ifdef HD2_DEDICATED
+    GetSoundModule()->SetBackgroundMusic(-1, 0);   // (the server's is empty)
     // (DS 0x007798a4) The session's settings in a file, for a server started again; `autorestart`: the watchdog told.
     char file[52];
     std::sprintf(file, "XDServer_%5d.txt", g_gameProfile.m_mpSettings->port);
@@ -673,10 +676,10 @@ void C_NetGame::StartVoiceServer()
         return;
     m_voiceServer = new C_NetVoice(nullptr, VoiceServerHandler);
     const GUID &guid = codec >= 1 && codec <= 7 ? g_netVoiceCodecs[codec] : g_netVoiceCodecs[0];
-#ifndef HD2_DEDICATED   // no window in LS3DRF.dll
+#ifndef HD2_DEDICATED
     m_voiceServer->Init(GetIGraph()->GetHWND(), true, false, m_server, 3, &guid, nullptr, 0);
-#else
-    m_voiceServer->Init(nullptr, true, false, m_server, 3, &guid, nullptr, 0);
+#else   // the server's window: its console
+    m_voiceServer->Init(GetConsole()->GetWindow(), true, false, m_server, 3, &guid, nullptr, 0);
 #endif
 }
 

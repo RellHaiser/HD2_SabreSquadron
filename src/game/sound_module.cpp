@@ -1174,6 +1174,10 @@ bool C_SoundModule::OpenStream(ISND_stream *&stream, const char *fileName, float
 
 void C_SoundModule::SetBackgroundMusic(int track, int position)
 {
+#ifdef HD2_DEDICATED   // the server's copy is empty
+    (void)track;
+    (void)position;
+#else
     g_soundTable.Load();
     OpenStream(m_music, nullptr, 0.0f, true);
     m_crossfadePending = false;
@@ -1187,6 +1191,7 @@ void C_SoundModule::SetBackgroundMusic(int track, int position)
     OpenStream(m_music, group->samples[pick]->fileName, m_musicVolume * m_musicFade, true);
     if (position && m_music && m_music->IsPlaying())
         m_music->SetPosition(position);
+#endif
 }
 
 void C_SoundModule::FadeBackgroundMusic(float volume, int time)
