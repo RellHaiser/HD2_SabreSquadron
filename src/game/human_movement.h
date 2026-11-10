@@ -650,7 +650,7 @@ public:
     // Room to fall along `dir` (the death animations; `side` 0 ahead / behind, 1 / 2 the sides).
     bool HasRoomToFall(const S_vector4 &dir, int side); // 0x0074cb40
     // The death: the death animation for the hit into `next`, the body's state for it.
-    bool Die(S_HumanAnimState *next);                   // 0x0074d970
+    bool Die(S_HumanAnimState *next);                   // 0x0074d970 (DS 0x007b0ce0)
     // Sitting down asked for: from sitting (0x22) "sednuti" (0x1C), else cross-legged (0x24).
     void StartSitting(S_HumanAnimState *next);          // 0x0074ec80
     // Moves the body out of a wall ahead (not called).
@@ -710,7 +710,7 @@ public:
     void UpdateCollisionVolumes(bool remote);           // 0x00764320
     // The change of stance the work asks for: the room for it (C_HumanSpecialMoves::
     // HasRoomForStance; refused: the stance stays) and the animation of the change.
-    void ChangeStance();                                // 0x0076b3d0
+    void ChangeStance();                                // 0x0076b3d0 (DS 0x007d3fe0)
     // The root motion speed of the animation playing (or about to play) and the facing it
     // moves along; `replace`: the previous velocity is kept (C_HumanAnimMixer).
     void UpdateVelocity(bool replace);                  // 0x0076bad0
@@ -916,7 +916,7 @@ private:
     void UpdateActivityTrack();                         // 0x00779850 (DS 0x007e56f0)
     // What starting an animation means for the body; sets the request that follows it.
     void OnAnimStarted(const S_HumanAnimRef &anim, const S_HumanAnimRef &old, bool singleStage);   // 0x0077a2c0
-    void OnCarryStarted(const int *carry, const int *old);   // 0x0077bcd0
+    void OnCarryStarted(const int *carry, const int *old);   // 0x0077bcd0 (DS 0x007e8490)
     void OnActivityStarted(const int *activity, const int *old);   // 0x0077c5a0 (DS 0x007e8e70)
     // Turn the requests into what the hands item and the carrying state allow.
     void AdjustAnimRequest(const S_HumanAnimRef &current, S_HumanAnimRef *next);   // 0x0077caf0
@@ -940,7 +940,7 @@ public:
     void Update(int time);                              // 0x00750c00
     // Advances the interaction under way (C_HumanMovement::m_interaction): into and out of the
     // seats and chairs, the doors' end.
-    void UpdateInteraction(int time);                   // 0x00755960
+    void UpdateInteraction(int time);                   // 0x00755960 (DS 0x007ba9a0)
     // Starts an interaction with `target` (the original returns true).
     void Interact(C_Actor *target, uint32_t interaction, int arg);   // 0x007518e0
     // Saves / loads the unit's statics (nothing; the original returns true).
@@ -1006,7 +1006,7 @@ public:
     // Glides the model toward the network position.
     void UpdatePosition(int time);                      // 0x00758c50
     // Animation events, sector, light level, carried body, delayed hands item, morphs.
-    void Update(int time);                              // 0x00758c90
+    void Update(int time);                              // 0x00758c90 (DS 0x007be900)
     // Rebuilds / removes the model's shadow (C_HumanMovement::m_shadow).
     void RebuildShadow();                               // 0x00759050
     void RemoveShadow();                                // 0x007590c0
@@ -1083,8 +1083,8 @@ public:
     // Re-synchronises the movement with the actor's frame after a teleport.
     void ResetToFrame();                                // 0x0041d800
     // Animation of the model (also on clients) and its physics (server).
-    void UpdateAnimation(int time);                     // 0x007876d0
-    void UpdatePhysics(int time);                       // 0x007881b0
+    void UpdateAnimation(int time);                     // 0x007876d0 (DS 0x007f63f0)
+    void UpdatePhysics(int time);                       // 0x007881b0 (DS 0x007f6f30)
     void SetPlayerControlled(bool on);                  // 0x00787530
     // Re-files the hit volumes (`volumes`) and refreshes the sector and the light level (`light`).
     void Ragdoll(bool volumes, bool light);             // 0x007872b0

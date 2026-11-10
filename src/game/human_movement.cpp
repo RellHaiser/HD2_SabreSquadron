@@ -842,7 +842,9 @@ void C_HumanMovement::UpdatePhysics(int time)
         return;
     if (m_unknown1AC == 0 && m_unknown9C0 == 0) {
         m_physicsProfileTime = 0;
+#ifndef HD2_DEDICATED   // no weapon pose on the server
         m_weaponPose->Update(time);
+#endif
         return;
     }
     if (!IsLocalGame() && !m_owner->GetFrame()->IsOn()) {
@@ -878,7 +880,9 @@ void C_HumanMovement::UpdatePhysics(int time)
     }
     UpdatePhysicsRest(time);
     m_physicsProfileTime += ProfileClock();
+#ifndef HD2_DEDICATED   // no weapon pose on the server
     m_weaponPose->Update(time);
+#endif
 }
 
 void C_HumanMovement::UpdatePhysicsParts(int time)

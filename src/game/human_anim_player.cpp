@@ -1419,8 +1419,10 @@ void C_HumanAnimPlayer::OnCarryStarted(const int *carry, const int *old)
     } else {
         const int length = set->GetEndTime();
         m_carryDelay = length;
+#ifndef HD2_DEDICATED   // no weapon pose on the server
         if (weaponSpecial)
             m_movement->m_owner->GetMovement()->m_weaponPose->PauseWeapon(length, specialObject);
+#endif
         if (specialObject)
             m_movement->m_unknownA24 = static_cast<int>(static_cast<double>(m_carryDelay) / MOVE_TIME_SCALE);
         // The remote action that replays it (prone).
@@ -1432,7 +1434,9 @@ void C_HumanAnimPlayer::OnCarryStarted(const int *carry, const int *old)
             m_movement->m_remoteActions.push_back(entry);
         };
         if (fromProne) {
+#ifndef HD2_DEDICATED   // no weapon pose on the server
             m_movement->m_weaponPose2->PauseHands(static_cast<int>(static_cast<double>(m_carryDelay) / MOVE_TIME_SCALE));
+#endif
             if (work->m_request.stance == HUMAN_STANCE_PRONE)
                 remote(0x0E);
         } else if (putAway && (work->m_request.stance == HUMAN_STANCE_PRONE || work->m_request.carryMode == 5)) {
