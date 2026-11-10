@@ -557,8 +557,12 @@ public:
         gl.glEnable(GL_SCISSOR_TEST);
         gl.glDepthRange(0, 1);
         // The frame's vertices, indices and uniform blocks (each its own range of one buffer).
+        const uint32_t job = diag::g_renderJob;
+        diag::Mark(diag::EV_GL_GEOMETRY_BEGIN, job);
         gl.glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(frame.vertices.size()), frame.vertices.data(), GL_STREAM_DRAW);
         gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(frame.indices.size() * 2), frame.indices.data(), GL_STREAM_DRAW);
+        diag::Mark(diag::EV_GL_GEOMETRY_END, job, frame.vertices.size() + frame.indices.size() * 2);
+        diag::Mark(diag::EV_GL_UNIFORMS_BEGIN, job);
         const auto align = [&](size_t n) { return (n + uniformAlignment - 1) / uniformAlignment * uniformAlignment; };
         const size_t vertexStride = align(sizeof(S_vertexUniforms)), pixelStride = align(sizeof(S_pixelUniforms));
         const size_t pixelStart = vertexStride * frame.vertexBlocks.size();
@@ -568,6 +572,7 @@ public:
         for (size_t i = 0; i < frame.pixelBlocks.size(); ++i)
             std::memcpy(uniformBytes.data() + pixelStart + i * pixelStride, &frame.pixelBlocks[i], sizeof(S_pixelUniforms));
         gl.glBufferData(GL_UNIFORM_BUFFER, static_cast<GLsizeiptr>(uniformBytes.size()), uniformBytes.data(), GL_STREAM_DRAW);
+        diag::Mark(diag::EV_GL_UNIFORMS_END, job, uniformBytes.size());
 
         gl.glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
         frameVertexStride = vertexStride;
@@ -584,7 +589,9 @@ public:
             DrawCommands(frame, 0, split, true);
             gl.glBindFramebuffer(GL_FRAMEBUFFER, drawFramebuffer);
             DrawCommands(frame, 0, split, false);
+            diag::Mark(diag::EV_GL_OCCLUSION_BEGIN, job);
             RunOcclusionPasses(frame.occlusion);
+            diag::Mark(diag::EV_GL_OCCLUSION_END, job);
             gl.glBindFramebuffer(GL_FRAMEBUFFER, drawFramebuffer);
             DrawCommands(frame, split, count, false);
         } else {
@@ -596,7 +603,9 @@ public:
             gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, multisampledFramebuffer);
             gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
             const GLint w = static_cast<GLint>(present.BackBufferWidth), h = static_cast<GLint>(present.BackBufferHeight);
+            diag::Mark(diag::EV_GL_RESOLVE_BEGIN, job);
             gl.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            diag::Mark(diag::EV_GL_RESOLVE_END, job);
         }
         return true;
     }
@@ -604,6 +613,12 @@ public:
     // Commands [first, last) of a frame into the framebuffer bound; `depthOnly`: those that write depth.
     void DrawCommands(const S_frame &frame, uint32_t first, uint32_t last, bool depthOnly)
     {
+        // (Diagnostics: the run's begin and end.)
+        struct S_marks {
+            uint32_t job, commands;
+            S_marks(uint32_t j, uint32_t n) : job(j), commands(n) { diag::Mark(diag::EV_GL_DRAWS_BEGIN, job); }
+            ~S_marks() { diag::Mark(diag::EV_GL_DRAWS_END, job, commands); }
+        } marks(diag::g_renderJob, last - first);
         gl.glUseProgram(program);
         gl.glEnable(GL_SCISSOR_TEST);
         const size_t vertexStride = frameVertexStride, pixelStride = framePixelStride, pixelStart = framePixelStart;

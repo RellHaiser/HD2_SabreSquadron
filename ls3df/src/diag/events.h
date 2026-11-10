@@ -100,6 +100,17 @@ enum E_event : uint16_t {
     EV_GPU_LAG = 88,                // OpenGL: how long after the CPU handed the job over (its present's end
                                     // stamped) the GPU finished it; about 0: the GPU was waiting for the CPU;
                                     // large: work queued ahead of it (GPU-bound); id: the job; value: ns
+    // OpenGL's Run, phase by phase (inside renderer_run); id: the render job
+    EV_GL_GEOMETRY_BEGIN = 90,      // the frame's vertices and indices to the driver (glBufferData)
+    EV_GL_GEOMETRY_END = 91,        // value: bytes
+    EV_GL_UNIFORMS_BEGIN = 92,      // every draw's uniform blocks packed and to the driver (glBufferData)
+    EV_GL_UNIFORMS_END = 93,        // value: bytes
+    EV_GL_DRAWS_BEGIN = 94,         // a run of the frame's draws (DrawCommands: state, attributes, draw calls)
+    EV_GL_DRAWS_END = 95,           // value: the commands in the run
+    EV_GL_OCCLUSION_BEGIN = 96,     // the ambient occlusion passes
+    EV_GL_OCCLUSION_END = 97,
+    EV_GL_RESOLVE_BEGIN = 98,       // the multisampled picture resolved (glBlitFramebuffer)
+    EV_GL_RESOLVE_END = 99,
 };
 
 inline const char *EventName(uint16_t type)
@@ -153,6 +164,16 @@ inline const char *EventName(uint16_t type)
     case EV_GPU_FRAME: return "gpu_frame";
     case EV_GPU_TIMER_LOST: return "gpu_timer_lost";
     case EV_GPU_LAG: return "gpu_lag";
+    case EV_GL_GEOMETRY_BEGIN: return "gl_geometry_begin";
+    case EV_GL_GEOMETRY_END: return "gl_geometry_end";
+    case EV_GL_UNIFORMS_BEGIN: return "gl_uniforms_begin";
+    case EV_GL_UNIFORMS_END: return "gl_uniforms_end";
+    case EV_GL_DRAWS_BEGIN: return "gl_draws_begin";
+    case EV_GL_DRAWS_END: return "gl_draws_end";
+    case EV_GL_OCCLUSION_BEGIN: return "gl_occlusion_begin";
+    case EV_GL_OCCLUSION_END: return "gl_occlusion_end";
+    case EV_GL_RESOLVE_BEGIN: return "gl_resolve_begin";
+    case EV_GL_RESOLVE_END: return "gl_resolve_end";
     default: return "unknown";
     }
 }

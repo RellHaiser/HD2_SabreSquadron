@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <chrono>
 #include <fstream>
+#include <map>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -313,6 +314,18 @@ void BackendTest(const char *name, bool sdlGpu)
                   Find(events, y, diag::EV_SUBMIT_BEGIN, &x) && Find(events, x, diag::EV_SUBMIT_END, &y) && y < pe;
     else
         present = present && Find(events, pfe, diag::EV_GL_SWAP_BEGIN, &x) && Find(events, x, diag::EV_GL_SWAP_END, &y) && y < pe;
+    if (!sdlGpu) {
+        // OpenGL's Run, phase by phase, inside the read-back job's renderer_run (the job with the scene's
+        // draws: the present after it has none), with that job's id.
+        size_t gr = 0, gre = 0, g = 0, ge = 0, u = 0, ue = 0, d = 0, de = 0;
+        const bool phases = Find(events, rf, diag::EV_RENDERER_RUN_BEGIN, &gr) && Find(events, gr, diag::EV_GL_GEOMETRY_BEGIN, &g) &&
+                            Find(events, g, diag::EV_GL_GEOMETRY_END, &ge) && Find(events, ge, diag::EV_GL_UNIFORMS_BEGIN, &u) &&
+                            Find(events, u, diag::EV_GL_UNIFORMS_END, &ue) && Find(events, ue, diag::EV_GL_DRAWS_BEGIN, &d) &&
+                            Find(events, d, diag::EV_GL_DRAWS_END, &de) && Find(events, de, diag::EV_RENDERER_RUN_END, &gre) &&
+                            gre < rfe && events[g].id == events[rf].id && events[de].id == events[rf].id && events[ge].value > 0 &&
+                            events[ue].value > 0 && events[de].value >= 2;
+        Check(phases, "OpenGL: renderer_run -> geometry (bytes) -> uniforms (bytes) -> draws (commands), the job's id");
+    }
     Check(present, (std::string(name) + (sdlGpu ? ": present -> run frame (0) -> acquire -> submit -> end" : ": present -> run frame (0) -> swap -> end")).c_str());
 
     if (sdlGpu) {
@@ -669,6 +682,7 @@ int Bench(int argc, char **argv)
                 capturePath.c_str(), backend.c_str(), backend == "sdlgpu" ? (" / " + driver).c_str() : "", frames, trials, trials, msaa,
                 occlusion ? "on" : "off", alphaToCoverage ? "on" : "off");
     std::vector<double> off, on, gpuFrame, gpuLag;
+    std::map<uint16_t, std::vector<double>> phaseMs;          // OpenGL Run's phases, the on trials' medians
     uint64_t hashOff = 0, hashOn = 0;
     bool same = true;
     uint32_t hitchRecords = 0;
@@ -699,7 +713,19 @@ int Bench(int argc, char **argv)
             ms = r.Repeat(frames);
         }
         if (markers) {
-            const S_gpuTimes g = GpuTimes(Recorded());
+            const std::vector<diag::S_event> recorded = Recorded();
+            std::map<uint16_t, std::vector<double>> trial;
+            std::map<uint32_t, int64_t> open[128];
+            for (const diag::S_event &ev : recorded)
+                if (ev.type >= diag::EV_GL_GEOMETRY_BEGIN && ev.type <= diag::EV_GL_RESOLVE_END) {
+                    if ((ev.type - diag::EV_GL_GEOMETRY_BEGIN) % 2 == 0)
+                        open[ev.type][ev.id] = ev.qpc;
+                    else if (open[ev.type - 1].count(ev.id))
+                        trial[static_cast<uint16_t>(ev.type - 1)].push_back(static_cast<double>(ev.qpc - open[ev.type - 1][ev.id]) * 1000.0 / 1e7);
+                }
+            for (auto &phase : trial)
+                phaseMs[phase.first].push_back(Median(phase.second));
+            const S_gpuTimes g = GpuTimes(recorded);
             if (!g.frame.empty()) {
                 gpuFrame.push_back(Median(g.frame));
                 gpuLag.push_back(Median(g.lag));
@@ -727,6 +753,14 @@ int Bench(int argc, char **argv)
     const double mOff = median(off), mOn = median(on);
     std::printf("bench: off median %.3f ms (spread %.3f), on median %.3f ms (spread %.3f): on - off = %+.3f ms a frame (%+.2f%%)\n",
                 mOff, spread(off), mOn, spread(on), mOn - mOff, 100.0 * (mOn - mOff) / mOff);
+    if (!phaseMs.empty()) {
+        std::printf("bench: OpenGL Run's phases (CPU, ms a job, median of the on trials' medians):");
+        for (auto &p : phaseMs) {
+            std::string name = diag::EventName(p.first);
+            std::printf(" %s %.3f", name.substr(3, name.size() - 9).c_str(), Median(p.second));
+        }
+        std::printf("\n");
+    }
     if (!gpuFrame.empty())
         std::printf("bench: GPU (OpenGL timer queries), median of the on trials' medians: frame %.3f ms, lag %.3f ms\n", Median(gpuFrame),
                     Median(gpuLag));
