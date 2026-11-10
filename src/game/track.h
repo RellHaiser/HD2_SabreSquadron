@@ -104,8 +104,8 @@ public:
     ~C_TrackModule() override;                                           // 0x004010e0
 
     void Update(int timeDelta) override;                                 // 0x00401fd0
-    void LoadMissionData(bool server) override;                          // 0x00402020
-    void FreeMissionData(bool server) override;                          // 0x00402030
+    void LoadMissionData(bool server) override;                          // 0x00402020 (DS 0x0041b4d0)
+    void FreeMissionData(bool server) override;                          // 0x00402030 (DS 0x0041b4f0)
     void StartMission(bool server) override {}                           // 0x004010b0
     void StopMission(bool server) override;                              // 0x00401f40
     void RestartMission(bool server) override;                           // 0x00401140

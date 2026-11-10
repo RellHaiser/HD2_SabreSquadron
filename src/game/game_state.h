@@ -58,19 +58,19 @@ public:
     virtual ~C_GameState();                         // 0x0067ef90 (the deleting one)
     // Enters the state; `arg` is what it starts with (C_game: the mission's definition,
     // null in multiplayer).
-    virtual bool Start(void *arg);                  // 0x04 (the base: 0x0067ef30, false)
-    virtual bool Stop();                            // 0x08 (0x0067ef40, false)
+    virtual bool Start(void *arg);                  // 0x04 (the base: 0x0067ef30 (DS 0x006bbf80), false)
+    virtual bool Stop();                            // 0x08 (0x0067ef40 (DS 0x006bbfa0), false)
     // The frame's controls: values held per action and those pressed in this frame
     // (C_Controls; null when there are none).
-    virtual bool HandleInput(float *held, float *pressed);   // 0x0C (0x0067ef50, false)
+    virtual bool HandleInput(float *held, float *pressed);   // 0x0C (0x0067ef50 (DS 0x006bbfc0), false)
     virtual void Tick(int timeDelta);               // 0x10 fixed server tick (100 ms; 0x0067ef60)
     virtual void Update(int timeDelta);             // 0x14 per frame (0x0067ef70)
     virtual void Render();                          // 0x18 (0x0067ef80)
-    virtual int GetTypeId() const;                  // 0x1C (0x0067ecf0, 0)
-    virtual int GetState() const;                   // 0x20 0x0067ed00
+    virtual int GetTypeId() const;                  // 0x1C (0x0067ecf0 (DS 0x006bbc00), 0)
+    virtual int GetState() const;                   // 0x20 0x0067ed00 (DS 0x006bbc20)
     virtual void SetState(int state);               // 0x24 0x0067ed10
-    virtual int GetPendingState() const;            // 0x28 0x0067ed20
-    virtual void SetPendingState(int state);        // 0x2C 0x0067ed30
+    virtual int GetPendingState() const;            // 0x28 0x0067ed20 (DS 0x006bbc60)
+    virtual void SetPendingState(int state);        // 0x2C 0x0067ed30 (DS 0x006bbc80)
     // Switches to the pending state, if there is one.
     virtual void CommitPendingState();              // 0x30 0x0067ed40
 

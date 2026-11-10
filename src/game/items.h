@@ -77,12 +77,12 @@ public:
     C_ItemContainer &operator=(const C_ItemContainer &) = delete;
     virtual ~C_ItemContainer() = default;               // 0x00 0x007d6c10
 
-    virtual void SetMaxWeight(float value) { m_maxWeight = value; }       // 0x04 0x007d6b20
-    virtual float GetMaxWeight() { return m_maxWeight; }                  // 0x08 0x007d6b30
+    virtual void SetMaxWeight(float value) { m_maxWeight = value; }       // 0x04 0x007d6b20 (DS 0x008101c0)
+    virtual float GetMaxWeight() { return m_maxWeight; }                  // 0x08 0x007d6b30 (DS 0x008101e0)
     virtual void SetMaxSpace(float value) { m_maxSpace = value; }         // 0x0C 0x007d6b40
-    virtual float GetMaxSpace() { return m_maxSpace; }                    // 0x10 0x007d6b50
+    virtual float GetMaxSpace() { return m_maxSpace; }                    // 0x10 0x007d6b50 (DS 0x00810220)
     virtual void SetMaxItemSize(int value) { m_maxItemSize = value; }     // 0x14 0x007d6b60
-    virtual int GetMaxItemSize() { return m_maxItemSize; }                // 0x18 0x007d6b70
+    virtual int GetMaxItemSize() { return m_maxItemSize; }                // 0x18 0x007d6b70 (DS 0x00810260)
     virtual float GetTotalWeight() = 0;                                   // 0x1C
     virtual float GetTotalSpace() = 0;                                    // 0x20
     // Number of items of type `typeId`.
@@ -101,15 +101,15 @@ public:
     virtual C_Item *GetItem() = 0;                                        // 0x40
     virtual int GetSlotCount() = 0;                                       // 0x44
     // A C_ItemSlot can be locked for a while (by mission time).
-    virtual bool IsLocked() { return false; }                             // 0x48 0x007d6b80
+    virtual bool IsLocked() { return false; }                             // 0x48 0x007d6b80 (DS 0x00810280)
     virtual void SetLockTime(uint32_t) {}                                 // 0x4C 0x007d6b90
-    virtual uint32_t GetLockTime() { return 0; }                          // 0x50 0x007d6ba0
+    virtual uint32_t GetLockTime() { return 0; }                          // 0x50 0x007d6ba0 (DS 0x008102c0)
     // (Slots 0x54 / 0x5C / 0x60 are empty in every container class; their arguments are
     // counted from RET n.)
     virtual void Unknown54(int) {}                                        // 0x54 0x007d6bb0
-    virtual int Unknown58() { return 0; }                                 // 0x58 0x007d6bc0
-    virtual bool Unknown5C(int, int) { return false; }                    // 0x5C 0x007d6bd0
-    virtual bool Unknown60(int, int) { return false; }                    // 0x60 0x007d6be0
+    virtual int Unknown58() { return 0; }                                 // 0x58 0x007d6bc0 (DS 0x00810300)
+    virtual bool Unknown5C(int, int) { return false; }                    // 0x5C 0x007d6bd0 (DS 0x00810320)
+    virtual bool Unknown60(int, int) { return false; }                    // 0x60 0x007d6be0 (DS 0x00810340)
 
     int GetKind() const { return m_kind; }
 
@@ -134,14 +134,14 @@ public:
     int RemoveItem(C_Item *item, int index) override;   // 0x007d6e40
     void Clear() override;                              // 0x007d6e60
     bool IsEmpty() override { return m_item == nullptr; }       // 0x007d6cb0
-    std::vector<C_Item *> *GetSlots() override { return nullptr; }   // 0x007d6cc0
-    C_Item *GetItem() override { return m_item; }       // 0x007d6cd0
-    int GetSlotCount() override { return 1; }           // 0x007d6ce0
+    std::vector<C_Item *> *GetSlots() override { return nullptr; }   // 0x007d6cc0 (DS 0x008104b0)
+    C_Item *GetItem() override { return m_item; }       // 0x007d6cd0 (DS 0x008104d0)
+    int GetSlotCount() override { return 1; }           // 0x007d6ce0 (DS 0x008104f0)
     bool IsLocked() override;                           // 0x007d6cf0
     void SetLockTime(uint32_t time) override { m_lockTime = time; }   // 0x007d6d10
-    uint32_t GetLockTime() override { return m_lockTime; }           // 0x007d6d20
+    uint32_t GetLockTime() override { return m_lockTime; }           // 0x007d6d20 (DS 0x00810560)
     void Unknown54(int) override {}                        // 0x007d6d30
-    int Unknown58() override { return 0; }              // 0x007d6d40
+    int Unknown58() override { return 0; }              // 0x007d6d40 (DS 0x008105a0)
 
 private:
     C_Item *m_item = nullptr;                           // +0x14
@@ -157,17 +157,17 @@ public:
     float GetTotalWeight() override;                    // 0x007d7040
     float GetTotalSpace() override;                     // 0x007d7090
     // (Not implemented by the original either.)
-    int CountItems(int) override { return 0; }          // 0x007d6f40
-    int GetUsedSlotCount() override { return 0; }       // 0x007d6f30
+    int CountItems(int) override { return 0; }          // 0x007d6f40 (DS 0x00810880)
+    int GetUsedSlotCount() override { return 0; }       // 0x007d6f30 (DS 0x00810860)
     int AddItem(C_Item *item, C_Item **replaced, int index) override;   // 0x007d70e0
     int RemoveItem(C_Item *item, int index) override;   // 0x007d72b0
     void Clear() override;                              // 0x007d7340
     bool IsEmpty() override { return m_items.empty(); } // 0x007d73c0
-    std::vector<C_Item *> *GetSlots() override { return nullptr; }   // 0x007d6f50
-    C_Item *GetItem() override { return nullptr; }      // 0x007d6f60
-    int GetSlotCount() override { return 0; }           // 0x007d6f70
+    std::vector<C_Item *> *GetSlots() override { return nullptr; }   // 0x007d6f50 (DS 0x008108a0)
+    C_Item *GetItem() override { return nullptr; }      // 0x007d6f60 (DS 0x008108c0)
+    int GetSlotCount() override { return 0; }           // 0x007d6f70 (DS 0x008108e0)
     void Unknown54(int) override {}                        // 0x007d6f80
-    int Unknown58() override { return 0; }              // 0x007d6f90
+    int Unknown58() override { return 0; }              // 0x007d6f90 (DS 0x00810920)
 
 private:
     std::vector<C_Item *> m_items;                      // +0x14 (heap-allocated in the original)
@@ -183,16 +183,16 @@ public:
     float GetTotalWeight() override;                    // 0x007d7680
     float GetTotalSpace() override;                     // 0x007d7700
     int CountItems(int typeId) override;                // 0x007d7780
-    int GetUsedSlotCount() override { return m_usedSlots; }   // 0x007d7520
+    int GetUsedSlotCount() override { return m_usedSlots; }   // 0x007d7520 (DS 0x008110d0)
     int AddItem(C_Item *item, C_Item **replaced, int index) override;   // 0x007d77f0
     int RemoveItem(C_Item *item, int index) override;   // 0x007d78d0
     void Clear() override;                              // 0x007d7a10
     bool IsEmpty() override { return m_usedSlots == 0; }       // 0x007d7a90
-    std::vector<C_Item *> *GetSlots() override { return m_slots.data(); }   // 0x007d7530
-    C_Item *GetItem() override { return nullptr; }      // 0x007d7540
-    int GetSlotCount() override { return static_cast<int>(m_slots.size()); }   // 0x007d7550
+    std::vector<C_Item *> *GetSlots() override { return m_slots.data(); }   // 0x007d7530 (DS 0x008110f0)
+    C_Item *GetItem() override { return nullptr; }      // 0x007d7540 (DS 0x00811110)
+    int GetSlotCount() override { return static_cast<int>(m_slots.size()); }   // 0x007d7550 (DS 0x00811130)
     void Unknown54(int) override {}                        // 0x007d7560
-    int Unknown58() override { return 0; }              // 0x007d7570
+    int Unknown58() override { return 0; }              // 0x007d7570 (DS 0x00811170)
 
 private:
     // +0x14 slot count, +0x18 array of heap vectors in the original.
@@ -221,16 +221,16 @@ public:
     // Spends `amount` rounds (weapons).
     virtual void Use(float) {}                          // 0x08 0x007d36a0
     // Rounds left / capacity; -1 where it does not apply.
-    virtual float GetAmount() { return -1.0f; }         // 0x0C 0x007d3cd0
-    virtual float GetMaxAmount() { return -1.0f; }      // 0x10 0x007d3ce0
+    virtual float GetAmount() { return -1.0f; }         // 0x0C 0x007d3cd0 (DS 0x0080cdf0)
+    virtual float GetMaxAmount() { return -1.0f; }      // 0x10 0x007d3ce0 (DS 0x0080ce10)
     // Network side of a reload: the server's result (`ammoUid` is the magazine used up, -1 none).
     virtual void SetRounds(C_Actor *, int, int) {}      // 0x14 0x007d36c0
     // Reloads from container `container` of `owner`; `*ammoUid` receives the magazine
     // used up (-1 none). See C_WeaponItem::Reload.
-    virtual bool Reload(C_Actor *, int, int *, bool) { return false; }   // 0x18 0x007d36b0
+    virtual bool Reload(C_Actor *, int, int *, bool) { return false; }   // 0x18 0x007d36b0 (DS 0x0080c560)
     // Uses up `amount` charges (medkits).
     virtual void Consume(float) {}                      // 0x1C 0x007d36d0
-    virtual float GetCharges() { return -1.0f; }        // 0x20 0x007d36e0
+    virtual float GetCharges() { return -1.0f; }        // 0x20 0x007d36e0 (DS 0x0080c5c0)
     // Fires from `pos` towards `dir`; FIRE_*. Bits 0-7 of `flags` set: no noise for the AI.
     virtual int Fire(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint32_t flags) = 0;   // 0x24
     virtual int FireSecondary(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint8_t flags) = 0;   // 0x28
@@ -239,10 +239,10 @@ public:
     // Inventory space taken: twice the size, at least 1.
     virtual float GetSpace();                           // 0x34 0x007d3710
     // Frame of the projectile sitting in the weapon (grenade, rocket ...), if any.
-    virtual I3D_frame *GetProjectileFrame() { return nullptr; }   // 0x38 0x007d3730
+    virtual I3D_frame *GetProjectileFrame() { return nullptr; }   // 0x38 0x007d3730 (DS 0x0080c650)
     // Moves a copy of the projectile into `hand` (null: puts it back on the weapon).
     virtual void AttachProjectile(I3D_frame *) {}       // 0x3C 0x007d3740
-    virtual int GetProjectileKind() { return 0; }       // 0x40 0x007d3750
+    virtual int GetProjectileKind() { return 0; }       // 0x40 0x007d3750 (DS 0x0080c690)
     virtual bool SaveGame(C_chunk &chunk);              // 0x44 0x007d3fb0
     virtual bool LoadGame(C_chunk &chunk);              // 0x48 0x007d41f0
 
@@ -354,7 +354,7 @@ public:
     void Use(float amount) override;                    // 0x007d4ab0
     // Rounds in the weapon; 0 until a reload / the last shot is finished.
     float GetAmount() override;                         // 0x007d4ae0
-    float GetMaxAmount() override { return m_capacity; }   // 0x007d4b00
+    float GetMaxAmount() override { return m_capacity; }   // 0x007d4b00 (DS 0x0080e0f0)
     void SetRounds(C_Actor *owner, int ammoUid, int rounds) override;   // 0x007d51d0
     // Takes the fullest magazine of the right type from container `container` of
     // `owner` (ITEM_BEHAVIOUR_LAUNCHER weapons use the backpack contents instead of the

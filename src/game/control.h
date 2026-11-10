@@ -128,18 +128,18 @@ public:
     // Shown, not inactive and taking input.
     virtual bool TakesInput() const;                    // +0x08 0x0064dd10
     // The frame shown while the cursor is over the control (the text buttons'; the base: none).
-    virtual I3D_frame *GetHighlightFrame() const { return nullptr; }   // +0x0C 0x0064dd30
+    virtual I3D_frame *GetHighlightFrame() const { return nullptr; }   // +0x0C 0x0064dd30 (DS 0x00680ec0)
     // The frame on (or off) and the notification.
     virtual void Show();                                // +0x10 0x0065ca80
     virtual void Hide();                                // +0x14 0x0065cab0
     // The shown control's children refreshed (the base has nothing of its own).
     virtual void Refresh();                             // +0x18 0x00661c30
     virtual void Tick(int time) {}                      // +0x1C 0x0064dd40
-    virtual bool Unknown20(int) { return false; }       // +0x20 0x0064dd50
+    virtual bool Unknown20(int) { return false; }       // +0x20 0x0064dd50 (DS 0x00680f00)
     // A typed character (the edit controls': taken, true).
-    virtual bool OnChar(int) { return false; }          // +0x24 0x0064dd60
+    virtual bool OnChar(int) { return false; }          // +0x24 0x0064dd60 (DS 0x00680f20)
     // Being edited (the edit controls').
-    virtual bool IsEditing() { return false; }          // +0x28 0x0064dd70
+    virtual bool IsEditing() { return false; }          // +0x28 0x0064dd70 (DS 0x00680f40)
     // The frame taken (its data the control's id) and the description's children made under it
     // (`root`: the screen's frames, passed on).
     virtual bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc);   // +0x2C 0x00661bc0
@@ -161,7 +161,7 @@ public:
     virtual int OnInput13(int id);                      // +0x60 0x0064df00
     virtual int OnInput0B(int id);                      // +0x64 0x0064df20
     // The editing started (the edit controls'; the screen's answer to CONTROL_MSG_START_EDITING).
-    virtual int BeginEdit(int) { return CONTROL_NOT_HANDLED; }   // +0x68 0x0064df40
+    virtual int BeginEdit(int) { return CONTROL_NOT_HANDLED; }   // +0x68 0x0064df40 (DS 0x00681200)
     // A message: a route kept; else its code handled (always true).
     virtual bool HandleMessage(S_ControlMessage *message);   // +0x6C 0x0065d060
     virtual bool HandleMessages(std::vector<S_ControlMessage> &messages);   // +0x70 0x0065d220

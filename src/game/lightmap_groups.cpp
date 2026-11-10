@@ -118,7 +118,7 @@ bool C_LightMapGroupsModule::LoadGame(C_chunk &chunk)   // 0x0048c920
     return true;
 }
 
-void C_LightMapGroupsModule::StopMission(bool)          // 0x0048cb60
+void C_LightMapGroupsModule::StopMission(bool)          // 0x0048cb60 (DS 0x004a26f0)
 {
     RestartMission(false);
 }

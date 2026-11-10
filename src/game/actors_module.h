@@ -119,7 +119,7 @@ public:
 
     void Tick(int timeDelta) override;                              // 0x004774c0
     void Update(int frameTime) override;                            // 0x00477590
-    void FreeMissionData(bool server) override { Clear(); }         // 0x00476fb0
+    void FreeMissionData(bool server) override { Clear(); }         // 0x00476fb0 (DS 0x00493a20)
     void StartMission(bool server) override;                        // 0x00477660
     void StopMission(bool server) override;                         // 0x00477a90
     bool OnMessage(C_BitStream *msg) override;                      // 0x004788e0

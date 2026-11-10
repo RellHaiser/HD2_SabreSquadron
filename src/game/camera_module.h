@@ -165,7 +165,7 @@ public:
     // A client stops and starts again, then SelectView(0) unless the active soldier is in the
     // Junkers.
     void RestartMission(bool server) override;          // 0x00464e10
-    bool SaveGame(C_chunk &chunk) override;             // 0x00464e60
+    bool SaveGame(C_chunk &chunk) override;             // 0x00464e60 (DS 0x00481dc0)
     // SelectView(0) and an update of 100 ms.
     bool LoadGame(C_chunk &chunk) override;             // 0x00464e70
 

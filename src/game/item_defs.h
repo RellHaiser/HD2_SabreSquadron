@@ -93,11 +93,11 @@ public:
     C_ItemComponent(const C_ItemComponent &) = delete;
     C_ItemComponent &operator=(const C_ItemComponent &) = delete;
 
-    virtual int GetUnknownVf00() { return 0x7FFFFFFF; }      // 0x00 0x007e06b0
+    virtual int GetUnknownVf00() { return 0x7FFFFFFF; }      // 0x00 0x007e06b0 (DS 0x0081c410)
     // *ioSize == 0: only reports the stream size; otherwise writes the stream.
     virtual void Save(int *ioSize, void *buffer) = 0;       // 0x04
     virtual void Load(int size, const void *data) = 0;      // 0x08
-    virtual int GetProjectileType() { return 3; }           // 0x0C 0x007e06c0
+    virtual int GetProjectileType() { return 3; }           // 0x0C 0x007e06c0 (DS 0x0081c430)
     // (Not in the original vtable: components were freed with a plain operator delete.)
     virtual ~C_ItemComponent() = default;
 
@@ -124,20 +124,20 @@ class C_WeaponComp : public C_ItemComponent {
 public:
     explicit C_WeaponComp(E_ItemComponentKind kind) : C_ItemComponent(kind) {}
 
-    virtual float GetAimedDispersion() { return 0.0f; }     // 0x10 0x007e06d0
-    virtual float GetMuzzleVelocity() { return 0.0f; }      // 0x14 0x007e06e0
+    virtual float GetAimedDispersion() { return 0.0f; }     // 0x10 0x007e06d0 (DS 0x0081c450)
+    virtual float GetMuzzleVelocity() { return 0.0f; }      // 0x14 0x007e06e0 (DS 0x0081c470)
     // Sound groups: shots in SOUND_CHAPTER_WEAPON_SHOOTING, the others in
     // SOUND_CHAPTER_WEAPON_MANIPULATION; -1 = none.
-    virtual int GetShotSound() { return m_shotSound; }      // 0x18 0x007e06f0
-    virtual int GetReloadSound() { return -1; }             // 0x1C 0x007e0700
-    virtual int GetReloadTimeMs() { return 0; }             // 0x20 0x007e0710
+    virtual int GetShotSound() { return m_shotSound; }      // 0x18 0x007e06f0 (DS 0x0081c490)
+    virtual int GetReloadSound() { return -1; }             // 0x1C 0x007e0700 (DS 0x0081c4b0)
+    virtual int GetReloadTimeMs() { return 0; }             // 0x20 0x007e0710 (DS 0x0081c4d0)
     // Played with the last round.
-    virtual int GetLastShotSound() { return -1; }           // 0x24 0x007e0720
+    virtual int GetLastShotSound() { return -1; }           // 0x24 0x007e0720 (DS 0x0081c4f0)
     // Played with every shot.
-    virtual int GetBoltSound() { return -1; }               // 0x28 0x007e0730
-    virtual float GetUnknownVf2C() { return 0.0f; }         // 0x2C 0x007e0740
+    virtual int GetBoltSound() { return -1; }               // 0x28 0x007e0730 (DS 0x0081c510)
+    virtual float GetUnknownVf2C() { return 0.0f; }         // 0x2C 0x007e0740 (DS 0x0081c530)
     // False: the weapon cannot be topped up while rounds are left.
-    virtual bool CanReload() { return m_canReload; }        // 0x30 0x007e0750
+    virtual bool CanReload() { return m_canReload; }        // 0x30 0x007e0750 (DS 0x0081c550)
 
     // Particle effect: muzzle flash of guns (at the weapon's "blsdum"), launch blast of
     // projectile weapons, explosion of mines.
@@ -234,7 +234,7 @@ public:
     C_FirearmComp() : C_WeaponComp(ICK_FIREARM) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df4b0
     void Load(int size, const void *data) override;     // 0x007df540
-    int GetProjectileType() override { return m_projectileType; }       // 0x007e0810
+    int GetProjectileType() override { return m_projectileType; }       // 0x007e0810 (DS 0x0081c6d0)
     float GetAimedDispersion() override { return m_aimedDispersion; }   // 0x007e07d0
     float GetMuzzleVelocity() override { return m_muzzleVelocity; }     // 0x007e07e0
     int GetReloadSound() override { return m_reloadSound; }             // 0x007e07f0
@@ -359,7 +359,7 @@ public:
     virtual int GetCarryMode() = 0;                     // 0x0C
     virtual int GetBehaviour() = 0;                     // 0x10 ITEM_BEHAVIOUR_*
     // Rounds in one item of an ammo type (-1 for other definitions).
-    virtual float GetAmmoAmount() { return -1.0f; }     // 0x14 0x007df830
+    virtual float GetAmmoAmount() { return -1.0f; }     // 0x14 0x007df830 (DS 0x0081b2d0)
     // Ammo item type a weapon loads, -1 if it has none.
     virtual int GetAmmoItemId() { return -1; }          // 0x18 0x007df840
     virtual int GetHeadgearItemId() { return -1; }      // 0x1C 0x007df850

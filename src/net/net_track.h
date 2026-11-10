@@ -59,9 +59,9 @@ public:
     virtual void SetNetValue(const S_vector4 &value) { m_net = value; }   // 0x0073fca0
     // The rate and its magnitude, the speed.
     virtual void SetRate(const S_vector4 &rate);                  // 0x0073fcc0 (slot 9)
-    virtual const S_vector4 &GetCurrent() { return m_current; }   // 0x0073fd60 (slot 10)
-    virtual const S_vector4 &GetTarget() { return m_target; }     // 0x0073fd70
-    virtual const S_vector4 &GetNetValue() { return m_net; }      // 0x0073fd80
+    virtual const S_vector4 &GetCurrent() { return m_current; }   // 0x0073fd60 (slot 10) (DS 0x0079efc0)
+    virtual const S_vector4 &GetTarget() { return m_target; }     // 0x0073fd70 (DS 0x0079efe0)
+    virtual const S_vector4 &GetNetValue() { return m_net; }      // 0x0073fd80 (DS 0x0079f000)
     // The rate set or read; when it is zero the step the last update moved by.
     virtual const S_vector4 &GetRate();                           // 0x0073fd90 (slot 13)
     // The value for player whose last value sent is `lastSent` (`delta`: nothing when it moved less than the

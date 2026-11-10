@@ -219,7 +219,7 @@ public:
     bool Tick(int timeDelta) override;                      // 0x00449290 (DS 0x004655a0)
     void Update(int timeDelta) override;                    // 0x00449030
     void Recycle() override {}                              // 0x00451870
-    virtual bool Unknown1C(int) { return true; }            // 0x1C 0x00451860 (not called)
+    virtual bool Unknown1C(int) { return true; }            // 0x1C 0x00451860 (not called) (DS 0x0046c4c0)
 
 private:
     int m_trail = -1;                                       // +0x70 particle effect handle
@@ -249,7 +249,7 @@ public:
     void Recycle() override {}                              // 0x00450560
     void SaveGame(C_chunk &) override {}                    // 0x00450570
     void LoadGame(C_chunk &) override {}                    // 0x00450580
-    virtual bool Unknown1C(int) { return true; }            // 0x1C 0x00450550 (not called)
+    virtual bool Unknown1C(int) { return true; }            // 0x1C 0x00450550 (not called) (DS 0x0046aec0)
 
 private:
     enum E_State {

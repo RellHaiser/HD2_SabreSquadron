@@ -340,7 +340,7 @@ void C_MeleeTrackerController::Reset()                  // 0x005ce5d0
     m_actionB = nullptr;
 }
 
-bool C_MeleeTrackerController::Detach()                 // 0x005cb230
+bool C_MeleeTrackerController::Detach()                 // 0x005cb230 (DS 0x005e2b60)
 {
     m_meleeTracker = nullptr;
     return true;
@@ -431,7 +431,7 @@ void C_MeleeTrackerScriptedAI::Reset()                  // 0x005d5b80
     m_barkTimer = -1;                                   // no idle barks
 }
 
-bool C_MeleeTrackerScriptedAI::Detach()                 // 0x005d5bb0
+bool C_MeleeTrackerScriptedAI::Detach()                 // 0x005d5bb0 (DS 0x005f0600)
 {
     m_meleeTracker = nullptr;
     ResetPath();
