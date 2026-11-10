@@ -89,6 +89,26 @@ std::vector<I3D_frame *> g_framesHit;
 std::vector<int> g_effects;
 float g_randFloat = 0.5f;
 C_Human *g_activePlayer;
+std::vector<std::string> g_chunkLog;
+std::vector<uint16_t> g_chunkIds;                                         // what Descend hands out
+std::vector<uint32_t> g_bits;                                             // what ReadBits hands out
+S_vector g_readPos;
+struct S_RayAnswer {
+    bool hit = false;
+    S_vector pos, normal;
+    uint32_t flags = 0;
+};
+S_RayAnswer g_ray;
+std::vector<std::string> g_rayLog;
+struct S_ExplosionLog {
+    S_vector pos;
+    float range, damage;
+    bool unknown18;
+    C_Actor *source;
+};
+std::vector<S_ExplosionLog> g_explosions;
+int g_difficulty = 2;
+std::vector<std::string> g_cameraLog;
 bool g_decalsOn;
 float g_light = 1.0f;
 std::vector<std::string> g_particleLog;
@@ -109,10 +129,20 @@ int C_CollisionWorld::QuerySegment(S_CollisionQuery &query) const
     query.hits = g_queryHits;
     return static_cast<int>(query.hits.size());
 }
-S_CollisionVolume *C_CollisionWorld::RayTest(const S_vector &, const S_vector &, S_vector *, S_vector *, uint32_t,
-                                             uint32_t) const
+S_CollisionVolume *C_CollisionWorld::RayTest(const S_vector &from, const S_vector &dir, S_vector *pos, S_vector *normal,
+                                             uint32_t types, uint32_t flags) const
 {
-    return nullptr;
+    char s[64];
+    std::snprintf(s, sizeof s, " %x %x", types, flags);
+    g_rayLog.push_back("ray " + std::to_string(from.x) + "," + std::to_string(from.y) + "," + std::to_string(from.z) + " " +
+                       std::to_string(dir.x) + "," + std::to_string(dir.y) + "," + std::to_string(dir.z) + s);
+    if (!g_ray.hit)
+        return nullptr;
+    *pos = g_ray.pos;
+    *normal = g_ray.normal;
+    static S_CollisionVolume volume;
+    volume.flags = g_ray.flags;
+    return &volume;
 }
 S_CollisionVolume *C_CollisionWorld::RayTestDynamic(const S_vector &, const S_vector &, S_vector *, S_vector *, uint32_t,
                                                     uint32_t) const
@@ -157,7 +187,10 @@ bool C_game::IsFirstPersonView() const { return false; }
 void C_game::Print(const char *, ...) {}
 bool C_CameraModule::GetCameraDir(int, S_vector4 *dir) { dir->x = 0.0f; dir->y = 0.0f; dir->z = 1.0f; return true; }
 bool C_CameraModule::GetCameraPos(int, S_vector4 *pos) { pos->x = 0.0f; pos->y = 0.0f; pos->z = -10.0f; return true; }
-void C_CameraModule::SetSpecialMode(int, bool, I3D_frame *) {}
+void C_CameraModule::SetSpecialMode(int mode, bool on, I3D_frame *target)
+{
+    g_cameraLog.push_back(std::to_string(mode) + (on ? " on " : " off ") + (target ? "frame" : "null"));
+}
 int C_ParticlesModule::Create(int effect, const S_matrix &, I3D_frame *frame, bool a, bool b)
 {
     g_effects.push_back(effect);
@@ -165,8 +198,10 @@ int C_ParticlesModule::Create(int effect, const S_matrix &, I3D_frame *frame, bo
                             (frame ? " frame" : ""));
     return 41;
 }
-int C_ParticlesModule::CreateAt(int effect, const S_vector &, const S_vector &, I3D_frame *, bool, bool)
+int C_ParticlesModule::CreateAt(int effect, const S_vector &, const S_vector &, I3D_frame *frame, bool a, bool b)
 {
+    g_particleLog.push_back("createat " + std::to_string(effect) + " " + std::to_string(a) + std::to_string(b) +
+                            (frame ? " frame" : ""));
     g_effects.push_back(effect);
     return 1;
 }
@@ -174,7 +209,7 @@ void C_ParticlesModule::Destroy(int id) { g_particleLog.push_back("destroy " + s
 void C_ParticlesModule::ToggleEmission(int id, int on) { g_particleLog.push_back("toggle " + std::to_string(id) + " " + std::to_string(on)); }
 C_PlayerOptions *C_GameProfile::GetDetailSettings() { return reinterpret_cast<C_PlayerOptions *>(g_soundModuleBytes); }
 bool C_PlayerOptions::IsEnabled(int option) const { return option == DETAIL_DECALS && g_decalsOn; }
-int C_GameProfile::GetDifficulty() const { return 2; }
+int C_GameProfile::GetDifficulty() const { return g_difficulty; }
 C_Human *C_Team::GetActivePlayer() const { return g_activePlayer; }
 void C_Team::NotifyGrenadeThrown(const S_vector &, const S_vector &, C_Actor *) {}
 namespace {
@@ -212,9 +247,17 @@ C_Module::C_Module(int id, const char *) : m_id(id) {}
 C_Module::~C_Module() {}
 C_BitStream *C_NetGame::CreateMessage(int, int) { return nullptr; }
 void C_NetGame::SendNetMessage(C_BitStream *) {}
-void C_NetMessage::ReadPosition(S_vector &) {}
+void C_NetMessage::ReadPosition(S_vector &pos) { pos = g_readPos; }
 void C_NetMessage::WritePosition(const S_vector &) {}
-uint32_t C_BitStream::ReadBits(int) { return 0; }
+uint32_t C_BitStream::ReadBits(int bits)
+{
+    if (g_bits.empty())
+        return 0xDEAD;
+    const uint32_t v = g_bits.front();
+    g_bits.erase(g_bits.begin());
+    g_chunkLog.push_back("bits " + std::to_string(bits));
+    return v;
+}
 void C_BitStream::WriteBits(uint32_t, int) {}
 C_RigidBody::C_RigidBody() {}
 C_RigidBody::~C_RigidBody() {}
@@ -231,11 +274,21 @@ void C_RigidBody::Nudge() {}
 void C_RigidBody::Step(uint32_t) {}
 void C_FirearmComp::Save(int *, void *) {}
 void C_FirearmComp::Load(int, const void *) {}
-void S_Explosion::Execute() {}
-bool C_chunk::Begin(uint16_t) { return true; }
-bool C_chunk::Descend(uint16_t &) { return false; }
-bool C_chunk::Ascend(uint32_t *) { return true; }
-int C_chunk::RemainingSize() const { return 0; }
+void C_ProjectileWeaponComp::Save(int *, void *) {}
+void C_ProjectileWeaponComp::Load(int, const void *) {}
+void S_Explosion::Execute() { g_explosions.push_back({pos, range, damage, unknown18, source}); }
+bool C_chunk::Begin(uint16_t id) { g_chunkLog.push_back("begin " + std::to_string(id)); return true; }
+bool C_chunk::Descend(uint16_t &id)
+{
+    if (g_chunkIds.empty())
+        return false;
+    id = g_chunkIds.front();
+    g_chunkIds.erase(g_chunkIds.begin());
+    g_chunkLog.push_back("descend " + std::to_string(id));
+    return true;
+}
+bool C_chunk::Ascend(uint32_t *) { g_chunkLog.push_back("ascend"); return true; }
+int C_chunk::RemainingSize() const { return static_cast<int>(g_chunkIds.size()); }
 void I3D_frame::UpdateWMatrixProc() {}
 S_vector __stdcall S_matrix::GetScale() const
 {
@@ -321,6 +374,11 @@ I3D_sector *__stdcall F_GetSector(void *, const S_vector &pos)
 {
     g_sceneLog.push_back("sector " + Vec(pos));
     return reinterpret_cast<I3D_sector *>(g_sectorFrame);
+}
+I3D_frame *__stdcall F_CreateFrame(void *, int type)
+{
+    g_sceneLog.push_back("createframe " + std::to_string(type));
+    return MakeFrame(FRAME_VISUAL, "sound");
 }
 int g_visualsMade;
 I3D_frame *__stdcall F_CreateVisual(void *, uint32_t type)
@@ -450,6 +508,7 @@ void SetMaterial(int id, uint32_t absorption, uint32_t cost)
     m.hitSound = 100 + id;
     m.hitSoundAlternate = 200 + id;
     m.hitEffect = 300 + id;
+    m.explosionEffect = 500 + id;
     m.decal = -1;
 }
 
@@ -514,6 +573,14 @@ void Reset(uint32_t role = GAME_ROLE_LOCAL)
     g_sceneLog.clear();
     g_intersectExtra = 0;
     g_itemFrameIndices.clear();
+    g_explosions.clear();
+    g_difficulty = 2;
+    g_cameraLog.clear();
+    g_chunkLog.clear();
+    g_chunkIds.clear();
+    g_bits.clear();
+    g_ray = S_RayAnswer();
+    g_rayLog.clear();
 }
 
 C_BulletShot *Fire(const S_vector &pos, const S_vector &dir, bool fake = false, bool flare = false)
@@ -1854,6 +1921,692 @@ void TestBulletDecals()
         CHECK(View(m.m_decals.back())->parentName == C_str(actor == item ? "No Parent" : "panel"));
     }
 }
+
+// ---- projectiles (C_ProjectileShot) ----
+
+// A rocket: 50 damage (the penetration budget), 100 m/s, an explosion of 200 within 8 m, sound 9, effect 33.
+C_ProjectileWeaponComp g_rocket;
+void SetUpRocket()
+{
+    g_rocket.m_damage = 50.0f;
+    g_rocket.m_muzzleVelocity = 100.0f;
+    g_rocket.m_explosionDamage = 200.0f;
+    g_rocket.m_explosionRadius = 8.0f;
+    g_rocket.m_explosionSound = 9;
+    g_rocket.m_explosionEffect = 33;
+    for (int i = 0; i < 80; ++i)
+        g_materialTable[i].explosionEffect = 500 + i;
+}
+C_ProjectileShot *Launch(const S_vector &pos, const S_vector &dir, I3D_frame *model = nullptr, int trail = -1,
+                         bool flySound = false, bool camera = false, bool fake = false)
+{
+    auto *p = new C_ProjectileShot();
+    p->Init(g_shooter, pos, dir, &g_rocket, model, trail, flySound, camera, fake);
+    return p;
+}
+int Count(const std::vector<std::string> &log, const std::string &line) { return static_cast<int>(std::count(log.begin(), log.end(), line)); }
+
+void TestProjectileInit()
+{
+    Reset();
+    C_ProjectileShot *p = Launch(S_vector(1, 2, 3), S_vector(0, 0, 1));
+    CHECK(Same(p->m_velocity, S_vector(0, 0, 100)) && Same(p->m_damage, 50.0f) && p->m_trail == -1 && !p->m_exploded);
+    CHECK(p->m_visual == nullptr && p->m_flySound == nullptr && g_sceneLog.empty() && p->m_removeDelay == 0);
+    CHECK(Same(p->m_prevPos, S_vector(1, 2, 3)) && Same(p->m_step, S_vector(0, 0, 0)) && p->m_flightTime == 0);
+    // With a model: a copy, linked into the dynamic root, aimed along the velocity, placed, on; the trail made
+    // on it (backwards); a client with the fly sound makes one (its file not found here: released).
+    Reset();
+    I3D_frame *model = MakeFrame(FRAME_MODEL, "rocketmodel");
+    p = Launch(S_vector(1, 2, 3), S_vector(0, 0, 1), model, 77, true);
+    I3D_frame *v = p->m_visual;
+    const std::string n = FrameName(v);
+    CHECK(v != nullptr && (g_sceneLog == std::vector<std::string>{"create " + std::to_string(I3DVISUAL_OBJECT),
+                                                                   "createframe " + std::to_string(FRAME_SOUND)}));
+    CHECK((g_frameLog == std::vector<std::string>{"duplicate " + n + " rocketmodel", "link " + n + " null 0",
+                                                  "link " + n + " null 0", "dir " + n + " 0,0,100 0", "pos " + n + " 1,2,3",
+                                                  "on " + n, "update " + n, "release sound"}));
+    CHECK(p->m_trail == 1);
+    CHECK(p->m_flySound == nullptr);
+    // Trail effect 0 is one (>= 0), made on the model, both flags set.
+    Reset();
+    p = Launch(S_vector(1, 2, 3), S_vector(0, 0, 1), model, 0);
+    CHECK(p->m_trail == 1 && (g_particleLog == std::vector<std::string>{"createat 0 11 frame"}));
+    // A server alone, or no fly sound asked: none made.
+    Reset(GAME_ROLE_SERVER);
+    Launch(S_vector(1, 2, 3), S_vector(0, 0, 1), model, -1, true);
+    CHECK(Count(g_sceneLog, "createframe " + std::to_string(FRAME_SOUND)) == 0);
+    Reset();
+    p = Launch(S_vector(1, 2, 3), S_vector(0, 0, 1), model, -1, false);
+    CHECK(Count(g_sceneLog, "createframe " + std::to_string(FRAME_SOUND)) == 0 && p->m_trail == -1);
+}
+
+void TestProjectileFlight()
+{
+    // Free flight: the bullet's step and gravity; 600 m ends it without an explosion.
+    Reset();
+    C_ProjectileShot *p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    CHECK(!p->Tick(100));
+    CHECK(Same(p->m_pos, S_vector(10, 10, 0)) && Same(p->m_velocity.y, -(100.0f * 0.001f * 9.8f)) && Same(p->m_distance, 10.0f));
+    CHECK((g_bodyLog == std::vector<std::string>{"remove", "restore"}) && g_queries.size() == 1 &&
+          g_queries[0].excludeTypes == 0x48001 && g_queries[0].excludeFlags == 0x200000);
+    p->m_distance = 591.0f;
+    CHECK(!p->Tick(100));                                                 // 601 m: gone, no explosion
+    CHECK(p->m_exploded && p->m_removeDelay == 0 && g_explosions.empty() && g_sounds.empty());
+    CHECK(p->Tick(100));
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->m_distance = 590.0f;
+    p->Tick(100);                                                         // 600 exactly: on
+    CHECK(!p->m_exploded);
+}
+
+void TestProjectileWalls()
+{
+    // (The manager's shared sound request left with another source and frame.)
+    g_shotManager.m_sound.source = MakeActor(ACTOR_BARREL);
+    g_shotManager.m_sound.attachTo = MakeFrame(FRAME_VISUAL, "stale");
+    // An impenetrable wall: it explodes at the hit, 0.2 m off the surface, half its explosion damage (a static
+    // surface), the AI told (local game); the client plays it: the explosion sound at the hit, silent to the AI,
+    // the weapon's effect and the material's.
+    Reset();
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), StaticVolume(2), 0.4f)};
+    C_ProjectileShot *p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    CHECK(!p->Tick(100) && p->m_exploded && Same(p->m_pos, S_vector(4, 10, 0)));
+    CHECK(g_explosions.size() == 1 && Same(g_explosions[0].pos, S_vector(4.0f - 0.2f, 10, 0)) &&
+          Same(g_explosions[0].range, 8.0f) && Same(g_explosions[0].damage, 100.0f) && !g_explosions[0].unknown18 &&
+          g_explosions[0].source == g_shooter);
+    CHECK(g_sounds.size() == 2 && g_sounds[0].chapter == SOUND_CHAPTER_EXPLOSION && g_sounds[0].group == 9 &&
+          g_sounds[0].flags == (SOUND_AI_ONLY | SOUND_AI_OCCLUSION) && g_sounds[0].source == g_shooter &&
+          Same(g_sounds[0].pos, S_vector(4.0f - 0.2f, 10, 0)));
+    CHECK(g_sounds[1].chapter == SOUND_CHAPTER_EXPLOSION && g_sounds[1].flags == SOUND_SILENT_TO_AI &&
+          g_sounds[1].source == nullptr && Same(g_sounds[1].pos, S_vector(4, 10, 0)));
+    CHECK(g_sounds[0].attachTo == nullptr && g_sounds[1].attachTo == nullptr);
+    // No range or no damage: no explosion executed (the AI still hears it).
+    for (int variant = 0; variant < 2; ++variant) {
+        Reset();
+        g_rocket.m_explosionRadius = variant == 0 ? 0.0f : 8.0f;
+        // (and a radius of 0.5 does explode: > 0)
+        g_rocket.m_explosionDamage = variant == 1 ? 0.0f : 200.0f;
+        g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), StaticVolume(2), 0.4f)};
+        Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+        CHECK(g_explosions.empty() && g_sounds.size() == 2);
+    }
+    Reset();
+    g_rocket.m_explosionRadius = 0.5f;
+    g_rocket.m_explosionDamage = 200.0f;
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), StaticVolume(2), 0.4f)};
+    Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+    CHECK(g_explosions.size() == 1 && Same(g_explosions[0].range, 0.5f));
+    g_rocket.m_explosionRadius = 8.0f;
+    g_rocket.m_explosionDamage = 200.0f;
+    CHECK((g_effects == std::vector<int>{33, 502}));
+    CHECK((g_particleLog == std::vector<std::string>{"createat 33 10", "createat 502 10"}));
+    CHECK(Same(p->m_velocity.y, -(100.0f * 0.001f * 9.8f)) && Same(p->m_distance, 4.0f));
+    // Gone the next tick (no camera).
+    CHECK(p->Tick(100));
+    // A server alone: exploded without playing; a client alone: played, no damage.
+    Reset(GAME_ROLE_SERVER);
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), StaticVolume(2), 0.4f)};
+    Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+    CHECK(g_explosions.size() == 1 && g_sounds.empty() && g_effects.empty());
+    Reset(GAME_ROLE_CLIENT);
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), StaticVolume(2), 0.4f)};
+    Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+    CHECK(g_explosions.empty() && g_sounds.size() == 1 && g_effects.size() == 2);
+    // STOP: gone without an explosion (a server alone returns at once).
+    Reset();
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), StaticVolume(MATERIAL_STOP), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    CHECK(!p->Tick(100) && p->m_exploded && g_explosions.empty() && g_sounds.empty() && Same(p->m_pos, S_vector(4, 10, 0)));
+    Reset(GAME_ROLE_SERVER);
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), StaticVolume(MATERIAL_STOP), 0.4f)};
+    CHECK(Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100));
+    // PASS: through.
+    Reset();
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), StaticVolume(MATERIAL_PASS), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(!p->m_exploded && Same(p->m_pos, S_vector(10, 10, 0)));
+    // Penetrable: cost 30 of 50 passes (20 left), a cost equal to what is left passes, above it explodes there.
+    // Passing a hit-effect material (31..34, 41, 43, 62, 70) plays its sound and effect (client); others not.
+    Reset();
+    SetMaterial(32, 0, 30);
+    SetMaterial(33, 0, 20);
+    g_queryHits = {Hit(S_vector(2, 10, 0), S_vector(-1, 0, 0), StaticVolume(32), 0.2f),
+                   Hit(S_vector(5, 10, 0), S_vector(-1, 0, 0), StaticVolume(33), 0.5f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(!p->m_exploded && Same(p->m_damage, 0.0f) && g_sounds.size() == 2 && (g_effects == std::vector<int>{332, 333}));
+    Reset();
+    SetMaterial(5, 0, 30);
+    SetMaterial(6, 0, 21);
+    g_queryHits = {Hit(S_vector(2, 10, 0), S_vector(-1, 0, 0), StaticVolume(5), 0.2f),
+                   Hit(S_vector(5, 10, 0), S_vector(-1, 0, 0), StaticVolume(6), 0.5f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(p->m_exploded && Same(p->m_damage, 20.0f) && Same(p->m_pos, S_vector(5, 10, 0)));
+    CHECK(g_explosions.size() == 1 && Same(g_explosions[0].damage, 100.0f));   // (a static surface: half)
+    CHECK(g_sounds.size() == 2 && (g_effects == std::vector<int>{33, 506}));    // (no hit sounds for 5)
+    for (int m : {31, 34, 41, 43, 62, 70, 30, 35, 42, 44, 61, 63, 69, 71}) {
+        Reset();
+        SetMaterial(m, 0, 1);
+        g_queryHits = {Hit(S_vector(2, 10, 0), S_vector(-1, 0, 0), StaticVolume(m), 0.2f)};
+        Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+        const bool effect = (m > 30 && m < 35) || m == 41 || m == 43 || m == 62 || m == 70;
+        CHECK(g_sounds.size() == (effect ? 1u : 0u));
+    }
+    // A level mesh tested (0xC0): told to the scripts when hit (server).
+    Reset();
+    I3D_frame *wall = MakeFrame(FRAME_VISUAL, "pwall");
+    I3D_frame *piece = MakeFrame(FRAME_VISUAL, "ppiece");
+    S_CollisionVolume *v = StaticVolume(2, COLLISION_FLAG_PRIMITIVE);
+    v->frame = wall;
+    g_intersects = {{piece, 3.5f, S_vector(-1, 0, 0)}};
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(0, 1, 0), v, 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(g_framesHit.size() == 1 && g_framesHit[0] == piece && Same(p->m_pos, S_vector(3.5f, 10, 0)));
+    CHECK(g_explosions.size() == 1 && Same(g_explosions[0].pos, S_vector(3.5f + 0.2f * -1.0f, 10, 0)));
+}
+
+void TestProjectileActors()
+{
+    S_TestHuman target = MakeHuman("ptarget");
+    g_headItem = nullptr;
+    // A human in a zone: explodes at full damage, at the hit (no Hit of its own: the explosion does it).
+    Reset();
+    g_actorMaterial = 1;
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(target.human), 0.4f)};
+    C_ProjectileShot *p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(p->m_exploded && g_hits.empty() && g_explosions.size() == 1 && Same(g_explosions[0].damage, 200.0f));
+    CHECK((g_effects == std::vector<int>{33, 501}));
+    // ...after passing a wall (the share back to full).
+    Reset();
+    SetMaterial(5, 0, 10);
+    g_actorMaterial = 1;
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(2, 10, 0), S_vector(-1, 0, 0), StaticVolume(5), 0.2f),
+                   Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(target.human), 0.4f)};
+    Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+    CHECK(g_explosions.size() == 1 && Same(g_explosions[0].damage, 200.0f));
+    // No zone: told it is shot at (server, alive; no hostility test), flies on.
+    Reset();
+    g_friends = true;
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(target.human), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(!p->m_exploded && g_shotAt.size() == 1 && Same(g_shotAt[0].velocity, S_vector(100, 0, 0)));
+    for (int variant = 0; variant < 2; ++variant) {
+        Reset(variant == 0 ? GAME_ROLE_CLIENT : GAME_ROLE_LOCAL);
+        target.human->m_stats[STAT_HEALTH] = variant == 1 ? 0 : 100;
+        g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(target.human), 0.4f)};
+        Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+        CHECK(g_shotAt.empty());
+    }
+    target.human->m_stats[STAT_HEALTH] = 1;
+    Reset();
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(target.human), 0.4f)};
+    Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+    CHECK(g_shotAt.size() == 1);
+    target.human->m_stats[STAT_HEALTH] = 100;
+    // A fake projectile skips actors.
+    Reset();
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(target.human), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0), nullptr, -1, false, false, true);
+    p->Tick(100);
+    CHECK(!p->m_exploded && g_intersectFrames.empty());
+    // A car: hit directly with the explosion damage 0.1 m before the hit along the direction (server); its hit
+    // material; the explosion at a tenth.
+    I3D_frame *carFrame = MakeFrame(FRAME_MODEL, "pcar");
+    C_Actor *car = MakeActor(ACTOR_CAR, carFrame);
+    Reset();
+    g_carMaterial = 2;
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(car), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(g_hits.size() == 1 && g_hits[0].type == HIT_PROJECTILE && Same(g_hits[0].amount, 200.0f) &&
+          Same(g_hits[0].pos, S_vector(4.0f - 0.1f, 10, 0)) && Same(g_hits[0].dir, S_vector(1, 0, 0)) && g_hits[0].part == 0);
+    CHECK(g_framesHit.size() == 1 && g_framesHit[0] == carFrame && g_explosions.size() == 1 &&
+          Same(g_explosions[0].damage, 20.0f) && p->m_exploded);
+    // Single player, difficulty 1, the player's side, a projectile with a model: four times.
+    I3D_frame *model = MakeFrame(FRAME_MODEL, "pmodel");
+    for (int variant = 0; variant < 5; ++variant) {
+        Reset(variant == 1 ? GAME_ROLE_SERVER : GAME_ROLE_LOCAL);
+        g_difficulty = variant == 2 ? 2 : 1;
+        reinterpret_cast<C_Human *>(g_shooter)->m_role = variant == 3 ? HUMAN_ROLE_ENEMY : HUMAN_ROLE_PLAYER;
+        g_carMaterial = 2;
+        g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(car), 0.4f)};
+        Launch(S_vector(0, 10, 0), S_vector(1, 0, 0), variant == 4 ? nullptr : model)->Tick(100);
+        CHECK(g_hits.size() == 1 && Same(g_hits[0].amount, variant == 0 ? 800.0f : 200.0f));
+    }
+    reinterpret_cast<C_Human *>(g_shooter)->m_role = HUMAN_ROLE_PLAYER;
+    // No hit material: its visual tested along the step; no part, or a part without material: flies on (hit
+    // all the same, server).
+    Reset();
+    g_carMaterial = MATERIAL_NONE;
+    g_intersects = {{nullptr, 0, S_vector(0, 0, 0)}};
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(car), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(!p->m_exploded && g_hits.size() == 1 && g_intersectFrames.size() == 1 && g_intersectFrames[0] == carFrame &&
+          g_intersectFlags[0] == I3DCOL_VISUAL_GEOMETRY && g_intersectExtra == 0);
+    I3D_frame *part = MakeFrame(FRAME_VISUAL, "ppart");
+    Reset();
+    g_carMaterial = MATERIAL_NONE;
+    g_actorMaterial = MATERIAL_NONE;
+    g_intersects = {{part, 4.0f, S_vector(-1, 0, 0)}};
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(car), 0.4f)};
+    CHECK(!Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100) && g_explosions.empty());
+    Reset();
+    g_carMaterial = MATERIAL_NONE;
+    g_actorMaterial = 2;
+    g_intersects = {{part, 4.0f, S_vector(-1, 0, 0)}};
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(car), 0.4f)};
+    Launch(S_vector(0, 10, 0), S_vector(1, 0, 0))->Tick(100);
+    CHECK(g_explosions.size() == 1 && Same(g_explosions[0].damage, 20.0f));
+    // The shooter's own vehicle: passed.
+    Reset();
+    g_carMaterial = 2;
+    reinterpret_cast<C_Human *>(g_shooter)->m_vehicle = car;
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(car), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(!p->m_exploded && g_hits.empty());
+    reinterpret_cast<C_Human *>(g_shooter)->m_vehicle = nullptr;
+    // Another actor: its visual; explodes at full damage.
+    Reset();
+    C_Actor *barrel = MakeActor(ACTOR_BARREL, MakeFrame(FRAME_MODEL, "pbarrel"));
+    g_actorMaterial = 4;
+    g_intersects = {{part, 3.0f, S_vector(-1, 0, 0)}};
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(barrel), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->Tick(100);
+    CHECK(p->m_exploded && Same(p->m_pos, S_vector(3, 10, 0)) && g_explosions.size() == 1 && Same(g_explosions[0].damage, 200.0f));
+    CHECK(g_framesHit.size() == 1 && g_hits.empty());
+    // A destructible part: damaged by the projectile's own damage (truncated), its material decides.
+    Reset();
+    I3D_frame *door = MakeFrame(FRAME_VISUAL, "pdoor");
+    static S_FrameData data{};
+    alignas(16) static unsigned char keeperBytes[sizeof(C_VersionKeeper)];
+    auto *keeper = reinterpret_cast<C_VersionKeeper *>(keeperBytes);
+    keeper->m_materialId = 5;
+    SetMaterial(5, 0, 10);
+    data.versionKeeper = keeper;
+    part->m_data = &data;
+    g_intersects = {{part, 3.0f, S_vector(-1, 0, 0)}};
+    g_queryHits = {Hit(S_vector(4, 10, 0), S_vector(-1, 0, 0), DynamicVolume(nullptr, door), 0.4f)};
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0));
+    p->m_damage = 49.9f;
+    p->Tick(100);
+    CHECK((g_keeperDamage == std::vector<int>{49}) && !p->m_exploded && Same(p->m_damage, 39.9f));
+    part->m_data = nullptr;
+}
+
+void TestProjectileCamera()
+{
+    // Update: the model shown along the step; the camera rides along with the local player's projectile once it
+    // has flown more than 300 ms (asked for at launch); after the explosion it lingers 1.5 s.
+    Reset();
+    g_localPlayer = reinterpret_cast<C_Human *>(g_shooter);
+    I3D_frame *model = MakeFrame(FRAME_MODEL, "cmodel");
+    C_ProjectileShot *p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0), model, -1, false, true);
+    const std::string n = FrameName(p->m_visual);
+    p->Tick(100);
+    g_frameLog.clear();
+    p->Update(50);
+    CHECK((g_frameLog == std::vector<std::string>{"pos " + n + " 5,10,0", "worlddir " + n + " 1,0,0 0", "on " + n,
+                                                  "update " + n}));
+    CHECK(p->m_flightTime == 50 && g_cameraLog.empty());
+    for (int i = 0; i < 5; ++i) {
+        p->m_interpolation = 0;
+        p->Update(50);
+    }
+    CHECK(p->m_flightTime == 300 && g_cameraLog.empty());                // (> 300)
+    p->Update(1);
+    CHECK((g_cameraLog == std::vector<std::string>{"9 on frame"}) && p->m_cameraFollows);
+    p->Update(1);
+    CHECK(g_cameraLog.size() == 1);
+    g_queryHits = {Hit(S_vector(14, 10, 0), S_vector(-1, 0, 0), StaticVolume(2), 0.4f)};
+    p->Tick(100);
+    CHECK(p->m_exploded && p->m_removeDelay == 1500);
+    // Exploded: hidden, the delay counted down, gone below 1.
+    g_frameLog.clear();
+    model->m_frameFlags |= 1;
+    p->m_visual->m_frameFlags |= 1;
+    CHECK(!p->Tick(1000) && p->m_removeDelay == 500 && Count(g_frameLog, "off " + n) == 1);
+    CHECK(!p->Tick(499) && p->m_removeDelay == 1);
+    CHECK(p->Tick(1) && p->m_removeDelay == 0);
+    // Release turns the camera back.
+    g_cameraLog.clear();
+    p->Release();
+    CHECK((g_cameraLog == std::vector<std::string>{"9 off null"}) && p->m_visual == nullptr);
+    // Not asked, not the local player, or no model: no camera.
+    for (int variant = 0; variant < 2; ++variant) {
+        Reset();
+        g_localPlayer = variant == 0 ? reinterpret_cast<C_Human *>(g_shooter) : nullptr;
+        p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0), model, -1, false, variant == 1);
+        p->Tick(100);
+        for (int i = 0; i < 8; ++i) {
+            p->m_interpolation = 0;
+            p->Update(50);
+        }
+        CHECK(g_cameraLog.empty() && !p->m_cameraFollows);
+    }
+    // Update without a step (or a visual): nothing, the flight time not counted.
+    Reset();
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0), model);
+    p->Update(50);
+    CHECK(p->m_flightTime == 0 && g_frameLog.size() == 7);               // (Init's own calls only)
+    // Release frees the trail and the model.
+    Reset();
+    p = Launch(S_vector(0, 10, 0), S_vector(1, 0, 0), model, 12);
+    const std::string n2 = FrameName(p->m_visual);
+    g_frameLog.clear();
+    g_particleLog.clear();
+    p->Release();
+    CHECK(Count(g_frameLog, "release " + n2) == 1 && (g_particleLog == std::vector<std::string>{"destroy 1"}) &&
+          p->m_trail == -1 && g_cameraLog.empty());
+}
+
+// ---- the manager ----
+
+// A shot that finishes when told, logging its calls.
+std::vector<std::string> g_shotLog;
+struct C_TestShot : C_Shot {
+    explicit C_TestShot(E_ShotType type, const char *name, int ticks) : C_Shot(type), m_name(name), m_ticks(ticks) {}
+    ~C_TestShot() override { g_shotLog.push_back("delete " + m_name); }
+    bool Tick(int dt) override
+    {
+        g_shotLog.push_back("tick " + m_name + " " + std::to_string(dt));
+        return --m_ticks <= 0;
+    }
+    void Update(int dt) override { g_shotLog.push_back("update " + m_name + " " + std::to_string(dt)); }
+    void SaveGame(C_chunk &) override { g_shotLog.push_back("save " + m_name); }
+    std::string m_name;
+    int m_ticks;
+};
+
+void TestManagerTick()
+{
+    C_ShotManager &m = g_shotManager;
+    // Tick: every shot ticked once, in order; the finished ones removed (the next one still ticked): a
+    // projectile or a thrown item deleted.
+    Reset();
+    g_shotLog.clear();
+    m.m_shots = {new C_TestShot(SHOT_PROJECTILE, "a", 1), new C_TestShot(SHOT_THROWN, "b", 2),
+                 new C_TestShot(SHOT_PROJECTILE, "c", 1), new C_TestShot(SHOT_PROJECTILE, "d", 4)};
+    m.Tick(100);
+    CHECK((g_shotLog == std::vector<std::string>{"tick a 100", "delete a", "tick b 100", "tick c 100", "delete c",
+                                                 "tick d 100"}));
+    CHECK(m.m_shots.size() == 2);
+    g_shotLog.clear();
+    m.Tick(50);
+    CHECK((g_shotLog == std::vector<std::string>{"tick b 50", "delete b", "tick d 50"}) && m.m_shots.size() == 1);
+    // Update (a server): every shot updated with the frame's time, no ticks.
+    g_shotLog.clear();
+    m.Update(16);
+    CHECK((g_shotLog == std::vector<std::string>{"update d 16"}));
+    // A pure client: its own 100 ms ticks, at most one a frame, once past 100 (the rest kept).
+    Reset(GAME_ROLE_CLIENT);
+    g_shotLog.clear();
+    m.m_clientTickTime = 0;
+    m.Update(100);
+    CHECK((g_shotLog == std::vector<std::string>{"update d 100"}) && m.m_clientTickTime == 100);
+    g_shotLog.clear();
+    m.Update(250);
+    CHECK((g_shotLog == std::vector<std::string>{"tick d 100", "update d 250"}) && m.m_clientTickTime == 250);
+    g_shotLog.clear();
+    m.Update(1);
+    CHECK((g_shotLog == std::vector<std::string>{"tick d 100", "delete d"}) && m.m_clientTickTime == 151 && m.m_shots.empty());
+    // 101 ms: a tick (> 100).
+    m.m_shots = {new C_TestShot(SHOT_PROJECTILE, "e", 9)};
+    m.m_clientTickTime = 0;
+    g_shotLog.clear();
+    m.Update(101);
+    CHECK((g_shotLog == std::vector<std::string>{"tick e 100", "update e 101"}) && m.m_clientTickTime == 1);
+    m.RemoveShots();
+    // A finished bullet goes back to the pool (recycled), not deleted.
+    Reset();
+    C_BulletShot *b = m.m_bulletPool.Get();
+    b->Init(g_shooter, S_vector(0, 0, 0), S_vector(1, 0, 0), &g_rifle, nullptr, false, false);
+    b->m_flareSparks = 5;
+    b->m_finished = true;
+    m.m_shots = {b};
+    m.Tick(100);
+    CHECK(m.m_shots.empty() && m.m_bulletPool.Get() == b && b->m_flareSparks == -1);
+}
+
+void TestManagerSaveLoad()
+{
+    C_ShotManager &m = g_shotManager;
+    // Save: an empty placeholder chunk per decal, blood drop and pool, then per shot (last first, its own save
+    // inside).
+    Reset();
+    g_shotLog.clear();
+    for (S_ShotDecal *d : m.m_decals)
+        (void)d;
+    const size_t decals = m.m_decals.size();
+    m.m_shots = {new C_TestShot(SHOT_PROJECTILE, "s1", 1), new C_TestShot(SHOT_PROJECTILE, "s2", 1)};
+    CHECK(m.SaveGame(*reinterpret_cast<C_chunk *>(g_gameBytes)));
+    std::vector<std::string> want;
+    for (size_t i = 0; i < decals; ++i) {
+        want.push_back("begin " + std::to_string(0x1A0A));
+        want.push_back("ascend");
+    }
+    want.insert(want.end(), {"begin " + std::to_string(0x1A0D), "ascend", "begin " + std::to_string(0x1A0D), "ascend"});
+    CHECK(g_chunkLog == want);
+    CHECK((g_shotLog == std::vector<std::string>{"save s2", "save s1"}));
+    for (C_Shot *s : m.m_shots)
+        delete s;
+    m.m_shots.clear();
+    // Load: the four placeholders skipped (ascended), others only entered.
+    Reset();
+    g_chunkIds = {0x1A0A, 0x1A0B, 0x1234, 0x1A0C, 0x1A0D};
+    CHECK(m.LoadGame(*reinterpret_cast<C_chunk *>(g_gameBytes)));
+    CHECK((g_chunkLog == std::vector<std::string>{"descend 6666", "ascend", "descend 6667", "ascend", "descend 4660",
+                                                  "descend 6668", "ascend", "descend 6669", "ascend"}));
+}
+
+void TestManagerMessage()
+{
+    C_ShotManager &m = g_shotManager;
+    // The explosion message (type 0 in 1 bit): its position, its material (8 bits); played with one of the
+    // three effects, upwards, sound 30.
+    for (int round = 0; round < 60; ++round) {
+        Reset(GAME_ROLE_CLIENT);
+        g_bits = {0, 7};
+        g_readPos = S_vector(1, 2, 3);
+        CHECK(m.OnMessage(reinterpret_cast<C_BitStream *>(g_gameBytes)));
+        CHECK((g_chunkLog == std::vector<std::string>{"bits 1", "bits 8"}));
+        CHECK(g_sounds.size() == 1 && g_sounds[0].group == 30 && g_sounds[0].chapter == SOUND_CHAPTER_EXPLOSION &&
+              Same(g_sounds[0].pos, S_vector(1, 2, 3)));
+        CHECK(g_effects.size() == 2 && (g_effects[0] == 43 || g_effects[0] == 48 || g_effects[0] == 49) && g_effects[1] == 507);
+    }
+    // Another type: nothing more read.
+    Reset(GAME_ROLE_CLIENT);
+    g_bits = {1, 7};
+    CHECK(m.OnMessage(reinterpret_cast<C_BitStream *>(g_gameBytes)) && g_chunkLog.size() == 1 && g_sounds.empty());
+}
+
+void TestClientBullets()
+{
+    // InitClient: the bullet keeps the unit direction; its end is where a 500 m ray from the muzzle hits (the
+    // ray's filters 0x2DC100 / 0x900000), with that surface's material, or the 500 m point, no material.
+    Reset(GAME_ROLE_CLIENT);
+    g_ray.hit = true;
+    g_ray.pos = S_vector(0, 0, 40);
+    g_ray.normal = S_vector(0, 0, -1);
+    g_ray.flags = 4u << 24;
+    auto *b = new C_BulletShot();
+    b->InitClient(g_shooter, S_vector(0, 0, 0), S_vector(0, 0, 1), &g_rifle, nullptr, false, true);
+    CHECK(Same(b->m_velocity, S_vector(0, 0, 1)) && Same(b->m_target, S_vector(0, 0, 40)) && b->m_targetMaterial == 4);
+    CHECK(!b->m_flare && b->m_flareSparks == -1 && Same(b->m_damage, 100.0f));
+    CHECK(g_rayLog.size() == 1 && g_rayLog[0] == "ray 0.000000,0.000000,0.000000 0.000000,0.000000,500.000000 2dc100 900000");
+    // TickClient: at the muzzle velocity towards the end; there: the end's sound and hit (fake: silent to the AI).
+    CHECK(!b->TickClient(25) && Same(b->m_pos, S_vector(0, 0, 20)));
+    CHECK(!b->TickClient(24) && Same(b->m_pos.z, 20.0f + 800.0f * 24.0f * 0.001f));
+    CHECK(g_sounds.empty());
+    CHECK(b->TickClient(25) && Same(b->m_pos, S_vector(0, 0, 40)) && b->m_finished);
+    CHECK(g_sounds.size() == 1 && g_sounds[0].group == 104 && g_sounds[0].flags == SOUND_SILENT_TO_AI &&
+          Same(g_sounds[0].pos, S_vector(0, 0, 40)) && g_effects.size() == 1);
+    // A reused bullet: its flare flag and its old target material are not kept.
+    Reset(GAME_ROLE_CLIENT);
+    b = new C_BulletShot();
+    b->m_flare = true;
+    b->m_targetMaterial = 4;
+    b->InitClient(g_shooter, S_vector(0, 0, 0), S_vector(0, 0, 1), &g_rifle, nullptr, false, false);
+    CHECK(!b->m_flare && b->m_targetMaterial == MATERIAL_NONE);
+    // Material 0 is one (>= 0): played at the end.
+    Reset(GAME_ROLE_CLIENT);
+    g_ray.hit = true;
+    g_ray.pos = S_vector(0, 0, 8);
+    g_ray.normal = S_vector(0, 0, -1);
+    g_ray.flags = 0;
+    SetMaterial(0, 0, MATERIAL_IMPENETRABLE);
+    b = new C_BulletShot();
+    b->InitClient(g_shooter, S_vector(0, 0, 0), S_vector(0, 0, 1), &g_rifle, nullptr, false, false);
+    CHECK(b->m_targetMaterial == 0 && b->TickClient(10) && g_sounds.size() == 1 && g_sounds[0].group == 100);
+    // The whole path is checked for a near miss at once.
+    Reset(GAME_ROLE_CLIENT);
+    {
+        C_Actor *listener = MakeActor(ACTOR_HUMAN);
+        reinterpret_cast<C_Human *>(listener)->m_bodyFrame = MakeFrameAt(S_vector(1, 0, 100));
+        g_activePlayer = reinterpret_cast<C_Human *>(listener);
+        b = new C_BulletShot();
+        b->InitClient(g_shooter, S_vector(0, 0, 0), S_vector(0, 0, 1), &g_rifle, nullptr, false, false);
+        CHECK(g_sounds.size() == 1 && g_sounds[0].group == 11 && b->m_nearMissPlayed);
+    }
+    // Exactly the speed's distance away: arrives (<=).
+    Reset(GAME_ROLE_CLIENT);
+    b = new C_BulletShot();
+    g_ray.hit = true;
+    g_ray.pos = S_vector(0, 0, 8);
+    g_ray.normal = S_vector(0, 0, -1);
+    g_ray.flags = 4u << 24;
+    b->InitClient(g_shooter, S_vector(0, 0, 0), S_vector(0, 0, 1), &g_rifle, nullptr, false, false);
+    CHECK(b->TickClient(10));
+    // Nothing hit: the 500 m point, no sound at the end.
+    Reset(GAME_ROLE_CLIENT);
+    b = new C_BulletShot();
+    b->InitClient(g_shooter, S_vector(1, 0, 0), S_vector(0, 0, 1), &g_rifle, nullptr, false, false);
+    CHECK(Same(b->m_target, S_vector(1, 0, 500)) && b->m_targetMaterial == MATERIAL_NONE);
+    int ticks = 0;
+    while (!b->TickClient(100) && ticks < 20)
+        ++ticks;
+    CHECK(ticks == 6 && g_sounds.empty() && g_effects.empty());           // (80 m a tick: 7 ticks)
+    // A trace: shown at each step, stretched to it.
+    Reset(GAME_ROLE_CLIENT);
+    b = new C_BulletShot();
+    b->InitClient(g_shooter, S_vector(0, 0, 0), S_vector(0, 0, 1), &g_rifle, nullptr, false, false);
+    b->m_visual = MakeFrame(FRAME_VISUAL, "ctrace");
+    b->TickClient(10);
+    CHECK((g_frameLog == std::vector<std::string>{"pos ctrace 0,0,8", "worlddir ctrace 0,0,8 0", "on ctrace", "update ctrace"}));
+    CHECK(Same(b->m_visual->m_scale, S_vector(1, 1, 8)));
+}
+
+void TestFireBullet()
+{
+    C_ShotManager &m = g_shotManager;
+    // The rifle as an item: its component the firearm.
+    static C_ItemDef *def = static_cast<C_ItemDef *>(::operator new(sizeof(C_ItemDef)));
+    std::memset(static_cast<void *>(def), 0, sizeof(C_ItemDef));
+    def->m_component = &g_rifle;
+    static C_WeaponItem *gun = static_cast<C_WeaponItem *>(::operator new(sizeof(C_WeaponItem)));
+    std::memset(static_cast<void *>(gun), 0, sizeof(C_WeaponItem));
+    gun->m_def = def;
+    C_Human *shooter = reinterpret_cast<C_Human *>(g_shooter);
+    shooter->m_frame = MakeFrame(FRAME_MODEL, "shooterframe");
+    // Local game: a bullet from the pool, initialised, in the shots; not stepped yet.
+    Reset();
+    m.m_shots.clear();
+    m.m_clientBullets.clear();
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0, -1);
+    CHECK(m.m_shots.size() == 1 && m.m_shots[0]->GetType() == SHOT_BULLET);
+    auto *b = static_cast<C_BulletShot *>(m.m_shots[0]);
+    CHECK(Same(b->m_pos, S_vector(0, 0, 0)) && !b->m_fake && !b->m_flare && b->m_visual == nullptr && g_queries.empty());
+    // From a vehicle: its first step at once.
+    Reset();
+    m.m_shots.clear();
+    shooter->m_vehicle = shooter;
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0, -1);
+    CHECK(g_queries.size() == 1 && Same(static_cast<C_BulletShot *>(m.m_shots[0])->m_pos, S_vector(80, 0, 0)));
+    shooter->m_vehicle = nullptr;
+    // Flags' low byte: a fake bullet; the trace model when asked for a tracer; the signal pistol: a flare
+    // (its model needs the driver: the flag only checked).
+    Reset();
+    m.m_shots.clear();
+    I3D_frame *traceModel = MakeFrame(FRAME_VISUAL, "tracemodel");
+    m.m_traceModel = nullptr;
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0x100, -1);
+    CHECK(!static_cast<C_BulletShot *>(m.m_shots[0])->m_fake);
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0x1, -1);
+    CHECK(static_cast<C_BulletShot *>(m.m_shots[1])->m_fake);
+    (void)traceModel;
+    // A network server: in the shots too; own shots of a network client: stepped at once.
+    Reset(GAME_ROLE_SERVER);
+    m.m_shots.clear();
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0, -1);
+    CHECK(m.m_shots.size() == 1 && g_queries.empty());
+    Reset(GAME_ROLE_CLIENT);
+    m.m_shots.clear();
+    g_localPlayer = shooter;
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0, -1);
+    CHECK(m.m_shots.size() == 1 && g_queries.size() == 1);
+    // A remote player's shot on a client: a client bullet, when the shooter was drawn in the last frame.
+    Reset(GAME_ROLE_CLIENT);
+    m.m_shots.clear();
+    m.m_clientBullets.clear();
+    FrameStamp(shooter->m_frame) = 7;
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0, -1);
+    CHECK(m.m_shots.empty() && m.m_clientBullets.size() == 1 && g_rayLog.size() == 1);
+    // Update moves the client bullets (TickClient) and recycles the arrived ones (two in flight: one 80 m away,
+    // one 500 m).
+    g_ray = S_RayAnswer();
+    g_ray.hit = true;
+    g_ray.pos = S_vector(80, 0, 0);
+    g_ray.normal = S_vector(-1, 0, 0);
+    g_ray.flags = 4u << 24;
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0, -1);
+    CHECK(m.m_clientBullets.size() == 2);
+    C_BulletShot *far500 = m.m_clientBullets[0];
+    C_BulletShot *near80 = m.m_clientBullets[1];
+    m.m_clientBullets = {near80, far500};                                 // (the arriving one first: the next still moves)
+    m.Update(50);
+    CHECK(m.m_clientBullets.size() == 2 && Same(near80->m_pos, S_vector(40, 0, 0)));
+    m.Update(50);
+    CHECK(m.m_clientBullets.size() == 1 && m.m_clientBullets[0] == far500 && Same(far500->m_pos, S_vector(80, 0, 0)));
+    C_BulletShot *again = m.m_bulletPool.Get();                           // the arrived one back in the pool
+    CHECK(again == near80);
+    m.m_bulletPool.Put(again);
+    for (int i = 0; i < 8; ++i)
+        m.Update(100);
+    CHECK(m.m_clientBullets.empty());
+    // RemoveShots takes the client bullets back too.
+    FrameStamp(shooter->m_frame) = 7;
+    m.FireBulletFrom(shooter, gun, S_vector(0, 0, 0), S_vector(1, 0, 0), nullptr, nullptr, false, 0, -1);
+    CHECK(m.m_clientBullets.size() == 1);
+    m.RemoveShots();
+    CHECK(m.m_clientBullets.empty());
+    // FireProjectile: a projectile from the weapon's component, fake by the flags' low byte.
+    Reset();
+    m.m_shots.clear();
+    static C_ItemDef *rdef = static_cast<C_ItemDef *>(::operator new(sizeof(C_ItemDef)));
+    std::memset(static_cast<void *>(rdef), 0, sizeof(C_ItemDef));
+    rdef->m_component = &g_rocket;
+    static C_Item *launcher = static_cast<C_Item *>(::operator new(sizeof(C_Item)));
+    std::memset(static_cast<void *>(launcher), 0, sizeof(C_Item));
+    launcher->m_def = rdef;
+    m.FireProjectile(shooter, launcher, S_vector(0, 0, 0), S_vector(0, 1, 0), nullptr, -1, false, false, 0x200);
+    m.FireProjectile(shooter, launcher, S_vector(0, 0, 0), S_vector(0, 1, 0), nullptr, -1, false, false, 0x2);
+    CHECK(m.m_shots.size() == 2 && m.m_shots[0]->GetType() == SHOT_PROJECTILE && !m.m_shots[0]->m_fake &&
+          m.m_shots[1]->m_fake && Same(m.m_shots[0]->m_velocity, S_vector(0, 100, 0)));
+    // RemoveShots: projectiles deleted, bullets and client bullets back to the pool.
+    m.RemoveShots();
+    CHECK(m.m_shots.empty() && m.m_clientBullets.empty());
+    g_localPlayer = nullptr;
+}
 }  // namespace
 
 int main()
@@ -1879,6 +2632,7 @@ int main()
     g_sceneVt[0x8C / 4] = reinterpret_cast<void *>(F_GetLightIntensity);
     g_sceneVt[0xE0 / 4] = reinterpret_cast<void *>(F_GetSector);
     g_driverVt[0x50 / 4] = reinterpret_cast<void *>(F_CreateVisual);
+    g_driverVt[0x54 / 4] = reinterpret_cast<void *>(F_CreateFrame);
     g_actorVt[0xD4 / 4 + 1] = reinterpret_cast<void *>(F_Hit);            // (g++: two destructor slots)
     g_actorVt[0xD8 / 4 + 1] = reinterpret_cast<void *>(F_GetMaterialId);
     reinterpret_cast<C_game *>(g_gameBytes)->m_scene = reinterpret_cast<I3D_scene *>(&g_scene);
@@ -1920,6 +2674,17 @@ int main()
     TestFlareUpdate();
     TestRecycleRelease();
     TestBulletDecals();
+    SetUpRocket();
+    TestProjectileInit();
+    TestProjectileFlight();
+    TestProjectileWalls();
+    TestProjectileActors();
+    TestProjectileCamera();
+    TestManagerTick();
+    TestManagerSaveLoad();
+    TestManagerMessage();
+    TestClientBullets();
+    TestFireBullet();
     std::printf("shots: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }

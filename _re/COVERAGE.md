@@ -261,7 +261,27 @@ expectations come from the original's assembly (0x0044b3b0, 0x0044b910, 0x004483
 
   312 checks. `mutations/mutate_shots2a.py`: 149 mutants, 128 killed, 9 don't build, 12 survived
   (11 equivalent, 1 without an exact float input; listed there). shots.cpp: 393 of 1,482 lines.
-- **Part 2b:** projectiles, thrown items, and the manager's save / load and network messages.
+- **Part 2b (done):** the projectiles, the client bullets, and the manager's core. Expectations
+  from 0x00449290 (the projectile's `Tick`) and 0x00451fb0 (the manager's `Update`):
+  - the projectile:
+    - its explosion share: 0.5 after any static surface, 1 for a human, 0.1 for a car;
+    - a car hit directly 0.1 m before the hit point, ×4 for the player's side on difficulty 1
+      with a model;
+    - penetration while its damage is at least the cost, hit effects for materials 31..34, 41,
+      43, 62 and 70;
+    - the explosion 0.2 m off the surface; the camera riding along after 300 ms, lingering 1.5 s;
+  - the client bullet: the 500 m ray with its filters;
+  - the manager:
+    - a pure client's 100 ms ticks (> 100), with arrived bullets recycled to the pool;
+    - the save placeholders, the explosion message, the firing roles, `RemoveShots`.
+
+  690 checks. `mutations/mutate_shots2b.py`: 273 mutants, 172 killed, 16 don't build, 85
+  survived. 12 survivors are equivalent and 4 can't be killed with this harness; the reasons are
+  in the file. The rest is effects code for part 2c.
+
+  shots.cpp: 733 of 1,482 lines (49 %), 558 of 1,075 branch outcomes.
+- **Part 2c:** thrown items (rigid body), shells, muzzle lights, blood, explosion decals, the fly
+  sound, `MeleeAttack`.
 
 `_re/harness/mutrun.py` now takes its repository root from its own path. It used to name the
 G: checkout, which has been out of date since the move to T:.
