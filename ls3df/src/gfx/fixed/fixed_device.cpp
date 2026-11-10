@@ -75,6 +75,17 @@ void Trace(const char *format, ...)
     std::fflush(log);
 }
 
+namespace {
+FrameObserver g_frameObserver = nullptr;
+void *g_frameObserverContext = nullptr;
+}  // namespace
+
+void SetFrameObserver(FrameObserver observer, void *context)
+{
+    g_frameObserver = observer;
+    g_frameObserverContext = context;
+}
+
 bool S_pipelineKey::operator<(const S_pipelineKey &o) const { return std::memcmp(this, &o, sizeof *this) < 0; }
 bool S_pipelineKey::operator==(const S_pipelineKey &o) const { return std::memcmp(this, &o, sizeof *this) == 0; }
 bool S_samplerKey::operator<(const S_samplerKey &o) const { return std::memcmp(this, &o, sizeof *this) < 0; }
@@ -1692,6 +1703,8 @@ private:
                     renderer->UploadTexture(t);
                     t->dirty = false;
                 }
+        if (g_frameObserver)
+            g_frameObserver(frame, g_frameObserverContext);
         const bool ok = renderer->Run(frame);
         DropFrame();
         return ok;

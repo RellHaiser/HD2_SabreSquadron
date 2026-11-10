@@ -268,4 +268,10 @@ S_rectangle PictureRectangle(int windowWidth, int windowHeight, UINT backWidth, 
 // leaves the last line as the culprit), with [Render] SDLGPUDebug=1 or SDLGPUStats=1.
 void Trace(const char *format, ...);
 
+// For tests (test_render_divergence reports the pipeline a draw got): called with each recorded frame
+// just before a renderer runs it, on the render thread. Null, the default: nothing is called. The
+// observer only reads the frame and keeps nothing of it.
+using FrameObserver = void (*)(const S_frame &frame, void *context);
+void SetFrameObserver(FrameObserver observer, void *context);
+
 }  // namespace ls3d::gfx::fixed

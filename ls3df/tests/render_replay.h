@@ -215,8 +215,13 @@ public:
     {
         Close();
         file = std::fopen(path, "rb");
+        if (!file)
+            return false;
+        _fseeki64(file, 0, SEEK_END);
+        bytes = static_cast<uint64_t>(_ftelli64(file));
+        _fseeki64(file, 0, SEEK_SET);
         char magic[sizeof kMagic];
-        return file && std::fread(magic, sizeof magic, 1, file) == 1 && std::memcmp(magic, kMagic, sizeof kMagic) == 0;
+        return std::fread(magic, sizeof magic, 1, file) == 1 && std::memcmp(magic, kMagic, sizeof kMagic) == 0;
     }
     void Close()
     {
@@ -236,6 +241,11 @@ public:
         uint32_t head[2];
         if (!file || std::fread(head, sizeof head, 1, file) != 1)
             return false;
+        // (A size past the file's end is a damaged capture: nothing is allocated for it.)
+        if (head[1] > bytes - static_cast<uint64_t>(_ftelli64(file))) {
+            cutShort = true;
+            return false;
+        }
         payload.resize(head[1] ? head[1] : 1);
         if (head[1] && std::fread(payload.data(), head[1], 1, file) != 1) {
             cutShort = true;
@@ -248,6 +258,7 @@ public:
 
 private:
     FILE *file = nullptr;
+    uint64_t bytes = 0;
     std::vector<uint8_t> payload;
 };
 

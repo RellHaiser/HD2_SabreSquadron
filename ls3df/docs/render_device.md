@@ -129,6 +129,12 @@ with `dxc`: DXIL for Direct3D 12 with the Windows SDK's, SPIR-V for Vulkan with 
 - culling and the fill mode;
 - the vertex format and the primitive type.
 
+**ZBIAS** n is drawn as Direct3D 8's runtime draws it, measured on Windows' `d3d8.dll` and
+dgVoodoo's (they agree): nearer by 2n depth steps and by (n + 2) / 8 of the triangle's depth slope.
+The slope's part keeps a decal on sloping ground in front of it; with only the steps, the snow's
+bootprints (ZBIAS 8) were lost. OpenGL keeps n of its own steps, which on its driver already
+measure 2n of 2^-24 or more. `test_render_divergence --zbias-probe --backend B` measures a backend.
+
 The missing vertex inputs come from a buffer of Direct3D's defaults (white diffuse). Samplers are
 cached by their filters, addressing, mip bias and anisotropy.
 
@@ -324,6 +330,41 @@ The SDL_GPU backend is compared the same way (`--backend sdlgpu`, `--driver dire
 - 31 to 45.5 dB; the menus 37.6 - 45.5 dB, the missions 31 - 38.4 dB;
 - no frame has a bias of more than 0.6 of 255 in any channel. Most pixels that differ are 1 or 2
   apart (the two APIs' filtering), and the rest are along alpha-tested foliage edges.
+
+**`test_render_divergence`** finds the first draw (or clear) at which two backends' pictures of a
+capture stop agreeing, and what that draw was:
+```
+test_render_divergence.exe <capture> [--d3d8 <dll>] --backend sdlgpu --tolerance 8 --min-pixels 64 [--minimize]
+```
+- The capture is validated first, without a device: each record's size against the file, each
+  payload against its operation's layout, resource ids defined before use and not redefined while
+  live. A capture with an error is not replayed (`--index <capture>...` only validates).
+- Checkpoint k is the capture up to the k-th clear or draw, then END_SCENE and PRESENT, replayed
+  from the start on a newly made device on each side (a read-back in the middle would run the fixed
+  renderer's frame early). Every ⌈√N⌉-th checkpoint, then one by one in the first window that
+  differs. Before a draw is named, the reference replays its prefix again to the same picture, and
+  every pixel that newly differs must be one the draw changed on a side.
+- `report.md` lists the capture's Direct3D 8 state at the draw and the pipeline the SDL_GPU or
+  OpenGL side recorded for it (`S_pipelineKey`, the shader's mode, samplers and stages, read
+  through `fixed::SetFrameObserver`), with expected / actual / difference PNGs.
+- `repro.ls3dframe` is that prefix with the reference picture as its game's picture, so
+  `test_render_replay repro.ls3dframe --backend <test>` fails on its own. `--minimize` adds
+  `minimal.ls3dframe`: delta debugging over the draws before it (clears stay), keeping a candidate
+  only when a replay still shows at least 90% of the draw's newly differing pixels, and only the
+  textures and buffers the kept draws use. Every candidate is replayed, so the result reproduces.
+- `--inject OP:rs:STATE:VALUE` (or `ts`, `tex`) puts a state change on the test side before draw OP,
+  for testing the tool; `--selftest` does that on its own scene.
+- A difference that later draws paint over completely is found only with `--stride 1`.
+
+Exit codes: 0 no divergence, 3 found, 4 found but not localized (the reason is in the report), 2 bad input.
+
+Result on the game frames (November 2026, dgVoodoo against SDL_GPU on Direct3D 12, tolerance 8,
+64 pixels): 10 to 53 s a mission frame. It found the bootprints lost to ZBIAS (frame 3, draw 375,
+1478 pixels; since fixed, the frame has no divergence) and depth ties along edges (frame 7, draw
+60: 112 of its 120 pixels drawn by Direct3D 8 only, all drawn with ZFUNC ALWAYS). `--minimize`
+cut those repros to a clear and one earlier draw each, in 11 - 15 candidates (18 - 34 s): frame 7
+114 MB to 13.8 MB, frame 4 53 to 10.3 MB, frame 3 (the bug put back with `--inject 375:rs:47:0`)
+134 to 10.8 MB, of which 7.7 MB is the picture. Each keeps all of the draw's differing pixels.
 
 Direct3D 12 and Vulkan draw the same pictures (the self-test: identical, 47.2 dB from Windows'
 Direct3D 8). `--repeat N` draws a capture N more times and times it (`--no-vsync` for SDL_GPU;
