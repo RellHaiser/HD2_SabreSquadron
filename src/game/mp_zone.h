@@ -56,8 +56,8 @@ public:
     // Its starting team again, the spawn points from the first.
     void RestartMission(bool server) override;          // 0x44 0x005ed8b0
     // (Nothing saved: false.)
-    bool SaveGame(C_chunk &) override { return false; } // 0x48 0x005ebf80
-    bool LoadGame(C_chunk &) override { return false; } // 0x4C 0x005ebf90
+    bool SaveGame(C_chunk &) override { return false; } // 0x48 0x005ebf80 (DS 0x0060c9d0)
+    bool LoadGame(C_chunk &) override { return false; } // 0x4C 0x005ebf90 (DS 0x0060c9f0)
     // The team (2 bits).
     void WriteState(C_BitStream *msg) override;         // 0x50 0x005ed2d0
     void ReadState(C_BitStream *msg) override;          // 0x54 0x005ed2f0

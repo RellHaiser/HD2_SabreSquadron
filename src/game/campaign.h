@@ -54,17 +54,17 @@ public:
     C_CampaignNode(const C_CampaignNode &other);        // 0x006b9e80
     C_CampaignNode &operator=(const C_CampaignNode &) = delete;
     virtual ~C_CampaignNode();                          // 0x00 0x0066eff0 (0x0066f010)
-    virtual bool LoadDefinition(C_chunk &chunk) { return false; }   // 0x04 0x0066efc0
-    virtual bool Load(C_chunk &chunk) { return false; }             // 0x08 0x0066efd0
-    virtual bool Save(C_chunk &chunk) { return false; }             // 0x0C 0x0066efe0
-    virtual bool LoadProgress(C_chunk &chunk) { return false; }     // 0x10 0x0066eef0
-    virtual bool SaveProgress(C_chunk &chunk) { return false; }     // 0x14 0x0066ef00
+    virtual bool LoadDefinition(C_chunk &chunk) { return false; }   // 0x04 0x0066efc0 (DS 0x006a7ed0)
+    virtual bool Load(C_chunk &chunk) { return false; }             // 0x08 0x0066efd0 (DS 0x006a7ef0)
+    virtual bool Save(C_chunk &chunk) { return false; }             // 0x0C 0x0066efe0 (DS 0x006a7f10)
+    virtual bool LoadProgress(C_chunk &chunk) { return false; }     // 0x10 0x0066eef0 (DS 0x006a7d70)
+    virtual bool SaveProgress(C_chunk &chunk) { return false; }     // 0x14 0x0066ef00 (DS 0x006a7d90)
     // Moves the cursor one step on (false: there is nothing more inside this node).
-    virtual bool Next() { return false; }               // 0x18 0x0066ef10
+    virtual bool Next() { return false; }               // 0x18 0x0066ef10 (DS 0x006a7db0)
     // One step back (false: the cursor was at this node's first step).
-    virtual bool Prev() { return false; }               // 0x1C 0x0066ef20
+    virtual bool Prev() { return false; }               // 0x1C 0x0066ef20 (DS 0x006a7dd0)
     // The step the cursor is on (a leaf: itself).
-    virtual C_CampaignNode *GetCurrent() { return this; }   // 0x20 0x0066ef30
+    virtual C_CampaignNode *GetCurrent() { return this; }   // 0x20 0x0066ef30 (DS 0x006a7df0)
     // Puts the cursor before the first step.
     virtual void Reset() {}                             // 0x24 0x0066ef40
 

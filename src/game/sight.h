@@ -96,7 +96,7 @@ class C_HumanSightTarget : public C_SightTarget {       // vtable 0x0080ffb0, 0x
 public:
     C_HumanSightTarget(C_Human *human, uint32_t mask, int index);   // 0x0046ec40
     C_Actor *GetActor() override;                       // 0x0046ecb0
-    int GetKind() override { return 0; }                // 0x0046ecc0
+    int GetKind() override { return 0; }                // 0x0046ecc0 (DS 0x0048a7b0)
     void Refresh() override;                            // 0x0046eb20
 
     C_Human *human;                                     // +0x30
@@ -106,7 +106,7 @@ class C_MeleeTrackerSightTarget : public C_SightTarget {   // vtable 0x0080ffbc,
 public:
     C_MeleeTrackerSightTarget(C_MeleeTracker *meleeTracker, uint32_t mask, int index);   // 0x0046ecf0
     C_Actor *GetActor() override;                       // 0x0046edc0
-    int GetKind() override { return 1; }                // 0x0046edd0
+    int GetKind() override { return 1; }                // 0x0046edd0 (DS 0x0048a930)
 
     C_MeleeTracker *meleeTracker;                       // +0x30
 };
@@ -186,8 +186,8 @@ public:
     void StartMission(bool server) override;            // 0x0046efd0
     void StopMission(bool server) override;             // 0x0046eff0
     void RestartMission(bool server) override;          // 0x00470090
-    bool SaveGame(C_chunk &) override { return true; }  // 0x0046ef00
-    bool LoadGame(C_chunk &) override { return true; }  // 0x0046ef10
+    bool SaveGame(C_chunk &) override { return true; }  // 0x0046ef00 (DS 0x0048ab10)
+    bool LoadGame(C_chunk &) override { return true; }  // 0x0046ef10 (DS 0x0048ab30)
 
     // Registration ids (a free slot reused, else appended); -1 on failure (the frame registered
     // already, no human or meleeTracker; a target's mask 0 or over 15).

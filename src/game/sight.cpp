@@ -514,13 +514,13 @@ void C_SightModule::Clear()                             // 0x0046ffb0
     m_targets.clear();
 }
 
-void C_SightModule::LoadMissionData(bool server)        // 0x0046eee0
+void C_SightModule::LoadMissionData(bool server)        // 0x0046eee0 (DS 0x0048aad0)
 {
     if (server)
         Clear();
 }
 
-void C_SightModule::FreeMissionData(bool server)        // 0x0046eef0
+void C_SightModule::FreeMissionData(bool server)        // 0x0046eef0 (DS 0x0048aaf0)
 {
     if (server)
         Clear();
@@ -535,7 +535,7 @@ void C_SightModule::StartMission(bool server)           // 0x0046efd0
     }
 }
 
-void C_SightModule::StopMission(bool server)            // 0x0046eff0
+void C_SightModule::StopMission(bool server)            // 0x0046eff0 (DS 0x0048ac80)
 {
     if (server)
         Clear();

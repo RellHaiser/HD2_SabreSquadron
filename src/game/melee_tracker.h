@@ -84,7 +84,7 @@ public:
     void Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *attacker,
              int flags) override;                       // 0xD4 0x005d7180
     // The tracker's surface material.
-    int GetMaterialId(I3D_frame * /*part*/) override { return 0x42; }   // 0xD8 0x005d4cb0
+    int GetMaterialId(I3D_frame * /*part*/) override { return 0x42; }   // 0xD8 0x005d4cb0 (DS 0x005ef2d0)
     // The tracker's own virtual (vtable +0xE0): reloads the model from its file and puts the frame
     // back at the mission-start placement.
     virtual void ReloadModel();                         // 0xE0 0x005d5560

@@ -77,7 +77,7 @@ C_FowlGenerator::C_FowlGenerator() : C_Actor(ACTOR_FOWL_GENERATOR)   // 0x005ba4
 {
 }
 
-void C_FowlGenerator::RestartMission(bool)              // 0x005ba1c0
+void C_FowlGenerator::RestartMission(bool)              // 0x005ba1c0 (DS 0x005cd8a0)
 {
     StopMission(true);
     StartMission(true);

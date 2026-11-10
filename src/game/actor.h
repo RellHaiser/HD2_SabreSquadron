@@ -105,7 +105,7 @@ public:
     // Called by SetFrame once the frame is bound; vehicles get their item store.
     virtual void Init();                                                        // 0x08 0x00610f80
     virtual void Done();                                                        // 0x0C 0x00611020
-    virtual int GetHitPoints() { return 100; }                                  // 0x10 0x005b61c0
+    virtual int GetHitPoints() { return 100; }                                  // 0x10 0x005b61c0 (DS 0x005c8530)
     // Every frame while active (frame time in ms).
     virtual void Update(int /*frameTime*/) {}                                   // 0x14 0x00611050
     // Fixed game tick while active.
@@ -113,13 +113,13 @@ public:
     // Network messages addressed to the actor (C_ActorsModule::OnMessage/Unknown28).
     virtual void OnMessage(C_BitStream * /*msg*/) {}                            // 0x1C 0x005b8860
     virtual void Unknown20(C_BitStream * /*msg*/) {}                            // 0x20 0x005b61d0
-    virtual bool Unknown24(C_chunk & /*chunk*/) { return true; }                // 0x24 0x004d0e50
-    virtual bool Unknown28(C_chunk & /*chunk*/) { return true; }                // 0x28 0x004d0e60
+    virtual bool Unknown24(C_chunk & /*chunk*/) { return true; }                // 0x24 0x004d0e50 (DS 0x004bd930)
+    virtual bool Unknown28(C_chunk & /*chunk*/) { return true; }                // 0x28 0x004d0e60 (DS 0x004bd950)
     // Binds the actor to `frame` (holds a reference) and calls Init().
     virtual bool SetFrame(I3D_frame *frame);                                    // 0x2C 0x00610200
     // Mission file actor properties (role, health, ...).
-    virtual bool WriteProperties(C_chunk & /*chunk*/) { return true; }          // 0x30 0x005b61e0
-    virtual bool ReadProperties(C_chunk & /*chunk*/) { return true; }           // 0x34 0x005b8870
+    virtual bool WriteProperties(C_chunk & /*chunk*/) { return true; }          // 0x30 0x005b61e0 (DS 0x005c8570)
+    virtual bool ReadProperties(C_chunk & /*chunk*/) { return true; }           // 0x34 0x005b8870 (DS 0x005cb7e0)
     // Takes over the state of `source` (pure, with a base implementation that
     // derived classes call).
     virtual void CopyFrom(const C_Actor *source) = 0;                           // 0x38 0x006101f0
@@ -136,65 +136,65 @@ public:
     {
         OnCollisionEx(other, pos, a3, a4, a5, a6, 0);
     }
-    virtual bool OnCollisionEx(C_Actor * /*other*/, const S_vector * /*pos*/, int, int, int, int, int) { return false; }   // 0x5C 0x00611070
+    virtual bool OnCollisionEx(C_Actor * /*other*/, const S_vector * /*pos*/, int, int, int, int, int) { return false; }   // 0x5C 0x00611070 (DS 0x0063b000)
     virtual void Unknown60(int) {}                                              // 0x60 0x004d0e70
     virtual bool IsActive() const { return m_activeIndex >= 0; }                // 0x64 0x004d0e80
     virtual void Unknown68(int, int, int) {}                                    // 0x68 0x004d0e90
 
     // --- seats (vehicles and static weapons override these) ---------------------
     // SEAT_FLAG_TAKEN: someone is getting in (SetSeatBlocked is true when it sets it).
-    virtual bool IsSeatBlocked(int /*seat*/) { return false; }                  // 0x6C 0x0059c300
-    virtual bool SetSeatBlocked(int /*seat*/, bool /*blocked*/) { return false; }   // 0x70 0x0059c310
+    virtual bool IsSeatBlocked(int /*seat*/) { return false; }                  // 0x6C 0x0059c300 (DS 0x005a75f0)
+    virtual bool SetSeatBlocked(int /*seat*/, bool /*blocked*/) { return false; }   // 0x70 0x0059c310 (DS 0x005a7610)
     // Puts `occupant` into `seat` (restoring saved games).
     virtual void SetSeatOccupant(int /*seat*/, C_Actor * /*occupant*/) {}       // 0x74 0x0059c320
-    virtual C_Actor *GetSeatOccupant(int /*seat*/) { return nullptr; }          // 0x78 0x0059c330
-    virtual int FindSeat(const C_Actor * /*occupant*/) { return -1; }           // 0x7C 0x0059c340
+    virtual C_Actor *GetSeatOccupant(int /*seat*/) { return nullptr; }          // 0x78 0x0059c330 (DS 0x005a7650)
+    virtual int FindSeat(const C_Actor * /*occupant*/) { return -1; }           // 0x7C 0x0059c340 (DS 0x005a7670)
     // Takes the occupant out of `seat` where it is (its frame into the scene's primary sector);
     // returns it.
-    virtual C_Actor *LeaveSeat(int /*seat*/) { return nullptr; }                // 0x80 0x0059c350
+    virtual C_Actor *LeaveSeat(int /*seat*/) { return nullptr; }                // 0x80 0x0059c350 (DS 0x005a7690)
     // The occupant gets out to the seat's way out (or another seat's); false: no room.
-    virtual bool ExitSeat(int /*seat*/) { return false; }                       // 0x84 0x0059c360
-    virtual int GetSeatCount() { return 0; }                                    // 0x88 0x0059c370
-    virtual uint32_t GetSeatFlags(int /*seat*/) { return 0; }                   // 0x8C 0x0059c380
+    virtual bool ExitSeat(int /*seat*/) { return false; }                       // 0x84 0x0059c360 (DS 0x005a76b0)
+    virtual int GetSeatCount() { return 0; }                                    // 0x88 0x0059c370 (DS 0x005a76d0)
+    virtual uint32_t GetSeatFlags(int /*seat*/) { return 0; }                   // 0x8C 0x0059c380 (DS 0x005a76f0)
     // Camera frame of a seat ("camera3RD_", "cameraFPV_" dummies).
-    virtual I3D_frame *GetSeatCamera(int /*seat*/) { return nullptr; }          // 0x90 0x0059c390
+    virtual I3D_frame *GetSeatCamera(int /*seat*/) { return nullptr; }          // 0x90 0x0059c390 (DS 0x005a7710)
     // The seat's text (the roll menu's; -1: the default "seat <n>").
-    virtual int GetSeatText(int /*seat*/) { return -1; }                        // 0x94 0x0059c3a0
-    virtual bool HasSeatWeapon(int /*seat*/) { return false; }                  // 0x98 0x0059c3b0
+    virtual int GetSeatText(int /*seat*/) { return -1; }                        // 0x94 0x0059c3a0 (DS 0x005a7730)
+    virtual bool HasSeatWeapon(int /*seat*/) { return false; }                  // 0x98 0x0059c3b0 (DS 0x005a7750)
     // (Vehicles and static weapons ask the seat weapon; RET 4: one argument, the 2026-10-17
     // audit removed a second one the declaration had.)
     // The rounds left in the seat weapon (0: reload it).
-    virtual int GetSeatWeaponRounds(int /*seat*/) { return 0; }                 // 0x9C 0x0059c3c0
+    virtual int GetSeatWeaponRounds(int /*seat*/) { return 0; }                 // 0x9C 0x0059c3c0 (DS 0x005a7770)
     // Rounds left for the weapon of `seat` in the vehicle's item store.
     virtual int GetSeatAmmoCount(int seat);                                     // 0xA0 0x00611140
     // The direction the weapon of `seat` points, and where it is (the world's).
     virtual S_vector GetSeatWeaponAim(int /*seat*/) { return S_vector(0.0f, 0.0f, 0.0f); }   // 0xA4 0x0059c3d0
     virtual S_vector GetSeatWeaponOrigin(int /*seat*/) { return S_vector(0.0f, 0.0f, 0.0f); }  // 0xA8 0x0059c3f0
     // A float of the seat (vehicles: the seat weapon's, which is 0; pi without one).
-    virtual float UnknownAC(int /*seat*/) { return 3.14159265f; }               // 0xAC 0x0059c410
+    virtual float UnknownAC(int /*seat*/) { return 3.14159265f; }               // 0xAC 0x0059c410 (DS 0x005a77f0)
     // The text (name) of the seat weapon's item, -1 without one.
-    virtual int GetSeatWeaponText(int /*seat*/) { return -1; }                  // 0xB0 0x0059c420
+    virtual int GetSeatWeaponText(int /*seat*/) { return -1; }                  // 0xB0 0x0059c420 (DS 0x005a7810)
     // The definition of the seat weapon's item, null without one.
-    virtual class C_ItemDef *GetSeatWeaponDef(int /*seat*/) { return nullptr; } // 0xB4 0x0059c430
+    virtual class C_ItemDef *GetSeatWeaponDef(int /*seat*/) { return nullptr; } // 0xB4 0x0059c430 (DS 0x005a7830)
     virtual void GetSeatWeaponLimits(int /*seat*/, float * /*a*/, float * /*b*/, float * /*c*/, float * /*d*/) {}   // 0xB8 0x0059c440
     // The seat weapon can be turned to point at `pos`.
-    virtual bool CanSeatWeaponAim(int /*seat*/, float * /*pos*/) { return false; }   // 0xBC 0x0059c450
+    virtual bool CanSeatWeaponAim(int /*seat*/, float * /*pos*/) { return false; }   // 0xBC 0x0059c450 (DS 0x005a7870)
     // The controls (C_HumanController's axes and buttons) of the human in `seat`, while the
     // seat has a weapon.
     virtual void ApplySeatControls(int /*seat*/, float * /*axes*/, float * /*buttons*/) {}   // 0xC0 0x0059c460
     // Shows / hides the seat's first-person parts (vehicles: the seat weapon's, else the
     // "VIEW<seat>" visuals): on for a local player seated in first person, off when it leaves.
     virtual void ShowSeatView(int /*seat*/, bool /*on*/) {}                     // 0xC4 0x0059c470
-    virtual bool UnknownC8(int /*seat*/, int * /*a*/, int * /*b*/, int * /*c*/) { return false; }   // 0xC8 0x0059c480
+    virtual bool UnknownC8(int /*seat*/, int * /*a*/, int * /*b*/, int * /*c*/) { return false; }   // 0xC8 0x0059c480 (DS 0x005a78d0)
     // Seat dummy marked "NO3RD" (no third-person view).
-    virtual bool IsSeatFirstPersonOnly(int /*seat*/) { return false; }          // 0xCC 0x0059c490
+    virtual bool IsSeatFirstPersonOnly(int /*seat*/) { return false; }          // 0xCC 0x0059c490 (DS 0x005a78f0)
     virtual void UnknownD0(int, int, int, int) {}                               // 0xD0 0x0059c4a0
 
     // Applies damage; `amount` < 0 kills.
     virtual void Hit(E_HitType /*type*/, float /*amount*/, const S_vector & /*pos*/, const S_vector & /*dir*/,
                      C_Actor * /*attacker*/, int /*flags*/) {}                  // 0xD4 0x005b88a0
     // Surface material of `part` (frame user property "matid"); 11 by default.
-    virtual int GetMaterialId(I3D_frame * /*part*/) { return 11; }              // 0xD8 0x005b88b0
+    virtual int GetMaterialId(I3D_frame * /*part*/) { return 11; }              // 0xD8 0x005b88b0 (DS 0x005cb860)
     // World-space corners of the box around the frame hierarchy's geometry.
     virtual void GetBoxCorners(S_vector4 corners[8]);                           // 0xDC 0x006115b0
 

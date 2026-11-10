@@ -297,7 +297,7 @@ bool C_AirAttack::SetFrame(I3D_frame *frame)            // 0x005e4070
     return C_Actor::SetFrame(frame);
 }
 
-void C_AirAttack::RestartMission(bool)                  // 0x005e3090
+void C_AirAttack::RestartMission(bool)                  // 0x005e3090 (DS 0x00601630)
 {
     StopMission(true);
     StartMission(true);

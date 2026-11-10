@@ -49,7 +49,7 @@ C_Pike::C_Pike() : C_Actor(ACTOR_PIKE)                  // 0x005b8d00
 {
 }
 
-void C_Pike::RestartMission(bool)                       // 0x005b8990
+void C_Pike::RestartMission(bool)                       // 0x005b8990 (DS 0x005cb9c0)
 {
     StopMission(true);
     StartMission(true);

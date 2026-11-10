@@ -106,7 +106,7 @@ C_Fish::C_Fish() : C_Actor(ACTOR_FISH)                  // 0x005dbd80
 {
 }
 
-void C_Fish::RestartMission(bool)                       // 0x005db870
+void C_Fish::RestartMission(bool)                       // 0x005db870 (DS 0x005f7be0)
 {
     StopMission(true);
     StartMission(true);
