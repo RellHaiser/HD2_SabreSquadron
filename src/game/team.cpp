@@ -100,7 +100,7 @@ bool C_EnemyRecords::Contains(const C_Human *enemy) const
     return false;
 }
 
-void C_EnemyRecords::Add(C_Human *enemy)                // 0x0045e410
+void C_EnemyRecords::Add(C_Human *enemy)                // 0x0045e410 (DS 0x00479640)
 {
     if (IsClient())
         GetGame()->GetInterface()->ShowEnemy(enemy, true);
@@ -141,7 +141,7 @@ void C_EnemyRecords::MarkDead(C_Human *enemy)           // 0x0045e3b0
     }
 }
 
-void C_EnemyRecords::Remove(C_Human *enemy)             // 0x0045e540
+void C_EnemyRecords::Remove(C_Human *enemy)             // 0x0045e540 (DS 0x004797a0)
 {
     if (IsClient())
         GetGame()->GetInterface()->ShowEnemy(enemy, false);

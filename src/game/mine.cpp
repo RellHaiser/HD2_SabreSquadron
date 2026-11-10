@@ -207,7 +207,7 @@ void C_Mine::Remove()                                   // 0x005feec0
     g_temporaryActors.DestroyActor(this);
 }
 
-void C_Mine::Defuse()                                   // 0x005feee0
+void C_Mine::Defuse()                                   // 0x005feee0 (DS 0x00624520)
 {
     m_armed = false;
     C_BitStream *msg = CreateTempActorMessage(m_netId, true);
@@ -231,7 +231,7 @@ void C_Mine::Detonate()                                 // 0x005fef50
     g_temporaryActors.DestroyActor(this);
 }
 
-void C_Mine::OnSteppedOn(C_Actor *actor, int)           // 0x005fefb0
+void C_Mine::OnSteppedOn(C_Actor *actor, int)           // 0x005fefb0 (DS 0x00624620)
 {
     if (!m_armed || actor == m_owner)
         return;

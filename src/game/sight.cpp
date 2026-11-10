@@ -181,7 +181,7 @@ bool C_SightObserver::SetRelation(int target, int relation)   // 0x0046d600
     return true;
 }
 
-C_HumanSightObserver::C_HumanSightObserver(C_Human *human_, uint32_t mask_, int index_)   // 0x0046d730
+C_HumanSightObserver::C_HumanSightObserver(C_Human *human_, uint32_t mask_, int index_)   // 0x0046d730 (DS 0x00488be0)
     : C_SightObserver(human_->GetFrame(), mask_, index_), human(human_)
 {
 }
@@ -388,7 +388,7 @@ void C_HumanSightObserver::Update(uint32_t, int target, int timeDelta)   // 0x00
     }
 }
 
-C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver(C_MeleeTracker *meleeTracker_, uint32_t mask_, int index_)   // 0x0046d760
+C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver(C_MeleeTracker *meleeTracker_, uint32_t mask_, int index_)   // 0x0046d760 (DS 0x00488c20)
     : C_SightObserver(meleeTracker_->GetFrame(), mask_, index_), meleeTracker(meleeTracker_)
 {
 }

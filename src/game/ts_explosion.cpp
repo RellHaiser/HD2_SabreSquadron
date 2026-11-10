@@ -314,7 +314,7 @@ void C_TSExplosion::MakeScorch()                        // 0x0060fe50 (DS 0x0063
 
 // --- creator --------------------------------------------------------------------------------------
 
-C_Actor *C_TSExplosionCreator::Create()                 // 0x0060edc0
+C_Actor *C_TSExplosionCreator::Create()                 // 0x0060edc0 (DS 0x00638560)
 {
     return new C_TSExplosion();                         // _aligned_malloc(0xd0, 16) in the original
 }

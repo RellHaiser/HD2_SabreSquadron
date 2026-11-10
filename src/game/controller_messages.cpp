@@ -441,7 +441,7 @@ void S_MsgHeal::Write(C_NetMessage &msg)                // 0x005b2150
     msg.WriteBits(removeItem ? 1 : 0, 1);
 }
 
-void S_MsgRemoteRequest::Read(C_NetMessage &msg)        // 0x005b0ee0 (0x005b0f50)
+void S_MsgRemoteRequest::Read(C_NetMessage &msg)        // 0x005b0ee0 (0x005b0f50) (DS 0x005c1c50 / DS 0x005c1cf0)
 {
     request = static_cast<int>(msg.ReadBits(4));
 }
@@ -452,7 +452,7 @@ void S_MsgRemoteRequest::Write(C_NetMessage &msg)       // 0x005b0f00
     msg.WriteBits(static_cast<uint32_t>(request), 4);
 }
 
-void S_MsgSoldierClass::Read(C_NetMessage &msg)         // 0x005b0e50 (0x005b0ec0)
+void S_MsgSoldierClass::Read(C_NetMessage &msg)         // 0x005b0e50 (0x005b0ec0) (DS 0x005c1b80 / DS 0x005c1c20)
 {
     soldierClass = static_cast<int>(msg.ReadBits(4));
 }
@@ -549,7 +549,7 @@ void S_Msg21::Write(C_NetMessage &msg)                  // 0x005b2fa0
     msg.WriteBits(static_cast<uint32_t>(value), 16);
 }
 
-void S_MsgSuspend::Read(C_NetMessage &msg)              // 0x005b2ff0
+void S_MsgSuspend::Read(C_NetMessage &msg)              // 0x005b2ff0 (DS 0x005c4710)
 {
     on = msg.ReadBits(1) == 1;
 }
@@ -560,7 +560,7 @@ void S_MsgSuspend::Write(C_NetMessage &msg)             // 0x005b3010
     msg.WriteBits(on ? 1 : 0, 1);
 }
 
-void S_Msg23::Read(C_NetMessage &msg)                   // 0x005b3060
+void S_Msg23::Read(C_NetMessage &msg)                   // 0x005b3060 (DS 0x005c47b0)
 {
     on = msg.ReadBits(1) == 1;
 }

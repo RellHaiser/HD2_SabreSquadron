@@ -19,7 +19,7 @@ public:
     C_Ladder();                                         // 0x005ea3d0
     // Fix: the volumes of a ladder destroyed while its mission runs are taken out of the world and
     // let go (the original leaves them, their actor gone).
-    ~C_Ladder() override;                               // 0x005ea590 (scalar deleting 0x005ea570)
+    ~C_Ladder() override;                               // 0x005ea590 (scalar deleting 0x005ea570, DS 0x0060a8c0)
 
     // The world positions of its ends ("up*" and "down*") and the way a climber faces it (level).
     const S_vector4 &GetTop() const { return m_top; }   // +0xA0

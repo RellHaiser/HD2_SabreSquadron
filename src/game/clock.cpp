@@ -37,7 +37,7 @@ bool C_Clock::SetFrame(I3D_frame *frame)                // 0x005b8240
     return C_Actor::SetFrame(frame);
 }
 
-void C_Clock::RestartMission(bool)                      // 0x005b80d0
+void C_Clock::RestartMission(bool)                      // 0x005b80d0 (DS 0x005cade0)
 {
     StopMission(false);
     StartMission(false);
@@ -120,7 +120,7 @@ bool C_Clock::LoadGame(C_chunk &chunk)                  // 0x005b8150
 
 // --- creator --------------------------------------------------------------------------------------
 
-C_Actor *C_ClockCreator::Create()                       // 0x005b8040
+C_Actor *C_ClockCreator::Create()                       // 0x005b8040 (DS 0x005cad10)
 {
     return new C_Clock();                               // _aligned_malloc(0xe0, 16) in the original
 }

@@ -132,7 +132,7 @@ public:
 
     // Creates a temporary actor of `type` on `frame`; id < 0 takes the next free id.
     C_Actor *CreateActor(E_ActorType type, I3D_frame *frame, int id = -1);    // 0x004770b0
-    void DestroyActor(C_Actor *actor);                              // 0x00477190
+    void DestroyActor(C_Actor *actor);                              // 0x00477190 (DS 0x00493c90)
     // The mines `owner` laid go (a player left the game).
     void DestroyMinesOf(C_Human *owner);                            // 0x00479700
     void SetActorActive(C_Actor *actor, bool active);               // 0x00477330

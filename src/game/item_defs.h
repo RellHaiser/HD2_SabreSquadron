@@ -267,7 +267,7 @@ private:
 class C_ScopeComp : public C_ItemComponent {            // vtable 0x00817304
 public:
     C_ScopeComp() : C_ItemComponent(ICK_SCOPE) {}
-    void Save(int *ioSize, void *buffer) override;      // 0x007df560
+    void Save(int *ioSize, void *buffer) override;      // 0x007df560 (DS 0x0081af00)
     void Load(int size, const void *data) override;     // 0x007df5a0
 
     int GetAimMode() const { return m_aimMode; }
@@ -281,7 +281,7 @@ private:
 class C_UniformComp : public C_ItemComponent {          // vtable 0x008172f4
 public:
     C_UniformComp() : C_ItemComponent(ICK_UNIFORM) {}
-    void Save(int *ioSize, void *buffer) override;      // 0x007df5d0
+    void Save(int *ioSize, void *buffer) override;      // 0x007df5d0 (DS 0x0081af90)
     void Load(int size, const void *data) override;     // 0x007df610
 
     int GetDisguiseSide() const { return m_disguiseSide; }
@@ -293,7 +293,7 @@ private:
 class C_MedkitComp : public C_ItemComponent {           // vtable 0x008172e4
 public:
     C_MedkitComp() : C_ItemComponent(ICK_MEDKIT) {}
-    void Save(int *ioSize, void *buffer) override;      // 0x007df640
+    void Save(int *ioSize, void *buffer) override;      // 0x007df640 (DS 0x0081b020)
     void Load(int size, const void *data) override;     // 0x007df680
 
     float GetHealingCapacity() const { return m_healingCapacity; }
@@ -326,7 +326,7 @@ private:
 class C_HeadgearComp : public C_ItemComponent {         // vtable 0x008172c4
 public:
     C_HeadgearComp() : C_ItemComponent(ICK_HEADGEAR) {}
-    void Save(int *ioSize, void *buffer) override;      // 0x007df720
+    void Save(int *ioSize, void *buffer) override;      // 0x007df720 (DS 0x0081b140)
     void Load(int size, const void *data) override;     // 0x007df760
 
     int GetHeadgearType() const { return m_headgearType; }
@@ -431,7 +431,7 @@ protected:
 
 class C_AmmoItemDef : public C_ItemDef {                // vtable 0x008173e4, 0x58 bytes
 public:
-    explicit C_AmmoItemDef(int id) : C_ItemDef(ITEM_AMMO, id) {}   // 0x007e0850
+    explicit C_AmmoItemDef(int id) : C_ItemDef(ITEM_AMMO, id) {}   // 0x007e0850 (DS 0x0081c750)
     void Save(int *ioSize, void *buffer) override;      // 0x007e08d0
     void Load(int *outSize, const void *data) override; // 0x007e0910
     int GetCarryMode() override { return ITEM_CARRY_AMMO; }   // 0x007e0880
