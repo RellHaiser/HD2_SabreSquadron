@@ -544,6 +544,11 @@ int RunGame()
 
     // The loop's markers (LS3DF.ini [Diagnostics] Events), on this thread: timestamps only, no effect on the loop.
     diag::Start(diag::ConfiguredCapacity());
+    diag::S_hitchConfig hitches;
+    if (diag::Enabled() && diag::ConfiguredHitches(&hitches)) {
+        hitches.captures = 0;       // (the engine's recorder asks for captures)
+        diag::StartHitches(hitches, "game", diag::EV_LOOP_BEGIN, "HD2_hitches.jsonl", "\"loop_floor_ms\":10");
+    }
     uint32_t iteration = 0;
     for (;;) {
         diag::Mark(diag::EV_LOOP_BEGIN, ++iteration);

@@ -157,8 +157,16 @@ EventBuffer=65536
 |---|---|---|
 | `Events` | 0 / 1 | Timestamped markers of each frame's stages, in two files: the engine's in `LS3DF_events.csv` next to the DLL (flips, presents, the fixed renderer's runs and read-backs, texture uploads, SDL_GPU's swapchain acquire, submit, upload waits and pipeline creation, OpenGL's swap), written when the engine closes; and `HD2_Port.exe`'s main loop in `HD2_events.csv` next to the EXE (input, the frame floor, the engine tick, drawing, network, the server's and the client's updates, the flip), written when the loop ends. Both stamp `QueryPerformanceCounter`, so the two files line up by time. Only the main thread's markers are recorded. Off: nothing is recorded and nothing is written. |
 | `EventBuffer` | events | How many of the latest events each file keeps (24 bytes each; 1,024 - 4,194,304, rounded up to a power of two). Missing: 65,536, about 20 seconds of play at 100 frames a second. |
+| `Hitches` | 0 / 1 | With `Events`: the hitch recorder. When frames are `HitchMs` apart, or a stage of a frame takes that long, or a wait takes `HitchWaitMs`, it keeps the events around that moment and writes them as one line to `LS3DF_hitches.jsonl` (the engine) and `HD2_hitches.jsonl` (the game loop): the trigger, the slow frame's stages by the time each took on its own, the largest of them as the cause, and the events. The files are emptied when the game starts. Missing: 1. |
+| `HitchMs` | ms | Frames this far apart, or a stage (drawing, update, flip, present …) this long, is a hitch. Missing: 50. |
+| `HitchWaitMs` | ms | A wait or creation this long is a hitch: texture uploads, SDL_GPU's upload wait, pipeline creation, swapchain acquire and submit, OpenGL's swap. Missing: 20 (above a 60 Hz refresh, so vsync alone does not count). |
+| `HitchBeforeMs`, `HitchAfterMs` | ms | Events kept before a hitch (and always from the slow frame's start) and after it. Missing: 2,000 and 500. |
+| `HitchFiles` | count | Hitches written at most in a session; the rest are counted in the file's last line. Missing: 50. |
+| `HitchCapture` | count | With `[Render] CaptureFrames=1`: that many of the engine's hitches also save the next frame to `LS3DF_frames\`, for the render tests. That frame's own slowness is not recorded as a hitch. Missing: 0. |
 
-The schema is `src/diag/events.h`. A mark costs about 30 ns (most of it the clock); off, one test.
+The schema is `src/diag/events.h`. A mark costs about 35 ns with the recorder on (most of it the clock); off, one test.
+The recorder writes nothing on the game's thread: a hitch's events are copied into one of four buffers made at the
+start, and a thread of its own writes them. With all four still being written, a hitch is counted, not written.
 
 ## Things to know
 

@@ -9,6 +9,12 @@
 //    -> texture upload -> renderer run; present -> run frame (value 0) -> renderer run -> acquire and
 //    submit (SDL_GPU) or swap (OpenGL). The picture with the markers on must be the one with them off.
 //    A backend that cannot make its device here is NOT RUN, not failed.
+// 4. The hitch recorder (E02), on synthetic frames with a stall put in on purpose (the marks are the
+//    real ones, the stall a spin): a CPU stall in the client update, a pipeline creation, an upload
+//    wait, a swapchain acquire, the game's time between the engine's flips. Each must give exactly one
+//    record whose cause is that stage. Also: no record for 300 frames that vary under the thresholds,
+//    the record limit (the rest counted), a capture asked for once and its own slow frames not
+//    recorded, and what a mark costs with the recorder on.
 //
 // Usage: test_diag_events.exe   (writes and deletes LS3DF.ini and a CSV next to itself)
 //
@@ -18,6 +24,7 @@
 #include <windows.h>
 
 #include <chrono>
+#include <fstream>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -312,6 +319,218 @@ void BackendTest(const char *name, bool sdlGpu)
     std::printf("%s: %zu events\n", name, events.size());
 }
 
+// ---------------------------------------------------------------- 4. the hitch recorder
+
+void SpinMs(double ms)
+{
+    LARGE_INTEGER f, a, b;
+    QueryPerformanceFrequency(&f);
+    QueryPerformanceCounter(&a);
+    do
+        QueryPerformanceCounter(&b);
+    while (static_cast<double>(b.QuadPart - a.QuadPart) * 1000.0 / static_cast<double>(f.QuadPart) < ms);
+}
+
+std::vector<std::string> ReadLines(const std::string &path)
+{
+    std::vector<std::string> lines;
+    std::ifstream in(path);
+    for (std::string line; std::getline(in, line);)
+        lines.push_back(line);
+    return lines;
+}
+
+struct S_hitchRun {
+    std::vector<std::string> records;   // the record lines
+    std::string header, end;
+    diag::S_hitchTotals totals;
+};
+
+// A recorder on a new ring for `frames` frames of `frame(i)`, then stopped; its file read back.
+template <typename F>
+S_hitchRun RunHitches(const char *stream, diag::E_event boundary, diag::S_hitchConfig config, int frames, F frame,
+                      void (*capture)() = nullptr)
+{
+    S_hitchRun run;
+    const std::string path = NextTo("test_hitches.jsonl");
+    diag::Start(65536);
+    if (!diag::StartHitches(config, stream, boundary, "test_hitches.jsonl", "\"test\":true", capture)) {
+        diag::Stop();
+        return run;
+    }
+    for (int i = 0; i < frames; ++i)
+        frame(i);
+    run.totals = diag::StopHitchesWithTotals();
+    diag::Stop();
+    for (const std::string &line : ReadLines(path)) {
+        if (line.find("\"format\":\"ls3d.hitches\"") != std::string::npos)
+            run.header = line;
+        else if (line.find("\"end\":true") != std::string::npos)
+            run.end = line;
+        else if (line.find("\"record\":") != std::string::npos)
+            run.records.push_back(line);
+    }
+    DeleteFileA(path.c_str());
+    return run;
+}
+
+bool Has(const std::string &line, const char *text) { return line.find(text) != std::string::npos; }
+
+// A game-loop frame: about 4 ms of marked stages, `stallMs` more in the client update.
+void GameFrame(int i, double stallMs)
+{
+    using namespace diag;
+    Mark(EV_LOOP_BEGIN, static_cast<uint32_t>(i + 1));
+    Mark(EV_INPUT_POLL_BEGIN);
+    Mark(EV_INPUT_POLL_END);
+    Mark(EV_FRAME_FLOOR_BEGIN);
+    SpinMs(1.0);
+    Mark(EV_FRAME_FLOOR_END, 0, 10);
+    Mark(EV_RENDER_RECORD_BEGIN);
+    SpinMs(1.5);
+    Mark(EV_RENDER_RECORD_END);
+    Mark(EV_UPDATE_CLIENT_BEGIN);
+    Mark(EV_INPUT_CONSUMED, 0, 1);
+    SpinMs(0.5 + stallMs);
+    Mark(EV_UPDATE_CLIENT_END);
+    Mark(EV_FLIP_CALL_BEGIN, static_cast<uint32_t>(i + 1));
+    SpinMs(1.0);
+    Mark(EV_FLIP_CALL_END, static_cast<uint32_t>(i + 1));
+    Mark(EV_LOOP_END, static_cast<uint32_t>(i + 1));
+}
+
+// An engine frame (SDL_GPU's marks): `stall` ms in the stage `where`, or between flips (0).
+void EngineFrame(int i, diag::E_event where, double stallMs)
+{
+    using namespace diag;
+    const uint32_t id = static_cast<uint32_t>(i + 1);
+    auto stage = [&](E_event begin, double ms) {
+        Mark(begin);
+        SpinMs(ms + (begin == where ? stallMs : 0.0));
+        Mark(static_cast<E_event>(begin + 1));
+    };
+    Mark(EV_FLIP_BEGIN, id);
+    Mark(EV_PRESENT_BEGIN, id);
+    Mark(EV_RUN_FRAME_BEGIN, id, 0);
+    Mark(EV_TEXTURE_UPLOAD_BEGIN, id);
+    stage(EV_UPLOAD_WAIT_BEGIN, 0.0);
+    Mark(EV_TEXTURE_UPLOAD_END, id, 1);
+    Mark(EV_RENDERER_RUN_BEGIN, id);
+    SpinMs(0.5);
+    stage(EV_PIPELINE_CREATE_BEGIN, 0.0);
+    Mark(EV_RENDERER_RUN_END, id);
+    Mark(EV_RUN_FRAME_END, id, 100);
+    stage(EV_ACQUIRE_BEGIN, 0.2);
+    stage(EV_SUBMIT_BEGIN, 0.1);
+    Mark(EV_PRESENT_END, id);
+    Mark(EV_FLIP_END, id);
+    SpinMs(2.0 + (where == 0 ? stallMs : 0.0));        // the game's part of the frame
+}
+
+int g_captures = 0;
+void CountCapture() { ++g_captures; }
+
+void HitchTests()
+{
+    diag::S_hitchConfig c;
+    c.gapMs = 50;
+    c.waitMs = 20;
+    c.beforeMs = 200;
+    c.afterMs = 60;
+    c.maxRecords = 50;
+
+    // A CPU stall in the client update (the game's stream).
+    S_hitchRun r = RunHitches("game", diag::EV_LOOP_BEGIN, c, 40, [](int i) { GameFrame(i, i == 20 ? 80.0 : 0.0); });
+    Check(r.records.size() == 1 && Has(r.records[0], "\"cause\":\"update_client\"") && Has(r.records[0], "\"kind\":\"stage\",\"event\":\"update_client\"") &&
+              Has(r.header, "\"stream\":\"game\"") && Has(r.end, "\"records\":1"),
+          "hitch: an 80 ms client update -> one record, cause update_client");
+    if (!r.records.empty()) {
+        // The window: the slow frame's own loop_begin (iteration 21) and frames after it.
+        Check(Has(r.records[0], ",1,21,0]") && Has(r.records[0], ",1,23,0]") && Has(r.records[0], "\"merged\":1"),
+              "hitch: the window holds the slow frame and the frames after it; the frame-gap trigger joined it");
+        std::printf("    %s\n", r.records[0].substr(0, std::min<size_t>(r.records[0].find("\"events\""), 400)).c_str());
+    }
+
+    // The engine's waits and creations, each stalled 30 ms in one frame.
+    struct S_case {
+        diag::E_event where;
+        const char *cause;
+    } cases[] = {{diag::EV_PIPELINE_CREATE_BEGIN, "\"cause\":\"pipeline_create\""},
+                 {diag::EV_UPLOAD_WAIT_BEGIN, "\"cause\":\"upload_wait\""},
+                 {diag::EV_ACQUIRE_BEGIN, "\"cause\":\"acquire\""},
+                 {static_cast<diag::E_event>(0), "\"cause\":\"outside_engine_flip\""}};
+    for (const S_case &k : cases) {
+        const double stall = k.where ? 30.0 : 80.0;
+        r = RunHitches("engine", diag::EV_FLIP_BEGIN, c, 40, [&](int i) { EngineFrame(i, k.where, i == 20 ? stall : 0.0); });
+        Check(r.records.size() == 1 && Has(r.records[0], k.cause),
+              (std::string("hitch: ") + (k.where ? diag::EventName(k.where) : "game time between flips") + " stalled -> one record, " +
+               k.cause).c_str());
+        if (r.records.size() != 1)
+            for (const std::string &line : r.records)
+                std::printf("    %s\n", line.substr(0, 300).c_str());
+    }
+
+    // Two different slow frames in one window (seen in the game: a frame gap, then 232 ms of texture
+    // uploads in the next flip, merged): the record lists both, each with its own cause.
+    r = RunHitches("engine", diag::EV_FLIP_BEGIN, c, 40, [](int i) {
+        EngineFrame(i, i == 22 ? diag::EV_PIPELINE_CREATE_BEGIN : static_cast<diag::E_event>(0), i == 20 ? 80.0 : i == 22 ? 30.0 : 0.0);
+    });
+    {
+        const std::string &line = r.records.empty() ? std::string() : r.records[0];
+        const size_t slow = line.find("\"slow_frames\":[");
+        const std::string frames = slow == std::string::npos ? std::string() : line.substr(slow, line.find("]}]", slow) - slow);
+        Check(r.records.size() == 1 && Has(line, "\"cause\":\"outside_engine_flip\"") && Has(frames, "\"cause\":\"outside_engine_flip\"") &&
+                  Has(frames, "\"cause\":\"pipeline_create\""),
+              "hitch: a frame gap and a slow pipeline two frames later -> one record, slow_frames names both causes");
+    }
+
+    // No hitch: 300 frames from 2 to 15 ms apart, waits up to 10 ms.
+    r = RunHitches("engine", diag::EV_FLIP_BEGIN, c, 300, [](int i) {
+        EngineFrame(i, (i % 7) ? diag::EV_ACQUIRE_BEGIN : static_cast<diag::E_event>(0), static_cast<double>((i * 37) % 11));
+    });
+    Check(r.records.empty() && Has(r.end, "\"records\":0,\"skipped_over_limit\":0,\"dropped_no_slot\":0"),
+          "hitch: 300 frames under the thresholds -> no record");
+
+    // The limit: 2 records, 3 more hitches counted.
+    diag::S_hitchConfig two = c;
+    two.maxRecords = 2;
+    r = RunHitches("game", diag::EV_LOOP_BEGIN, two, 50, [](int i) { GameFrame(i, i % 10 == 5 ? 60.0 : 0.0); });
+    Check(r.records.size() == 2 && r.totals.records == 2 && r.totals.skipped == 3 && Has(r.end, "\"skipped_over_limit\":3"),
+          "hitch: HitchFiles=2 -> 2 records, 3 hitches counted over the limit");
+    if (r.records.size() != 2 || r.totals.skipped != 3)
+        std::printf("    records %zu (totals %u), skipped %u, dropped %u; end: %s\n", r.records.size(), r.totals.records, r.totals.skipped,
+                    r.totals.dropped, r.end.c_str());
+
+    // A capture asked for once; the hitch right after it (the capture's own) is not recorded.
+    diag::S_hitchConfig capture = c;
+    capture.captures = 1;
+    g_captures = 0;
+    r = RunHitches("engine", diag::EV_FLIP_BEGIN, capture, 60, [](int i) {
+        EngineFrame(i, static_cast<diag::E_event>(0), i == 10 || i == 30 ? 80.0 : (i == 11 ? 120.0 : 0.0));
+    }, &CountCapture);
+    Check(g_captures == 1 && r.records.size() == 2 && Has(r.records[0], "\"capture_requested\":true") &&
+              Has(r.records[1], "\"capture_requested\":false"),
+          "hitch: HitchCapture=1 -> one capture asked for, the next slow frame suppressed, a later hitch recorded");
+
+    // The cost of a mark with the recorder on (no hitch).
+    {
+        using Clock = std::chrono::steady_clock;
+        diag::Start(65536);
+        diag::S_hitchConfig quiet = c;
+        diag::StartHitches(quiet, "engine", diag::EV_FLIP_BEGIN, "test_hitches.jsonl", "");
+        const int n = 10000000;
+        const auto start = Clock::now();
+        for (int i = 0; i < n; ++i)
+            diag::Mark((i & 1) ? diag::EV_RUN_FRAME_END : diag::EV_RUN_FRAME_BEGIN, static_cast<uint32_t>(i));
+        const double ns = std::chrono::duration<double, std::nano>(Clock::now() - start).count() / n;
+        const diag::S_hitchTotals totals = diag::StopHitchesWithTotals();
+        diag::Stop();
+        DeleteFileA(NextTo("test_hitches.jsonl").c_str());
+        std::printf("cost per mark with the hitch recorder on: %.2f ns\n", ns);
+        Check(ns < 200.0 && totals.records == 0, "hitch: a mark with the recorder on under 200 ns, no record");
+    }
+}
+
 }  // namespace
 
 int main()
@@ -319,6 +538,7 @@ int main()
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     RingTests();
     CostTests();
+    HitchTests();
     WNDCLASSA wc = {};
     wc.lpfnWndProc = DefWindowProcA;
     wc.hInstance = GetModuleHandleA(nullptr);

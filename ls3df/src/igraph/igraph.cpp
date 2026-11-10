@@ -12,6 +12,7 @@
 #include "core/debug.h"
 #include "core/enhance.h"
 #include "diag/events.h"
+#include "gfx/trace/recorder.h"
 #include "dx/dxerr8.h"
 #include "i3d/i3d_links.h"
 #include "i3d/vb_manager.h"
@@ -1501,6 +1502,22 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     }
     // LS3DF.ini [Diagnostics] Events: the engine's markers from here on, on this (the window's) thread.
     diag::Start(diag::ConfiguredCapacity());
+    diag::S_hitchConfig hitches;
+    if (diag::Enabled() && diag::ConfiguredHitches(&hitches)) {
+        // The hitch recorder (E02): the settings that change what a frame costs. (The backend is the one
+        // asked for; the events show the one drawing: gl_swap OpenGL, acquire/submit SDL_GPU, no present D3D8.)
+        const S_enhancements &o = Enhancements();
+        char metadata[512];
+        std::snprintf(metadata, sizeof metadata,
+                      "\"backend_asked\":\"%s\",\"sdlgpu_driver\":\"%s\",\"present_mode\":\"%s\",\"msaa\":%d,"
+                      "\"alpha_to_coverage\":%s,\"ambient_occlusion\":%s,\"capture_frames\":%s,\"screen\":[%d,%d],\"windowed\":%s,\"game_vsync\":%s",
+                      o.sdlGpu ? "sdlgpu" : o.openGl ? "opengl" : "d3d8", o.sdlGpuDriver, o.presentMode[0] ? o.presentMode : "game",
+                      o.msaa, o.alphaToCoverage ? "true" : "false", o.occlusion ? "true" : "false", o.captureFrames ? "true" : "false",
+                      ScrnX(), ScrnY(), (g_init.flags & IG_FULLSCREEN) ? "false" : "true",
+                      (g_init.flags & IG_VSYNC) ? "true" : "false");
+        diag::StartHitches(hitches, "engine", diag::EV_FLIP_BEGIN, "LS3DF_hitches.jsonl", metadata,
+                           o.captureFrames ? &gfx::RequestFrameCapture : nullptr);
+    }
     Clear(0, 1.0f, 3);
     Flip();
     Clear(0, 1.0f, 3);
