@@ -24,7 +24,7 @@ private:
 
 class C_MeleeTrackerScript : public C_Script {                       // vtable 0x0080f70c, 0x110 bytes
 public:
-    C_MeleeTrackerScript(I3D_frame *frame, C_MeleeTracker *meleeTracker);              // 0x00421930
+    C_MeleeTrackerScript(I3D_frame *frame, C_MeleeTracker *meleeTracker);              // 0x00421930 (DS 0x00443790)
     bool ExecuteCommand(const S_ScriptCommand &cmd) override;   // 0x00421970
     int GetKind() const override { return SCRIPT_KIND_MELEE_TRACKER; }    // 0x00421960
 

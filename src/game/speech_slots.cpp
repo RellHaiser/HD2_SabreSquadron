@@ -272,6 +272,7 @@ void AttachSpeechSlot(int index, C_Human *owner)
 
 void ResetSpeechSlots()
 {
+#ifndef HD2_DEDICATED   // the server's copy is empty
     for (S_SpeechSlot &slot : g_slots) {
         if (slot.morph)
             SetNeutralMouth(slot.morph);
@@ -279,6 +280,7 @@ void ResetSpeechSlots()
         ReleaseSlotSound(slot);
     }
     ClearAllSlots();
+#endif
 }
 
 void StopFrameSpeech(I3D_frame *owner)
