@@ -32,9 +32,9 @@ One runner and manifest for every harness build script under `_re/harness` (37 s
 - Not run: vehicle_params' original-reader comparison (ORIG_DIR), and its `apply.exe` (built only).
   The mutation lists are not part of the baseline run.
 
-### Baseline, 2026-11-10 (revision 59f8b0b0)
+### Baseline, 2026-11-10
 
-The first run gave 33 pass, 1 fail, 2 crashed, 1 missing prerequisite. All three failures were out
+The first run (at 59f8b0b0) gave 33 pass, 1 fail, 2 crashed, 1 missing prerequisite. All three failures were out
 of date tests, not port bugs:
 
 - **vehicle.text and vehicle.factory crashed.** The bar test passed the pool list a raw buffer with
@@ -48,7 +48,16 @@ of date tests, not port bugs:
 - **vehicle.factory, description.dsWrite.** This was the runner's fault: parallel chunks in one
   folder shared the test's `mpdesc_test.txt`.
 
-So the runner catches failing checks, crashes and broken inputs. The latest result is in the report.
+A full run at c96abfef, which also has PR 13 merged, gave 34 pass, 2 build-failed and 1 missing
+prerequisite (mp_setup). Both crash builds failed to link: fa665363 added the crash report dialog,
+which reads `g_texts`. crash_test.cpp now fakes the text and the builds link `c_str.cpp`, and both
+pass. That leaves 36 of 37 passing, with mp_setup not run.
+
+So the runner catches failing checks, crashes, link failures and broken inputs.
+
+The profile suite rewrites two tracked files in `profile/run` (`profile1.sav` and
+`PlayersProfiles/Tester/profile.sav`). Restore them with `git checkout -- _re/harness/profile/run`
+after a run.
 
 ## Address ledger: `tools/address_ledger.py`
 

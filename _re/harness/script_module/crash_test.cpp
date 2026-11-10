@@ -9,10 +9,14 @@
 #include <string>
 
 #include "game/crash_report.h"
+#include "game/game_texts.h"
 #include "game/pending.h"
 #include "ls3d/igraph.h"
 
 uint32_t g_gameRole;
+// The crash report dialog's text (CrashReportProc, not run here).
+C_GameTexts g_texts;
+C_str C_GameTexts::Get(int) const { return C_str(); }
 extern "C" uint32_t GetEngineVersion() { return 1234; }
 static std::string g_debugText;
 extern "C" void dbgPrintf2(const char *format, ...)
