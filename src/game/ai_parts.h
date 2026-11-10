@@ -309,7 +309,7 @@ struct alignas(16) S_AITask {
     int unknown10 = 0;                                  // +0x10
 };
 // Type 1 (vtable 0x008110d8, 0x50 bytes).
-struct S_AITask1 : S_AITask {
+struct S_AITask1 : S_AITask {   // dtor: 0x0058a630 (DS 0x005926c0)
     S_AITask1() : S_AITask(1) {}
     bool SaveGame(C_chunk &chunk) const override;       // 0x0054fe40
     bool LoadGame(C_chunk &chunk) override;             // 0x00550090
@@ -320,7 +320,7 @@ struct S_AITask1 : S_AITask {
     int checkpoint = 0;                                 // +0x48
 };
 // Type 2 (vtable 0x008110f0, 0x50 bytes).
-struct S_AITask2 : S_AITask {
+struct S_AITask2 : S_AITask {   // deleting dtor and dtor: 0x0058a6f0 (DS 0x005927d0), 0x0058a710 (DS 0x00592800)
     S_AITask2() : S_AITask(2) {}
     bool SaveGame(C_chunk &chunk) const override;       // 0x00550370
     bool LoadGame(C_chunk &chunk) override;             // 0x005505b0
@@ -330,7 +330,7 @@ struct S_AITask2 : S_AITask {
     C_Human *human = nullptr;                           // +0x44
 };
 // Type 3 (vtable 0x008110fc, 0x40 bytes).
-struct S_AITask3 : S_AITask {
+struct S_AITask3 : S_AITask {   // deleting dtor and dtor: 0x0058a820 (DS 0x00592970), 0x0058a840 (DS 0x005929a0)
     S_AITask3() : S_AITask(3) {}
     bool SaveGame(C_chunk &chunk) const override;       // 0x00550870
     bool LoadGame(C_chunk &chunk) override;             // 0x00550a70
@@ -344,28 +344,28 @@ struct S_AITaskEmpty : S_AITask {
     bool SaveGame(C_chunk &chunk) const override;       // 0x00550d20 / 0x00551100 / 0x005514e0
     bool LoadGame(C_chunk &chunk) override;             // 0x00550ed0 / 0x005512b0 / 0x00551690
 };
-struct S_AITask4 : S_AITaskEmpty { S_AITask4() : S_AITaskEmpty(4) {} };
-struct S_AITask5 : S_AITaskEmpty { S_AITask5() : S_AITaskEmpty(5) {} };
-struct S_AITask6 : S_AITaskEmpty { S_AITask6() : S_AITaskEmpty(6) {} };
+struct S_AITask4 : S_AITaskEmpty { S_AITask4() : S_AITaskEmpty(4) {} };   // deleting dtor and dtor: 0x0058a950 (DS 0x00592b10), 0x0058a970 (DS 0x00592b40)
+struct S_AITask5 : S_AITaskEmpty { S_AITask5() : S_AITaskEmpty(5) {} };   // deleting dtor and dtor: 0x0058aa80 (DS 0x00592cb0), 0x0058aaa0 (DS 0x00592ce0)
+struct S_AITask6 : S_AITaskEmpty { S_AITask6() : S_AITaskEmpty(6) {} };   // deleting dtor and dtor: 0x0058abd0 (DS 0x00592e80), 0x0058abf0 (DS 0x00592eb0)
 // Type 7 (vtable 0x0081112c, 0x50 bytes).
-struct S_AITask7 : S_AITask {
+struct S_AITask7 : S_AITask {   // deleting dtor and dtor: 0x0058ad20 (DS 0x00593050), 0x0058ad40 (DS 0x00593080)
     S_AITask7() : S_AITask(7) {}
     S_vector4 unknown20 = {};                           // +0x20
     S_vector4 unknown30 = {};                           // +0x30
 };
 // Type 8 (vtable 0x00811138, 0x20 bytes).
-struct S_AITask8 : S_AITask {
+struct S_AITask8 : S_AITask {   // deleting dtor and dtor: 0x0058ae70 (DS 0x00593220), 0x0058ae90 (DS 0x00593250)
     S_AITask8() : S_AITask(8) {}
     int unknown14 = 0;                                  // +0x14
     int unknown18 = 0;                                  // +0x18
     int unknown1C = 0;                                  // +0x1C
 };
 // Types 9, 10 and 11 (vtables 0x00811144, 0x00811150, 0x0081115c; 0x18 bytes).
-struct S_AITask9 : S_AITask { S_AITask9() : S_AITask(9) {} };
-struct S_AITask10 : S_AITask { S_AITask10() : S_AITask(10) {} };
-struct S_AITask11 : S_AITask { S_AITask11() : S_AITask(11) {} };
+struct S_AITask9 : S_AITask { S_AITask9() : S_AITask(9) {} };   // deleting dtor and dtor: 0x0058afc0 (DS 0x005933f0), 0x0058afe0 (DS 0x00593420)
+struct S_AITask10 : S_AITask { S_AITask10() : S_AITask(10) {} };   // deleting dtor and dtor: 0x0058b0f0 (DS 0x00593590), 0x0058b110 (DS 0x005935c0)
+struct S_AITask11 : S_AITask { S_AITask11() : S_AITask(11) {} };   // deleting dtor and dtor: 0x0058b220 (DS 0x00593730), 0x0058b240 (DS 0x00593760)
 // Type 12 (vtable 0x00811168, 0x40 bytes).
-struct S_AITask12 : S_AITask {
+struct S_AITask12 : S_AITask {   // deleting dtor and dtor: 0x0058b350 (DS 0x005938d0), 0x0058b370 (DS 0x00593900)
     S_AITask12() : S_AITask(12) {}
     S_vector4 pos = {};                                 // +0x20
     int unknown30 = 0;                                  // +0x30
