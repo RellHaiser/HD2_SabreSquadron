@@ -31,8 +31,9 @@ Tested by playing:
 
 Not tested yet:
 
-- Hosting with another player joined, and a dedicated server. (LAN and internet listen servers have been started and
-  spawned in; no report yet of another player joining.)
+- Hosting from the game with another player joined. (LAN and internet listen servers have been started and spawned in;
+  no report yet of another player joining.) The port's dedicated server has hosted a client: see
+  [hd2ds_sabresquadron](hd2ds_sabresquadron/README.md).
 - The other missions past loading, the few squad orders that need particular gear, and a side-by-side
   measurement against the original of how the fights balance.
 
@@ -116,8 +117,8 @@ compiled with diagnostics, then the link.
 Related ports, each a drop-in for the game's own DLL: [LS3DF](https://github.com/RellHaiser/LS3DF) (the
 engine), [rw_data](https://github.com/RellHaiser/rw_data) (the archives), [IJOY](https://github.com/RellHaiser/IJOY)
 (joystick input). The port needs LS3DF; the other two are optional. All three are included here as
-subtrees (`ls3df/`, `rw_data/`, `ijoy/`), with [LS3DRF](https://github.com/readher/LS3DRF), the engine without sound
-or rendering that the dedicated server loads (`ls3drf/`).
+subtrees (`ls3df/`, `rw_data/`, `ijoy/`). `ls3drf/` holds LS3DRF, the engine without sound or rendering that the
+dedicated server loads; it is maintained here (its old repository, readher/LS3DRF, is archived).
 
 ## Layout
 
@@ -134,8 +135,8 @@ or rendering that the dedicated server loads (`ls3drf/`).
 | `ls3df` | The LS3D engine DLL, `LS3DF.dll` ([RellHaiser/LS3DF](https://github.com/RellHaiser/LS3DF), kept in sync with `git subtree --prefix=ls3df`); built and tested with its own `build.py` |
 | `rw_data` | The virtual file system DLL, `rw_data.dll` ([RellHaiser/rw_data](https://github.com/RellHaiser/rw_data), kept in sync with `git subtree --prefix=rw_data`); `src/ls3d/rw_data.h` forwards to its header; built by `_re/tools/build_rw_data.py` |
 | `ijoy` | The joystick DLL, `IJoy.dll` ([RellHaiser/IJOY](https://github.com/RellHaiser/IJOY), kept in sync with `git subtree --prefix=ijoy`); built and tested against the original with its own `build.py` (MSVC only) |
-| `ls3drf` | The dedicated server's engine DLL, `LS3DRF.dll`: LS3DF's port without sound, video, input or the render device ([readher/LS3DRF](https://github.com/readher/LS3DRF), kept in sync with `git subtree --prefix=ls3drf`); built and tested with its own `build.py`. Its code began as a copy of LS3DF's, so LS3DF's fixes are carried over by hand ([how](ls3drf/README.md#source-and-ls3df)) |
-| `hd2ds_sabresquadron` | The dedicated server, `HD2DS_SabreSquadron.exe`: not started (the binary's facts only) |
+| `ls3drf` | The dedicated server's engine DLL, `LS3DRF.dll`: LS3DF's port without sound, video, input or the render device (began as [readher/LS3DRF](https://github.com/readher/LS3DRF), now archived: this folder is its source); built and tested with its own `build.py`. Its code began as a copy of LS3DF's, so LS3DF's fixes are carried over by hand ([how](ls3drf/README.md#source-and-ls3df)) |
+| `hd2ds_sabresquadron` | The dedicated server, `HD2DS_SabreSquadron.exe`: built from `src/` with `HD2_DEDICATED`; hosts maps and a client has played on it ([status](hd2ds_sabresquadron/README.md#status)) |
 | `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md) |
 
 ## Legal

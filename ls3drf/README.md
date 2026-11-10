@@ -1,8 +1,8 @@
 # LS3DRF.dll — source port
 
-> The source is [readher/LS3DRF](https://github.com/readher/LS3DRF). The `ls3drf/` folder of
-> [HD2_SabreSquadron](https://github.com/RellHaiser/HD2_SabreSquadron) is a `git subtree` of it:
-> make changes in readher/LS3DRF, not in the folder.
+> The source is the `ls3drf/` folder of [HD2_SabreSquadron](https://github.com/RellHaiser/HD2_SabreSquadron):
+> make changes there. [readher/LS3DRF](https://github.com/readher/LS3DRF), where it was first published,
+> is archived (read-only).
 
 Clean C++17 rewrite of `LS3DRF.dll`, the build of the LS3D engine (version 5.59.5, build of
 16 August 2004) that the Hidden & Dangerous 2 / Sabre Squadron dedicated server
@@ -36,12 +36,14 @@ The companion port of `rw_data.dll`, the game's data-file layer, is at
 
 ## Status
 
-> **Not tried with the server yet.** Every one of the original's 722 engine functions (the C
+> **Runs the port's server.** The dedicated server built from HD2_SabreSquadron's `src/`
+> ([hd2ds_sabresquadron](../hd2ds_sabresquadron)) loads it and hosts a map. With the original server it has only run
+> under a patched copy, not as a plain drop-in. Every one of the original's 722 engine functions (the C
 > runtime and static initialisers left out) has a counterpart in the port, 275 of them ported
 > from LS3DRF's own body. The DLL links with the original's 59 exports, and its 26 engine classes
 > have LS3DRF's virtual tables, sizes and field offsets (the server reads and calls engine objects
 > directly); what a few fields mean is still uncertain. Parts of the DLL are verified against the
-> original by the differential tests below; the rest has not run anywhere yet. Use it in a copy of
+> original by the differential tests below; the rest has run only as far as the server uses it. Use it in a copy of
 > the game folder and keep the original DLL.
 
 | Part | Verified against the original by |
@@ -136,13 +138,9 @@ first difference (exit code 1).
 
 ## Source and LS3DF
 
-The source is [readher/LS3DRF](https://github.com/readher/LS3DRF): make changes there. The
-`ls3drf/` folder of [HD2_SabreSquadron](https://github.com/RellHaiser/HD2_SabreSquadron) is a
-`git subtree` of it, like that repository's `ls3df/` and `rw_data/`, and is updated with:
-
-```bat
-git subtree pull --prefix=ls3drf https://github.com/readher/LS3DRF main
-```
+The source is the `ls3drf/` folder of [HD2_SabreSquadron](https://github.com/RellHaiser/HD2_SabreSquadron):
+make changes there. It was published as [readher/LS3DRF](https://github.com/readher/LS3DRF) and pulled in as a
+`git subtree`; that repository is now archived, so there is nothing left to pull.
 
 The port itself began as a copy of LS3DF's, not a subtree: its classes have LS3DRF's layouts and
 much of the code is gone, so the two are different files from then on. A fix in LS3DF does not reach
