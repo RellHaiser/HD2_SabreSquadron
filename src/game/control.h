@@ -76,7 +76,7 @@ constexpr int CONTROL_NOT_HANDLED = 7;
 // 0 for the CONTROL_NOTIFY_ANY one): its result returned by Notify's callbacks.
 using ControlCallback = bool (*)(void *object, void *argument, C_Control *control, uint32_t notification,
                                  uint32_t value);
-struct S_ControlCallback {                              // 0x0C bytes
+struct S_ControlCallback {                              // 0x0C bytes (its constructor: 0x00654850 (DS 0x006890d0))
     uint32_t notification = 0;
     void *object = nullptr;
     ControlCallback function = nullptr;

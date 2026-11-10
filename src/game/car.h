@@ -46,7 +46,7 @@ struct S_CarZone {
 // ("DM" + the model's file name, a hidden copy placed on the car for hit tests), its damage zones,
 // explosive parts, the turrets' frames it turns with the car's, the seats' hit boxes, and the
 // wreck's fire, smoke and sound.
-struct S_CarParts {
+struct S_CarParts {                                     // its vectors' implicit dtor: 0x004d0ec0 (DS 0x004bda00)
     S_CarParts();                                       // 0x004e08c0
     // The damage model of `owner`'s model loaded (none when there is no such file) and its parts
     // gathered, hidden.

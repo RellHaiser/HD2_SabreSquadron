@@ -26,7 +26,7 @@ class I3D_scene;
 class I3D_sound;
 
 // A text the menus show where they ask (the main menu's hints): its box on a frame of theirs.
-struct S_MenuHint {                                     // 0xB0 bytes (C_MenuState +0x40)
+struct S_MenuHint {                                     // 0xB0 bytes (C_MenuState +0x40; its destructor: 0x0067efb0 (DS 0x006bc1b0))
     S_MenuHint() { Reset(); }
     // Not shown, no text, no frame, the box emptied.
     void Reset();                                       // 0x0066e480 (__fastcall)

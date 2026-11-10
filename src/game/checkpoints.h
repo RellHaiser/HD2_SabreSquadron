@@ -145,7 +145,7 @@ struct S_CheckpointActor {                              // 8 bytes
 };
 
 // The positions FindEscapePath flees from: the AI controller's growable aligned array.
-struct S_Vector4Array {                                 // 0x10 bytes
+struct S_Vector4Array {                                 // 0x10 bytes (its free: 0x00559760 (DS 0x00554b40))
     S_vector4 *data = nullptr;                          // _aligned_malloc'd
     int capacity = 0;
     int count = 0;
