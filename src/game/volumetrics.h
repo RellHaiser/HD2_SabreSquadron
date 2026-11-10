@@ -121,7 +121,7 @@ private:
 };
 
 // The clouds (0x0089b74c): their two textures; the vertex buffers (0x0089b754, 0x0089b758).
-struct S_Clouds {
+struct S_Clouds {                                       // server constructor (DS 0x004a1540)
     IImage *images[2] = {nullptr, nullptr};
 };
 extern S_Clouds g_clouds;                               // 0x0089b74c (static init 0x00482df0)
