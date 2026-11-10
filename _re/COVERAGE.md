@@ -242,8 +242,26 @@ expectations come from the original's assembly (0x0044b3b0, 0x0044b910, 0x004483
 - **Mutations:** `mutations/mutate_shots1.py` (146 mutants, from `gen_mutations.py`). 56 killed,
   10 don't build, 80 survived. The survivors are equivalent ones, listed with reasons in the
   file, and code part 2 will test.
-- **Part 2:** humans and hit zones, the trace and flare visuals (`Update`), decals, projectiles,
-  thrown items, and the manager's save / load and network messages.
+- **Part 2a (done):** humans and hit zones, the trace and flare visuals (`Update`), and bullet
+  decals. Added:
+  - logging fakes for the frame vtable (SetPos, SetDir, SetWorldDir, Update, SetOn, LinkTo,
+    FindChildFrame, Release and the projector's slots), the driver's `CreateVisual`, and the
+    scene's light and sector;
+  - the real `c_str.cpp`.
+
+  Expectations from 0x00455670 (`GetHitZone`), 0x0044b400 (`Update`) and 0x0044ebd0
+  (`AddBulletDecal`):
+  - zones 0..9 in order, each put on its joint at scale 1, a type-0 helmet tried before the head;
+  - the squad not hitting itself in a local game; `NotifyShotAt` on a miss;
+  - the trace hidden for its first 30 m, its distance kept as an int: 30 ms of an 80 m step is 23
+    m, not 24, since `30 * 0.01f` is just under 0.3;
+  - the flare's glow and sparks between 30 and 100 m, its burn-out and the signal-pistol flag;
+  - decals: the type filters, the skinned-parent walk, the 0.4 / 1 light steps, reuse of the
+    oldest, and the hit part or no frame through `Tick`.
+
+  312 checks. `mutations/mutate_shots2a.py`: 149 mutants, 128 killed, 9 don't build, 12 survived
+  (11 equivalent, 1 without an exact float input; listed there). shots.cpp: 393 of 1,482 lines.
+- **Part 2b:** projectiles, thrown items, and the manager's save / load and network messages.
 
 `_re/harness/mutrun.py` now takes its repository root from its own path. It used to name the
 G: checkout, which has been out of date since the move to T:.

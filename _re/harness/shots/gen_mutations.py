@@ -1,6 +1,6 @@
 """Generates a mutation list for _re/harness/mutrun.py from a range of lines of a source.
 
-    python gen_mutations.py SOURCE FIRST LAST OUT.py [TITLE]
+    python gen_mutations.py SOURCE RANGES OUT.py [TITLE]     (RANGES: "304-665" or "348-470,558-578")
 
 SOURCE relative to the repository (src/game/shots.cpp). One mutation per kind per line, only for lines
 found once in the file (mutrun replaces the text once):
@@ -62,13 +62,14 @@ def mutants(line):
 
 
 def main():
-    source, first, last, out = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
-    title = sys.argv[5] if len(sys.argv) > 5 else "mutations of %s %d..%d" % (source, first, last)
+    source, ranges, out = sys.argv[1], sys.argv[2], sys.argv[3]
+    title = sys.argv[4] if len(sys.argv) > 4 else "mutations of %s %s" % (source, ranges)
+    numbers = [n for r in ranges.split(",") for n in range(int(r.split("-")[0]), int(r.split("-")[1]) + 1)]
     path = os.path.join(ROOT, source)
     text = open(path, encoding="utf-8", newline="").read()
     lines = text.splitlines(keepends=True)
     rows = []
-    for no in range(first, last + 1):
+    for no in numbers:
         line = lines[no - 1]
         if text.count(line) != 1:
             continue

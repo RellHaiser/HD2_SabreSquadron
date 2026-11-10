@@ -16,6 +16,7 @@
 #include <windows.h>
 
 #include <algorithm>
+#include <map>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -88,6 +89,9 @@ std::vector<I3D_frame *> g_framesHit;
 std::vector<int> g_effects;
 float g_randFloat = 0.5f;
 C_Human *g_activePlayer;
+bool g_decalsOn;
+float g_light = 1.0f;
+std::vector<std::string> g_particleLog;
 int g_carMaterial = MATERIAL_NONE;
 std::vector<int> g_keeperDamage;
 bool g_keeperSurvives = true;
@@ -154,28 +158,52 @@ void C_game::Print(const char *, ...) {}
 bool C_CameraModule::GetCameraDir(int, S_vector4 *dir) { dir->x = 0.0f; dir->y = 0.0f; dir->z = 1.0f; return true; }
 bool C_CameraModule::GetCameraPos(int, S_vector4 *pos) { pos->x = 0.0f; pos->y = 0.0f; pos->z = -10.0f; return true; }
 void C_CameraModule::SetSpecialMode(int, bool, I3D_frame *) {}
-int C_ParticlesModule::Create(int effect, const S_matrix &, I3D_frame *, bool, bool) { g_effects.push_back(effect); return 1; }
+int C_ParticlesModule::Create(int effect, const S_matrix &, I3D_frame *frame, bool a, bool b)
+{
+    g_effects.push_back(effect);
+    g_particleLog.push_back("create " + std::to_string(effect) + " " + std::to_string(a) + std::to_string(b) +
+                            (frame ? " frame" : ""));
+    return 41;
+}
 int C_ParticlesModule::CreateAt(int effect, const S_vector &, const S_vector &, I3D_frame *, bool, bool)
 {
     g_effects.push_back(effect);
     return 1;
 }
-void C_ParticlesModule::Destroy(int) {}
-void C_ParticlesModule::ToggleEmission(int, int) {}
-C_PlayerOptions *C_GameProfile::GetDetailSettings() { return nullptr; }
-bool C_PlayerOptions::IsEnabled(int) const { return false; }   // (no decals)
+void C_ParticlesModule::Destroy(int id) { g_particleLog.push_back("destroy " + std::to_string(id)); }
+void C_ParticlesModule::ToggleEmission(int id, int on) { g_particleLog.push_back("toggle " + std::to_string(id) + " " + std::to_string(on)); }
+C_PlayerOptions *C_GameProfile::GetDetailSettings() { return reinterpret_cast<C_PlayerOptions *>(g_soundModuleBytes); }
+bool C_PlayerOptions::IsEnabled(int option) const { return option == DETAIL_DECALS && g_decalsOn; }
 int C_GameProfile::GetDifficulty() const { return 2; }
 C_Human *C_Team::GetActivePlayer() const { return g_activePlayer; }
 void C_Team::NotifyGrenadeThrown(const S_vector &, const S_vector &, C_Actor *) {}
-bool C_Human::IsLocalPlayer() const { return false; }
-bool C_Human::IsFriendOf(const C_Actor *) const { return false; }
-void C_Human::NotifyShotAt(C_Actor *, const S_vector &) {}
+namespace {
+const C_Human *g_localPlayer;
+bool g_friends;
+struct S_ShotAt {
+    const C_Human *human;
+    C_Actor *shooter;
+    S_vector velocity;
+};
+std::vector<S_ShotAt> g_shotAt;
+std::map<const C_Item *, I3D_frame *> g_itemFrames;
+}  // namespace
+bool C_Human::IsLocalPlayer() const { return this == g_localPlayer; }
+bool C_Human::IsFriendOf(const C_Actor *) const { return g_friends; }
+void C_Human::NotifyShotAt(C_Actor *shooter, const S_vector &velocity) { g_shotAt.push_back({this, shooter, velocity}); }
 const S_vector &C_Human::GetFacingDir() const { static S_vector dir(0, 0, 1); return dir; }
 void C_Human::RemoveItem(int, bool) {}
 int C_Car::GetHitMaterial(const S_vector &, const S_vector &) { return g_carMaterial; }
 bool C_VersionKeeper::Damage(int damage, I3D_frame **, E_VersionEffects) { g_keeperDamage.push_back(damage); return g_keeperSurvives; }
 bool C_VersionMaster::DamageFrame(I3D_frame *, int) { return true; }
-I3D_frame *C_Item::GetFrame(int) { return nullptr; }
+namespace {
+std::vector<int> g_itemFrameIndices;
+}
+I3D_frame *C_Item::GetFrame(int index)
+{
+    g_itemFrameIndices.push_back(index);
+    return g_itemFrames.count(this) ? g_itemFrames[this] : nullptr;
+}
 I3D_frame *C_WeaponItem::GetBlastDummy() { return nullptr; }
 I3D_frame *C_WeaponItem::GetCartridgeDummy() { return nullptr; }
 I3D_frame *C_FirstPersonView::GetBlastDummy() { return nullptr; }
@@ -208,12 +236,21 @@ bool C_chunk::Begin(uint16_t) { return true; }
 bool C_chunk::Descend(uint16_t &) { return false; }
 bool C_chunk::Ascend(uint32_t *) { return true; }
 int C_chunk::RemainingSize() const { return 0; }
-void C_str::Release() {}
-C_str &C_str::operator=(const char *) { return *this; }
 void I3D_frame::UpdateWMatrixProc() {}
-S_vector __stdcall S_matrix::GetScale() const { return S_vector(1.0f, 1.0f, 1.0f); }
+S_vector __stdcall S_matrix::GetScale() const
+{
+    return S_vector(std::sqrt(m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2]),
+                    std::sqrt(m[1][0] * m[1][0] + m[1][1] * m[1][1] + m[1][2] * m[1][2]),
+                    std::sqrt(m[2][0] * m[2][0] + m[2][1] * m[2][1] + m[2][2] * m[2][2]));
+}
 void __stdcall S_quat::Make(const S_matrix &) {}
-extern "C" I3D_driver *I3DGetDriver() { return nullptr; }
+namespace {
+void *g_driverVt[128];
+struct S_FakeDriver {
+    void **vtable = g_driverVt;
+} g_driver;
+}  // namespace
+extern "C" I3D_driver *I3DGetDriver() { return reinterpret_cast<I3D_driver *>(&g_driver); }
 extern "C" IGraph *GetIGraph() { return nullptr; }
 template <> HRESULT C_ResourceCache<I3D_model>::OpenInto(I3D_model *, const char *, uint32_t, void *, void *, int) { return E_FAIL; }
 template <> HRESULT C_ResourceCache<I3D_sound>::OpenInto(I3D_sound *, const char *, uint32_t, void *, void *, int) { return E_FAIL; }
@@ -238,10 +275,14 @@ struct S_Intersect {
 };
 std::vector<S_Intersect> g_intersects;
 std::vector<I3D_frame *> g_intersectFrames;
+std::vector<uint32_t> g_intersectFlags;
+int g_intersectExtra;                                                    // or of the three unidentified arguments
 I3D_frame *__stdcall F_IntersectFrame(void *, const S_vector &, const S_vector &, I3D_frame *frame,
-                                      I3D_collision_info *info, uint32_t, int, int, int)
+                                      I3D_collision_info *info, uint32_t flags, int a, int b, int c)
 {
+    g_intersectExtra |= a | b | c;
     g_intersectFrames.push_back(frame);
+    g_intersectFlags.push_back(flags);
     if (g_intersects.empty())
         return nullptr;
     const S_Intersect answer = g_intersects.front();
@@ -256,13 +297,91 @@ I3D_frame *__stdcall F_IntersectFrame(void *, const S_vector &, const S_vector &
 int &SceneStamp() { return *reinterpret_cast<int *>(reinterpret_cast<unsigned char *>(&g_scene) + 0x11C); }
 int &FrameStamp(I3D_frame *frame) { return *reinterpret_cast<int *>(reinterpret_cast<unsigned char *>(frame) + 0x11C); }
 
-// Frames: zeroed bytes with a vtable (only what the code reads is set).
+// Frames: zeroed bytes with a vtable; the engine calls the code makes are logged ("<call> <name> ...").
 void *g_frameVt[128];
+std::map<const I3D_frame *, std::string> g_frameNames;
+std::map<std::pair<const I3D_frame *, std::string>, I3D_frame *> g_frameChildren;
+std::vector<std::string> g_frameLog;
+std::string FrameName(const I3D_frame *f) { return f ? (g_frameNames.count(f) ? g_frameNames[f] : "?") : "null"; }
+std::string Vec(const S_vector &v)
+{
+    char s[96];
+    std::snprintf(s, sizeof s, "%g,%g,%g", v.x, v.y, v.z);
+    return s;
+}
+I3D_frame *MakeFrame(E_I3D_FRAME_TYPE type = FRAME_VISUAL, const char *name = nullptr);
+std::vector<std::string> g_sceneLog;
+float __stdcall F_GetLightIntensity(void *, const S_vector &pos, I3D_sector *sector, int a, int b)
+{
+    g_sceneLog.push_back("light " + Vec(pos) + (sector ? " sector " : " - ") + std::to_string(a) + std::to_string(b));
+    return g_light;
+}
+I3D_frame *g_sectorFrame;
+I3D_sector *__stdcall F_GetSector(void *, const S_vector &pos)
+{
+    g_sceneLog.push_back("sector " + Vec(pos));
+    return reinterpret_cast<I3D_sector *>(g_sectorFrame);
+}
+int g_visualsMade;
+I3D_frame *__stdcall F_CreateVisual(void *, uint32_t type)
+{
+    I3D_frame *f = MakeFrame(FRAME_VISUAL, ("decal" + std::to_string(++g_visualsMade)).c_str());
+    g_sceneLog.push_back("create " + std::to_string(type));
+    S_vector &base = *reinterpret_cast<S_vector *>(reinterpret_cast<unsigned char *>(f) + 0x1F0);
+    base = S_vector(0.5f, 0.25f, 1.0f);
+    return f;
+}
+uint32_t __stdcall F_FrRelease(I3D_frame *self) { g_frameLog.push_back("release " + FrameName(self)); return 0; }
+uint32_t g_visualType = 0;
+std::map<const I3D_frame *, uint32_t> g_visualTypes;
+uint32_t __stdcall F_FrGetVisualType(I3D_frame *self) { return g_visualTypes.count(self) ? g_visualTypes[self] : g_visualType; }
+void __stdcall F_FrSetPos(I3D_frame *self, const S_vector &pos)
+{
+    g_frameLog.push_back("pos " + FrameName(self) + " " + Vec(pos));
+    self->m_localMatrix(3) = pos;
+    self->m_worldMatrix(3) = pos;
+}
+void __stdcall F_FrSetDir(I3D_frame *self, const S_vector &dir, float roll)
+{
+    char s[32];
+    std::snprintf(s, sizeof s, " %g", roll);
+    g_frameLog.push_back("dir " + FrameName(self) + " " + Vec(dir) + s);
+}
+void __stdcall F_FrSetWorldDir(I3D_frame *self, const S_vector &dir, float roll)
+{
+    char s[32];
+    std::snprintf(s, sizeof s, " %g", roll);
+    g_frameLog.push_back("worlddir " + FrameName(self) + " " + Vec(dir) + s);
+}
+void __stdcall F_FrUpdate(I3D_frame *self) { g_frameLog.push_back("update " + FrameName(self)); }
+void __stdcall F_FrSetOn(I3D_frame *self, bool on) { g_frameLog.push_back(std::string(on ? "on " : "off ") + FrameName(self)); }
+void __stdcall F_FrLinkTo(I3D_frame *self, I3D_frame *parent, uint32_t flags)
+{
+    g_frameLog.push_back("link " + FrameName(self) + " " + FrameName(parent) + " " + std::to_string(flags));
+}
+I3D_frame *__stdcall F_FrFindChild(I3D_frame *self, const char *name, uint32_t)
+{
+    auto it = g_frameChildren.find({self, name});
+    return it == g_frameChildren.end() ? nullptr : it->second;
+}
+void __stdcall F_PrSetTexture(I3D_frame *self, IImage *image)
+{
+    g_frameLog.push_back("texture " + FrameName(self) + " " + std::to_string(reinterpret_cast<uintptr_t>(image)));
+}
+void __stdcall F_PrSetOrthogonal(I3D_frame *self, int v) { g_frameLog.push_back("ortho " + FrameName(self) + " " + std::to_string(v)); }
+void __stdcall F_PrSetColor(I3D_frame *self, const S_vector &c) { g_frameLog.push_back("color " + FrameName(self) + " " + Vec(c)); }
+void __stdcall F_PrSetMode(I3D_frame *self, int v) { g_frameLog.push_back("mode " + FrameName(self) + " " + std::to_string(v)); }
+void __stdcall F_PrSetBuffered(I3D_frame *self, int v) { g_frameLog.push_back("buffered " + FrameName(self) + " " + std::to_string(v)); }
+HRESULT __stdcall F_FrDuplicate(I3D_frame *self, I3D_frame *source)
+{
+    g_frameLog.push_back("duplicate " + FrameName(self) + " " + FrameName(source));
+    return 0;
+}
 struct S_FakeFrame {
     alignas(16) unsigned char bytes[0x400];
     I3D_frame *frame() { return reinterpret_cast<I3D_frame *>(bytes); }
 };
-I3D_frame *MakeFrame(E_I3D_FRAME_TYPE type = FRAME_VISUAL)
+I3D_frame *MakeFrame(E_I3D_FRAME_TYPE type, const char *name)
 {
     S_FakeFrame *fake = new S_FakeFrame();
     std::memset(fake->bytes, 0, sizeof(fake->bytes));
@@ -273,6 +392,9 @@ I3D_frame *MakeFrame(E_I3D_FRAME_TYPE type = FRAME_VISUAL)
     frame->m_frameFlags |= FRMFLAGS_WMATRIX_VALID;
     for (int i = 0; i < 4; ++i)
         frame->m_worldMatrix.m[i][i] = 1.0f;
+    static int count;
+    g_frameNames[frame] = name ? name : "f" + std::to_string(++count);
+    frame->m_name = const_cast<char *>(g_frameNames[frame].c_str());
     return frame;
 }
 I3D_frame *MakeFrameAt(const S_vector &pos)
@@ -379,6 +501,19 @@ void Reset(uint32_t role = GAME_ROLE_LOCAL)
     g_keeperSurvives = true;
     g_impulses.clear();
     SceneStamp() = 7;
+    g_localPlayer = nullptr;
+    g_friends = false;
+    g_shotAt.clear();
+    g_intersectFlags.clear();
+    g_frameLog.clear();
+    g_visualType = 0;
+    g_particleLog.clear();
+    reinterpret_cast<C_game *>(g_gameBytes)->m_signalPistolFired = false;
+    g_decalsOn = false;
+    g_light = 1.0f;
+    g_sceneLog.clear();
+    g_intersectExtra = 0;
+    g_itemFrameIndices.clear();
 }
 
 C_BulletShot *Fire(const S_vector &pos, const S_vector &dir, bool fake = false, bool flare = false)
@@ -1059,6 +1194,666 @@ void TestCarsAndStaticWeapons()
     CHECK(g_hits.empty() && g_sounds.size() == 1 && g_sounds[0].group == 102 && b->m_finished);
     CHECK(Same(b->m_pos, S_vector(0, 0, 15)) && g_framesHit.empty());
 }
+
+// ---- humans and hit zones ----
+
+// A container whose every virtual is GetItem (the only call the shots make on one).
+C_Item *g_headItem;
+C_Item *__thiscall F_GetItem(void *) { return g_headItem; }
+void *g_containerVt[64];
+struct S_FakeContainer {
+    void **vtable = g_containerVt;
+    unsigned char bytes[0x40] = {};
+};
+S_FakeContainer g_headContainer;
+C_ItemContainer *g_containers[8];
+
+// A human with the hit zones' joints: 22 joint frames, joint j at (j, 10 + j, 100 + j).
+struct S_TestHuman {
+    C_Human *human;
+    I3D_frame *frame;
+    I3D_frame *mesh;
+    I3D_frame *joints[22];
+};
+S_TestHuman MakeHuman(const char *name)
+{
+    S_TestHuman h{};
+    h.frame = MakeFrame(FRAME_MODEL, name);
+    h.mesh = MakeFrame(FRAME_VISUAL, (std::string(name) + ".a").c_str());
+    g_frameChildren[{h.frame, "a"}] = h.mesh;
+    for (int j = 0; j < 22; ++j)
+        h.joints[j] = MakeFrameAt(S_vector(static_cast<float>(j), 10.0f + j, 100.0f + j));
+    *reinterpret_cast<I3D_frame ***>(reinterpret_cast<unsigned char *>(h.mesh) + 0x214) = h.joints;
+    h.human = reinterpret_cast<C_Human *>(MakeActor(ACTOR_HUMAN, h.frame));
+    h.human->m_stats[STAT_HEALTH] = 100;
+    h.human->m_role = HUMAN_ROLE_PLAYER;
+    h.human->m_containers = g_containers;
+    return h;
+}
+
+// The zones model and its ten zone frames (the original's names: c f l m h i s t o p).
+I3D_frame *g_zones[10];
+void SetUpZones()
+{
+    static const char *const names[10] = {"c", "f", "l", "m", "h", "i", "s", "t", "o", "p"};
+    g_hitZones.m_model = MakeFrame(FRAME_MODEL, "zones");
+    for (int i = 0; i < 10; ++i)
+        g_hitZones.m_zones[i] = g_zones[i] = MakeFrame(FRAME_VISUAL, names[i]);
+    for (void *&slot : g_containerVt)
+        slot = reinterpret_cast<void *>(F_GetItem);
+    g_containers[0] = reinterpret_cast<C_ItemContainer *>(&g_headContainer);
+}
+
+// A headgear item of `type` (0: a helmet that stops bullets) with its frame.
+C_Item *MakeHeadgear(int type, I3D_frame *frame)
+{
+    auto *comp = static_cast<C_HeadgearComp *>(::operator new(sizeof(C_HeadgearComp)));
+    std::memset(static_cast<void *>(comp), 0, sizeof(C_HeadgearComp));
+    comp->m_headgearType = type;
+    auto *def = static_cast<C_ItemDef *>(::operator new(sizeof(C_ItemDef)));
+    std::memset(static_cast<void *>(def), 0, sizeof(C_ItemDef));
+    def->m_component = comp;
+    auto *item = static_cast<C_Item *>(::operator new(sizeof(C_Item)));
+    std::memset(static_cast<void *>(item), 0, sizeof(C_Item));
+    item->m_def = def;
+    g_itemFrames[item] = frame;
+    return item;
+}
+
+// The answers of IntersectFrame for the zone tests: hit only `frame` (null: none).
+void HitOnly(I3D_frame *frame, int calls)
+{
+    g_intersects.clear();
+    for (int i = 0; i < calls; ++i)
+        g_intersects.push_back({nullptr, 0.0f, S_vector(0, 0, 0)});
+    (void)frame;
+}
+
+void TestHitZones()
+{
+    Reset();
+    S_TestHuman h = MakeHuman("soldier");
+    g_headItem = nullptr;
+    const S_vector pos(0, 0, 0), dir(0, 0, 50);
+    // No zones model: none, nothing asked.
+    I3D_frame *model = g_hitZones.m_model;
+    g_hitZones.m_model = nullptr;
+    CHECK(g_hitZones.GetHitZone(h.human, pos, dir) == HIT_ZONE_NONE && g_intersectFrames.empty());
+    g_hitZones.m_model = model;
+    // No joints: none.
+    *reinterpret_cast<I3D_frame ***>(reinterpret_cast<unsigned char *>(h.mesh) + 0x214) = nullptr;
+    CHECK(g_hitZones.GetHitZone(h.human, pos, dir) == HIT_ZONE_NONE && g_intersectFrames.empty());
+    *reinterpret_cast<I3D_frame ***>(reinterpret_cast<unsigned char *>(h.mesh) + 0x214) = h.joints;
+    // Every zone in turn: the first hit wins; each zone tested so far was put on its joint (its world
+    // matrix as the zone's local one), at scale 1, and updated; the later ones not touched.
+    static const int joints[10] = {1, 6, 13, 14, 9, 10, 20, 21, 16, 17};
+    for (int k = 0; k < 10; ++k) {
+        Reset();
+        for (int i = 0; i < 10; ++i)
+            g_zones[i]->m_localMatrix.m[3][0] = -1.0f;
+        g_intersects.clear();
+        for (int i = 0; i < k; ++i)
+            g_intersects.push_back({nullptr, 0.0f, S_vector(0, 0, 0)});
+        g_intersects.push_back({g_zones[k], 1.0f, S_vector(0, 0, -1)});
+        CHECK(g_hitZones.GetHitZone(h.human, pos, dir) == k);
+        CHECK(static_cast<int>(g_intersectFrames.size()) == k + 1 && g_intersectFrames[k] == g_zones[k]);
+        CHECK(g_intersectFlags[k] == 0x08040000u);
+        bool placed = true;
+        for (int i = 0; i <= k; ++i)
+            placed &= Same(g_zones[i]->m_localMatrix.m[3][0], static_cast<float>(joints[i])) &&
+                      Same(g_zones[i]->m_localMatrix.m[3][2], 100.0f + joints[i]) &&
+                      Same(g_zones[i]->m_scale, S_vector(1, 1, 1));
+        for (int i = k + 1; i < 10; ++i)
+            placed &= Same(g_zones[i]->m_localMatrix.m[3][0], -1.0f);
+        CHECK(placed);
+        int updates = 0;
+        for (const std::string &line : g_frameLog)
+            updates += line.rfind("update ", 0) == 0;
+        CHECK(updates == k + 1);
+    }
+    // None hit: none, all ten tested.
+    Reset();
+    CHECK(g_hitZones.GetHitZone(h.human, pos, dir) == HIT_ZONE_NONE && g_intersectFrames.size() == 10);
+    CHECK(g_intersectExtra == 0);
+    // A joint scaled 2: its zone at scale 1 all the same (the zone keeps its own size).
+    Reset();
+    for (int i = 0; i < 3; ++i)
+        h.joints[1]->m_worldMatrix.m[i][i] = 2.0f;
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    CHECK(g_hitZones.GetHitZone(h.human, pos, dir) == 0 && Same(g_zones[0]->m_scale, S_vector(1, 1, 1)));
+    CHECK(Same(g_zones[0]->m_localMatrix.m[0][0], 2.0f));
+    for (int i = 0; i < 3; ++i)
+        h.joints[1]->m_worldMatrix.m[i][i] = 1.0f;
+    // A helmet (headgear type 0) is tested before the head zone, with the helmet flags: hit, HELMET.
+    Reset();
+    I3D_frame *helmetFrame = MakeFrame(FRAME_MODEL, "helmet");
+    g_headItem = MakeHeadgear(0, helmetFrame);
+    g_intersects = {{nullptr, 0, S_vector(0, 0, 0)}, {helmetFrame, 1.0f, S_vector(0, 0, -1)}};
+    CHECK(g_hitZones.GetHitZone(h.human, pos, dir) == HIT_ZONE_HELMET);
+    CHECK(g_intersectExtra == 0 && (g_itemFrameIndices == std::vector<int>{0}));
+    CHECK(g_intersectFrames.size() == 2 && g_intersectFrames[0] == g_zones[0] && g_intersectFrames[1] == helmetFrame &&
+          g_intersectFlags[1] == 0x04040000u);
+    // The helmet missed: the head zone next.
+    Reset();
+    g_intersects = {{nullptr, 0, S_vector(0, 0, 0)}, {nullptr, 0, S_vector(0, 0, 0)}, {g_zones[1], 1.0f, S_vector(0, 0, -1)}};
+    CHECK(g_hitZones.GetHitZone(h.human, pos, dir) == HIT_ZONE_HEAD && g_intersectFrames[2] == g_zones[1]);
+    // Other headgear (type 1): not tested.
+    Reset();
+    g_headItem = MakeHeadgear(1, helmetFrame);
+    g_intersects = {{nullptr, 0, S_vector(0, 0, 0)}, {g_zones[1], 1.0f, S_vector(0, 0, -1)}};
+    CHECK(g_hitZones.GetHitZone(h.human, pos, dir) == HIT_ZONE_HEAD && g_intersectFrames.size() == 2);
+    g_headItem = nullptr;
+}
+
+void TestBulletsAndHumans()
+{
+    S_TestHuman target = MakeHuman("target");
+    g_headItem = nullptr;
+    target.human->m_role = HUMAN_ROLE_ENEMY;                              // (the squad rule below)
+    // A zone hit (server): Hit with the power above the human's material's absorption, at the hit along the
+    // direction, the zone as the part; no sound, no effect (humans bleed elsewhere). Soft flesh lets it on.
+    Reset();
+    g_actorMaterial = 1;
+    g_intersects = {{nullptr, 0, S_vector(0, 0, 0)}, {nullptr, 0, S_vector(0, 0, 0)}, {nullptr, 0, S_vector(0, 0, 0)},
+                    {g_zones[3], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 1, 0), DynamicVolume(target.human), 0.2f)};
+    C_BulletShot *b = Fire(S_vector(0, 0, 0), S_vector(0, 0, 1));
+    b->Tick(100);
+    CHECK(g_hits.size() == 1 && g_hits[0].actor == target.human && g_hits[0].type == HIT_BULLET &&
+          Same(g_hits[0].amount, 90.0f) && Same(g_hits[0].pos, S_vector(0, 0, 14)) &&
+          Same(g_hits[0].dir, S_vector(0, 0, 1)) && g_hits[0].source == g_shooter && g_hits[0].part == 3);
+    CHECK(g_sounds.empty() && g_effects.empty() && Same(b->m_damage, 80.0f) && !b->m_finished);
+    // The zone test is along the step from the bullet's position.
+    // The helmet: MATERIAL_HELMET's absorption (here 12: 20, impenetrable): stopped, hit for 80.
+    Reset();
+    SetMaterial(MATERIAL_HELMET, 20, MATERIAL_IMPENETRABLE);
+    I3D_frame *helmetFrame = MakeFrame(FRAME_MODEL, "helmet2");
+    g_headItem = MakeHeadgear(0, helmetFrame);
+    g_actorMaterial = 1;
+    g_intersects = {{nullptr, 0, S_vector(0, 0, 0)}, {helmetFrame, 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+    b = Fire(S_vector(0, 0, 0), S_vector(0, 0, 1));
+    b->Tick(100);
+    CHECK(g_hits.size() == 1 && Same(g_hits[0].amount, 80.0f) && g_hits[0].part == HIT_ZONE_HELMET && b->m_finished);
+    g_headItem = nullptr;
+    // Power not above the absorption: no Hit.
+    Reset();
+    SetMaterial(8, 100, MATERIAL_IMPENETRABLE);
+    g_actorMaterial = 8;
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+    Fire(S_vector(0, 0, 0), S_vector(0, 0, 1))->Tick(100);
+    CHECK(g_hits.empty());
+    // A client alone: no Hit (the material still stops or lets the bullet on).
+    Reset(GAME_ROLE_CLIENT);
+    g_actorMaterial = 1;
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+    b = Fire(S_vector(0, 0, 0), S_vector(0, 0, 1));
+    b->Tick(100);
+    CHECK(g_hits.empty() && g_sounds.empty() && Same(b->m_damage, 80.0f));
+    // A miss (no zone): the target, hostile, alive, is told it is shot at with the bullet's velocity (server,
+    // not a fake shot); the bullet goes on.
+    Reset();
+    b = Fire(S_vector(0, 0, 0), S_vector(0, 0, 1));
+    const S_vector v0 = b->m_velocity;
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+    b->Tick(100);
+    CHECK(g_hits.empty() && g_shotAt.size() == 1 && g_shotAt[0].human == target.human &&
+          g_shotAt[0].shooter == g_shooter && Same(g_shotAt[0].velocity, v0) && !b->m_finished);
+    // ...health 1 is alive,
+    Reset();
+    target.human->m_stats[STAT_HEALTH] = 1;
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+    Fire(S_vector(0, 0, 0), S_vector(0, 0, 1))->Tick(100);
+    CHECK(g_shotAt.size() == 1);
+    target.human->m_stats[STAT_HEALTH] = 100;
+    // ...not when a friend, dead, on a client alone, or for a fake shot (which skips the actors altogether).
+    for (int variant = 0; variant < 4; ++variant) {
+        Reset(variant == 2 ? GAME_ROLE_CLIENT : GAME_ROLE_LOCAL);
+        g_friends = variant == 0;
+        target.human->m_stats[STAT_HEALTH] = variant == 1 ? 0 : 100;
+        g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+        Fire(S_vector(0, 0, 0), S_vector(0, 0, 1), variant == 3)->Tick(100);
+        CHECK(g_shotAt.empty() && g_hits.empty());
+    }
+    target.human->m_stats[STAT_HEALTH] = 100;
+    target.human->m_role = HUMAN_ROLE_PLAYER;
+    // In a local game the player's squad does not hit itself: the shooter (a player-side AI, not the local
+    // player) and the target both HUMAN_ROLE_PLAYER: passed over, no zone test.
+    Reset();
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+    Fire(S_vector(0, 0, 0), S_vector(0, 0, 1))->Tick(100);
+    CHECK(g_hits.empty() && g_intersectFrames.empty() && g_shotAt.empty());
+    // ...the local player himself does hit them,
+    Reset();
+    g_localPlayer = reinterpret_cast<C_Human *>(g_shooter);
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+    Fire(S_vector(0, 0, 0), S_vector(0, 0, 1))->Tick(100);
+    CHECK(g_hits.size() == 1);
+    // ...an enemy is hit, and a squad member shot by an enemy,
+    for (int variant = 0; variant < 2; ++variant) {
+        Reset();
+        (variant == 0 ? target.human : reinterpret_cast<C_Human *>(g_shooter))->m_role = HUMAN_ROLE_ENEMY;
+        g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+        g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+        Fire(S_vector(0, 0, 0), S_vector(0, 0, 1))->Tick(100);
+        CHECK(g_hits.size() == 1);
+        target.human->m_role = HUMAN_ROLE_PLAYER;
+        reinterpret_cast<C_Human *>(g_shooter)->m_role = HUMAN_ROLE_PLAYER;
+    }
+    // ...and in a network game (a server alone) all are.
+    Reset(GAME_ROLE_SERVER);
+    g_intersects = {{g_zones[0], 1.0f, S_vector(0, 0, -1)}};
+    g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 0, -1), DynamicVolume(target.human), 0.2f)};
+    Fire(S_vector(0, 0, 0), S_vector(0, 0, 1))->Tick(100);
+    CHECK(g_hits.size() == 1);
+}
+
+// ---- the trace and the flare (C_BulletShot::Update) ----
+
+float &FlareScale(I3D_frame *glow) { return *reinterpret_cast<float *>(reinterpret_cast<unsigned char *>(glow) + 0x1E4); }
+std::vector<std::string> Without(const std::vector<std::string> &log, const char *prefix)
+{
+    std::vector<std::string> out;
+    for (const std::string &line : log)
+        if (line.rfind(prefix, 0) != 0)
+            out.push_back(line);
+    return out;
+}
+
+// Update's arithmetic as the asm does it (0x0044b400), in float: the part of the step shown so far
+// (interpolation * 0.01), this frame's length |step * (dt * 0.01)|, the traced distance kept as an int.
+struct S_TraceRef {
+    int interpolation = 0;
+    int traced = 0;
+    float length = 0.0f;
+    S_vector shown{0, 0, 0};
+    void Step(const S_vector &step, int dt)
+    {
+        if (interpolation + dt > 100)
+            dt = 100 - interpolation;
+        interpolation += dt;
+        const float f = static_cast<float>(interpolation) * 0.01f;
+        shown = S_vector(step.x * f, step.y * f, step.z * f);
+        const float g = static_cast<float>(dt) * 0.01f;
+        const S_vector part(step.x * g, step.y * g, step.z * g);
+        length = std::sqrt(part.x * part.x + part.y * part.y + part.z * part.z);
+        traced = static_cast<int>(length + static_cast<float>(traced));
+    }
+};
+
+void TestTraceUpdate()
+{
+    // A bullet with a trace visual, after one 100 ms step of 80 m along +x from (0, 1, 0).
+    Reset();
+    C_BulletShot *b = Fire(S_vector(0, 1, 0), S_vector(1, 0, 0));
+    I3D_frame *trace = MakeFrame(FRAME_VISUAL, "trace");
+    b->m_visual = trace;
+    b->Tick(100);
+    CHECK(Same(b->m_step, S_vector(80, 0, 0)) && b->m_interpolation == 0 && b->m_traceDistance == 0);
+    g_frameLog.clear();
+    S_TraceRef ref;
+    // 30 ms: 23 m drawn so far (30 * 0.01 is just under 0.3 in float: 23.999998 truncated); the first 30 m are
+    // not shown.
+    b->Update(30);
+    ref.Step(b->m_step, 30);
+    CHECK(ref.traced == 23);
+    CHECK((g_frameLog == std::vector<std::string>{"off trace", "update trace"}));
+    CHECK(b->m_interpolation == 30 && b->m_traceDistance == ref.traced);
+    // 40 ms more: 55 m; shown: placed at the start plus this much of the step, turned along it, stretched to
+    // this frame's length, on.
+    g_frameLog.clear();
+    b->Update(40);
+    ref.Step(b->m_step, 40);
+    CHECK(ref.traced == 55);
+    CHECK((g_frameLog == std::vector<std::string>{"pos trace " + Vec(S_vector(0, 1, 0) + ref.shown), "worlddir trace 1,0,0 0",
+                                                  "on trace", "update trace"}));
+    CHECK(Same(trace->m_scale, S_vector(1, 1, ref.length)) && b->m_traceDistance == ref.traced);
+    // 50 ms more would pass the step's 100: cut to 30.
+    g_frameLog.clear();
+    b->Update(50);
+    ref.Step(b->m_step, 50);
+    CHECK(b->m_interpolation == 100 && b->m_traceDistance == ref.traced && Same(trace->m_scale, S_vector(1, 1, ref.length)));
+    CHECK(!g_frameLog.empty() && g_frameLog[0] == "pos trace 80,1,0");
+    // At 100 already: 0 ms, the length 0 (still drawn: the distance is past 30 m).
+    g_frameLog.clear();
+    const int before = b->m_traceDistance;
+    b->Update(20);
+    CHECK(b->m_interpolation == 100 && b->m_traceDistance == before && Same(trace->m_scale, S_vector(1, 1, 0)));
+    // Exactly 30 m: shown.
+    Reset();
+    b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    b->m_visual = trace;
+    b->m_step = S_vector(50, 0, 0);
+    b->m_traceDistance = 25;
+    b->Update(10);
+    CHECK(b->m_traceDistance == 30 && std::find(g_frameLog.begin(), g_frameLog.end(), "on trace") != g_frameLog.end());
+    // The traced distance is kept as an int: fractions are dropped every frame.
+    Reset();
+    b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    b->m_visual = trace;
+    b->Tick(100);
+    for (int i = 0; i < 10; ++i)
+        b->Update(1);                                                    // 0.8 m a frame: truncated to 0 each time
+    CHECK(b->m_traceDistance == 0 && b->m_interpolation == 10);
+    // No visual, a step too short (its square below 1e-16), or burnt out: nothing.
+    Reset();
+    b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    b->Tick(100);
+    b->Update(30);
+    CHECK(b->m_interpolation == 0);
+    b->m_visual = trace;
+    b->m_burnedOut = true;
+    b->Update(30);
+    CHECK(b->m_interpolation == 0 && g_frameLog.empty());
+    b->m_burnedOut = false;
+    b->m_step = S_vector(1e-9f, 0, 0);
+    b->Update(30);
+    CHECK(b->m_interpolation == 0 && g_frameLog.empty());
+    b->m_step = S_vector(1e-7f, 0, 0);                                   // square 1e-14: drawn
+    b->Update(30);
+    CHECK(b->m_interpolation == 30);
+}
+
+void TestFlareUpdate()
+{
+    // A flare: its glow ("flare" child) lights up between 30 and 100 m (+ 2 per second, at most 1), with sparks
+    // made once; past 100 m it dims (0.5 per second) and burns out at 0.
+    Reset();
+    C_BulletShot *b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    I3D_frame *model = MakeFrame(FRAME_MODEL, "flaremodel");
+    I3D_frame *glow = MakeFrame(FRAME_VISUAL, "glow");
+    g_frameChildren[{model, "flare"}] = glow;
+    FlareScale(glow) = 0.1f;
+    b->m_visual = model;
+    b->m_flare = true;
+    b->m_step = S_vector(100, 0, 0);                                      // (as if a step was flown)
+    b->m_interpolation = 0;
+    b->Update(20);                                                       // 20 m: not shown
+    CHECK(g_particleLog.empty() && Same(FlareScale(glow), 0.1f) && b->m_flareSparks == -1);
+    b->Update(20);                                                       // 40 m: sparks, brighter
+    CHECK((g_particleLog == std::vector<std::string>{"create 23 11 frame"}) && b->m_flareSparks == 41);
+    CHECK(Same(FlareScale(glow), 0.1f + 40.0f * 0.001f));
+    CHECK(std::find(g_frameLog.begin(), g_frameLog.end(), "update glow") != g_frameLog.end());
+    b->Update(20);                                                       // 60 m: no second sparks
+    CHECK(g_particleLog.size() == 1 && Same(FlareScale(glow), (0.1f + 40.0f * 0.001f) + 40.0f * 0.001f));
+    FlareScale(glow) = 0.99f;
+    b->Update(20);                                                       // 80 m: capped at 1
+    CHECK(Same(FlareScale(glow), 1.0f));
+    b->Update(20);                                                       // 100 m: still lighting (<= 100)
+    CHECK(Same(FlareScale(glow), 1.0f));
+    // Past 100 m: dims.
+    b->m_step = S_vector(100, 0, 0);
+    b->m_interpolation = 0;
+    b->m_traceDistance = 100;
+    b->Update(40);                                                       // 140 m
+    CHECK(Same(FlareScale(glow), 1.0f - 40.0f * 0.0005f) && !b->m_burnedOut);
+    // Burns out once at 0 (<= 0): the sparks stop, the mission is told the flare was fired (local game, server),
+    // the model shrinks to nothing, updated, and is not switched on.
+    FlareScale(glow) = 0.01f;
+    g_particleLog.clear();
+    g_frameLog.clear();
+    b->m_interpolation = 0;
+    b->Update(20);                                                       // 0.01 - 0.01 = 0
+    CHECK(b->m_burnedOut && (g_particleLog == std::vector<std::string>{"toggle 41 0"}));
+    CHECK(reinterpret_cast<C_game *>(g_gameBytes)->m_signalPistolFired);
+    CHECK(Same(model->m_scale, S_vector(0, 0, 0)) && (g_frameLog == std::vector<std::string>{"update flaremodel"}));
+    // On a client alone the mission is not told; without sparks neither (nor toggled).
+    for (int variant = 0; variant < 2; ++variant) {
+        Reset(variant == 0 ? GAME_ROLE_CLIENT : GAME_ROLE_LOCAL);
+        b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+        b->m_visual = model;
+        b->m_flare = true;
+        b->m_step = S_vector(100, 0, 0);
+        b->m_traceDistance = 150;
+        b->m_flareSparks = variant == 0 ? 41 : -1;
+        FlareScale(glow) = 0.005f;
+        b->Update(20);
+        CHECK(b->m_burnedOut && !reinterpret_cast<C_game *>(g_gameBytes)->m_signalPistolFired);
+        CHECK(g_particleLog.size() == (variant == 0 ? 1u : 0u));
+    }
+    // Exactly 30 m traced: shown (>= 30); exactly 100 m: still lighting (<= 100). (0.1 * 50 is 5 in float.)
+    Reset();
+    b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    b->m_visual = model;
+    b->m_flare = true;
+    b->m_step = S_vector(50, 0, 0);
+    b->m_traceDistance = 25;
+    FlareScale(glow) = 0.5f;
+    b->Update(10);
+    CHECK(b->m_traceDistance == 30 && g_particleLog.size() == 1 && Same(FlareScale(glow), 0.5f + 20.0f * 0.001f));
+    b->m_traceDistance = 95;
+    b->Update(10);
+    CHECK(b->m_traceDistance == 100 && FlareScale(glow) > 0.5f + 20.0f * 0.001f);
+    // A glow above 1 already is not grown (nor cut back) while lighting.
+    FlareScale(glow) = 1.25f;
+    b->m_traceDistance = 50;
+    b->m_interpolation = 0;
+    b->Update(10);
+    CHECK(Same(FlareScale(glow), 1.25f));
+    // Dimming to exactly 0 burns it out (<= 0).
+    Reset();
+    b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    b->m_visual = model;
+    b->m_flare = true;
+    b->m_step = S_vector(100, 0, 0);
+    b->m_traceDistance = 150;
+    FlareScale(glow) = static_cast<float>(20) * 0.0005f;
+    b->Update(20);
+    CHECK(b->m_burnedOut);
+    // A flare without its glow child: sparks all the same, no scaling.
+    Reset();
+    b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    I3D_frame *bare = MakeFrame(FRAME_MODEL, "bare");
+    b->m_visual = bare;
+    b->m_flare = true;
+    b->m_step = S_vector(100, 0, 0);
+    b->m_traceDistance = 40;
+    b->Update(10);
+    CHECK(g_particleLog.size() == 1 && !b->m_burnedOut);
+    b->m_traceDistance = 150;
+    b->Update(10);
+    CHECK(!b->m_burnedOut);                                              // (only a glow burns out)
+    // Not a flare: no glow looked for, no sparks.
+    Reset();
+    b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    b->m_visual = model;
+    b->m_step = S_vector(100, 0, 0);
+    b->m_traceDistance = 40;
+    FlareScale(glow) = 0.5f;
+    b->Update(10);
+    CHECK(g_particleLog.empty() && Same(FlareScale(glow), 0.5f));
+}
+
+void TestRecycleRelease()
+{
+    // Recycle and Release free the visual and the sparks (Destroy), and forget both.
+    Reset();
+    C_BulletShot *b = Fire(S_vector(0, 0, 0), S_vector(1, 0, 0));
+    b->m_visual = MakeFrame(FRAME_VISUAL, "v1");
+    b->m_flareSparks = 7;
+    b->Recycle();
+    CHECK((g_frameLog == std::vector<std::string>{"release v1"}) && (g_particleLog == std::vector<std::string>{"destroy 7"}));
+    CHECK(b->m_visual == nullptr && b->m_flareSparks == -1);
+    Reset();
+    b->m_visual = MakeFrame(FRAME_VISUAL, "v2");
+    b->m_flareSparks = 8;
+    b->Release();
+    CHECK((g_frameLog == std::vector<std::string>{"release v2"}) && (g_particleLog == std::vector<std::string>{"destroy 8"}));
+    CHECK(b->m_visual == nullptr && b->m_flareSparks == -1);
+    Reset();
+    b->Recycle();
+    b->Release();
+    CHECK(g_frameLog.empty() && g_particleLog.empty());
+}
+
+// ---- bullet decals ----
+
+const S_vector kBase(0.5f, 0.25f, 1.0f);
+// S_ShotDecal is shots.cpp's own: its layout (the projector, the parent's name).
+struct S_DecalView {
+    I3D_projector_visual *visual;
+    C_str parentName;
+};
+const S_DecalView *View(const S_ShotDecal *d) { return reinterpret_cast<const S_DecalView *>(d); }                                 // the fake projector's base colour
+
+void TestBulletDecals()
+{
+    C_ShotManager &m = g_shotManager;
+    for (int i = 0; i < 9; ++i)
+        m.m_decalTextures[i] = reinterpret_cast<IImage *>(static_cast<uintptr_t>(0x1000 + i));
+    m.m_maxDecals = 2;
+    g_sectorFrame = MakeFrame(FRAME_SECTOR, "sector");
+    SetMaterial(20, 0, 1);
+    g_materialTable[20].decal = 3;
+    I3D_frame *wall = MakeFrame(FRAME_VISUAL, "wall");
+    g_visualTypes[wall] = I3DVISUAL_OBJECT;
+    const S_vector pos(1, 2, 3), normal(0, 2, 0);                         // (not unit: normalised)
+    // Disabled: nothing.
+    Reset();
+    m.AddBulletDecal(20, pos, normal, wall);
+    CHECK(g_sceneLog.empty() && m.m_decals.empty());
+    // On a static object visual: a projector (buffered 3, mode 1, orthogonal), facing into the surface turned by
+    // (r - 0.5) * pi, sized r * 0.01 + 0.015 (depth 0.03), 1 cm off the surface, the material's texture,
+    // coloured by the light there, linked to the frame keeping its world place, orthogonal again, updated.
+    Reset();
+    g_decalsOn = true;
+    g_randFloat = 0.25f;
+    g_light = 0.7f;
+    m.AddBulletDecal(20, pos, normal, wall);
+    CHECK(m.m_decals.size() == 1 && View(m.m_decals[0])->parentName == C_str("wall"));
+    I3D_frame *v = reinterpret_cast<I3D_frame *>(View(m.m_decals[0])->visual);
+    const std::string n = FrameName(v);
+    char roll[32];
+    std::snprintf(roll, sizeof roll, "%g", (0.25f - 0.5f) * 3.14159274f);
+    const float size = 0.25f * 0.01f + 0.015f;
+    const S_vector at = S_vector(0, 1, 0) * 0.01f + pos;
+    const S_vector color(kBase.x * 0.7f, kBase.y * 0.7f, kBase.z * 0.7f);
+    CHECK((g_frameLog == std::vector<std::string>{"buffered " + n + " 3", "mode " + n + " 1", "ortho " + n + " 1",
+                                                  "dir " + n + " -0,-1,-0 " + roll, "pos " + n + " " + Vec(at),
+                                                  "texture " + n + " 4099", "color " + n + " " + Vec(color),
+                                                  "link " + n + " wall 1", "ortho " + n + " 1", "update " + n}));
+    CHECK(Same(v->m_scale, S_vector(size, size, 0.03f)));
+    CHECK((g_sceneLog == std::vector<std::string>{"create " + std::to_string(I3DVISUAL_PROJECTOR),
+                                                  "light " + Vec(at) + " - 10"}));
+    // The light below 0.4: 0.4 of the base colour; 1 and above: white.
+    for (float light : {0.39f, 0.4f, 0.5f, 0.99f, 1.0f, 3.0f}) {
+        Reset();
+        g_decalsOn = true;
+        g_light = light;
+        m.AddBulletDecal(20, pos, normal, wall);
+        const float f = light < 0.4f ? 0.4f : light;
+        const S_vector want = light < 1.0f ? S_vector(kBase.x * f, kBase.y * f, kBase.z * f) : S_vector(1, 1, 1);
+        bool found = false;
+        for (const std::string &line : g_frameLog)
+            found |= line.rfind("color ", 0) == 0 && line.substr(line.rfind(' ') + 1) == Vec(want);
+        CHECK(found);
+    }
+    // Two shown at most: the oldest is moved (its projector reused: not created, not set up again).
+    CHECK(m.m_decals.size() == 2);
+    S_ShotDecal *oldest = m.m_decals[0];
+    Reset();
+    g_decalsOn = true;
+    m.AddBulletDecal(20, pos, normal, wall);
+    CHECK(m.m_decals.size() == 2 && m.m_decals[1] == oldest && g_sceneLog.size() == 1);   // (only the light)
+    CHECK(g_frameLog.size() == 7 && g_frameLog[0].rfind("dir ", 0) == 0);
+    // No frame: linked to the sector at the position, "No Parent".
+    Reset();
+    g_decalsOn = true;
+    m.AddBulletDecal(20, pos, normal, nullptr);
+    CHECK(View(m.m_decals.back())->parentName == C_str("No Parent"));
+    CHECK(g_sceneLog.size() == 2 && g_sceneLog[1] == "sector " + Vec(pos));
+    CHECK(std::find(g_frameLog.begin(), g_frameLog.end(), "link " + FrameName(reinterpret_cast<I3D_frame *>(View(m.m_decals.back())->visual)) +
+                    " sector 1") != g_frameLog.end());
+    // Refused: no decal for the material (-1, 9 and up), a material past the table, a texture not loaded, a
+    // frame of another visual type, a skinned part's flags (0x3000), a parent that is a skinned mesh.
+    auto refused = [&](int material, I3D_frame *frame) {
+        Reset();
+        g_decalsOn = true;
+        m.AddBulletDecal(material, pos, normal, frame);
+        return g_sceneLog.empty() && g_frameLog.empty();
+    };
+    g_materialTable[20].decal = -1;
+    CHECK(refused(20, wall));
+    g_materialTable[20].decal = 9;
+    CHECK(refused(20, wall));
+    g_materialTable[20].decal = 8;
+    CHECK(!refused(20, wall));
+    g_materialTable[20].decal = 0;
+    CHECK(!refused(20, wall));
+    g_materialCount = 20;
+    CHECK(refused(20, wall));
+    g_materialCount = 80;
+    g_materialTable[20].decal = 8;
+    m.m_decalTextures[8] = nullptr;
+    CHECK(refused(20, wall));
+    g_materialTable[20].decal = 3;
+    for (uint32_t type : {I3DVISUAL_LMAP, I3DVISUAL_MIRROR}) {
+        g_visualTypes[wall] = type;
+        bool ok = !refused(20, wall);
+        g_visualTypes[wall] = type;
+        CHECK(ok);
+    }
+    g_visualTypes[wall] = I3DVISUAL_PROJECTOR;
+    CHECK(refused(20, wall));
+    g_visualTypes[wall] = I3DVISUAL_OBJECT;
+    uint32_t &flags = *reinterpret_cast<uint32_t *>(reinterpret_cast<unsigned char *>(wall) + 0x1D0);
+    flags = 0x1000;
+    CHECK(refused(20, wall));
+    flags = 0x2000;
+    CHECK(refused(20, wall));
+    flags = 0x4000;
+    CHECK(!refused(20, wall));
+    flags = 0;
+    I3D_frame *body = MakeFrame(FRAME_VISUAL, "body");
+    I3D_frame *root = MakeFrame(FRAME_MODEL, "root");
+    wall->m_parent = body;
+    body->m_parent = root;
+    for (uint32_t type : {I3DVISUAL_SINGLEMESH, I3DVISUAL_SHD, I3DVISUAL_SINGLEMORPH}) {
+        g_visualTypes[root] = type;                                       // (the grandparent counts too)
+        bool no = refused(20, wall);
+        g_visualTypes[root] = type;
+        CHECK(no);
+    }
+    g_visualTypes[root] = I3DVISUAL_OBJECT;
+    CHECK(!refused(20, wall));
+    wall->m_parent = nullptr;
+    // Through a bullet (client): the hit part as the frame; a destructible part the server destroyed, or a
+    // lying item, get theirs on no frame (the sector).
+    I3D_frame *door = MakeFrame(FRAME_VISUAL, "door");
+    I3D_frame *panel = MakeFrame(FRAME_VISUAL, "panel");
+    g_visualTypes[panel] = I3DVISUAL_OBJECT;
+    static S_FrameData panelData{};
+    alignas(16) static unsigned char keeperBytes[sizeof(C_VersionKeeper)];
+    auto *keeper = reinterpret_cast<C_VersionKeeper *>(keeperBytes);
+    keeper->m_materialId = 20;
+    panelData.versionKeeper = keeper;
+    panel->m_data = &panelData;
+    for (int variant = 0; variant < 2; ++variant) {
+        Reset();
+        g_decalsOn = true;
+        g_keeperSurvives = variant == 0;
+        g_intersects = {{panel, 15.0f, S_vector(0, 0, -1)}};
+        g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 1, 0), DynamicVolume(nullptr, door), 0.2f)};
+        Fire(S_vector(0, 0, 0), S_vector(0, 0, 1))->Tick(100);
+        CHECK(View(m.m_decals.back())->parentName == C_str(variant == 0 ? "panel" : "No Parent"));
+    }
+    panel->m_data = nullptr;
+    C_Actor *item = MakeActor(ACTOR_ITEM, MakeFrame(FRAME_MODEL, "item"));
+    C_Actor *barrel = MakeActor(ACTOR_BARREL, MakeFrame(FRAME_MODEL, "barrel"));
+    for (C_Actor *actor : {item, barrel}) {
+        Reset();
+        g_decalsOn = true;
+        g_actorMaterial = 20;
+        g_intersects = {{panel, 15.0f, S_vector(0, 0, -1)}};
+        g_queryHits = {Hit(S_vector(0, 0, 14), S_vector(0, 1, 0), DynamicVolume(actor), 0.2f)};
+        Fire(S_vector(0, 0, 0), S_vector(0, 0, 1))->Tick(100);
+        CHECK(View(m.m_decals.back())->parentName == C_str(actor == item ? "No Parent" : "panel"));
+    }
+}
 }  // namespace
 
 int main()
@@ -1066,6 +1861,24 @@ int main()
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     for (void *&slot : g_sceneVt) slot = nullptr;
     g_sceneVt[0x104 / 4] = reinterpret_cast<void *>(F_IntersectFrame);
+    g_frameVt[0x00 / 4] = reinterpret_cast<void *>(F_FrRelease);
+    g_frameVt[0x04 / 4] = reinterpret_cast<void *>(F_FrGetVisualType);
+    g_frameVt[0x08 / 4] = reinterpret_cast<void *>(F_FrSetPos);
+    g_frameVt[0x0C / 4] = reinterpret_cast<void *>(F_FrSetDir);
+    g_frameVt[0x1C / 4] = reinterpret_cast<void *>(F_FrSetWorldDir);
+    g_frameVt[0x24 / 4] = reinterpret_cast<void *>(F_FrUpdate);
+    g_frameVt[0x30 / 4] = reinterpret_cast<void *>(F_FrSetOn);
+    g_frameVt[0x38 / 4] = reinterpret_cast<void *>(F_FrLinkTo);
+    g_frameVt[0x48 / 4] = reinterpret_cast<void *>(F_FrFindChild);
+    g_frameVt[0x4C / 4] = reinterpret_cast<void *>(F_FrDuplicate);
+    g_frameVt[0x9C / 4] = reinterpret_cast<void *>(F_PrSetTexture);
+    g_frameVt[0xA4 / 4] = reinterpret_cast<void *>(F_PrSetOrthogonal);
+    g_frameVt[0xB0 / 4] = reinterpret_cast<void *>(F_PrSetColor);
+    g_frameVt[0xB4 / 4] = reinterpret_cast<void *>(F_PrSetMode);
+    g_frameVt[0xB8 / 4] = reinterpret_cast<void *>(F_PrSetBuffered);
+    g_sceneVt[0x8C / 4] = reinterpret_cast<void *>(F_GetLightIntensity);
+    g_sceneVt[0xE0 / 4] = reinterpret_cast<void *>(F_GetSector);
+    g_driverVt[0x50 / 4] = reinterpret_cast<void *>(F_CreateVisual);
     g_actorVt[0xD4 / 4 + 1] = reinterpret_cast<void *>(F_Hit);            // (g++: two destructor slots)
     g_actorVt[0xD8 / 4 + 1] = reinterpret_cast<void *>(F_GetMaterialId);
     reinterpret_cast<C_game *>(g_gameBytes)->m_scene = reinterpret_cast<I3D_scene *>(&g_scene);
@@ -1100,6 +1913,13 @@ int main()
     TestDoorsAndPhysics();
     TestGetFrameMaterial();
     TestCarsAndStaticWeapons();
+    SetUpZones();
+    TestHitZones();
+    TestBulletsAndHumans();
+    TestTraceUpdate();
+    TestFlareUpdate();
+    TestRecycleRelease();
+    TestBulletDecals();
     std::printf("shots: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }
