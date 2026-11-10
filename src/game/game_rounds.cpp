@@ -37,7 +37,7 @@ int g_areaCheckTimer = 0;
 int g_roundChecks = 0;
 
 // The other of the two teams.
-int OtherTeam(int team)                             // 0x00725270
+int OtherTeam(int team)                             // 0x00725270 (DS 0x0077c9d0)
 {
     return (team + 1) % 2;
 }

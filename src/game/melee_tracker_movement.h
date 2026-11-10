@@ -124,7 +124,7 @@ private:
     // Resets the tracks and stages and hooks the note callback. (0x005c6d10)
     void ResetTracks();
 
-    void *m_vtable = nullptr;                           // +0x00 (0x008121d0; dispatched directly in the port)
+    void *m_vtable = nullptr;                           // (set by 0x005d4ce0 (DS 0x005ef320)) +0x00 (0x008121d0; dispatched directly in the port)
     uint8_t m_unknown04[0x0C] = {};                     // +0x04
     I3D_model *m_model = nullptr;                        // +0x10
     S_MeleeTrackerMixerTrack m_tracks[MELEE_TRACKER_MIXER_TRACKS];          // +0x14

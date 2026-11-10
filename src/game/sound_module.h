@@ -214,6 +214,7 @@ private:
     int AllocSlot();
     void ReleaseSlotSound(S_SoundSlot *slot);           // 0x004361b0
     void NotifyListeners(int slot, bool occluded);      // 0x00435b00
+    bool NotifyListenersForRequest(const S_SoundRequest &request);   // 0x00435dc0 (DS 0x0045a8a0)
     void InitSectorAcoustics();                         // 0x004328d0
     void FreeSectorAcoustics();                         // 0x00432860 (DS 0x00458280)
     static uint32_t __stdcall AddSectorAcoustics(I3D_frame *sector, void *module);   // 0x00432900
@@ -224,8 +225,8 @@ private:
     static bool OpenStream(ISND_stream *&stream, const char *fileName, float volume, bool loop);   // 0x00437210
 
     std::vector<S_Listener> m_listeners;                // +0x0C
-    std::vector<S_SoundSlot *> m_slots;                 // +0x1C
-    std::vector<int> m_freeSlots;                       // +0x2C
+    std::vector<S_SoundSlot *> m_slots;                 // +0x1C (free 0x00437680 (DS 0x0045b6c0))
+    std::vector<int> m_freeSlots;                       // +0x2C (free 0x004376a0 (DS 0x0045b6f0))
     float m_masterVolume = 0.0f;                        // +0x3C
     bool m_masterVolumeApplied = false;                 // +0x40
     float m_musicVolume = 1.0f;                         // +0x44

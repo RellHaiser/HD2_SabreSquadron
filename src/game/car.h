@@ -46,7 +46,7 @@ struct S_CarZone {
 // ("DM" + the model's file name, a hidden copy placed on the car for hit tests), its damage zones,
 // explosive parts, the turrets' frames it turns with the car's, the seats' hit boxes, and the
 // wreck's fire, smoke and sound.
-struct S_CarParts {
+struct S_CarParts {                                     // its vectors' implicit dtor: 0x004d0ec0 (DS 0x004bda00)
     S_CarParts();                                       // 0x004e08c0
     // The damage model of `owner`'s model loaded (none when there is no such file) and its parts
     // gathered, hidden.
@@ -481,7 +481,7 @@ public:
     bool RayTest(const S_vector4 &from, const S_vector &dir, S_vector4 *pos, S_vector4 *normal);   // 0x004dec60
     // A charge (`item`, behaviour 11) placed by `human` at `pos` (none placed yet): the car is
     // wrecked in 15 s, by `human`. Shown here: AttachCharge; a dedicated server removes the item.
-    bool PlaceCharge(C_Item *item, C_Human *human, const S_vector4 &pos, const S_vector4 &normal);   // 0x004dead0
+    bool PlaceCharge(C_Item *item, C_Human *human, const S_vector4 &pos, const S_vector4 &normal);   // 0x004dead0 (DS 0x004cd8a0)
     // A copy of the item's model linked to the car at `pos` facing `normal`; the item removed.
     bool AttachCharge(C_Item *item, C_Human *human, const S_vector4 &pos, const S_vector4 &normal);  // 0x004deb50
     // The vehicle's top speed (+0x780; what C_Vehicle::SetUnknown4f2630 gets when the AI lets go:

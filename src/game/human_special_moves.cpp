@@ -1157,9 +1157,13 @@ bool C_HumanSpecialMoves::Die(S_HumanAnimState *next)
         scene->UpdateFrameSector(model, model->GetWorldPos());
         GetGame()->GetScene()->MarkTrackedModel(m_owner->GetFrame());
     }
+#ifndef HD2_DEDICATED
     const S_vector4 force = {work->m_request.hitForce.x, work->m_request.hitForce.y, work->m_request.hitForce.z,
                              *reinterpret_cast<const float *>(work->m_request.unknown7C)};
     movement->m_weaponPose2->StartDeath(work->m_request.hitFlags, &force.x, deathAnim, reaction, nullptr);
+#else
+    movement->m_weaponPose2->DropMovement();   // the server's: no death pose
+#endif
     return true;
 }
 

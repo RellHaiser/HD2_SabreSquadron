@@ -321,7 +321,9 @@ void C_BulletShot::Init(C_Actor *shooter, const S_vector &pos, const S_vector &d
         m_visual->SetPosInline(m_prevPos);
         m_visual->SetOn(false);
         m_visual->Update();
-    } else if (flare) {
+    }
+#ifndef HD2_DEDICATED   // the server makes no flare model
+    else if (flare) {
         m_visual = I3DGetDriver()->CreateFrame(FRAME_MODEL);
         g_modelCache.OpenInto(static_cast<I3D_model *>(m_visual), "m_w_flare");
         m_visual->LinkTo(dynamicRoot, 0);
@@ -335,6 +337,7 @@ void C_BulletShot::Init(C_Actor *shooter, const S_vector &pos, const S_vector &d
             glow->Update();
         }
     }
+#endif
     m_ricocheted = false;
     m_flare = flare;
     m_nearMissPlayed = false;
@@ -417,9 +420,14 @@ void C_BulletShot::Update(int timeDelta)
             // A flare lights up within 100 m, then burns down.
             auto *glow = static_cast<I3D_lensflare_visual *>(m_visual->FindChildFrame("flare", FRAME_MASK_ANY));
             if (traced <= 100.0f) {
-                if (m_flareSparks == -1)
+                if (m_flareSparks == -1) {
+#ifdef HD2_DEDICATED   // the server creates no particles (the id stays -1)
+                    m_flareSparks = -1;
+#else
                     m_flareSparks = g_particlesModule.Create(EFFECT_FLARE_SPARKS, m_visual->GetMatrix(), m_visual, true,
                                                              true);
+#endif
+                }
                 if (glow) {
                     float scale = glow->GetFlareScale();
                     if (scale < 1.0f) {
@@ -435,7 +443,9 @@ void C_BulletShot::Update(int timeDelta)
                 if (scale <= 0.0f) {
                     m_burnedOut = true;
                     if (m_flareSparks != -1) {
+#ifndef HD2_DEDICATED   // no particles on the server
                         g_particlesModule.ToggleEmission(m_flareSparks, 0);
+#endif
                         // Mission scripts check whether the player fired the signal flare.
                         if (IsLocalGame() && IsServer())
                             GetGame()->SetSignalPistolFired(true);
@@ -2155,8 +2165,13 @@ void C_ShotManager::PlayHitEffect(int material, const S_vector &pos, const S_vec
     cameras->GetCameraPos(0, &cameraPos);
     S_vector toHit = pos - S_vector(cameraPos.x, cameraPos.y, cameraPos.z);
     toHit.Normalize();
+#ifdef HD2_DEDICATED   // the server's copy stops here: no particles
+    (void)material;
+    (void)normal;
+#else
     if (toHit.Dot(S_vector(cameraDir.x, cameraDir.y, cameraDir.z)) > -0.05f)
         g_particlesModule.CreateAt(g_materials[material].hitEffect, pos, normal, nullptr, true, false);
+#endif
 }
 
 void C_ShotManager::PlayNearMissSound(const S_vector &pos)
@@ -2409,8 +2424,10 @@ void MeleeAttack(C_Actor *attacker, C_Item *weapon, bool backstab, const S_vecto
             target->Hit(HIT_MELEE, damage, hitPos, reach, attacker, zone);
         }
     }
+#ifndef HD2_DEDICATED   // the server shows no hit effect
     if (material != MATERIAL_NONE && g_materials[material].hitEffect != 0)
         g_particlesModule.CreateAt(g_materials[material].hitEffect, hitPos, normal, nullptr, true, false);
+#endif
 }
 
 void SendExplosionMessage(const S_vector &pos, int material)

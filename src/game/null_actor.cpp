@@ -1,7 +1,7 @@
 // Null actors (C_NullActor; original 0x005e2a10..0x005e2c00).
 #include "game/null_actor.h"
 
-void C_NullActor::RestartMission(bool)                  // 0x005e2ad0
+void C_NullActor::RestartMission(bool)                  // 0x005e2ad0 (DS 0x00600e30)
 {
     StopMission(true);
     StartMission(true);

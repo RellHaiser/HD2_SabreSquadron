@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include "game/ai_parts.h"
+#include "game/collision.h"
 #include "game/controller_internal.h"
 #include "game/controller_messages.h"
 #include "game/game.h"
@@ -669,4 +670,84 @@ S_HumanEvent *S_HumanEvent::Init(const C_Actor *actor, uint32_t eventType, const
     pos = position;
     unknown30 = value30;
     return this;
+}
+
+float C_AIController::GetTargetDistance2() const
+{
+    return Distance(m_fire.target->GetFrame()->GetWorldPos(), m_human->GetFrame()->GetWorldPos());
+}
+
+float C_AIController::GetViewDotTo(const C_Actor *target) const
+{
+    const S_vector4 dir = GetAimDirTo(target);
+    return dir.x * m_facingDir.x + dir.y * m_facingDir.y + dir.z * m_facingDir.z;
+}
+
+void C_AIController::GetWeaponPos(S_vector4 *pos) const
+{
+    if (!m_handsItem) {
+        pos->x = 0.0f;
+        pos->y = 0.0f;
+        pos->z = 0.0f;
+        return;
+    }
+    I3D_frame *frame = m_handsItem->GetFrame(0);
+    const E_ItemComponentKind kind = m_handsItem->GetDef()->GetComponentKind();
+    if (kind == ICK_FIREARM || kind == ICK_PROJECTILE_WEAPON)
+        frame = frame->FindChildFrame("shdum", FRAME_MASK_DUMMY);
+    const S_matrix &m = frame->GetMatrix();
+    pos->x = m.m[3][0];
+    pos->y = m.m[3][1];
+    pos->z = m.m[3][2];
+    pos->w = m.m[3][3];
+}
+
+void C_AIController::FaceTowards(const S_vector4 &from, const S_vector4 &to)
+{
+    const bool level = !m_human->IsBodyWorkState5();
+    S_vector dir(to.x - from.x, level ? 0.0f : to.y - from.y, to.z - from.z);
+    dir.Normalize();
+    m_facingDir.x = dir.x;
+    m_facingDir.y = dir.y;
+    m_facingDir.z = dir.z;
+}
+
+bool C_AIController::CanSeeHeadOf(const C_Human *target) const
+{
+    if (!target)
+        return false;
+    const S_vector &own = m_human->GetFrame()->GetWorldPos();
+    const S_vector from(own.x, own.y + 0.5f, own.z);
+    const S_vector &body = target->GetBodyFrame()->GetWorldPos();
+    S_vector dir(body.x - from.x, body.y - from.y, body.z - from.z);
+    dir.Normalize();
+    dir *= 5.0f;
+    S_vector hitPos;
+    S_vector hitNormal;
+    return g_collisionWorld.RayTest(from, dir, &hitPos, &hitNormal, 3, 0) != nullptr;
+}
+
+void C_AIController::GetNearestEnemy(float *distance, float *dot) const
+{
+    *distance = 65535.0f;
+    *dot = 1.0f;
+    const std::vector<C_Human *> &enemies = m_human->m_seenEnemies;
+    const S_vector &own = m_human->GetFrame()->GetWorldPos();
+    int nearest = -1;
+    for (int i = static_cast<int>(enemies.size()); i-- > 0;) {
+        const float d = Distance(enemies[i]->GetFrame()->GetWorldPos(), own);
+        if (d < *distance) {
+            *distance = d;
+            nearest = i;
+        }
+    }
+    if (nearest < 0)
+        return;
+    const S_vector &enemy = enemies[nearest]->GetFrame()->GetWorldPos();
+    S_vector toEnemy(enemy.x - own.x, enemy.y - own.y, enemy.z - own.z);
+    toEnemy.Normalize();
+    const S_vector4 &waypoint = m_waypoints[0]->pos;
+    S_vector toWaypoint(waypoint.x - own.x, waypoint.y - own.y, waypoint.z - own.z);
+    toWaypoint.Normalize();
+    *dot = toWaypoint.x * toEnemy.x + toWaypoint.y * toEnemy.y + toWaypoint.z * toEnemy.z;
 }

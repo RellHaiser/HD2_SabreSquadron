@@ -153,7 +153,7 @@ S_matrix InverseOf(const I3D_frame *frame)
     return inverse;
 }
 
-// An int / float leaf: read, then left (0x0053b1d0 / 0x00482170).
+// An int / float leaf: read, then left (0x0053b1d0 / 0x00482170). (DS 0x0052eda0)
 int ReadIntLeaf(C_chunk &chunk, int value)
 {
     chunk.Read(value);
@@ -284,7 +284,7 @@ void C_Barrel::StopMission(bool server)                 // 0x00606bb0
     m_holes.clear();
 }
 
-void C_Barrel::RestartMission(bool)                     // 0x00606340
+void C_Barrel::RestartMission(bool)                     // 0x00606340 (DS 0x0062d820)
 {
     StopMission(false);
     StartMission(false);

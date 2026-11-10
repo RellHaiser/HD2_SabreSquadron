@@ -65,7 +65,7 @@ public:
     C_LoadoutPresets(const C_LoadoutPresets &) = delete;
     C_LoadoutPresets &operator=(const C_LoadoutPresets &) = delete;
     // (The original leaves them to Clear.)
-    ~C_LoadoutPresets() { Clear(); }
+    ~C_LoadoutPresets() { Clear(); }                    // 0x0067f400 (DS 0x006bc7b0)
 
     // Both lists' presets deleted (the last first).
     void Clear();                                       // 0x0067d4d0

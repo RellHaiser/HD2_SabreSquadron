@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstring>
 
+#include "game/game_texts.h"
 #include "game/pending.h"
 #include "ls3d/igraph.h"
 
@@ -380,4 +381,27 @@ void OnFatalError(const char *report)
         std::strcpy(dot + 1, "RPT");
     AppendToFile(s_path, s_buffer);
     // Left out: the second copy, to \\Intra\HD2_graf\CRASH_REPORTS\<file name>, the developer's own network share.
+}
+
+// The crash report dialog: its explanation and the report (`lParam`). OK (0) sends it; Cancel or closing (1) does not.
+INT_PTR CALLBACK CrashReportProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam)   // 0x00731e10 (DS 0x0078ca60)
+{
+    switch (message) {
+    case WM_CLOSE:
+        EndDialog(dialog, 1);
+        break;
+    case WM_INITDIALOG:
+        SetDlgItemTextA(dialog, 0x3FC, g_texts.Get(0x578).c_str());
+        SetDlgItemTextA(dialog, 0x3FA, reinterpret_cast<LPCSTR>(lParam));
+        return TRUE;
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDOK)
+            EndDialog(dialog, 0);
+        else if (LOWORD(wParam) == IDCANCEL)
+            EndDialog(dialog, 1);
+        break;
+    default:
+        break;
+    }
+    return FALSE;
 }

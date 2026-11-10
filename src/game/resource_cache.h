@@ -74,8 +74,8 @@ protected:
     virtual void Duplicate(T *dest, T *source) = 0;                     // vtable +0x30
 
 private:
-    struct S_Entry {
-        T *object = nullptr;                                            // holds one reference
+    struct S_Entry {    // dtor: animations 0x004203e0 (DS 0x00441bb0), sounds 0x00437740 (DS 0x004b0c20), shadows 0x0048b440 (DS 0x0070ba00); sounds' ctor 0x00437770 (DS 0x004b0c80)
+        T *object = nullptr;                                            // holds one reference (sounds' assignment, AddRef / Release: 0x00437780 (DS 0x004b0ca0))
         C_str name;
     };
 

@@ -66,9 +66,10 @@ void C_HumanWeaponPose::SetBlendLength(int time)
 {
 }
 
-// Not in the server.
+// Inline in the server (DS 0x007ba9a0).
 void C_HumanWeaponPose::SetSeatStance(int stance)
 {
+    m_stance = stance;   // the server's (inline in UpdateInteraction): the stance only, no prone fit
 }
 
 // 0x007b8a00: not in the server.
@@ -76,9 +77,10 @@ void C_HumanWeaponPose::SetStainsVisible(bool on)
 {
 }
 
-// Not in the server.
+// Inline in the server (DS 0x007d3fe0).
 void C_HumanWeaponPose::SetStanceChange(int stance)
 {
+    m_stance = stance;   // the server's (inline in ChangeStance): the stance only, no prone fit
 }
 
 // 0x007a78d0: not in the server.

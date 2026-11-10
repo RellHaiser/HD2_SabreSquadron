@@ -624,14 +624,16 @@ I3D_frame *C_Team::GetRandomVolume(int index) const     // 0x0045d6d0
     return list[static_cast<unsigned>(std::rand()) % list.size()];
 }
 
-void C_Team::OnMemberDied(C_Human *human)               // 0x0045e790
+void C_Team::OnMemberDied(C_Human *human)               // 0x0045e790 (DS 0x00479a40)
 {
     if (!IsMember(human))
         return;
     const std::vector<C_Human *> &seen = human->GetSeenEnemies();
     for (size_t i = seen.size(); i-- > 0;)
         m_enemyRecords.Remove(seen[i]);
+#ifndef HD2_DEDICATED   // the server has no map
     GetGame()->GetInterface()->RemoveFromMap(human);
+#endif
     if (human == GetCommandedMember())
         SetCommandedIndex(-1);
     GetGame()->Print("%s is dead !!!", human->GetFullName());
@@ -1098,4 +1100,19 @@ void C_TeamManager::DestroyFormation(C_Formation *formation)   // 0x00461390
         m_formations[i] = m_formations.back();
         m_formations.pop_back();
     }
+}
+
+bool C_CoopTeam::HasItem(int itemId) const
+{
+    for (int i = GetMemberCount(); i-- > 0;) {
+        const C_Human *member = GetMember(i);
+        if (member->IsAlive() && member->FindItem(itemId))
+            return true;
+    }
+    return false;
+}
+
+void PrintEnemyKilled(const C_Human *killer)            // 0x0045e8a0 (DS 0x00479b80)
+{
+    GetGame()->PrintColored(S_vector(1.0f, 0.0f, 0.0f), "%s killed an enemy soldier!!!", killer->GetFullName());
 }

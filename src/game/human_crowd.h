@@ -59,7 +59,7 @@ public:
 
     std::vector<C_Human *> m_humans;                    // +0x04
     std::vector<C_Car *> m_cars;                        // +0x14
-    std::vector<S_vector> m_carHalves;                  // +0x24
+    std::vector<S_vector> m_carHalves;                  // +0x24 (free 0x0056e810 (DS 0x0056f6a0))
     std::vector<const S_Checkpoint *> m_scratch;        // +0x34
     S_PlanNode m_nodes[CROWD_MAX_NODES];                      // +0x40
     int m_nodeCount = 0;                                // +0x48

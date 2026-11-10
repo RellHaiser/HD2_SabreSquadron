@@ -25,6 +25,11 @@
 #include "net/net_autorestart.h"
 #include "script/script_module.h"
 
+static void LoadStringResource(HINSTANCE module, UINT id, LPSTR buffer, int size)    // 0x006ed840 (DS 0x00738bd0)
+{
+    LoadStringA(module, id, buffer, size);
+}
+
 // Note: the original interleaves calls into the copy-protection layer and shuffled
 // indirection tables with this code. They have no effect on the game logic and are
 // not reproduced (game/copy_protection.h).
@@ -157,7 +162,7 @@ bool InitGraphics()
 void SetWindowTitle()
 {
     char title[0x80];
-    LoadStringA(g_instance, 3, title, 0x7F);
+    LoadStringResource(g_instance, 3, title, 0x7F);
     GetIGraph()->SetAppName(title);
 }
 

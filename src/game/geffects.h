@@ -81,7 +81,58 @@ struct alignas(16) S_CameraAnimation {                  // 0x30 bytes (_aligned_
     void Restore();
 };
 
+#ifdef HD2_DEDICATED
+// The server's module derives from an abstract one: its vtable 0x0084edf8 holds C_Module's slots,
+// then _purecall for each of the module's own (+0x40..+0xBC). (The client has one too, vtable
+// 0x008102b8, constructor 0x00486eb0; folded into C_GEffectsModule there.)
+class C_GEffectsBase : public C_Module {
+public:
+    C_GEffectsBase(int id, const char *name) : C_Module(id, name) {}   // (DS 0x004a1970)
+    ~C_GEffectsBase() override {}                       // (DS 0x004a19d0), deleting (DS 0x004a19a0)
+
+    virtual void SetRain(bool on) = 0;
+    virtual void SetThunderstorm(bool on, I3D_light *light, bool immediate) = 0;
+    virtual void StartMpLightning(int time) = 0;
+    virtual bool SetModelAlpha(I3D_frame *model, float level) = 0;
+    virtual bool SetModelTransparency(I3D_frame *model, float level) = 0;
+    virtual bool SetModelLightLevel(I3D_frame *model, float level) = 0;
+    virtual void SetHierarchyOn(I3D_frame *frame, bool on, uint32_t typeMask) = 0;
+    virtual void HideVisual(I3D_frame *visual, bool on) = 0;
+    virtual bool ClearModelTransparency(I3D_frame *model) = 0;
+    virtual void FadeOutModel(I3D_frame *model, int time, bool switchOff) = 0;
+    virtual void FadeIn(I3D_frame *model, int time, bool turnOn) = 0;
+    virtual void FadeInModel(I3D_frame *model, int time, bool turnOn) = 0;
+    virtual void FadeOutHierarchy(I3D_frame *model, int time, bool switchOff) = 0;
+    virtual void FadeHuman(C_Human *human, int time, bool in) = 0;
+    virtual I3D_frame *CreateShadow(I3D_frame *model) = 0;
+    virtual I3D_frame *GetShadow(I3D_frame *model) = 0;
+    virtual void SetShadowParams(const S_ShadowParams *params) = 0;
+    virtual S_ShadowParams *GetShadowParams() = 0;
+    virtual void SetFadeLevel(float level, const S_vector *color) = 0;
+    virtual void Fade(int time, int direction, const S_vector *color) = 0;
+    virtual void SetWeatherOn(bool on) = 0;
+    virtual float GetGroundCover(int material) = 0;
+    virtual void SetTimeScale(float scale, float acceleration) = 0;
+    virtual float GetTimeScale() = 0;
+    virtual void RenderFade() = 0;
+    virtual void RenderVolumetrics() = 0;
+    virtual bool DressUniform(C_Human *human, int uniform) = 0;
+    virtual bool SwitchFaceTexture(I3D_frame *model, const char *texture) = 0;
+    virtual void SetCameraAnimation(I3D_frame *camera, const char *fileName) = 0;
+    virtual void ShatterGlass(I3D_frame *visual, float maxArea) = 0;
+    virtual void SetCloudsOn(bool on) = 0;
+    virtual void SetLensFlareOn(bool on) = 0;
+};
+#endif
+
+// On the server (vtable 0x0084eee0) every slot is a stub (geffects.cpp's HD2_DEDICATED part): no
+// fades, alpha, shadows, time scale or weather. Its object there is a bare C_Module; the members
+// below are still built but never read.
+#ifdef HD2_DEDICATED
+class C_GEffectsModule : public C_GEffectsBase {        // vtable 0x008101f0
+#else
 class C_GEffectsModule : public C_Module {              // vtable 0x008101f0
+#endif
 public:
     C_GEffectsModule(int id, const char *name);         // 0x004860b0
     ~C_GEffectsModule() override;                       // 0x00486f00
@@ -96,7 +147,7 @@ public:
     void StartMission(bool server) override;            // 0x004885d0
     void StopMission(bool server) override;             // 0x004888c0
     void RestartMission(bool server) override;          // 0x004863f0
-    bool SaveGame(C_chunk &) override { return true; }  // 0x00486460
+    bool SaveGame(C_chunk &) override { return true; }  // 0x00486460 (DS 0x004a1df0)
     // The start's black screen skipped (2.5 s past it).
     bool LoadGame(C_chunk &) override;                  // 0x00486470
 

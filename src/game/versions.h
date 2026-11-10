@@ -57,7 +57,7 @@ public:
     // Applies `damage` hit points; `outFrame` receives the part's (possibly new)
     // frame. Returns false when the part was used up — it may then have been
     // deleted, and its master too (check C_VersionsModule::GetMaster()).
-    bool Damage(int damage, I3D_frame **outFrame, E_VersionEffects effects);   // 0x0043b000
+    bool Damage(int damage, I3D_frame **outFrame, E_VersionEffects effects);   // 0x0043b000 (DS 0x0045ed20)
     // Jumps to damage stage `version` (-1: the last one) unless the part is already
     // further; `effects` plays particles, sound and physics debris.
     void SetVersion(int version, bool effects);             // 0x0043c040

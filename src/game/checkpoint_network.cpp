@@ -738,3 +738,95 @@ float C_CheckpointNetwork::GetPathLength(const std::vector<uint16_t> &path) cons
     }
     return total * (1.0f / 256.0f);
 }
+
+namespace {
+
+// The sorted tables' search: the last entry and the first are tried before halving.
+template <class T>
+uint16_t FindEntryOfPoint(const T *entries, uint16_t count, uint16_t index)
+{
+    if (!count)
+        return 0xFFFF;
+    const int last = count - 1;
+    if (index > entries[last].index)
+        return 0xFFFF;
+    if (entries[last].index == index)
+        return static_cast<uint16_t>(last);
+    if (entries[0].index > index)
+        return 0xFFFF;
+    if (entries[0].index == index)
+        return 0;
+    int lo = 0;
+    int hi = last;
+    while (hi - lo > 1) {
+        const int mid = (lo + hi) >> 1;
+        if (entries[mid].index == index)
+            return static_cast<uint16_t>(mid);
+        if (entries[mid].index > index)
+            hi = mid;
+        else
+            lo = mid;
+    }
+    return 0xFFFF;
+}
+
+}  // namespace
+
+uint16_t C_CheckpointNetwork::FindNameEntry(const char *name) const
+{
+    for (uint16_t i = 0; i < m_nameCount; ++i) {
+        if (_strnicmp(m_names[i].name, name, sizeof(m_names[i].name)) == 0)
+            return i;
+    }
+    return 0xFFFF;
+}
+
+uint16_t C_CheckpointNetwork::FindNameEntryOfPoint(uint16_t index) const
+{
+    return FindEntryOfPoint(m_names, m_nameCount, index);
+}
+
+uint16_t C_CheckpointNetwork::FindFrameEntryOfPoint(uint16_t index) const
+{
+    return FindEntryOfPoint(m_frames, m_frameCount, index);
+}
+
+uint16_t C_CheckpointNetwork::FindActorEntryOfPoint(uint16_t index) const
+{
+    return FindEntryOfPoint(m_actors, m_actorCount, index);
+}
+
+void C_CheckpointNetwork::CollectReachableWithCosts(const S_Checkpoint *from, float radius, std::vector<uint16_t> *out)
+{
+    if (!from || !out || radius < 0.0f)
+        return;
+    struct S_Reached {
+        uint16_t point;
+        float cost;
+    };
+    std::vector<S_Reached> reached;
+    reached.push_back({static_cast<uint16_t>(from - m_points), 0.0f});
+    for (size_t i = 0; i < reached.size(); ++i) {
+        const S_Checkpoint *point = Get(reached[i].point);
+        if (!point || !point->links)
+            continue;
+        const int links = point->flags & 0x3F;
+        for (int j = 0; j < links; ++j) {
+            const S_CheckpointLink &link = point->links[j];
+            const float cost = static_cast<float>(link.cost) * 0.00390625f + reached[i].cost;
+            if (!(cost <= radius))
+                continue;
+            bool known = false;
+            for (const S_Reached &entry : reached) {
+                if (static_cast<int>(entry.point) == static_cast<int>(static_cast<uint16_t>(link.target))) {
+                    known = true;
+                    break;
+                }
+            }
+            if (!known)
+                reached.push_back({static_cast<uint16_t>(link.target), cost});
+        }
+    }
+    for (const S_Reached &entry : reached)
+        out->push_back(entry.point);
+}

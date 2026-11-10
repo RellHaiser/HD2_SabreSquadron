@@ -419,6 +419,10 @@ public:
     // The death (clients): the killing hit's flags and force, the dying animation (null:
     // none), E_DeathKind, the human carrying the body when it is dropped (null: none).
     void StartDeath(uint32_t hitFlags, const float *force, I3D_animation_set *deathAnim, int kind, C_Human *carrier);   // 0x007b0d70
+#ifdef HD2_DEDICATED
+    // The server's death of the pose (inline in C_HumanSpecialMoves::Die): it lets go of the movement.
+    void DropMovement() { m_movement = nullptr; }
+#endif
     // The body is picked up.
     void PickUpBody();                                  // 0x007b3510
     // The ragdoll's weight: below 1e-8 it has settled.

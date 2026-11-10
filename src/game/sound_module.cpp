@@ -1001,6 +1001,62 @@ void C_SoundModule::NotifyListeners(int index, bool occluded)
     }
 }
 
+// What the listeners would hear of a request that is not played: a human's sound, with the ranges of its group's
+// first sample (or its own).
+bool C_SoundModule::NotifyListenersForRequest(const S_SoundRequest &request)    // 0x00435dc0 (DS 0x0045a8a0)
+{
+    if (!request.source || request.source->GetType() != ACTOR_HUMAN)
+        return false;
+    float nearRange, farRange;
+    if (!request.fileName) {
+        const S_SoundGroup *group = g_soundTable.GetChapter(request.chapter)->groups[request.group];
+        if (group->samples.empty())
+            return false;
+        farRange = group->samples[0]->farRange * request.farScale;
+        nearRange = group->samples[0]->nearRange * request.nearScale;
+    } else {
+        farRange = request.farScale * request.farRange;
+        nearRange = request.nearScale * request.nearRange;
+    }
+    S_vector pos = request.pos;
+    if (request.attachTo) {
+        const S_matrix &matrix = request.attachTo->GetMatrix();
+        pos.x += matrix.m[3][0];
+        pos.y += matrix.m[3][1];
+        pos.z += matrix.m[3][2];
+    }
+
+    S_HeardSound heard = {};
+    heard.pos = pos;
+    heard.posW = request.posW;
+    heard.chapter = request.chapter;
+    heard.source = request.source;
+    I3D_sector *sourceSector = request.source->GetSector();
+
+    for (std::size_t i = m_listeners.size(); i-- > 0;) {
+        const S_Listener &listener = m_listeners[i];
+        if (!listener.callback || !listener.frame)
+            continue;
+        const S_vector ear = EarPosition(listener.frame);
+        float distance = (pos - ear).Magnitude();
+        if (distance > farRange)
+            continue;
+        heard.listener = listener.frame;
+        if (!(request.flags & SOUND_AI_OCCLUSION)) {
+            heard.intensity = Intensity(distance, nearRange, farRange);
+        } else {
+            float factor = 1.0f;
+            if (listener.human)
+                distance = PortalDistance(factor, pos, ear, sourceSector, listener.human->GetSector());
+            if (distance > farRange)
+                continue;
+            heard.intensity = distance > nearRange ? Intensity(distance, nearRange, farRange) * factor : 1.0f;
+        }
+        listener.callback(&heard);
+    }
+    return true;
+}
+
 bool C_SoundModule::PlayDubbing(C_Human *owner, I3D_frame *frame, int dubbing, float nearRange, float farRange,
                                 bool showSubtitle)
 {
@@ -1118,6 +1174,10 @@ bool C_SoundModule::OpenStream(ISND_stream *&stream, const char *fileName, float
 
 void C_SoundModule::SetBackgroundMusic(int track, int position)
 {
+#ifdef HD2_DEDICATED   // the server's copy is empty
+    (void)track;
+    (void)position;
+#else
     g_soundTable.Load();
     OpenStream(m_music, nullptr, 0.0f, true);
     m_crossfadePending = false;
@@ -1131,6 +1191,7 @@ void C_SoundModule::SetBackgroundMusic(int track, int position)
     OpenStream(m_music, group->samples[pick]->fileName, m_musicVolume * m_musicFade, true);
     if (position && m_music && m_music->IsPlaying())
         m_music->SetPosition(position);
+#endif
 }
 
 void C_SoundModule::FadeBackgroundMusic(float volume, int time)

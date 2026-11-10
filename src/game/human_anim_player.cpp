@@ -696,7 +696,9 @@ void C_HumanAnimPlayer::UpdateCarryTrack()
 
     if (g_carrySet) {
         if (g_curCarry[0] == 0x27) {
+#ifndef HD2_DEDICATED   // the server's has no recoil
             pose->StartRecoil(g_carrySet);
+#endif
             return;
         }
         m_movement->m_animState.carryVariant = g_curCarry[1];
@@ -852,7 +854,9 @@ void C_HumanAnimPlayer::UpdateActivityTrack()
 
     if (g_activitySet) {
         if (g_curActivity[0] < 8) {
+#ifndef HD2_DEDICATED   // the server's plays no weapon pose activity
             m_movement->m_weaponPose2->PlayActivity(g_activitySet);
+#endif
         } else {
             m_movement->m_animState.activity = g_curActivity[0];
             m_movement->m_animState.activityVariant = g_curActivity[1];
@@ -1415,8 +1419,10 @@ void C_HumanAnimPlayer::OnCarryStarted(const int *carry, const int *old)
     } else {
         const int length = set->GetEndTime();
         m_carryDelay = length;
+#ifndef HD2_DEDICATED   // no weapon pose on the server
         if (weaponSpecial)
             m_movement->m_owner->GetMovement()->m_weaponPose->PauseWeapon(length, specialObject);
+#endif
         if (specialObject)
             m_movement->m_unknownA24 = static_cast<int>(static_cast<double>(m_carryDelay) / MOVE_TIME_SCALE);
         // The remote action that replays it (prone).
@@ -1428,7 +1434,9 @@ void C_HumanAnimPlayer::OnCarryStarted(const int *carry, const int *old)
             m_movement->m_remoteActions.push_back(entry);
         };
         if (fromProne) {
+#ifndef HD2_DEDICATED   // no weapon pose on the server
             m_movement->m_weaponPose2->PauseHands(static_cast<int>(static_cast<double>(m_carryDelay) / MOVE_TIME_SCALE));
+#endif
             if (work->m_request.stance == HUMAN_STANCE_PRONE)
                 remote(0x0E);
         } else if (putAway && (work->m_request.stance == HUMAN_STANCE_PRONE || work->m_request.carryMode == 5)) {
@@ -1558,7 +1566,9 @@ void C_HumanAnimPlayer::OnActivityStarted(const int *activity, const int *old)
         work->PlayWorkAnimation(ACTIVITY_NONE, true);
         mixer.SetTrackTag(2, 0x53);
         const int length = GetActivityAnimLength(0x49, work->m_request.stance);
+#ifndef HD2_DEDICATED   // no weapon pose on the server
         m_owner->GetMovement()->m_weaponPose->PauseWeapon(static_cast<int>(static_cast<float>(length) * 0.625f), false);
+#endif
         break;
     }
     default:

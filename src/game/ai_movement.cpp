@@ -115,7 +115,7 @@ void CutCorner(S_AIWaypoint &waypoint, const S_vector &prev, const S_vector &nex
 
 }  // namespace
 
-float SegmentDistance2(const S_vector &p, const S_vector &a, const S_vector &b, float *t)   // 0x00581210
+float SegmentDistance2(const S_vector &p, const S_vector &a, const S_vector &b, float *t)   // 0x00581210 (DS 0x00586b50)
 {
     const S_vector ab = b - a;
     *t = 0.0f;
@@ -1769,5 +1769,77 @@ void C_AIController::InsertDetours(std::vector<C_Human *> &blockers)
                 return;
         }
         from = m_waypoints[k]->pos;
+    }
+}
+
+bool C_AIController::IsNearSelectedSoldier() const
+{
+    const C_Human *selected = g_teamManager.GetPlayerTeam()->GetSelectedMember();
+    if (!selected)
+        return false;
+    const S_vector &a = selected->GetFrame()->GetWorldPos();
+    const S_vector &b = m_human->GetFrame()->GetWorldPos();
+    const float x = b.x - a.x;
+    const float y = b.y - a.y;
+    const float z = b.z - a.z;
+    return y * y + x * x + z * z < 9.0f;
+}
+
+void C_AIController::ClearRoute()
+{
+    ReleaseWaypoints(m_waypoints);
+    ReleaseWaypoint(m_waypoint);
+    m_waypoint = nullptr;
+}
+
+void C_AIController::SkipPassedWaypoint()
+{
+    if (m_waypoints.size() < 2)
+        return;
+    const S_matrix &m = m_human->GetFrame()->GetMatrix();
+    const float x = m.m[3][0];
+    const float z = m.m[3][2];
+    S_vector4 &first = m_waypoints[0]->pos;
+    const S_vector4 &second = m_waypoints[1]->pos;
+    if ((second.x - x) * (first.x - x) + (second.z - z) * (first.z - z) < 0.0f)
+        first = {x, m.m[3][1], z, m.m[3][3]};
+}
+
+// The last actor within 0.8 m of `pos`, null if none.
+C_Actor *FindActorNear(const S_vector &pos, const std::vector<C_Actor *> &actors)   // 0x00581440 (DS 0x00586e10)
+{
+    for (size_t i = actors.size(); i-- > 0;) {
+        const S_vector &at = actors[i]->GetFrame()->GetWorldPos();
+        const float x = at.x - pos.x;
+        const float y = at.y - pos.y;
+        const float z = at.z - pos.z;
+        if (y * y + x * x + z * z < 0.64f)
+            return actors[i];
+    }
+    return nullptr;
+}
+
+// `pos` is beside the stretch from `a` to `b`, within the radius interpolated between theirs.
+bool IsPosNearSegment(const S_vector &pos, const S_AIWaypoint &a, const S_AIWaypoint &b)   // 0x00580120 (DS 0x005855e0)
+{
+    const float dx = b.pos2.x - a.pos2.x;
+    const float dy = b.pos2.y - a.pos2.y;
+    const float dz = b.pos2.z - a.pos2.z;
+    const float t = ((pos.x - a.pos2.x) * dx + (pos.y - a.pos2.y) * dy + (pos.z - a.pos2.z) * dz)
+                    / (dx * dx + dy * dy + dz * dz);
+    if (!(0.0f < t && t < 1.0f))
+        return false;
+    const S_vector offset((dx * t + a.pos2.x) - pos.x, (dy * t + a.pos2.y) - pos.y, (dz * t + a.pos2.z) - pos.z);
+    return offset.Magnitude() < (b.radius - a.radius) * t + a.radius;
+}
+
+void C_AIController::SetRoutePoints(const std::vector<uint16_t> &path)
+{
+    ClearRoute();
+    for (const uint16_t index : path) {
+        const S_Checkpoint *point = m_checkpoints->Get(index);
+        const S_vector4 pos = {point->pos.x, point->pos.y, point->pos.z, 0.0f};
+        m_waypoints.push_back(AllocWaypoint(index, pos, point->flags & 0xFB40, point->type,
+                                            static_cast<float>(point->radius) * 0.0625f));
     }
 }

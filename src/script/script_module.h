@@ -139,7 +139,7 @@ public:
     bool ReadSaveGameValues(C_chunk &chunk);                       // 0x00427050
 
 private:
-    struct S_ScriptAssignment {                                    // 8 bytes
+    struct S_ScriptAssignment {                                    // 8 bytes (its destructor: 0x00428a40 (DS 0x0044c5c0))
         C_str frameName;
         C_str scriptName;
     };

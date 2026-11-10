@@ -228,3 +228,11 @@ const S_vector4 *S_Checkpoint::GetDirectionVector(uint8_t bits)   // 0x005245c0 
     }
     return &DIRECTION_VECTORS[0];
 }
+
+void S_Checkpoint::ClearLinks()
+{
+    this->~S_Checkpoint();
+    links = nullptr;
+    flags = 0;
+    type = 0;
+}

@@ -146,12 +146,22 @@ void FreeSharedString(void *element)                    // 0x0073a2c0
 
 }  // namespace
 
+static thread_local S_HashTable *t_sharedStrings;
+
 S_HashTable *SbSharedStrings()                          // 0x0073a240
 {
-    static thread_local S_HashTable *table;
-    if (!table)
-        table = TableNew2(sizeof(S_SharedString), 500, 4, HashFirstField, CompareFirstField, FreeSharedString);
-    return table;
+    if (!t_sharedStrings)
+        t_sharedStrings = TableNew2(sizeof(S_SharedString), 500, 4, HashFirstField, CompareFirstField, FreeSharedString);
+    return t_sharedStrings;
+}
+
+// The table goes once nothing is left in it.
+void SbFreeSharedStrings()                              // 0x0073a2d0 (DS 0x00797770)
+{
+    if (t_sharedStrings && TableCount(t_sharedStrings) == 0) {
+        TableFree(t_sharedStrings);
+        t_sharedStrings = nullptr;
+    }
 }
 
 namespace {
@@ -643,6 +653,23 @@ uint8_t CipherDecryptByte(S_SbCipher *cipher, uint8_t in)   // 0x00739a50
     cipher->lastCipher = in;
     cipher->lastPlain = static_cast<uint8_t>(first ^ second ^ in);
     return cipher->lastPlain;
+}
+
+uint8_t CipherEncryptByte(S_SbCipher *cipher, uint8_t in)   // 0x00739910 (DS 0x00796a70)
+{
+    uint8_t *const c = cipher->cards;
+    cipher->ratchet = static_cast<uint8_t>(cipher->ratchet + c[cipher->rotor++]);
+    const uint8_t swap = c[cipher->lastCipher];
+    c[cipher->lastCipher] = c[cipher->ratchet];
+    c[cipher->ratchet] = c[cipher->lastPlain];
+    c[cipher->lastPlain] = c[cipher->rotor];
+    c[cipher->rotor] = swap;
+    cipher->avalanche = static_cast<uint8_t>(cipher->avalanche + c[swap]);
+    const uint8_t first = c[c[(c[cipher->lastPlain] + c[cipher->ratchet] + c[cipher->lastCipher]) & 0xFF]];
+    const uint8_t second = c[(c[cipher->avalanche] + c[cipher->rotor]) & 0xFF];
+    cipher->lastPlain = in;
+    cipher->lastCipher = static_cast<uint8_t>(first ^ second ^ in);
+    return cipher->lastCipher;
 }
 
 void CipherDecrypt(S_SbCipher *cipher, char *data, int size)   // 0x00739b60
@@ -1418,6 +1445,7 @@ S_ServerBrowser *ServerBrowserNew(const char *queryForGame, const char *queryFro
     browser->callback = callback;
     browser->instance = instance;
     browser->dontUpdate = 0;
+    browser->triggerIp = 0;
     browser->disconnectOnComplete = 0;
     ListInit(&browser->list, queryForGame, queryFromGame, queryFromKey, queryFromVersion, OnListEvent, browser);
     EngineInit(&browser->engine, maxUpdates, queryVersion, OnQueryEvent, browser);
@@ -1446,6 +1474,19 @@ void ServerBrowserUpdate(S_ServerBrowser *browser, int async, int disconnectOnCo
         Sleep(10);
         result = ServerBrowserThink(browser);
     }
+}
+
+// Thinks until the trigger update is answered, an error comes or (`viaMaster`) the list's state is 0.
+int ServerBrowserWaitForTrigger(S_ServerBrowser *browser, bool viaMaster)  // 0x0073b100 (DS 0x00798af0)
+{
+    int error = 0;
+    while (browser->triggerIp != 0 && error == 0) {
+        Sleep(10);
+        error = ServerBrowserThink(browser);
+        if (viaMaster && browser->list.state == 0)
+            break;
+    }
+    return error;
 }
 
 int ServerBrowserThink(S_ServerBrowser *browser)        // 0x0073b240
@@ -1485,4 +1526,38 @@ uint32_t SBServerGetPing(S_SbServer *server)            // 0x0073aa10
 uint32_t SBServerGetPublicInetAddress(S_SbServer *server)   // 0x0073a6a0
 {
     return server->publicIp;
+}
+
+double SBServerGetFloatValue(S_SbServer *server, const char *key, double fallback)   // 0x0073a470 (DS 0x007979a0)
+{
+    const char *value = SBServerGetStringValue(server, key, nullptr);
+    return value ? atof(value) : fallback;
+}
+
+// Sends to the master server, reconnecting once.
+int ListSendData(S_SbServerList *list, const char *data, int size)  // 0x0073bc60 (DS 0x00799a30)
+{
+    for (int retries = 1;; --retries) {
+        if (send(list->socket, data, size, 0) > 0)
+            return 0;
+        if (retries == 0)
+            return 3;
+        ListDisconnect(list);
+        const int error = ListConnectAndQuery(list, nullptr, nullptr, 2, 0);
+        if (error != 0) {
+            ListError(list);
+            return error;
+        }
+    }
+}
+
+// The index of `server` in the list, -1 if it is not there.
+int ListFindServer(S_SbServerList *list, const S_SbServer *server)  // 0x0073ccf0 (DS 0x0079afa0)
+{
+    const int count = ArrayLength(list->servers);
+    for (int i = 0; i < count; ++i) {
+        if (*static_cast<S_SbServer **>(ArrayNth(list->servers, i)) == server)
+            return i;
+    }
+    return -1;
 }

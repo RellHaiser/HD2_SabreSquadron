@@ -40,7 +40,7 @@ public:
     // The rw_data handle (a lightmapped visual reads its lightmaps from it).
     int GetHandle() const { return m_handle; }
     bool Read(void *buffer, int size);             // 0x00405940
-    template <typename T> bool Read(T &value) { return Read(&value, sizeof(T)); }
+    template <typename T> bool Read(T &value) { return Read(&value, sizeof(T)); }   // (an S_vector read into an S_vector4, then Ascend: 0x0055fe60 (DS 0x0055cec0))
     // Reads the remainder of the current chunk as a string (at most bufferSize-1 chars).
     // (0x00415d00 reads up to 999 chars into a C_str and ascends.)
     bool ReadString(char *buffer, int bufferSize);

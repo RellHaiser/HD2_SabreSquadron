@@ -19,7 +19,7 @@
 #include "game/world.h"
 #include "net/bitstream.h"
 
-C_ActorsModule g_actorsModule(MODULE_ACTORS, "Actors");
+C_ActorsModule g_actorsModule(MODULE_ACTORS, "Actors");  // constructed by 0x00475150 (DS 0x00491290)
 C_TemporaryActorsList g_temporaryActors(MODULE_TEMP_ACTORS, "Temp. Actors");
 
 namespace {

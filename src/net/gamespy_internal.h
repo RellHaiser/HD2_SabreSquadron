@@ -50,6 +50,7 @@ struct S_HashTable {                                    // 0x14 bytes
 S_HashTable *TableNew2(int elementSize, int buckets, int chainSize, TableHashFn hash, ArrayCompareFn compare,
                        ArrayElementFreeFn freeElement);  // 0x00736dd0
 void TableFree(S_HashTable *table);                     // 0x00736e40
+int TableCount(const S_HashTable *table);               // 0x00736e80
 void TableEnter(S_HashTable *table, const void *element);   // 0x00736eb0
 bool TableRemove(S_HashTable *table, const void *element);  // 0x00736f00
 void *TableLookup(S_HashTable *table, const void *element); // 0x00736f50
@@ -181,9 +182,11 @@ struct S_ServerBrowser {                                // 0x620 bytes
     S_SbServerList list;                                // +0x048
     int disconnectOnComplete;                           // +0x608
     int dontUpdate;                                     // +0x60C no queries by itself
+    uint32_t triggerIp;                                 // +0x610 a trigger update's server, 0 when none is waited for
     ServerBrowserCallback callback;                     // +0x618
     void *instance;                                     // +0x61C
 };
 
+void SbFreeSharedStrings();                             // 0x0073a2d0
 S_HashTable *SbSharedStrings();                         // 0x0073a240 the keys' and values' strings, counted (this thread's)
 extern const char *g_sbMasterOverride;                  // 0x00982de4 the master server's name instead of the usual

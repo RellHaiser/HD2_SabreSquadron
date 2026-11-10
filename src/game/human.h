@@ -207,7 +207,7 @@ class C_HumanEvents {
 public:
     void Reset();                                       // 0x005ae450
     // What the enemy AI's morale gains every 5 s (less the enemies in view).
-    int GetMoraleGain() const { return 2; }             // 0x005ae940
+    int GetMoraleGain() const { return 2; }             // 0x005ae940 (DS 0x005bea50)
     bool SaveGame(C_chunk &chunk);                      // 0x005ad040
     bool LoadGame(C_chunk &chunk);                      // 0x005ad390
     // Ages the events; drops those whose time ran out.
@@ -354,9 +354,9 @@ struct S_HumanBody {                                    // 0x18 bytes
     bool SaveGame(C_chunk &chunk);                      // 0x005ab4e0
     bool LoadGame(C_chunk &chunk);                      // 0x005ab7a0
     // (Always succeed.)
-    static bool StartMission(bool server) { (void)server; return true; }   // 0x005aba70 / 0x005aba80
+    static bool StartMission(bool server) { (void)server; return true; }   // 0x005aba70 / 0x005aba80 (DS 0x005badf0 / DS 0x005bae10)
     static void StopMission(bool server) { (void)server; }                 // 0x005abb10 / 0x005abb20
-    void Update(int frameTime);                         // 0x005abc20
+    void Update(int frameTime);                         // 0x005abc20 (DS 0x005bb070)
     void Tick(int timeDelta);                           // 0x005abc70
 
     // Where the human faces / looks / aims (from its controller, every frame).
@@ -367,7 +367,7 @@ struct S_HumanBody {                                    // 0x18 bytes
     uint32_t TakeFlags();                               // 0x005ac0d0
 
     // Plays the reaction to a hit (`flags`: zone / kind bits) pushing the body with `force`.
-    void ApplyHit(uint32_t flags, const S_vector &pos, const S_vector &force);   // 0x005abbd0
+    void ApplyHit(uint32_t flags, const S_vector &pos, const S_vector &force);   // 0x005abbd0 (DS 0x005baff0)
     // Death animation (`killer` may be null).
     void Die(C_Actor *killer);                          // 0x005abbe0
     void PlayDeath();                                   // 0x005abbf0
@@ -468,7 +468,7 @@ public:
     bool WriteProperties(C_chunk &chunk) override;      // 0x0059e6c0
     bool ReadProperties(C_chunk &chunk) override;       // 0x0059e800
     void CopyFrom(const C_Actor *source) override;      // 0x0059e650
-    void StartMission(bool server) override;            // 0x0059f2c0
+    void StartMission(bool server) override;            // 0x0059f2c0 (DS 0x005ab190)
     void StopMission(bool server) override;             // 0x0059fa60
     void RestartMission(bool server) override;          // 0x0059d100
     bool SaveGame(C_chunk &chunk) override;             // 0x0059d5d0
@@ -478,7 +478,7 @@ public:
     // A car faster than 2 m/s runs the human over (killed by its driver).
     bool OnCollisionEx(C_Actor *other, const S_vector *pos, int a3, int a4, int a5, int a6, int a7) override;   // 0x005a07c0
     void Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *attacker,
-             int zone) override;                        // 0x005a1c90
+             int zone) override;                        // 0x005a1c90 (DS 0x005ae520)
     int GetMaterialId(I3D_frame *) override { return 66; }   // 0x0059c2a0
     void GetBoxCorners(S_vector4 corners[8]) override;  // 0x005a85f0
 
@@ -546,8 +546,8 @@ public:
     void AddUnknownProgress(float amount);              // 0x005a92f0 (not called)
     void AddEndurance(float amount);                    // 0x005a93a0
     void AddMorale(float amount);                       // 0x005a9410 (not called)
-    void AddShooting(float amount);                     // 0x005a9480
-    void AddStealth(float amount);                      // 0x005a94f0
+    void AddShooting(float amount);                     // 0x005a9480 (DS 0x005b7db0)
+    void AddStealth(float amount);                      // 0x005a94f0 (DS 0x005b7e40)
     void AddFirstAid(float amount);                     // 0x005a9560
     void AddLockpick(float amount);                     // 0x005a95d0
     void AddExperience(int amount);                     // 0x005a9640
@@ -574,8 +574,8 @@ public:
     // Leaves / joins the world while the actor stays: freezes the body and turns the frame off.
     void Freeze(bool on);                               // 0x005a5d50
     // Fades the model out / in over `time` ms (effects module).
-    void FadeOut(int time);                             // 0x005a86f0
-    void FadeIn(int time);                              // 0x005a8740
+    void FadeOut(int time);                             // 0x005a86f0 (DS 0x005b6c70)
+    void FadeIn(int time);                              // 0x005a8740 (DS 0x005b6cc0)
     // Leaves the vehicle and drops sight and hearing registrations before the human is
     // removed.
     void DetachFromWorld();                             // 0x005a7fe0
@@ -736,11 +736,11 @@ public:
         m_vehicle = nullptr;
         m_seat = -1;
     }
-    void DropCarried();                                 // 0x005a97c0
+    void DropCarried();                                 // 0x005a97c0 (DS 0x005b81f0)
 
     // --- damage ------------------------------------------------------------------------------
     // Network client: a hit the server reports (new `health`; `pos` relative to the human).
-    void ApplyRemoteHit(int type, int zone, int health, int killerId, const S_vector &pos, const S_vector &dir);   // 0x005a15d0
+    void ApplyRemoteHit(int type, int zone, int health, int killerId, const S_vector &pos, const S_vector &dir);   // 0x005a15d0 (DS 0x005adcc0)
     // Tells the AI of the human that `shooter` shoots at it (ignored for local players and
     // deaf humans).
     void NotifyShotAt(C_Actor *shooter, const S_vector &velocity);   // 0x005a5960
@@ -793,7 +793,7 @@ public:
     // Fills the equipment fields of `state`.
     void GetEquipmentState(S_SoldierState &state) const;   // 0x005a8b50
     // Creates the items of `state` (and stores the new uids in it on network games).
-    void CreateEquipment(S_SoldierState *state);        // 0x0059eb60
+    void CreateEquipment(S_SoldierState *state);        // 0x0059eb60 (DS 0x005aa8c0)
     // Inventory requests to the controller (they go to the server).
     bool RequestMoveItem(C_Item *item, C_Actor *other, int fromContainer, int toContainer, int slot);   // 0x005a2b40
     bool RequestTransferItem(C_Item *item, int arg, C_Human *other, C_Item *otherItem, int container);   // 0x005a2bb0
@@ -924,9 +924,9 @@ private:
     friend class C_RemoteController;
 
     // Mission restarts per game kind (RestartMission()).
-    void RestartSinglePlayer(bool server);              // 0x0059c4d0
-    void RestartCoop();                                 // 0x0059ca00
-    void RestartMultiplayer();                          // 0x0059cec0
+    void RestartSinglePlayer(bool server);              // 0x0059c4d0 (DS 0x005a7960)
+    void RestartCoop();                                 // 0x0059ca00 (DS 0x005a7f70)
+    void RestartMultiplayer();                          // 0x0059cec0 (DS 0x005a8530)
     void SaveState(C_chunk &chunk);                     // 0x0059d190 (chunk 0x3E9)
     void LoadState(C_chunk &chunk);                     // 0x0059d970
     // Multiplayer: asks for a respawn once the death animation has ended.
@@ -941,7 +941,7 @@ private:
     // Multiplayer messages about hits and kills.
     void ShowHitMessage(int type, int zone, int killerId);   // 0x005a0da0
     void TickBleeding(int timeDelta);                   // 0x005a0420
-    void UpdateBleeding(int frameTime);                 // 0x005a0480
+    void UpdateBleeding(int frameTime);                 // 0x005a0480 (DS 0x005ac6e0)
     void UpdateVelocity(int timeDelta);                 // 0x005a0660
     void ClearContainers();                             // 0x005a29c0
     void ForgetOldSounds();                             // 0x005a5380

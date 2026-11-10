@@ -453,7 +453,9 @@ void C_HumanLocomotion::Update(int time)
         movement->m_unknown9B4 -= time;
         if (movement->m_unknown9B4 < 1) {
             movement->m_unknown9B4 = MOVE_NO_TIME;
+#ifndef HD2_DEDICATED   // no weapon pose on the server
             movement->m_weaponPose2->StopProneFit();
+#endif
         }
     }
     if (m_unknown0EC > 0)

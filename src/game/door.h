@@ -52,7 +52,7 @@ public:
     // only rattles it (the message), unless `force`; it opens after the opening delay, closing by
     // itself 15 s later with `autoClose` (and the door's flag). Dropped: the copy protection's check
     // (single player, from campaign mission 13: a failed check kept every door shut).
-    void SetState(int action, bool autoClose, bool linked, int force);   // 0x005ff4b0
+    void SetState(int action, bool autoClose, bool linked, int force);   // 0x005ff4b0 (DS 0x00624cc0)
     // With the door's key (`key` its item): unlocked (and the other half; the message 3), else the
     // message 5. True when it is unlocked.
     bool Unlock(int key);                               // 0x005ff5f0

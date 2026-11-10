@@ -19,7 +19,7 @@ enum : int {
 };
 
 // A body action (vtable 0x00810be8, 0x70 bytes): E_ControllerAction with what it needs.
-class C_NetActionMessage : public C_NetObjectMessage {
+class C_NetActionMessage : public C_NetObjectMessage {   // dtor: 0x0053b960 (DS 0x0052f710)
 public:
     C_NetActionMessage() : C_NetObjectMessage(NET_MSG_ACTION) {}
     // The action (5 bits); a reload's magazine and rounds; the fire actions' direction (raw),
@@ -37,7 +37,7 @@ public:
 };
 
 // The dive (vtable 0x00810c10, 0x30 bytes; nothing but the kind).
-class C_NetDiveMessage : public C_NetObjectMessage {
+class C_NetDiveMessage : public C_NetObjectMessage {   // dtor: 0x0053b8f0 (DS 0x0052f650)
 public:
     C_NetDiveMessage() : C_NetObjectMessage(NET_MSG_DIVE) {}
     void Write(C_BitStream *stream) override;           // 0x0053b6a0
@@ -45,7 +45,7 @@ public:
 };
 
 // The binoculars taken out / put away (vtable 0x00810c38, 0x34 bytes).
-class C_NetBinocularsMessage : public C_NetObjectMessage {
+class C_NetBinocularsMessage : public C_NetObjectMessage {   // dtor: 0x0053b920 (DS 0x0052f6a0)
 public:
     C_NetBinocularsMessage() : C_NetObjectMessage(NET_MSG_BINOCULARS) {}
     void Write(C_BitStream *stream) override;           // 0x0053b6f0

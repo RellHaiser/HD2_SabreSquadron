@@ -47,7 +47,7 @@ struct S_Decorator {
     float frequency;                                    // +0x18 (1; version 7+)
     I3D_mesh *mesh = nullptr;                           // +0x1C the animated mesh (a reference)
     std::vector<float *> vertices;                      // +0x20 its vertices that sway
-    std::vector<S_vector4> restPositions;               // +0x30 theirs at rest (an aligned array, grown by 8)
+    std::vector<S_vector4> restPositions;               // +0x30 theirs at rest (an aligned array, grown by 8; free 0x0047d2a0 (DS 0x0049b760))
     int animation;                                      // +0x40 0 none, 1 / 2 the sway's two forms (version 6+)
 };
 

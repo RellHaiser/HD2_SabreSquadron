@@ -220,7 +220,7 @@ private:
     int m_hitMaterial = -1;                             // +0x5B0 -1: ApplyImpulse records no hit
     float m_hardestHit = 0.0f;                          // +0x5B4 this frame's hardest impulse
     int m_unknown5B8 = 0;                               // +0x5B8
-    S_RigidBodyActorContact *m_actorContacts = nullptr; // +0x5BC
+    S_RigidBodyActorContact *m_actorContacts = nullptr; // +0x5BC (the array's free 0x004d0030 (DS 0x004bc630))
     int m_actorContactsCapacity = 0;                    // +0x5C0
     int m_actorContactCount = 0;                        // +0x5C4
     int m_actorContactsGrowBy = 4;                      // +0x5C8

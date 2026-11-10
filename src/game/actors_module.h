@@ -177,8 +177,8 @@ private:
     std::vector<C_Actor *> m_active;                    // +0x1C
     std::vector<C_Actor *> m_pending;                   // +0x2C activation changes while iterating
     std::vector<C_Actor *> m_toDestroy;                 // +0x3C destruction requests while iterating
-    std::vector<S_BreakableObject> m_breakables;        // +0x4C (aligned array, grows by 10)
-    std::vector<S_ItemPlacement> m_respawnItems;        // +0x5C (aligned array, grows by 2)
+    std::vector<S_BreakableObject> m_breakables;        // +0x4C (aligned array, grows by 10; free 0x00479750 (DS 0x00496c10))
+    std::vector<S_ItemPlacement> m_respawnItems;        // +0x5C (aligned array, grows by 2; free 0x00479770 (DS 0x00496c40))
     bool m_iterating = false;                           // +0x6C
     int m_nextId = 0;                                   // +0x70
     int m_debrisCount = 0;                              // +0x74
