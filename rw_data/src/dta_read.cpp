@@ -308,10 +308,14 @@ int ReadArchived(const S_ReadContext &ctx, S_DtaCursor &c, uint8_t *dst, uint32_
         return -1;
     }
     c.bufferSize = static_cast<uint32_t>(decoded);
-    std::memcpy(dst + done, ctx.decoded + c.blockPosition, tail);
-    c.position += tail;
-    c.blockPosition += tail;
-    return static_cast<int>(done + tail);
+    // `tail` assumes every whole block decoded to 32 KB. A damaged one can decode to more (up to
+    // the room left in `dst`); the original then copied the tail past the caller's buffer and
+    // returned more than `count`. Only the room that is left is filled here.
+    const uint32_t copied = std::min(tail, count - done);
+    std::memcpy(dst + done, ctx.decoded + c.blockPosition, copied);
+    c.position += copied;
+    c.blockPosition += copied;
+    return static_cast<int>(done + copied);
 }
 
 // A file on disk, read through its 32 KB buffer. Returns the bytes read or -1.
