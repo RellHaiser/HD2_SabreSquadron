@@ -60,6 +60,31 @@ copy of the game's folder.
   plain text search, so avoid them in folder names too.
 - A crash writes `HD2_Port.RPT` next to the executable, with the call stack. The next crash overwrites it.
 
+### Mods
+
+The port mounts every `.dta` archive in the game folder's `Mods` folder before the game's own archives, so a
+file in a mod replaces the game's copy. Mod archives are not encrypted: pack them with a blank key.
+
+```bash
+python rw_data/tools/dta_pack.py MyMod Mods/MyMod.dta --key blank
+```
+
+When two mods hold the same file, the archive mounted first wins. Archives are mounted in alphabetical order
+(ignoring case), unless `Mods\load_order.txt` says otherwise:
+
+```
+# Comments start with '#'; blank lines are skipped.
+prefer_archives = yes      # archives are searched before loose files on disk (default: no)
+HighestPriority.dta        # mounted first: wins over everything below
+Second                     # ".dta" may be left out; names ignore case
+-Disabled.dta              # not mounted
+```
+
+Archives the file does not name are mounted after the named ones, in alphabetical order. `prefer_archives`
+is rw_data's global switch: with it every archive (the game's own too) is searched before loose files;
+without it a loose file on disk overrides any archive, as in the original game. The mounted mods, and any
+problem (a named archive that is missing, an archive packed with a key), are written to the debug log.
+
 ## Building
 
 Needs Visual Studio with the C++ x86 tools, and Python; the engine DLLs also need MinGW's 32-bit `dlltool`

@@ -6,6 +6,9 @@
 #include <cstring>
 #include <ctime>
 #include <process.h>
+#include <algorithm>
+#include <string>
+#include <vector>
 
 #include <objbase.h>
 #include <mmsystem.h>
@@ -13,6 +16,7 @@
 #include "common/c_str.h"
 #include "common/chunk.h"
 #include "game/game.h"
+#include "common/os_files.h"
 #include "game/human_anim_tables.h"
 #include "game/module.h"
 #include "game/pending.h"
@@ -62,6 +66,7 @@ int g_timeScaleRemainder;                          // 0x008aee30
 LONG g_originalWndProc;                            // 0x008aee3c
 bool g_pollKeyboard = true;                        // 0x00843534
 C_DtaArchive *g_archives[16];                      // 0x008aeb08
+std::vector<C_DtaArchive *> g_modArchives;         // (port) Mods\*.dta, searched before g_archives
 
 // Object at 0x008ac448: a C_chunk plus a list of entries, created at startup and
 // closed straight away. Its purpose is not identified yet.
@@ -214,7 +219,226 @@ void InitInputAndTexts()
     LoadGameTexts(language.c_str());
 }
 
+// (port) Mod archives --------------------------------------------------------------------
+//
+// Every Mods\*.dta is mounted before the game's archives, so a file in a mod replaces the
+// game's own. Mod archives are not encrypted (packed with a blank key:
+// `dta_pack.py MyMod Mods\MyMod.dta --key blank`).
+//
+// The first archive mounted is searched first, so it wins when two mods hold the same file.
+// The order is alphabetical (ignoring case) unless Mods\load_order.txt says otherwise:
+//
+//     # Comments start with '#'; blank lines are skipped.
+//     prefer_archives = yes      setting: archives are searched before loose files on disk
+//     HighestPriority.dta        archives in search order, the first one wins
+//     Second.dta                 (".dta" may be left out; names ignore case)
+//     -Disabled.dta              not mounted at all
+//
+// Archives in the folder that the file does not name are mounted after the named ones, in
+// alphabetical order. `prefer_archives` is rw_data's global switch (C_DtaArchive::
+// SetPreferArchives): it applies to every archive, the game's own included; without it a
+// loose file on disk overrides any archive, as in the original game.
+namespace {
+
+const char MODS_DIRECTORY[] = "Mods";
+const char MODS_LOAD_ORDER[] = "Mods\\load_order.txt";
+
+struct S_ModLoadOrder {
+    std::vector<std::string> order;       // named archives, in search order
+    std::vector<std::string> disabled;    // archives named with a leading '-'
+    bool preferArchives = false;
+    bool preferArchivesSet = false;
+};
+
+std::string TrimText(const std::string &text)
+{
+    const size_t begin = text.find_first_not_of(" \t\r\n");
+    if (begin == std::string::npos)
+        return std::string();
+    const size_t end = text.find_last_not_of(" \t\r\n");
+    return text.substr(begin, end - begin + 1);
+}
+
+bool SameName(const std::string &a, const std::string &b)
+{
+    return _stricmp(a.c_str(), b.c_str()) == 0;
+}
+
+bool ContainsName(const std::vector<std::string> &names, const std::string &name)
+{
+    for (const std::string &other : names)
+        if (SameName(other, name))
+            return true;
+    return false;
+}
+
+// "Name" -> "Name.dta"; a name that already ends with ".dta" is kept.
+std::string WithDtaExtension(const std::string &name)
+{
+    if (name.size() >= 4 && _stricmp(name.c_str() + name.size() - 4, ".dta") == 0)
+        return name;
+    return name + ".dta";
+}
+
+// Reads the load order file from disk (not through rw_data, so no archive can supply it).
+// A missing file leaves `config` empty.
+void ReadModLoadOrder(S_ModLoadOrder &config)
+{
+    FILE *file = std::fopen(MODS_LOAD_ORDER, "rt");
+    if (!file)
+        return;
+    char buffer[1024];
+    int lineNumber = 0;
+    while (std::fgets(buffer, sizeof(buffer), file)) {
+        ++lineNumber;
+        std::string line = buffer;
+        const size_t comment = line.find('#');
+        if (comment != std::string::npos)
+            line.erase(comment);
+        line = TrimText(line);
+        if (line.empty())
+            continue;
+
+        // Settings: "name = value". Only known setting names are taken as settings, so an
+        // archive whose name holds '=' still works.
+        const size_t equals = line.find('=');
+        if (equals != std::string::npos && SameName(TrimText(line.substr(0, equals)), "prefer_archives")) {
+            const std::string value = TrimText(line.substr(equals + 1));
+            if (SameName(value, "yes") || SameName(value, "true") || SameName(value, "on") || value == "1") {
+                config.preferArchives = true;
+            } else if (SameName(value, "no") || SameName(value, "false") || SameName(value, "off") || value == "0") {
+                config.preferArchives = false;
+            } else {
+                dbgPrintf("# ERROR MODS : %s line %d: prefer_archives must be yes or no, not '%s'",
+                                 MODS_LOAD_ORDER, lineNumber, value.c_str());
+                continue;
+            }
+            config.preferArchivesSet = true;
+            continue;
+        }
+
+        if (line[0] == '-') {
+            const std::string name = TrimText(line.substr(1));
+            if (!name.empty() && !ContainsName(config.disabled, WithDtaExtension(name)))
+                config.disabled.push_back(WithDtaExtension(name));
+            continue;
+        }
+        const std::string name = WithDtaExtension(line);
+        if (!ContainsName(config.order, name))
+            config.order.push_back(name);
+    }
+    std::fclose(file);
+}
+
+// Set by ModKeyErrorCallback while a mod archive's table is read.
+bool g_modKeyError;
+
+// rw_data reports a wrong key only through the error callback (the ISD1 checksums do not
+// match); SetKey itself succeeds.
+void __cdecl ModKeyErrorCallback(C_DtaArchive *, const char *, int)
+{
+    g_modKeyError = true;
+}
+
+// The names of the .dta files in the Mods folder, alphabetical ignoring case.
+std::vector<std::string> FindModArchives()
+{
+    std::vector<std::string> names;
+    _finddata_t data;
+    const intptr_t find = FileFindFirst(C_fstr("%s\\*.dta", MODS_DIRECTORY), &data);
+    if (find == -1)
+        return names;
+    do {
+        if ((data.attrib & _A_SUBDIR) == 0)
+            names.push_back(data.name);
+    } while (FileFindNext(find, &data) == 0);
+    FileFindClose(find);
+    std::sort(names.begin(), names.end(), [](const std::string &a, const std::string &b) {
+        return _stricmp(a.c_str(), b.c_str()) < 0;
+    });
+    return names;
+}
+
+// Mounts the Mods folder's archives (see above). Called before the game's archives are
+// mounted, so they are searched first. Returns the load order file's settings.
+S_ModLoadOrder MountModArchives()
+{
+    S_ModLoadOrder config;
+    ReadModLoadOrder(config);
+    const std::vector<std::string> found = FindModArchives();
+
+    // Named archives first, in the file's order, then the rest alphabetically.
+    std::vector<std::string> order;
+    for (const std::string &name : config.order) {
+        if (ContainsName(config.disabled, name))
+            continue;
+        bool present = false;
+        for (const std::string &file : found) {
+            if (SameName(file, name)) {
+                order.push_back(file);
+                present = true;
+                break;
+            }
+        }
+        if (!present)
+            dbgPrintf("# ERROR MODS : '%s' is in %s but not in the Mods folder", name.c_str(), MODS_LOAD_ORDER);
+    }
+    for (const std::string &file : found)
+        if (!ContainsName(order, file) && !ContainsName(config.disabled, file))
+            order.push_back(file);
+
+    for (const std::string &file : order) {
+        const C_fstr path("%s\\%s", MODS_DIRECTORY, file.c_str());
+        C_DtaArchive *archive = dtaCreate(path);
+        if (!archive) {
+            dbgPrintf("# ERROR MODS : '%s' is not a .dta archive", static_cast<const char *>(path));
+            continue;
+        }
+        // Mod archives are packed with a blank key; the header and table of an encrypted
+        // (ISD1) archive fail their checksums with it. (An ISD0 archive has no checksums,
+        // so a wrong key goes unnoticed there; dta_pack.py writes ISD1.)
+        g_modKeyError = false;
+        const dtaErrorCallback previous = dtaSetCallbackERR(ModKeyErrorCallback);
+        const bool keyed = archive->SetKey(0, 0);
+        dtaSetCallbackERR(previous);
+        if (!keyed || g_modKeyError) {
+            dbgPrintf("# ERROR MODS : '%s' could not be read (it must be packed with a blank key)",
+                             static_cast<const char *>(path));
+            archive->Release();
+            continue;
+        }
+        g_modArchives.push_back(archive);
+        dbgPrintf("Mod archive %u: %s", static_cast<unsigned>(g_modArchives.size()),
+                         static_cast<const char *>(path));
+    }
+    for (const std::string &file : found)
+        if (ContainsName(config.disabled, file))
+            dbgPrintf("Mod archive disabled: %s\\%s", MODS_DIRECTORY, file.c_str());
+
+    return config;
+}
+
+// Applies the load order file's prefer_archives. The switch is global in rw_data but is
+// reached through an archive object, so any mounted archive will do.
+void ApplyModSettings(const S_ModLoadOrder &config)
+{
+    if (!config.preferArchivesSet)
+        return;
+    C_DtaArchive *any = !g_modArchives.empty() ? g_modArchives.front() : nullptr;
+    for (int i = 0; !any && i < 16; ++i)
+        any = g_archives[i];
+    if (!any) {
+        dbgPrintf("# ERROR MODS : prefer_archives not applied: no archive is mounted");
+        return;
+    }
+    any->SetPreferArchives(config.preferArchives);
+    dbgPrintf("Mods: prefer_archives = %s", config.preferArchives ? "yes" : "no");
+}
+
+} // namespace
+
 // Mounts the data archives in priority order (patches first).  0x006dba30
+// (port) The archives of the Mods folder are mounted before them (MountModArchives).
 void MountDataArchives()
 {
     struct S_ArchiveKey {
@@ -241,6 +465,7 @@ void MountDataArchives()
 
     for (int i = 0; i < 16; ++i)
         g_archives[i] = nullptr;
+    const S_ModLoadOrder modSettings = MountModArchives();   // (port) searched before the game's archives
     for (int i = 0; i < 16; ++i) {
         if (!names[i])
             continue;
@@ -263,6 +488,7 @@ void MountDataArchives()
             dbgPrintf(C_fstr("# ERROR DATAFILE : datafile '%s' missing", names[i]));
         }
     }
+    ApplyModSettings(modSettings);                 // (port)
 }
 
 // Search directories of the resource caches.  0x006dc230
@@ -387,6 +613,9 @@ void ShutdownGame()
             archive = nullptr;
         }
     }
+    for (C_DtaArchive *archive : g_modArchives)    // (port)
+        archive->Release();
+    g_modArchives.clear();
     CoUninitialize();
 }
 
