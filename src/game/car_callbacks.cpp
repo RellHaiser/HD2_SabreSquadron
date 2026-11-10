@@ -353,6 +353,7 @@ bool __fastcall CarOnPartOff(void *context, int index, const S_vector *velocity,
     }
     if (C_Debris *debris = ThrowOff(part.frame))
         debris->Setup(params, true);
+#ifndef HD2_DEDICATED   // no lamps on the server
     // The last lamp on a part under this one breaks (one at most).
     for (size_t i = vehicle.m_lamps.size(); i-- > 0;) {
         S_VehicleLamp &lamp = vehicle.m_lamps[i];
@@ -365,6 +366,7 @@ bool __fastcall CarOnPartOff(void *context, int index, const S_vector *velocity,
         lamp.flags |= VEHICLE_LAMP_BROKEN;
         break;
     }
+#endif
     part.state |= VEHICLE_PART_STATE_1;
     part.frame->SetOn(false);
     part.frame->Update();

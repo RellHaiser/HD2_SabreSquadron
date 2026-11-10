@@ -54,7 +54,7 @@ struct S_CarParts {                                     // its vectors' implicit
     // The mission's start (StartMission, RestoreModel): the parts gathered again whole, no fuse,
     // not wrecked, the wreck's fire and smoke destroyed. (Quirk kept: their handles stay set; a
     // later Reset destroys them again, which then misses.)
-    void Reset();                                       // 0x004e0ea0 (__fastcall)
+    void Reset();                                       // 0x004e0ea0 (__fastcall) (DS 0x004d06c0)
     // The car's end: the model released, the explosive parts freed (their effects left), the
     // turrets' frames forgotten.
     void Release();                                     // 0x004e0ee0
@@ -77,12 +77,12 @@ struct S_CarParts {                                     // its vectors' implicit
     // A client's wreck (CAR_MSG_DESTROYED): the explosive parts' effects destroyed, the fire and
     // smoke started at the particle dummy (else the car's frame) with the car's frame their parent,
     // the wreck's sound there (SID; SOUND_CHAPTER_EXPLOSION, silent to the AI).
-    void StartWreckEffects();                           // 0x004e2000 (__fastcall)
+    void StartWreckEffects();                           // 0x004e2000 (__fastcall) (DS 0x004d1c90)
     // A damage part's effect (the server's CAR_MSG_PART_EFFECT, sent from Hit): the explosive
     // part's PARTID effect at its frame, the car's frame its parent. Fix: a part past the list is
     // ignored (the original indexes by the message's number). (Quirk kept: one running is not
     // destroyed first.)
-    void StartPartEffect(int part);                     // 0x004e1f70
+    void StartPartEffect(int part);                     // 0x004e1f70 (DS 0x004d1bf0)
     // The saved game (the car's CHUNK_CAR_PARTS): each explosive part (from the last: its index,
     // started, fuse, effect), each zone (from the last: its index, HP), then wrecked and the fuse.
     // Read back: a part's index out of range is passed over (Fix: the count itself too; the
@@ -114,7 +114,7 @@ private:
     // The damage model's parts and the wreck's effects (Setup, Reset).
     void Gather();                                      // 0x004e09d0 (__fastcall)
     // Forgets the parts, destroying the explosive parts' effects.
-    void Clear();                                       // 0x004e0dc0 (__fastcall)
+    void Clear();                                       // 0x004e0dc0 (__fastcall) (DS 0x004d05b0)
     // The car wrecked, once (the fuse's end, Hit).
     void WreckOnce();                                   // 0x004e1fe0 (__fastcall)
     // The damage model put on the car (its world place and turn, in the scene's primary sector),
@@ -333,12 +333,12 @@ public:
     // Every 100 ms: the sunk car's timer, a charge, the server's item store, the water, the seat
     // weapons and their ammo (network games), the damage parts, the crew bailing out of a car on
     // its side, the engine's noise for the AI.
-    void Tick(int timeDelta) override;                  // 0x18 0x004d2790
+    void Tick(int timeDelta) override;                  // 0x18 0x004d2790 (DS 0x004bf910)
     // The server's message (game/car_net.cpp): a glass or damage part's health (a part at none
     // comes off), a wheel's on a client (at none off, not in mode +0x550), a tyre burst, the wreck
     // (the parts' effects, ShowDestroyed), a part's effect, the restart, the item store (added on a
     // client), the fuel, a push. Fix: a part or wheel past the car's (or missing) is ignored.
-    void OnMessage(C_BitStream *msg) override;          // 0x1C 0x004db360
+    void OnMessage(C_BitStream *msg) override;          // 0x1C 0x004db360 (DS 0x004c92e0)
     // A client's message to the server: a wheel's health, the deadly ground (Wreck(true), the
     // parts wrecked), a hit of its car (HIT_THROWN_OBJECT by the driver: on every living
     // occupant for -1, else on the human), the fuel (sent on to the clients), a push.
@@ -359,7 +359,7 @@ public:
     // the volumes, full fuel, the lights on automatic, the seats' "SEAT<digits>" flags, "name<n>"
     // texts, weapons and "camera3RD*" keepers, the checkpoints marked, the wreck's model ("C" +
     // the model's file name) loaded, 20 ms of settling.
-    void StartMission(bool server) override;            // 0x3C 0x004d16a0
+    void StartMission(bool server) override;            // 0x3C 0x004d16a0 (DS 0x004be420)
     // The model back, the wreck's model released, the net object removed, the seat weapons
     // stopped and deleted, every seat left and its camera keeper put back; the vehicle stopped
     // (once started, or single player's client side); the actor inactive, the marks cleared.
@@ -368,7 +368,7 @@ public:
     // restarted), the vehicle reset to the start place and settled (5 ms) with full fuel, no
     // attacker, driver or charge; the volumes and the replicated place as at the start. (Quirk
     // kept: the vehicle's Restart then puts the volumes back in the world, a client's too.)
-    void RestartMission(bool server) override;          // 0x44 0x004dd0d0
+    void RestartMission(bool server) override;          // 0x44 0x004dd0d0 (DS 0x004cb800)
     // The saved game (game/car_save.cpp): C_Actor's, the vehicle's state block, each seat
     // weapon's (from the last seat), the wreck's two flags, the periodic link and the last
     // attacker, the damage parts', the placed charge. (Quirk kept: SaveGame returns false;
@@ -396,7 +396,7 @@ public:
     // Seats `occupant` (a human; a seat taken by another is left alone): out of the seats it
     // has, linked to the seat's frame facing the seat's z axis; the driver's seat makes it the
     // driver and starts the engine. The server tells the clients the seat weapon's rounds.
-    void SetSeatOccupant(int seat, C_Actor *occupant) override;   // 0x74 0x004d9430
+    void SetSeatOccupant(int seat, C_Actor *occupant) override;   // 0x74 0x004d9430 (DS 0x004c6bd0)
     C_Actor *GetSeatOccupant(int seat) override;        // 0x78 0x004d99d0
     int FindSeat(const C_Actor *occupant) override;     // 0x7C 0x004d9a00
     C_Actor *LeaveSeat(int seat) override;              // 0x80 0x004d9a40
@@ -442,7 +442,7 @@ public:
     // to them; the charge's visual dropped; of the first six wheels each on its own coin flip
     // thrown off (not in mode +0x550); a dedicated server reloads the model at the restart; the
     // blast.
-    void Wreck(bool told);                              // 0x004dbf00
+    void Wreck(bool told);                              // 0x004dbf00 (DS 0x004ca180)
     // Material of the part a shot from `pos` along `dir` hits, -1 if none (the damage parts' own
     // test, +0x24E0).
     int GetHitMaterial(const S_vector &pos, const S_vector &dir);   // 0x004dbed0
@@ -598,7 +598,7 @@ private:
     void UpdateVehicle(int time);                       // 0x004d38f0
     // The vehicle's simulation options by the active camera's distance (and the sounds on within
     // 100 m of a shown model).
-    void UpdateDetail();                                // 0x004d3970
+    void UpdateDetail();                                // 0x004d3970 (DS 0x004c0ed0)
     // Under water: the engine dies and the crew drowns (network games start m_respawnTimer).
     void CheckWater();                                  // 0x004d2c50
     // The loudest playing engine sound's volume (0 with the engine off) and the engine sounds' far
@@ -634,7 +634,7 @@ private:
     // The seat weapons' messages of the net object: shots and reloads (a client skips its
     // player's own seat; for a living gunner: the server acts and sends them on, a client shows
     // them), rounds, ammo for the store. Fix: a seat without a weapon is passed over.
-    void ReadMessages();                                // 0x004d2ec0
+    void ReadMessages();                                // 0x004d2ec0 (DS 0x004c01f0)
     // The item store's contents: each item's uid (16 bits) and type (8 bits), 0xFFFF last; read
     // back (`add`: the items made and added to the store, not emptied first; else skipped).
     void WriteStore(C_BitStream *msg);                  // 0x004de150
@@ -724,13 +724,13 @@ bool __fastcall CarIsActorFirm(void *context, S_CollisionVolume *hit, bool *defo
 // where the car is driven: single player, the local driver's client, else the server.
 void __fastcall CarOnVehicleImpact(void *context, const S_vector *impulse, const S_vector *largest,
                                    const S_vector4 *point, float radius, const S_vector *velocity, C_Actor *actor,
-                                   const S_CollisionVolume *volume, int unknown);   // 0x004d4740
+                                   const S_CollisionVolume *volume, int unknown);   // 0x004d4740 (DS 0x004c2020)
 // A bumper, mirror, light, wing, plate or door is thrown off as debris (true; false for the
 // others), hidden, and the last lamp on a part under it breaks.
-bool __fastcall CarOnPartOff(void *context, int index, const S_vector *velocity, const S_vector *push);   // 0x004d4ca0
+bool __fastcall CarOnPartOff(void *context, int index, const S_vector *velocity, const S_vector *push);   // 0x004d4ca0 (DS 0x004c2700)
 // The wheel is hidden (WHEEL_DETACHED; true) and thrown off as debris where it is shown; the
 // server (or the driver's client) tells the others (CAR_MSG_WHEEL).
-bool __fastcall CarOnWheelOff(void *context, int index, const S_vector *velocity, const S_vector *push);  // 0x004d4eb0
+bool __fastcall CarOnWheelOff(void *context, int index, const S_vector *velocity, const S_vector *push);  // 0x004d4eb0 (DS 0x004c28d0)
 // A shown glass part with its mesh shatters (GEffects) and is hidden.
 void __fastcall CarOnGlassBroken(void *context, int part, const S_vector *velocity, const char *sound);   // 0x004d4a10
 // Water (wading, swimming, cold) is not met; a physics object is hit and a destructible one broken
