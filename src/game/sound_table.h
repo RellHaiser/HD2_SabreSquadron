@@ -70,7 +70,7 @@ struct S_SoundGroup {                                   // 0x18 bytes
     void Clear();                                       // 0x0043a5e0
 
     C_str name = "#name error";                         // +0x00 chunk 0x4BA
-    std::vector<S_SoundSample *> samples;               // +0x04 chunk 0x514
+    std::vector<S_SoundSample *> samples;               // +0x04 chunk 0x514 (free 0x00432390 (DS 0x00457c40))
     // Played even when out of range of the listener (as a non-positional sound).
     bool alwaysAudible = false;                         // +0x14 chunk 0x51E
 };

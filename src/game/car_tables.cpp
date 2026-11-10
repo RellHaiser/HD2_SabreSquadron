@@ -10,8 +10,8 @@
 #include "game/shots.h"                                 // g_materials
 #include "ls3d/rw_data.h"
 
-std::vector<S_TyreType> g_tyreTypes;                    // 0x0089c174
-std::vector<S_CarSurface> g_carSurfaces;                // 0x0089c160
+std::vector<S_TyreType> g_tyreTypes;                    // 0x0089c174 (construction, atexit: 0x004e2690 (DS 0x004d2490), 0x004e26b0 (DS 0x004d24c0))
+std::vector<S_CarSurface> g_carSurfaces;                // 0x0089c160 (construction, atexit: 0x004e2710 (DS 0x004d2550), 0x004e2730 (DS 0x004d2580))
 int g_carSurfaceOfMaterial[256];                        // 0x0089bd60
 
 namespace {

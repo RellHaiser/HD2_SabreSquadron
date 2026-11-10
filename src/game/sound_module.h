@@ -225,8 +225,8 @@ private:
     static bool OpenStream(ISND_stream *&stream, const char *fileName, float volume, bool loop);   // 0x00437210
 
     std::vector<S_Listener> m_listeners;                // +0x0C
-    std::vector<S_SoundSlot *> m_slots;                 // +0x1C
-    std::vector<int> m_freeSlots;                       // +0x2C
+    std::vector<S_SoundSlot *> m_slots;                 // +0x1C (free 0x00437680 (DS 0x0045b6c0))
+    std::vector<int> m_freeSlots;                       // +0x2C (free 0x004376a0 (DS 0x0045b6f0))
     float m_masterVolume = 0.0f;                        // +0x3C
     bool m_masterVolumeApplied = false;                 // +0x40
     float m_musicVolume = 1.0f;                         // +0x44

@@ -12,7 +12,7 @@
 #include "game/game.h"
 #include "game/rigid_body_internal.h"
 
-std::vector<C_RigidBody *> g_rigidBodies;              // 0x0089bcd4
+std::vector<C_RigidBody *> g_rigidBodies;              // 0x0089bcd4 (construction, atexit: 0x004cffc0 (DS 0x004bc590), 0x004cffe0 (DS 0x004bc5c0))
 
 namespace {
 
