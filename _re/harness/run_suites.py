@@ -120,6 +120,8 @@ SUITES = [
     # (The human's side of the items: items_test.cpp built with HUMAN_ITEMS_TEST, game/human_items.cpp linked.)
     T("items.human", "items/build_human.bat", TMP + r"\human_items_test.exe", needs=("mingw", "equipment_save", "items_sav")),
     T("actors", "actors/build.bat", TMP + r"\actors_test.exe", needs=("mingw",)),
+    # (The levels' collision files: MISSIONS_DIR, the unpacked missions.)
+    T("collision", "collision/build.bat", TMP + r"\collision_test.exe", needs=("mingw", "missions")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

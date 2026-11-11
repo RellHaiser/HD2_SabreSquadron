@@ -652,3 +652,49 @@ particles and the surface marks. Files are served from memory.
 - **A harness note:** a crash at exit (static destructors after the fake creators) left
   processes that `taskkill` couldn't stop, holding the executable. They had to be ended through
   WMI (`Win32_Process.Terminate`). The test now turns off crash dialogs (`SetErrorMode`).
+
+## New harness: collision part 1 (loading, rays, volumes, 2026-11-11)
+
+- **The build:** suite `collision` (`collision/build.bat`, input: the levels' `tree.klz`). It links
+  the four collision sources and the LS3DF math.
+- **Levels:**
+  - all 82 levels' files are read and checked against my own parse of the format (header, tables,
+    the cells' entries in z, y, x order);
+  - NORMANDY3_MP_ZONE's file is a 16-byte stub, like the rest of that mission, and is skipped;
+  - without the scene, every game triangle is disabled (they all use the scene's visuals), so on
+    the real levels the primitives are what get tested.
+- **Rays on the real levels:** 161,963 random segments (500 per level in the quick mode). The grid
+  walk (`RayTest`), `RayTestBrute`, `RayTestStatic` (lowest layer), `QuerySegment` and my own ray
+  tests of boxes, axis-aligned boxes, spheres, rectangles and poles agree.
+- **Collision files written by the test (`WriteSynth`):**
+  - triangles of all seven kinds, one- and two-sided, water, plus capsule and convex primitives;
+  - the kinds the files store, checked against the loader's classification of the lowest layer
+    (including its thresholds and ties);
+  - fake visuals for the game's own path: a mirror, a model where a visual is required, a frame
+    not found, degenerate triangles at their thresholds.
+- **Dynamic volumes:** boxes, world boxes, spheres, capsules and convex hulls. Covered: the grid
+  (adding, moving, releasing, clamping, ignored volumes, `ClearGrid`), every ray query, and exact
+  normals and places.
+- **Region queries:** `GetVolumeAt`, `GetVolumesInRadius`, and `TestBoxSweep` checked against my
+  own reading of its rules (my levels, BURMA1, Co_Sicily1).
+- **Other levels:** a level whose corner is not at 0, a non-square level, and a single-cell level.
+- **Infinite and huge segments:** answered without hanging (the knife-kill fix, 43d5ac75).
+- **Original weaknesses, kept (checked in the original's asm, the port matching):**
+  - **Boxes:** a segment starting inside a box parallel to a face hits it at once (0x006f46e0).
+  - **Capsules:** a segment starting inside a capsule's infinite cylinder, beyond an end, misses
+    it (0x006f4d70).
+  - **Vertical segments:** `QuerySegment` finds no static geometry along them (0x006ff510; its
+    jump table 0x00700f60 visits no cell).
+  - **Box sweeps:** `TestBoxSweep` uses the squared half diagonal as a radius (0x006f0ac0).
+  - **Clearing the grid:** `ClearGrid` deletes an emptied but unreleased cell and leaves it in the
+    grid (0x006eff70); callers must `ReleaseEmptyCells` first.
+- **Results:** 1,163,769 checks.
+  - `collision.cpp`: lines 503 of 511, functions 35 of 36.
+  - `collision_ray.cpp`: lines 526 of 526, functions 51 of 51.
+  - `mutations/mutate_collision1.py`: 869 mutants, 603 killed, 93 don't build, 173 survived: 102
+    boundary comparisons, the rest leaks, unused values, margins and early stops (listed).
+- **A harness lesson:** the first two mutation runs were void. The test wrote its files to fixed
+  names in %TEMP% and the runner's parallel copies overwrote each other's; files are now per
+  process.
+- **Not in part 1:** sphere sweeps and sliding (`collision_sweep.cpp`, `collision_body.cpp`):
+  part 2.
