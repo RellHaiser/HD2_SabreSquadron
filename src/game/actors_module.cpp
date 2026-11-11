@@ -746,11 +746,11 @@ bool C_TemporaryActorsList::SaveGame(C_chunk &chunk)
 bool C_TemporaryActorsList::LoadGame(C_chunk &chunk)
 {
     uint16_t id;
-    // Kept from chunk to chunk, as in the original (0x00477f50): the item, mine and
-    // fence chunks set it (a fence not found: null), the others keep the previous
-    // one, which they then activate (their active flag is 1).
-    C_Actor *actor = nullptr;
     while (chunk.RemainingSize() > 0 && chunk.Descend(id)) {
+        // Fix: each chunk starts without an actor. (The original 0x00477f50 keeps the
+        // previous chunk's, so a following next-id, debris or unknown chunk activates it
+        // again: an inactive item, mine or fence before a debris chunk comes back active.)
+        C_Actor *actor = nullptr;
         uint8_t active = 1;
         switch (id) {
         case CHUNK_TEMP_NEXT_ID:
