@@ -9,6 +9,9 @@
 // its swaps, TransferItemAuto, IsSwapBlocked, CanAdd / CanPutItemInSlot, removing and dropping, the definition rules.
 // Part 3: the weapons (Init, Reload, SetRounds, sounds, Fire by kind, projectiles, save / load), the mission items
 // files of the game (MISSIONS_DIR) loaded and saved back, the module lifecycle, the activity props, frame trees.
+// Part 4 (build_human.bat, HUMAN_ITEMS_TEST: human_items_test.inc and human_items_test2.inc instead of parts 1-3,
+// game/human_items.cpp linked): the human's containers, lookups and counts, removing, the controller requests, the
+// server / client moves and transfers, dropping, supply boxes, picking up, uniforms, the soldier state.
 #include <windows.h>
 
 #include <algorithm>
@@ -44,6 +47,15 @@
 #include "game/team.h"
 #include "ls3d/i3d.h"
 #include "ls3d/rw_data.h"
+#ifdef HUMAN_ITEMS_TEST
+#include "game/geffects.h"
+#include "game/human_controller.h"
+#include "game/item_actor.h"
+#include "game/mp_zone.h"
+#include "game/sight.h"
+#include "game/soldier.h"
+#include "game/supply_box.h"
+#endif
 #undef private
 #undef protected
 
@@ -257,9 +269,11 @@ S_vector C_HumanEquipment::GetDropPosition(int place)
     Log("eq droppos " + std::to_string(place));
     return S_vector(1.0f, 2.0f, 3.0f);
 }
+#ifndef HUMAN_ITEMS_TEST   // (the real ones in human_items.cpp)
 void C_Human::OnUniformChanged(int uid) { Log("uniform " + std::to_string(uid)); }
 void C_Human::OnHandsChanged() { Log("handschanged"); }
 void C_Human::RemoveItem(int uid, bool destroy) { Log("human remove " + std::to_string(uid) + " " + std::to_string(destroy)); }
+#endif
 namespace {
 bool g_localPlayer;
 }
@@ -4774,6 +4788,10 @@ void TestModuleEnd()
 }
 }  // namespace
 
+#ifdef HUMAN_ITEMS_TEST
+#include "human_items_test.inc"
+#endif
+
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
@@ -4812,6 +4830,14 @@ int main()
         std::printf("items: %d checks, %d failures (no items.sav or save)\n", checks, failures);
         return 1;
     }
+#ifdef HUMAN_ITEMS_TEST
+    g_itemsModule.EnsureItemsLoaded();
+    FindTypes();
+    FindGuns();
+    RunHumanItemsTests();
+    std::printf("human items: %d checks, %d failures\n", checks, failures);
+    return failures != 0;
+#endif
     TestDefinitions();
     TestSaveRoundTrip();
     TestModuleRoundTrip();

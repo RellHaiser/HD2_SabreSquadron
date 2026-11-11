@@ -562,3 +562,41 @@ particles and the surface marks. Files are served from memory.
   (equivalent or untestable, listed per file).
 - **Not tested:** the definitions' model, image and diving-gear loaders (`GetModel`,
   `GetFpvModel`, `GetImage`, `GetDivingGear`), which need the engine's models.
+
+### Items part 4: the human's items, `human_items.cpp` (2026-11-10)
+
+- **The build:** a second build of the items harness, suite `items.human`
+  (`items/build_human.bat`). It is items_test.cpp with `HUMAN_ITEMS_TEST` and
+  `human_items_test.inc` / `human_items_test2.inc`, linking the real `game/human_items.cpp` on
+  the real item system and `items.sav`. Faked and logged: the controller (its virtuals by g++
+  slot), the temporary actors (their `DropItem` takes the item out as the real one does), supply
+  boxes, item actors, zones, the sight module, the effects' `DressUniform`.
+- **Tested:**
+  - `Init` / `ClearContainers` / `Done` and the slot getters;
+  - every lookup and count, each container and its search order (slots from their ends; the
+    belt's last ready slot first);
+  - `RemoveItem` from each container (the hands: reload sound, view mode) and
+    `RemoveItemsFromStore`;
+  - the requests to the controller, including the uniform-swap rules, and `DrawLongGun` /
+    `DrawSidearm` for every reason;
+  - the server and client moves and transfers;
+  - `DropItem`, `ClientDropItem` and `DropAllItems`, with the random velocities replayed from a
+    seed;
+  - the supply boxes: charges, states, the item lists by team, no room;
+  - picking up; `PutOnUniform` and its client version;
+  - the soldier state: uids only outside a local game, and an empty item 38 left out in single
+    player;
+  - `DropCarried`, the action's progress (seat weapons of the four vehicle kinds, zones).
+- **Checked against the original's asm, the port matching:** `RequestThrowItem` (0x005a2c50);
+  `DropAllItems`' base direction, velocities and hands rule (0x005a2fe0); `CountAmmo`
+  (0x005a6c50); `GetEquipmentState` (0x005a8b50); `ServerMoveItem`'s lookup (0x005a2d50).
+- **An original weakness, kept:** `ClearContainers` (0x005a29c0) leaves the backpack contents'
+  pointer to the store it just freed with the backpack. Respawn and `CreateEquipment` clear the
+  pointer first (`ClearActorContainers`); the plain mission stop does not.
+- **Also as in the original:** a store actor's items can't be taken with `ServerMoveItem`. Its
+  container 0 is read as the head slot, and a store has no item there; the client side finds them
+  anywhere.
+- **Results:** 418 checks. `human_items.cpp`: lines 499 of 500, functions 72 of 72, branch
+  outcomes 490 of 526 (93 %); the rest are inline null checks and unreachable branches.
+  `mutations/mutate_items4.py`: 260 mutants, 215 killed, 29 don't build, 16 survived
+  (equivalent, leaks, a debug message, one unreachable; listed).

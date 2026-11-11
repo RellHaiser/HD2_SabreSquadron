@@ -117,6 +117,8 @@ SUITES = [
     # (Its save round trip reads equipment chunks from a quick save of the original: EQUIPMENT_SAVE above.)
     T("equipment", "equipment/build.bat", TMP + r"\equipment_test.exe", needs=("mingw", "equipment_save")),
     T("items", "items/build.bat", TMP + r"\items_test.exe", needs=("mingw", "equipment_save", "items_sav")),
+    # (The human's side of the items: items_test.cpp built with HUMAN_ITEMS_TEST, game/human_items.cpp linked.)
+    T("items.human", "items/build_human.bat", TMP + r"\human_items_test.exe", needs=("mingw", "equipment_save", "items_sav")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
