@@ -311,3 +311,47 @@ expectations come from the original's assembly (0x0044b3b0, 0x0044b910, 0x004483
 
 `_re/harness/mutrun.py` now takes its repository root from its own path. It used to name the
 G: checkout, which has been out of date since the move to T:.
+
+## New harness: equipment (part 1, 2026-11-10)
+
+`src/game/human_equipment.cpp` (C_HumanEquipment: the models a soldier carries) was in no
+suite. `_re/harness/equipment`: `build.bat` builds `equipment_test.cpp` with
+`equipment_globals.cpp` and the real `human_equipment.cpp`, `equipment_frames.cpp`, `chunk.cpp`
+and `c_str.cpp`. The LS3DF port's `math.cpp` is linked too, built for x87 with PC_24 set as the
+game runs it, because a loaded quaternion goes through `SetRot`, which normalises it.
+
+- **Fakes:** the engine frames get one vtable that logs its calls. It includes the model's
+  animation stages, the visual's light level, the driver's `CreateFrame` and the scene's
+  `FindFrame`. `C_Human`, `C_HumanMovement` and the weapon pose are zeroed bytes
+  (`#define private public`), with their containers, items and definitions as small subclasses.
+  Chunks are read from and written to memory.
+- **Part 1 tests:**
+  - the holsters: setup in the holster pose (checked against the asm), `GetHolsterSlot`'s
+    behaviour and type tables (0x00791b80), the counts shown per frame, the light level, hiding,
+    release and setting up again;
+  - `SetModel` / `GetModel` for every place;
+  - save / load.
+- **Save / load against the original:** the round trip reads a quick save made with the
+  original game. It isn't in the repository: by default it's
+  `%TEMP%\eq_saves\original_SMCAM_quick.sav`, or set env `EQUIPMENT_SAVE`. Without it the suite
+  reports missing-prerequisite. Its 49 equipment chunks (0x309) are each loaded and saved again:
+  1,644 of 1,663 fields come back the same. The other 19 are rotations within 4 ulps: the saved
+  quaternions aren't exactly unit length, and the original's `SetRot` renormalises them too.
+  Then each field is varied on those chunks: the actors given to / taken from (0 and -1
+  included), the special object found in the scene by its saved name, models of uid 0 or -1 or
+  saved as none, the long gun and backpack switched off, the long gun hidden by the movement's
+  state, and the defaults after a second load of an empty chunk.
+- **Results:** 400 checks. `mutations/mutate_equipment1.py`: 318 mutants, 290 killed, 19 don't
+  build, 9 survived. Those 9 are equivalent, or wait for part 2; the docstring lists them.
+- **Coverage:** human_equipment.cpp **524 of 1,274 lines, 23 of 42 functions, 412 of 1,156
+  branch outcomes**.
+- **Still to test:**
+  - part 2: `AttachModel` / `DetachModel`, `Update` (the long gun's tilt, slide and lift),
+    animation events;
+  - part 3: the item callbacks, `ShowHandsItem` / `PutAway`, the flashlight;
+  - the hands and special models' other load paths (belt, thrown, props, actors).
+
+`mutrun.py`: it now takes the g++ line with the most `%SRC%` sources, because the equipment
+bat compiles math.cpp first. Env `MUT_EXTRA_SRCS` / `MUT_EXTRA_INC` add sources from outside
+`src/`, which are compiled once and not mutated. The equipment run:
+`MUT_HARNESS=equipment MUT_EXTRA_SRCS=ls3df/src/math/math.cpp MUT_EXTRA_INC=ls3df/src`.

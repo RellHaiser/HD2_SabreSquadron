@@ -21,8 +21,13 @@ GXX = r"C:\nim-2.2.6\dist\mingw32\bin\g++.exe"
 env = dict(os.environ, PATH=r"C:\nim-2.2.6\dist\mingw32\bin;" + os.environ["PATH"])
 HARNESS = ROOT + "\\_re\\harness\\" + os.environ.get("MUT_HARNESS", "net")
 bat = open(HARNESS + "\\" + os.environ.get("MUT_BAT", "build.bat"), encoding="utf-8").read()
-SRCS = re.findall(r"%SRC%\\([\w\\]+\.cpp)", next(l for l in bat.splitlines() if l.startswith("g++")))
-LINE = next(l for l in bat.splitlines() if l.startswith("g++"))
+# (The harness's own g++ line: the one naming the most sources under %SRC%; others build helpers.)
+LINE = max((l for l in bat.splitlines() if l.startswith("g++")), key=lambda l: l.count("%SRC%"))
+SRCS = re.findall(r"%SRC%\\([\w\\]+\.cpp)", LINE)
+# Env MUT_EXTRA_SRCS: sources outside src/ the harness links (repository paths, ';'-separated; compiled once per tree
+# from the repository, not mutated), MUT_EXTRA_INC: their include directories (likewise).
+EXTRA_SRCS = [os.path.join(ROOT, p) for p in os.environ.get("MUT_EXTRA_SRCS", "").split(";") if p]
+EXTRA_INC = ["-I" + os.path.join(ROOT, p) for p in os.environ.get("MUT_EXTRA_INC", "").split(";") if p]
 LOCALS = list(dict.fromkeys(re.findall(r"(?<![\\\w%])(\w+\.cpp)", LINE)))
 PASS = os.environ.get("MUT_PASS", r"\w+: \d+ checks, 0 failures").encode()
 EXTRA = os.environ.get("MUT_DEFS", "").split()
@@ -31,7 +36,7 @@ FLAGS = ["-std=c++17", "-faligned-new=8", "-O1", "-msse2", "-mfpmath=sse", "-DLS
 
 def compile_one(source, obj, d, port):
     cmd = [GXX] + FLAGS + ["-DSB_TEST_PORT=%d" % (port - 1), "-DGCD_TEST_PORT=%d" % port, "-I" + d + r"\src", "-I" + d + r"\h",
-                           "-c", source, "-o", obj]
+                           *EXTRA_INC, "-c", source, "-o", obj]
     r = subprocess.run(cmd, capture_output=True, text=True, env=env)
     if r.returncode != 0:
         compile_one.last_error = r.stderr[:1500]
@@ -55,6 +60,10 @@ def tree(n, port):
         tests.append(d + "\\test%d.o" % i)
         if not compile_one(d + "\\h\\" + local, tests[-1], d, port):
             raise SystemExit("test compile failed: " + local + "\n" + compile_one.last_error)
+    for i, extra in enumerate(EXTRA_SRCS):
+        tests.append(d + "\\extra%d.o" % i)
+        if not compile_one(extra, tests[-1], d, port):
+            raise SystemExit("extra compile failed: " + extra + "\n" + compile_one.last_error)
     return d, objs, tests
 
 

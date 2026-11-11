@@ -50,6 +50,8 @@ VCVARS = r"T:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Bu
 TAIL = 256 * 1024
 
 CARS, MISSIONS = "cars", "missions"
+# The equipment suite's save made with the original game (not in the repository): env EQUIPMENT_SAVE, else this.
+EQUIPMENT_SAVE = os.environ.get("EQUIPMENT_SAVE", os.path.join(TEMP, "eq_saves", "original_SMCAM_quick.sav"))
 FACTORY_CHECKS = ["campaignscreens", "description", "equipmentdesc", "equipmentpanel", "equipmentscreen", "factory",
                   "gamemenu", "herostats", "loadout", "mainmenu", "menu", "menurun", "menusoldier", "mpsettings",
                   "options", "player", "replication", "screen", "storelist"]
@@ -110,6 +112,8 @@ SUITES = [
     T("speech", "script_module/build_speech.bat", TMP + r"\speech_test.exe", tree_copy="script_module/speech_test.exe"),
     T("stains", "script_module/build_stains.bat", TMP + r"\stains_test.exe"),
     T("shots", "shots/build.bat", TMP + r"\shots_test.exe"),
+    # (Its save round trip reads equipment chunks from a quick save of the original: EQUIPMENT_SAVE above.)
+    T("equipment", "equipment/build.bat", TMP + r"\equipment_test.exe", needs=("mingw", "equipment_save")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
@@ -557,7 +561,7 @@ def missing(s, ctx):
     have = dict(mingw=os.path.exists(MINGW), msvc=os.path.exists(VCVARS),
                 data=os.path.isdir(os.path.join(ctx["data"], "MISSIONS")),
                 mp_data=bool(ctx["mp_data"]) and os.path.isdir(ctx["mp_data"] or ""),
-                cars=CARS in ctx, missions=MISSIONS in ctx)
+                cars=CARS in ctx, missions=MISSIONS in ctx, equipment_save=os.path.isfile(EQUIPMENT_SAVE))
     lost = [n for n in s["needs"] if not have.get(n, False)]
     if s.get("hardcoded_data") and os.path.normcase(os.path.normpath(ctx["data"])) != os.path.normcase(r"H:\HD2_Unpacked"):
         lost.append("data at H:\\HD2_Unpacked (hard-coded in %s)" % s["bat"])
