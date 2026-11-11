@@ -778,7 +778,8 @@ void C_HumanEquipment::AttachModel(int place)
             }
         } else {
             S_vector p = m_handsModel->GetPos();
-            RotateAboutYxX(m_handsModel, m_longGunModel ? -1.4280f : -1.9634955f);
+            // (-1.4279966f is the original's 0xbfb6c898; -1.428f would be another float.)
+            RotateAboutYxX(m_handsModel, m_longGunModel ? -1.4279966f : -1.9634955f);
             m_handsModel->SetPosInline(S_vector(p.x - 0.01f, p.y, p.z - 0.08f));
             m_handsModel->Update();
             if (!m_longGunModel) {
