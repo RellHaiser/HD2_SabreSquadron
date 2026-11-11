@@ -484,3 +484,33 @@ particles and the surface marks. Files are served from memory.
   - part 2: moving items (`MoveItem`, `PutItem`, `TransferItem`, `CanPutItem*`, the result
     codes, weight and space limits, swaps, drops);
   - part 3: the weapons (reload, fire, sounds, projectiles) and the mission items file.
+
+### Items part 2: moving items (2026-11-10)
+
+- **Tests** (the harness now gives actors a vtable for `GetHitPoints`, raw equipments for the
+  logged callbacks, an interface, a first-person view and a scene):
+  - `MoveItem`: every container's checks one at a time, the order where two fail, boundaries,
+    locks, the same place, test-only; then the bookkeeping: weights, the owner and container
+    index, busy times, replaced items, backpacks with their contents, items lying in the world;
+  - `NotifyMove`'s callbacks, locks and first-person events;
+  - `PutItem` / `CanPutItem` / `PutItemAuto`, `CreateItem` / `GiveItem` / `CreateFreeItem`;
+  - `TransferItem`: every swap shape with its exact equipment and first-person callbacks
+    (including the displaced item put elsewhere or dropped, and uniforms on a server), and
+    `TransferItemAuto`;
+  - `IsSwapBlocked`'s checks one by one, `CanAddItemToInventory` / `CanPutItemInSlot`,
+    removing and dropping;
+  - `GetAllowedContainers` / `GetInventoryGroup` over every behaviour and size.
+- **Checked against the original's asm:** `MoveItem`'s hands and backpack cases, and the start of
+  `TransferItem`. The port matches.
+- **Found:** `TransferItem` passes `IsSwapBlocked` a null source when the source isn't a human,
+  and `IsSwapBlocked` reads it when the target place is taken. The original does the same
+  (0x007da274..), so a vehicle's item into a taken slot crashes there too. It isn't tested and I
+  haven't changed it.
+- A local game has the server bit, so items moved in the last 920 ms are busy. The tests wait a
+  second before each transfer.
+- **Results:** 4,098 checks. `mutations/mutate_items2.py`: 424 mutants, 363 killed, 25 don't
+  build, 36 survived. All 36 are equivalent; the docstring lists them.
+- **Coverage:** items_module.cpp 704 of 964 lines (74 % of branch outcomes); item_defs.cpp 405
+  of 459.
+- **Still to test (part 3):** the weapons (`C_WeaponItem`: reload, fire, sounds, projectiles),
+  the mission items file, the module's mission lifecycle, and the activity props.
