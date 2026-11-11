@@ -193,7 +193,9 @@ bool C_Item::LoadGame(C_chunk &chunk)
             break;
         case CHUNK_ITEM_LOAD_OWNER: {
             const int owner = ReadValue<int>(chunk);
-            m_owner = owner == -1 ? nullptr : g_actorsModule.GetActorById(owner);
+            // (By index, as the original: GetActor 0x00475dd0 at 0x007d4430. SaveGame writes the owner under
+            // CHUNK_ITEM_OWNER, which this switch does not read, so the game's own saves never reach here.)
+            m_owner = owner == -1 ? nullptr : g_actorsModule.GetActor(owner);
             break;
         }
         default:
