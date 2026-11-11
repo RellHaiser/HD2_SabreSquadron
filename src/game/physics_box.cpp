@@ -87,8 +87,8 @@ bool C_PhysBox::TickFlying(float dt)
     const S_vector move = m_velocity * dt;
     m_frame->SetPos(m_pos + move);
     m_frame->Update();
-    S_vector a = m_axis1Start * m_frame->GetMatrix();
-    S_vector b = m_axis1End * m_frame->GetMatrix();
+    S_vector a = MulAssigned(m_axis1Start, m_frame->GetMatrix());
+    S_vector b = MulAssigned(m_axis1End, m_frame->GetMatrix());
 
     // Does the box's axis at the new position, or the move itself, touch anything?
     S_vector hitPos, hitNormal;
@@ -106,8 +106,8 @@ bool C_PhysBox::TickFlying(float dt)
         Rotate(dt);
         m_frame->SetRot(m_rot);
         m_frame->Update();
-        a = m_axis1Start * m_frame->GetMatrix();
-        b = m_axis1End * m_frame->GetMatrix();
+        a = MulAssigned(m_axis1Start, m_frame->GetMatrix());
+        b = MulAssigned(m_axis1End, m_frame->GetMatrix());
         g_collisionWorld.SetIgnoredVolume(&m_volume, 0);
         hit = CollisionRayTest(a, b - a, &hitPos, &hitNormal, 0xFFFFFFFF, 0);
         if (!hit)
@@ -168,17 +168,17 @@ bool C_PhysBox::TickTipping(float dt)
 {
     if (!m_frame)
         return false;
-    const S_vector a0 = m_axis1Start * m_frame->GetMatrix();
-    const S_vector b0 = m_axis1End * m_frame->GetMatrix();
+    const S_vector a0 = MulAssigned(m_axis1Start, m_frame->GetMatrix());
+    const S_vector b0 = MulAssigned(m_axis1End, m_frame->GetMatrix());
     Tip(dt);
-    const S_vector a1 = m_axis1Start * m_frame->GetMatrix();
-    const S_vector b1 = m_axis1End * m_frame->GetMatrix();
+    const S_vector a1 = MulAssigned(m_axis1Start, m_frame->GetMatrix());
+    const S_vector b1 = MulAssigned(m_axis1End, m_frame->GetMatrix());
 
     // The end further from the contact moves most; test it first.
     S_vector hitPos, hitNormal;
     g_collisionWorld.SetIgnoredVolume(&m_volume, 0);
     const S_CollisionVolume *hit;
-    if ((m_contact - a0).Magnitude() <= (m_contact - b0).Magnitude()) {
+    if (DistanceZYX(m_contact, a0) <= DistanceZYX(m_contact, b0)) {
         hit = CollisionRayTest(b0, b1 - b0, &hitPos, &hitNormal, 0xFFFFFFFF, 0);
         if (!hit)
             hit = CollisionRayTest(a0, a1 - a0, &hitPos, &hitNormal, 0xFFFFFFFF, 0);
@@ -199,12 +199,11 @@ bool C_PhysBox::TickTipping(float dt)
     m_frame->SetPos(m_pos);
     m_frame->Update();
     m_state = BOX_ROLLING;
-    // (Operands of this axis are unclear in the decompilation; the box's long axis
-    // in world space is the evident intent.)
-    m_rollAxis = (a0 - b0).Normalized();
+    // The box's long axis in world space, from its start to its end (0x0040d21a).
+    m_rollAxis = (b0 - a0).Normalized();
     m_contact = m_pos;
-    const S_vector c = m_axis2Start * m_frame->GetMatrix();
-    const S_vector d = m_axis2End * m_frame->GetMatrix();
+    const S_vector c = MulAssigned(m_axis2Start, m_frame->GetMatrix());
+    const S_vector d = MulAssigned(m_axis2End, m_frame->GetMatrix());
     if (d.y < c.y)
         m_rollAxis = -m_rollAxis;
     return false;
@@ -225,15 +224,15 @@ bool C_PhysBox::TickRolling(float dt)
 {
     if (!m_frame)
         return false;
-    const S_vector a0 = m_axis2Start * m_frame->GetMatrix();
-    const S_vector b0 = m_axis2End * m_frame->GetMatrix();
+    const S_vector a0 = MulAssigned(m_axis2Start, m_frame->GetMatrix());
+    const S_vector b0 = MulAssigned(m_axis2End, m_frame->GetMatrix());
     Roll(dt);
-    const S_vector a1 = m_axis2Start * m_frame->GetMatrix();
-    const S_vector b1 = m_axis2End * m_frame->GetMatrix();
+    const S_vector a1 = MulAssigned(m_axis2Start, m_frame->GetMatrix());
+    const S_vector b1 = MulAssigned(m_axis2End, m_frame->GetMatrix());
 
     S_vector hitPos, hitNormal;
     g_collisionWorld.SetIgnoredVolume(&m_volume, 0);
-    const S_CollisionVolume *hit = (m_contact - a0).Magnitude() <= (m_contact - b0).Magnitude()
+    const S_CollisionVolume *hit = DistanceZYX(m_contact, a0) <= DistanceZYX(m_contact, b0)
                                        ? CollisionRayTest(b0, b1 - b0, &hitPos, &hitNormal, 0xFFFFFFFF, 0)
                                        : CollisionRayTest(a0, a1 - a0, &hitPos, &hitNormal, 0xFFFFFFFF, 0);
     g_collisionWorld.SetIgnoredVolume(nullptr, 0);

@@ -769,3 +769,49 @@ particles and the surface marks. Files are served from memory.
   - the step going up and meeting something above (B 231);
   - the low sweep's restart after a human when contacts were already recorded (B 276/279);
   - mutrun doesn't run `sweep_diff`.
+
+## New harness: physics (objects, the module, boxes, doors, fences, trees, 2026-11-11)
+
+- **The build:** suite `physics` (`physics/build.bat`, `physics_test.exe`; `physics_test.exe motion` runs part 2
+  alone). Tests in `module_test.inc` (part 1), `motion_test.inc` (part 2), `break_test.inc` (part 3),
+  `ctor_test.inc`. Fake LS3D frames (the engine's layout; world matrices by LS3DF.dll's own `UpdateWMatrixProc`), a
+  fake scene, driver and model cache, ground of my own (`collision/synth_level.inc`, shared with the collision suite).
+- **Part 1, the module (own reading):** handles and lists through creation, destruction, waking and resting (3,000
+  random operations, the invariants after each), the callbacks and their kinds, which role ticks which type, the
+  scene's `phobj` objects from their properties, the doors' state message both ways, frame sync and volumes.
+- **Part 2, against the original executable** (`collision/original_exe.h`; objects copied into the original's layout
+  by a field table, its own vtable, its world a copy of the port's):
+  - every type's step, `ApplyImpulse`, `Hit`, `Bounce` and `SyncFrame`: about 160,000 calls, all agree;
+  - every constructor (1,400): the original's run twice, on 0xCD and on zeros, to tell the fields it never writes;
+  - in its loaded copy, the original's AddVolume / MoveVolume / RemoveVolume and AddBreakable go to loggers and
+    GetGame / I3DGetDriver / GetGEffects to the fakes, so a step that adds or removes a volume is compared (which
+    volumes end up in the world), and the objects keep their volumes (the grid copy names the original's copy of
+    them, which the original ignores by address);
+  - five other random seeds agree as well.
+- **Part 3, fences and trees (own reading of 0x00407bd0, 0x00406740, KnockOverTree, 0x004079f0):** the original's
+  model cache cannot run here. Breaking with and without a scene, parts left out of the model, the collision boxes
+  (dummies and scaled visuals), every reference count, the destructor giving the old fence back; trees swapped for
+  the damaged model, with and without the part, the model missing, no owner, no scene; a world without cells.
+- **Port bugs found and fixed on main:**
+  - the physics callback: the original calls it `__fastcall` (kind in ECX, handle in EDX, context on the stack) with
+    the kinds created 0, bounced 1, pushed 2, deleted 3, resting 5 (no game code sets one);
+  - the sphere's volume: the model's bound times the largest world scale, centred on the bound's center in world
+    space (0x0040f7ff..), not the ball's radius at the frame; its step copies the local bound center and radius
+    (0x0040f650);
+  - boxes: the roll axis's sign (0x0040d21a); the axis ends and the doors' corners with `operator*=` as the original,
+    not `operator*` (another summation order: a door's axis differed by a few ulps); the distances that pick a box's
+    end to test summed z first as the original's inline code, since the two ends are equally far from the contact and
+    the rounding decides (one roll step went the other way).
+- **Original weaknesses, kept:** a door pushed while a tree reads its rattling flag unset (heap garbage in the
+  original; the port's is false); the swing's and door's never-written fields (listed by the constructor test).
+- **Results:** 151,557 checks.
+  - `physics.cpp`: lines 613 of 625; `physics_box.cpp`: 163 of 169; `physics_door.cpp`: 304 of 311.
+  - `mutations/mutate_physics1.py`: 848 mutants, 647 killed, 68 don't build, 116 survived: boundary comparisons and
+    the rest equivalent, within tolerance or not reached (listed).
+- **Harness lessons (my mistakes):**
+  - a 7-byte jump written over a 6-byte import thunk broke the next thunk (Rotate): thunks are patched by their slot;
+  - frames given a scale by writing `m_scale` lost it on the first relink: `SetScale` marks the matrix;
+  - the first comparisons skipped every step that moved a volume, and removed doors' and swings' volumes first, which
+    hid the swings' settling and the doors' volume handling until the original's world calls were logged.
+- **Not exercised:** the effects module's fade-out of debris, the null-frame guards, rays excluding switches for balls
+  (they run without the dynamic grid), a debris piece bouncing up onto ground of another height.

@@ -127,6 +127,8 @@ SUITES = [
     T("collision", "collision/build.bat", TMP + r"\collision_test.exe", needs=("mingw", "missions")),
     # (The sphere sweeps against one shape, against the original's functions.)
     T("collision.sweepdiff", "collision/sweep_diff.bat", TMP + r"\sweep_diff.exe", needs=("mingw", "original_exe")),
+    # (Physics objects on the real collision world; their steps also against the original executable's.)
+    T("physics", "physics/build.bat", TMP + r"\physics_test.exe", needs=("mingw",)),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

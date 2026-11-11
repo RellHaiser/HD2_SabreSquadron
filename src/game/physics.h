@@ -63,9 +63,18 @@ enum E_PhysicsHitKind {
     PHYS_HIT_BREAK = 3,             // breakable fences break
 };
 
-// Called with the object's context when it bounces, when it comes to rest (a
-// result of 1 then deletes the object), when it is woken up and when it is deleted.
-using T_PhysicsCallback = int(__cdecl *)(void *context);
+// Called with what happened (E_PhysicsCallbackKind), the object's handle and its context:
+// when it is made, when it bounces, when it is pushed awake, when it comes to rest (a
+// result of 1 then deletes the object) and when it is deleted. (No game code sets one.)
+enum E_PhysicsCallbackKind {
+    PHYS_CALLBACK_CREATED = 0,      // 0x0041008c (the handle in EDX)
+    PHYS_CALLBACK_BOUNCED = 1,      // 0x0040b5bb
+    PHYS_CALLBACK_PUSHED = 2,       // 0x0041051c
+    PHYS_CALLBACK_DELETED = 3,      // 0x0040b816
+    PHYS_CALLBACK_RESTING = 5,      // 0x00410968
+};
+struct S_PhysicsHandle;
+using T_PhysicsCallback = int(__fastcall *)(int kind, S_PhysicsHandle *handle, void *context);
 
 // Door part of S_PhysicsObjectDesc.
 struct S_DoorParams {                                       // 0x0C bytes
@@ -131,7 +140,7 @@ public:
         m_collideWithBoxes = collideWithBoxes;
     }
     void SetCallbackContext(void *context) { m_callbackContext = context; }
-    int CallCallback() const { return m_callback ? m_callback(m_callbackContext) : 0; }
+    int CallCallback(int kind) const { return m_callback ? m_callback(kind, m_handle, m_callbackContext) : 0; }
 
     I3D_frame *GetFrame() const { return m_frame; }
     S_PhysicsHandle *GetHandle() const { return m_handle; }

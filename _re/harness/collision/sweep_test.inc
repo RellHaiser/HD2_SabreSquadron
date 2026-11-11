@@ -1065,33 +1065,6 @@ void TestVolumeSweeps()
 typedef S_CollisionVolume *(__attribute__((thiscall)) * T_OrigMove)(C_CollisionWorld *, S_MoveContacts *);
 const uint32_t kOrigMove[3] = {0x0071ba20, 0x0071bec0, 0x0071cba0};
 
-// Two triangles of the quad a b c d (the stored normal into the surface: against `outward`).
-void AddQuad(S_Synth &s, S_vector a, S_vector b, S_vector c, S_vector d, const S_vector &outward)
-{
-    const S_vector corners[2][3] = {{a, b, c}, {a, c, d}};
-    for (const auto &q : corners) {
-        S_SynthTri t = Tri(q[0], q[1], q[2], 0, false);
-        if (t.normal.Dot(outward) > 0.0f)
-            t = Tri(q[0], q[1], q[2], 0, true);
-        s.tris.push_back(t);
-    }
-}
-// A block lo..hi: its top and sides.
-void AddBlock(S_Synth &s, const S_vector &lo, const S_vector &hi)
-{
-    AddQuad(s, S_vector(lo.x, hi.y, lo.z), S_vector(hi.x, hi.y, lo.z), S_vector(hi.x, hi.y, hi.z), S_vector(lo.x, hi.y, hi.z), S_vector(0, 1, 0));
-    AddQuad(s, S_vector(lo.x, lo.y, lo.z), S_vector(lo.x, hi.y, lo.z), S_vector(lo.x, hi.y, hi.z), S_vector(lo.x, lo.y, hi.z), S_vector(-1, 0, 0));
-    AddQuad(s, S_vector(hi.x, lo.y, lo.z), S_vector(hi.x, hi.y, lo.z), S_vector(hi.x, hi.y, hi.z), S_vector(hi.x, lo.y, hi.z), S_vector(1, 0, 0));
-    AddQuad(s, S_vector(lo.x, lo.y, lo.z), S_vector(hi.x, lo.y, lo.z), S_vector(hi.x, hi.y, lo.z), S_vector(lo.x, hi.y, lo.z), S_vector(0, 0, -1));
-    AddQuad(s, S_vector(lo.x, lo.y, hi.z), S_vector(hi.x, lo.y, hi.z), S_vector(hi.x, hi.y, hi.z), S_vector(lo.x, hi.y, hi.z), S_vector(0, 0, 1));
-}
-// A ramp along +x from (x0, 1, z0), `length` long and `width` wide, rising by `height`.
-void AddRamp(S_Synth &s, float x0, float z0, float length, float width, float height)
-{
-    AddQuad(s, S_vector(x0, 1, z0), S_vector(x0 + length, 1 + height, z0), S_vector(x0 + length, 1 + height, z0 + width), S_vector(x0, 1, z0 + width),
-            S_vector(-height, length, 0).Normalized());
-}
-
 // A human the stepping sweep asks (C_Human::GetStanceFlags reads its controller's move flags, +0xB0 then +0x50;
 // collision_test.cpp's stub does the same).
 struct S_FakeHuman {

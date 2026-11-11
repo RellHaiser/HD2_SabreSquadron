@@ -97,7 +97,7 @@ C_PhysObject::~C_PhysObject()
 {
     if (m_volumeActive)
         SetVolumeActive(false);
-    CallCallback();
+    CallCallback(PHYS_CALLBACK_DELETED);
     if (m_frame) {
         SetFramePhysicsObject(m_frame, g_noPhysicsObject);
         m_frame->Release();
@@ -174,7 +174,7 @@ void C_PhysObject::Bounce(S_vector &velocity, const S_vector &normal)
     velocity.Normalize();
     const S_vector side = normal.Cross(velocity) * 2.0f;
     velocity = (side.Cross(normal) - velocity) * speed;   // mirrored at the surface
-    CallCallback();
+    CallCallback(PHYS_CALLBACK_BOUNCED);
 }
 
 void C_PhysObject::AddBoxVolume(S_CollisionVolume &volume, S_matrix &matrix, S_matrix &invMatrix,
@@ -394,9 +394,9 @@ C_PhysSphere::C_PhysSphere(I3D_frame *frame, float radius, S_PhysicsHandle *hand
     const I3D_bound_volume bound = HierarchyBound(frame);
     m_radius = radius >= 0.0f ? radius : bound.radius;
 
+    // (Unlike a can's, the volume is the model's bound, whatever the ball's radius: 0x0040f7ff..0x0040f9db.)
     m_volume = S_CollisionVolume();
     m_volume.flags = COLLISION_SHAPE_SPHERE;
-    m_volume.radius = m_radius;
     m_volume.bbox = bound.bbox;
     m_matrix = m_frame->GetMatrix();
     m_volume.matrix = &m_matrix;
@@ -404,7 +404,9 @@ C_PhysSphere::C_PhysSphere(I3D_frame *frame, float radius, S_PhysicsHandle *hand
     m_volume.invMatrix = &m_invMatrix;
     m_volume.frame = m_frame;
     m_volume.type = 0;
-    m_volume.center = m_frame->GetWorldPos();
+    const S_vector scale = m_frame->GetWorldScale();
+    m_volume.radius = std::max(scale.x, std::max(scale.y, scale.z)) * bound.radius;
+    m_volume.center = bound.center * m_frame->GetMatrix();
     g_collisionWorld.AddVolume(&m_volume);
     g_collisionWorld.MoveVolume(&m_volume);
 }
@@ -442,13 +444,15 @@ bool C_PhysSphere::Tick(float dt)
         m_velocity.y -= rest * 9.81f;
         move = m_velocity * rest;
     }
-    // (The end of this function is ambiguous in the decompilation; the frame is
-    // moved and the collision volume follows it.)
     m_frame->SetPos(pos);
     m_frame->Update();
     m_pos = pos;
+    const I3D_bound_volume bound = m_frame->GetBound();
     m_invMatrix.Inverse(m_frame->GetMatrix());
-    m_volume.center = m_frame->GetBound().center * m_frame->GetMatrix();
+    // (As the original, 0x0040f650: the frame's local bound center and radius copied into the
+    // volume's center and the word after it, not moved into world space. Balls are never made.)
+    m_volume.center = bound.center;
+    m_volume.centerW = bound.radius;
     g_collisionWorld.MoveVolume(&m_volume);
     return true;
 }
@@ -654,7 +658,7 @@ T_PhysicsObject C_PhysicsModule::CreateObject(const S_PhysicsObjectDesc &desc)
         m_handles.push_back(handle);
     SetFramePhysicsObject(desc.frame, handle);
     if (desc.callback)
-        desc.callback(desc.callbackContext);
+        desc.callback(PHYS_CALLBACK_CREATED, handle, desc.callbackContext);
     return handle;
 }
 
@@ -711,7 +715,7 @@ void C_PhysicsModule::ApplyImpulse(T_PhysicsObject handle, const S_vector &impul
         return;
     if (C_PhysObject *object = Wake(handle)) {
         object->ApplyImpulse(impulse, point, factor);
-        object->CallCallback();
+        object->CallCallback(PHYS_CALLBACK_PUSHED);
     }
 }
 
@@ -760,7 +764,7 @@ void C_PhysicsModule::Update(int timeDelta)
 void C_PhysicsModule::Deactivate(int index, bool destroy)
 {
     C_PhysObject *object = m_active[index];
-    if (object->CallCallback() == 1)
+    if (object->CallCallback(PHYS_CALLBACK_RESTING) == 1)
         destroy = true;
 
     m_resting.push_back(object);

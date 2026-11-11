@@ -37,8 +37,11 @@ C_PhysDoor::C_PhysDoor(const S_PhysicsObjectDesc &desc, S_PhysicsHandle *handle)
 
     // Bottom center and rotation axis in world space; the top corners (local) are
     // the points checked against the world while the leaf turns.
-    const S_vector top = bound.bbox.max * m_frame->GetMatrix();
-    const S_vector bottom = bound.bbox.min * m_frame->GetMatrix();
+    // (operator*=, as the original: its sums go in another order than operator*'s.)
+    S_vector top = bound.bbox.max;
+    top *= m_frame->GetMatrix();
+    S_vector bottom = bound.bbox.min;
+    bottom *= m_frame->GetMatrix();
     m_axis = S_vector(top.x - bottom.x, 0.0f, top.z - bottom.z);
     m_center = S_vector((top.x + bottom.x) * 0.5f, bottom.y, (top.z + bottom.z) * 0.5f);
     m_edge1 = top;
@@ -113,12 +116,12 @@ bool C_PhysDoor::MoveLeaf()
         return false;
     m_rot = m_phase == 1.0f ? m_openRot1 : m_closedRot.Slerp(m_openRot1, m_amplitude * m_phase, true);
 
-    const S_vector from1 = m_edge1 * m_frame->GetMatrix();
-    const S_vector from2 = m_edge2 * m_frame->GetMatrix();
+    const S_vector from1 = MulAssigned(m_edge1, m_frame->GetMatrix());
+    const S_vector from2 = MulAssigned(m_edge2, m_frame->GetMatrix());
     m_frame->SetRot(m_rot);
     m_frame->Update();
-    const S_vector to1 = m_edge1 * m_frame->GetMatrix();
-    const S_vector to2 = m_edge2 * m_frame->GetMatrix();
+    const S_vector to1 = MulAssigned(m_edge1, m_frame->GetMatrix());
+    const S_vector to2 = MulAssigned(m_edge2, m_frame->GetMatrix());
 
     // Did the top corners sweep through anything (other doors excluded)?
     g_collisionWorld.SetIgnoredVolume(&m_volume, 0);
