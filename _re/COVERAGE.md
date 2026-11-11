@@ -427,3 +427,60 @@ game runs it, because a loaded quaternion goes through `SetRot`, which normalise
 bat compiles math.cpp first. Env `MUT_EXTRA_SRCS` / `MUT_EXTRA_INC` add sources from outside
 `src/`, which are compiled once and not mutated. The equipment run:
 `MUT_HARNESS=equipment MUT_EXTRA_SRCS=ls3df/src/math/math.cpp MUT_EXTRA_INC=ls3df/src`.
+
+## New harness: items (part 1, 2026-11-10)
+
+The item system (`items_module.cpp`, `item_instances.cpp`, `item_defs.cpp`,
+`item_containers.cpp`, about 3,500 lines) was in no suite. `_re/harness/items` links all four
+as they are, with chunk.cpp, c_str.cpp and the LS3DF math. Everything else is faked and logged:
+the engine (no models load), the humans' and the equipment's callbacks, sound, shots,
+particles and the surface marks. Files are served from memory.
+
+- **Inputs:**
+  - `ITEMS_SAV`: by default `G:\Hidden & Dangerous 2\Tables\items.sav`, the loose table the
+    original reads ahead of the packed one. It is 252,000 bytes, the port's `ITEMS_TABLE_SIZE`,
+    and differs from H:\HD2_Unpacked's 2003 copy.
+  - `EQUIPMENT_SAVE`: your quick save from the original, as for the equipment suite.
+  - The suite reports missing-prerequisite without either.
+- **Definitions:** all 272 of the table are written back by `C_ItemDef::Save` as the table holds
+  them. Each is written twice (over 0x00 and 0xEE) so unwritten bytes show. The sizes come from
+  an independent table of component stream sizes, and the derived fields are checked where the
+  layout puts them.
+  - Not compared: 11,182 padding bytes. The editor that wrote the table left them 0xCD / 0xCC
+    (debug fills). The original copies a component stream into the object and back whole
+    (0x007df370 / 0x007df330), so it would keep them; the port goes field by field and writes 0
+    or nothing.
+  - Nothing in the game saves definitions, so this can't affect play.
+- **Your save:** all 69 actor item chunks (0x2775) load into a human's containers (7 into an
+  item store) and save back byte for byte. The exceptions are 909 container (0x66) and owner
+  (0x67) fields:
+  - The original's `C_Item::LoadGame` reads those under 0xCA / 0xCB (its byte table at
+    0x007d4514); only `MoveItem` sets them again.
+  - So a loaded item saves container 0 and no owner until it moves: an original weakness the
+    port keeps.
+  - The module chunk (0xB256, the last uid 551) comes back the same.
+- **Port bug found:** the owner read under 0xCB used `GetActorById` where the original calls
+  `GetActor` (by index). Fixed on main (2ac8bb2c); no save of the game holds 0xCB.
+- **Also tested:**
+  - the containers' rules (slot, list, store: sorts, the first free slot, the slot shift,
+    full);
+  - the loaded actors' carried weight and backpack contents;
+  - each of the 272 types' new-item values;
+  - items.sav missing, unreadable, or opened once from the disk;
+  - destructors, medkits, and the 0xCA / 0xCB ids.
+- **Results:** 2,410 checks. `mutations/mutate_items1.py` (four sources, merged: labels M / D
+  / I / C + line): 441 mutants, 399 killed, 20 don't build, 22 survived. They are equivalent,
+  or out of bounds in the original too; the docstring lists them.
+- **Coverage:**
+
+  | File | Lines | Branch outcomes |
+  |---|---:|---:|
+  | item_containers.cpp | 109 of 109 | 98 % |
+  | item_defs.cpp | 372 of 459 | |
+  | item_instances.cpp | 180 of 454 | |
+  | items_module.cpp | 194 of 964 | |
+
+- **Still to test:**
+  - part 2: moving items (`MoveItem`, `PutItem`, `TransferItem`, `CanPutItem*`, the result
+    codes, weight and space limits, swaps, drops);
+  - part 3: the weapons (reload, fire, sounds, projectiles) and the mission items file.
