@@ -375,6 +375,29 @@ game runs it, because a loaded quaternion goes through `SetRot`, which normalise
 - **Results:** 594 checks. `mutations/mutate_equipment2a.py`: 282 mutants, 257 killed, 16 don't
   build, 9 survived, all equivalent (listed there).
 
+### Equipment part 2b: events, Update, names, helpers (2026-11-10)
+
+- **Tests:**
+  - `OnAnimationEvent`: the support hand, give and take between two humans, the launcher's
+    round (items get a vtable; the fake slots come from g++'s own member pointers because g++'s
+    vtable isn't MSVC's), and the special places' events 4..15;
+  - `Update`: the hands time running out, and the long gun's lift against a step-by-step
+    reference following the original's order (0x007932ac..0x0079355e); the flashlight's and
+    lens flare's times;
+  - `UpdateModelNames`: the temporary names by behaviour, capacity and headgear kind, and when
+    the model is shown;
+  - `Unknown793b40`, `Unknown7938f0`, `GetDropPosition`, `Unknown792310`, `FindJoints`.
+- **An original drift:** the lift slides the gun out and then tilts it (turning the slid
+  position as well), and on the way back undoes them in the other order. So each full lift
+  leaves the long gun about 1.1 mm lower. The port does the same; the test pins it.
+- **Results:** 731 checks. `mutations/mutate_equipment2b.py`: 172 mutants, 143 killed, 20 don't
+  build, 9 survived. Eight are equivalent; the lens flare's waits for part 3.
+- **Coverage after part 2:** human_equipment.cpp **934 of 1,274 lines, 31 of 42 functions,
+  768 of 1,156 branch outcomes (66 %)**.
+- **Still to test (part 3):** `ShowHandsItem`, `PutAwayHandsItem`, the item callbacks
+  (`OnItemCreated/Added/Removed`), `SetFlashlight`, `UpdateLensFlare`, and LoadGame's
+  special-object paths other than the scene's.
+
 `mutrun.py`: it now takes the g++ line with the most `%SRC%` sources, because the equipment
 bat compiles math.cpp first. Env `MUT_EXTRA_SRCS` / `MUT_EXTRA_INC` add sources from outside
 `src/`, which are compiled once and not mutated. The equipment run:

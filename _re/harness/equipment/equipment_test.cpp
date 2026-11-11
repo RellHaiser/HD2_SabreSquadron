@@ -1,7 +1,8 @@
 // The models of the items on a human's body (game/human_equipment.cpp). Part 1: the holsters, the models' places,
 // save / load against the original's own save. Part 2a: AttachModel / DetachModel (the frames get world matrices:
 // the local one through the parent's; the long gun's geometry against a reference written from the asm's steps and
-// constants). The engine, the human and the items faked; game/equipment_frames.cpp,
+// constants). Part 2b: the animation events, Update (the long gun's lift against a stepping reference), the
+// temporary model names, the small helpers. The engine, the human and the items faked; game/equipment_frames.cpp,
 // common/chunk.cpp, common/c_str.cpp and the LS3DF port's math (ls3df/src/math/math.cpp) linked as they are.
 // MinGW; build.bat; run equipment_test.exe ("equipment: N checks, 0 failures").
 //
@@ -155,7 +156,11 @@ I3D_frame *GetActivityProp(int) { return nullptr; }
 void C_HumanWeaponPose::SetModel(I3D_frame *model, int behaviour) { Log("pose model " + Name(model) + " " + std::to_string(behaviour)); }
 void C_HumanWeaponPose::SetMode(int mode) { Log("pose mode " + std::to_string(mode)); }
 void C_HumanWeaponPose::SetStainsVisible(bool on) { Log("pose stains " + std::to_string(on)); }
-void C_HumanWeaponPose::SetSupportHand(bool on) { Log("pose support " + std::to_string(on)); }
+void C_HumanWeaponPose::SetSupportHand(bool on)
+{
+    Log("pose support " + std::to_string(on));
+    m_hand = on ? (m_hand | 0x80000000u) : (m_hand & ~0x80000000u);
+}
 void C_HumanWeaponPose::RaiseWeapon(int v) { Log("pose raise " + std::to_string(v)); }
 void C_HumanWork::SetCarryMode(int mode, bool b) { Log("carry " + std::to_string(mode) + " " + std::to_string(b)); }
 void C_HumanAnimMixer::FadeOutTrack(int a, int b) { Log("fadeout " + std::to_string(a) + " " + std::to_string(b)); }
@@ -163,7 +168,7 @@ I3D_frame *C_HumanMovement::GetSectorFrame() const { return nullptr; }
 void C_HumanMovement::RemoveCollision(bool b) { Log("removecollision " + std::to_string(b)); }
 void C_HumanMovement::RestoreCollision(bool b) { Log("restorecollision " + std::to_string(b)); }
 void C_HumanMovement::SetModelVisible(bool on) { Log("modelvisible " + std::to_string(on)); }
-void C_HumanVisual::RebuildShadow() {}
+void C_HumanVisual::RebuildShadow() { Log("rebuildshadow"); }
 void C_HumanVisual::Unknown7585d0(bool) {}
 void C_FirstPersonView::OnInventoryEvent(int, int) {}
 
@@ -230,6 +235,30 @@ template <> HRESULT C_ResourceCache<I3D_model>::OpenInto(I3D_model *, const char
 }
 
 namespace {
+// ============================================================ items with a vtable
+void __attribute__((thiscall)) F_AttachProjectile(C_Item *, I3D_frame *hand) { Log("attachprojectile " + Name(hand)); }
+int __attribute__((thiscall)) F_GetProjectileKind(C_Item *) { return 7; }
+void *g_itemVt[64];
+// A virtual function's slot in g++'s vtable (not MSVC's: g++ has two destructor slots), from its member pointer.
+template <class F> int VirtualSlot(F f)
+{
+    union {
+        F f;
+        struct {
+            uintptr_t ptr;
+            ptrdiff_t adj;
+        } s;
+    } u;
+    u.f = f;
+    return static_cast<int>((u.s.ptr - 1) / sizeof(void *));
+}
+void GiveVtable(C_Item *item)
+{
+    g_itemVt[VirtualSlot(&C_Item::AttachProjectile)] = reinterpret_cast<void *>(F_AttachProjectile);
+    g_itemVt[VirtualSlot(&C_Item::GetProjectileKind)] = reinterpret_cast<void *>(F_GetProjectileKind);
+    *reinterpret_cast<void ***>(item) = g_itemVt;
+}
+
 // ============================================================ fake frames
 void *g_frameVt[128];
 bool g_exiting;
@@ -277,6 +306,8 @@ void __stdcall F_SetWorldDir(I3D_frame *self, const S_vector &d, float)
     self->SetLocalMatrix(m);
 }
 void __stdcall F_UpdateBound(I3D_frame *self) { self->m_frameFlags |= FRMFLAGS_BOUND_VALID; }
+// A sector's RemoveLight (0x78).
+void __stdcall F_RemoveLight(I3D_frame *self, I3D_frame *light) { Log("removelight " + Name(self) + " " + Name(light)); }
 void __stdcall F_Tick(I3D_frame *self, int t) { Log("tick " + Name(self) + " " + std::to_string(t)); }
 void __stdcall F_Update(I3D_frame *self) { Log("update " + Name(self)); }
 void __stdcall F_SetOn(I3D_frame *self, bool on)
@@ -485,6 +516,10 @@ void Reset()
 }
 
 int Count(const std::string &line) { return static_cast<int>(std::count(g_log.begin(), g_log.end(), line)); }
+int CountPrefix(const std::string &prefix)
+{
+    return static_cast<int>(std::count_if(g_log.begin(), g_log.end(), [&](const std::string &l) { return l.rfind(prefix, 0) == 0; }));
+}
 
 // ============================================================ tests
 
@@ -1970,6 +2005,533 @@ void TestDetachSpecial()
         CHECK(g_log.empty());
     }
 }
+
+// ============================================================ part 2b: events, Update, names
+
+// `m` with its position row set to `p`.
+S_matrix Translated(S_matrix m, const S_vector &p)
+{
+    m(3) = p;
+    return m;
+}
+// A work object (RaiseWeapon's condition) for the rig's human.
+C_HumanWork *GiveWork(S_Rig &r)
+{
+    const size_t size = sizeof(C_HumanWork) + 0x100;
+    auto *work = static_cast<C_HumanWork *>(::operator new(size, std::align_val_t(16)));
+    std::memset(static_cast<void *>(work), 0, size);
+    r.h->human->m_body.work = work;
+    return work;
+}
+
+void TestEvents()
+{
+    // Event 0: the support hand taken (or, while put away, marked pending); event 1: let go (or the mark cleared);
+    // nothing when it already is so.
+    {
+        S_Rig r = Rig();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_0);
+        CHECK(Count("pose support 1") == 1 && r.pose->IsSupportHandOn());
+        r.pose->m_hand = 0;
+        r.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        g_log.clear();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_0);
+        CHECK(g_log.empty() && r.eq->m_flags == (EQUIPMENT_HANDS_PUT_AWAY | EQUIPMENT_EVENT0_PENDING));
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_1);
+        CHECK(r.eq->m_flags == (EQUIPMENT_HANDS_PUT_AWAY | EQUIPMENT_EVENT0_PENDING));   // the hand is not on
+        r.pose->m_hand = 0x80000000u;
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_0);
+        CHECK(g_log.empty());
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_1);
+        CHECK(g_log.empty() && r.eq->m_flags == EQUIPMENT_HANDS_PUT_AWAY);
+        r.eq->m_flags = 0;
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_1);
+        CHECK(Count("pose support 0") == 1);
+        r.pose->m_hand = 0;
+        g_log.clear();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_1);
+        CHECK(g_log.empty());
+    }
+    // Give: the support hand let go; the receiver attaches the model of the place given; ours detached unless it is
+    // the very model the receiver now has; no hands model left.
+    {
+        S_Rig to = Rig();
+        S_Rig r = Rig();
+        I3D_frame *pack = MakeFrame(FRAME_MODEL, "givenpack");
+        to.eq->m_backpackModel = pack;
+        to.eq->m_backpackTypeId = -1;
+        I3D_frame *rifle = MakeFrame(FRAME_MODEL, "ourrifle");
+        r.eq->m_handsModel = rifle;
+        r.eq->m_giveTo = to.h->human;
+        r.eq->m_giveToPlace = EQUIPMENT_PLACE_BACKPACK;
+        r.pose->m_hand = 0x80000000u;
+        g_log.clear();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_GIVE);
+        CHECK(Count("pose support 0") == 1 && Count("link givenpack j_d 2") == 1 && r.eq->m_giveTo == nullptr);
+        CHECK(Count("link ourrifle null 0") == 1 && r.eq->m_handsModel == nullptr && At("pose support 0") < At("link givenpack"));
+        // The receiver's model is ours: not detached here.
+        to.eq->m_handsModel = rifle;
+        to.eq->m_handsTypeId = -1;
+        r.eq->m_handsModel = rifle;
+        r.eq->m_giveTo = to.h->human;
+        r.eq->m_giveToPlace = EQUIPMENT_PLACE_HANDS;
+        r.pose->m_hand = 0;
+        g_log.clear();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_GIVE);
+        CHECK(Count("link ourrifle j_HW1 6") == 1 && Count("link ourrifle null 0") == 0 && r.eq->m_handsModel == nullptr);
+        // Nobody to give to, no model: nothing but the hands model forgotten.
+        g_log.clear();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_GIVE);
+        CHECK(g_log.empty());
+    }
+    // Take: the giver's model detached (or attached, when asked to); then ours attached in the hand (or put away).
+    {
+        S_Rig from = Rig();
+        S_Rig r = Rig();
+        I3D_frame *helmet = MakeFrame(FRAME_MODEL, "theirhelmet");
+        from.eq->m_headModel = helmet;
+        r.eq->m_takeFrom = from.h->human;
+        r.eq->m_takeFromPlace = EQUIPMENT_PLACE_HEAD;
+        r.eq->m_takeFromAttach = false;
+        I3D_frame *rifle = MakeFrame(FRAME_MODEL, "ourrifle");
+        r.eq->m_handsModel = rifle;
+        r.eq->m_handsTypeId = -1;
+        g_log.clear();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_TAKE);
+        CHECK(Count("link theirhelmet null 0") == 1 && from.eq->m_headModel == nullptr && r.eq->m_takeFrom == nullptr);
+        CHECK(Count("link ourrifle j_HW1 6") == 1);
+        from.eq->m_headModel = helmet;
+        r.eq->m_takeFrom = from.h->human;
+        r.eq->m_takeFromAttach = true;
+        r.eq->m_handsModel = nullptr;
+        g_log.clear();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_TAKE);
+        CHECK(Count("link theirhelmet j_f 2") == 1 && !r.eq->m_takeFromAttach && r.eq->m_takeFrom == nullptr && !Logged("link ourrifle"));
+        // Put away: onto the back (place 10).
+        Def(880, 5);
+        r.eq->m_handsModel = Gun("putrifle", S_vector(0.0f, 0.0f, 0.3f), false);
+        r.eq->m_handsTypeId = 880;
+        r.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        g_log.clear();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_TAKE);
+        CHECK(Count("link putrifle j_d 2") == 1 && !Logged("link putrifle j_HW1"));
+    }
+    // The launcher's round: to HW2, HW1, or back into the weapon (null); no hands item: nothing.
+    {
+        S_Rig r = Rig();
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_PROJECTILE_HAND1);
+        CHECK(g_log.empty());
+        CHECK(r.eq->GetHandsProjectileKind() == 0);
+        Def(890, 6);
+        C_Item *launcher = Item(890, 890, "launcher");
+        GiveVtable(launcher);
+        r.h->containers[ITEM_CONTAINER_HANDS].item = launcher;
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_PROJECTILE_HAND2);
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_PROJECTILE_HAND1);
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_PROJECTILE_WEAPON);
+        CHECK((g_log == std::vector<std::string>{"attachprojectile j_HW2", "attachprojectile j_HW1", "attachprojectile null"}));
+        CHECK(r.eq->GetHandsProjectileKind() == 7);
+    }
+    // 4 + 2k: DetachModel(4 + k); 5 + 2k: AttachModel(4 + k); above 0x12: nothing.
+    {
+        S_Rig r = Rig();
+        I3D_frame *thing = Special("evthing");
+        for (int event = EQUIPMENT_EVENT_SPECIAL_FIRST; event <= EQUIPMENT_EVENT_SPECIAL_LAST; ++event) {
+            const int place = 4 + (event - 4) / 2;
+            if (place == 9)
+                continue;                                              // (place 9's animation: TestAttachSpecial)
+            r.eq->m_specialModel = thing;
+            r.eq->m_specialPlace = (event % 2 == 0) ? place : EQUIPMENT_PLACE_NONE;
+            r.eq->m_specialTime = 1;
+            g_log.clear();
+            r.eq->OnAnimationEvent(event);
+            if (event % 2 == 1)
+                CHECK(r.eq->m_specialPlace == place);
+            else
+                CHECK(r.eq->m_specialTime == C_HumanEquipment::NO_TIME && Logged("link evthing null 1"));
+        }
+        // Event 15: place 9 (its animation).
+        static unsigned char animTable[0x2600];
+        static unsigned char anim[0x200];
+        g_humanAnimTable = reinterpret_cast<C_HumanAnimTable *>(animTable);
+        g_stage.anim = reinterpret_cast<I3D_animation_set *>(anim);
+        r.eq->m_specialModel = thing;
+        r.eq->m_specialPlace = EQUIPMENT_PLACE_NONE;
+        r.eq->OnAnimationEvent(EQUIPMENT_EVENT_SPECIAL_LAST);
+        CHECK(r.eq->m_specialPlace == 9 && Count("getanim evthing 6") == 1);
+        g_stage.anim = nullptr;
+        r.eq->m_specialModel = thing;
+        r.eq->m_specialPlace = 5;
+        g_log.clear();
+        r.eq->OnAnimationEvent(0x13);
+        r.eq->OnAnimationEvent(-1);
+        CHECK(g_log.empty() && r.eq->m_specialPlace == 5);
+    }
+}
+
+void TestUpdate()
+{
+    // The hands model shows once its time runs out (below 1 ms): attached; event 0 unless thrown or a sidearm; the
+    // weapon raised (300) while the work's 5C is 1; dead: only the time cleared.
+    {
+        S_Rig r = Rig();
+        C_HumanWork *work = GiveWork(r);
+        Def(900, 5);
+        r.eq->m_handsModel = MakeFrame(FRAME_MODEL, "uprifle");
+        r.eq->m_handsTypeId = 900;
+        r.eq->m_handsTime = 150;
+        r.eq->Update(100);
+        CHECK(r.eq->m_handsTime == 50 && !Logged("link uprifle"));
+        r.eq->Update(49);
+        CHECK(r.eq->m_handsTime == 1 && !Logged("link uprifle"));
+        r.eq->Update(1);
+        CHECK(Count("link uprifle j_HW1 6") == 1 && Count("pose support 1") == 1 && !Logged("pose raise"));
+        work->m_request.unknown5C = 1;
+        r.eq->m_handsTime = 10;
+        g_log.clear();
+        r.eq->Update(10);
+        CHECK(Count("pose raise 300") == 1);
+        work->m_request.unknown5C = 2;
+        for (int behaviour : {ITEM_BEHAVIOUR_THROWN, ITEM_BEHAVIOUR_SIDEARM}) {
+            Def(901, behaviour);
+            r.eq->m_handsTypeId = 901;
+            r.eq->m_handsTime = 5;
+            g_log.clear();
+            r.eq->Update(10);
+            CHECK(Logged("link uprifle j_HW1 6") && !Logged("pose support"));
+        }
+        // An unknown type: attached, no event.
+        r.eq->m_handsTypeId = 9997;
+        r.eq->m_handsTime = 5;
+        g_log.clear();
+        r.eq->Update(10);
+        CHECK(Logged("link uprifle j_HW1 6") && !Logged("pose support"));
+        r.h->human->m_stats[STAT_HEALTH] = 0;
+        r.eq->m_handsTime = 5;
+        g_log.clear();
+        r.eq->Update(10);
+        CHECK(g_log.empty() && r.eq->m_handsTime == C_HumanEquipment::NO_TIME);
+        r.eq->Update(10);
+        CHECK(r.eq->m_handsTime == C_HumanEquipment::NO_TIME);
+    }
+    // The long gun lifted: slides out 1.2 mm and tilts 0.7 mrad per ms up to its maxima; let go: tilts back first,
+    // then slides back. Against a reference stepping as the original does (0x007932ac..0x0079355e): the slide moves
+    // the position along z, then the tilt turns the whole local matrix about x (the position with it: no restore).
+    {
+        S_Rig r = Rig();
+        I3D_frame *gun = MakeFrame(FRAME_MODEL, "liftgun");
+        r.eq->m_longGunModel = gun;
+        r.eq->m_longGunMaxTilt = 0.4f;
+        r.eq->m_longGunMaxSlide = 0.068f;
+        float tilt = 0.0f, slide = 0.0f;
+        S_matrix m = gun->GetLocalMatrix();
+        auto step = [&](int lift, int time) {
+            float tiltStep = static_cast<float>(time) * 0.0007f, slideStep = static_cast<float>(time) * 0.0012f;
+            if (lift == 1) {
+                if (slide < 0.068f) {
+                    if (0.068f < slideStep + slide)
+                        slideStep = 0.068f - slide;
+                    slide += slideStep;
+                    m(3).z -= slideStep;
+                }
+            } else if (slide > 0.0f && tilt <= 0.0f) {
+                if (slide - slideStep < 0.0f)
+                    slideStep = slide;
+                slide -= slideStep;
+                m(3).z += slideStep;
+            }
+            if (lift == 1) {
+                if (tilt < 0.4f) {
+                    if (0.4f < tiltStep + tilt)
+                        tiltStep = 0.4f - tilt;
+                    tilt += tiltStep;
+                    m = m * equipment::Rotation(S_vector(1.0f, 0.0f, 0.0f), -tiltStep);
+                }
+            } else if (tilt > 0.0f) {
+                if (tilt - tiltStep < 0.0f)
+                    tiltStep = tilt;
+                tilt -= tiltStep;
+                m = m * equipment::Rotation(S_vector(1.0f, 0.0f, 0.0f), tiltStep);
+            }
+            r.eq->m_longGunLift = lift;
+            r.eq->Update(time);
+            return r.eq->m_longGunTilt == tilt && r.eq->m_longGunSlide == slide && NearM(gun->GetLocalMatrix(), m, 1e-6f);
+        };
+        CHECK(step(1, 10) && slide == 10 * 0.0012f && tilt == 10 * 0.0007f);
+        bool same = true;
+        for (int i = 0; i < 100; ++i)
+            same &= step(1, 10);
+        CHECK(same && slide == 0.068f && tilt == 0.4f);
+        // Let go: the tilt first, the slide held until it is 0.
+        same = true;
+        int held = 0;
+        for (int i = 0; i < 100; ++i) {
+            same &= step(0, 10);
+            held += tilt > 0.0f && slide == 0.068f;
+        }
+        // (The original's own drift: the slide was turned by the tilts on the way out and is taken back after them, so
+        // one lift leaves the gun about 1.1 mm lower than it started: (0, -0.00112, 0.0000137).)
+        CHECK(same && held == 57 && slide == 0.0f && tilt == 0.0f && Near(gun->GetPos(), S_vector(0.0f, -0.00111989f, 1.37165e-05f), 1e-7f));
+        // Big steps: clamped at once each way; lift 2 is not lifted.
+        CHECK(step(1, 1000) && slide == 0.068f && tilt == 0.4f);
+        CHECK(step(0, 1000) && tilt == 0.0f && slide == 0.068f);
+        CHECK(step(0, 1000) && slide == 0.0f);
+        CHECK(step(2, 10) && slide == 0.0f && tilt == 0.0f);
+        // A slide left over while tilted (as AttachModel's lifted start leaves it): not slid back until untilted.
+        tilt = r.eq->m_longGunTilt = 0.1f;
+        slide = r.eq->m_longGunSlide = 0.05f;
+        CHECK(step(0, 10) && slide == 0.05f && step(2, 1000) && tilt == 0.0f && step(0, 10) && slide < 0.05f);
+    }
+    // The flashlight's time: run out, its light leaves its sectors; the lens flare's time counts down.
+    {
+        S_Rig r = Rig();
+        I3D_frame *light = MakeFrame(FRAME_LIGHT, "flashlight");
+        static I3D_frame *sectors[2];
+        sectors[0] = MakeFrame(FRAME_SECTOR, "sec0");
+        sectors[1] = MakeFrame(FRAME_SECTOR, "sec1");
+        *reinterpret_cast<I3D_frame ***>(reinterpret_cast<unsigned char *>(light) + 0x120) = sectors;
+        *reinterpret_cast<int *>(reinterpret_cast<unsigned char *>(light) + 0x128) = 2;
+        r.eq->m_flashlight = light;
+        r.eq->m_flashlightTime = 20;
+        r.eq->m_lensFlareTime = 30;
+        r.eq->Update(19);
+        CHECK(r.eq->m_flashlightTime == 1 && g_log.empty() && r.eq->m_lensFlareTime == 11);
+        r.eq->Update(1);
+        CHECK(r.eq->m_flashlightTime == C_HumanEquipment::NO_TIME &&
+              (g_log == std::vector<std::string>{"removelight sec0 flashlight", "removelight sec1 flashlight"}));
+        r.eq->Update(5);
+        CHECK(r.eq->m_flashlightTime == C_HumanEquipment::NO_TIME && r.eq->m_lensFlareTime == 5);
+    }
+}
+
+void TestModelNames()
+{
+    // The hands model renamed by its behaviour, the backpack by its capacity, the head by its kind, while the movement
+    // refreshes its copies (the body on meanwhile); the names put back.
+    struct S_Case {
+        int behaviour;
+        const char *name;
+    };
+    for (const S_Case &c : {S_Case{0, "sm"}, S_Case{1, "sm"}, S_Case{2, "sm"}, S_Case{3, "me"}, S_Case{4, "lo"}, S_Case{5, "lo"},
+                            S_Case{7, "lo"}, S_Case{12, "lo"}, S_Case{6, "panzer"}, S_Case{8, nullptr}, S_Case{11, nullptr}}) {
+        S_Rig r = Rig();
+        Def(910, c.behaviour);
+        r.eq->m_handsModel = MakeFrame(FRAME_MODEL, "handsm");
+        r.eq->m_handsTypeId = 910;
+        r.eq->UpdateModelNames();
+        if (c.name)
+            CHECK(Count(std::string("name handsm ") + c.name) == 1 && At(std::string("name handsm ") + c.name) < At("rebuildshadow"));
+        else
+            CHECK(CountPrefix("name handsm ") == 1);
+        CHECK(Count("name handsm handsm") == 1 && At("name handsm handsm") > At("rebuildshadow"));
+    }
+    {
+        // A type below 0 or unknown: the name only put back (empty when unknown below 0: not read).
+        S_Rig r = Rig();
+        r.eq->m_handsModel = MakeFrame(FRAME_MODEL, "handsm");
+        r.eq->m_handsTypeId = -1;
+        r.eq->UpdateModelNames();
+        CHECK(Count("name handsm ") == 1);
+        r.eq->m_handsTypeId = 9996;
+        g_log.clear();
+        r.eq->UpdateModelNames();
+        CHECK(Count("name handsm handsm") == 1);
+        // Type 0 is a type.
+        Def(0, 3);
+        r.eq->m_handsTypeId = 0;
+        g_log.clear();
+        r.eq->UpdateModelNames();
+        CHECK(Count("name handsm me") == 1);
+        auto *comp = static_cast<C_BackpackComp *>(::operator new(sizeof(C_BackpackComp)));
+        std::memset(static_cast<void *>(comp), 0, sizeof(C_BackpackComp));
+        comp->m_kind = ICK_BACKPACK;
+        GetItemDef(0)->m_component = comp;
+        r.eq->m_backpackModel = MakeFrame(FRAME_MODEL, "pack0");
+        r.eq->m_backpackTypeId = 0;
+        g_log.clear();
+        r.eq->UpdateModelNames();
+        CHECK(Count("name pack0 smlbag") == 1);
+        GetItemDef(0)->m_component = nullptr;
+        g_defs.erase(0);
+    }
+    // The backpack: over 30 kg "bigbag", else "smlbag"; another component: kept.
+    for (float capacity : {30.0f, 30.5f}) {
+        S_Rig r = Rig();
+        C_TestDef *def = Def(920, 16);
+        auto *comp = static_cast<C_BackpackComp *>(::operator new(sizeof(C_BackpackComp)));
+        std::memset(static_cast<void *>(comp), 0, sizeof(C_BackpackComp));
+        comp->m_kind = ICK_BACKPACK;
+        comp->m_maxWeight = capacity;
+        def->m_component = comp;
+        r.eq->m_backpackModel = MakeFrame(FRAME_MODEL, "packm");
+        r.eq->m_backpackTypeId = 920;
+        r.eq->UpdateModelNames();
+        CHECK(Count(capacity > 30.0f ? "name packm bigbag" : "name packm smlbag") == 1 && Count("name packm packm") == 1);
+        comp->m_kind = ICK_HEADGEAR;
+        g_log.clear();
+        r.eq->UpdateModelNames();
+        CHECK(Count("name packm packm") == 1 && !Logged("name packm smlbag") && !Logged("name packm bigbag"));
+        def->m_component = nullptr;
+        r.eq->m_backpackTypeId = -1;
+        g_log.clear();
+        r.eq->UpdateModelNames();
+        CHECK(Count("name packm ") == 1);
+    }
+    // The head: helmet 0 "helm", field cap 1 "brig", cap 2 "lod", other kinds kept; the item's own frame renamed.
+    for (int kind : {0, 1, 2, 3}) {
+        S_Rig r = Rig();
+        C_TestDef *def = Def(930, 16);
+        auto *comp = static_cast<C_HeadgearComp *>(::operator new(sizeof(C_HeadgearComp)));
+        std::memset(static_cast<void *>(comp), 0, sizeof(C_HeadgearComp));
+        comp->m_kind = ICK_HEADGEAR;
+        comp->m_headgearType = kind;
+        def->m_component = comp;
+        C_Item *item = Item(930, 931, "headm");
+        r.eq->m_headModel = g_itemFrames[item];
+        r.eq->m_headUid = 931;
+        r.eq->UpdateModelNames();
+        const char *want[] = {"name headm helm", "name headm brig", "name headm lod", nullptr};
+        if (want[kind])
+            CHECK(Count(want[kind]) == 1 && At(want[kind]) < At("rebuildshadow"));
+        CHECK(Count("name headm headm") == 1 && CountPrefix("name headm ") - Count("name headm headm") == (want[kind] ? 1 : 0));
+        // Uid 0 is an item; below 0 not looked up.
+        Item(930, 0, "headm0");
+        r.eq->m_headModel = g_itemFrames[g_itemsByUid[0]];
+        r.eq->m_headUid = 0;
+        g_log.clear();
+        r.eq->UpdateModelNames();
+        CHECK(Count("name headm0 headm0") == 1);
+        r.eq->m_headUid = -1;
+        g_log.clear();
+        r.eq->UpdateModelNames();
+        CHECK(Count("name headm0 ") == 1);
+    }
+    // Shown: the body on (or the local player in first person), and not seated or seated 6 and up but not in state
+    // 0x9F; the body's own state put back.
+    struct S_Vis {
+        bool bodyOn, local, firstPerson;
+        int seat, state;
+        bool visible;
+    };
+    for (const S_Vis &v : {S_Vis{true, false, false, 0, 0, true}, S_Vis{false, false, false, 0, 0, false},
+                           S_Vis{false, true, true, 0, 0, true}, S_Vis{false, true, false, 0, 0, false},
+                           S_Vis{false, false, true, 0, 0, false}, S_Vis{true, false, false, 1, 0, false},
+                           S_Vis{true, false, false, 5, 0, false}, S_Vis{true, false, false, 6, 0, true},
+                           S_Vis{true, false, false, 6, 0x9F, false}, S_Vis{true, false, false, 0, 0x9F, true},
+                           S_Vis{true, false, false, -1, 0, true}}) {
+        S_Rig r = Rig();
+        r.h->body->m_frameFlags = v.bodyOn ? (r.h->body->m_frameFlags | 1) : (r.h->body->m_frameFlags & ~1u);
+        g_localPlayer = v.local;
+        g_firstPerson = v.firstPerson;
+        r.mv->m_seatMode = v.seat;
+        r.mv->m_animState.anim.anim = static_cast<decltype(r.mv->m_animState.anim.anim)>(v.state);
+        r.eq->UpdateModelNames();
+        g_localPlayer = g_firstPerson = false;
+        CHECK(Count(std::string("modelvisible ") + (v.visible ? "1" : "0")) == 1 && r.h->body->IsOn() == v.bodyOn);
+        CHECK(At("on body") >= 0 && At("on body") < At("rebuildshadow") && Count(v.bodyOn ? "on body" : "off body") == (v.bodyOn ? 2 : 1));
+    }
+}
+
+void TestHelpers()
+{
+    // The joints found by name; both hand dummies turned on (only when both are there).
+    {
+        S_Rig r = Rig();
+        r.eq->FindJoints(nullptr);
+        CHECK(Count("on j_HW1") == 1 && Count("on j_HW2") == 1 && Name(r.eq->m_jointD) == "j_d" && r.eq->m_backpackJoint == r.eq->m_jointD &&
+              Name(r.eq->m_jointF) == "j_f" && Name(r.eq->m_jointU) == "j_u" && Name(r.eq->m_jointQ) == "j_q" && Name(r.eq->m_handDummy2) == "j_HW2");
+        g_children.erase({r.h->body, "HW2"});
+        g_log.clear();
+        r.eq->FindJoints(nullptr);
+        CHECK(!Logged("on j_HW1") && r.eq->m_handDummy2 == nullptr);
+    }
+    // The model changed: holsters rebuilt for it, the belt's items and a sidearm in the hands counted, the joints
+    // found again.
+    {
+        const equipment::S_HolsterModel *hm = ModelWithSet();
+        static std::string file = std::string("models\\") + hm->model + ".4ds";
+        Reset();
+        g_nextFrames = {HolsterModel()};
+        S_TestHuman *h = MakeHuman(file.c_str());
+        auto *eq = new C_HumanEquipment(h->human);
+        Def(940, 99, ITEM_AMMO, 0);
+        Def(941, ITEM_BEHAVIOUR_SIDEARM);
+        C_Item *mag = Item(940, 940, nullptr);
+        h->containers[ITEM_CONTAINER_BELT].slots = {{mag, mag, mag, mag}, {}, {mag}};
+        h->containers[ITEM_CONTAINER_HANDS].item = Item(941, 941, nullptr);
+        eq->m_holsters[2].itemCount = 9;
+        eq->m_handDummy1 = nullptr;
+        g_nextFrames = {HolsterModel()};
+        g_log.clear();
+        eq->Unknown793b40();
+        CHECK(eq->m_holsters[2].itemCount == 5 && eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 1 && eq->m_handDummy1 != nullptr);
+        CHECK(Logged("release h_") && Count("release anim") == 1);
+        // A hands item that is no sidearm: not counted.
+        Def(942, 5);
+        h->containers[ITEM_CONTAINER_HANDS].item = Item(942, 942, nullptr);
+        g_nextFrames = {HolsterModel()};
+        eq->Unknown793b40();
+        CHECK(eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 0);
+        h->containers[ITEM_CONTAINER_BELT].slots.clear();
+        h->containers[ITEM_CONTAINER_HANDS].item = nullptr;
+    }
+    // The special object follows hand 1 in world space: its position and facing, marked, linked to the sector frame
+    // (flags 1), shown as the body is; advanced by time x D0 x 2 when both are above 0.
+    {
+        S_Rig r = Rig();
+        I3D_frame *thing = Special("follower");
+        r.eq->m_handDummy1->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+        r.eq->m_handDummy1->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        r.eq->m_specialModel = thing;
+        r.eq->m_unknownD0 = 0.75f;
+        r.h->body->m_frameFlags |= 1;
+        r.eq->Unknown7938f0(40);
+        CHECK(Count("pos follower " + Vec(S_vector(1.0f, 2.0f, 3.0f))) == 1 && Count("dir follower " + Vec(S_vector(0, 0, 1))) == 1);
+        CHECK(!Logged("dir roll") && Count("tracked follower") == 1 && Count("link follower null 1") == 1 && Count("on follower") == 1 &&
+              Count("tick follower 60") == 1 && At("update follower") < At("tracked follower"));
+        r.h->body->m_frameFlags &= ~1u;
+        g_log.clear();
+        r.eq->Unknown7938f0(0);
+        CHECK(Count("off follower") == 1 && !Logged("tick"));
+        r.eq->m_unknownD0 = 0.0f;
+        g_log.clear();
+        r.eq->Unknown7938f0(40);
+        CHECK(!Logged("tick"));
+        r.eq->m_specialModel = nullptr;
+        g_log.clear();
+        r.eq->Unknown7938f0(40);
+        CHECK(g_log.empty());
+    }
+    // Where a dropped item starts: the place's offset plus the joint's position, through the joint's world matrix; hand
+    // 1's world position otherwise; the origin without one.
+    {
+        S_Rig r = Rig();
+        for (I3D_frame *j : {r.eq->m_jointF, r.eq->m_jointD}) {
+            j->m_localMatrix(3) = S_vector(0.5f, 1.0f, 0.0f);
+            j->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        }
+        r.eq->m_handDummy1->m_localMatrix(3) = S_vector(-1.0f, 0.0f, 2.0f);
+        r.eq->m_handDummy1->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        const S_vector j(0.5f, 1.0f, 0.0f);
+        CHECK(Near(r.eq->GetDropPosition(EQUIPMENT_PLACE_HEAD), equipment::g_headModelOffset + j + j));
+        CHECK(Near(r.eq->GetDropPosition(EQUIPMENT_PLACE_BACKPACK), equipment::g_backpackModelOffset + j + j));
+        CHECK(Near(r.eq->GetDropPosition(EQUIPMENT_PLACE_LONG_GUN), equipment::g_longGunModelOffset + j + j));
+        CHECK(Same(r.eq->GetDropPosition(EQUIPMENT_PLACE_HANDS), S_vector(-1.0f, 0.0f, 2.0f)));
+        r.eq->m_handDummy1 = nullptr;
+        CHECK(Same(r.eq->GetDropPosition(7), S_vector(0, 0, 0)));
+    }
+    // The carry animation 0x20 fades the mixer's track 1 out over 250 ms.
+    {
+        S_Rig r = Rig();
+        r.mv->m_animState.carryAnim = 0x20;
+        r.eq->Unknown792310();
+        CHECK((g_log == std::vector<std::string>{"fadeout 1 250"}));
+        r.mv->m_animState.carryAnim = 0x21;
+        g_log.clear();
+        r.eq->Unknown792310();
+        CHECK(g_log.empty());
+    }
+}
 }  // namespace
 
 int main()
@@ -2006,6 +2568,7 @@ int main()
     g_sceneVt[0xEC / 4] = reinterpret_cast<void *>(F_UpdateFrameSector);
     g_sceneVt[0x144 / 4] = reinterpret_cast<void *>(F_MarkTracked);
     g_frameVt[0x58 / 4] = reinterpret_cast<void *>(F_UpdateBound);
+    g_frameVt[0x78 / 4] = reinterpret_cast<void *>(F_RemoveLight);
     GetGame()->m_scene = reinterpret_cast<I3D_scene *>(&g_sceneObject);
 
     TestHolsterSetup();
@@ -2020,6 +2583,10 @@ int main()
     TestAttachHands();
     TestAttachSpecial();
     TestDetachSpecial();
+    TestEvents();
+    TestUpdate();
+    TestModelNames();
+    TestHelpers();
     std::printf("equipment: %d checks, %d failures\n", checks, failures);
     g_exiting = true;
     return failures != 0;
