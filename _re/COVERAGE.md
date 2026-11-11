@@ -514,3 +514,51 @@ particles and the surface marks. Files are served from memory.
   of 459.
 - **Still to test (part 3):** the weapons (`C_WeaponItem`: reload, fire, sounds, projectiles),
   the mission items file, the module's mission lifecycle, and the activity props.
+
+### Items part 3: weapons, the mission items file, the lifecycle (2026-11-10)
+
+- **The mission items files:** all 75 `items.dat` of H:\HD2_Unpacked\MISSIONS (env
+  `MISSIONS_DIR`) go through the real `LoadMissionItems`. The scene fake makes an actor for every
+  name a record asks for: an item store when all its records are in container 0 (boxes, fixed
+  guns), a human otherwise.
+  - The 74 complete files load as an independent parse expects: 325 placed items with their
+    exact position, rotation, armed and empty flags, and 20,997 items in their actors.
+    `SaveMissionItems` writes every actor's records back the same.
+  - normandy3_mp_zone's file ends in the middle of a record; the load returns false, as the
+    original's reader does on a short read.
+  - The original also reads `nameLength + 1` name bytes (0x007d87ae), so the placed records with
+    no name line up. My first parse got that wrong, not the port.
+  - Also tested: the file's failures (cut short at each field, names of 127 / 128 characters,
+    versions 13 / 14 / 15, short armed / empty reads, write failures).
+- **The module's lifecycle:** mission data, start / stop / restart per pass, freeing, the
+  surface marks' ticks (server, and clients in 100 ms steps), uids, `Done`; the activity props;
+  copying and releasing frame trees.
+- **The weapons:**
+  - `Init`, `Use`, `GetAmount`, the dummies;
+  - `Reload`: every refusal; the fullest and emptiest magazine; the rest; infinite ammunition;
+    the last magazine kept; pending reloads; the launcher's contents; the sound and ready times.
+    Checked against the original's asm (0x007d4ee3..0x007d5030); the port matches.
+  - `SetRounds`, the empty click, `StopReloadSound` (including a wrapped clock);
+  - `Fire` by kind: thrown, firearm with tracers every third round of SMGs and MGs, projectile
+    with its blast, melee by role; `FireSecondary`;
+  - the projectile found, copied and attached; save / load;
+  - the shot sound frames, the AI's noise (silenced types 7 / 22 / 260 carry 0.3 as far), the
+    action sounds of every weapon type in the table.
+- **Note:** a local game has both the server and the client bit, so the client-side sounds play
+  too.
+- **Results:** 25,678 checks. `mutations/mutate_items3.py`: 454 mutants, 398 killed, 33 don't
+  build, 23 survived. They are equivalent, leaks, unreachable, or out of range only in the
+  fakes; the docstring lists them.
+- **The item system in all:**
+
+  | File | Lines | Branch outcomes |
+  |---|---:|---:|
+  | items_module.cpp | 913 of 964 | 87 % |
+  | item_instances.cpp | 442 of 454 | 87 % |
+  | item_defs.cpp | 405 of 459 | |
+  | item_containers.cpp | 109 of 109 | |
+
+  Mutations over parts 1–3: 1,319 mutants, 1,160 killed, 78 don't build, 81 survived
+  (equivalent or untestable, listed per file).
+- **Not tested:** the definitions' model, image and diving-gear loaders (`GetModel`,
+  `GetFpvModel`, `GetImage`, `GetDivingGear`), which need the engine's models.
