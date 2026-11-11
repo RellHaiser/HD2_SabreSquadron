@@ -122,7 +122,43 @@ struct S_Script {
     bool cameraUnderWater = false;
     bool ladderCanUse = false;
     float viewDirY = 0.0f;
+    bool activeIsOwner = false;                         // the player team's active player is the test human
+    bool headInWater = false;                           // GetHeadWater's answer (headUnderWater: below the surface)
+    bool soundPlays = true;                             // C_MovementSounds::Play gives the fake sound
+    int soundLength = 900;
 } g_script;
+
+// The swimming sound (an I3D_sound: both sides call it through its vtable; SetVolume 0x8C, GetLength 0xA8).
+struct S_FakeSound {
+    void **vt;
+    uint8_t rest[0x200];
+} g_sound;
+void *g_soundVt[64];
+void __stdcall FS_Unexpected(void *)
+{
+    std::printf("unexpected I3D_sound call\n");
+    std::exit(3);
+}
+void __stdcall FS_SetVolume(S_FakeSound *self, float volume) { Log(self, "SetVolume", {volume}); }
+int __stdcall FS_GetLength(S_FakeSound *self)
+{
+    Log(self, "GetLength");
+    return g_script.soundLength;
+}
+void *FakeSound()
+{
+    if (!g_sound.vt) {
+        for (void *&slot : g_soundVt)
+            slot = reinterpret_cast<void *>(FS_Unexpected);
+        g_soundVt[0x8C / 4] = reinterpret_cast<void *>(FS_SetVolume);
+        g_soundVt[0xA8 / 4] = reinterpret_cast<void *>(FS_GetLength);
+        g_sound.vt = g_soundVt;
+        g_names[&g_sound] = "swimSound";
+    }
+    return g_script.soundPlays ? &g_sound : nullptr;
+}
+// Words of shared objects the code under test writes inline (both sides alike): kept apart per side and compared.
+std::vector<std::pair<uint32_t *, std::string>> g_sharedWords;
 // RandFloat (the LS3DF port's, std::rand) serves both sides: seeded alike before each side of a call.
 unsigned g_randSeed = 1;
 }  // namespace
@@ -185,7 +221,7 @@ bool C_HumanMovement::GetHeadWater(bool *underWater, float *surface) const
         *underWater = g_script.headUnderWater;
     if (surface)
         *surface = g_script.headSurface;
-    return g_script.headUnderWater;
+    return g_script.headInWater;
 }
 bool C_HumanMovement::IsCameraUnderWater() { return g_script.cameraUnderWater; }
 void C_HumanMovement::MoveDummies(const S_vector &pos) { LogV(this, "MoveDummies", &pos.x, 3); }
@@ -194,7 +230,9 @@ void C_HumanMovement::PlaySound(int group) { Log(this, "PlaySound", {double(grou
 void C_HumanMovement::RemoveCollision(bool unknown) { Log(this, "RemoveCollision", {double(unknown)}); }
 void C_HumanMovement::RestoreCollision(bool unknown) { Log(this, "RestoreCollision", {double(unknown)}); }
 void C_HumanMovement::SetSeatMode(int mode, bool on) { Log(this, "SetSeatMode", {double(mode), double(on)}); }
-void C_HumanMovement::UpdateDummies() { Log(this, "UpdateDummies"); }
+// (Logged with where the frame is: the dummies are read from it.)
+namespace { const float *FramePos(); }
+void C_HumanMovement::UpdateDummies() { LogV(this, "UpdateDummies", FramePos(), 3); }
 void C_HumanMovement::UpdateHitSpheres() { Log(this, "UpdateHitSpheres"); }
 void C_HumanMovement::UpdateStanceVolumes(int stance) { Log(this, "UpdateStanceVolumes", {double(stance)}); }
 
@@ -204,12 +242,32 @@ bool C_HumanSpecialMoves::TryClimbOver(S_HumanAnimState *) { Log(this, "TryClimb
 bool C_HumanSpecialMoves::UpdateWater() { Log(this, "UpdateWater"); return g_script.updateWater; }
 
 void C_HumanVisual::SetNetworkPosition(const S_vector4 &pos) { LogV(this, "SetNetworkPosition", &pos.x, 4); }
-void C_HumanWeaponPose::SetStanceChange(int change) { Log(this, "SetStanceChange", {double(change)}); }
+// (Inline in the original's ChangeStance: its body, human_weapon_pose.cpp's, not a logged call.)
+void C_HumanWeaponPose::SetStanceChange(int stance)
+{
+    m_stance = stance;
+    if (stance == POSE_STANCE_PRONE) {
+        m_proneFit = true;
+        m_proneSettle = 500;
+    }
+}
 
 S_vector4 C_HumanWork::GetViewDir() const { Log(this, "GetViewDir"); return {0.0f, g_script.viewDirY, 1.0f, 0.0f}; }
 void C_HumanWork::Play(int animation, bool on) { Log(this, "Play", {double(animation), double(on)}); }
 void C_HumanWork::SetFacingDir(const S_vector &dir, bool on) { LogV(this, "SetFacingDir", &dir.x, 3, {double(on)}); }
-void C_HumanWork::SetLookAt(const S_vector4 &target, bool on) { LogV(this, "SetLookAt", &target.x, 4, {double(on)}); }
+// The move direction the work keeps (m_request.unknown10; the work's layout is the original's, so the original's
+// work takes it the same way): UpdateVelocity reads it back.
+void ApplyLookAt(void *work, const float *target)
+{
+    float *current = &static_cast<C_HumanWork *>(work)->m_request.unknown10.x;
+    if (current[0] != target[0] || current[1] != target[1] || current[2] != target[2])
+        std::memcpy(current, target, 16);
+}
+void C_HumanWork::SetLookAt(const S_vector4 &target, bool on)
+{
+    LogV(this, "SetLookAt", &target.x, 4, {double(on)});
+    ApplyLookAt(this, &target.x);
+}
 void C_HumanWork::SetStance(int stance, bool on) { Log(this, "SetStance", {double(stance), double(on)}); }
 void C_HumanWork::SetStanceTimer(int time, int stance, uint32_t blocked)
 {
@@ -222,10 +280,22 @@ bool C_Ladder::CanUse(const S_vector4 &pos, const S_vector4 &dir, const S_vector
     return g_script.ladderCanUse;
 }
 void C_Ladder::RemoveClimber(C_Human *human) { Log(this, "RemoveClimber", {double(human != nullptr)}); }
-I3D_sound *C_MovementSounds::Play(int group, I3D_frame *, const S_vector *) { Log(this, "SoundsPlay", {double(group)}); return nullptr; }
-void C_MovementSounds::Return(I3D_sound *) { Log(this, "SoundsReturn"); }
+I3D_sound *C_MovementSounds::Play(int group, I3D_frame *frame, const S_vector *pos)
+{
+    LogV(this, ("SoundsPlay " + NameOf(frame)).c_str(), &pos->x, 3, {double(group)});
+    return static_cast<I3D_sound *>(FakeSound());
+}
+void C_MovementSounds::Return(I3D_sound *sound) { Log(this, ("SoundsReturn " + NameOf(sound)).c_str()); }
 C_MovementSounds *GetMovementSounds() { return nullptr; }
-C_Human *C_Team::GetActivePlayer() const { Log(this, "GetActivePlayer"); return nullptr; }
+void *g_portHuman;
+// (Each side gets its own copy of the test human when it is the active player.)
+C_Human *C_Team::GetActivePlayer() const
+{
+    Log(this, "GetActivePlayer");
+    return g_script.activeIsOwner ? static_cast<C_Human *>(g_portHuman) : nullptr;
+}
+// The player team (g_teamManager's, in raw storage) by name.
+void NameTeam() { g_names[g_teamManager.GetPlayerTeam()] = "playerTeam"; }
 void C_Door::SetState(int action, bool autoClose, bool linked, int force)
 {
     Log(this, "DoorSetState", {double(action), double(autoClose), double(linked), double(force)});
@@ -291,7 +361,9 @@ struct S_TestHuman {
     C_HumanMovement *movement = nullptr;
     C_HumanWork *work = nullptr;
     unsigned char *equipment = nullptr;
+    unsigned char *pose = nullptr;                      // the weapon pose (the original's layout: shared)
     I3D_frame *frame = nullptr;
+    I3D_frame *camera = nullptr;
     S_CollisionVolume stanceVolumes[4], hitVolumes[2];
 };
 // The original's copies.
@@ -333,6 +405,7 @@ template <class F> size_t VSlot(F f)
 }
 
 S_TestHuman g_h;
+const float *FramePos() { return &g_h.frame->GetMatrix().m[3][0]; }
 void MakeHuman()
 {
     S_TestHuman &h = g_h;
@@ -353,6 +426,8 @@ void MakeHuman()
     h.movement = new (::operator new(sizeof(C_HumanMovement), std::align_val_t(16))) C_HumanMovement();
     h.work = new C_HumanWork();
     h.equipment = new unsigned char[0x400]();
+    h.pose = static_cast<unsigned char *>(::operator new(sizeof(C_HumanWeaponPose) + 0x100, std::align_val_t(16)));
+    std::memset(h.pose, 0, sizeof(C_HumanWeaponPose) + 0x100);
     h.frame = NewFrame(FRAME_MODEL, "human", S_vector(20, 1, 20), Identity(), Box(S_vector(0.3f, 0.9f, 0.3f)), "", g_sector);
     h.human->m_frame = h.frame;
     h.human->m_controller = reinterpret_cast<C_HumanController *>(g_controller);
@@ -364,6 +439,10 @@ void MakeHuman()
     h.human->m_body.work = h.work;
     h.human->m_body.equipment = reinterpret_cast<C_HumanEquipment *>(h.equipment);
     h.movement->m_owner = h.human;
+    h.movement->m_weaponPose = h.movement->m_weaponPose2 = reinterpret_cast<C_HumanWeaponPose *>(h.pose);
+    // The active camera of the scene (+0x15C; its fields read inline: FOV +0x120, range +0x124 / +0x128, aspect +0x138).
+    h.camera = NewFrame(FRAME_DUMMY, "camera", S_vector(32, 3, 2), Identity(), Box(S_vector(0.1f, 0.1f, 0.1f)), "", g_sector);
+    *reinterpret_cast<I3D_frame **>(g_sceneBytes + 0x15C) = h.camera;
     h.work->m_movement = h.movement;
     h.work->m_movementBase = h.movement;
     h.work->m_owner = &h.movement->m_owner;
@@ -382,6 +461,9 @@ void MakeHuman()
     g_names[m] = g_names[o_movement] = "movement";
     g_names[h.work] = g_names[o_work] = "work";
     g_names[h.equipment] = "equipment";
+    g_names[h.pose] = "weaponPose";
+    g_portHuman = h.human;
+    NameTeam();
     g_names[&m->m_mixer] = g_names[o_movement + 0x260] = "mixer";
     g_names[&m->m_morph] = g_names[o_movement + 0x610] = "morph";
     g_names[&m->m_specialMoves] = g_names[o_movement + 0xAA0] = "specialMoves";
@@ -395,10 +477,12 @@ void MakeHuman()
 // in this image and not one of the test's (found by NoteAssumedGround); the original's is at 0x00983350.
 const void *g_portAssumedGround = nullptr;
 // Port object -> its copy (the pointers in the copies are rewritten by this table).
+// More objects with a copy of their own (the actors of the contacts test).
+std::vector<std::pair<const void *, void *>> g_extraPointers;
 std::vector<std::pair<const void *, void *>> PointerMap()
 {
     C_HumanMovement *m = g_h.movement;
-    return {{g_h.human, o_human},
+    std::vector<std::pair<const void *, void *>> map = {{g_h.human, o_human},
             {m, o_movement},
             {g_h.work, o_work},
             {&m->m_mixer, o_movement + 0x260},
@@ -410,6 +494,8 @@ std::vector<std::pair<const void *, void *>> PointerMap()
             {&m->m_visual, o_movement + 0xCD0},
             {&m->m_owner, o_movement + 0x258},
             {g_portAssumedGround, OriginalAt<void *>(0x00983350)}};
+    map.insert(map.end(), g_extraPointers.begin(), g_extraPointers.end());
+    return map;
 }
 void Remap(uint8_t *bytes, size_t size, const std::vector<std::pair<const void *, void *>> &map)
 {
@@ -429,6 +515,7 @@ const uint32_t O_GAME_ROLE = 0x00982100;
 const uint32_t O_MOVE_ITERATIONS = 0x008441e4;
 const uint32_t O_MP_SETTINGS = 0x008aea30;               // -> the settings (fallingDamage at +0x258)
 const uint32_t O_LOCAL_PLAYER_SLOT = 0x00982104;
+const uint32_t O_CAMERA_UNDER_WATER = 0x0098a6ac;     // g_cameraUnderWater (read inline)
 
 // The state of the port's objects in the original's layout (into o_*).
 void ToOriginal()
@@ -455,6 +542,7 @@ void ToOriginal()
     *OriginalAt<int *>(O_LOCAL_PLAYER_SLOT) = g_script.localPlayer ? g_h.human->m_netId : 99;
     g_controller[0x48] = g_script.localPlayer ? 1 : 0;
     *OriginalAt<float *>(O_MOVE_ITERATIONS) = g_moveIterations;
+    *OriginalAt<bool *>(O_CAMERA_UNDER_WATER) = g_script.cameraUnderWater;
 }
 
 // ---- comparing the copies: by field, floats within a tolerance
@@ -529,6 +617,7 @@ namespace {
 }  // namespace
 #include "original_side.inc"
 #include "locomotion_test.inc"
+#include "locomotion2_test.inc"
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
 LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
@@ -562,6 +651,8 @@ int main(int argc, char **argv)
     InstallOriginalSide();
     MakeHuman();
     TestLocomotion();
+    TestLocomotion2();
+    PrintStats();
     for (const std::string &f : g_tempFiles)
         std::remove(f.c_str());
     std::printf("human: %d checks, %d failures\n", checks, failures);

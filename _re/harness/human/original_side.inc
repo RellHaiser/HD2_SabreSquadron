@@ -57,7 +57,7 @@ bool OT O_GetHeadWater(void *self, bool *underWater, float *surface)
         *underWater = g_script.headUnderWater;
     if (surface)
         *surface = g_script.headSurface;
-    return g_script.headUnderWater;
+    return g_script.headInWater;
 }
 void OT O_MoveDummies(void *self, const float *pos) { LogV(self, "MoveDummies", pos, 3); }
 void OT O_MoveHitSpheres(void *self, const float *pos) { LogV(self, "MoveHitSpheres", pos, 3); }
@@ -65,11 +65,12 @@ void OT O_PlaySound(void *self, int group) { Log(self, "PlaySound", {double(grou
 void OT O_RemoveCollision(void *self, int unknown) { Log(self, "RemoveCollision", {double(B(unknown))}); }
 void OT O_RestoreCollision(void *self, int unknown) { Log(self, "RestoreCollision", {double(B(unknown))}); }
 void OT O_SetSeatMode(void *self, int mode, int on) { Log(self, "SetSeatMode", {double(mode), double(B(on))}); }
-void OT O_UpdateDummies(void *self) { Log(self, "UpdateDummies"); }
+void OT O_UpdateDummies(void *self) { LogV(self, "UpdateDummies", FramePos(), 3); }
 void OT O_UpdateHitSpheres(void *self) { Log(self, "UpdateHitSpheres"); }
 void OT O_UpdateStanceVolumes(void *self, int stance) { Log(self, "UpdateStanceVolumes", {double(stance)}); }
 
-bool OT O_CanTurn(void *self, float angle) { Log(self, "CanTurn", {angle}); return g_script.canTurn; }
+// (The original's takes the angle by pointer.)
+bool OT O_CanTurn(void *self, const float *angle) { Log(self, "CanTurn", {*angle}); return g_script.canTurn; }
 bool OT O_HasRoomForStance(void *self, int change) { Log(self, "HasRoomForStance", {double(change)}); return g_script.hasRoom; }
 bool OT O_TryClimbOver(void *self, void *) { Log(self, "TryClimbOver"); return g_script.tryClimb; }
 bool OT O_UpdateWater(void *self) { Log(self, "UpdateWater"); return g_script.updateWater; }
@@ -87,7 +88,11 @@ float *OT O_GetViewDir(void *self, float *out)
 }
 void OT O_Play(void *self, int animation, int on) { Log(self, "Play", {double(animation), double(B(on))}); }
 void OT O_SetFacingDir(void *self, const float *dir, int on) { LogV(self, "SetFacingDir", dir, 3, {double(B(on))}); }
-void OT O_SetLookAt(void *self, const float *target, int on) { LogV(self, "SetLookAt", target, 4, {double(B(on))}); }
+void OT O_SetLookAt(void *self, const float *target, int on)
+{
+    LogV(self, "SetLookAt", target, 4, {double(B(on))});
+    ApplyLookAt(self, target);
+}
 void OT O_SetStance(void *self, int stance, int on) { Log(self, "SetStance", {double(stance), double(B(on))}); }
 void OT O_SetStanceTimer(void *self, int time, int stance, uint32_t blocked)
 {
@@ -100,15 +105,22 @@ bool OT O_LadderCanUse(void *self, const float *pos, const float *dir, const flo
     return g_script.ladderCanUse;
 }
 void OT O_RemoveClimber(void *self, void *human) { Log(self, "RemoveClimber", {double(human != nullptr)}); }
-void *OT O_SoundsPlay(void *self, int group, void *, const void *) { Log(self, "SoundsPlay", {double(group)}); return nullptr; }
-void OT O_SoundsReturn(void *self, void *) { Log(self, "SoundsReturn"); }
+void *OT O_SoundsPlay(void *self, int group, void *frame, const float *pos)
+{
+    LogV(self, ("SoundsPlay " + NameOf(frame)).c_str(), pos, 3, {double(group)});
+    return FakeSound();
+}
+void OT O_SoundsReturn(void *self, void *sound) { Log(self, ("SoundsReturn " + NameOf(sound)).c_str()); }
 void *O_GetMovementSounds() { return nullptr; }
-void *OT O_GetPlayerTeam(void *) { return nullptr; }
-void *OT O_GetActivePlayer(void *self) { Log(self, "GetActivePlayer"); return nullptr; }
+// (The port's team object stands for the original's too: only its name is logged.)
+void *OT O_GetPlayerTeam(void *) { return g_teamManager.GetPlayerTeam(); }
+void *OT O_GetActivePlayer(void *self) { Log(self, "GetActivePlayer"); return g_script.activeIsOwner ? o_human : nullptr; }
 void OT O_DoorSetState(void *self, int action, int autoClose, int linked, int force)
 {
     Log(self, "DoorSetState", {double(action), double(B(autoClose)), double(B(linked)), double(force)});
 }
+// The world's volumes: the original's never registered (its allocator never started).
+void OT O_NoVolume(void *, void *) {}
 void *O_Unexpected()
 {
     std::printf("unexpected call in the original\n");
@@ -120,6 +132,7 @@ alignas(16) uint8_t g_origGame[0x100];
 void *O_GetGame()
 {
     *reinterpret_cast<void **>(g_origGame + 0x18) = GetGame()->m_scene;
+    *reinterpret_cast<uint32_t *>(g_origGame + 0x28) = GetGame()->m_missionTime;
     return g_origGame;
 }
 // The human's virtual calls (the original's slots: Hit 0xD4, OnCollisionEx 0x5C).
@@ -200,6 +213,9 @@ void InstallOriginalSide()
         {0x0055fe60, reinterpret_cast<const void *>(O_Unexpected)},
         {0x007e5302, reinterpret_cast<const void *>(O_RandFloat)},
         {0x006987d0, reinterpret_cast<const void *>(O_GetGame)},
+        {0x006ef7b0, reinterpret_cast<const void *>(O_NoVolume)},           // AddVolume
+        {0x006efbc0, reinterpret_cast<const void *>(O_NoVolume)},           // MoveVolume
+        {0x006ef9b0, reinterpret_cast<const void *>(O_NoVolume)},           // RemoveVolume
     };
     for (const auto &r : redirects)
         RedirectOriginal(r.first, r.second);

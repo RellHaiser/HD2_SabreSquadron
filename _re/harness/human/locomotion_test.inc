@@ -138,6 +138,13 @@ void AddContact(const char *name, int type, const S_vector &at, const S_vector &
         a->m_position = {at.x, at.y - half.y, at.z, 1.0f};
         if (type == ACTOR_DOOR)
             reinterpret_cast<C_Door *>(a)->m_motion = motion;
+        S_vector4 top = {}, bottom = {};
+        if (type == ACTOR_LADDER) {
+            top = {at.x, at.y + half.y, at.z + 0.3f, 1.0f};
+            bottom = {at.x, at.y - half.y, at.z - 0.1f, 1.0f};
+            reinterpret_cast<C_Ladder *>(a)->m_top = top;
+            reinterpret_cast<C_Ladder *>(a)->m_bottom = bottom;
+        }
         // The original's.
         c->orig = static_cast<uint8_t *>(::operator new(0x400, std::align_val_t(16)));
         std::memset(c->orig, 0, 0x400);
@@ -145,7 +152,12 @@ void AddContact(const char *name, int type, const S_vector &at, const S_vector &
         *reinterpret_cast<int *>(c->orig + 0x18) = type;
         std::memcpy(c->orig + 0x30, &a->m_position, 16);
         *reinterpret_cast<int *>(c->orig + 0x224) = motion;
+        if (type == ACTOR_LADDER) {
+            std::memcpy(c->orig + 0xA0, &top, 16);
+            std::memcpy(c->orig + 0xB0, &bottom, 16);
+        }
         g_names[c->port] = g_names[c->orig] = name;
+        g_extraPointers.push_back({c->port, c->orig});
     }
     g_collisionWorld.AddVolume(&c->volume);
     g_collisionWorld.MoveVolume(&c->volume);
@@ -223,9 +235,22 @@ void PlaceSpheres(int stance)
 
 // ---- one call compared
 struct S_PortState {
-    std::vector<uint8_t> human, movement, work, frame;
+    std::vector<uint8_t> human, movement, work, frame, equipment, pose, volumes, camera;
     float moveIterations;
 };
+// The human's stance and hit volumes, as one block.
+uint8_t *HumanVolumes() { return reinterpret_cast<uint8_t *>(g_h.stanceVolumes); }
+const size_t HUMAN_VOLUMES_SIZE = sizeof(S_CollisionVolume) * 6;
+static_assert(offsetof(S_TestHuman, hitVolumes) == offsetof(S_TestHuman, stanceVolumes) + sizeof(S_CollisionVolume) * 4, "volumes");
+// (The port's MoveVolume files them in the world; the test's world never keeps them: the body's own sweeps would meet
+// them, and the original's are not registered either.)
+void RemoveHumanVolumes()
+{
+    for (S_CollisionVolume &v : g_h.stanceVolumes)
+        g_collisionWorld.RemoveVolume(&v);
+    for (S_CollisionVolume &v : g_h.hitVolumes)
+        g_collisionWorld.RemoveVolume(&v);
+}
 S_PortState TakePort()
 {
     S_PortState s;
@@ -237,6 +262,11 @@ S_PortState TakePort()
     s.movement.assign(m, m + sizeof(C_HumanMovement));
     s.work.assign(w, w + sizeof(C_HumanWork));
     s.frame.assign(f, f + 0x400);
+    s.equipment.assign(g_h.equipment, g_h.equipment + 0x400);
+    s.pose.assign(g_h.pose, g_h.pose + sizeof(C_HumanWeaponPose));
+    s.volumes.assign(HumanVolumes(), HumanVolumes() + HUMAN_VOLUMES_SIZE);
+    const auto *c = reinterpret_cast<const uint8_t *>(g_h.camera);
+    s.camera.assign(c, c + 0x400);
     s.moveIterations = g_moveIterations;
     return s;
 }
@@ -246,6 +276,10 @@ void PutPort(const S_PortState &s)
     std::memcpy(static_cast<void *>(g_h.movement), s.movement.data(), s.movement.size());
     std::memcpy(static_cast<void *>(g_h.work), s.work.data(), s.work.size());
     std::memcpy(static_cast<void *>(g_h.frame), s.frame.data(), s.frame.size());
+    std::memcpy(g_h.equipment, s.equipment.data(), s.equipment.size());
+    std::memcpy(g_h.pose, s.pose.data(), s.pose.size());
+    std::memcpy(HumanVolumes(), s.volumes.data(), s.volumes.size());
+    std::memcpy(static_cast<void *>(g_h.camera), s.camera.data(), s.camera.size());
     g_moveIterations = s.moveIterations;
 }
 
@@ -282,8 +316,22 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
     ContactsFor(false);
     if (std::getenv("HUMAN_TRACE"))
         std::printf("[%s %ld port]", what, st.calls);
+    // (How often the frame is placed and linked: the fake frame counts them, past its engine bytes.)
+    S_FakeFrame *fake = Fake(g_h.frame);
+    const int setPos0 = fake->setPos, links0 = fake->links;
+    std::vector<uint32_t> sharedBefore, sharedPort;
+    for (const auto &w : g_sharedWords)
+        sharedBefore.push_back(*w.first);
     const int portResult = port();
+    for (size_t i = 0; i < g_sharedWords.size(); ++i) {
+        sharedPort.push_back(*g_sharedWords[i].first);
+        *g_sharedWords[i].first = sharedBefore[i];
+    }
     const std::vector<S_Call> portCalls = g_calls;
+    const int portSetPos = fake->setPos - setPos0, portLinks = fake->links - links0;
+    fake->setPos = setPos0;
+    fake->links = links0;
+    RemoveHumanVolumes();
     NoteAssumedGround();
     const S_PortState after = TakePort();
     // The port's result in the original's layout.
@@ -305,6 +353,7 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
                                                    [&] { return original(static_cast<void *>(o_movement + 0xAC0)); });
     const std::vector<S_Call> origCalls = g_calls;
     ContactsFor(false);
+    const int origSetPos = fake->setPos - setPos0, origLinks = fake->links - links0;
     // Compared.
     std::string why;
     if (portResult != origResult)
@@ -330,6 +379,60 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
     }
     if (why.empty() && std::fabs(*OriginalAt<float *>(O_MOVE_ITERATIONS) - portIterations) > 0.0f)
         why = "g_moveIterations";
+    // The shared objects (the same layout on both sides): the port's after its call against what the original left.
+    const auto sharedDiffers = [&](const std::vector<uint8_t> &port, const uint8_t *orig, const char *name) -> std::string {
+        for (size_t i = 0; i + 4 <= port.size(); i += 4) {
+            uint32_t x, y;
+            std::memcpy(&x, port.data() + i, 4);
+            std::memcpy(&y, orig + i, 4);
+            if (!WordsNear(x, y, 'm'))
+                return std::string(name) + "+" + std::to_string(i);
+        }
+        return "";
+    };
+    if (why.empty())
+        why = sharedDiffers(after.equipment, g_h.equipment, "equipment");
+    if (why.empty())
+        why = sharedDiffers(after.pose, g_h.pose, "weaponPose");
+    if (why.empty()) {
+        // The volumes: their places and sizes (where each side files them is its world's business).
+        for (int i = 0; i < 6 && why.empty(); ++i) {
+            const auto *p = reinterpret_cast<const S_CollisionVolume *>(after.volumes.data()) + i;
+            const S_CollisionVolume *o = reinterpret_cast<const S_CollisionVolume *>(HumanVolumes()) + i;
+            const float pv[5] = {p->center.x, p->center.y, p->center.z, p->centerW, p->radius};
+            const float ov[5] = {o->center.x, o->center.y, o->center.z, o->centerW, o->radius};
+            for (int k = 0; k < 5; ++k) {
+                uint32_t x, y;
+                std::memcpy(&x, &pv[k], 4);
+                std::memcpy(&y, &ov[k], 4);
+                if (!WordsNear(x, y, 'f')) {
+                    why = "volume " + std::to_string(i) + " word " + std::to_string(k);
+                    break;
+                }
+            }
+        }
+    }
+    if (why.empty()) {
+        // The frame: its place.
+        const auto *pf = reinterpret_cast<const I3D_frame *>(after.frame.data());
+        const I3D_frame *of = g_h.frame;
+        for (int k = 0; k < 16 && why.empty(); ++k) {
+            uint32_t x, y;
+            std::memcpy(&x, &pf->m_localMatrix.m[k / 4][k % 4], 4);
+            std::memcpy(&y, &of->m_localMatrix.m[k / 4][k % 4], 4);
+            if (!WordsNear(x, y, 'f'))
+                why = "frame matrix word " + std::to_string(k);
+        }
+        if (why.empty() && pf->m_parent != of->m_parent)
+            why = "frame parent";
+        if (why.empty() && (portSetPos != origSetPos || portLinks != origLinks))
+            why = "frame SetPos / LinkTo count";
+    }
+    for (size_t i = 0; i < g_sharedWords.size(); ++i) {
+        if (why.empty() && *g_sharedWords[i].first != sharedPort[i])
+            why = g_sharedWords[i].second;
+        *g_sharedWords[i].first = sharedPort[i];
+    }
     PutPort(after);
     CHECK(why.empty());
     if (why.empty()) {
@@ -347,6 +450,10 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
                         bph.m_position.x, bph.m_position.y, bph.m_position.z, bmv.m_mixer.m_move.x, bmv.m_mixer.m_move.y, bmv.m_mixer.m_move.z,
                         bwk.m_request.stance, bmv.m_flags, bmv.m_animState.anim.anim, bmv.m_locomotion.m_fallSpeed, g_script.localPlayer,
                         g_script.serverSimulated, int(bph.m_role), g_gameRole);
+            std::printf("    next anim %d, useObject %s, asked %g %g %g, facing %g %g %g, hold %d, pending %d delay %d\n",
+                        bmv.m_nextAnimState.anim.anim, NameOf(bmv.m_useObject).c_str(), bwk.m_request.unknown10.x, bwk.m_request.unknown10.y,
+                        bwk.m_request.unknown10.z, bph.m_direction.x, bph.m_direction.y, bph.m_direction.z, bmv.m_mixer.m_tracks[0].hold,
+                        bmv.m_animPlayer.m_pendingAnim.anim, bmv.m_animPlayer.m_animDelay);
             for (int side = 0; side < 2; ++side) {
                 const uint8_t *l = (side ? o_movement : bm) + 0xAC0;
                 const auto F = [&](int at) { float v; std::memcpy(&v, l + at, 4); return v; };
@@ -545,6 +652,9 @@ void TestLocomotion()
     MakeContacts();
     TestFalls();
     TestGroundMoves();
+}
+void PrintStats()
+{
     for (auto &[what, st] : g_stats) {
         std::printf("  %s: %ld, agree %ld", what.c_str(), st.calls, st.agree);
         for (auto &[field, n] : st.differ)

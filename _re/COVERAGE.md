@@ -867,3 +867,48 @@ particles and the surface marks. Files are served from memory.
   - backslashes collapsed twice more in Python run through bash heredocs: scripts now go through files.
 - **Not exercised:** a ladder's OnCollisionEx agreeing (the original's deque would allocate), lying bodies' second
   rays, the cheap ground mode's step up on a client, the replicas' ground ray.
+
+## Human part 2 (the locomotion's update, turning, the velocity, 2026-11-11)
+
+- **The tests:** `human/locomotion2_test.inc`, in the same harness and the same way as part 1 (each call against the
+  original executable's, on copies in its layout).
+  - **TestTurnsAndVelocity:** 18,000 calls, one function each in turn: UpdatePitch, UpdateVelocity, IsTurnAllowed,
+    GetTurnTime, SetTurnTarget, UpdateTurn, ChangeStance, UpdateDetail and ScaleStanceVolumes. They run from random
+    humans: facing (pitched, not of unit length), the animations now and coming, the work's requests (the asked move,
+    stance, carry mode), the turn target, the counters, a seat, a ladder in use, the camera and the frames' render
+    stamps (UpdateDetail's level of detail).
+  - **TestUpdates:** 3,000 UpdateCollisionVolumes calls, half of them as a client sees another soldier (the frame
+    drifted from the body by a little or a lot, the volumes' timer at its edges). Also 3,000 trajectories of 12
+    Update steps on the ground.
+- **New in the harness:**
+  - the weapon pose block, the equipment, the volumes and the scene's camera (+0x15C in the client build) are
+    snapshotted and compared;
+  - the frame's SetPos and LinkTo calls are counted per side, and its place is logged at UpdateDummies;
+  - C_HumanWork::SetLookAt's fake keeps the asked move, as the real one does (UpdateVelocity reads it back);
+  - the player team's active player can be the test human (each side its own copy);
+  - SetStanceChange is run, not logged: the original has it inline in ChangeStance;
+  - the original's Add/Move/RemoveVolume are no-ops (the port's are removed after its call);
+  - words of shared objects written inline (`g_sharedWords`) are compared per side.
+- **Results:**
+  - Update 36,000 calls, UpdateCollisionVolumes 3,000, the others 2,000 each, all agree (119,896 checks with part
+    1);
+  - lines of part 2's code (RelaxRoll, MoveHitVolumes, the speed table, Update, UpdateCollisionVolumes, and lines
+    2204-2878): 716 of 742. Not run:
+    - Update's dispatch to swimming, climbing, jumping, the ladder and dying (part 3);
+    - UpdatePitch on a ladder with no ladder;
+    - UpdateVelocity on a ladder with a held track (the original passes an uninitialised vector there);
+    - a look angle below -3 rad;
+    - the local player's drift test (unreachable: the local player takes the first branch);
+    - UpdateTurn's steps past 2.25 rad (unreachable within the turn limit);
+  - `human/mutations/mutate_human2.py`: 632 mutants, 496 killed, 37 don't build, 99 survived. Of those, 21 are in
+    part 3's dispatch; the rest are boundary comparisons of floats, counters clamped to 0 either way, unreachable
+    lines, or equivalent mutants (listed in its docstring).
+  - No port bug was found in this part.
+- **Undefined behaviour of the original, kept out of the comparison:** UpdateVelocity on a ladder animation without
+  a ladder (an uninitialised direction) or with a held track (an uninitialised vector). The port defines both,
+  commented in human_locomotion.cpp. The tests give ladder animations a ladder and no hold.
+- **Harness lessons (my mistakes):**
+  - CanTurn takes the angle by pointer in the original;
+  - the camera is at scene +0x15C in this build (I put it at +0x13C first, which crashed);
+  - a fake that only logs (SetLookAt) hid code that depends on its effect (L 2568 survived until it kept the value);
+  - the frame's SetPos / LinkTo were not observed at first (L 637, 693 survived).
