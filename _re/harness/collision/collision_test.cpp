@@ -6,7 +6,11 @@
 // scene's visuals) are disabled and the levels' primitives are tested, against my own ray tests and the brute-force
 // RayTestBrute. Triangles, capsule and convex primitives come from collision files written here in the same format
 // (WriteSynth), some with fake visuals as the game's. Each query is compared with my own reading of its rules.
-// COLLISION_QUICK (the mutation runs): a quarter of the rays.
+//
+// Part 2 (sphere sweeps, slides, body sweeps: sweep_test.inc): compared with the original executable's own functions
+// (original_exe.h: the test starts a copy of itself with 0x400000 held for it) and with my own exact sweeps.
+// "collision_test.exe sweeps" runs part 2 alone. sweep_diff.cpp compares the single-shape sweeps.
+// COLLISION_QUICK (the mutation runs): a quarter of the rays and sweeps.
 #include <windows.h>
 
 #include <algorithm>
@@ -30,6 +34,7 @@
 #include "game/human.h"
 #include "ls3d/i3d.h"
 #include "ls3d/rw_data.h"
+#include "original_exe.h"
 #undef private
 #undef protected
 
@@ -154,7 +159,12 @@ I3D_frame *SceneFrame(int type, uint32_t visualType, const std::vector<S_vector>
 C_game *GetGame() { return reinterpret_cast<C_game *>(g_gameBytes); }
 extern "C" I3D_driver *I3DGetDriver() { return reinterpret_cast<I3D_driver *>(&g_driver); }
 void I3D_frame::UpdateWMatrixProc() {}
-uint32_t C_Human::GetStanceFlags() const { return 0; }
+// (As the original's 0x005a5d10: the controller's move flags, read raw: the body sweeps' fake humans.)
+uint32_t C_Human::GetStanceFlags() const
+{
+    const uint8_t *controller = *reinterpret_cast<uint8_t *const *>(reinterpret_cast<const uint8_t *>(this) + 0xB0);
+    return controller ? *reinterpret_cast<const uint32_t *>(controller + 0x50) & 7 : 0;
+}
 
 namespace {
 // A file of my own in %TEMP%, named after the process (runs in parallel, as the mutation runner's, must not
@@ -629,6 +639,7 @@ void OrderByX(S_SynthTri &t)
 {
     std::sort(t.v, t.v + 3, [](const S_vector &a, const S_vector &b) { return a.x < b.x; });
 }
+bool g_synthQuiet;                                      // (part 2's levels: the made kinds are not checked)
 S_SynthTri Tri(S_vector a, S_vector b, S_vector c, uint32_t flags, bool flip, int kind = 0)
 {
     S_SynthTri t;
@@ -652,8 +663,13 @@ S_SynthTri Tri(S_vector a, S_vector b, S_vector c, uint32_t flags, bool flip, in
     else
         stored = e.x == 0.0f ? TRIANGLE_KIND_XY_EDGE_Y : TRIANGLE_KIND_XY;
     t.flags = flags | stored;
+    // The sphere sweeps take a triangle's corners as wound against its stored normal (seen from its front, the way
+    // a sweep into it goes: (v1 - v0) x (v2 - v0) points out of the surface); one wound with it is marked reversed.
+    // (The levels' files mark none: their stored normals follow the corners' order.)
+    if (!flip)
+        t.flags |= COLLISION_TRIANGLE_REVERSED;
     t.kind = kind;
-    if (kind && static_cast<int>(stored) != kind)
+    if (kind && static_cast<int>(stored) != kind && !g_synthQuiet)
         std::printf("  (made kind %d, computed %u)\n", kind, stored);
     return t;
 }
@@ -2827,8 +2843,13 @@ void TestLoaderDetails()
 }
 }  // namespace
 
+#include "sweep_test.inc"
+
 int main(int argc, char **argv)
 {
+    int childExit;
+    if (RunReservingOriginalBase(childExit))
+        return childExit;
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
     _controlfp(0x00020000u, 0x00030000u);                       // _PC_24, _MCW_PC: the game's precision
@@ -2839,6 +2860,9 @@ int main(int argc, char **argv)
     g_frameVt[0x7C / 4] = reinterpret_cast<void *>(F_SetWorldSpace);
     g_meshVt[0x04 / 4] = reinterpret_cast<void *>(F_GetLevel);
     g_levelVt[0x04 / 4] = reinterpret_cast<void *>(F_GetVertices);
+    LoadOriginalExe();
+    const bool sweepsOnly = argc > 1 && std::strcmp(argv[1], "sweeps") == 0;   // (part 2 alone)
+    if (!sweepsOnly) {
     TestLevelLoading();
     TestLevelRays();
     TestSynthTriangles();
@@ -2850,6 +2874,8 @@ int main(int argc, char **argv)
     TestNormalsAndShapes();
     TestBoxSweeps();
     TestLoaderDetails();
+    }
+    TestSweeps();
     for (const std::string &f : g_tempFiles)
         std::remove(f.c_str());
     std::printf("collision: %d checks, %d failures\n", checks, failures);

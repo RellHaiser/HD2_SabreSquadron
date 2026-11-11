@@ -4,7 +4,8 @@ local .cpp); MUT_PASS: the regex of a passing run's output, bytes (default: "NAM
 
 Bounded: a test's output is read up to OUTPUT_LIMIT and it is killed beyond that (a mutant that prints for ever once ran the
 machine out of memory through capture_output), or after TIMEOUT. Results print as they finish. The unmutated sources are
-compiled once. Env MUT_DEFS: extra -D options, space separated (-DGAMESPY_BROWSER_ONLY skips the slower earlier tests)."""
+compiled once. Env MUT_DEFS: extra -D options, space separated (-DGAMESPY_BROWSER_ONLY skips the slower earlier tests).
+Env MUT_LDFLAGS: extra link options (space separated); MUT_TIMEOUT: seconds a run may take (default 40)."""
 import concurrent.futures, importlib.util, os, queue, re, shutil, subprocess, sys, threading
 
 # (This repository: the G: checkout it named before is out of date since the move to T:.)
@@ -13,7 +14,7 @@ MUT, WORK = sys.argv[1], sys.argv[2]
 JOBS = int(sys.argv[3]) if len(sys.argv) > 3 else 6
 want = set(sys.argv[4:])
 OUTPUT_LIMIT = 256 * 1024
-TIMEOUT = 40
+TIMEOUT = int(os.environ.get("MUT_TIMEOUT", "40"))
 spec = importlib.util.spec_from_file_location("m", MUT)
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
@@ -31,6 +32,7 @@ EXTRA_INC = ["-I" + os.path.join(ROOT, p) for p in os.environ.get("MUT_EXTRA_INC
 LOCALS = list(dict.fromkeys(re.findall(r"(?<![\\\w%])(\w+\.cpp)", LINE)))
 PASS = os.environ.get("MUT_PASS", r"\w+: \d+ checks, 0 failures").encode()
 EXTRA = os.environ.get("MUT_DEFS", "").split()
+LDFLAGS = os.environ.get("MUT_LDFLAGS", "").split()
 FLAGS = ["-std=c++17", "-faligned-new=8", "-O1", "-msse2", "-mfpmath=sse", "-DLS3D_API=", "-DRW_DATA_API="] + EXTRA
 
 
@@ -110,7 +112,7 @@ def run(d, objs, test, port, rebuilt=None):
         if not compile_one(source, obj, d, port):
             return "build failed"
         use[name] = obj
-    cmd = [GXX] + list(use.values()) + list(test) + ["-lws2_32", "-limm32", "-o", exe]
+    cmd = [GXX] + list(use.values()) + list(test) + LDFLAGS + ["-lws2_32", "-limm32", "-o", exe]
     linked = subprocess.run(cmd, capture_output=True, text=True, env=env)
     if linked.returncode != 0:
         if not rebuilt:

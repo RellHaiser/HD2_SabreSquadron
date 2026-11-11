@@ -698,3 +698,74 @@ particles and the surface marks. Files are served from memory.
   process.
 - **Not in part 1:** sphere sweeps and sliding (`collision_sweep.cpp`, `collision_body.cpp`):
   part 2.
+
+## New harness: collision part 2 (sphere sweeps, slides, body sweeps, 2026-11-11)
+
+- **The build:** the same suite (`collision`; `collision_test.exe sweeps` runs part 2 alone),
+  tests in `collision/sweep_test.inc`, and a new suite `collision.sweepdiff` (`sweep_diff.cpp`).
+- **The original executable as the oracle (`collision/original_exe.h`):**
+  - the unpacked `HD2_SabreSquadron_unpacked.exe` is put at its own base, 0x400000, inside the
+    test process. The test is linked at 0x20000000, relaunches itself suspended with that range
+    held, copies the sections by hand and binds the imports to the game's DLLs;
+  - its `SphereTest`, `SlideSphere`, `MoveSpheres`, `MoveSpheresStepping` and `MoveSpheresLow` are
+    called on the port's own world (the same layout). The dynamic grid is passed as a copy with
+    MSVC6's 16-byte vectors;
+  - results must match within the x87's 24-bit precision against the port's floats.
+- **Also my own exact sweep** (a ternary search and bisection on the distance to each shape's
+  core). Where the original's sweeps approximate, mine differs and the original decides.
+- **Scenes:**
+  - the levels' primitives (23,280 sweeps);
+  - a level of my own: triangles of every kind, a tilted rectangle, capsule and convex primitives;
+  - dynamic volumes of every sphere-sweep shape: boxes, world boxes, spheres, cylinders, the
+    second sphere kind, scaled boxes, capsules and convex hulls;
+  - ground of my own for the bodies: a floor, steps, walls, ramps, a V of steep slopes, a narrow
+    slot, a roof, an overhang, humans standing and lying, crates.
+- **Results against the original:**
+  - `SphereTest`: every query agrees (54,594).
+  - Body moves: `MoveSpheres` 3,500 of 3,501, `MoveSpheresStepping` 3,561 of 3,561,
+    `MoveSpheresLow` 3,498 of 3,498. The one other is accounted for as below.
+  - `SlideSphere`: about 99% agree; every difference has a shown cause.
+- **How chain differences are judged:** slides and body moves are chains, and each step's rounding
+  goes into the next. The steps are written out again in the test and must give the port's chain
+  over the port's own sweeps. A difference is accounted for only if one of these holds:
+  - over the original's sweeps, the written-out steps give the original's chain or the port's;
+  - the port moved 0.1 mm gives the original's;
+  - the chain was stuck touching one place when the two parted.
+- **`sweep_diff`, single shapes against the original:**
+  - boxes, edges, triangles and capsules (200,000 sweeps each);
+  - every static primitive kind through `SweepSpherePrimitive` (300,000 sweeps);
+  - all agree.
+- **Port bug found and fixed on main:** `MoveSpheresLow` starts again from just above the ground
+  after meeting a human. The original then caps the contacts at `g_moveIterations - 1`
+  (0x0071cf4e); the port used the full count.
+- **Original weaknesses, kept (the port matches each):**
+  - convex hulls take their entry however far ahead and keep it as a squared fraction of the move,
+    so a shape tested after one can be met beyond the move's end;
+  - a capsule volume is swept with the direction left in world space, so a laid-down capsule (a
+    lying human) is mostly missed;
+  - a capsule gives no contact when the move goes away from its axis, though it would meet an end
+    cap;
+  - box, rectangle and triangle sweeps test only the edges the leading point passes outside of,
+    take the first edge met, then one corner, and can miss an earlier contact;
+  - above 6 iterations, `MoveSpheresLow` can write an 11th contact past its 10-entry table. The
+    locomotion mostly uses 2–6; one branch adds 1.
+- **A data convention:** a triangle whose corners, sorted by x, wind along its stored normal needs
+  `COLLISION_TRIANGLE_REVERSED` for sphere sweeps. The game's 2.3 million triangles have none; the
+  test's own files (`Tri`) now set it.
+- **Results:** 1,275,855 collision checks (part 1 and 2).
+  - `collision_sweep.cpp`: lines 567 of 567, functions 23 of 23, branch outcomes 605 of 635.
+  - `collision_body.cpp`: lines 224 of 224, functions 8 of 8, branch outcomes 151 of 156.
+  - `mutations/mutate_collision2.py`: 736 mutants, 534 killed, 71 don't build, 131 survived: 76
+    boundary comparisons, the rest equivalent, within tolerance or not reached (listed). 2 more are
+    killed by `sweep_diff`.
+- **Harness lessons (my mistakes):**
+  - the game's DLLs reset the FPU to 53 bits, and until restored the original disagreed;
+  - the original writes 16-byte vectors, which overran 12-byte locals;
+  - the test's own triangles lacked the reversed flag, so half were inside-out;
+  - a first, looser chain excuse (my copy of the steps matching the original) proved the copy, not
+    the port: it hid the `MoveSpheresLow` bug's cases and, later, mutants B 81/82.
+- **Not exercised:**
+  - convex sweeps alone at function level (only through `SphereTest`);
+  - the step going up and meeting something above (B 231);
+  - the low sweep's restart after a human when contacts were already recorded (B 276/279);
+  - mutrun doesn't run `sweep_diff`.

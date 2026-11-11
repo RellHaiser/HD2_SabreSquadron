@@ -277,7 +277,7 @@ S_CollisionVolume *C_CollisionWorld::MoveSpheresLow(S_MoveContacts &contacts) co
                 lifted = false;
                 last = nullptr;
                 touched = 0;
-                most = static_cast<int>(g_moveIterations);
+                most = static_cast<int>(g_moveIterations - 1.0f);   // (one fewer the second time: 0x0071cf4e)
                 continue;
             }
             S_vector step = move;

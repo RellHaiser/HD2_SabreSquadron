@@ -54,6 +54,8 @@ CARS, MISSIONS = "cars", "missions"
 EQUIPMENT_SAVE = os.environ.get("EQUIPMENT_SAVE", os.path.join(TEMP, "eq_saves", "original_SMCAM_quick.sav"))
 # The items suite's table: the items.sav the original game read when that save was made (env ITEMS_SAV).
 ITEMS_SAV = os.environ.get("ITEMS_SAV", r"G:\Hidden & Dangerous 2\Tables\items.sav")
+# The original game executable, unpacked (the collision suites call its functions: collision/original_exe.h).
+ORIGINAL_EXE = os.environ.get("HD2_ORIGINAL_EXE", r"H:\Other HD2 Files\HD2_SabreSquadron_unpacked.exe")
 FACTORY_CHECKS = ["campaignscreens", "description", "equipmentdesc", "equipmentpanel", "equipmentscreen", "factory",
                   "gamemenu", "herostats", "loadout", "mainmenu", "menu", "menurun", "menusoldier", "mpsettings",
                   "options", "player", "replication", "screen", "storelist"]
@@ -120,8 +122,11 @@ SUITES = [
     # (The human's side of the items: items_test.cpp built with HUMAN_ITEMS_TEST, game/human_items.cpp linked.)
     T("items.human", "items/build_human.bat", TMP + r"\human_items_test.exe", needs=("mingw", "equipment_save", "items_sav")),
     T("actors", "actors/build.bat", TMP + r"\actors_test.exe", needs=("mingw",)),
-    # (The levels' collision files: MISSIONS_DIR, the unpacked missions.)
+    # (The levels' collision files: MISSIONS_DIR, the unpacked missions; the sweeps are also compared with the
+    # original executable's, HD2_ORIGINAL_EXE, and the game's DLLs, HD2_GAME_DIR: without them, with my own only.)
     T("collision", "collision/build.bat", TMP + r"\collision_test.exe", needs=("mingw", "missions")),
+    # (The sphere sweeps against one shape, against the original's functions.)
+    T("collision.sweepdiff", "collision/sweep_diff.bat", TMP + r"\sweep_diff.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
@@ -569,7 +574,8 @@ def missing(s, ctx):
     have = dict(mingw=os.path.exists(MINGW), msvc=os.path.exists(VCVARS),
                 data=os.path.isdir(os.path.join(ctx["data"], "MISSIONS")),
                 mp_data=bool(ctx["mp_data"]) and os.path.isdir(ctx["mp_data"] or ""),
-                cars=CARS in ctx, missions=MISSIONS in ctx, equipment_save=os.path.isfile(EQUIPMENT_SAVE), items_sav=os.path.isfile(ITEMS_SAV))
+                cars=CARS in ctx, missions=MISSIONS in ctx, equipment_save=os.path.isfile(EQUIPMENT_SAVE), items_sav=os.path.isfile(ITEMS_SAV),
+                original_exe=os.path.isfile(ORIGINAL_EXE))
     lost = [n for n in s["needs"] if not have.get(n, False)]
     if s.get("hardcoded_data") and os.path.normcase(os.path.normpath(ctx["data"])) != os.path.normcase(r"H:\HD2_Unpacked"):
         lost.append("data at H:\\HD2_Unpacked (hard-coded in %s)" % s["bat"])
