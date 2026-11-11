@@ -167,7 +167,7 @@ public:
 private:
     // Client side: actors the server announced.
     C_Actor *ClientCreateMine(int id, int ownerId, int itemId, const S_vector &pos, const S_vector &dir);   // 0x00478d30
-    C_Actor *LoadMine(int itemId, int id);                          // 0x00478e50
+    C_Actor *LoadMine(int id, int itemId);                            // 0x00478e50
     void SendCreateMine(int id, int ownerId, int itemId, const S_vector &pos, const S_vector &dir);   // 0x00478cc0
     void CreateBreakables();                                        // 0x004794d0
     void CreateBreakablesOnClient();                                // 0x00479530

@@ -600,3 +600,54 @@ particles and the surface marks. Files are served from memory.
   outcomes 490 of 526 (93 %); the rest are inline null checks and unreachable branches.
   `mutations/mutate_items4.py`: 260 mutants, 215 killed, 29 don't build, 16 survived
   (equivalent, leaks, a debug message, one unreachable; listed).
+
+## New harness: actors (the actor lists, `actors_module.cpp`, 2026-11-10)
+
+- **The build:** suite `actors` (`actors/build.bat`). It links the real `game/actors_module.cpp`
+  with `net/bitstream.cpp` (the real message encoding, with a player table quantising 2 km in
+  1 cm steps), `common/chunk.cpp` and the LS3DF math. The actors are raw objects made by fake
+  creators in `g_actorCreators`, with a logging vtable (g++ slots). Faked and logged: the items
+  module (its own simple item records), the humans, frames and their data, collision, the net
+  game, the interface.
+- **`C_ActorsModule`:**
+  - creation: types out of range or without a creator; player slots and their use count; an
+    occupant replaced; a failing creator; frame data made or rebound;
+  - destruction: the last actor taking the freed place; frame data freed only when nothing else
+    uses it; delayed removal of humans and their lookup by id and as a human;
+  - the active set and the changes queued while it is iterated (`Tick` / `Update` order);
+  - free player slots; spawn points, the random one replayed from a seed;
+  - removals by role, including several in one tick;
+  - start, stop and restart by role; the enemy counts (every condition, carnage enemies, co-op);
+  - save / load byte layout and activity; state and messages (the 10-bit index, player slots
+    to the human's handler); the message helpers; `Clear`; the destructors.
+- **`C_TemporaryActorsList`:**
+  - creation (ids, start by role) and destruction (deferred while iterating, stop by role, the
+    interface told on clients); `DestroyMinesOf`;
+  - mines: laid (the owner's item taken, the multiplayer message's fields), on clients, loaded;
+  - dropped items and the client's version (new or taken from the owner; the exact facing);
+  - range and nearby queries; debris; breakable fences (on clients only without the server bit);
+  - the mission start: armed mines laid by a ray 0.5 m above, 2 m down, or at their place; items
+    at their place and rotation; multiplayer pick-ups kept; stop / restart by role;
+  - save / load chunks and activity; `WriteState` → `ReadState` round trip from server to client
+    through the real encoding; the 16-bit next id; the messages and commands.
+- **Checked against the original's asm:**
+  - `TickRemovals` (0x00476860): the entry moved into a freed place has its time taken off
+    once. The port did the same, but its comment said twice; the comment is corrected.
+  - The role tests of `Tick` / `Update` (0x00476080 / 0x00476160): a pure server removes in
+    both, a client in `Update` only, a local game never.
+  - `LoadMine` (0x00478e50) and its call (0x004781f5) take the id, then the item. The header's
+    parameter names were swapped; corrected.
+- **Original weaknesses, kept:**
+  - a saved mine whose model doesn't load makes `LoadGame` call through null;
+  - `DestroyMinesOf` skips a mine of the owner moved into a freed place;
+- **A difference from the original on main, not changed:** `C_TemporaryActorsList::LoadGame`
+  starts each chunk with no actor. The original (0x00477f50) resets only the active flag (to 1)
+  and keeps the previous chunk's actor (EDI). So a debris or unknown chunk that follows an
+  inactive item, mine or fence switches that actor on in the original, and not in the port.
+- **Results:** 672 checks. `actors_module.cpp`: lines 656 of 656, functions 80 of 82 (the two
+  destructors' other compiled copies), branch outcomes 467 of 472 (99 %).
+  `mutations/mutate_actors.py`: 373 mutants, 312 killed, 41 don't build, 20 survived
+  (equivalent, out-of-range undefined behaviour, debug text; listed).
+- **A harness note:** a crash at exit (static destructors after the fake creators) left
+  processes that `taskkill` couldn't stop, holding the executable. They had to be ended through
+  WMI (`Win32_Process.Terminate`). The test now turns off crash dialogs (`SetErrorMode`).

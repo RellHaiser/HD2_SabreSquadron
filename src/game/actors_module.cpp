@@ -465,8 +465,8 @@ void C_ActorsModule::TickRemovals(int timeDelta)
         if (IsClient())
             GetGame()->GetInterface()->OnActorEvent(INTERFACE_ACTOR_DELETED, actor);
         g_actorCreators[actor->GetType()]->Destroy(actor);
-        // The last entry takes this place and is checked next (its time is
-        // decremented a second time this tick, as in the original).
+        // The last entry takes this place and is checked next (not reached yet,
+        // so its time is decremented once, as in the original).
         if (m_removed.size() > 1) {
             m_removed[i] = m_removed.back();
             --i;
