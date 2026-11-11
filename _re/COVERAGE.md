@@ -398,6 +398,31 @@ game runs it, because a loaded quaternion goes through `SetRot`, which normalise
   (`OnItemCreated/Added/Removed`), `SetFlashlight`, `UpdateLensFlare`, and LoadGame's
   special-object paths other than the scene's.
 
+### Equipment part 3: the hands item, the item callbacks, the flashlight, the lifetime (2026-11-10)
+
+- **Tests:**
+  - `ShowHandsItem` (hide, show, toggle) and `PutAwayHandsItem` (small things hidden, rifles on
+    the back, back into the hand, the first-person view told for a client's active player);
+  - `OnItemCreated/Added/Removed` for every container, with hand-overs to and from living,
+    dead and put-away humans;
+  - `SetFlashlight` and `UpdateLensFlare` (lights and sectors get their own fake vtables,
+    because their slots reuse the model's offsets);
+  - LoadGame's hands links and every source of the special object (belt kinds 14 / 19,
+    type 0xE5, thrown items, activity props, actors, the scene);
+  - `Init`, `Done`, `Reset`, the destructor, and save / load on a closed chunk.
+- **Checked against the original:** `PutAwayHandsItem` sets the put-away flag before it reads
+  the support hand (0x0079211b, 0x0079212c). So putting a rifle away never lets the support
+  hand go at that point. The port matches.
+- **Results:** 971 checks. Mutations: `mutate_equipment3.py` 196 mutants, 177 killed, 16 don't
+  build, 3 survived (equivalent); `mutate_equipment3c.py` 21 mutants, 19 killed, 2 don't
+  build, none survived.
+- **human_equipment.cpp in all: 1,273 of 1,274 lines, 42 of 42 functions, 1,055 of 1,156
+  branch outcomes (91 %).** The one line not run is the cap of 4 frames a holster slot: no slot
+  of the real table has more than 3 dummies.
+- **Mutations over the file:** 989 mutants in parts 1, 2a, 2b, 3 and 3c: 889 killed, 73 don't
+  build, 27 survived, all equivalent (listed per file). Part 1's lift reset and part 2b's lens
+  flare were caught once part 3's tests were in.
+
 `mutrun.py`: it now takes the g++ line with the most `%SRC%` sources, because the equipment
 bat compiles math.cpp first. Env `MUT_EXTRA_SRCS` / `MUT_EXTRA_INC` add sources from outside
 `src/`, which are compiled once and not mutated. The equipment run:

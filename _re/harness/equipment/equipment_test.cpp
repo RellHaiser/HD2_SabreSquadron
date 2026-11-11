@@ -2,7 +2,9 @@
 // save / load against the original's own save. Part 2a: AttachModel / DetachModel (the frames get world matrices:
 // the local one through the parent's; the long gun's geometry against a reference written from the asm's steps and
 // constants). Part 2b: the animation events, Update (the long gun's lift against a stepping reference), the
-// temporary model names, the small helpers. The engine, the human and the items faked; game/equipment_frames.cpp,
+// temporary model names, the small helpers. Part 3: the hands item shown / put away, the item callbacks, the
+// flashlight and lens flare, LoadGame's hands links and special-object sources, Init / Done / Reset / the destructor.
+// The engine, the human and the items faked; game/equipment_frames.cpp,
 // common/chunk.cpp, common/c_str.cpp and the LS3DF port's math (ls3df/src/math/math.cpp) linked as they are.
 // MinGW; build.bat; run equipment_test.exe ("equipment: N checks, 0 failures").
 //
@@ -121,6 +123,9 @@ bool g_localPlayer, g_firstPerson;
 bool g_hitSomething;                                                     // CollisionSphereTest's answer
 std::map<int, int> g_itemDefLookups;                                     // GetItemDef calls by type id
 I3D_frame *g_handsItemFrame;                                             // C_Human::GetHandsItemFrame
+std::map<int, C_Item *> g_beltItems;                                     // C_Human::FindBeltItem by kind
+std::map<int, I3D_frame *> g_activityProps;                              // GetActivityProp
+C_Human *g_activePlayer;                                                 // the player team's active player
 S_vector g_hitPos;
 }
 
@@ -142,15 +147,15 @@ void C_ItemDef::Save(int *, void *) {}
 void C_ItemDef::Load(int *, const void *) {}
 C_ItemContainer::C_ItemContainer(int) {}
 C_Item *C_Human::FindItemByUid(int uid) const { return g_itemsByUid.count(uid) ? g_itemsByUid[uid] : nullptr; }
-C_Item *C_Human::FindBeltItem(int) const { return nullptr; }
+C_Item *C_Human::FindBeltItem(int kind) const { return g_beltItems.count(kind) ? g_beltItems[kind] : nullptr; }
 I3D_frame *C_Human::GetHandsItemFrame() const { return g_handsItemFrame; }
 bool C_Human::IsLocalPlayer() const { return g_localPlayer; }
-C_Human *C_Team::GetActivePlayer() const { return nullptr; }
+C_Human *C_Team::GetActivePlayer() const { return g_activePlayer; }
 namespace {
 std::map<int, C_Actor *> g_actorsByIndex;
 }
 C_Actor *C_ActorsModule::GetActor(int index) const { return g_actorsByIndex.count(index) ? g_actorsByIndex[index] : nullptr; }
-I3D_frame *GetActivityProp(int) { return nullptr; }
+I3D_frame *GetActivityProp(int i) { return g_activityProps.count(i) ? g_activityProps[i] : nullptr; }
 
 // ---- the human's parts
 void C_HumanWeaponPose::SetModel(I3D_frame *model, int behaviour) { Log("pose model " + Name(model) + " " + std::to_string(behaviour)); }
@@ -162,15 +167,18 @@ void C_HumanWeaponPose::SetSupportHand(bool on)
     m_hand = on ? (m_hand | 0x80000000u) : (m_hand & ~0x80000000u);
 }
 void C_HumanWeaponPose::RaiseWeapon(int v) { Log("pose raise " + std::to_string(v)); }
-void C_HumanWork::SetCarryMode(int mode, bool b) { Log("carry " + std::to_string(mode) + " " + std::to_string(b)); }
+void C_HumanWork::SetCarryMode(int mode, bool b)
+{
+    Log("carry " + std::to_string(mode) + " " + std::to_string(b) + " forced " + std::to_string(m_forced));
+}
 void C_HumanAnimMixer::FadeOutTrack(int a, int b) { Log("fadeout " + std::to_string(a) + " " + std::to_string(b)); }
 I3D_frame *C_HumanMovement::GetSectorFrame() const { return nullptr; }
 void C_HumanMovement::RemoveCollision(bool b) { Log("removecollision " + std::to_string(b)); }
 void C_HumanMovement::RestoreCollision(bool b) { Log("restorecollision " + std::to_string(b)); }
 void C_HumanMovement::SetModelVisible(bool on) { Log("modelvisible " + std::to_string(on)); }
 void C_HumanVisual::RebuildShadow() { Log("rebuildshadow"); }
-void C_HumanVisual::Unknown7585d0(bool) {}
-void C_FirstPersonView::OnInventoryEvent(int, int) {}
+void C_HumanVisual::Unknown7585d0(bool on) { Log("visual7585d0 " + std::to_string(on)); }
+void C_FirstPersonView::OnInventoryEvent(int e, int n) { Log("fpv " + std::to_string(e) + " " + std::to_string(n)); }
 
 // ---- the game, sound, caches
 C_game *GetGame() { return reinterpret_cast<C_game *>(g_gameBytes); }
@@ -306,6 +314,18 @@ void __stdcall F_SetWorldDir(I3D_frame *self, const S_vector &d, float)
     self->SetLocalMatrix(m);
 }
 void __stdcall F_UpdateBound(I3D_frame *self) { self->m_frameFlags |= FRMFLAGS_BOUND_VALID; }
+// A light's slots (0x74..0x9C).
+void __stdcall F_LightType(I3D_frame *self, int type) { Log("lighttype " + Name(self) + " " + std::to_string(type)); }
+void __stdcall F_LightColor(I3D_frame *self, const S_vector &c) { Log("lightcolor " + Name(self) + " " + Vec(c)); }
+void __stdcall F_LightPower(I3D_frame *self, float p) { Log("lightpower " + Name(self) + " " + Vec(S_vector(p, 0, 0))); }
+void __stdcall F_LightSpecular(I3D_frame *self, float p) { Log("lightspecular " + Name(self) + " " + Vec(S_vector(p, 0, 0))); }
+void __stdcall F_LightAmbient(I3D_frame *self, float p) { Log("lightambient " + Name(self) + " " + Vec(S_vector(p, 0, 0))); }
+void __stdcall F_LightRange(I3D_frame *self, float r) { Log("lightrange " + Name(self) + " " + Vec(S_vector(r, 0, 0))); }
+void __stdcall F_LightAttenuation(I3D_frame *self, float a, float b, float c)
+{
+    Log("lightatten " + Name(self) + " " + Vec(S_vector(a, b, c)));
+}
+void __stdcall F_AddLight(I3D_frame *self, I3D_frame *light) { Log("addlight " + Name(self) + " " + Name(light)); }
 // A sector's RemoveLight (0x78).
 void __stdcall F_RemoveLight(I3D_frame *self, I3D_frame *light) { Log("removelight " + Name(self) + " " + Name(light)); }
 void __stdcall F_Tick(I3D_frame *self, int t) { Log("tick " + Name(self) + " " + std::to_string(t)); }
@@ -320,6 +340,7 @@ void __stdcall F_LinkTo(I3D_frame *self, I3D_frame *parent, uint32_t flags)
 {
     Log("link " + Name(self) + " " + Name(parent) + " " + std::to_string(flags));
     self->m_parent = parent;
+    self->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
 }
 I3D_frame *__stdcall F_FindChild(I3D_frame *self, const char *name, uint32_t)
 {
@@ -379,6 +400,12 @@ struct {
 void __stdcall F_UpdateFrameSector(void *, I3D_frame *f, const S_vector &p) { Log("sector " + Name(f) + " " + Vec(p)); }
 void __stdcall F_MarkTracked(void *, I3D_frame *f) { Log("tracked " + Name(f)); }
 std::map<std::string, I3D_frame *> g_sceneFrames;
+I3D_frame *g_sceneSector;
+I3D_frame *__stdcall F_SceneGetSector(void *, const S_vector &pos)
+{
+    Log("getsector " + Vec(pos));
+    return g_sceneSector;
+}
 I3D_frame *__stdcall F_SceneFindFrame(void *, const char *name, uint32_t)
 {
     Log(std::string("scenefind ") + name);
@@ -2532,6 +2559,840 @@ void TestHelpers()
         CHECK(g_log.empty());
     }
 }
+
+// ============================================================ part 3: the hands item, the callbacks, the flashlight
+
+void *g_lightVt[128];
+void *g_sectorVt[128];
+// A light frame and a sector frame with their own slots.
+I3D_frame *Light(const char *name)
+{
+    std::memcpy(g_lightVt, g_frameVt, sizeof g_lightVt);
+    g_lightVt[0x74 / 4] = reinterpret_cast<void *>(F_LightType);
+    g_lightVt[0x7C / 4] = reinterpret_cast<void *>(F_LightColor);
+    g_lightVt[0x88 / 4] = reinterpret_cast<void *>(F_LightPower);
+    g_lightVt[0x8C / 4] = reinterpret_cast<void *>(F_LightSpecular);
+    g_lightVt[0x90 / 4] = reinterpret_cast<void *>(F_LightAmbient);
+    g_lightVt[0x98 / 4] = reinterpret_cast<void *>(F_LightRange);
+    g_lightVt[0x9C / 4] = reinterpret_cast<void *>(F_LightAttenuation);
+    I3D_frame *f = MakeFrame(FRAME_LIGHT, name);
+    *reinterpret_cast<void ***>(f) = g_lightVt;
+    return f;
+}
+I3D_frame *Sector(const char *name)
+{
+    std::memcpy(g_sectorVt, g_frameVt, sizeof g_sectorVt);
+    g_sectorVt[0x74 / 4] = reinterpret_cast<void *>(F_AddLight);
+    g_sectorVt[0x78 / 4] = reinterpret_cast<void *>(F_RemoveLight);
+    I3D_frame *f = MakeFrame(FRAME_SECTOR, name);
+    *reinterpret_cast<void ***>(f) = g_sectorVt;
+    return f;
+}
+
+void TestShowHands()
+{
+    S_Rig r = Rig();
+    I3D_frame *rifle = MakeFrame(FRAME_MODEL, "shown");
+    // No model or no change: false, nothing.
+    CHECK(!r.eq->ShowHandsItem(false, 0, false) && g_log.empty());
+    r.eq->m_handsModel = rifle;
+    r.eq->m_handsShown = true;
+    CHECK(!r.eq->ShowHandsItem(true, 0, false) && g_log.empty());
+    // Hidden: the support hand let go, pose mode 0, updated, grips 0 / 2 (the second and the first), false all the same.
+    r.pose->m_hand = 0x80000000u;
+    rifle->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+    CHECK(!r.eq->ShowHandsItem(false, 0, false));
+    CHECK(!r.eq->m_handsShown && Count("pose support 0") == 1 && Count("pose mode 0") == 1 && Count("update shown") == 1 &&
+          r.mv->m_morph.m_grip2Request == 0 && r.mv->m_morph.m_gripRequest == 2 && Same(rifle->GetPos(), S_vector(1, 2, 3)));
+    // Shown: mode 1, at its origin, updated, grips 0 / 2 the other way, true.
+    g_log.clear();
+    CHECK(r.eq->ShowHandsItem(true, 0, false));
+    CHECK(r.eq->m_handsShown && Count("pose mode 1") == 1 && Same(rifle->GetPos(), S_vector(0, 0, 0)) && Count("update shown") == 1 &&
+          r.mv->m_morph.m_gripRequest == 0 && r.mv->m_morph.m_grip2Request == 2 && !Logged("pose support"));
+    // Toggled: the other way, mode 2.
+    g_log.clear();
+    CHECK(!r.eq->ShowHandsItem(true, 0, true) && !r.eq->m_handsShown && Count("pose mode 2") == 1);
+    g_log.clear();
+    CHECK(r.eq->ShowHandsItem(false, 0, true) && r.eq->m_handsShown && Count("pose mode 2") == 1);
+}
+
+void TestPutAway()
+{
+    auto rig = [](int behaviour, bool model) {
+        S_Rig r = Rig();
+        GiveWork(r);
+        Def(950 + behaviour, behaviour);
+        Item(950 + behaviour, 95, "putitem");
+        r.eq->m_handsUid = 95;
+        r.eq->m_handsTypeId = 950 + behaviour;
+        if (model)
+            r.eq->m_handsModel = Gun("putaway", S_vector(0.0f, 0.0f, 0.3f), false);
+        g_log.clear();
+        return r;
+    };
+    // Put away, a small thing (behaviour 0): hidden, the flag set; the pose's model none, the carry 0 / 0, carry mode
+    // 100 forced.
+    {
+        S_Rig r = rig(0, true);
+        r.eq->PutAwayHandsItem(true);
+        CHECK(r.eq->m_flags == EQUIPMENT_HANDS_PUT_AWAY && Count("off putaway") == 1 && !Logged("link putaway"));
+        CHECK(Count("pose model null -1") == 1 && Count("carry 100 1 forced 1") == 1 && !r.h->human->GetWork()->m_forced);
+        CHECK(r.mv->m_request.carryMode == 0 && r.mv->m_handsCarryState == 0 && !Logged("fpv"));
+    }
+    // A rifle (5): onto the back (place 10), released the same way. (The flag is set before event 1, so a support hand
+    // is not let go there: event 1 only clears the pending mark.)
+    {
+        S_Rig r = rig(5, true);
+        r.pose->m_hand = 0x80000000u;
+        r.eq->m_flags = EQUIPMENT_EVENT0_PENDING;
+        r.mv->m_request.carryMode = 7;
+        r.eq->PutAwayHandsItem(true);
+        CHECK(r.eq->m_flags == EQUIPMENT_HANDS_PUT_AWAY && Count("pose support 0") == 0 && Count("link putaway j_d 2") == 1 &&
+              Count("carry 100 1 forced 1") == 1 && r.mv->m_request.carryMode == 0);
+        // Again: already put away (a rifle clears the flag first, so it goes again).
+        g_log.clear();
+        r.eq->PutAwayHandsItem(true);
+        CHECK(Count("link putaway j_d 2") == 1);
+        // Back: into the hand, the carry mode of the item forced, the hands carry 3 / 3; a pending event 0 done; the
+        // flags cleared.
+        r.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY | EQUIPMENT_EVENT0_PENDING;
+        r.pose->m_hand = 0;
+        g_log.clear();
+        r.eq->PutAwayHandsItem(false);
+        CHECK(Count("link putaway j_HW1 6") == 1 && Count("carry 3 1 forced 1") == 1 && r.mv->m_request.carryMode == 3 &&
+              r.mv->m_handsCarryState == 3 && Count("pose support 1") == 1 && r.eq->m_flags == 0 && !Logged("fpv"));
+        g_log.clear();
+        r.eq->PutAwayHandsItem(false);
+        CHECK(g_log.empty());
+    }
+    // No model: a rifle's flag set, nothing released; the item unknown and the flag set: nothing; uid below 0: the
+    // rifle path without the item.
+    {
+        S_Rig r = rig(5, false);
+        r.eq->PutAwayHandsItem(true);
+        CHECK(r.eq->m_flags == EQUIPMENT_HANDS_PUT_AWAY && !Logged("pose model") && !Logged("carry"));
+        r.eq->m_handsUid = 96;
+        g_log.clear();
+        r.eq->PutAwayHandsItem(true);
+        CHECK(g_log.empty());
+        // Back without a model: only the flags.
+        r.eq->PutAwayHandsItem(false);
+        CHECK(r.eq->m_flags == 0 && !Logged("carry"));
+        S_Rig n = rig(0, true);
+        n.eq->m_handsUid = -1;
+        n.eq->PutAwayHandsItem(true);
+        CHECK(n.eq->m_flags == EQUIPMENT_HANDS_PUT_AWAY && Count("link putaway j_d 2") == 0 && Count("off putaway") == 1);
+        // Uid 0 is an item (a small thing: hidden).
+        S_Rig z = rig(0, true);
+        Item(950, 0, "zeroitem");
+        z.eq->m_handsUid = 0;
+        z.eq->PutAwayHandsItem(true);
+        CHECK(Count("off putaway") == 1 && !Logged("link putaway j_d"));
+    }
+    // The limits: behaviour 3 is a rifle (onto the back), 8 a small thing; told apart without a model too (a small
+    // thing is released, a rifle not).
+    {
+        S_Rig r = rig(3, true);
+        r.eq->PutAwayHandsItem(true);
+        CHECK(Count("link putaway j_d 2") == 1);
+        S_Rig e = rig(8, false);
+        e.eq->PutAwayHandsItem(true);
+        CHECK(Count("pose model null -1") == 1);
+        S_Rig z = rig(0, false);
+        Item(950, 0, "zeroitem");
+        z.eq->m_handsUid = 0;
+        z.eq->PutAwayHandsItem(true);
+        CHECK(Count("pose model null -1") == 1);
+    }
+    // The first-person view told (put away 9, drawn 8) when this is a client's active player.
+    {
+        S_Rig r = rig(5, true);
+        g_gameRole = GAME_ROLE_CLIENT;
+        g_activePlayer = r.h->human;
+        r.eq->PutAwayHandsItem(true);
+        CHECK(Count("fpv 9 0") == 1);
+        g_log.clear();
+        r.eq->PutAwayHandsItem(false);
+        CHECK(Count("fpv 8 0") == 1);
+        S_Rig s = rig(0, true);
+        g_gameRole = GAME_ROLE_CLIENT;
+        g_activePlayer = s.h->human;
+        s.eq->PutAwayHandsItem(true);
+        CHECK(Count("fpv 9 0") == 1);
+        // Another player active, or not a client: not told.
+        S_Rig o = rig(5, true);
+        g_gameRole = GAME_ROLE_CLIENT;
+        g_activePlayer = r.h->human;
+        o.eq->PutAwayHandsItem(true);
+        CHECK(!Logged("fpv"));
+        g_activePlayer = nullptr;
+        g_gameRole = GAME_ROLE_LOCAL;
+    }
+}
+
+void TestItemCallbacks()
+{
+    // Created: each container's model set and attached; the belt counted; the hands: a sidearm counted, the model set
+    // (not attached), the carry 3 / 3, carry mode 3 forced (not 'now'), the visual told.
+    {
+        S_Rig r = Rig();
+        GiveWork(r);
+        Def(960, 16);
+        r.eq->OnItemCreated(Item(960, 961, "chead"), ITEM_CONTAINER_HEAD);
+        CHECK(r.eq->m_headModel == g_itemFrames[g_itemsByUid[961]] && r.eq->m_headUid == 961 && Count("link chead j_f 2") == 1);
+        Def(962, 5);
+        I3D_frame *cgun = Gun("cgun", S_vector(0, 0, 0.3f), false);
+        C_Item *gunItem = Item(962, 962, nullptr);
+        g_itemFrames[gunItem] = cgun;
+        r.eq->OnItemCreated(gunItem, ITEM_CONTAINER_LONG_GUN);
+        CHECK(r.eq->m_longGunModel == cgun && r.eq->m_longGunTypeId == 962 && Count("link cgun j_d 2") == 1);
+        r.eq->OnItemCreated(Item(960, 963, "cpack"), ITEM_CONTAINER_BACKPACK);
+        CHECK(r.eq->m_backpackUid == 963 && r.eq->m_backpackTypeId == 960 && Count("link cpack j_d 2") == 1);
+        Def(964, ITEM_BEHAVIOUR_SIDEARM);
+        g_log.clear();
+        r.eq->OnItemCreated(Item(964, 964, "cpistol"), ITEM_CONTAINER_HANDS);
+        CHECK(r.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 1 && Name(r.eq->m_handsModel) == "cpistol" && r.eq->m_handsUid == 964 &&
+              !Logged("link cpistol"));
+        CHECK(r.mv->m_request.carryMode == 3 && r.mv->m_handsCarryState == 3 && Count("carry 3 0 forced 1") == 1 &&
+              Count("visual7585d0 1") == 1);
+        Def(965, 5);
+        r.eq->OnItemCreated(Item(965, 965, "crifle"), ITEM_CONTAINER_HANDS);
+        CHECK(r.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 1);
+        Def(966, 99, ITEM_AMMO, 0);
+        r.eq->OnItemCreated(Item(966, 966, nullptr), ITEM_CONTAINER_BELT);
+        r.eq->OnItemCreated(Item(966, 967, nullptr), ITEM_CONTAINER_BELT);
+        CHECK(r.eq->m_holsters[2].itemCount == 2);
+        g_log.clear();
+        r.eq->OnItemCreated(Item(966, 968, "cother"), ITEM_CONTAINER_UNIFORM);
+        CHECK(g_log.empty());
+    }
+    // Added from nobody: attached at once; from a living human's hands: only set (that human's give event attaches
+    // it), unless that human's hands item is put away (attached, and that human's hands forgotten).
+    for (int container : {ITEM_CONTAINER_HEAD, ITEM_CONTAINER_LONG_GUN, ITEM_CONTAINER_BACKPACK}) {
+        for (int giverState = 0; giverState < 5; ++giverState) {     // none, alive, alive put away, dead, alive at 1
+            S_Rig giver = Rig();
+            S_Rig r = Rig();
+            GiveWork(r);
+            Def(970, 5);
+            C_Item *item = Item(970, 970, nullptr);
+            g_itemFrames[item] = Gun("added", S_vector(0, 0, 0.3f), false);
+            giver.eq->m_handsUid = 33;
+            if (giverState == 2)
+                giver.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+            if (giverState == 3)
+                giver.h->human->m_stats[STAT_HEALTH] = 0;
+            if (giverState == 4)
+                giver.h->human->m_stats[STAT_HEALTH] = 1;
+            g_log.clear();
+            r.eq->OnItemAdded(item, container, giverState ? reinterpret_cast<C_Actor *>(giver.h->human) : nullptr, ITEM_CONTAINER_HANDS, false);
+            const bool attached = giverState != 1 && giverState != 4;
+            CHECK(r.eq->GetModel(container == ITEM_CONTAINER_HEAD ? EQUIPMENT_PLACE_HEAD
+                                 : container == ITEM_CONTAINER_LONG_GUN ? EQUIPMENT_PLACE_LONG_GUN : EQUIPMENT_PLACE_BACKPACK) == g_itemFrames[item]);
+            CHECK(Logged("link added ") == attached && (giver.eq->m_handsUid == -1) == (giverState == 2));
+            // From another container of a living human: no hand-over.
+            if (giverState == 1) {
+                g_log.clear();
+                r.eq->OnItemAdded(item, container, reinterpret_cast<C_Actor *>(giver.h->human), ITEM_CONTAINER_BELT, false);
+                CHECK(Logged("link added "));
+            }
+        }
+    }
+    // The belt: counted; a put-away giver forgotten.
+    {
+        S_Rig giver = Rig();
+        S_Rig r = Rig();
+        Def(971, 99, ITEM_AMMO, 0);
+        giver.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        giver.eq->m_handsUid = 33;
+        r.eq->OnItemAdded(Item(971, 971, nullptr), ITEM_CONTAINER_BELT, reinterpret_cast<C_Actor *>(giver.h->human), ITEM_CONTAINER_HANDS, false);
+        CHECK(r.eq->m_holsters[2].itemCount == 1 && giver.eq->m_handsUid == -1);
+        g_log.clear();
+        r.eq->OnItemAdded(Item(971, 972, nullptr), ITEM_CONTAINER_UNIFORM, nullptr, ITEM_CONTAINER_HANDS, false);
+        CHECK(g_log.empty());
+    }
+    // Into the hands, alive: the take event will finish it (take from, its place by container; the attach flag; event 1
+    // when attaching); the carry mode forced, DC8 3, the hands carry 0 / 0.
+    struct S_From {
+        int container, place;
+    };
+    for (const S_From &f : {S_From{ITEM_CONTAINER_HEAD, EQUIPMENT_PLACE_HEAD}, S_From{ITEM_CONTAINER_LONG_GUN, EQUIPMENT_PLACE_LONG_GUN},
+                            S_From{ITEM_CONTAINER_HANDS, EQUIPMENT_PLACE_HANDS}, S_From{ITEM_CONTAINER_BACKPACK, EQUIPMENT_PLACE_BACKPACK},
+                            S_From{ITEM_CONTAINER_UNIFORM, -1}}) {
+        for (bool attach : {false, true}) {
+            S_Rig from = Rig();
+            S_Rig r = Rig();
+            GiveWork(r);
+            from.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;               // (a living giver's hands put away: attached here)
+            Def(975, 5);
+            C_Item *item = Item(975, 975, "taken");
+            r.pose->m_hand = 0x80000000u;
+            r.mv->m_handsCarryState = 3;
+            r.mv->m_request.carryMode = 7;
+            r.eq->m_takeFromPlace = 9;
+            g_log.clear();
+            r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(from.h->human), f.container, attach);
+            CHECK(r.mv->m_request.carryMode == 0);
+            CHECK(r.eq->m_handsModel == g_itemFrames[item] && r.eq->m_handsUid == 975 && r.eq->m_takeFromAttach == attach);
+            CHECK(r.eq->m_takeFrom == (f.place >= 0 ? from.h->human : nullptr) && (f.place < 0 || r.eq->m_takeFromPlace == f.place));
+            CHECK((Count("pose support 0") == 1) == attach && r.mv->m_unknownDC8 == 3 && r.mv->m_handsCarryState == 0 &&
+                  Count("carry 3 0 forced 1") == 1 && !Logged("link taken"));
+        }
+    }
+    // From the belt: the previous hands model detached at once, the new one set; no take.
+    {
+        S_Rig r = Rig();
+        GiveWork(r);
+        Def(976, 5);
+        Def(977, 5);
+        r.eq->SetModel(MakeFrame(FRAME_MODEL, "previous"), EQUIPMENT_PLACE_HANDS, 76, C_HumanEquipment::NO_TIME, 976);
+        C_Item *item = Item(977, 977, "frombelt");
+        r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, nullptr, ITEM_CONTAINER_BELT, false);
+        CHECK(Count("link previous null 0") == 1 && Name(r.eq->m_handsModel) == "frombelt" && r.eq->m_handsUid == 977 &&
+              r.eq->m_handsTypeId == 977 && r.eq->m_takeFrom == nullptr && r.eq->m_handsTime == 700);
+        // No previous model: nothing detached.
+        S_Rig n = Rig();
+        GiveWork(n);
+        n.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, nullptr, ITEM_CONTAINER_BELT, false);
+        CHECK(!Logged("link previous") && Name(n.eq->m_handsModel) == "frombelt");
+    }
+    // Put away here: from a human whose hands are not put away (dead: no hand-over): that human gives it (give to us,
+    // our give place the hands); else attached at once (onto the back).
+    {
+        S_Rig from = Rig();
+        S_Rig r = Rig();
+        GiveWork(r);
+        from.h->human->m_stats[STAT_HEALTH] = 0;
+        r.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        Def(978, 5);
+        C_Item *item = Item(978, 978, nullptr);
+        g_itemFrames[item] = Gun("awaygun", S_vector(0, 0, 0.3f), false);
+        r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(from.h->human), ITEM_CONTAINER_HANDS, false);
+        CHECK(from.eq->m_giveTo == r.h->human && r.eq->m_giveToPlace == EQUIPMENT_PLACE_HANDS && !Logged("link awaygun"));
+        from.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        from.eq->m_giveTo = nullptr;
+        g_log.clear();
+        r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(from.h->human), ITEM_CONTAINER_HANDS, false);
+        CHECK(from.eq->m_giveTo == nullptr && Count("link awaygun j_d 2") == 1);
+        g_log.clear();
+        r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, nullptr, ITEM_CONTAINER_HANDS, false);
+        CHECK(Count("link awaygun j_d 2") == 1);
+        g_log.clear();
+        r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(from.h->human), ITEM_CONTAINER_BELT, false);
+        CHECK(Count("link awaygun j_d 2") == 1);
+    }
+    // From a living giver not put away: nothing attached, no take; still the carry.
+    {
+        S_Rig from = Rig();
+        S_Rig r = Rig();
+        GiveWork(r);
+        Def(979, 5);
+        C_Item *item = Item(979, 979, "handed");
+        r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(from.h->human), ITEM_CONTAINER_HANDS, false);
+        CHECK(r.eq->m_takeFrom == nullptr && !Logged("link handed") && Count("carry 3 0 forced 1") == 1 && Name(r.eq->m_handsModel) == "handed");
+    }
+    // Into a dead human's hands: set; attached unless handed over; a sidearm counted.
+    {
+        S_Rig from = Rig();
+        S_Rig r = Rig();
+        r.h->human->m_stats[STAT_HEALTH] = 0;
+        Def(980, ITEM_BEHAVIOUR_SIDEARM);
+        C_Item *item = Item(980, 980, "deadhands");
+        r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, nullptr, ITEM_CONTAINER_BELT, false);
+        CHECK(Count("link deadhands j_HW1 6") == 1 && r.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 1 && !Logged("carry"));
+        g_log.clear();
+        r.eq->OnItemAdded(item, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(from.h->human), ITEM_CONTAINER_HANDS, false);
+        CHECK(!Logged("link deadhands") && r.eq->m_handsUid == 980);
+    }
+    // Removed: detached, unless handed over (into a living human's hands not put away); the belt counted down.
+    for (int container : {ITEM_CONTAINER_HEAD, ITEM_CONTAINER_LONG_GUN, ITEM_CONTAINER_BACKPACK}) {
+        for (int toState = 0; toState < 6; ++toState) {               // nobody, alive, alive put away, dead, alive belt, at 1
+            S_Rig to = Rig();
+            S_Rig r = Rig();
+            I3D_frame *m = MakeFrame(FRAME_MODEL, "removed");
+            const int place = container == ITEM_CONTAINER_HEAD ? EQUIPMENT_PLACE_HEAD
+                              : container == ITEM_CONTAINER_LONG_GUN ? EQUIPMENT_PLACE_LONG_GUN : EQUIPMENT_PLACE_BACKPACK;
+            r.eq->SetModel(m, place, 1, C_HumanEquipment::NO_TIME, -1);
+            if (toState == 2)
+                to.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+            if (toState == 3)
+                to.h->human->m_stats[STAT_HEALTH] = 0;
+            if (toState == 5)
+                to.h->human->m_stats[STAT_HEALTH] = 1;
+            g_log.clear();
+            r.eq->OnItemRemoved(Item(970, 990, nullptr), container, toState ? reinterpret_cast<C_Actor *>(to.h->human) : nullptr,
+                                toState == 4 ? ITEM_CONTAINER_BELT : ITEM_CONTAINER_HANDS);
+            const bool handOver = toState == 1 || toState == 5;
+            CHECK((r.eq->GetModel(place) == nullptr) == !handOver && Logged("link removed null") == !handOver);
+        }
+    }
+    {
+        S_Rig r = Rig();
+        Def(991, 99, ITEM_AMMO, 0);
+        r.eq->m_holsters[2].itemCount = 3;
+        r.eq->OnItemRemoved(Item(991, 991, nullptr), ITEM_CONTAINER_BELT, nullptr, ITEM_CONTAINER_COUNT);
+        CHECK(r.eq->m_holsters[2].itemCount == 2);
+        g_log.clear();
+        r.eq->OnItemRemoved(Item(991, 992, nullptr), ITEM_CONTAINER_UNIFORM, nullptr, ITEM_CONTAINER_COUNT);
+        CHECK(g_log.empty() && r.eq->m_holsters[2].itemCount == 2);
+    }
+    // Out of the hands: handed over: the model forgotten, the pose's none; to nobody: detached, the pose's none, carry
+    // 100 forced; dead: detached; else the give event will finish it (give to, its place by container); carry 0.
+    {
+        S_Rig to = Rig();
+        S_Rig r = Rig();
+        GiveWork(r);
+        Def(993, ITEM_BEHAVIOUR_SIDEARM);
+        C_Item *pistol = Item(993, 993, "outpistol");
+        auto arm = [&]() {
+            r.eq->SetModel(g_itemFrames[pistol], EQUIPMENT_PLACE_HANDS, 993, C_HumanEquipment::NO_TIME, 993);
+            r.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount = 3;
+            r.eq->m_giveTo = nullptr;
+            r.eq->m_giveToPlace = 9;
+            g_log.clear();
+        };
+        arm();
+        r.eq->OnItemRemoved(pistol, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(to.h->human), ITEM_CONTAINER_HANDS);
+        CHECK(r.eq->m_handsModel == nullptr && Count("pose model null -1") == 1 && !Logged("link outpistol") &&
+              r.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 2 && Count("carry 0 0 forced 1") == 1);
+        arm();
+        r.eq->OnItemRemoved(pistol, ITEM_CONTAINER_HANDS, nullptr, ITEM_CONTAINER_COUNT);
+        CHECK(Count("link outpistol null 0") == 1 && Count("pose model null -1") == 2 && Count("carry 100 0 forced 1") == 1 && !Logged("carry 0 "));
+        arm();
+        r.h->human->m_stats[STAT_HEALTH] = 0;
+        r.eq->OnItemRemoved(pistol, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(to.h->human), ITEM_CONTAINER_BELT);
+        CHECK(Count("link outpistol null 0") == 1 && !Logged("carry") && r.eq->m_giveTo == nullptr);
+        // An owner of health 1 is alive: given by the event.
+        arm();
+        r.h->human->m_stats[STAT_HEALTH] = 1;
+        r.eq->OnItemRemoved(pistol, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(to.h->human), ITEM_CONTAINER_BELT);
+        CHECK(!Logged("link outpistol") && Count("carry 0 0 forced 1") == 1);
+        r.h->human->m_stats[STAT_HEALTH] = 100;
+        for (const S_From &f : {S_From{ITEM_CONTAINER_HEAD, EQUIPMENT_PLACE_HEAD}, S_From{ITEM_CONTAINER_LONG_GUN, EQUIPMENT_PLACE_LONG_GUN},
+                                S_From{ITEM_CONTAINER_BACKPACK, EQUIPMENT_PLACE_BACKPACK}, S_From{ITEM_CONTAINER_BELT, -1}}) {
+            arm();
+            r.eq->OnItemRemoved(pistol, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(to.h->human), f.container);
+            CHECK(r.eq->m_giveTo == (f.place >= 0 ? to.h->human : nullptr) && (f.place < 0 || r.eq->m_giveToPlace == f.place));
+            CHECK(r.eq->m_handsModel != nullptr && !Logged("link outpistol") && Count("carry 0 0 forced 1") == 1);
+        }
+        // Into the hands of a human whose hands are put away (or dead): given by the event too.
+        to.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        arm();
+        r.eq->OnItemRemoved(pistol, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(to.h->human), ITEM_CONTAINER_HANDS);
+        CHECK(r.eq->m_giveTo == to.h->human && r.eq->m_giveToPlace == EQUIPMENT_PLACE_HANDS && r.eq->m_handsModel != nullptr);
+        to.eq->m_flags = 0;
+        to.h->human->m_stats[STAT_HEALTH] = 0;
+        arm();
+        r.eq->OnItemRemoved(pistol, ITEM_CONTAINER_HANDS, reinterpret_cast<C_Actor *>(to.h->human), ITEM_CONTAINER_HANDS);
+        CHECK(r.eq->m_giveTo == to.h->human && r.eq->m_handsModel != nullptr);
+    }
+}
+
+void TestFlashlight()
+{
+    // A special object with a "fire" dummy (the light hangs there), a lens flare ("lensf") and smoke.
+    auto rig = [](S_Rig &r) {
+        I3D_frame *lamp = MakeFrame(FRAME_MODEL, "lamp");
+        I3D_frame *fire = MakeFrame(FRAME_DUMMY, "fire");
+        fire->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+        fire->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        g_children[{lamp, "fire"}] = fire;
+        g_children[{lamp, "lensf"}] = MakeFrame(FRAME_VISUAL, "lensf");
+        g_children[{lamp, "light_smoke"}] = MakeFrame(FRAME_VISUAL, "smoke");
+        r.eq->m_specialModel = lamp;
+        r.eq->m_flashlight = Light("light");
+        g_sceneSector = Sector("room");
+        g_log.clear();
+        return lamp;
+    };
+    // On: a point light (1) of colour (0.35, 0.35, 0.1), power 0.4, no specular or ambient, attenuation (0.3, 0, 0),
+    // range 1.5, on the fire dummy, 1071 ms (1500 / 1.4), added to the sector at its position; the lens flare shown.
+    {
+        S_Rig r = Rig();
+        rig(r);
+        r.eq->SetFlashlight(true);
+        CHECK(Count("lighttype light 1") == 1 && Count("lightcolor light " + Vec(S_vector(0.35f, 0.35f, 0.1f))) == 1);
+        CHECK(Count("lightpower light " + Vec(S_vector(0.4f, 0, 0))) == 1 && Count("lightspecular light 0,0,0") == 1 &&
+              Count("lightambient light 0,0,0") == 1 && Count("lightatten light " + Vec(S_vector(0.3f, 0, 0))) == 1 &&
+              Count("lightrange light " + Vec(S_vector(1.5f, 0, 0))) == 1);
+        CHECK(Count("link light fire 0") == 1 && r.eq->m_flashlightTime == 1071 && Count("getsector 1,2,3") == 1 &&
+              Count("addlight room light") == 1 && At("link light fire 0") < At("getsector"));
+        CHECK(Count("on lensf") == 1 && Count("update lensf") == 1);
+        // Off: the smoke unlinked and released, the light out of its sectors, the lens flare dimmed, the object dropped
+        // (two references released).
+        static I3D_frame *sectors[1];
+        sectors[0] = Sector("room");
+        *reinterpret_cast<I3D_frame ***>(reinterpret_cast<unsigned char *>(r.eq->m_flashlight) + 0x120) = sectors;
+        *reinterpret_cast<int *>(reinterpret_cast<unsigned char *>(r.eq->m_flashlight) + 0x128) = 1;
+        g_log.clear();
+        r.eq->SetFlashlight(false);
+        CHECK(Count("link smoke null 0") == 1 && Count("release smoke") == 1 && r.eq->m_flashlightTime == C_HumanEquipment::NO_TIME &&
+              Count("removelight room light") == 1);
+        CHECK(Count("update lensf") == 1 && r.eq->m_lensFlareTime == C_HumanEquipment::NO_TIME && Count("link lamp null 0") == 1 &&
+              Count("release lamp") == 2 && r.eq->m_specialModel == nullptr && !Logged("off lensf"));
+        *reinterpret_cast<int *>(reinterpret_cast<unsigned char *>(r.eq->m_flashlight) + 0x128) = 0;
+    }
+    {
+        // No smoke: the rest the same.
+        S_Rig r = Rig();
+        I3D_frame *lamp = rig(r);
+        g_children.erase({lamp, "light_smoke"});
+        r.eq->SetFlashlight(false);
+        CHECK(!Logged("release smoke") && Count("release lamp") == 2);
+        // Only a lens flare: shown / hidden.
+        S_Rig f = Rig();
+        I3D_frame *torch = rig(f);
+        g_children.erase({torch, "fire"});
+        f.eq->SetFlashlight(true);
+        CHECK(Count("on lensf") == 1 && Count("update lensf") == 1 && !Logged("lighttype"));
+        g_log.clear();
+        f.eq->SetFlashlight(false);
+        CHECK(Count("off lensf") == 1 && f.eq->m_specialModel == torch);
+        // Not a local game, or no special object: nothing.
+        g_gameRole = GAME_ROLE_CLIENT;
+        g_log.clear();
+        f.eq->SetFlashlight(true);
+        CHECK(g_log.empty());
+        g_gameRole = GAME_ROLE_LOCAL;
+        f.eq->m_specialModel = nullptr;
+        f.eq->SetFlashlight(true);
+        CHECK(g_log.empty());
+    }
+    // The lens flare: on for 1071 ms (0.75, 0.13, 100, 0.22), shown; off: (0.75, 0.1, 50, 0.15); without one: nothing.
+    {
+        S_Rig r = Rig();
+        I3D_frame *lamp = rig(r);
+        unsigned char *flare = reinterpret_cast<unsigned char *>(g_children[{lamp, "lensf"}]);
+        auto params = [&](float a, float b, float c, float d) {
+            return *reinterpret_cast<float *>(flare + 0x1E0) == a && *reinterpret_cast<float *>(flare + 0x1E4) == b &&
+                   *reinterpret_cast<float *>(flare + 0x240) == c && *reinterpret_cast<float *>(flare + 0x244) == d;
+        };
+        r.eq->UpdateLensFlare(true);
+        CHECK(r.eq->m_lensFlareTime == 1071 && params(0.75f, 0.13f, 100.0f, 0.22f) && Count("on lensf") == 1 && Count("update lensf") == 1);
+        // Its time in Update: still 1 ms left: kept; run out: off.
+        r.eq->m_lensFlareTime = 2;
+        r.eq->Update(1);
+        CHECK(r.eq->m_lensFlareTime == 1 && params(0.75f, 0.13f, 100.0f, 0.22f));
+        r.eq->Update(1);
+        CHECK(r.eq->m_lensFlareTime == C_HumanEquipment::NO_TIME && params(0.75f, 0.1f, 50.0f, 0.15f));
+        g_children.erase({lamp, "lensf"});
+        g_log.clear();
+        r.eq->UpdateLensFlare(true);
+        CHECK(g_log.empty() || !Logged("on"));
+        r.eq->m_specialModel = nullptr;
+        r.eq->UpdateLensFlare(true);
+        CHECK(r.eq->m_lensFlareTime == C_HumanEquipment::NO_TIME);
+    }
+}
+
+// ---- LoadGame: the hands model's link, the special object's sources
+std::string ChunkOf(const std::vector<std::pair<int, std::string>> &fields)
+{
+    std::string b("\x09\x03\x00\x00\x00\x00", 6);
+    for (const auto &f : fields) {
+        uint16_t id = static_cast<uint16_t>(f.first);
+        uint32_t size = static_cast<uint32_t>(f.second.size() + 6);
+        b.append(reinterpret_cast<const char *>(&id), 2);
+        b.append(reinterpret_cast<const char *>(&size), 4);
+        b += f.second;
+    }
+    uint32_t total = static_cast<uint32_t>(b.size());
+    std::memcpy(&b[2], &total, 4);
+    return b;
+}
+
+void TestLoadPaths()
+{
+    // The hands model by its saved link: on the back (3, joint d, flags 0), in hand 2 (1, pose mode 0), else hand 1
+    // (pose mode 1; hidden when put away and saved on its place 2); its pose model and behaviour; no item: none.
+    struct S_Hands {
+        int link;
+        unsigned flags;
+        const char *joint;
+        int mode;
+        bool hidden;
+    };
+    for (const S_Hands &c : {S_Hands{3, 0, "j_d", -1, false}, S_Hands{1, 0, "j_HW2", 0, false}, S_Hands{2, 0, "j_HW1", 1, false},
+                             S_Hands{2, 1, "j_HW1", 1, true}, S_Hands{0, 1, "j_HW1", 1, false}}) {
+        S_Rig r = Rig();
+        Def(1000, 5);
+        Item(1000, 100, "loadhands");
+        LoadChunk(r.eq, ChunkOf({{0x12, IntBytes(c.link)}, {0x17, IntBytes(100)}, {0x0B, IntBytes(static_cast<int>(c.flags))},
+                                 {0x1F, FloatBytes({0.1f, 0.2f, 0.3f})}}));
+        CHECK(Name(r.eq->m_handsModel) == "loadhands" && Count("pose model loadhands 5") == 1 &&
+              Count(std::string("link loadhands ") + c.joint + " 0") == 1);
+        CHECK((c.mode < 0 ? !Logged("pose mode ") : Count("pose mode " + std::to_string(c.mode)) == 1) && Count("off loadhands") == (c.hidden ? 1 : 0));
+        CHECK(Same(r.eq->m_handsModel->GetPos(), S_vector(0.1f, 0.2f, 0.3f)) && At("update loadhands") > At("link loadhands"));
+    }
+    {
+        S_Rig r = Rig();
+        LoadChunk(r.eq, ChunkOf({{0x12, IntBytes(2)}, {0x17, IntBytes(101)}}));
+        CHECK(r.eq->m_handsModel == nullptr && Count("pose model null -1") == 1);
+        S_Rig n = Rig();
+        Item(1000, 102, "nolink");
+        LoadChunk(n.eq, ChunkOf({{0x12, IntBytes(4)}, {0x17, IntBytes(102)}}));
+        CHECK(n.eq->m_handsModel == nullptr && Count("pose model null -1") == 1);
+    }
+    // The special object (saved link 2: hand 1, flags 1; 1: hand 2; 0: not linked), one reference more, its transform
+    // back, updated.
+    auto load = [](S_Rig &r, int time, int link, const std::vector<std::pair<int, std::string>> &more = {}) {
+        std::vector<std::pair<int, std::string>> f = {{0x13, IntBytes(link)}, {0x1D, IntBytes(time)}, {0x21, FloatBytes({0.5f, 0.0f, 0.0f})}};
+        f.insert(f.end(), more.begin(), more.end());
+        LoadChunk(r.eq, ChunkOf(f));
+    };
+    *reinterpret_cast<uint32_t *>(reinterpret_cast<unsigned char *>(GetGame()) + offsetof(C_game, m_missionTime)) = 1000;
+    // -7 / -5: the belt items of kinds 14 / 19.
+    for (int kind : {14, 19}) {
+        for (int link : {2, 1, 0}) {
+            S_Rig r = Rig();
+            C_Item *item = Item(1001, 1001, "beltthing");
+            g_beltItems[kind] = item;
+            load(r, kind == 14 ? -7 : -5, link);
+            g_beltItems.clear();
+            I3D_frame *f = g_itemFrames[item];
+            CHECK(r.eq->m_specialModel == f && f->m_refCount == 2 && Same(f->GetPos(), S_vector(0.5f, 0, 0)) && Count("update beltthing") == 1);
+            CHECK(Count("link beltthing j_HW1 1") == (link == 2) && Count("link beltthing j_HW2 1") == (link == 1) &&
+                  (link != 0 || !Logged("link beltthing")));
+        }
+        S_Rig n = Rig();
+        load(n, kind == 14 ? -7 : -5, 2);
+        CHECK(n.eq->m_specialModel == nullptr);
+    }
+    // -8: the last used belt slot holding a type 0xE5 item due by now; no used slot: the hands item.
+    {
+        S_Rig r = Rig();
+        Def(0xE5, 99);
+        Def(1002, 99);
+        C_Item *a = Item(0xE5, 1003, "e5a");
+        C_Item *b = Item(0xE5, 1004, "e5b");
+        b->m_time = 1000;                                              // due exactly now
+        C_Item *late = Item(0xE5, 1005, "e5late");
+        late->m_time = 5000;
+        C_Item *other = Item(1002, 1006, "other");
+        r.h->containers[ITEM_CONTAINER_BELT].slots = {{a}, {b}, {other}, {late}};
+        load(r, -8, 2);
+        CHECK(Name(r.eq->m_specialModel) == "e5b");
+        // (The used slots are counted, and the search runs from that count down: here the last two are empty.)
+        r.h->containers[ITEM_CONTAINER_BELT].slots = {{a}, {}, {b}, {}};
+        load(r, -8, 2);
+        CHECK(Name(r.eq->m_specialModel) == "e5a");
+        r.h->containers[ITEM_CONTAINER_BELT].slots.clear();
+        Def(1007, 5);
+        Item(1007, 1007, "handsforE5");
+        load(r, -8, 2, {{0x12, IntBytes(2)}, {0x17, IntBytes(1007)}});
+        CHECK(Name(r.eq->m_specialModel) == "handsforE5");
+        r.h->containers[ITEM_CONTAINER_BELT].slots = {{other}};
+        load(r, -8, 2);
+        CHECK(r.eq->m_specialModel == nullptr);
+        r.h->containers[ITEM_CONTAINER_BELT].slots.clear();
+    }
+    // -6: a thrown belt item, else the backpack contents' last thrown item due by now; one reference more.
+    {
+        S_Rig r = Rig();
+        Def(1010, ITEM_BEHAVIOUR_THROWN);
+        Def(1011, 5);
+        C_Item *grenade = Item(1010, 1010, "beltgrenade");
+        g_beltItems[ITEM_BEHAVIOUR_THROWN] = grenade;
+        load(r, -6, 2);
+        g_beltItems.clear();
+        CHECK(r.eq->m_specialModel == g_itemFrames[grenade] && g_itemFrames[grenade]->m_refCount == 3);
+        C_Item *packed = Item(1010, 1012, "packgrenade");
+        packed->m_time = 1000;                                         // due exactly now
+        C_Item *packedLate = Item(1010, 1013, "packlate");
+        packedLate->m_time = 5000;
+        C_Item *rifle = Item(1011, 1014, "packrifle");
+        r.h->containers[ITEM_CONTAINER_BACKPACK_CONTENTS].slots = {{packed}, {rifle}, {packedLate}};
+        load(r, -6, 2);
+        CHECK(r.eq->m_specialModel == g_itemFrames[packed] && g_itemFrames[packed]->m_refCount == 3);
+        r.h->containers[ITEM_CONTAINER_BACKPACK_CONTENTS].slots = {{rifle}};
+        load(r, -6, 2);
+        CHECK(r.eq->m_specialModel == nullptr);
+        r.h->containers[ITEM_CONTAINER_BACKPACK_CONTENTS].slots.clear();
+    }
+    // -1 / -2 / -3: the activity prop 1 / 0 / 2 copied and the copy released; the special model stays none.
+    for (int time : {-1, -2, -3}) {
+        S_Rig r = Rig();
+        const int index = time == -3 ? 2 : time == -2 ? 0 : 1;
+        g_activityProps[index] = MakeFrame(FRAME_MODEL, "prop");
+        I3D_frame *copy = MakeFrame(FRAME_MODEL, "propcopy");
+        g_nextFrames = {copy};
+        load(r, time, 2);
+        g_activityProps.clear();
+        CHECK(Count("createframe " + std::to_string(FRAME_MODEL)) == 1 && Count("duplicate propcopy prop") == 1 && Count("release propcopy") == 1 &&
+              r.eq->m_specialModel == nullptr);
+        S_Rig n = Rig();
+        load(n, time, 2);
+        CHECK(!Logged("createframe"));
+    }
+    // An actor's id: its body; 0 or an unknown id: none.
+    {
+        S_Rig r = Rig();
+        S_TestHuman *other = MakeHuman("models\\NOSUCHMODEL.4ds");
+        g_actorsByIndex.clear();
+        g_actorsByIndex[5] = reinterpret_cast<C_Actor *>(other->human);
+        load(r, 5, 2);
+        CHECK(r.eq->m_specialModel == other->body);
+        g_actorsByIndex[1] = reinterpret_cast<C_Actor *>(other->human);
+        load(r, 1, 2);
+        CHECK(r.eq->m_specialModel == other->body);
+        g_actorsByIndex[0] = reinterpret_cast<C_Actor *>(other->human);
+        load(r, 0, 2);
+        CHECK(r.eq->m_specialModel == nullptr);
+        load(r, 6, 2);
+        CHECK(r.eq->m_specialModel == nullptr);
+        g_actorsByIndex.clear();
+    }
+    // -9: the scene's frame, picked up with both hands (AttachModel(4)): no reference here, no link to hand 1 (flags 1).
+    {
+        S_Rig r = Rig();
+        I3D_frame *crate = Special("scenecrate");
+        g_sceneFrames["scenecrate"] = crate;
+        load(r, -9, 2, {{0x1E, std::string("scenecrate\0", 11)}});
+        CHECK(r.eq->m_specialModel == crate && r.eq->m_specialPlace == 4 && crate->m_refCount == 2 && Count("link scenecrate j_HW1 3") == 1 &&
+              !Logged("link scenecrate j_HW1 1"));
+        // Saved link none: nothing looked for.
+        S_Rig n = Rig();
+        load(n, -9, 4, {{0x1E, std::string("scenecrate\0", 11)}});
+        CHECK(n.eq->m_specialModel == nullptr && !Logged("scenefind"));
+    }
+    *reinterpret_cast<uint32_t *>(reinterpret_cast<unsigned char *>(GetGame()) + offsetof(C_game, m_missionTime)) = 0;
+}
+
+// ---- the lifetime: Init, Done, Reset, the destructor; the odd paths of save / load
+void TestLifetime()
+{
+    // Init: cleared; the flashlight (a light frame "m_SpecFrameLight"); the joints; the items already held: the hands
+    // model set (not attached) with no carry delay, its carry mode, the hands locked for a second, a sidearm counted;
+    // the long gun, the backpack and the head attached (the head without a type); the belt counted.
+    {
+        S_Rig r = Rig();
+        GiveWork(r);
+        *reinterpret_cast<uint32_t *>(reinterpret_cast<unsigned char *>(GetGame()) + offsetof(C_game, m_missionTime)) = 2000;
+        Def(1100, ITEM_BEHAVIOUR_SIDEARM);
+        Def(1101, 5);
+        Def(1102, 16);
+        Def(1103, 99, ITEM_AMMO, 0);
+        r.h->containers[ITEM_CONTAINER_HANDS].item = Item(1100, 1100, "ipistol");
+        C_Item *gun = Item(1101, 1101, nullptr);
+        g_itemFrames[gun] = Gun("igun", S_vector(0, 0, 0.3f), false);
+        r.h->containers[ITEM_CONTAINER_LONG_GUN].item = gun;
+        r.h->containers[ITEM_CONTAINER_BACKPACK].item = Item(1102, 1102, "ipack");
+        r.h->containers[ITEM_CONTAINER_HEAD].item = Item(1102, 1104, "ihead");
+        C_Item *mag = Item(1103, 1103, nullptr);
+        r.h->containers[ITEM_CONTAINER_BELT].slots = {{mag, mag}};
+        I3D_frame *light = MakeFrame(FRAME_LIGHT, "lightframe");
+        g_nextFrames = {light};
+        r.eq->m_handsUid = 5;
+        r.mv->m_animPlayer.m_carryDelay = 5;
+        r.mv->m_animPlayer.m_carryDelayState = 5;
+        r.eq->Init();
+        CHECK(r.eq->m_flashlight == light && Count("createframe " + std::to_string(FRAME_LIGHT)) == 1 && Count("name lightframe m_SpecFrameLight") == 1);
+        CHECK(Name(r.eq->m_handsModel) == "ipistol" && r.eq->m_handsUid == 1100 && r.eq->m_handsTypeId == 1100 && !Logged("link ipistol"));
+        CHECK(r.mv->m_animPlayer.m_carryDelay == C_HumanEquipment::NO_TIME && r.mv->m_animPlayer.m_carryDelayState == 0 &&
+              Count("carry 3 0 forced 0") == 1 && Count("locktime 3000") == 1);
+        CHECK(r.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 1 && r.eq->m_holsters[2].itemCount == 2);
+        CHECK(Count("link igun j_d 2") == 1 && r.eq->m_longGunTypeId == 1101 && Count("link ipack j_d 2") == 1 && r.eq->m_backpackTypeId == 1102);
+        CHECK(Count("link ihead j_f 2") == 1 && r.eq->m_headUid == 1104 && At("link ihead") > At("link ipack") && At("link ipack") > At("link igun"));
+        // A hands item that is no sidearm: not counted. Nothing held: only the light and the joints.
+        S_Rig n = Rig();
+        GiveWork(n);
+        n.h->containers[ITEM_CONTAINER_HANDS].item = Item(1101, 1105, "irifle");
+        n.eq->Init();
+        CHECK(n.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 0 && Name(n.eq->m_handsModel) == "irifle");
+        S_Rig e = Rig();
+        e.eq->m_handsModel = MakeFrame(FRAME_MODEL, "stale");
+        e.eq->m_jointD = e.eq->m_jointF = e.eq->m_handDummy1 = nullptr;
+        e.eq->Init();
+        CHECK(e.eq->m_handsModel == nullptr && !Logged("link") && e.eq->m_flashlight != nullptr);
+        CHECK(Name(e.eq->m_jointD) == "j_d" && Name(e.eq->m_jointF) == "j_f" && Name(e.eq->m_handDummy1) == "j_HW1");
+        *reinterpret_cast<uint32_t *>(reinterpret_cast<unsigned char *>(GetGame()) + offsetof(C_game, m_missionTime)) = 0;
+        r.h->containers[ITEM_CONTAINER_BELT].slots.clear();
+    }
+    // Done: the flashlight out and released; the pose's model none; the diving gear unlinked and released; in a local
+    // game the special object put back where it was taken (its sector updated) and released; the holsters released.
+    {
+        S_Rig r = Rig();
+        I3D_frame *light = Light("donelight");
+        r.eq->m_flashlight = light;
+        for (int i = 0; i < 4; ++i)
+            r.eq->m_divingGear[i] = MakeFrame(FRAME_MODEL, ("gear" + std::to_string(i)).c_str());
+        I3D_frame *box = Special("donebox");
+        g_children[{box, "lensf"}] = MakeFrame(FRAME_VISUAL, "donelensf");
+        r.eq->m_specialModel = box;
+        r.eq->m_specialPos = S_vector(4.0f, 5.0f, 6.0f);
+        r.eq->Done();
+        CHECK(Count("off donelensf") == 1 && At("off donelensf") < At("release donelight"));
+        CHECK(Count("release donelight") == 1 && r.eq->m_flashlight == nullptr && Count("pose model null -1") == 1);
+        CHECK(Count("link gear0 null 0") == 1 && Count("release gear3") == 1 && r.eq->m_divingGear[2] == nullptr);
+        CHECK(Count("link donebox null 0") == 1 && Count("pos donebox 4,5,6") == 1 && Logged("sector donebox ") && Count("release donebox") == 1 &&
+              At("update donebox") > At("sector donebox") && r.eq->m_specialModel == nullptr && Count("release anim") == 1);
+        // Not local: the special object only forgotten.
+        S_Rig c = Rig();
+        c.eq->m_flashlight = Light("clientlight");
+        c.eq->m_specialModel = Special("clientbox");
+        g_gameRole = GAME_ROLE_CLIENT;
+        c.eq->Done();
+        g_gameRole = GAME_ROLE_LOCAL;
+        CHECK(!Logged("link clientbox") && !Logged("release clientbox") && c.eq->m_specialModel == nullptr);
+    }
+    // Reset: Done, then Init.
+    {
+        S_Rig r = Rig();
+        GiveWork(r);
+        r.eq->m_flashlight = Light("oldlight");
+        g_nextFrames = {MakeFrame(FRAME_LIGHT, "newlight")};
+        r.eq->Reset();
+        CHECK(Count("release oldlight") == 1 && Name(r.eq->m_flashlight) == "newlight" && At("release oldlight") < At("createframe"));
+    }
+    // The destructor releases the diving gear.
+    {
+        S_Rig r = Rig();
+        r.eq->m_divingGear[1] = MakeFrame(FRAME_MODEL, "dtorgear");
+        r.h->human->m_body.equipment = nullptr;
+        delete r.eq;
+        CHECK(Count("release dtorgear") == 1);
+    }
+    // Saving into, or loading from, a chunk that is not open: false, nothing written.
+    {
+        S_Rig r = Rig();
+        C_chunk closed;
+        CHECK(!r.eq->SaveGame(closed) && !r.eq->LoadGame(closed));
+    }
+    // A load unlinks the diving gear and counts a sidearm held in the hands.
+    {
+        S_Rig r = Rig();
+        r.eq->m_divingGear[0] = MakeFrame(FRAME_MODEL, "loadgear");
+        r.eq->m_longGunLift = 1;                                       // (Clear: not lifted after a load)
+        Def(1110, ITEM_BEHAVIOUR_SIDEARM);
+        r.h->containers[ITEM_CONTAINER_HANDS].item = Item(1110, 1110, nullptr);
+        LoadChunk(r.eq, EMPTY_CHUNK);
+        CHECK(Count("link loadgear null 0") == 1 && r.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 1 && r.eq->m_longGunLift == 0);
+        Def(1111, 5);
+        r.h->containers[ITEM_CONTAINER_HANDS].item = Item(1111, 1111, nullptr);
+        LoadChunk(r.eq, EMPTY_CHUNK);
+        CHECK(r.eq->m_holsters[HOLSTER_SLOT_SIDEARM].itemCount == 0);
+        r.h->containers[ITEM_CONTAINER_HANDS].item = nullptr;
+    }
+    // The hands model hidden too while the movement's state is 0x5F.
+    {
+        S_Rig r = Rig();
+        Def(1112, 5);
+        Item(1112, 1112, "statehands");
+        r.mv->m_animState.anim.anim = static_cast<decltype(r.mv->m_animState.anim.anim)>(0x5F);
+        LoadChunk(r.eq, ChunkOf({{0x12, IntBytes(2)}, {0x17, IntBytes(1112)}}));
+        CHECK(Count("off statehands") == 1);
+    }
+    // A holster set missing a dummy: that slot gets no frame, the others theirs.
+    {
+        const equipment::S_HolsterModel *hm = ModelWithSet();
+        static std::string file = std::string("models\\") + hm->model + ".4ds";
+        Reset();
+        I3D_frame *holsters = HolsterModel();
+        g_children.erase({holsters, "1"});
+        g_nextFrames = {holsters};
+        auto *eq = new C_HumanEquipment(MakeHuman(file.c_str())->human);
+        CHECK(eq->m_holsters[0].frameCount == 0 && eq->m_holsters[1].frameCount == 1);
+    }
+}
 }  // namespace
 
 int main()
@@ -2567,6 +3428,9 @@ int main()
     g_sceneVt[0x7C / 4] = reinterpret_cast<void *>(F_SceneFindFrame);
     g_sceneVt[0xEC / 4] = reinterpret_cast<void *>(F_UpdateFrameSector);
     g_sceneVt[0x144 / 4] = reinterpret_cast<void *>(F_MarkTracked);
+    g_sceneVt[0xE0 / 4] = reinterpret_cast<void *>(F_SceneGetSector);
+    static unsigned char fpv[0x100];
+    GetGame()->m_firstPersonView = reinterpret_cast<C_FirstPersonView *>(fpv);
     g_frameVt[0x58 / 4] = reinterpret_cast<void *>(F_UpdateBound);
     g_frameVt[0x78 / 4] = reinterpret_cast<void *>(F_RemoveLight);
     GetGame()->m_scene = reinterpret_cast<I3D_scene *>(&g_sceneObject);
@@ -2587,6 +3451,12 @@ int main()
     TestUpdate();
     TestModelNames();
     TestHelpers();
+    TestShowHands();
+    TestPutAway();
+    TestItemCallbacks();
+    TestFlashlight();
+    TestLoadPaths();
+    TestLifetime();
     std::printf("equipment: %d checks, %d failures\n", checks, failures);
     g_exiting = true;
     return failures != 0;
