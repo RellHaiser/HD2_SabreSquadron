@@ -640,10 +640,11 @@ particles and the surface marks. Files are served from memory.
 - **Original weaknesses, kept:**
   - a saved mine whose model doesn't load makes `LoadGame` call through null;
   - `DestroyMinesOf` skips a mine of the owner moved into a freed place;
-- **A difference from the original on main, not changed:** `C_TemporaryActorsList::LoadGame`
-  starts each chunk with no actor. The original (0x00477f50) resets only the active flag (to 1)
-  and keeps the previous chunk's actor (EDI). So a debris or unknown chunk that follows an
-  inactive item, mine or fence switches that actor on in the original, and not in the port.
+- **Restored on main (2026-11-10):** `C_TemporaryActorsList::LoadGame` keeps the previous
+  chunk's actor, as the original (0x00477f50) does. The original resets only the active flag (to
+  1) per chunk, so a debris or unknown chunk that follows an inactive item, mine or fence switches
+  that actor on. The port had started each chunk with no actor; that version is on the branch
+  `temp-actors-load-reset`.
 - **Results:** 672 checks. `actors_module.cpp`: lines 656 of 656, functions 80 of 82 (the two
   destructors' other compiled copies), branch outcomes 467 of 472 (99 %).
   `mutations/mutate_actors.py`: 373 mutants, 312 killed, 41 don't build, 20 survived

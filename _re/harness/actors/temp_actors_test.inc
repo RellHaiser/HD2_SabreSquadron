@@ -523,7 +523,9 @@ void TestTempSaveLoad()
     CHECK(static_cast<C_ItemActor *>(i1)->GetItem()->GetUid() == 40 && static_cast<C_ItemActor *>(i3)->GetItem()->GetTypeId() == TYPE_RIFLE &&
           static_cast<C_Mine *>(m)->GetItemId() == TYPE_MINE && !static_cast<C_Mine *>(m)->GetOwner());
     CHECK(Lines("actor load") == std::vector<std::string>({"actor load 0 7", "actor load 1 17", "actor load 2 27", "actor load 3 37"}));
-    CHECK(fence->GetActiveIndex() >= 0 && i1->GetActiveIndex() >= 0 && m->GetActiveIndex() == -1 && i3->GetActiveIndex() == -1);
+    // (The mine was saved inactive, but the debris chunk after it activates it again: the original keeps the previous
+    // chunk's actor, 0x00477f50.)
+    CHECK(fence->GetActiveIndex() >= 0 && i1->GetActiveIndex() >= 0 && m->GetActiveIndex() >= 0 && i3->GetActiveIndex() == -1);
     CHECK(Count("loaditem 4 40 1 0 0 none") == 1 && Count("setupitem 1 40 vel 0 0 0") == 1);
     // A fence that is not there: its data skipped. Chunks without the active byte: active. Unknown chunks skipped.
     {
