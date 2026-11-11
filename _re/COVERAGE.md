@@ -815,3 +815,55 @@ particles and the surface marks. Files are served from memory.
     hid the swings' settling and the doors' volume handling until the original's world calls were logged.
 - **Not exercised:** the effects module's fade-out of debris, the null-frame guards, rays excluding switches for balls
   (they run without the dynamic grid), a debris piece bouncing up onto ground of another height.
+
+## New harness: human part 1 (the locomotion on the ground, 2026-11-11)
+
+- **The build:** suite `human` (`human/build.bat`, `human_test.exe`; needs the original executable). Tests in
+  `human/locomotion_test.inc`; the original's side in `human/original_side.inc`.
+- **Every call against the original executable's:**
+  - the port's human, movement and work are built (the movement's and the work's in-class initialisers through
+    constructors defined by the test; the human as raw memory with a vtable of loggers);
+  - before each call they are copied into the original's layout. The locomotion, the animation mixer, the work and
+    the movement's other parts already have it. The actor, the human and the movement (after its 12-byte
+    `std::vector`) do not: their members are copied by tables generated from the headers' offset comments
+    (`_re/tools/layout_offsets.py`, new: it also lists every member at another offset). Pointers to the port's
+    objects are rewritten to the copies;
+  - the original's function runs on the copy, against a copy of the port's collision world
+    (`collision/original_world.inc`, now shared with physics);
+  - the result is compared field by field with a copy taken of the port's state after its own call. Floats are
+    compared within 2e-4; pointers, flags and integers exactly;
+  - what the locomotion calls outside itself is faked on both sides alike: the port's functions are defined by the
+    test, the original's redirected to the same loggers (`RedirectOriginal`, now in `original_exe`). Each call is
+    logged with its arguments and the two logs must agree. What they answer is scripted, consistent with the
+    human's fields (the original also has IsServerSimulated inline);
+  - the original's own small helpers (AngleBetween2D, RotateAboutX/Y, GetCollisionMaterial,
+    S_HumanAnimRef::Normalize, IsSingleStageAnim) serve both sides; they belong to parts 2 and 3.
+- **The world:** a floor, ramps of 15 to 65 degrees with open high ends, steps, a wall, platforms of 3, 6 and 12 m,
+  a beam, a low roof, a pond, a low wall only the player's squad meets (flag 0x800000), a truck (a dynamic box).
+  Actors to walk into: a human, doors (closed, opening), a ladder, a barrel, a train, a physics object, a box of no
+  actor, a volume only the local player meets (type 0x100). Each side finds its own object behind a volume's frame
+  data (the original's layout: type +0x18, position +0x30, a door's motion +0x224).
+- **The calls:** 1,500 trajectories of 40 steps from random states, every one compared. The states vary:
+  - the game's role (local, server, client) and the human's (player, enemy, neutral, ally); the local player or not;
+  - stance, gait and animation; the movement flags (cheap ground ray, path, remote, small, hidden);
+  - fall speeds and heights, pushes, edges, shifts, water; places on the truck, by the actors, over the pond.
+  Also 3,000 UpdateFall calls with random arguments.
+- **Results:**
+  - MoveOnGround: about 59,900 calls, UpdateFall 3,000, all agree (62,896 checks);
+  - lines of part 1's code (the contact helpers, MoveOnGround, SweepBody, SlowOnSlope, AdjustToGround, UpdateFall,
+    ApplyFallDamage, Land): 633 of 659;
+  - `human/mutations/mutate_human1.py`: 723 mutants, 503 killed, 37 don't build, 183 survived: code of parts 2
+    and 3, results the caller does not read, values overwritten, rare branches and boundary comparisons (listed).
+  - No port bug was found in this part.
+- **Undefined words not compared** (the original writes garbage there, the port a defined value, as
+  human_locomotion.cpp says): the w of the human's position, direction and velocity, of the locomotion's vectors,
+  and of the vectors passed to what is faked.
+- **Harness lessons (my mistakes):**
+  - a placeholder pointer of 1 in the remapping table turned every word equal to 1 into an address (the movement's
+    +0x1AC);
+  - this image is not at its preferred base (ASLR): an address range test must use the module's real range;
+  - scripted answers that contradict the human's fields gave false differences where the original inlines a check;
+  - the fake game had no scene (a crash on a moving dynamic floor);
+  - backslashes collapsed twice more in Python run through bash heredocs: scripts now go through files.
+- **Not exercised:** a ladder's OnCollisionEx agreeing (the original's deque would allocate), lying bodies' second
+  rays, the cheap ground mode's step up on a client, the replicas' ground ray.

@@ -17,3 +17,7 @@ bool LoadOriginalExe();
 bool OriginalExeLoaded();
 // An address of the original (its own addresses: the image is at its preferred base).
 template <class T> T OriginalAt(uint32_t address) { return reinterpret_cast<T>(static_cast<uintptr_t>(address)); }
+// The original's function at `at` goes to `to` instead (in the loaded copy only): an import's thunk (jmp [slot]) by
+// its slot, a function by a 5-byte jmp rel32 (none shorter is patched). For code the original must not run (it
+// allocates) or that the test fakes.
+void RedirectOriginal(uint32_t at, const void *to);

@@ -23,34 +23,19 @@ void *OrigGetGame()
 }
 void *OrigGetGEffects() { return nullptr; }
 
-// The original's `at` goes to `to`: an import's thunk (jmp [slot]) by its slot, a function by a jmp rel32 (5 bytes:
-// the shortest functions patched are 6).
-void JumpFrom(uint32_t at, const void *to)
-{
-    uint8_t *p = OriginalAt<uint8_t *>(at);
-    if (p[0] == 0xFF && p[1] == 0x25) {
-        uint32_t slot;
-        std::memcpy(&slot, p + 2, 4);
-        *OriginalAt<const void **>(slot) = to;
-        return;
-    }
-    const int32_t rel = static_cast<int32_t>(reinterpret_cast<uintptr_t>(to) - (reinterpret_cast<uintptr_t>(p) + 5));
-    p[0] = 0xE9;
-    std::memcpy(p + 1, &rel, 4);
-}
 bool g_origPatched;
 void PatchOriginal()
 {
     if (g_origPatched || !OriginalExeLoaded())
         return;
     g_origPatched = true;
-    JumpFrom(0x006ef7b0, reinterpret_cast<const void *>(OrigAddVolume));
-    JumpFrom(0x006efbc0, reinterpret_cast<const void *>(OrigMoveVolume));
-    JumpFrom(0x006ef9b0, reinterpret_cast<const void *>(OrigRemoveVolume));
-    JumpFrom(0x00479540, reinterpret_cast<const void *>(OrigAddBreakable));
-    JumpFrom(0x007e529c, reinterpret_cast<const void *>(I3DGetDriver));     // (the import's thunk)
-    JumpFrom(0x006987d0, reinterpret_cast<const void *>(OrigGetGame));
-    JumpFrom(0x00486510, reinterpret_cast<const void *>(OrigGetGEffects));
+    RedirectOriginal(0x006ef7b0, reinterpret_cast<const void *>(OrigAddVolume));
+    RedirectOriginal(0x006efbc0, reinterpret_cast<const void *>(OrigMoveVolume));
+    RedirectOriginal(0x006ef9b0, reinterpret_cast<const void *>(OrigRemoveVolume));
+    RedirectOriginal(0x00479540, reinterpret_cast<const void *>(OrigAddBreakable));
+    RedirectOriginal(0x007e529c, reinterpret_cast<const void *>(I3DGetDriver));     // (the import's thunk)
+    RedirectOriginal(0x006987d0, reinterpret_cast<const void *>(OrigGetGame));
+    RedirectOriginal(0x00486510, reinterpret_cast<const void *>(OrigGetGEffects));
 }
 
 static_assert(offsetof(S_PhysicsObjectDesc, door) == 0x1C && offsetof(S_PhysicsObjectDesc, radius) == 0x28, "the original's desc");

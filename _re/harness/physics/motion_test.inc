@@ -11,7 +11,6 @@
 // the world before a hit is compared.
 namespace {
 
-const uint32_t kOrigWorld = 0x008cb480;
 struct S_OrigCode {
     uint32_t vtable, tick, impulse, hit;
 };
@@ -107,51 +106,22 @@ size_t ObjectSize(int type)
     }
 }
 
-// ---- the original's world: a copy of the port's, its dynamic grid with MSVC6's vectors (or none)
-struct S_MsvcCell {
-    int x, z;
-    uint32_t allocator;
-    S_CollisionVolume **first, **last, **end;
-};
-// The object's own volumes in the cells are given as the original's copy of them (it ignores its volume by address).
+// ---- the original's world: a copy of the port's (collision/original_world.inc); the object's own volumes given as the
+// original's copy of them (it ignores its volume by address).
+#include "original_world.inc"
 const C_PhysObject *g_diffObject;
 template <class F> auto WithOriginalWorld(bool grid, F f) -> decltype(f())
 {
-    std::vector<S_MsvcCell> cells;
-    std::vector<S_MsvcCell *> table;
-    std::vector<std::vector<S_CollisionVolume *>> lists;
-    S_CollisionGrid copy{};
-    const S_CollisionGrid *g = grid ? g_collisionWorld.m_grid : nullptr;
-    if (g) {
-        copy = *g;
-        const int n = g->cellsX * g->cellsZ;
-        cells.resize(n);
-        table.assign(n, nullptr);
-        lists.resize(n);
-        const S_CollisionVolume *own1 = g_diffObject ? &g_diffObject->m_volume : nullptr;
-        const S_CollisionVolume *own2 = g_diffObject && g_diffObject->GetType() == PHYS_SWINGING
-                                            ? &static_cast<const C_PhysSwingingObject *>(g_diffObject)->m_volume2 : nullptr;
-        for (int i = 0; i < n; ++i)
-            if (S_CollisionGridCell *c = g->cells[i]) {
-                lists[i] = c->volumes;
-                for (S_CollisionVolume *&v : lists[i])
-                    if (own1 && v == own1)
-                        v = reinterpret_cast<S_CollisionVolume *>(g_origObject + 0xD0);
-                    else if (own2 && v == own2)
-                        v = reinterpret_cast<S_CollisionVolume *>(g_origObject + 0x230);
-                S_CollisionVolume **data = lists[i].data();
-                cells[i] = {c->x, c->z, 0, data, data + lists[i].size(), data + lists[i].size()};
-                table[i] = &cells[i];
-            }
-        copy.cells = reinterpret_cast<S_CollisionGridCell **>(table.data());
-    }
-    // Up to the grid the layouts agree; after it the original's vectors are 16 bytes (the port's 12): its free and
-    // empty cell lists (+0x3F0, +0x400) empty, nothing ignored (+0x410..+0x42C), by its own offsets.
-    auto *world = OriginalAt<uint8_t *>(kOrigWorld);
-    std::memcpy(world, static_cast<const void *>(&g_collisionWorld), 0x3EC);
-    *reinterpret_cast<const S_CollisionGrid **>(world + 0x3EC) = g ? &copy : nullptr;
-    std::memset(world + 0x3F0, 0, 0x42C - 0x3F0);
-    return f();
+    const S_CollisionVolume *own1 = g_diffObject ? &g_diffObject->m_volume : nullptr;
+    const S_CollisionVolume *own2 = g_diffObject && g_diffObject->GetType() == PHYS_SWINGING
+                                        ? &static_cast<const C_PhysSwingingObject *>(g_diffObject)->m_volume2 : nullptr;
+    return WithOriginalWorldMapped(grid, [&](S_CollisionVolume *v) {
+        if (own1 && v == own1)
+            return reinterpret_cast<S_CollisionVolume *>(g_origObject + 0xD0);
+        if (own2 && v == own2)
+            return reinterpret_cast<S_CollisionVolume *>(g_origObject + 0x230);
+        return v;
+    }, f);
 }
 
 // ---- comparing two states of an object (byte copies) and its frame

@@ -1,7 +1,7 @@
 """Physics: objects, the module, boxes, doors (game/physics.cpp, physics_box.cpp, physics_door.cpp)
 
 Run: set MUT_HARNESS=physics, MUT_DEFS=-DPHYSICS_MUTATION (the full test: 0.4 s), MUT_EXTRA_SRCS=
-ls3df/src/math/math.cpp;_re/harness/collision/original_exe.cpp, MUT_EXTRA_INC=ls3df/src;_re/harness/collision,
+ls3df/src/math/math.cpp;_re/harness/collision/original_exe.cpp, MUT_EXTRA_INC=ls3df/src;_re/harness/collision;_re/harness/common,
 MUT_LDFLAGS=-Wl,--image-base=0x20000000, MUT_TIMEOUT=90, then
 python _re/harness/mutrun.py _re/harness/physics/mutations/mutate_physics1.py WORK [JOBS]. Needs the original
 executable (HD2_ORIGINAL_EXE, HD2_GAME_DIR). Labels: P physics.cpp, B physics_box.cpp, D physics_door.cpp, + line.
