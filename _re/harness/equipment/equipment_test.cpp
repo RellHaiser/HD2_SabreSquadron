@@ -1,5 +1,7 @@
-// The models of the items on a human's body (game/human_equipment.cpp), part 1: the holsters, the models' places,
-// save / load against the original's own save. The engine, the human and the items faked; game/equipment_frames.cpp,
+// The models of the items on a human's body (game/human_equipment.cpp). Part 1: the holsters, the models' places,
+// save / load against the original's own save. Part 2a: AttachModel / DetachModel (the frames get world matrices:
+// the local one through the parent's; the long gun's geometry against a reference written from the asm's steps and
+// constants). The engine, the human and the items faked; game/equipment_frames.cpp,
 // common/chunk.cpp, common/c_str.cpp and the LS3DF port's math (ls3df/src/math/math.cpp) linked as they are.
 // MinGW; build.bat; run equipment_test.exe ("equipment: N checks, 0 failures").
 //
@@ -110,14 +112,29 @@ std::string Name(const I3D_frame *f) { return f ? (g_names.count(f) ? g_names[f]
 void Log(const std::string &s) { g_log.push_back(s); }
 }  // namespace
 
+// ---- what the tests set
+namespace {
+I3D_frame *MakeFrame(E_I3D_FRAME_TYPE type, const char *name);
+std::map<const C_ItemDef *, I3D_frame **> g_divingGear;                 // a definition's four diving gear models
+bool g_localPlayer, g_firstPerson;
+bool g_hitSomething;                                                     // CollisionSphereTest's answer
+std::map<int, int> g_itemDefLookups;                                     // GetItemDef calls by type id
+I3D_frame *g_handsItemFrame;                                             // C_Human::GetHandsItemFrame
+S_vector g_hitPos;
+}
+
 // ---- items
-C_ItemDef *GetItemDef(int typeId) { return g_defs.count(typeId) ? g_defs[typeId] : nullptr; }
+C_ItemDef *GetItemDef(int typeId)
+{
+    ++g_itemDefLookups[typeId];
+    return g_defs.count(typeId) ? g_defs[typeId] : nullptr;
+}
 I3D_frame *C_Item::GetFrame(int index)
 {
     Log("itemframe " + std::to_string(index));
     return index == 0 && g_itemFrames.count(this) ? g_itemFrames[this] : nullptr;
 }
-I3D_frame **C_ItemDef::GetDivingGear() { return nullptr; }
+I3D_frame **C_ItemDef::GetDivingGear() { return g_divingGear.count(this) ? g_divingGear[this] : nullptr; }
 C_ItemDef::C_ItemDef(E_ItemRecordType, int) {}
 C_ItemDef::~C_ItemDef() {}
 void C_ItemDef::Save(int *, void *) {}
@@ -125,8 +142,8 @@ void C_ItemDef::Load(int *, const void *) {}
 C_ItemContainer::C_ItemContainer(int) {}
 C_Item *C_Human::FindItemByUid(int uid) const { return g_itemsByUid.count(uid) ? g_itemsByUid[uid] : nullptr; }
 C_Item *C_Human::FindBeltItem(int) const { return nullptr; }
-I3D_frame *C_Human::GetHandsItemFrame() const { return nullptr; }
-bool C_Human::IsLocalPlayer() const { return false; }
+I3D_frame *C_Human::GetHandsItemFrame() const { return g_handsItemFrame; }
+bool C_Human::IsLocalPlayer() const { return g_localPlayer; }
 C_Human *C_Team::GetActivePlayer() const { return nullptr; }
 namespace {
 std::map<int, C_Actor *> g_actorsByIndex;
@@ -143,8 +160,8 @@ void C_HumanWeaponPose::RaiseWeapon(int v) { Log("pose raise " + std::to_string(
 void C_HumanWork::SetCarryMode(int mode, bool b) { Log("carry " + std::to_string(mode) + " " + std::to_string(b)); }
 void C_HumanAnimMixer::FadeOutTrack(int a, int b) { Log("fadeout " + std::to_string(a) + " " + std::to_string(b)); }
 I3D_frame *C_HumanMovement::GetSectorFrame() const { return nullptr; }
-void C_HumanMovement::RemoveCollision(bool) {}
-void C_HumanMovement::RestoreCollision(bool) {}
+void C_HumanMovement::RemoveCollision(bool b) { Log("removecollision " + std::to_string(b)); }
+void C_HumanMovement::RestoreCollision(bool b) { Log("restorecollision " + std::to_string(b)); }
 void C_HumanMovement::SetModelVisible(bool on) { Log("modelvisible " + std::to_string(on)); }
 void C_HumanVisual::RebuildShadow() {}
 void C_HumanVisual::Unknown7585d0(bool) {}
@@ -152,14 +169,42 @@ void C_FirstPersonView::OnInventoryEvent(int, int) {}
 
 // ---- the game, sound, caches
 C_game *GetGame() { return reinterpret_cast<C_game *>(g_gameBytes); }
-bool C_game::IsFirstPersonView() const { return false; }
+bool C_game::IsFirstPersonView() const { return g_firstPerson; }
 C_SoundModule *GetSoundModule() { return reinterpret_cast<C_SoundModule *>(g_soundBytes); }
-int C_SoundModule::Play(const S_SoundRequest &r) { Log("sound " + std::to_string(r.chapter) + " " + std::to_string(r.group)); return 1; }
-void I3D_frame::UpdateWMatrixProc() {}
-bool CloneFrameTree(I3D_frame *&, I3D_frame *, I3D_frame *) { return false; }
-S_CollisionVolume *CollisionSphereTest(const S_vector &, const S_vector &, float, S_vector *, S_vector *, uint32_t, uint32_t)
+int C_SoundModule::Play(const S_SoundRequest &r)
 {
-    return nullptr;
+    Log("sound " + std::to_string(r.chapter) + " " + std::to_string(r.group));
+    char s[160];
+    std::snprintf(s, sizeof s, "soundreq %g %g %g flags %u source %p attach %p", r.pos.x, r.pos.y, r.pos.z, r.flags,
+                  static_cast<void *>(r.source), static_cast<void *>(r.attachTo));
+    Log(s);
+    return 1;
+}
+// The world matrix: the local one through the parent's world one.
+void I3D_frame::UpdateWMatrixProc()
+{
+    const S_matrix local = GetLocalMatrix();
+    m_worldMatrix = m_parent ? local * m_parent->GetMatrix() : local;
+    m_frameFlags |= FRMFLAGS_WMATRIX_VALID;
+}
+bool CloneFrameTree(I3D_frame *&out, I3D_frame *src, I3D_frame *)
+{
+    Log("clone " + Name(src));
+    out = MakeFrame(FRAME_VISUAL, ("clone_" + Name(src)).c_str());
+    out->m_localMatrix(3) = src->m_localMatrix(3);
+    return true;
+}
+S_CollisionVolume *CollisionSphereTest(const S_vector &from, const S_vector &move, float radius, S_vector *hit, S_vector *,
+                                       uint32_t a, uint32_t b)
+{
+    char s[160];
+    std::snprintf(s, sizeof s, "sphere %g %g %g / %g %g %g r %g %x %x", from.x, from.y, from.z, move.x, move.y, move.z, radius, a, b);
+    Log(s);
+    if (!g_hitSomething)
+        return nullptr;
+    *hit = g_hitPos;
+    static S_CollisionVolume *volume = reinterpret_cast<S_CollisionVolume *>(new unsigned char[256]());
+    return volume;
 }
 namespace {
 uint32_t __stdcall F_AnimRelease(void *);
@@ -200,7 +245,8 @@ I3D_frame *MakeFrame(E_I3D_FRAME_TYPE type, const char *name)
     *reinterpret_cast<void ***>(frame) = g_frameVt;
     frame->m_type = type;
     frame->m_refCount = 1;
-    frame->m_frameFlags |= FRMFLAGS_WMATRIX_VALID;
+    frame->m_frameFlags |= FRMFLAGS_WMATRIX_VALID | FRMFLAGS_LMATRIX_VALID | FRMFLAGS_ROT_VALID;
+    frame->m_rot.Identity();
     for (int i = 0; i < 4; ++i) {
         frame->m_worldMatrix.m[i][i] = 1.0f;
         frame->m_localMatrix.m[i][i] = 1.0f;
@@ -215,8 +261,22 @@ uint32_t __stdcall F_GetVisualType(I3D_frame *self) { return self->m_type == FRA
 void __stdcall F_SetLightLevel(I3D_frame *self, float) { Log("light " + Name(self)); }
 uint32_t __stdcall F_AnimRelease(void *) { if (!g_exiting) Log("release anim"); return 0; }
 void __stdcall F_SetPos(I3D_frame *self, const S_vector &p) { Log("pos " + Name(self) + " " + Vec(p)); self->m_localMatrix(3) = p; }
-void __stdcall F_SetDir(I3D_frame *self, const S_vector &d, float) { Log("dir " + Name(self) + " " + Vec(d)); }
-void __stdcall F_SetWorldDir(I3D_frame *self, const S_vector &d, float) { Log("worlddir " + Name(self) + " " + Vec(d)); }
+void __stdcall F_SetDir(I3D_frame *self, const S_vector &d, float roll)
+{
+    Log("dir " + Name(self) + " " + Vec(d));
+    if (roll != 0.0f)
+        Log("dir roll " + Name(self) + " " + std::to_string(roll));
+}
+void __stdcall F_SetWorldDir(I3D_frame *self, const S_vector &d, float)
+{
+    Log("worlddir " + Name(self) + " " + Vec(d));
+    S_matrix m;
+    m.Identity();
+    m.SetDir3(d);
+    m(3) = self->m_localMatrix(3);
+    self->SetLocalMatrix(m);
+}
+void __stdcall F_UpdateBound(I3D_frame *self) { self->m_frameFlags |= FRMFLAGS_BOUND_VALID; }
 void __stdcall F_Tick(I3D_frame *self, int t) { Log("tick " + Name(self) + " " + std::to_string(t)); }
 void __stdcall F_Update(I3D_frame *self) { Log("update " + Name(self)); }
 void __stdcall F_SetOn(I3D_frame *self, bool on)
@@ -250,7 +310,11 @@ void __stdcall F_SetAnimation(I3D_frame *self, I3D_animation_set *a, int stage, 
     std::snprintf(s, sizeof s, " %p %d %g %d", static_cast<void *>(a), stage, w, flags);
     Log("setanim " + Name(self) + s);
 }
-I3D_animation_set *__stdcall F_GetAnimation(I3D_frame *, int) { return g_stage.anim; }
+I3D_animation_set *__stdcall F_GetAnimation(I3D_frame *self, int stage)
+{
+    Log("getanim " + Name(self) + " " + std::to_string(stage));
+    return g_stage.anim;
+}
 void __stdcall F_StopAnimation(I3D_frame *self, int stage) { Log("stopanim " + Name(self) + " " + std::to_string(stage)); }
 void __stdcall F_SetAnimWeight(I3D_frame *self, int stage, float w)
 {
@@ -276,10 +340,13 @@ struct {
     void **vt = g_driverVt;
 } g_driver;
 std::vector<I3D_frame *> g_nextFrames;
-void *g_sceneVt[64];
+void *g_sceneVt[128];
 struct {
     void **vt = g_sceneVt;
+    unsigned char fields[0x400] = {};
 } g_sceneObject;
+void __stdcall F_UpdateFrameSector(void *, I3D_frame *f, const S_vector &p) { Log("sector " + Name(f) + " " + Vec(p)); }
+void __stdcall F_MarkTracked(void *, I3D_frame *f) { Log("tracked " + Name(f)); }
 std::map<std::string, I3D_frame *> g_sceneFrames;
 I3D_frame *__stdcall F_SceneFindFrame(void *, const char *name, uint32_t)
 {
@@ -389,8 +456,9 @@ S_TestHuman *MakeHuman(const char *modelFile)
     const size_t msize = sizeof(C_HumanMovement) + 0x100;
     h->movement = static_cast<unsigned char *>(::operator new(msize, std::align_val_t(16)));
     std::memset(h->movement, 0, msize);
-    h->pose = static_cast<unsigned char *>(::operator new(0x1000, std::align_val_t(16)));
-    std::memset(h->pose, 0, 0x1000);
+    const size_t psize = sizeof(C_HumanWeaponPose) + 0x100;
+    h->pose = static_cast<unsigned char *>(::operator new(psize, std::align_val_t(16)));
+    std::memset(h->pose, 0, psize);
     reinterpret_cast<C_HumanMovement *>(h->movement)->m_weaponPose = reinterpret_cast<C_HumanWeaponPose *>(h->pose);
     h->human->m_body.movement = reinterpret_cast<C_HumanMovement *>(h->movement);
     for (const char *name : {equipment::HAND_DUMMY1, "HW2", equipment::JOINT_C, equipment::JOINT_D, equipment::JOINT_F,
@@ -1183,6 +1251,725 @@ void TestSaveFieldVariations()
         in.Close();
     }
 }
+
+// ============================================================ part 2: attach / detach
+
+struct S_Rig {
+    S_TestHuman *h;
+    C_HumanEquipment *eq;
+    C_HumanMovement *mv;
+    C_HumanWeaponPose *pose;
+};
+S_Rig Rig()
+{
+    Reset();
+    g_localPlayer = g_firstPerson = false;
+    S_Rig r;
+    r.h = MakeHuman("models\\NOSUCHMODEL.4ds");
+    r.eq = new C_HumanEquipment(r.h->human);
+    r.eq->FindJoints(nullptr);
+    r.h->human->m_body.equipment = r.eq;
+    r.mv = reinterpret_cast<C_HumanMovement *>(r.h->movement);
+    r.pose = reinterpret_cast<C_HumanWeaponPose *>(r.h->pose);
+    g_log.clear();
+    return r;
+}
+bool Same(const S_vector &a, const S_vector &b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
+bool Near(const S_vector &a, const S_vector &b, float eps = 1e-5f)
+{
+    return std::fabs(a.x - b.x) <= eps && std::fabs(a.y - b.y) <= eps && std::fabs(a.z - b.z) <= eps;
+}
+bool NearM(const S_matrix &a, const S_matrix &b, float eps = 1e-5f)
+{
+    for (int r = 0; r < 4; ++r)
+        for (int c = 0; c < 3; ++c)
+            if (std::fabs(a.m[r][c] - b.m[r][c]) > eps)
+                return false;
+    return true;
+}
+bool Logged(const std::string &prefix)
+{
+    return std::any_of(g_log.begin(), g_log.end(), [&](const std::string &l) { return l.rfind(prefix, 0) == 0; });
+}
+// The index of the first log line starting with `prefix` (-1: none).
+int At(const std::string &prefix)
+{
+    for (int i = 0; i < static_cast<int>(g_log.size()); ++i)
+        if (g_log[i].rfind(prefix, 0) == 0)
+            return i;
+    return -1;
+}
+
+// The local matrix a long gun gets on the back (AttachModel, 0x0078e89f..0x0078f0ef; its constants read there): its
+// world direction (0, 1, 0) (here with the joint at the origin), the offset; the backlink dummy `b` brought to the joint
+// (+0.0275, +0.09); turned about local -z and then local x (magazine) or y, the position kept; then about x by 0.15
+// (a magazine) or 0.25; lifted: tilted back by the maximum and slid down by it.
+S_matrix RefLongGun(const S_vector &b, bool magazineBranch, bool magazine, bool lifted, const S_vector &offset,
+                    float dx, float dz, float yxAngle)
+{
+    I3D_frame *f = MakeFrame(FRAME_MODEL, "ref");
+    I3D_frame *bl = MakeFrame(FRAME_DUMMY, "refbacklink");
+    bl->m_parent = f;
+    bl->SetPosInline(b);
+    S_matrix m;
+    m.Identity();
+    m.SetDir3(S_vector(0.0f, 1.0f, 0.0f));
+    f->SetLocalMatrix(m);
+    f->SetPosInline(offset);
+    const S_vector link = -bl->GetPos() * f->GetLocalMatrix();
+    f->SetPosInline(S_vector(link.x + dx, link.y, link.z + dz));
+    float maxTilt, maxSlide;
+    if (magazineBranch) {
+        maxTilt = 0.29f;
+        maxSlide = 0.038f;
+        S_vector p = f->GetPos();
+        p.x -= 0.01f;
+        p.z -= 0.08f;
+        equipment::RotateAboutYxX(f, yxAngle);
+        f->SetPosInline(p);
+        p = f->GetPos();
+        equipment::Rotate(f, f->GetLocalMatrix()(0), -0.35f);
+        f->SetPosInline(p);
+    } else {
+        maxTilt = 0.4f;
+        maxSlide = 0.068f;
+        S_vector p = f->GetPos();
+        equipment::RotateAboutYxX(f, -0.25f);
+        f->SetPosInline(p);
+        p = f->GetPos();
+        equipment::Rotate(f, f->GetLocalMatrix()(1), 0.1f);
+        f->SetPosInline(p);
+    }
+    equipment::Rotate(f, S_vector(1.0f, 0.0f, 0.0f), magazine ? 0.15f : 0.25f);
+    if (lifted) {
+        equipment::Rotate(f, S_vector(1.0f, 0.0f, 0.0f), -maxTilt);
+        const S_vector p = f->GetPos();
+        f->SetPosInline(S_vector(p.x, p.y, p.z - maxSlide));
+    }
+    return f->GetLocalMatrix();
+}
+// A gun model with its backlink dummy at `b` (and a magazine frame).
+I3D_frame *Gun(const char *name, const S_vector &b, bool magazine)
+{
+    I3D_frame *gun = MakeFrame(FRAME_MODEL, name);
+    I3D_frame *backlink = MakeFrame(FRAME_DUMMY, (std::string(name) + "_backlink").c_str());
+    backlink->m_parent = gun;
+    backlink->SetPosInline(b);
+    g_children[{gun, equipment::BACKLINK_DUMMY}] = backlink;
+    if (magazine)
+        g_children[{gun, equipment::MAGAZINE_FRAME}] = MakeFrame(FRAME_VISUAL, (std::string(name) + "_mag").c_str());
+    return gun;
+}
+
+void TestAttachBody()
+{
+    // The head: on joint f (flags 2), facing z, shown, at its offset (the original's save has the head models there),
+    // updated; the stains shown unless the item weighs 0.1 or less; a null model: nothing.
+    {
+        S_Rig r = Rig();
+        Def(800, 16)->m_weight = 0.5f;
+        Item(800, 801, "helmet_item");
+        I3D_frame *helmet = MakeFrame(FRAME_VISUAL, "helmet");
+        r.eq->m_headModel = helmet;
+        r.eq->m_headUid = 801;
+        r.eq->AttachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(Count("link helmet j_f 2") == 1 && Count("worlddir helmet 0,0,1") == 1 && Count("on helmet") == 1);
+        CHECK(Same(helmet->GetPos(), equipment::g_headModelOffset) && At("update helmet") > At("worlddir helmet"));
+        CHECK(Count("pose stains 1") == 1 && Count("light helmet") == 1);
+        CHECK(equipment::g_headModelOffset.x == 0.0167346001f && equipment::g_headModelOffset.y == 0.138341993f &&
+              equipment::g_headModelOffset.z == -0.0175083f);
+        // A cap (0.1): no stains; 0.10001: stains.
+        GetItemDef(800)->m_weight = 0.1f;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(Count("pose stains 1") == 0);
+        GetItemDef(800)->m_weight = 0.10001f;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(Count("pose stains 1") == 1);
+        // No item of that uid (or a negative uid): stains.
+        GetItemDef(800)->m_weight = 0.05f;
+        r.eq->m_headUid = 802;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(Count("pose stains 1") == 1);
+        r.eq->m_headUid = -1;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(Count("pose stains 1") == 1);
+        // Uid 0 is an item (a light one: no stains).
+        Item(800, 0, "cap_item");
+        r.eq->m_headUid = 0;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(Count("pose stains 1") == 0);
+        r.eq->m_headModel = nullptr;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(g_log.empty());
+        // Detached: unlinked, gone, no stains.
+        r.eq->m_headModel = helmet;
+        g_log.clear();
+        r.eq->DetachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(Count("link helmet null 0") == 1 && r.eq->m_headModel == nullptr && Count("pose stains 0") == 1);
+        g_log.clear();
+        r.eq->DetachModel(EQUIPMENT_PLACE_HEAD);
+        CHECK(g_log.empty());
+    }
+    // A backpack: on joint d (flags 2), facing z, shown while not seated, at its offset, updated, lit.
+    {
+        S_Rig r = Rig();
+        I3D_frame *pack = MakeFrame(FRAME_VISUAL, "pack");
+        r.eq->m_backpackModel = pack;
+        r.eq->m_backpackTypeId = -1;
+        g_itemDefLookups.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_BACKPACK);
+        CHECK(g_itemDefLookups.count(-1) == 0);
+        CHECK(Count("link pack j_d 2") == 1 && Count("worlddir pack 0,0,1") == 1 && Count("on pack") == 1);
+        CHECK(Same(pack->GetPos(), equipment::g_backpackModelOffset) && Count("update pack") == 1 && Count("light pack") == 1);
+        CHECK(equipment::g_backpackModelOffset.x == -0.000953259994f && equipment::g_backpackModelOffset.y == 0.157157004f &&
+              equipment::g_backpackModelOffset.z == -0.132352993f);
+        r.mv->m_seatMode = 1;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_BACKPACK);
+        CHECK(Count("on pack") == 0 && Count("link pack j_d 2") == 1);
+        r.mv->m_seatMode = 0;
+        // An aqualung (a definition with diving gear): the four models copied once; the mask on the head, two on joints
+        // u and q at their origin, the bottles in place of the backpack model.
+        // (A fifth model after them: never copied.)
+        static I3D_frame *gear[5] = {MakeFrame(FRAME_MODEL, "mask"), MakeFrame(FRAME_MODEL, "hoseu"), MakeFrame(FRAME_MODEL, "hoseq"),
+                                     MakeFrame(FRAME_MODEL, "bottles"), MakeFrame(FRAME_MODEL, "extra")};
+        for (int i = 0; i < 5; ++i)
+            gear[i]->m_localMatrix(3) = S_vector(1.0f + i, 2.0f, 3.0f);
+        C_TestDef *aqualung = Def(810, 16);
+        g_divingGear[aqualung] = gear;
+        r.eq->m_backpackTypeId = 810;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_BACKPACK);
+        CHECK(Count("clone mask") == 1 && Count("clone bottles") == 1 && r.eq->m_backpackModel == r.eq->m_divingGear[3]);
+        CHECK(Count("link clone_mask j_f 2") == 1 && Count("on clone_mask") == 1 && Same(r.eq->m_divingGear[0]->GetPos(), equipment::g_headModelOffset));
+        CHECK(Count("link clone_hoseu j_u 2") == 1 && Count("link clone_hoseq j_q 2") == 1 && Count("on clone_hoseu") == 1 &&
+              Count("on clone_hoseq") == 1);
+        CHECK(Count("worlddir clone_hoseu 0,0,1") == 1 && Count("update clone_hoseq") == 1);
+        CHECK(Same(r.eq->m_divingGear[1]->GetPos(), S_vector(0, 0, 0)) && Count("link clone_bottles j_d 2") == 1);
+        CHECK(Same(r.eq->m_divingGear[2]->GetPos(), S_vector(0, 0, 0)) && Count("clone extra") == 0);
+        for (const char *g : {"clone_mask", "clone_hoseu", "clone_hoseq"})
+            CHECK(Count(std::string("worlddir ") + g + " 0,0,1") == 1 && Count(std::string("update ") + g) == 1 &&
+                  Count(std::string("on ") + g) == 1 && Count(std::string("light ") + g) == 1);
+        CHECK(Count("light clone_bottles") == 2);
+        r.eq->m_backpackModel = pack;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_BACKPACK);
+        CHECK(Count("clone mask") == 0 && r.eq->m_backpackModel == r.eq->m_divingGear[3]);
+        // Detached: unlinked with the gear.
+        g_log.clear();
+        r.eq->DetachModel(EQUIPMENT_PLACE_BACKPACK);
+        CHECK(r.eq->m_backpackModel == nullptr && Count("link clone_bottles null 0") == 2 && Count("link clone_mask null 0") == 1 &&
+              Count("link clone_hoseq null 0") == 1);
+        g_divingGear.clear();
+    }
+}
+
+void TestAttachLongGun()
+{
+    const S_vector b(-0.010044088f, 0.060267403f, 0.38182217f);       // w_98k's backlink (H:\HD2_Unpacked)
+    const S_vector offset = equipment::g_longGunModelOffset;
+    // No backlink dummy: nothing.
+    {
+        S_Rig r = Rig();
+        r.eq->m_longGunModel = MakeFrame(FRAME_MODEL, "plain");
+        r.eq->AttachModel(EQUIPMENT_PLACE_LONG_GUN);
+        CHECK(!Logged("link plain"));
+    }
+    struct S_Case {
+        bool magazine;
+        int behaviour;
+        bool lifted;
+        int seat;
+    };
+    for (const S_Case &c : {S_Case{false, 5, false, 0}, S_Case{true, 5, false, 0}, S_Case{true, 4, false, 0},
+                            S_Case{false, 5, true, 0}, S_Case{true, 5, true, 0}, S_Case{false, 5, false, 1}}) {
+        S_Rig r = Rig();
+        Def(820, c.behaviour);
+        I3D_frame *gun = Gun("gun", b, c.magazine);
+        r.eq->m_longGunModel = gun;
+        r.eq->m_longGunTypeId = 820;
+        r.eq->m_longGunLift = c.lifted ? 1 : 0;
+        r.eq->m_longGunTilt = 0.123f;
+        r.eq->m_longGunSlide = 0.456f;
+        r.mv->m_seatMode = c.seat;
+        r.eq->AttachModel(EQUIPMENT_PLACE_LONG_GUN);
+        const bool magazineBranch = c.magazine && c.behaviour != 4;
+        const S_matrix want = RefLongGun(b, magazineBranch, c.magazine, c.lifted, offset, 0.0275f, 0.09f, -1.9634955f);
+        CHECK(NearM(gun->GetLocalMatrix(), want));
+        if (!NearM(gun->GetLocalMatrix(), want))
+            std::printf("  long gun case mag %d beh %d lift %d\n", c.magazine, c.behaviour, c.lifted);
+        CHECK(Count("link gun j_d 2") == 1 && Count("worlddir gun 0,1,0") == 1 && Count("on gun") == (c.seat < 1 ? 1 : 0));
+        CHECK(r.eq->m_longGunMaxTilt == (magazineBranch ? 0.29f : 0.4f) && r.eq->m_longGunMaxSlide == (magazineBranch ? 0.038f : 0.068f));
+        CHECK(r.eq->m_longGunTilt == (c.lifted ? r.eq->m_longGunMaxTilt : 0.0f) &&
+              r.eq->m_longGunSlide == (c.lifted ? r.eq->m_longGunMaxSlide : 0.0f));
+        CHECK(Count("light gun") == 0 && Count("update gun") == 5);
+        // Detached: unlinked.
+        g_log.clear();
+        r.eq->DetachModel(EQUIPMENT_PLACE_LONG_GUN);
+        CHECK(Count("link gun null 0") == 1 && r.eq->m_longGunModel == nullptr);
+    }
+    // A visual long gun is lit.
+    {
+        S_Rig r = Rig();
+        Def(821, 5);
+        I3D_frame *gun = Gun("vgun", b, false);
+        gun->m_type = FRAME_VISUAL;
+        r.eq->m_longGunModel = gun;
+        r.eq->m_longGunTypeId = 821;
+        r.eq->AttachModel(EQUIPMENT_PLACE_LONG_GUN);
+        CHECK(Count("light vgun") == 1);
+    }
+    // The constants against the original's (0x0098ada0).
+    CHECK(offset.x == 0.175592005f && offset.y == 0.180546999f && offset.z == -0.133314997f);
+}
+
+// The hands item: taken in hand 1, or put away (place 10).
+void TestAttachHands()
+{
+    auto handsRig = [](int typeId, int behaviour, bool magazine) {
+        S_Rig r = Rig();
+        if (behaviour >= 0)
+            Def(typeId, behaviour)->m_armedSound = 77;
+        r.eq->m_handsModel = Gun("rifle", S_vector(0.01f, 0.05f, 0.3f), magazine);
+        r.eq->m_handsTypeId = typeId;
+        r.eq->m_handsTime = 500;
+        g_log.clear();
+        return r;
+    };
+    // In the hand: shown, on HW1 (flags 6) at its origin facing x, updated; the grip 2 (1 for thrown or melee items),
+    // the pose's model, the other grip 2; the armed sound (at the origin, flags 0, from the human, attached to his
+    // hands item); lit; the hands time cleared.
+    {
+        S_Rig r = handsRig(830, 5, false);
+        r.eq->m_handsModel->m_type = FRAME_VISUAL;
+        r.eq->m_handsModel->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+        I3D_frame *itemFrame = MakeFrame(FRAME_MODEL, "handsitem");
+        g_handsItemFrame = itemFrame;
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        g_handsItemFrame = nullptr;
+        char s[160];
+        std::snprintf(s, sizeof s, "soundreq 0 0 0 flags 0 source %p attach %p", static_cast<void *>(r.h->human),
+                      static_cast<void *>(itemFrame));
+        CHECK(Count(s) == 1 && Count("light rifle") == 1);
+        CHECK(Count("on rifle") == 2 && Count("link rifle j_HW1 6") == 1 && Count("worlddir rifle 1,0,0") == 1 &&
+              Same(r.eq->m_handsModel->GetPos(), S_vector(0, 0, 0)));
+        CHECK(At("on rifle") < At("link rifle") && At("update rifle") > At("worlddir rifle"));
+        CHECK(r.mv->m_morph.m_grip2Request == 2 && r.mv->m_morph.m_gripRequest == 2 && Count("pose model rifle 5") == 1);
+        CHECK(Count("sound 3 77") == 1 && r.eq->m_handsTime == C_HumanEquipment::NO_TIME);   // chapter 3: items
+    }
+    {
+        S_Rig r = handsRig(831, ITEM_BEHAVIOUR_THROWN, false);
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(r.mv->m_morph.m_grip2Request == 1 && Count("pose model rifle " + std::to_string(ITEM_BEHAVIOUR_THROWN)) == 1);
+    }
+    {
+        // A melee component: grip 1.
+        S_Rig r = handsRig(832, 5, false);
+        auto *comp = static_cast<C_ItemComponent *>(::operator new(64));
+        std::memset(static_cast<void *>(comp), 0, 64);
+        comp->m_kind = ICK_MELEE;
+        GetItemDef(832)->m_component = comp;
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(r.mv->m_morph.m_grip2Request == 1);
+        GetItemDef(832)->m_component = nullptr;
+    }
+    {
+        // An unknown type: grip 2, the pose's behaviour -1, no sound.
+        S_Rig r = handsRig(9998, -1, false);
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(r.mv->m_morph.m_grip2Request == 2 && Count("pose model rifle -1") == 1 && !Logged("sound "));
+        // Type -1: no sound either.
+        S_Rig r2 = handsRig(-1, -1, false);
+        r2.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(!Logged("sound "));
+    }
+    {
+        // The local player in first person: no sound; in third person (or another human in first person): the sound.
+        S_Rig r = handsRig(833, 5, false);
+        g_localPlayer = g_firstPerson = true;
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(!Logged("sound "));
+        g_firstPerson = false;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(Logged("sound "));
+        g_localPlayer = false;
+        g_firstPerson = true;
+        g_log.clear();
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(Logged("sound "));
+        g_firstPerson = false;
+    }
+    {
+        // No hand dummy or no model: only the names refreshed.
+        S_Rig r = handsRig(834, 5, false);
+        r.eq->m_handDummy1 = nullptr;
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(!Logged("link rifle") && r.eq->m_handsTime == 500 && Logged("modelvisible"));
+    }
+    // Put away (the flag set): place 10. A rifle (behaviour 3..7, 12) with a backlink goes on the back like a long gun;
+    // smaller things are hidden.
+    for (int behaviour : {0, 2, 3, 7, 8, 11, 12, 13}) {
+        S_Rig r = handsRig(840 + behaviour, behaviour, false);
+        r.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        r.eq->m_handsTime = C_HumanEquipment::NO_TIME;
+        r.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        const bool rifle = (behaviour >= 3 && behaviour <= 7) || behaviour == 12;
+        CHECK(Logged("link rifle j_d 2") == rifle && (Count("off rifle") == 1) == !rifle && r.eq->m_flags == EQUIPMENT_HANDS_PUT_AWAY);
+    }
+    // Place 10 with a take pending (the hands time set) and alive: first taken into the hand (the flag kept).
+    {
+        S_Rig r = handsRig(850, 5, false);
+        r.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        r.h->human->m_stats[STAT_HEALTH] = 1;
+        r.eq->AttachModel(10);
+        CHECK(Count("link rifle j_HW1 6") == 1 && At("link rifle j_HW1 6") < At("link rifle j_d 2") &&
+              r.eq->m_flags == EQUIPMENT_HANDS_PUT_AWAY && r.eq->m_handsTime == C_HumanEquipment::NO_TIME);
+        // Through place 3 the hands time is cleared first: straight onto the back.
+        S_Rig h = handsRig(853, 5, false);
+        h.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        h.eq->AttachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(Count("link rifle j_HW1 6") == 0 && Count("link rifle j_d 2") == 1);
+        // Dead: not.
+        S_Rig d = handsRig(851, 5, false);
+        d.eq->m_flags = EQUIPMENT_HANDS_PUT_AWAY;
+        d.h->human->m_stats[STAT_HEALTH] = 0;
+        d.eq->AttachModel(10);
+        CHECK(Count("link rifle j_HW1 6") == 0 && d.eq->m_handsTime == C_HumanEquipment::NO_TIME);
+        // No backlink: left where it is.
+        S_Rig n = handsRig(852, 5, false);
+        n.eq->m_handsModel = MakeFrame(FRAME_MODEL, "nobacklink");
+        n.eq->m_handsTime = C_HumanEquipment::NO_TIME;
+        n.eq->AttachModel(10);
+        CHECK(!Logged("link nobacklink") && !Logged("off nobacklink"));
+    }
+    // On the back: the geometry, alone or beside a long gun (its offset's x mirrored), with or without a backpack and
+    // a magazine.
+    const S_vector b(0.01f, 0.05f, 0.3f);
+    for (int k = 0; k < 8; ++k) {
+        const bool magazine = k & 1, longGun = k & 2, backpack = k & 4;
+        S_Rig r = handsRig(860, 5, magazine);
+        r.eq->m_handsTime = C_HumanEquipment::NO_TIME;
+        if (longGun)
+            r.eq->m_longGunModel = MakeFrame(FRAME_MODEL, "longgun");
+        if (backpack)
+            r.eq->m_backpackModel = MakeFrame(FRAME_MODEL, "backpack");
+        r.eq->AttachModel(10);
+        S_vector offset = equipment::g_longGunModelOffset;
+        if (longGun)
+            offset.x = -offset.x;
+        // The reference: like a long gun, but beside one: +0.01 (with a backpack) or +0.025 and z +0.06, turned by
+        // -1.4279966 (the original's 0xbfb6c898) with a magazine, neither the second turn nor (without a magazine) the
+        // turn about y.
+        S_matrix want;
+        if (!longGun) {
+            if (magazine) {
+                want = RefLongGun(b, true, true, false, offset, 0.0275f, 0.09f, -1.9634955f);
+            } else {
+                // (Only the turn about y here: place 10 has no -0.25 turn, 0x007902a0..0x0079060c.)
+                I3D_frame *f = MakeFrame(FRAME_MODEL, "ref");
+                I3D_frame *bl = MakeFrame(FRAME_DUMMY, "refbacklink");
+                bl->m_parent = f;
+                bl->SetPosInline(b);
+                S_matrix m;
+                m.Identity();
+                m.SetDir3(S_vector(0.0f, 1.0f, 0.0f));
+                f->SetLocalMatrix(m);
+                f->SetPosInline(offset);
+                const S_vector link = -bl->GetPos() * f->GetLocalMatrix();
+                f->SetPosInline(S_vector(link.x + 0.0275f, link.y, link.z + 0.09f));
+                const S_vector p = f->GetPos();
+                equipment::Rotate(f, f->GetLocalMatrix()(1), 0.1f);
+                f->SetPosInline(p);
+                equipment::Rotate(f, S_vector(1.0f, 0.0f, 0.0f), 0.25f);
+                want = f->GetLocalMatrix();
+            }
+        } else {
+            I3D_frame *f = MakeFrame(FRAME_MODEL, "ref");
+            I3D_frame *bl = MakeFrame(FRAME_DUMMY, "refbacklink");
+            bl->m_parent = f;
+            bl->SetPosInline(b);
+            S_matrix m;
+            m.Identity();
+            m.SetDir3(S_vector(0.0f, 1.0f, 0.0f));
+            f->SetLocalMatrix(m);
+            f->SetPosInline(offset);
+            const S_vector link = -bl->GetPos() * f->GetLocalMatrix();
+            f->SetPosInline(S_vector((backpack ? 0.01f : 0.025f) + link.x, link.y, link.z + 0.06f));
+            if (magazine) {
+                const S_vector p = f->GetPos();
+                equipment::RotateAboutYxX(f, -1.4279966f);
+                f->SetPosInline(S_vector(p.x - 0.01f, p.y, p.z - 0.08f));
+            }
+            equipment::Rotate(f, S_vector(1.0f, 0.0f, 0.0f), 0.15f);
+            want = f->GetLocalMatrix();
+        }
+        CHECK(NearM(r.eq->m_handsModel->GetLocalMatrix(), want));
+        if (!NearM(r.eq->m_handsModel->GetLocalMatrix(), want))
+            std::printf("  put away case %d\n", k);
+        CHECK(Count("worlddir rifle 0,1,0") == 1 && Count("on rifle") == 1 && Count("light rifle") == 0);
+    }
+    // Seated: not shown.
+    {
+        S_Rig r = handsRig(861, 5, false);
+        r.eq->m_handsTime = C_HumanEquipment::NO_TIME;
+        r.mv->m_seatMode = 1;
+        r.eq->AttachModel(10);
+        CHECK(Count("link rifle j_d 2") == 1 && Count("on rifle") == 0);
+    }
+    // Detached from the hands: the support hand released first (event 1), unlinked, the pose's model none, the grips 0.
+    {
+        S_Rig r = handsRig(870, 5, false);
+        r.pose->m_hand = 0x80000000u;
+        r.mv->m_morph.m_gripRequest = r.mv->m_morph.m_grip2Request = 2;
+        I3D_frame *rifle = r.eq->m_handsModel;
+        r.eq->DetachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(Count("pose support 0") == 1 && Count("link rifle null 0") == 1 && Count("pose model null -1") == 1);
+        CHECK(r.eq->m_handsModel == nullptr && r.mv->m_morph.m_gripRequest == 0 && r.mv->m_morph.m_grip2Request == 0 &&
+              Logged("modelvisible") && rifle != nullptr);
+        r.pose->m_hand = 0;
+        r.eq->m_handsModel = rifle;
+        g_log.clear();
+        r.eq->DetachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(Count("pose support 0") == 0 && Count("link rifle null 0") == 1);
+        g_log.clear();
+        r.eq->DetachModel(EQUIPMENT_PLACE_HANDS);
+        CHECK(g_log.empty());
+    }
+}
+
+// A special object (places 4..9).
+I3D_frame *Special(const char *name)
+{
+    I3D_frame *f = MakeFrame(FRAME_MODEL, name);
+    f->m_bound.bbox.min = S_vector(-0.2f, 0.0f, -0.1f);
+    f->m_bound.bbox.max = S_vector(0.2f, 0.5f, 0.3f);
+    f->m_frameFlags |= FRMFLAGS_BOUND_VALID;
+    return f;
+}
+void TestAttachSpecial()
+{
+    // Place 4 (both hands): kept (a reference), its rotation and world position remembered; the bound's centre put
+    // halfway between the hand dummies, 0.1 m along the facing; on HW1 (flags 3); shown unless faded out; grips 2.
+    {
+        S_Rig r = Rig();
+        I3D_frame *box = Special("box");
+        box->m_localMatrix(3) = S_vector(5.0f, 1.0f, 2.0f);
+        box->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        r.eq->m_handDummy1->m_localMatrix(3) = S_vector(0.2f, 1.0f, 0.4f);
+        r.eq->m_handDummy2->m_localMatrix(3) = S_vector(-0.2f, 1.2f, 0.4f);
+        r.eq->m_handDummy1->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        r.eq->m_handDummy2->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        r.h->human->m_direction = {0.6f, 0.0f, 0.8f, 0.0f};
+        r.eq->m_specialModel = box;
+        const int refs = box->m_refCount;
+        r.eq->AttachModel(4);
+        CHECK(r.eq->m_specialPlace == 4 && box->m_refCount == refs + 1 && Same(r.eq->m_specialPos, S_vector(5.0f, 1.0f, 2.0f)));
+        // between (0, 1.1, 0.4) + 0.1 of the facing (0.06, 0.08 in z), minus the centre (0, 0.25, 0.1), plus the world
+        // position; no roll.
+        CHECK(Near(box->GetPos(), S_vector(0.06f + 5.0f, 1.85f, 0.48f - 0.1f + 2.0f)) && !Logged("dir roll"));
+        CHECK(Count("link box j_HW1 3") == 1 && Count("on box") == 1 && Logged("dir box ") && r.mv->m_morph.m_gripRequest == 2 &&
+              r.mv->m_morph.m_grip2Request == 2);
+        // Faded out: hidden. An empty bound (min above max): only kept and placed.
+        r.h->human->m_fadedOut = true;
+        g_log.clear();
+        r.eq->AttachModel(4);
+        CHECK(Count("off box") == 1);
+        r.h->human->m_fadedOut = false;
+        // A flat bound (min x = max x): placed.
+        box->m_bound.bbox.min.x = box->m_bound.bbox.max.x;
+        g_log.clear();
+        r.eq->AttachModel(4);
+        CHECK(Logged("link box j_HW1 3"));
+        box->m_bound.bbox.min.x = 1.0f;
+        g_log.clear();
+        const int refs2 = box->m_refCount;
+        r.eq->m_specialPlace = 0;
+        r.eq->AttachModel(4);
+        CHECK(g_log.empty() && box->m_refCount == refs2 + 1 && r.eq->m_specialPlace == 4);
+    }
+    // Places 5..8: in a hand (HW1 for 8 or while unknown2c, else HW2), at its origin; the position remembered except for
+    // 6 and 7.
+    for (int place : {5, 6, 7, 8}) {
+        for (bool hand1 : {true, false}) {
+            S_Rig r = Rig();
+            I3D_frame *thing = Special("thing");
+            thing->m_localMatrix(3) = S_vector(3.0f, 4.0f, 5.0f);
+            thing->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+            r.eq->m_specialModel = thing;
+            r.eq->m_unknown2c = hand1;
+            r.eq->m_specialPos = S_vector(9, 9, 9);
+            r.eq->AttachModel(place);
+            const bool inHand1 = place == 8 || hand1;
+            CHECK(r.eq->m_specialPlace == place && thing->m_refCount == 2);
+            CHECK(Count(std::string("link thing ") + (inHand1 ? "j_HW1" : "j_HW2") + " 2") == 1 && Count("link thing null 0") == 1 &&
+                  At("link thing null 0") < At("link thing j_"));
+            CHECK(Same(r.eq->m_specialPos, place == 6 || place == 7 ? S_vector(9, 9, 9) : S_vector(3, 4, 5)));
+            CHECK(Same(thing->GetPos(), S_vector(0, 0, 0)) && Count("on thing") == 1 && Count("update thing") == 1);
+        }
+    }
+    // Place 9: the special animation on stage 6 (play mode 2), advanced a second, then following the hand.
+    {
+        S_Rig r = Rig();
+        static unsigned char animTable[0x2600];
+        static unsigned char anim[0x200];
+        g_humanAnimTable = reinterpret_cast<C_HumanAnimTable *>(animTable);
+        g_humanAnimTable->m_slots[288].anim = reinterpret_cast<I3D_animation_set *>(0x1288);
+        g_humanAnimTable->m_slots[291].anim = reinterpret_cast<I3D_animation_set *>(0x1291);
+        g_stage.anim = reinterpret_cast<I3D_animation_set *>(anim);
+        I3D_frame *door = Special("door");
+        r.eq->m_specialModel = door;
+        r.eq->m_unknownD0 = 0.5f;
+        r.eq->AttachModel(9);
+        CHECK(Count("getanim door 6") == 1 && Count("tick door 100") == 1);
+        char s[64];
+        std::snprintf(s, sizeof s, "setanim door %p 6 1 2", reinterpret_cast<void *>(0x1288));
+        CHECK(Count(s) == 1 && reinterpret_cast<I3D_animation_set *>(anim)->m_playMode == 2 && Count("tick door 1000") == 1);
+        CHECK(r.eq->m_specialPlace == 9 && door->m_refCount == 2 && Count("tracked door") == 1 && At("tick door 1000") < At("tracked door"));
+        g_stage.anim = nullptr;
+    }
+    // Null models and other places: nothing.
+    {
+        S_Rig r = Rig();
+        for (int place : {4, 5, 6, 7, 8, 9, 11, -1})
+            r.eq->AttachModel(place);
+        CHECK(g_log.empty());
+    }
+}
+
+void TestDetachSpecial()
+{
+    // Places 4 and 8: put down 0.6 m in front of the human (its height added twice: the original's), back in the scene's
+    // primary sector (flags 3), turned as it was, released; the grips 0; place 8 also forgets the place.
+    for (int place : {4, 8}) {
+        S_Rig r = Rig();
+        I3D_frame *sector = MakeFrame(FRAME_SECTOR, "primary");
+        *reinterpret_cast<I3D_frame **>(g_sceneObject.fields + 0x1D8 - 4) = sector;
+        *reinterpret_cast<I3D_frame **>(g_sceneObject.fields + 0x1F8 - 4) = sector;
+        I3D_frame *box = Special("box");
+        box->m_bound.bbox.min.y = -0.25f;
+        r.eq->m_specialModel = box;
+        r.eq->m_specialPlace = place;
+        r.eq->m_specialTime = 5;
+        r.eq->m_specialRot = S_quat(1.0f, 0.0f, 0.0f, 0.0f);
+        r.h->body->m_localMatrix(3) = S_vector(10.0f, 2.0f, 20.0f);
+        r.h->body->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        r.mv->m_morph.m_gripRequest = r.mv->m_morph.m_grip2Request = 2;
+        r.eq->DetachModel(place);
+        CHECK(r.eq->m_specialModel == nullptr && r.eq->m_specialTime == C_HumanEquipment::NO_TIME && Count("release box") == 1);
+        CHECK(Count("link box null 1") == 1 && Count("link box primary 3") == 1 && Logged("sector box "));
+        // The body faces z: (10, 2, 20.6); then y: 2 - (-0.25) + 2.
+        CHECK(Near(box->GetPos(), S_vector(10.0f, 4.25f, 20.6f)));
+        CHECK(r.mv->m_morph.m_gripRequest == 0 && r.mv->m_morph.m_grip2Request == 0);
+        CHECK(r.eq->m_specialPlace == (place == 8 ? EQUIPMENT_PLACE_NONE : 4));
+    }
+    // Place 5: back where it was, in the primary sector (flags 0).
+    {
+        S_Rig r = Rig();
+        I3D_frame *sector = MakeFrame(FRAME_SECTOR, "primary");
+        *reinterpret_cast<I3D_frame **>(g_sceneObject.fields + 0x1D8 - 4) = sector;
+        *reinterpret_cast<I3D_frame **>(g_sceneObject.fields + 0x1F8 - 4) = sector;
+        I3D_frame *lamp = Special("lamp");
+        r.eq->m_specialModel = lamp;
+        r.eq->m_specialPlace = 5;
+        r.eq->m_specialPos = S_vector(7.0f, 8.0f, 9.0f);
+        r.eq->DetachModel(5);
+        CHECK(Same(lamp->GetPos(), S_vector(7.0f, 8.0f, 9.0f)) && Count("link lamp primary 0") == 1 && Count("release lamp") == 1);
+        CHECK(Count("update lamp") == 2 && At("sector lamp") > At("update lamp") && r.eq->m_specialPlace == EQUIPMENT_PLACE_NONE &&
+              r.eq->m_specialModel == nullptr);
+    }
+    // Places 6 and 7: unlinked (flags 1) and released; held at another place: that place detached instead; place 7 still
+    // linked: one release more.
+    for (int place : {6, 7}) {
+        S_Rig r = Rig();
+        I3D_frame *thing = Special("thing");
+        thing->m_parent = r.eq->m_handDummy1;
+        r.eq->m_specialModel = thing;
+        r.eq->m_specialPlace = place;
+        r.eq->DetachModel(place);
+        CHECK(Count("release thing") == (place == 7 ? 2 : 1) && Count("link thing null 1") == 1 && r.eq->m_specialModel == nullptr &&
+              r.eq->m_specialPlace == EQUIPMENT_PLACE_NONE);
+        // Not linked: one release.
+        S_Rig u = Rig();
+        I3D_frame *loose = Special("loose");
+        u.eq->m_specialModel = loose;
+        u.eq->m_specialPlace = EQUIPMENT_PLACE_NONE;
+        u.eq->DetachModel(place);
+        CHECK(Count("release loose") == 1);
+        // Held at place 5: detached from there (back to its position).
+        S_Rig o = Rig();
+        I3D_frame *other = Special("other");
+        o.eq->m_specialModel = other;
+        o.eq->m_specialPlace = 5;
+        o.eq->m_specialPos = S_vector(1.0f, 2.0f, 3.0f);
+        o.eq->DetachModel(place);
+        CHECK(Same(other->GetPos(), S_vector(1.0f, 2.0f, 3.0f)) && Count("release other") == 1);
+    }
+    // Place 9: thrown 0.4 m forward (the special end animation), 0.5 m up; the sphere swept from 0.5 m up by the
+    // difference with 0.5 added to its y again (0x0079139a: the original's); something within 0.5 m: kept back from
+    // it; farther: at the start.
+    for (int hit = 0; hit < 4; ++hit) {
+        S_Rig r = Rig();
+        static unsigned char animTable[0x2600];
+        g_humanAnimTable = reinterpret_cast<C_HumanAnimTable *>(animTable);
+        g_humanAnimTable->m_slots[291].anim = reinterpret_cast<I3D_animation_set *>(0x1291);
+        I3D_frame *crate = Special("crate");
+        r.eq->m_specialModel = crate;
+        r.eq->m_specialPlace = 9;
+        r.h->body->m_localMatrix(3) = S_vector(1.0f, 0.0f, 1.0f);
+        r.h->body->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        g_hitSomething = hit > 0;
+        g_hitPos = hit == 1 ? S_vector(1.0f, 0.5f, 1.3f) : hit == 2 ? S_vector(1.0f, 0.5f, 1.6f) : S_vector(1.0f, 0.5f, 1.5f);
+        r.eq->DetachModel(9);
+        g_hitSomething = false;
+        char s[64];
+        std::snprintf(s, sizeof s, "setanim crate %p 6 1 2", reinterpret_cast<void *>(0x1291));
+        CHECK(Count(s) == 1 && Count("tick crate 1000") == 1 && Count("sphere 1 0.5 1 / 0 1 0.4 r 0.33 c8002 230000") == 1);
+        // (Hit 3: exactly 0.5 m away: at the start.)
+        const S_vector want = hit == 0 ? S_vector(1.0f, 0.5f, 1.4f) : hit == 1 ? S_vector(1.0f, 0.5f, 0.8f) : S_vector(1.0f, 0.5f, 1.0f);
+        CHECK(Count("removecollision 0") == 1 && Count("restorecollision 0") == 1 &&
+              At("removecollision 0") < At("sphere") && At("restorecollision 0") > At("sphere"));
+        CHECK(Near(crate->GetPos(), want));
+        if (!Near(crate->GetPos(), want))
+            std::printf("  thrown %d: %s\n", hit, Vec(crate->GetPos()).c_str());
+        CHECK(Count("tracked body") == 1 && Count("release crate") == 1 && r.eq->m_specialModel == nullptr &&
+              r.eq->m_specialPlace == EQUIPMENT_PLACE_NONE && r.eq->m_specialTime == C_HumanEquipment::NO_TIME);
+    }
+    // Facing between x and z (0.6, 0.8): the throw and the step back along it.
+    for (int hit = 0; hit < 2; ++hit) {
+        S_Rig r = Rig();
+        I3D_frame *crate = Special("crate");
+        r.eq->m_specialModel = crate;
+        r.eq->m_specialPlace = 9;
+        S_matrix m;
+        m.Identity();
+        m.SetDir3(S_vector(0.6f, 0.0f, 0.8f));
+        m(3) = S_vector(1.0f, 0.0f, 1.0f);
+        r.h->body->SetLocalMatrix(m);
+        r.h->body->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        g_hitSomething = hit > 0;
+        g_hitPos = S_vector(1.18f, 0.5f, 1.24f);                       // 0.3 m along the facing
+        r.eq->DetachModel(9);
+        g_hitSomething = false;
+        const S_vector want = hit == 0 ? S_vector(1.24f, 0.5f, 1.32f) : S_vector(1.0f - 0.6f * 0.2f, 0.5f, 1.0f - 0.8f * 0.2f);
+        CHECK(Near(crate->GetPos(), want));
+        if (!Near(crate->GetPos(), want))
+            std::printf("  thrown along: %s\n", Vec(crate->GetPos()).c_str());
+    }
+    // Nothing held: nothing.
+    {
+        S_Rig r = Rig();
+        for (int place : {4, 5, 6, 7, 8, 9, 10, -1})
+            r.eq->DetachModel(place);
+        CHECK(g_log.empty());
+    }
+}
 }  // namespace
 
 int main()
@@ -1216,6 +2003,9 @@ int main()
     g_driverVt[0x54 / 4] = reinterpret_cast<void *>(F_CreateFrame);
     g_frameVt[0xA4 / 4] = reinterpret_cast<void *>(F_SetLightLevel);
     g_sceneVt[0x7C / 4] = reinterpret_cast<void *>(F_SceneFindFrame);
+    g_sceneVt[0xEC / 4] = reinterpret_cast<void *>(F_UpdateFrameSector);
+    g_sceneVt[0x144 / 4] = reinterpret_cast<void *>(F_MarkTracked);
+    g_frameVt[0x58 / 4] = reinterpret_cast<void *>(F_UpdateBound);
     GetGame()->m_scene = reinterpret_cast<I3D_scene *>(&g_sceneObject);
 
     TestHolsterSetup();
@@ -1225,6 +2015,11 @@ int main()
     TestModels();
     TestSaveRoundTrip();
     TestSaveFieldVariations();
+    TestAttachBody();
+    TestAttachLongGun();
+    TestAttachHands();
+    TestAttachSpecial();
+    TestDetachSpecial();
     std::printf("equipment: %d checks, %d failures\n", checks, failures);
     g_exiting = true;
     return failures != 0;

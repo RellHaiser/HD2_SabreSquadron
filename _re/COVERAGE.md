@@ -351,6 +351,30 @@ game runs it, because a loaded quaternion goes through `SetRot`, which normalise
   - part 3: the item callbacks, `ShowHandsItem` / `PutAway`, the flashlight;
   - the hands and special models' other load paths (belt, thrown, props, actors).
 
+### Equipment part 2a: AttachModel / DetachModel (2026-11-10)
+
+- **Fakes:** the frames' world matrices are now computed: the local matrix through the
+  parent's. `SetWorldDir` turns the local matrix (the joints sit at the origin), and
+  `UpdateBound`, `CloneFrameTree`, the scene's sector calls and the collision sweep are faked.
+  The local player and the first-person view can be set.
+- **Tests:**
+  - every place attached and detached: the head (stains by weight), the backpack and the
+    aqualung's diving gear, the long gun, the hands item in the hand and put away on the back
+    (place 10), and the special object in both hands, in one hand, and on the animation
+    (places 4..9);
+  - put down, put back, released, thrown, with and without something in the way.
+- **Geometry:** the long gun's and the put-away rifle's local matrices are checked against a
+  reference that follows the original's steps, with the constants read from its asm
+  (0x0078e89f.., 0x007900ff..). That check found a port bug: place 10 used -1.428f where the
+  original has 0xbfb6c898 (-1.4279966). Fixed on main (fd1afd66).
+- **Your save as a geometry reference:** I tried it and it doesn't work. The long guns saved
+  there sit where the H:\HD2_Unpacked models' backlink dummies can't put them (w_98k's frame 1
+  is offset, w_98ks's isn't, yet their saved positions differ only in x). Sabre Squadron
+  probably ships its own weapon models. The original's `BacklinkOffset` does what the port does
+  (0x0078e992). The head and backpack offsets do match the saved positions.
+- **Results:** 594 checks. `mutations/mutate_equipment2a.py`: 282 mutants, 257 killed, 16 don't
+  build, 9 survived, all equivalent (listed there).
+
 `mutrun.py`: it now takes the g++ line with the most `%SRC%` sources, because the equipment
 bat compiles math.cpp first. Env `MUT_EXTRA_SRCS` / `MUT_EXTRA_INC` add sources from outside
 `src/`, which are compiled once and not mutated. The equipment run:
