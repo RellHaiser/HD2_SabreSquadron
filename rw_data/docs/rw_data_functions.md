@@ -335,8 +335,10 @@ For other sample formats an LZSS stream follows the (optional) header copy inste
 
 An addition of the port, not in the original DLL: a block of type 2 holds one LZ4 **block**
 in the reference format (<https://github.com/lz4/lz4>, `doc/lz4_Block_format.md`), as
-`LZ4_compress_default` writes it, with no frame and no size header (the decoded size is known:
-32 KB, or the rest of the file). The stream is a list of sequences:
+`LZ4_compress_default` and the high-compression `LZ4_compress_HC` (`lib/lz4hc.c`, levels 3–12)
+write it, with no frame and no size header (the decoded size is known: 32 KB, or the rest of
+the file). LZ4 HC only searches harder for matches; its blocks are the same format, so one
+block type and one decoder serve both. The stream is a list of sequences:
 
 | Field | Content |
 |---|---|
@@ -350,9 +352,10 @@ blocks exactly like `LZ4_decompress_safe`; on damaged ones (a length past the in
 of 0 or before the start of the output) it stops there, and it never writes past the 32 KB
 room. Like the other block types the result is not compared with the expected size.
 
-LZ4 is designed for fast decoding and is what `tools/dta_pack.py
---compression lz4` writes, but archives that use it can only be read by the port: the original
-DLL would hand the compressed bytes to the game as they are.
+LZ4 is designed for fast decoding and is what `tools/dta_pack.py --compression lz4` (or
+`--compression lz4hc --level 3..12`, smaller and slower to pack) writes, but archives that use
+it can only be read by the port: the original DLL would hand the compressed bytes to the game
+as they are.
 
 ### 4.7 Reading an archived file
 

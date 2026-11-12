@@ -8,6 +8,7 @@ Run without arguments for the window; with arguments it packs from the command l
     python dta_pack.py MyMod Test.dta --key 0x12345678:0x9ABCDEF0 --store
     python dta_pack.py MyMod Plain.dta --key blank
     python dta_pack.py MyMod PatchX02.dta --compression lz4
+    python dta_pack.py MyMod PatchX02.dta --compression lz4hc --level 12
 
 Every file under the folder is stored under its path relative to the folder, with
 backslashes ("Tables\\items.sav"), which is the name the game asks rw_data.dll for.
@@ -33,12 +34,10 @@ its own start.
              points at the first file's blocks. The reader takes the blocks from that
              offset, so this needs no change to the format.
     blocks   each decodes to 32 KB (the last one to the rest). Type 1 is an LZSS stream
-             whose first byte is the type, type 2 an LZ4 block (LZ4_compress_default's
-             format, no size header), type 0 stores the bytes as they are. A block that
-             does not get smaller is stored. An empty file has one empty stored block.
-
-LZ4 blocks are read only by the rw_data port: the original rw_data.dll takes type 2 for
-stored data, so an archive packed with LZ4 needs the port. LZSS (the default) works with both.
+             whose first byte is the type, type 2 an LZ4 block (the reference's block
+             format, no size header; written by the LZ4 and the LZ4 HC compressors alike),
+             type 0 stores the bytes as they are. A block that does not get smaller is
+             stored. An empty file has one empty stored block.
     table    0x1C bytes per file, sorted by hash, encrypted as one piece: hash (name length
              << 16 | 16-bit sum of the upper-case name), header offset, offset of the first
              block, the last 16 characters of the upper-case name (zero padded).
@@ -46,6 +45,11 @@ stored data, so an archive packed with LZ4 needs the port. LZSS (the default) wo
 The fields the reader ignores are filled like in the game's own archives: in all 68,968
 files of the retail archives the first header field is the entry's stored size, the second
 holds Windows file attributes (0x20, 0x21 or 0x80), and every file has the 0x8000 flag.
+
+LZ4 blocks are read only by the rw_data port: the original rw_data.dll takes type 2 for
+stored data, so an archive packed with LZ4 or LZ4 HC needs the port. LZSS (the default)
+works with both. LZ4 HC (levels 3..12, default 9) packs slower than LZ4 but smaller; both
+decode at the same speed.
 """
 
 from __future__ import annotations
@@ -80,6 +84,7 @@ BLOCK_LZ4 = 2                  # read only by the rw_data port
 COMPRESSION_METHODS = {
     "lzss": "LZSS, like the game's archives (any rw_data.dll)",
     "lz4": "LZ4 (needs the rw_data.dll port)",
+    "lz4hc": "LZ4 HC, smaller and slower to pack (needs the port)",
     "none": "None (stored)",
 }
 
@@ -330,15 +335,7 @@ def lz4_compress(data: bytes) -> bytes | None:
                 ref -= 1
             length = LZ4_MIN_MATCH + _common_length(data, pos + LZ4_MIN_MATCH, ref + LZ4_MIN_MATCH,
                                                     match_end - pos - LZ4_MIN_MATCH)
-            literals = pos - anchor
-            code = length - LZ4_MIN_MATCH
-            out.append(min(literals, 15) << 4 | min(code, 15))
-            if literals >= 15:
-                out += _lz4_length(literals - 15)
-            out += data[anchor:pos]
-            out += (pos - ref).to_bytes(2, "little")
-            if code >= 15:
-                out += _lz4_length(code - 15)
+            _lz4_sequence(out, data, anchor, pos, pos - ref, length)
             pos += length
             anchor = pos
             if len(out) >= size:
@@ -346,15 +343,211 @@ def lz4_compress(data: bytes) -> bytes | None:
             if pos > last_start:
                 break
             table[data[pos - 2:pos + 2]] = pos - 2
+    return _lz4_finish(out, data, anchor)
 
-    literals = size - anchor
+
+def _lz4_sequence(out: bytearray, data: bytes, anchor: int, pos: int, offset: int, length: int):
+    """Appends the literals data[anchor:pos] and a match of `length` bytes `offset` back."""
+    literals = pos - anchor
+    code = length - LZ4_MIN_MATCH
+    out.append(min(literals, 15) << 4 | min(code, 15))
+    if literals >= 15:
+        out += _lz4_length(literals - 15)
+    out += data[anchor:pos]
+    out += offset.to_bytes(2, "little")
+    if code >= 15:
+        out += _lz4_length(code - 15)
+
+
+def _lz4_finish(out: bytearray, data: bytes, anchor: int) -> bytes | None:
+    """Appends the last literals; None when the block did not get smaller."""
+    literals = len(data) - anchor
     out.append(min(literals, 15) << 4)
     if literals >= 15:
         out += _lz4_length(literals - 15)
     out += data[anchor:]
-    if len(out) >= size:
+    if len(out) >= len(data):
         return None
     return bytes(out)
+
+
+# LZ4 HC --------------------------------------------------------------------------------
+#
+# The high-compression encoder of the reference (lib/lz4hc.c) writes the same LZ4 blocks,
+# so the DLL reads them with the same decoder; it only searches harder. Like its level table:
+# levels 3..9 follow chains of earlier positions with the same 4 bytes (4 << (level - 3)
+# candidates) and look one byte ahead before taking a match ("lazy" matching); levels 10..12
+# use the optimal parser, which weighs every match length at every position by its cost in
+# bytes (96 / 512 candidates for levels 10 / 11; a match longer than 64 / 128 is taken at
+# once). The reference's level 12 (16384 candidates, 4096) takes minutes per block on very
+# repetitive data in Python, so level 12 here uses 2048 / 512: in tests it came out within
+# 0.01% of the reference level 12 and still smaller than level 11. Level 9 is the reference's
+# default. The output is not byte-identical to lz4hc.c (its chains are hashed and its parser
+# keeps more state), but it is the same format and, level for level, close in size. With the
+# python-lz4 package installed, its lz4hc.c is used at the level asked for instead.
+
+LZ4HC_LEVEL_MIN = 3
+LZ4HC_LEVEL_DEFAULT = 9
+LZ4HC_LEVEL_OPT_MIN = 10
+LZ4HC_LEVEL_MAX = 12
+_LZ4HC_OPT_PARAMS = {10: (96, 64), 11: (512, 128), 12: (2048, 512)}   # candidates, sufficient length
+
+
+def _lz4hc_search(data: bytes, chains: dict, pos: int, depth: int, limit: int) -> tuple:
+    """(length, offset) of the longest match at `pos` among its last `depth` candidates,
+    at most `limit` bytes long; (0, 0) if there is none. Does not record `pos`."""
+    candidates = chains.get(data[pos:pos + 4])
+    best = 0
+    offset = 0
+    if candidates:
+        oldest = pos - LZ4_MAX_OFFSET
+        for at in reversed(candidates[-depth:]):
+            if at < oldest:
+                break
+            if best and data[at + best] != data[pos + best]:
+                continue   # cannot be longer than the best so far
+            length = LZ4_MIN_MATCH + _common_length(data, at + LZ4_MIN_MATCH, pos + LZ4_MIN_MATCH,
+                                                    limit - LZ4_MIN_MATCH)
+            if length > best:
+                best = length
+                offset = pos - at
+                if best >= limit:
+                    break
+    return best, offset
+
+
+def _lz4hc_insert(data: bytes, chains: dict, start: int, stop: int):
+    """Records the positions start..stop-1 in the chains."""
+    for at in range(start, stop):
+        key = data[at:at + 4]
+        candidates = chains.get(key)
+        if candidates is None:
+            chains[key] = [at]
+        else:
+            candidates.append(at)
+
+
+def _lz4hc_chain(data: bytes, depth: int) -> bytes | None:
+    """Levels 3..9: hash chains with lazy matching."""
+    size = len(data)
+    out = bytearray()
+    anchor = 0
+    last_start = size - LZ4_MF_LIMIT
+    match_end = size - LZ4_LAST_LITERALS
+    chains: dict = {}
+    pos = 0
+    recorded = 0                 # positions below this are in the chains
+    while pos <= last_start:
+        length, offset = _lz4hc_search(data, chains, pos, depth, match_end - pos)
+        _lz4hc_insert(data, chains, pos, pos + 1)
+        recorded = pos + 1
+        if length < LZ4_MIN_MATCH:
+            pos += 1
+            continue
+        # A longer match one byte further on wins over this one.
+        while pos + 1 <= last_start:
+            next_length, next_offset = _lz4hc_search(data, chains, pos + 1, depth, match_end - pos - 1)
+            if next_length <= length:
+                break
+            _lz4hc_insert(data, chains, pos + 1, pos + 2)
+            pos += 1
+            recorded = pos + 1
+            length, offset = next_length, next_offset
+        # Extend it backwards over the pending literals.
+        while pos > anchor and pos - offset > 0 and data[pos - 1] == data[pos - offset - 1]:
+            pos -= 1
+            length += 1
+        _lz4_sequence(out, data, anchor, pos, offset, length)
+        if len(out) >= size:
+            return None
+        _lz4hc_insert(data, chains, recorded, min(pos + length, last_start + 1))
+        pos += length
+        recorded = max(recorded, pos)
+        anchor = pos
+    return _lz4_finish(out, data, anchor)
+
+
+def _lz4_extra(n: int) -> int:
+    """The bytes a length (literal count, or match length - 4) takes beyond its nibble."""
+    return 0 if n < 15 else 1 + (n - 15) // 255
+
+
+def _lz4hc_optimal(data: bytes, depth: int, sufficient: int) -> bytes | None:
+    """Levels 10..12: the cheapest parse in bytes. cost[i] = the fewest bytes that encode
+    data[:i], reached with `run[i]` pending literals (the reference's approximation: one state
+    per position)."""
+    size = len(data)
+    last_start = size - LZ4_MF_LIMIT
+    match_end = size - LZ4_LAST_LITERALS
+    infinite = 1 << 60
+    cost = [infinite] * (size + 1)
+    run = [0] * (size + 1)
+    step: list = [None] * (size + 1)   # how i was reached: None = a literal, else (start, offset)
+    cost[0] = 0
+    chains: dict = {}
+    skip_until = 0               # inside a match taken at once: no search
+    for pos in range(size):
+        here = cost[pos]
+        literals = run[pos] + 1
+        price = here + 1 + _lz4_extra(literals) - _lz4_extra(literals - 1)
+        if price < cost[pos + 1]:
+            cost[pos + 1] = price
+            run[pos + 1] = literals
+            step[pos + 1] = None
+        if pos > last_start:
+            continue
+        if pos < skip_until:
+            _lz4hc_insert(data, chains, pos, pos + 1)
+            continue
+        length, offset = _lz4hc_search(data, chains, pos, depth, match_end - pos)
+        _lz4hc_insert(data, chains, pos, pos + 1)
+        if length < LZ4_MIN_MATCH:
+            continue
+        # Token, offset and the extra literal-count bytes the pending run needed (already in
+        # cost[pos] one by one), plus the match length's extra bytes.
+        base = here + 3
+        shortest = length if length > sufficient else LZ4_MIN_MATCH
+        for n in range(shortest, length + 1):
+            price = base + _lz4_extra(n - LZ4_MIN_MATCH)
+            if price < cost[pos + n]:
+                cost[pos + n] = price
+                run[pos + n] = 0
+                step[pos + n] = (pos, offset)
+        if length > sufficient:
+            skip_until = pos + length
+
+    matches = []
+    pos = size
+    while pos > 0:
+        how = step[pos]
+        if how is None:
+            pos -= 1
+        else:
+            matches.append((how[0], how[1], pos - how[0]))
+            pos = how[0]
+    out = bytearray()
+    anchor = 0
+    for start, offset, length in reversed(matches):
+        _lz4_sequence(out, data, anchor, start, offset, length)
+        anchor = start + length
+    return _lz4_finish(out, data, anchor)
+
+
+def lz4hc_compress(data: bytes, level: int = LZ4HC_LEVEL_DEFAULT) -> bytes | None:
+    """Compresses one block like LZ4_compress_HC at `level` (3..12). Returns the LZ4 block,
+    or None when it would not be smaller than the data."""
+    level = max(LZ4HC_LEVEL_MIN, min(LZ4HC_LEVEL_MAX, level))
+    size = len(data)
+    if size < 8 or len(zlib.compress(data, 1)) > size - size // 32:
+        return None   # (almost) incompressible: not worth the search
+    if _lz4_block is not None:
+        out = _lz4_block.compress(data, mode="high_compression", compression=level, store_size=False)
+        return out if len(out) < size else None
+    if size <= LZ4_MF_LIMIT:
+        return _lz4_finish(bytearray(), data, 0)
+    if level >= LZ4HC_LEVEL_OPT_MIN:
+        return _lz4hc_optimal(data, *_LZ4HC_OPT_PARAMS[level])
+    return _lz4hc_chain(data, 4 << (level - LZ4HC_LEVEL_MIN))
 
 
 # Blocks (run in the worker processes) --------------------------------------------------
@@ -371,20 +564,22 @@ def _normalize_method(compress) -> str:
     return method
 
 
-def encode_block(raw: bytes, method: str) -> tuple:
-    """(type, stored bytes without the type) of one block, before encryption."""
+def encode_block(raw: bytes, method: str, level: int = LZ4HC_LEVEL_DEFAULT) -> tuple:
+    """(type, stored bytes without the type) of one block, before encryption. `level` is
+    the LZ4 HC level."""
     if method == "lzss":
         stream = lzss_compress(raw)
         if stream is not None:
             return stream[0], stream[1:]
-    elif method == "lz4":
-        stream = lz4_compress(raw)
+    elif method in ("lz4", "lz4hc"):
+        stream = lz4_compress(raw) if method == "lz4" else lz4hc_compress(raw, level)
         if stream is not None:
-            return BLOCK_LZ4, stream
+            return BLOCK_LZ4, stream   # HC writes the same LZ4 blocks
     return BLOCK_STORED, raw
 
 
-def encode_chunk(path: str, offset: int, length: int, key: int, method: str) -> list:
+def encode_chunk(path: str, offset: int, length: int, key: int, method: str,
+                 level: int = LZ4HC_LEVEL_DEFAULT) -> list:
     """Reads `length` bytes of a file and turns them into stored blocks.
     Returns [(type, encrypted data, checksum of the encrypted data), ...].
     Raises OSError only: the worker processes send their errors back by pickling them."""
@@ -395,7 +590,7 @@ def encode_chunk(path: str, offset: int, length: int, key: int, method: str) -> 
         raise OSError(f"{path} changed while it was being packed")
     blocks = []
     for start in range(0, length, BLOCK_SIZE) or [0]:
-        kind, stored = encode_block(data[start:start + BLOCK_SIZE], method)
+        kind, stored = encode_block(data[start:start + BLOCK_SIZE], method, level)
         stored = xor_key(stored, key)
         blocks.append((kind, stored, checksum16(stored)))
     return blocks
@@ -638,11 +833,12 @@ def find_duplicates(files: list, progress=None, cancel: threading.Event | None =
 
 
 def pack_files(files: list, output: str, key: int, compress: bool | str = True, workers: int = 0,
-               progress=None, cancel: threading.Event | None = None, dedup: bool = True) -> dict:
+               progress=None, cancel: threading.Event | None = None, dedup: bool = True,
+               level: int = LZ4HC_LEVEL_DEFAULT) -> dict:
     """Packs `files` (from collect_files) into the archive `output`.
 
-    `compress` is a COMPRESSION_METHODS name ("lzss", "lz4", "none"), or True for LZSS and
-    False for none. With `dedup`, files with the same contents are stored once: the others
+    `compress` is a COMPRESSION_METHODS name ("lzss", "lz4", "lz4hc", "none"), or True for
+    LZSS and False for none; `level` is the LZ4 HC level (3..12). With `dedup`, files with the same contents are stored once: the others
     get their own header and name but share the first one's blocks (see find_duplicates).
 
     progress(done_bytes, total_bytes, name) is called as files are packed (from this
@@ -652,6 +848,8 @@ def pack_files(files: list, output: str, key: int, compress: bool | str = True, 
     if not files:
         raise PackError("There are no files to pack.")
     method = _normalize_method(compress)
+    if not LZ4HC_LEVEL_MIN <= level <= LZ4HC_LEVEL_MAX:
+        raise PackError(f"The LZ4 HC level must be {LZ4HC_LEVEL_MIN} to {LZ4HC_LEVEL_MAX}.")
     total = sum(f.size for f in files)
     workers = workers or os.cpu_count() or 1
     if total < 2 * 1024 * 1024:
@@ -660,13 +858,13 @@ def pack_files(files: list, output: str, key: int, compress: bool | str = True, 
     started = time.monotonic()
     duplicates = find_duplicates(files, progress, cancel) if dedup else {}
 
-    jobs = []   # (file index, (path, offset, length, key, method))
+    jobs = []   # (file index, (path, offset, length, key, method, level))
     for index, source in enumerate(files):
         if index in duplicates:
             continue
         for offset in range(0, source.size, CHUNK_BLOCKS * BLOCK_SIZE) or [0]:
             length = min(CHUNK_BLOCKS * BLOCK_SIZE, source.size - offset)
-            jobs.append((index, (source.path, offset, length, key, method)))
+            jobs.append((index, (source.path, offset, length, key, method, level)))
 
     temp = output + ".part"
     executor = None
@@ -808,6 +1006,7 @@ class PackerWindow:
         self.high_var = tk.StringVar()
         self.key_info = tk.StringVar()
         self.compress_var = tk.StringVar(value=COMPRESSION_METHODS["lzss"])
+        self.level_var = tk.IntVar(value=LZ4HC_LEVEL_DEFAULT)
         self.workers_var = tk.IntVar(value=os.cpu_count() or 1)
         self.dedup_var = tk.BooleanVar(value=True)
         self.summary_var = tk.StringVar()
@@ -861,6 +1060,12 @@ class PackerWindow:
         self.compress_check = ttk.Combobox(options, textvariable=self.compress_var, values=methods,
                                            state="readonly", width=max(len(m) for m in methods))
         self.compress_check.pack(side="left", padx=4)
+        ttk.Label(options, text="Level").pack(side="left")
+        self.level_spin = ttk.Spinbox(options, from_=LZ4HC_LEVEL_MIN, to=LZ4HC_LEVEL_MAX,
+                                      textvariable=self.level_var, width=3, state="readonly")
+        self.level_spin.pack(side="left", padx=4)
+        self.compress_check.bind("<<ComboboxSelected>>", self.on_compress_choice)
+        self.on_compress_choice()
         ttk.Label(options, text="     Processes").pack(side="left")
         self.workers_spin = ttk.Spinbox(options, from_=1, to=max(1, os.cpu_count() or 1),
                                         textvariable=self.workers_var, width=4)
@@ -1001,17 +1206,26 @@ class PackerWindow:
 
     # Packing
 
+    def compress_method(self) -> str:
+        choice = self.compress_var.get()
+        return next((name for name, text in COMPRESSION_METHODS.items() if text == choice), "lzss")
+
+    def on_compress_choice(self, _=None):
+        """The level only applies to LZ4 HC."""
+        self.level_spin.configure(state="readonly" if self.compress_method() == "lz4hc" else "disabled")
+
     def set_busy(self, busy: bool):
         for widget in (self.source_entry, self.browse_source, self.output_entry, self.browse_output,
                        self.compress_check, self.workers_spin, self.dedup_check, self.pack_button):
             widget.configure(state="disabled" if busy else "normal")
         self.cancel_button.configure(state="normal" if busy else "disabled")
         if busy:
-            for widget in (self.key_box, self.low_entry, self.high_entry):
+            for widget in (self.key_box, self.low_entry, self.high_entry, self.level_spin):
                 widget.configure(state="disabled")
         else:
             self.key_box.configure(state="readonly")
             self.compress_check.configure(state="readonly")
+            self.on_compress_choice()
             self.on_key_choice()
 
     def start_pack(self):
@@ -1043,16 +1257,17 @@ class PackerWindow:
         self.set_busy(True)
         self.progress["value"] = 0
         self.status_var.set("Starting...")
-        choice = self.compress_var.get()
         dedup = self.dedup_var.get()
-        compress = next((name for name, text in COMPRESSION_METHODS.items() if text == choice), "lzss")
+        compress = self.compress_method()
+        level = int(self.level_var.get())
 
         def report(done, total, name):
             self.messages.put(("progress", done, total, name))
 
         def work():
             try:
-                result = pack_files(files, output, key, compress, workers, report, self.cancel, dedup)
+                result = pack_files(files, output, key, compress, workers, report, self.cancel, dedup,
+                                    level)
                 self.messages.put(("done", result, output))
             except PackCancelled:
                 self.messages.put(("cancelled",))
@@ -1143,7 +1358,12 @@ def main(argv=None):
                              "or LOW:HIGH as two 32-bit hex values (default: PatchX02.dta)")
     parser.add_argument("--compression", choices=list(COMPRESSION_METHODS), default="lzss",
                         help="lzss (default: read by every rw_data.dll), lz4 (fast to decode, but "
-                             "only the rw_data.dll port reads it) or none")
+                             "only the rw_data.dll port reads it), lz4hc (the same LZ4 blocks, "
+                             "smaller but slower to pack) or none")
+    parser.add_argument("--level", type=int, default=LZ4HC_LEVEL_DEFAULT,
+                        choices=range(LZ4HC_LEVEL_MIN, LZ4HC_LEVEL_MAX + 1), metavar="3..12",
+                        help=f"LZ4 HC level: 3..9 hash chains, 10..12 optimal parsing (smallest, "
+                             f"slowest; default: {LZ4HC_LEVEL_DEFAULT})")
     parser.add_argument("--store", action="store_true", help="do not compress (same as --compression none)")
     parser.add_argument("--workers", type=int, default=0, help="compression processes (default: all CPUs)")
     parser.add_argument("--no-dedup", action="store_true",
@@ -1166,7 +1386,8 @@ def main(argv=None):
                 print(f"\r{100 * done / total if total else 100:5.1f}%  {name[:60]:<60}", end="", flush=True)
 
         method = "none" if args.store else args.compression
-        result = pack_files(files, output, key, method, args.workers, report, dedup=not args.no_dedup)
+        result = pack_files(files, output, key, method, args.workers, report, dedup=not args.no_dedup,
+                            level=args.level)
     except PackError as error:
         print(f"\nerror: {error}", file=sys.stderr)
         return 1

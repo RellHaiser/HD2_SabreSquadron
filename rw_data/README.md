@@ -19,7 +19,7 @@ in [docs/rw_data_functions.md](docs/rw_data_functions.md).
 
 `tools/dta_pack.py` (Python 3.9+, standard library only) packs a folder into an ISD1
 archive that the original DLL and the port read: every file is stored under its path
-relative to the folder (`Tables\items.sav`), LZSS- or LZ4-compressed in 32 KB blocks on all CPU
+relative to the folder (`Tables\items.sav`), LZSS-, LZ4- or LZ4 HC-compressed in 32 KB blocks on all CPU
 cores, and encrypted with the key of one of the game's archives, a custom key or none. Files with
 identical contents (same size, CRC-32 and then SHA-256) are stored once and share their blocks,
 which the original DLL reads as well (`--no-dedup` turns this off).
@@ -32,9 +32,11 @@ python tools/dta_pack.py MyMod PatchX02.dta --key PatchX02.dta
 ```
 
 The first opens the window; the second packs from the command line (`--key` also takes
-`blank` or `LOW:HIGH` in hex, `--compression lzss|lz4|none` picks the compression, `--store`
-turns it off).
+`blank` or `LOW:HIGH` in hex, `--compression lzss|lz4|lz4hc|none` picks the compression,
+`--level 3..12` the LZ4 HC level (default 9), `--store` turns it off).
 
 LZ4 (block type 2, see section 4.6 of the docs) is designed for fast decoding but is an addition of
 this port: the original `rw_data.dll` reads type 2 as stored data, so archives packed with
-`--compression lz4` need the port's DLL. LZSS stays the default.
+`--compression lz4` need the port's DLL. LZSS stays the default. `--compression lz4hc` writes
+the same LZ4 blocks with the high-compression search of the reference's `lz4hc.c`: smaller
+archives that pack slower but read just as fast, and need no further DLL support.

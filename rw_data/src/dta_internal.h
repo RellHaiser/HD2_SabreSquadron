@@ -240,8 +240,8 @@ constexpr uint32_t DTA_DECODE_PAD = 0x40;
 uint32_t LzssDecompressRetail(const uint8_t *src, uint32_t srcSize, uint8_t *dst, uint32_t out,
                               uint32_t capacity);                            // 0x1000ea20
 
-// dta_lz4.cpp (port only). Decodes one LZ4 block (LZ4_compress_default's format) into `dst`;
-// returns the decoded size, at most `dstCapacity`. Damaged data ends the output early.
+// dta_lz4.cpp (port only). Decodes one LZ4 block (from LZ4_compress_default or LZ4_compress_HC)
+// into `dst`; returns the decoded size, at most `dstCapacity`. Damaged data ends the output early.
 uint32_t Lz4Decompress(const uint8_t *src, uint32_t srcSize, uint8_t *dst, uint32_t dstCapacity);
 
 // dta_wav.cpp

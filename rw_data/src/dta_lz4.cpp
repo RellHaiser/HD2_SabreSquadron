@@ -1,9 +1,10 @@
 // LZ4 decoder of the archive blocks (an addition of the port: the original only knew LZSS).
 //
 // A block of type DTA_BLOCK_LZ4 holds one LZ4 *block* (https://github.com/lz4/lz4,
-// doc/lz4_Block_format.md) as written by LZ4_compress_default: no frame, no size header (a
-// block always decodes to 32 KB, the last one of a file to the rest). The stream is a list of
-// sequences:
+// doc/lz4_Block_format.md) as written by LZ4_compress_default or, at levels 3..12, by the
+// high-compression LZ4_compress_HC (lib/lz4hc.c), which only searches harder for matches and
+// writes the same format. No frame, no size header (a block always decodes to 32 KB, the last
+// one of a file to the rest). The stream is a list of sequences:
 //   token     high nibble = literal length, low nibble = match length - 4; a nibble of 15 is
 //             continued by bytes added to it, up to and including the first one that is not 255
 //   literals  the literal bytes
