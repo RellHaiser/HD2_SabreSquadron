@@ -126,6 +126,9 @@ void *O_Unexpected()
     std::printf("unexpected call in the original\n");
     std::abort();
 }
+void *OT O_SoundRequestInit(void *self) { return self; }
+// LoadGame's unused local C_fstr (constructed and released only): left empty, so nothing is allocated or released.
+void **O_FstrConstruct(void **dest, const void *) { *dest = nullptr; return dest; }
 float O_RandFloat() { return RandFloat(); }
 // The original's game: its scene at +0x18.
 alignas(16) uint8_t g_origGame[0x100];
@@ -208,9 +211,13 @@ void InstallOriginalSide()
         {0x00461410, reinterpret_cast<const void *>(O_GetPlayerTeam)},
         {0x0045d1d0, reinterpret_cast<const void *>(O_GetActivePlayer)},
         {0x005ff4b0, reinterpret_cast<const void *>(O_DoorSetState)},
-        {0x004374d0, reinterpret_cast<const void *>(O_Unexpected)},          // S_SoundRequest::Init
-        {0x0053b1d0, reinterpret_cast<const void *>(O_Unexpected)},
-        {0x0055fe60, reinterpret_cast<const void *>(O_Unexpected)},
+        {0x004374d0, reinterpret_cast<const void *>(O_SoundRequestInit)},    // S_SoundRequest::Init (StartSwimSound's unused local)
+        // rw_data.dll's file calls (import thunks): the test's files (the original's C_chunk code runs on the port's
+        // C_chunk objects: the same layout).
+        {0x00405100, reinterpret_cast<const void *>(O_FstrConstruct)},       // C_fstr_Construct (cdecl)
+        {0x007e5392, reinterpret_cast<const void *>(dtaWrite)},
+        {0x007e5398, reinterpret_cast<const void *>(dtaSeek)},
+        {0x007e539e, reinterpret_cast<const void *>(dtaRead)},
         {0x007e5302, reinterpret_cast<const void *>(O_RandFloat)},
         {0x006987d0, reinterpret_cast<const void *>(O_GetGame)},
         {0x006ef7b0, reinterpret_cast<const void *>(O_NoVolume)},           // AddVolume

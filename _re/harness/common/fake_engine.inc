@@ -32,9 +32,16 @@ int RW_DATA_CALL dtaSeek(int handle, int offset, int origin)
     return static_cast<int>(std::ftell(f));
 }
 int RW_DATA_CALL dtaRead(int handle, void *data, int size) { return static_cast<int>(std::fread(data, 1, size, g_open[handle])); }
-// (The module's chunk code links them; nothing here writes files.)
-int RW_DATA_CALL dtaOpenWrite(const char *, int) { return DTA_INVALID_HANDLE; }
-int RW_DATA_CALL dtaWrite(int, const void *, int) { return 0; }
+// (Saved games of the test, on disk: C_chunk writes them.)
+int RW_DATA_CALL dtaOpenWrite(const char *name, int)
+{
+    FILE *f = std::fopen(name, "w+b");
+    if (!f)
+        return DTA_INVALID_HANDLE;
+    g_open[g_nextHandle] = f;
+    return g_nextHandle++;
+}
+int RW_DATA_CALL dtaWrite(int handle, const void *data, int size) { return static_cast<int>(std::fwrite(data, 1, size, g_open[handle])); }
 
 namespace {
 std::set<std::string> g_tempFiles;

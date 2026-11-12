@@ -1324,8 +1324,8 @@ public:
     int m_unknown954 = 0;                               // +0x954
     float m_unknown958 = 0.0f;                          // +0x958 (climbing: heights, inferred)
     float m_unknown95C = 0.0f;                          // +0x95C
-    int m_unknown960 = 0;                               // +0x960
-    int m_unknown964 = 0;                               // +0x964
+    float m_unknown960 = 0.0f;                          // +0x960 ms (scaled: the move clock) the climb starts rising
+    float m_unknown964 = 0.0f;                          // +0x964 ms it stops (floats: not truncated)
     float m_unknown968 = 0.0f;                          // +0x968
     bool m_unknown96C = false;                          // +0x96C
     S_CollisionVolume *m_trailVolumes[4] = {};          // +0x970

@@ -1436,8 +1436,8 @@ void C_HumanLocomotion::MoveClimbing(int time)
     movement->m_stillTime = 0;
     m_unknown0E8 = 3;
     movement->m_unknown968 += ms;
-    const float sinceStart = movement->m_unknown968 - static_cast<float>(movement->m_unknown960);
-    const float end = static_cast<float>(movement->m_unknown964);
+    const float sinceStart = movement->m_unknown968 - movement->m_unknown960;
+    const float end = movement->m_unknown964;
     if (ms + sinceStart >= 0.0f && movement->m_unknown968 < end) {
         float part;
         if (ms + movement->m_unknown968 <= end)
@@ -1445,8 +1445,8 @@ void C_HumanLocomotion::MoveClimbing(int time)
         else if (sinceStart >= 0.0f)
             part = end - movement->m_unknown968;
         else
-            part = end - static_cast<float>(movement->m_unknown960);
-        rise = ((movement->m_unknown958 - movement->m_unknown95C) * part) / (end - static_cast<float>(movement->m_unknown960));
+            part = end - movement->m_unknown960;
+        rise = ((movement->m_unknown958 - movement->m_unknown95C) * part) / (end - movement->m_unknown960);
     }
     I3D_frame *head = player->m_headDummy;
     if (!head)
@@ -1999,7 +1999,10 @@ void C_HumanLocomotion::MoveDeadBody(int time)
     if (!hit) {
         movement->m_unknown9CC += time;
         if (IsSimulatedHere(m_owner)) {
-            m_owner->SetPosition4({pos.x + m_move.x, pos.y + m_move.y, pos.z + m_move.z, pos.w});
+            // (The move added to the position as UpdateFall left it: when it slid the body by 0.9 of the move, the
+            // body moves 1.9 of it, as in the original.)
+            const S_vector4 &now = m_owner->GetPosition4();
+            m_owner->SetPosition4({now.x + m_move.x, now.y + m_move.y, now.z + m_move.z, pos.w});
             m_positionChanged = true;
         }
         return;
@@ -2195,6 +2198,7 @@ void C_HumanLocomotion::AlignDeadBody(int time)
         S_vector poolPos, poolNormal;
         if (CollisionRayTest(S_vector(at.x, at.y + 0.1f, at.z), S_vector(0.0f, -0.4f, 0.0f), &poolPos, &poolNormal, 0xFFFFFFFF,
                              TEST_FLAGS)) {
+            // (The w kept: the original copies an undefined one in.)
             movement->m_unknown9F0 = ToVector4(poolPos, movement->m_unknown9F0.w);
             movement->m_unknownA00 = ToVector4(poolNormal, movement->m_unknownA00.w);
         }
@@ -2895,7 +2899,9 @@ void C_HumanLocomotion::StartSwimSound()
 {
     if (!IsClient())
         return;
-    if (m_swimSound || !IsSwimSoundAudible(m_owner, m_swimSoundKind))
+    // (Whether it is heard first, as the original asks the team even with a sound playing.)
+    const bool audible = IsSwimSoundAudible(m_owner, m_swimSoundKind);
+    if (m_swimSound || !audible)
         return;
     const S_vector pos(0.0f, 0.0f, 0.0f);
     m_swimSound = GetMovementSounds()->Play(m_swimSoundKind, m_movement->m_joints[HUMAN_JOINT_F1].frame, &pos);

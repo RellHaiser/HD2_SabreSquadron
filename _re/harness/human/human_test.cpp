@@ -31,6 +31,7 @@
 
 #define private public
 #define protected public
+#include "common/chunk.h"
 #include "game/actor.h"
 #include "game/collision.h"
 #include "game/collision_internal.h"
@@ -569,10 +570,11 @@ bool WordsNear(uint32_t a, uint32_t b, char kind)
 template <size_t N> std::string FieldsDiffer(const S_LayoutField (&fields)[N], const uint8_t *a, const uint8_t *b, const char *object)
 {
     for (const S_LayoutField &f : fields) {
-        // (The w of the human's position, direction and velocity: the original often writes an undefined one there;
-        // the port keeps the owner's, as human_locomotion.cpp says.)
+        // (The w of the human's position, direction and velocity, and of the movement's blood pool place and normal:
+        // the original often writes an undefined one there; the port keeps the owner's, as human_locomotion.cpp says.)
         const bool anyW = std::strcmp(f.name, "m_position") == 0 || std::strcmp(f.name, "m_direction") == 0 ||
-                          std::strcmp(f.name, "m_velocity") == 0;
+                          std::strcmp(f.name, "m_velocity") == 0 || std::strcmp(f.name, "m_unknown9F0") == 0 ||
+                          std::strcmp(f.name, "m_unknownA00") == 0;
         const bool locomotion = std::strcmp(f.name, "m_locomotion") == 0;
         for (size_t i = 0; i < f.size; i += 4) {
             if (anyW && i % 16 == 12)
@@ -618,6 +620,7 @@ namespace {
 #include "original_side.inc"
 #include "locomotion_test.inc"
 #include "locomotion2_test.inc"
+#include "locomotion3_test.inc"
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
 LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
@@ -650,8 +653,15 @@ int main(int argc, char **argv)
     }
     InstallOriginalSide();
     MakeHuman();
+#ifdef HUMAN_PART3_ONLY
+    // (Part 3's mutation runs: its world, then its tests alone.)
+    LoadGround();
+    MakeContacts();
+#else
     TestLocomotion();
     TestLocomotion2();
+#endif
+    TestLocomotion3();
     PrintStats();
     for (const std::string &f : g_tempFiles)
         std::remove(f.c_str());

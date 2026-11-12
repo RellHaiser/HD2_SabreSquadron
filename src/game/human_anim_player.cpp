@@ -932,8 +932,9 @@ void C_HumanAnimPlayer::OnAnimStarted(const S_HumanAnimRef &anim, const S_HumanA
         // Over an obstacle: its height, the times of the climb, the standing animation after it.
         const auto climbOver = [&](float height, float time1, float time2, bool standUp) {
             m_movement->m_unknown95C = height;
-            m_movement->m_unknown960 = MoveTime(time1);
-            m_movement->m_unknown964 = MoveTime(time2);
+            // (Floats, not MoveTime's truncated ints: the original stores ms / 1.4 with FSTP.)
+            m_movement->m_unknown960 = time1 / MOVE_TIME_SCALE;
+            m_movement->m_unknown964 = time2 / MOVE_TIME_SCALE;
             if (m_movement->m_unknown954 == 1)
                 setPendingStance(0x38, HUMAN_STANCE_CROUCH);
             else if (standUp || pending.anim == 0x2B || pending.anim == 0x2C)
@@ -981,8 +982,8 @@ void C_HumanAnimPlayer::OnAnimStarted(const S_HumanAnimRef &anim, const S_HumanA
             m_movement->PlaySound(MOVE_SOUND_OVER3);
             m_locomotion->Land(false);
             m_movement->m_unknown95C = -1.629f;
-            m_movement->m_unknown960 = MoveTime(0.0f);
-            m_movement->m_unknown964 = MoveTime(0.0f);
+            m_movement->m_unknown960 = 0.0f / MOVE_TIME_SCALE;
+            m_movement->m_unknown964 = 0.0f / MOVE_TIME_SCALE;
             setPendingStance(work->m_request.gait == 2 ? 0x6C : 0x6B, HUMAN_STANCE_STAND);
             m_animBlocked = BLOCK_NONE;
             C_HumanWork *ownerWork = m_movement->m_owner->GetWork();

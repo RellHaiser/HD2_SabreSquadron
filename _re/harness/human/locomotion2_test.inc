@@ -110,8 +110,10 @@ void RandomHuman2()
     // The frame: at the body or a little away (it lags).
     const S_vector4 &p = h->m_position;
     g_h.frame->SetPosInline(S_vector(p.x + (P(0.5f) ? U(-0.6f, 0.6f) : 0.0f), p.y + (P(0.5f) ? U(-0.3f, 0.3f) : 0.0f), p.z));
-    g_h.frame->m_rot.Make(S_vector(0, 1, 0), U(0, 6.2831f));
-    g_h.frame->m_frameFlags |= FRMFLAGS_ROT_DIRTY;
+    // (SetRot: it clears the local matrix's valid flag, so the matrix is rebuilt from the rotation.)
+    S_quat yaw;
+    yaw.Make(S_vector(0, 1, 0), U(0, 6.2831f));
+    g_h.frame->SetRot(yaw);
     UpdateTree(g_h.frame);
     // On a ladder (now or coming up) there is one, and no hold: the original passes an uninitialised direction without
     // a ladder and an uninitialised vector with a held track (the port defined ones: not comparable).

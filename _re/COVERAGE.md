@@ -911,4 +911,56 @@ particles and the surface marks. Files are served from memory.
   - CanTurn takes the angle by pointer in the original;
   - the camera is at scene +0x15C in this build (I put it at +0x13C first, which crashed);
   - a fake that only logs (SetLookAt) hid code that depends on its effect (L 2568 survived until it kept the value);
-  - the frame's SetPos / LinkTo were not observed at first (L 637, 693 survived).
+  - the frame's SetPos / LinkTo were not observed at first (L 637, 693 survived);
+  - the human frame's random rotation never took effect: `m_rot.Make` with `|= FRMFLAGS_ROT_DIRTY` is ignored once
+    the local matrix is valid. Found in part 3 and fixed (SetRot). Part 2's 72 remaining survivors were rerun with
+    the frame turned, and none was killed.
+
+## Human part 3 (climbing, ladders, swimming, dying, saved games, 2026-11-11)
+
+- **The tests:** `human/locomotion3_test.inc`, the same way as parts 1 and 2. The original's functions run on
+  copies in its layout, and every call is compared.
+  - MoveClimbing and MoveJumping (4,000 calls). The animation's head dummy sits under a turned root of its own; the
+    climb's heights and times vary.
+  - MoveOnLadder and GetLadderPos (4,000). Up, down, sliding, idle and getting on, at the ladder's foot, middle and
+    top. Also anywhere in the world, and into the floor and the low roof, so the sphere tests touch.
+  - MoveSwimming, PitchTowards, StartSwimming and StopSwimming (6,000).
+  - MoveDying, MoveDeadBody, AlignDeadBody and GetSlideOff (6,000). The death states vary, and so does the blood
+    pool, bodies on ramps and on the floor, lying and upright joints.
+  - The swimming sound (Start, Stop, Update), Init, ResetState, Reset and Done (6,000). The parachute test of the
+    player's squad runs high up.
+  - Update through all its moves (3,000).
+  - SaveGame and LoadGame (2,000 each). Both sides write through the same files (the original's rw_data imports
+    are redirected to the harness's file fakes; its C_chunk code runs on the port's C_chunk objects, the same
+    layout), and the files must be byte for byte the same. Saves are loaded back into another state, and so are
+    made-up files: chunks in any order, unknown ones, another chunk id, nothing open.
+- **New in the harness:**
+  - joint frames (F1, D1, C1), the head dummy and its root, the shadow;
+  - a fake I3D_sound (SetVolume, GetLength through its vtable);
+  - the camera-under-water global written for the original (0x98a6ac, read inline);
+  - fakes that keep the original's unused locals harmless: S_SoundRequest::Init, and LoadGame's C_fstr;
+  - `HUMAN_PART3_ONLY` builds part 3's tests alone (for its mutation runs).
+- **Port bugs found and fixed (on main; both are port mistakes, not flaws of the original):**
+  - the climb's start and end times (C_HumanMovement +0x960 / +0x964) are floats in the original: OnAnimStarted
+    stores ms / 1.4 with FSTP, MoveClimbing reads them as floats. The port had ints (truncated times), and its
+    saved games wrote int bits where the original's have float bits;
+  - MoveDeadBody, nothing hit: the original adds the move to the position as UpdateFall left it (UpdateFall
+    slides the body by 0.9 of the move first: 1.9 of it in all). The port added it to the position read at the
+    start. The double move is the original's own: kept, commented;
+  - also: StartSwimSound asks whether the sound is heard before checking for one playing, as the original does
+    (only the calls' order changed).
+- **Results:**
+  - every function of part 3 agrees with the original (159,396 checks with parts 1 and 2, 0 failures);
+  - lines of part 3's code: 898 of 904 (the whole file: 2,255 of 2,284). Not run:
+    - getting on a ladder near its top with LADDER_UP held (the original's UpdateVelocity reads an uninitialised
+      vector there; the tests keep ladder animations unheld);
+    - MoveDying's slide for states 2, 3 and 6 (they return at the top: unreachable);
+    - AlignDeadBody's limit of the drop by the middle sphere (rare geometry);
+  - `human/mutations/mutate_human3.py`: 750 mutants, 607 killed, 45 don't build, 98 survived. They are boundary
+    comparisons, unreachable lines, rare geometry, or the same result (listed in its docstring).
+- **Undefined words not compared:** the w of the blood pool's place and normal (m_unknown9F0 / A00), copied in
+  undefined by the original.
+- **Harness lessons (my mistakes):**
+  - the head dummy's parent never turned (the same rotation mistake as above). The mutant deleting
+    `step *= parent` survived until then;
+  - a test that only compares two written files passes when both are empty: the size is checked too.

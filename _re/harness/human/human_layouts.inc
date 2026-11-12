@@ -133,8 +133,8 @@
     S_LayoutField{0x954, 2384, 4, "m_unknown954", 'i'}, \
     S_LayoutField{0x958, 2388, 4, "m_unknown958", 'f'}, \
     S_LayoutField{0x95C, 2392, 4, "m_unknown95C", 'f'}, \
-    S_LayoutField{0x960, 2396, 4, "m_unknown960", 'i'}, \
-    S_LayoutField{0x964, 2400, 4, "m_unknown964", 'i'}, \
+    S_LayoutField{0x960, 2396, 4, "m_unknown960", 'f'}, \
+    S_LayoutField{0x964, 2400, 4, "m_unknown964", 'f'}, \
     S_LayoutField{0x968, 2404, 4, "m_unknown968", 'f'}, \
     S_LayoutField{0x96C, 2408, 1, "m_unknown96C", 'i'}, \
     S_LayoutField{0x970, 2412, 16, "m_trailVolumes", 'p'}, \
