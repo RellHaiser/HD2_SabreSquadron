@@ -20,7 +20,9 @@ in [docs/rw_data_functions.md](docs/rw_data_functions.md).
 `tools/dta_pack.py` (Python 3.9+, standard library only) packs a folder into an ISD1
 archive that the original DLL and the port read: every file is stored under its path
 relative to the folder (`Tables\items.sav`), LZSS- or LZ4-compressed in 32 KB blocks on all CPU
-cores, and encrypted with the key of one of the game's archives, a custom key or none.
+cores, and encrypted with the key of one of the game's archives, a custom key or none. Files with
+identical contents (same size, CRC-32 and then SHA-256) are stored once and share their blocks,
+which the original DLL reads as well (`--no-dedup` turns this off).
 `PatchX02.dta` and `PatchX03.dta` are mounted by the game before all its own archives but
 are not part of the retail game, so they hold mods without replacing anything.
 

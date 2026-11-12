@@ -27,6 +27,11 @@ its own start.
              the stored type table. Then the name (encrypted, original case), u32 per block
              (stored size | Checksum16 of the stored block << 16, not encrypted), u8 per
              block its type (encrypted), and the blocks (encrypted).
+             A file identical to an earlier one (same size, CRC-32 and SHA-256) has no
+             blocks of its own: its header, name and block tables (a copy of the first
+             file's) are written after the last file, and its table entry's block offset
+             points at the first file's blocks. The reader takes the blocks from that
+             offset, so this needs no change to the format.
     blocks   each decodes to 32 KB (the last one to the rest). Type 1 is an LZSS stream
              whose first byte is the type, type 2 an LZ4 block (LZ4_compress_default's
              format, no size header), type 0 stores the bytes as they are. A block that
@@ -48,6 +53,7 @@ from __future__ import annotations
 import argparse
 import collections
 import concurrent.futures
+import hashlib
 import multiprocessing
 import os
 import queue
@@ -496,10 +502,12 @@ class _ArchiveWriter:
         self.key = key
         self.entries = []
         self.current = None
+        self.written = {}   # file index -> (data offset, size table, type table) of its blocks
         f.write(b"ISD1" + bytes(20))
 
-    def begin(self, source: SourceFile):
+    def begin(self, source: SourceFile, index: int = -1):
         self.current = source
+        self.current_index = index
         self.header_offset = self.f.tell()
         self.types = bytearray()
         self.sizes = []
@@ -521,20 +529,40 @@ class _ArchiveWriter:
         if len(self.types) != count:
             raise PackError(f"{source.path} changed while it was being packed")
         end = self.f.tell()
-        name = source.name
         sizes = struct.pack(f"<{count}I", *self.sizes)
         types = xor_key(bytes(self.types), self.key)
+        data_offset = self.header_offset + 0x20 + len(source.name) + 5 * count
+        self.f.seek(self.header_offset)
+        self._write_entry(source, end - self.header_offset, sizes, types, data_offset)
+        self.f.seek(end)
+        if self.current_index >= 0:
+            self.written[self.current_index] = (data_offset, sizes, types)
+        self.current = None
+
+    def add_duplicate(self, source: SourceFile, original: int):
+        """Writes the header, name and block tables of a file identical to the already
+        written file `original`; its table entry points at that file's blocks, which the
+        reader takes from the entry's data offset."""
+        data_offset, sizes, types = self.written[original]
+        self._write_entry(source, 0x20 + len(source.name) + len(sizes) + len(types),
+                          sizes, types, data_offset)
+        if self.f.tell() > MAX_ARCHIVE_SIZE:
+            raise PackError("The archive would be larger than 2 GB, which the game cannot read.")
+
+    def _write_entry(self, source: SourceFile, stored_size: int, sizes: bytes, types: bytes,
+                     data_offset: int):
+        """Writes the header, name and block tables at the current position and adds the
+        table entry."""
+        header_offset = self.f.tell()
+        name = source.name
+        count = len(types)
         tables_checksum = checksum16(types, checksum16(sizes, checksum16(name)))
-        header = struct.pack("<IIQIIIHH", end - self.header_offset, source.attributes,
+        header = struct.pack("<IIQIIIHH", stored_size, source.attributes,
                              source.filetime, source.size, count, 0,
                              len(name) | NAME_ENCRYPTED_BLOCKS, tables_checksum)
         header = header[:0x18] + struct.pack("<I", checksum16(header)) + header[0x1C:]
-        self.f.seek(self.header_offset)
         self.f.write(xor_key(header, self.key) + xor_key(name, self.key) + sizes + types)
-        self.f.seek(end)
-        data_offset = self.header_offset + 0x20 + len(name) + 5 * count
-        self.entries.append((source.hash, source.upper, self.header_offset, data_offset))
-        self.current = None
+        self.entries.append((source.hash, source.upper, header_offset, data_offset))
 
     def finish(self):
         self.entries.sort(key=lambda e: (e[0], e[1]))
@@ -552,12 +580,70 @@ class _ArchiveWriter:
         self.f.seek(0, os.SEEK_END)
 
 
+HASH_CHUNK = 1024 * 1024
+
+
+def _file_digest(path: str, make) -> bytes:
+    """Digest of a whole file: `make` is a hashlib constructor, or None for CRC-32."""
+    crc = 0
+    hasher = make() if make else None
+    with open(path, "rb") as f:
+        while True:
+            chunk = f.read(HASH_CHUNK)
+            if not chunk:
+                break
+            if hasher is not None:
+                hasher.update(chunk)
+            else:
+                crc = zlib.crc32(chunk, crc)
+    return hasher.digest() if hasher is not None else crc.to_bytes(4, "little")
+
+
+def find_duplicates(files: list, progress=None, cancel: threading.Event | None = None) -> dict:
+    """Finds files with the same contents as an earlier file of the list.
+
+    Returns {index of a duplicate: index of the first file with those contents}. Only files
+    of equal size are compared: first by CRC-32 (fast), and files whose CRC-32 matches by
+    SHA-256 as well, so a CRC collision is never taken for a duplicate. Empty files are left
+    alone (they have no blocks to share)."""
+    by_size = collections.defaultdict(list)
+    for index, source in enumerate(files):
+        if source.size > 0:
+            by_size[source.size].append(index)
+    candidates = [group for group in by_size.values() if len(group) > 1]
+    total = sum(files[group[0]].size * len(group) for group in candidates)
+    done = 0
+    duplicates = {}
+    for group in candidates:
+        by_crc = collections.defaultdict(list)
+        for index in group:
+            if cancel is not None and cancel.is_set():
+                raise PackCancelled()
+            if progress:
+                progress(done, total, files[index].display_name)
+            by_crc[_file_digest(files[index].path, None)].append(index)
+            done += files[index].size
+        for matches in by_crc.values():
+            if len(matches) < 2:
+                continue
+            first_by_digest = {}
+            for index in matches:
+                if cancel is not None and cancel.is_set():
+                    raise PackCancelled()
+                digest = _file_digest(files[index].path, hashlib.sha256)
+                first = first_by_digest.setdefault(digest, index)
+                if first != index:
+                    duplicates[index] = first
+    return duplicates
+
+
 def pack_files(files: list, output: str, key: int, compress: bool | str = True, workers: int = 0,
-               progress=None, cancel: threading.Event | None = None) -> dict:
+               progress=None, cancel: threading.Event | None = None, dedup: bool = True) -> dict:
     """Packs `files` (from collect_files) into the archive `output`.
 
     `compress` is a COMPRESSION_METHODS name ("lzss", "lz4", "none"), or True for LZSS and
-    False for none.
+    False for none. With `dedup`, files with the same contents are stored once: the others
+    get their own header and name but share the first one's blocks (see find_duplicates).
 
     progress(done_bytes, total_bytes, name) is called as files are packed (from this
     thread). Setting `cancel` stops packing (PackCancelled). The archive is written to
@@ -571,13 +657,17 @@ def pack_files(files: list, output: str, key: int, compress: bool | str = True, 
     if total < 2 * 1024 * 1024:
         workers = 1   # starting the processes would take longer than the work
 
+    started = time.monotonic()
+    duplicates = find_duplicates(files, progress, cancel) if dedup else {}
+
     jobs = []   # (file index, (path, offset, length, key, method))
     for index, source in enumerate(files):
+        if index in duplicates:
+            continue
         for offset in range(0, source.size, CHUNK_BLOCKS * BLOCK_SIZE) or [0]:
             length = min(CHUNK_BLOCKS * BLOCK_SIZE, source.size - offset)
             jobs.append((index, (source.path, offset, length, key, method)))
 
-    started = time.monotonic()
     temp = output + ".part"
     executor = None
     try:
@@ -613,12 +703,24 @@ def pack_files(files: list, output: str, key: int, compress: bool | str = True, 
                     if current >= 0:
                         writer.end()
                     current = index
-                    writer.begin(files[index])
+                    writer.begin(files[index], index)
                 writer.add_blocks(blocks)
                 done += length
                 if progress:
                     progress(done, total, files[index].display_name)
             writer.end()
+            for index, original in sorted(duplicates.items()):
+                source = files[index]
+                try:
+                    unchanged = os.stat(source.path).st_size == source.size
+                except OSError:
+                    unchanged = False
+                if not unchanged:
+                    raise PackError(f"{source.path} changed while it was being packed")
+                writer.add_duplicate(source, original)
+                done += source.size
+            if progress:
+                progress(total, total, files[-1].display_name)
             writer.finish()
             archive_size = f.tell()
         os.replace(temp, output)
@@ -639,6 +741,8 @@ def pack_files(files: list, output: str, key: int, compress: bool | str = True, 
         if executor is not None:
             executor.shutdown(wait=True)
     return {"files": len(files), "input_size": total, "archive_size": archive_size,
+            "duplicates": len(duplicates),
+            "duplicate_size": sum(files[i].size for i in duplicates),
             "seconds": time.monotonic() - started}
 
 
@@ -705,6 +809,7 @@ class PackerWindow:
         self.key_info = tk.StringVar()
         self.compress_var = tk.StringVar(value=COMPRESSION_METHODS["lzss"])
         self.workers_var = tk.IntVar(value=os.cpu_count() or 1)
+        self.dedup_var = tk.BooleanVar(value=True)
         self.summary_var = tk.StringVar()
         self.status_var = tk.StringVar()
 
@@ -760,6 +865,9 @@ class PackerWindow:
         self.workers_spin = ttk.Spinbox(options, from_=1, to=max(1, os.cpu_count() or 1),
                                         textvariable=self.workers_var, width=4)
         self.workers_spin.pack(side="left", padx=4)
+        self.dedup_check = ttk.Checkbutton(options, text="Store identical files once",
+                                           variable=self.dedup_var)
+        self.dedup_check.pack(side="left", padx=(12, 0))
 
         ttk.Label(frame, textvariable=self.summary_var).grid(row=6, column=0, columnspan=3, sticky="w", pady=(6, 2))
         list_frame = ttk.Frame(frame)
@@ -895,7 +1003,7 @@ class PackerWindow:
 
     def set_busy(self, busy: bool):
         for widget in (self.source_entry, self.browse_source, self.output_entry, self.browse_output,
-                       self.compress_check, self.workers_spin, self.pack_button):
+                       self.compress_check, self.workers_spin, self.dedup_check, self.pack_button):
             widget.configure(state="disabled" if busy else "normal")
         self.cancel_button.configure(state="normal" if busy else "disabled")
         if busy:
@@ -936,6 +1044,7 @@ class PackerWindow:
         self.progress["value"] = 0
         self.status_var.set("Starting...")
         choice = self.compress_var.get()
+        dedup = self.dedup_var.get()
         compress = next((name for name, text in COMPRESSION_METHODS.items() if text == choice), "lzss")
 
         def report(done, total, name):
@@ -943,7 +1052,7 @@ class PackerWindow:
 
         def work():
             try:
-                result = pack_files(files, output, key, compress, workers, report, self.cancel)
+                result = pack_files(files, output, key, compress, workers, report, self.cancel, dedup)
                 self.messages.put(("done", result, output))
             except PackCancelled:
                 self.messages.put(("cancelled",))
@@ -986,6 +1095,9 @@ class PackerWindow:
             ratio = 100 * result["archive_size"] / result["input_size"] if result["input_size"] else 100
             self.status_var.set(f"Packed {result['files']:,} files into {_format_size(result['archive_size'])} "
                                 f"({ratio:.0f}%) in {result['seconds']:.1f} s.")
+            if result["duplicates"]:
+                self.status_var.set(self.status_var.get() + f" {result['duplicates']:,} duplicate files "
+                                    f"({_format_size(result['duplicate_size'])}) stored once.")
             messagebox.showinfo("DTA Packer", f"Created {output}\n\n{self.status_var.get()}", parent=self.root)
         elif finished[0] == "cancelled":
             self.progress["value"] = 0
@@ -1034,6 +1146,9 @@ def main(argv=None):
                              "only the rw_data.dll port reads it) or none")
     parser.add_argument("--store", action="store_true", help="do not compress (same as --compression none)")
     parser.add_argument("--workers", type=int, default=0, help="compression processes (default: all CPUs)")
+    parser.add_argument("--no-dedup", action="store_true",
+                        help="store files with the same contents separately (by default they "
+                             "share one copy of the data)")
     args = parser.parse_args(argv)
     try:
         key = parse_key(args.key)
@@ -1051,12 +1166,15 @@ def main(argv=None):
                 print(f"\r{100 * done / total if total else 100:5.1f}%  {name[:60]:<60}", end="", flush=True)
 
         method = "none" if args.store else args.compression
-        result = pack_files(files, output, key, method, args.workers, report)
+        result = pack_files(files, output, key, method, args.workers, report, dedup=not args.no_dedup)
     except PackError as error:
         print(f"\nerror: {error}", file=sys.stderr)
         return 1
     print(f"\nPacked {result['files']:,} files ({_format_size(result['input_size'])}) into {output} "
           f"({_format_size(result['archive_size'])}) in {result['seconds']:.1f} s")
+    if result["duplicates"]:
+        print(f"{result['duplicates']:,} files ({_format_size(result['duplicate_size'])}) were identical "
+              f"to another file and share its data")
     return 0
 
 

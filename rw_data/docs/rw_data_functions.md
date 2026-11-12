@@ -186,6 +186,13 @@ The table is an array of 0x1C-byte entries, encrypted as one piece, **sorted by 
 Names are paths with backslashes, stored upper case (`MAPS\FOO.4DS`); lookups upper-case
 the requested name, so they are case-insensitive.
 
+The header (with the name and, for ISD1, the block tables) is read at the header offset, but
+the blocks are always taken from the entry's `dataOffset` (the original does the same:
+`OpenFromArchives` copies entry +0x08 into the open file). The blocks therefore need not follow
+the header, and **several entries can share one copy of the blocks**: `tools/dta_pack.py` stores
+files with identical contents this way (each keeps its own header, name and block tables, a
+copy of the first file's). Such archives need no change to the format or to either DLL.
+
 ### 3.3 File header and name
 
 At the entry's header offset: a 0x20-byte header, then the name, each encrypted separately.
