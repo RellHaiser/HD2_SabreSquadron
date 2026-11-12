@@ -126,7 +126,8 @@ void *O_Unexpected()
     std::printf("unexpected call in the original\n");
     std::abort();
 }
-void *OT O_SoundRequestInit(void *self) { return self; }
+// (The defaults: the port's in-class initialisers are the original's Init.)
+void *OT O_SoundRequestInit(void *self) { return new (self) S_SoundRequest(); }
 // LoadGame's unused local C_fstr (constructed and released only): left empty, so nothing is allocated or released.
 void **O_FstrConstruct(void **dest, const void *) { *dest = nullptr; return dest; }
 float O_RandFloat() { return RandFloat(); }

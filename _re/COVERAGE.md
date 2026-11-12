@@ -1003,3 +1003,44 @@ particles and the surface marks. Files are served from memory.
   - the shared words were restored before the port's state was taken;
   - the shot dummies were one above the other, so a broken direction (a zero vector normalises to straight up)
     went unseen.
+
+## Human part 4b (the movement base: command record, footsteps, sounds, damage, 2026-11-11)
+
+- **The tests:** `human/base2_test.inc`, in the HUMAN_BASE build. 16,000 calls:
+  - S_MoveRequest Reset, SaveGame and LoadGame: random records; the saved files compared, and loaded back; a chunk
+    of another id; nothing open;
+  - SetOwnerBase;
+  - DamageByMaterial and DamageByContacts: the damaging and exploding materials, repeats among the contacts, no
+    contacts;
+  - StartUseSound and StopUseSound: a ladder with its climb sound or none, a sound already playing or not;
+  - PlaySound for others than the active player;
+  - Footstep: the ground's material or a ray down, the stealth roll, the sound by gait and stance, inside or
+    outdoors, the AI hearing it or not, first person, the sand dust of remote humans;
+  - the carrier's side of OnPickUpBody and OnDropBody.
+- **New in the harness:**
+  - the original's sound module, a fake object answering through its vtable (Play, Stop, SetChannelLimit);
+  - every sound request logged whole on both sides;
+  - the original's S_SoundRequest::Init filling the defaults;
+  - one material table both sides read;
+  - fakes for particles, the first-person view, the equipment's models and events, and the network's explosion
+    message.
+- **Port bug found and fixed (on main; a port mistake):**
+  - StartUseSound (a ladder's climbing sound) set no flags and played at the joint itself. The original asks
+    SOUND_SILENT_TO_AI | SOUND_KEEP_SLOT and puts the sound 0.4 m below the pelvis joint (0x0075f240).
+  - Without KEEP_SLOT the slot could be given to another sound once this one ended, and StopUseSound would then
+    stop that one. The AI also heard the ladder.
+- **Results:** every function agrees (35,000 checks with part 4a, 0 failures).
+  `human/mutations/mutate_human4b.py`: 229 mutants, 207 killed, 12 don't build, 10 survived (defaults already set,
+  equivalent, boundaries; listed).
+- **Undefined words not compared:** S_MoveRequest's unknown10.w and facingDir.w after Reset (the original copies
+  undefined ones in; the port's comment said it left them, now corrected). Also the saved record's three pointers
+  (each side's own objects; LoadGame clears them).
+- **Not exercised (part 4c):**
+  - the footprint (surface marks: the original's footprint kinds are an inline table, its marks a pool of
+    visuals);
+  - the body's side of picking up and dropping (a second human with its model, vehicle and transparency);
+  - UpdateBreath;
+  - PlaySound for the active player, UpdateSounds, ProcessRemoteActions, ResetBase, InitBase, DoneBase,
+    RestartBase, SaveBase and LoadBase. They grow or free the movement's sound vector and remote action deque: the
+    original's MSVC6 containers (its vector is 16 bytes, so the original's fields after +0x194 sit 4 bytes later)
+    allocate through its statically linked C runtime's heap, which the test never starts.

@@ -237,7 +237,8 @@ bool IsClimbingAnim(int anim) { return anim > 7 && anim < 0x0F; }
 
 void S_MoveRequest::Reset()
 {
-    // (The w components are left as the original leaves them: not set.)
+    // (The w components are left as they are: the original copies undefined ones into
+    // unknown10's and facingDir's.)
     anim = 0x2D;
     activity = 0x4B;
     unknown10.x = unknown10.y = unknown10.z = 0.0f;
@@ -1365,11 +1366,15 @@ void C_HumanMovement::StartUseSound()
 {
     if (!m_useObject || GetLadderSoundGroup(m_useObject) == -1 || m_useSound != -1)
         return;
+    // (0.4 m below the joint, unheard by the AI, its slot kept until StopUseSound: 0x0075f240.)
     S_SoundRequest request;
-    request.source = m_owner;
-    request.group = GetLadderSoundGroup(m_useObject);
+    request.pos = S_vector(0.0f, -0.4f, 0.0f);
+    request.flags = SOUND_SILENT_TO_AI | SOUND_KEEP_SLOT;
     request.attachTo = m_joints[HUMAN_JOINT_A].frame;
-    request.pos.x = 0.0f;
+    request.source = m_owner;
+    request.chapter = 0;
+    request.group = GetLadderSoundGroup(m_useObject);
+    request.channel = SOUND_CHANNEL_NONE;
     m_useSound = GetSoundModule()->Play(request);
 }
 

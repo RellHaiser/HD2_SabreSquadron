@@ -45,6 +45,7 @@
 #include "game/ladder.h"
 #include "game/pending.h"
 #include "game/physics.h"
+#include "game/sound_module.h"
 #include "game/team.h"
 #include "ls3d/i3d.h"
 #include "ls3d/rw_data.h"
@@ -584,8 +585,12 @@ template <size_t N> std::string FieldsDiffer(const S_LayoutField (&fields)[N], c
                           std::strcmp(f.name, "m_velocity") == 0 || std::strcmp(f.name, "m_unknown9F0") == 0 ||
                           std::strcmp(f.name, "m_unknownA00") == 0 || std::strcmp(f.name, "m_dummyPos") == 0 || std::strcmp(f.name, "m_dummyOffset") == 0;
         const bool locomotion = std::strcmp(f.name, "m_locomotion") == 0;
+        const bool request = std::strcmp(f.name, "m_request") == 0;
         for (size_t i = 0; i < f.size; i += 4) {
             if (anyW && i % 16 == 12)
+                continue;
+            // (The command record's unknown10.w and facingDir.w: S_MoveRequest::Reset copies undefined ones in.)
+            if (request && (i == 0x1C || i == 0x2C))
                 continue;
             // (The locomotion's vectors' w: m_unknown000, m_move, m_turnTarget, m_unknown030, m_push, m_volumesDir,
             // m_velocity, m_unknown0C0; the original copies undefined ones in.)
@@ -631,6 +636,7 @@ namespace {
 #include "locomotion3_test.inc"
 #ifdef HUMAN_BASE
 #include "base_test.inc"
+#include "base2_test.inc"
 #endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
@@ -669,6 +675,7 @@ int main(int argc, char **argv)
     MakeContacts();
     SetUp3();
     TestBase();
+    TestBase2();
 #elif defined(HUMAN_PART3_ONLY)
     // (Part 3's mutation runs: its world, then its tests alone.)
     LoadGround();

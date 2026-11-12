@@ -145,7 +145,7 @@ typedef bool(__attribute__((thiscall)) * T_MBoolVoid)(void *);
 void *MovementOf(void *locomotion) { return static_cast<uint8_t *>(locomotion) - 0xAC0; }
 
 // ---- the model: its shot and stance dummies (boxes: their half width is the sphere's radius), the feet.
-I3D_frame *g_shotDummy[2], *g_stanceDummy[STANCE_DUMMY_COUNT], *g_footU, *g_footQ;
+I3D_frame *g_shotDummy[2], *g_stanceDummy[STANCE_DUMMY_COUNT], *g_footU, *g_footQ, *g_pelvis;
 S_CollisionVolume g_trailVolumes[4];
 const S_vector kStanceDummyAt[STANCE_DUMMY_COUNT] = {{0, 0.3f, 0}, {0, 0.9f, 0}, {0, 1.5f, 0}, {0, 0.3f, 0}, {0, 0.9f, 0},
                                                      {0, 0.2f, 0.6f}, {0, 0.2f, 0.2f}, {0, 0.2f, -0.2f}, {0, 0.2f, -0.6f}};
@@ -175,6 +175,14 @@ void SetUpBase()
         g_stanceDummy[i] = ModelDummy(names[i], kStanceDummyAt[i], 0.25f + 0.02f * i);
     g_footU = ModelDummy("u", S_vector(-0.15f, 0.05f, 0.1f), 0.05f);
     g_footQ = ModelDummy("q", S_vector(0.15f, 0.05f, -0.1f), 0.05f);
+    // (The feet turned a little: their local direction's x is read.)
+    for (I3D_frame *foot : {g_footU, g_footQ}) {
+        S_quat turn;
+        turn.Make(S_vector(0, 1, 0), foot == g_footU ? 0.3f : -0.4f);
+        foot->SetRot(turn);
+        UpdateTree(foot);
+    }
+    g_pelvis = ModelDummy("a", S_vector(0, 0.9f, 0), 0.1f);
     for (I3D_frame *f : {g_shotDummy[0], g_shotDummy[1], g_footU, g_footQ})
         g_sharedFrames.push_back(f);
     for (I3D_frame *f : g_stanceDummy)
@@ -220,6 +228,7 @@ void RandomHumanBase()
         m->m_stanceDummies[i] = g_stanceDummy[i];   // (every human model has all nine)
     m->m_joints[HUMAN_JOINT_U].frame = g_footU;
     m->m_joints[HUMAN_JOINT_Q].frame = g_footQ;
+    m->m_joints[HUMAN_JOINT_A].frame = g_pelvis;
     for (int i = 0; i < STANCE_DUMMY_COUNT; ++i) {
         m->m_dummyPos[i] = {U(-50, 50), U(0, 5), U(-50, 50), 1.0f};
         m->m_dummyOffset[i] = {U(-1, 1), U(0, 2), U(-1, 1), 0.0f};
@@ -414,6 +423,26 @@ void TestBase()
 // ---- the port's side: what the movement base calls outside itself (logged; HUMAN_BASE builds)
 namespace {
 alignas(16) uint8_t g_fakeSoundModule[0x200], g_fakeGEffects[0x200];
+int g_soundSlot = 3;                                    // what C_SoundModule::Play answers (both sides)
+bool g_firstPerson = false;                             // what C_game::IsFirstPersonView answers
+I3D_frame *g_equipmentModel[4];                         // C_HumanEquipment::GetModel's answers by place (a getter: not logged)
+void LogCreateAt(const void *self, int effect, const S_vector &pos, const S_vector &dir, const void *parent, bool faceCamera, bool transient)
+{
+    Log(self, ("CreateAt " + NameOf(parent)).c_str(),
+        {double(effect), pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, double(faceCamera), double(transient)});
+}
+// A sound request, logged whole (its frame and source by name; posW is not read).
+void LogSoundRequest(const void *self, const S_SoundRequest &r)
+{
+    Log(self, ("SoundPlay " + NameOf(r.attachTo) + " " + NameOf(r.source) + " " + (r.fileName ? r.fileName : "")).c_str(),
+        {r.pos.x, r.pos.y, r.pos.z, double(r.flags), double(r.chapter), double(r.group), r.nearRange, r.farRange, double(r.channel),
+         r.nearScale, r.farScale, r.volume});
+}
+void LogSoundStop(const void *self, int *slot)
+{
+    Log(self, "SoundStop", {double(*slot)});
+    *slot = -1;
+}
 }  // namespace
 void C_HumanMorph::Init(C_Human *) { Log(this, "MorphInit"); }
 void C_HumanMorph::Done() { Log(this, "MorphDone"); }
@@ -424,7 +453,7 @@ void C_HumanMorph::SetUnknown2(int speed) { Log(this, "MorphSetUnknown2", {doubl
 void C_HumanMorph::SetUnknown3(int speed) { Log(this, "MorphSetUnknown3", {double(speed)}); }
 void C_HumanAnimMixer::Relink(I3D_model *, I3D_model *) { Log(this, "MixerRelink"); }
 void C_HumanEquipment::FindJoints(I3D_frame *) { Log(this, "FindJoints"); }
-I3D_frame *C_HumanEquipment::GetModel(int place) const { Log(this, "GetModel", {double(place)}); return nullptr; }
+I3D_frame *C_HumanEquipment::GetModel(int place) const { return place >= 0 && place < 4 ? g_equipmentModel[place] : nullptr; }
 void C_HumanEquipment::OnAnimationEvent(int event) { Log(this, "OnAnimationEvent", {double(event)}); }
 void C_HumanMovement::UpdateModelNames() { Log(this, "UpdateModelNames"); }
 int C_HumanMovement::UseObject(C_Actor *object) { Log(this, ("UseObject " + NameOf(object)).c_str()); return 0; }
@@ -434,20 +463,24 @@ void C_HumanWeaponPose::StartDeath(uint32_t hitFlags, const float *force, I3D_an
     LogV(this, "StartDeath", force, 3, {double(hitFlags), double(deathAnim != nullptr), double(kind), double(carrier != nullptr)});
 }
 void C_HumanWork::PlayWorkAnimation(int animation, bool on) { Log(this, "PlayWorkAnimation", {double(animation), double(on)}); }
-int C_ParticlesModule::CreateAt(int effect, const S_vector &pos, const S_vector &dir, I3D_frame *, bool faceCamera, bool transient)
+int C_ParticlesModule::CreateAt(int effect, const S_vector &pos, const S_vector &dir, I3D_frame *parent, bool faceCamera, bool transient)
 {
-    Log(this, "CreateAt", {double(effect), pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, double(faceCamera), double(transient)});
+    LogCreateAt(this, effect, pos, dir, parent, faceCamera, transient);
     return 0;
 }
-int C_SoundModule::Play(const S_SoundRequest &) { Log(this, "SoundPlay"); return 0; }
-void C_SoundModule::Stop(int *) { Log(this, "SoundStop"); }
+int C_SoundModule::Play(const S_SoundRequest &request)
+{
+    LogSoundRequest(this, request);
+    return g_soundSlot;
+}
+void C_SoundModule::Stop(int *slot) { LogSoundStop(this, slot); }
 void C_SoundModule::SetChannelLimit(int channel, int limit) { Log(this, "SetChannelLimit", {double(channel), double(limit)}); }
 C_SoundModule *GetSoundModule() { return reinterpret_cast<C_SoundModule *>(g_fakeSoundModule); }
 C_GEffectsModule *GetGEffects() { return reinterpret_cast<C_GEffectsModule *>(g_fakeGEffects); }
 C_Actor *C_ActorsModule::GetActor(int index) const { Log(this, "GetActor", {double(index)}); return nullptr; }
 C_Actor *C_ActorsModule::GetActorById(int id) const { Log(this, "GetActorById", {double(id)}); return nullptr; }
 C_Actor *C_TemporaryActorsList::FindActor(int id) const { Log(this, "FindTemporaryActor", {double(id)}); return nullptr; }
-bool C_game::IsFirstPersonView() const { return false; }
+bool C_game::IsFirstPersonView() const { return g_firstPerson; }
 void SendExplosionMessage(const S_vector &pos, int material) { Log(nullptr, "SendExplosionMessage", {pos.x, pos.y, pos.z, double(material)}); }
 void SurfaceMarks_Clear() { Log(nullptr, "SurfaceMarks_Clear"); }
 S_SurfaceMark *SurfaceMarks_NewMark(int) { Log(nullptr, "SurfaceMarks_NewMark"); return nullptr; }
