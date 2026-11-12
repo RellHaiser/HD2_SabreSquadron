@@ -205,6 +205,7 @@ void C_Human::PlayerRequestDamage(int type, int damage, int attackerId, int zone
 }
 void C_Human::SendRemoteRequest(int request) { Log(this, "SendRemoteRequest", {double(request)}); }
 
+#ifndef HUMAN_MIXER   // (the HUMAN_MIXER build links game/human_anim_mixer.cpp)
 void C_HumanAnimMixer::AddMove(const S_vector4 &move, int duration) { LogV(this, "AddMove", &move.x, 4, {double(duration)}); }
 void C_HumanAnimMixer::AddMove2(const S_vector4 &move, int duration) { LogV(this, "AddMove2", &move.x, 4, {double(duration)}); }
 void C_HumanAnimMixer::ReplaceVelocity(const S_vector4 &velocity, float weight, float maxSpeed, S_vector4 *result)
@@ -222,6 +223,7 @@ void C_HumanAnimMixer::SetVelocity(const S_vector4 &velocity, float weight, floa
 void C_HumanAnimMixer::SetTrackRate(int track, float rate) { Log(this, "SetTrackRate", {double(track), rate}); }
 void C_HumanAnimMixer::Slide(const S_vector4 &offset, int duration) { LogV(this, "Slide", &offset.x, 4, {double(duration)}); }
 void C_HumanAnimMixer::Update(int time) { Log(this, "MixerUpdate", {double(time)}); }
+#endif
 
 void C_HumanEquipment::PutAwayHandsItem(bool putAway) { Log(this, "PutAwayHandsItem", {double(putAway)}); }
 void C_HumanMorph::SetExhausted(bool start, bool cap) { Log(this, "SetExhausted", {double(start), double(cap)}); }
@@ -639,6 +641,8 @@ template <size_t N> std::string FieldsDiffer(const S_LayoutField (&fields)[N], c
                           std::strcmp(f.name, "m_unknown9D0") == 0 ||   // (LoadBase: 12 bytes read, 16 copied)
                           std::strcmp(f.name, "m_unknown940") == 0;     // (likewise)
         const bool locomotion = std::strcmp(f.name, "m_locomotion") == 0;
+        // (The mixer's vectors' w, +0x230..+0x320: Init, Update and LoadGame store stack temps' undefined ones.)
+        const bool mixer = std::strcmp(f.name, "m_mixer") == 0;
         const bool request = std::strcmp(f.name, "m_request") == 0;
         for (size_t i = 0; i < f.size; i += 4) {
             if (anyW && i % 16 == 12)
@@ -649,6 +653,8 @@ template <size_t N> std::string FieldsDiffer(const S_LayoutField (&fields)[N], c
             // (The locomotion's vectors' w: m_unknown000, m_move, m_turnTarget, m_unknown030, m_push, m_volumesDir,
             // m_velocity, m_unknown0C0; the original copies undefined ones in.)
             if (locomotion && i < 0xD0 && i % 16 == 12 && i != 0x4C && i != 0x5C && i != 0x6C && i != 0x8C && i != 0x9C)
+                continue;
+            if (mixer && i >= 0x230 && i < 0x320 && i % 16 == 12)
                 continue;
             uint32_t x = 0, y = 0;
             const size_t n = std::min<size_t>(4, f.size - i);
@@ -696,6 +702,9 @@ namespace {
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
+#endif
+#ifdef HUMAN_MIXER
+#include "mixer_test.inc"
 #endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
@@ -748,7 +757,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#ifdef HUMAN_MOVE
+#if defined(HUMAN_MIXER)
+    TestMixer();
+#elif defined(HUMAN_MOVE)
     TestMove();
 #else
     TestRagdoll();

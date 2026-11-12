@@ -176,6 +176,13 @@ bool LoadOriginalExe()
     return true;
 }
 
+// The first five bytes of each function entry patched (RestoreOriginal puts them back).
+struct S_SavedEntry {
+    uint32_t at;
+    uint8_t bytes[5];
+};
+static std::vector<S_SavedEntry> g_savedEntries;
+
 void RedirectOriginal(uint32_t at, const void *to)
 {
     uint8_t *p = OriginalAt<uint8_t *>(at);
@@ -185,7 +192,22 @@ void RedirectOriginal(uint32_t at, const void *to)
         *OriginalAt<const void **>(slot) = to;
         return;
     }
+    if (std::none_of(g_savedEntries.begin(), g_savedEntries.end(), [at](const S_SavedEntry &e) { return e.at == at; })) {
+        S_SavedEntry e{at, {}};
+        std::memcpy(e.bytes, p, 5);
+        g_savedEntries.push_back(e);
+    }
     const int32_t rel = static_cast<int32_t>(reinterpret_cast<uintptr_t>(to) - (reinterpret_cast<uintptr_t>(p) + 5));
     p[0] = 0xE9;
     std::memcpy(p + 1, &rel, 4);
+}
+
+bool RestoreOriginal(uint32_t at)
+{
+    for (const S_SavedEntry &e : g_savedEntries)
+        if (e.at == at) {
+            std::memcpy(OriginalAt<uint8_t *>(at), e.bytes, 5);
+            return true;
+        }
+    return false;
 }

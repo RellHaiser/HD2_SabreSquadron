@@ -27,4 +27,8 @@ alignas(16) unsigned char g_shotManager[0x400];
 alignas(16) unsigned char g_gameProfile[0x1000];
 alignas(16) unsigned char g_soundCache[0x400];
 #endif
+#ifdef HUMAN_MIXER
+// (The mixer's, HUMAN_MIXER builds: its Get is the test's.)
+alignas(16) unsigned char g_animationCache[0x400];
+#endif
 uint32_t g_surfaceMarksEnabled;

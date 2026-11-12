@@ -21,3 +21,5 @@ template <class T> T OriginalAt(uint32_t address) { return reinterpret_cast<T>(s
 // its slot, a function by a 5-byte jmp rel32 (none shorter is patched). For code the original must not run (it
 // allocates) or that the test fakes.
 void RedirectOriginal(uint32_t at, const void *to);
+// Undoes RedirectOriginal on a function entry (its first five bytes back); false if it was never patched.
+bool RestoreOriginal(uint32_t at);

@@ -112,8 +112,10 @@ C_CameraModule *C_game::GetCameraModule() { return reinterpret_cast<C_CameraModu
 bool C_Car::IsDestroyed() const { Log(this, "IsDestroyed"); return g_mv.carDestroyed; }
 bool C_GameProfile::IsCooperativeGame() const { return g_mv.coop; }
 void C_Human::SetMoveFlags(uint32_t flags) { Log(this, "SetMoveFlags", {double(flags)}); }
+#ifndef HUMAN_MIXER   // (game/human_anim_mixer.cpp's own in HUMAN_MIXER builds)
 bool C_HumanAnimMixer::SaveGame(C_chunk &) { Log(this, "MixerSaveGame"); return g_mv.partSaves; }
 bool C_HumanAnimMixer::LoadGame(C_chunk &) { Log(this, "MixerLoadGame"); return g_mv.partSaves; }
+#endif
 void C_HumanAnimPlayer::FindHeadDummy() { Log(this, "FindHeadDummy"); }
 void C_HumanAnimPlayer::Init(C_HumanMovement *m, C_HumanSpecialMoves *s, C_HumanLocomotion *l, C_Human *o)
 {

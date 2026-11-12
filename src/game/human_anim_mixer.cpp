@@ -392,7 +392,8 @@ void C_HumanAnimMixer::UpdateStages(int /*time*/, int step, bool start, const S_
         const int other = 2 * track + (trk.current == 0 ? 1 : 0);
         S_MixerStage &stage = m_stages[current];
         if (trk.hold < 1) {
-            trk.time = static_cast<int>(stepTime * MOVE_TIME_SCALE + static_cast<float>(trk.time));
+            // (FIADD in the original: the time is added exactly and the sum rounded to float once.)
+            trk.time = static_cast<int>(static_cast<float>(static_cast<double>(stepTime * MOVE_TIME_SCALE) + trk.time));
             if (m_holdTime >= 0 && track == 0) {
                 const int holdTime = m_holdTime;
                 if (m_model->GetAnimTime(current) >= holdTime) {
@@ -599,8 +600,11 @@ void C_HumanAnimMixer::SyncTrackTime(const S_MixerAnim *anims, int track)
         if (!now)
             return;
         const int length = now->GetEndTime();
-        if (oldLength > 0)
-            m_model->SetAnimTime(stage, static_cast<int>(static_cast<double>(otherTime) / oldLength * length));
+        // (FIDIV / FIMUL at the game's float precision: each step rounded to float.)
+        if (oldLength > 0) {
+            const float share = static_cast<float>(otherTime) / static_cast<float>(oldLength);
+            m_model->SetAnimTime(stage, static_cast<int>(share * static_cast<float>(length)));
+        }
     }
 }
 
@@ -1462,6 +1466,8 @@ bool C_HumanAnimMixer::LoadGame(C_chunk &chunk)
                 char name[1000];
                 chunk.ReadString(name, sizeof(name));
                 chunk.Ascend();
+                // (Without the mode chunk the original reads a mode anyway and gets a stack word; SaveGame always
+                // writes it.)
                 int mode = 0;
                 const bool inMode = chunk.Descend(id);
                 if (inMode)

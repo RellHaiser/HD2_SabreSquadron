@@ -1182,3 +1182,46 @@ particles and the surface marks. Files are served from memory.
   - the model frame is shared by both sides and was not restored: the port showed a hidden model and the original
     found it already shown (mutation testing found it);
   - in a few Python edits through the shell, `\n` in C++ strings became real line breaks again (fixed by hand).
+
+## Human part 7 (the animation mixer, `human_anim_mixer.cpp`, 2026-11-12)
+
+- **The build:** `human/build_mixer.bat` (HUMAN_MIXER): build_move.bat's harness with game/human_anim_mixer.cpp
+  linked, `human/mixer_test.inc`'s tests alone. The mixer is the movement's field at 0x260 (944 bytes), compared
+  whole; the original's methods get the original movement's mixer.
+- **The tests:**
+  - 60,000 calls over 30 entry points (Init, the stage and track setters and getters, PlayAnim / Carry / Activity,
+    the queues, SyncTrackTime, the blends, UpdateStages, Update with its moves, slides and extra moves, AddMove /
+    MoveTo / AddMove2 / Slide / SetVelocity / ReplaceVelocity, HoldTrack, FadeOutTrack3, SetHoldTime,
+    NotifyFrames), and 20,000 of MixerBlendProgress;
+  - the notes: NoteHook and OnNote over every kind of note (dubbing, sound files, groups, steps, holds, events),
+    with a note frame "a" under the pelvis; Attach / DetachModelUpdateHook;
+  - saved games: SaveGame (the files byte for byte) and LoadGame from the port's file, sometimes with an unknown chunk
+    first.
+- **New in the harness:** a fake model's 8 stages per model (two models: the human's and a second one with "a"
+  frames), shared by both sides; fake animation sets (names, end times, play modes, one sometimes empty) and the
+  resource cache's Get redirected to the port's; `RestoreOriginal` (original_exe.cpp) puts back an original function
+  that an earlier redirect replaced (the mixer's own, faked for the movement's tests); the original's static sscanf
+  and atoi redirected to the test's CRT (their locks were never set up: they hung); the model's callback stored
+  canonically, so the original's hook compares as the port's.
+- **Port bugs found and fixed (on main; port mistakes):**
+  - UpdateStages added the step to a track's time in double; the original's FIADD adds it exactly and rounds the sum
+    to float once (near the 0x7FFFFC17 guard the time came out on the other side of it);
+  - SyncTrackTime computed the share in double; the original's FIDIV / FIMUL round to float at each step (1 ms off).
+- **Undefined in the original, not compared:** the w of velocityA / B, m_move and m_addMove (stack temps' w); LoadGame
+  of a stage without its mode chunk (the original reads a stack word; SaveGame always writes the chunk).
+- **The port's documented fixes, kept out:** the 5-event cap on a track; HoldTrack of a track without a current
+  stage (the original writes stage -1's rate); a saved stage 8; a cached animation file no longer found.
+- **Results:** every function agrees (268,000 checks, 0 failures). Lines: human_anim_mixer.cpp 99.6 % of 1,065.
+- **Mutations** (`human/mutations/mutate_mixer1.py`): 865 mutants; 750 killed, 49 not building, 66 survived
+  (classified in its docstring: equivalents, the documented fixes, AddTrackEvent and float boundaries). 76 survived
+  the first run; biasing the random state to the integer boundaries (a hold of 1, a fade-out of 0, stage times at an
+  animation's end, a 1 ms animation) took it to 66.
+- **Not exercised:** AddTrackEvent (no original address: inline in the animation player); LoadGame's stage-8 fix
+  (line 1463); a stage saved without an animation's name.
+- **Harness lessons (my mistakes):**
+  - the first comparisons failed at call 0: earlier tests had redirected the original's own mixer functions, which
+    the original now had to run (hence RestoreOriginal);
+  - the original's sscanf / atoi hung the note tests before I redirected them; a crafted save without the mode chunk
+    was compared until I saw the original reads a stack word there;
+  - I edited the tree while a mutation run was building from it (every mutant "failed to build"; rerun), and one
+    edit script went through a shell heredoc against the standing rule (it came through intact).

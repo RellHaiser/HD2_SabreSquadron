@@ -456,7 +456,9 @@ void C_HumanMorph::Relink(I3D_frame *) { Log(this, "MorphRelink"); }
 void C_HumanMorph::SetUnknown1(int speed) { Log(this, "MorphSetUnknown1", {double(speed)}); }
 void C_HumanMorph::SetUnknown2(int speed) { Log(this, "MorphSetUnknown2", {double(speed)}); }
 void C_HumanMorph::SetUnknown3(int speed) { Log(this, "MorphSetUnknown3", {double(speed)}); }
+#ifndef HUMAN_MIXER   // (game/human_anim_mixer.cpp's own in HUMAN_MIXER builds)
 void C_HumanAnimMixer::Relink(I3D_model *, I3D_model *) { Log(this, "MixerRelink"); }
+#endif
 void C_HumanEquipment::FindJoints(I3D_frame *) { Log(this, "FindJoints"); }
 I3D_frame *C_HumanEquipment::GetModel(int place) const { return place >= 0 && place < 16 ? g_equipmentModel[place] : nullptr; }
 void C_HumanEquipment::OnAnimationEvent(int event) { Log(this, "OnAnimationEvent", {double(event)}); }
