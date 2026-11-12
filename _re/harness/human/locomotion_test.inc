@@ -236,8 +236,11 @@ void PlaceSpheres(int stance)
 // ---- one call compared
 struct S_PortState {
     std::vector<uint8_t> human, movement, work, frame, equipment, pose, volumes, camera;
+    std::vector<std::vector<uint8_t>> frames;
     float moveIterations;
 };
+// More frames the code under test may move (the model's dummies follow the model): each side starts from the same.
+std::vector<I3D_frame *> g_sharedFrames;
 // The human's stance and hit volumes, as one block.
 uint8_t *HumanVolumes() { return reinterpret_cast<uint8_t *>(g_h.stanceVolumes); }
 const size_t HUMAN_VOLUMES_SIZE = sizeof(S_CollisionVolume) * 6;
@@ -268,6 +271,10 @@ S_PortState TakePort()
     const auto *c = reinterpret_cast<const uint8_t *>(g_h.camera);
     s.camera.assign(c, c + 0x400);
     s.moveIterations = g_moveIterations;
+    for (I3D_frame *f : g_sharedFrames) {
+        const auto *b = reinterpret_cast<const uint8_t *>(f);
+        s.frames.emplace_back(b, b + 0x400);
+    }
     return s;
 }
 void PutPort(const S_PortState &s)
@@ -281,6 +288,8 @@ void PutPort(const S_PortState &s)
     std::memcpy(HumanVolumes(), s.volumes.data(), s.volumes.size());
     std::memcpy(static_cast<void *>(g_h.camera), s.camera.data(), s.camera.size());
     g_moveIterations = s.moveIterations;
+    for (size_t i = 0; i < g_sharedFrames.size() && i < s.frames.size(); ++i)
+        std::memcpy(static_cast<void *>(g_sharedFrames[i]), s.frames[i].data(), 0x400);
 }
 
 void NoteAssumedGround()
@@ -323,10 +332,8 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
     for (const auto &w : g_sharedWords)
         sharedBefore.push_back(*w.first);
     const int portResult = port();
-    for (size_t i = 0; i < g_sharedWords.size(); ++i) {
+    for (size_t i = 0; i < g_sharedWords.size(); ++i)
         sharedPort.push_back(*g_sharedWords[i].first);
-        *g_sharedWords[i].first = sharedBefore[i];
-    }
     const std::vector<S_Call> portCalls = g_calls;
     const int portSetPos = fake->setPos - setPos0, portLinks = fake->links - links0;
     fake->setPos = setPos0;
@@ -334,6 +341,8 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
     RemoveHumanVolumes();
     NoteAssumedGround();
     const S_PortState after = TakePort();
+    for (size_t i = 0; i < g_sharedWords.size(); ++i)
+        *g_sharedWords[i].first = sharedBefore[i];
     // The port's result in the original's layout.
     ToOriginal();
     static alignas(16) uint8_t bh[sizeof o_human], bm[sizeof o_movement], bw[sizeof o_work];
@@ -429,7 +438,7 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
             why = "frame SetPos / LinkTo count";
     }
     for (size_t i = 0; i < g_sharedWords.size(); ++i) {
-        if (why.empty() && *g_sharedWords[i].first != sharedPort[i])
+        if (why.empty() && !WordsNear(*g_sharedWords[i].first, sharedPort[i], 'm'))
             why = g_sharedWords[i].second;
         *g_sharedWords[i].first = sharedPort[i];
     }

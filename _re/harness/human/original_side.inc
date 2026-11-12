@@ -160,6 +160,10 @@ void OT O_UnexpectedVirtual(void *self)
 // The scene's MarkTrackedModel (slot 0x144), logged for both sides.
 void __stdcall F_MarkTrackedModel(void *, I3D_frame *frame) { Log(GetGame()->m_scene, "MarkTrackedModel", {double(frame != nullptr)}); }
 
+#ifdef HUMAN_BASE
+bool BaseKeepsOriginal(uint32_t address);   // (base_test.inc)
+void InstallBaseRedirects();
+#endif
 void InstallOriginalSide()
 {
     const std::pair<uint32_t, const void *> redirects[] = {
@@ -224,8 +228,16 @@ void InstallOriginalSide()
         {0x006efbc0, reinterpret_cast<const void *>(O_NoVolume)},           // MoveVolume
         {0x006ef9b0, reinterpret_cast<const void *>(O_NoVolume)},           // RemoveVolume
     };
-    for (const auto &r : redirects)
+    for (const auto &r : redirects) {
+#ifdef HUMAN_BASE
+        if (BaseKeepsOriginal(r.first))
+            continue;
+#endif
         RedirectOriginal(r.first, r.second);
+    }
+#ifdef HUMAN_BASE
+    InstallBaseRedirects();
+#endif
     for (void *&slot : o_humanVt)
         slot = reinterpret_cast<void *>(O_UnexpectedVirtual);
     o_humanVt[0xD4 / 4] = reinterpret_cast<void *>(O_Hit);

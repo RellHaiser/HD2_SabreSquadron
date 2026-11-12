@@ -598,7 +598,11 @@ void C_HumanMovement::UpdateStanceVolumes(int stance)
 
     // Fix: the original gathers the spheres straight into m_stanceSpheres (4 of them), which
     // two stances at once would overrun, and indexes it with the -10000 of a stance whose
-    // dummies are missing; they are gathered here and at most 4 used.
+    // dummies are missing; they are gathered here and at most 4 used. (It also keeps the count
+    // unclamped: -10000, or 5 to 11, which files the hit volumes and the words after them as
+    // stance volumes.) Neither happens in the game: m_nextStance2 is only ever set to none, so
+    // one stance at a time, and every human model has all nine dummies; the harness compares
+    // only those cases.
     S_vector4 spheres[STANCE_DUMMY_COUNT];
     int count = 0;
     if (stanceA == HUMAN_STANCE_STAND || stanceB == HUMAN_STANCE_STAND) {

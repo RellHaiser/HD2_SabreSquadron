@@ -211,10 +211,12 @@ void C_HumanEquipment::PutAwayHandsItem(bool putAway) { Log(this, "PutAwayHandsI
 void C_HumanMorph::SetExhausted(bool start, bool cap) { Log(this, "SetExhausted", {double(start), double(cap)}); }
 void C_HumanMorph::ShowDeathFace() { Log(this, "ShowDeathFace"); }
 
+#ifndef HUMAN_BASE   // (the HUMAN_BASE build links game/human_movement_base.cpp: its functions are tested)
 void C_HumanMovement::DamageByContacts(const S_MoveContacts *contacts, const S_CollisionVolume *volume, int time)
 {
     Log(this, "DamageByContacts", {double(contacts ? contacts->count : -1), double(volume != nullptr), double(time)});
 }
+#endif
 bool C_HumanMovement::GetHeadWater(bool *underWater, float *surface) const
 {
     Log(this, "GetHeadWater");
@@ -225,6 +227,7 @@ bool C_HumanMovement::GetHeadWater(bool *underWater, float *surface) const
     return g_script.headInWater;
 }
 bool C_HumanMovement::IsCameraUnderWater() { return g_script.cameraUnderWater; }
+#ifndef HUMAN_BASE
 void C_HumanMovement::MoveDummies(const S_vector &pos) { LogV(this, "MoveDummies", &pos.x, 3); }
 void C_HumanMovement::MoveHitSpheres(const S_vector &pos) { LogV(this, "MoveHitSpheres", &pos.x, 3); }
 void C_HumanMovement::PlaySound(int group) { Log(this, "PlaySound", {double(group)}); }
@@ -236,6 +239,7 @@ namespace { const float *FramePos(); }
 void C_HumanMovement::UpdateDummies() { LogV(this, "UpdateDummies", FramePos(), 3); }
 void C_HumanMovement::UpdateHitSpheres() { Log(this, "UpdateHitSpheres"); }
 void C_HumanMovement::UpdateStanceVolumes(int stance) { Log(this, "UpdateStanceVolumes", {double(stance)}); }
+#endif
 
 bool C_HumanSpecialMoves::CanTurn(float angle) { Log(this, "CanTurn", {angle}); return g_script.canTurn; }
 bool C_HumanSpecialMoves::HasRoomForStance(int change) { Log(this, "HasRoomForStance", {double(change)}); return g_script.hasRoom; }
@@ -324,21 +328,25 @@ void RotateAboutX(S_vector4 &v, float angle)
     typedef void(__fastcall * T)(S_vector4 *, int, float);
     OriginalAt<T>(0x00788950)(&v, 0, angle);
 }
+#ifndef HUMAN_BASE   // (the movement base's own, linked in HUMAN_BASE builds)
 int GetCollisionMaterial(const S_CollisionVolume *volume)
 {
     typedef int(__stdcall * T)(const S_CollisionVolume *);
     return OriginalAt<T>(0x0075cda0)(volume);
 }
+#endif
 void S_HumanAnimRef::Normalize()
 {
     typedef void(__attribute__((thiscall)) * T)(S_HumanAnimRef *);
     OriginalAt<T>(0x00783310)(this);
 }
+#ifndef HUMAN_BASE
 bool IsSingleStageAnim(int anim)
 {
     typedef bool(__stdcall * T)(int, int, int, int);
     return OriginalAt<T>(0x0075cc40)(anim, 0, 0, 0);
 }
+#endif
 
 // ---- the objects (the port's), and their copies in the original's layout
 namespace {
@@ -574,7 +582,7 @@ template <size_t N> std::string FieldsDiffer(const S_LayoutField (&fields)[N], c
         // the original often writes an undefined one there; the port keeps the owner's, as human_locomotion.cpp says.)
         const bool anyW = std::strcmp(f.name, "m_position") == 0 || std::strcmp(f.name, "m_direction") == 0 ||
                           std::strcmp(f.name, "m_velocity") == 0 || std::strcmp(f.name, "m_unknown9F0") == 0 ||
-                          std::strcmp(f.name, "m_unknownA00") == 0;
+                          std::strcmp(f.name, "m_unknownA00") == 0 || std::strcmp(f.name, "m_dummyPos") == 0 || std::strcmp(f.name, "m_dummyOffset") == 0;
         const bool locomotion = std::strcmp(f.name, "m_locomotion") == 0;
         for (size_t i = 0; i < f.size; i += 4) {
             if (anyW && i % 16 == 12)
@@ -621,6 +629,9 @@ namespace {
 #include "locomotion_test.inc"
 #include "locomotion2_test.inc"
 #include "locomotion3_test.inc"
+#ifdef HUMAN_BASE
+#include "base_test.inc"
+#endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
 LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
@@ -653,7 +664,12 @@ int main(int argc, char **argv)
     }
     InstallOriginalSide();
     MakeHuman();
-#ifdef HUMAN_PART3_ONLY
+#ifdef HUMAN_BASE
+    LoadGround();
+    MakeContacts();
+    SetUp3();
+    TestBase();
+#elif defined(HUMAN_PART3_ONLY)
     // (Part 3's mutation runs: its world, then its tests alone.)
     LoadGround();
     MakeContacts();
@@ -661,7 +677,9 @@ int main(int argc, char **argv)
     TestLocomotion();
     TestLocomotion2();
 #endif
+#ifndef HUMAN_BASE
     TestLocomotion3();
+#endif
     PrintStats();
     for (const std::string &f : g_tempFiles)
         std::remove(f.c_str());

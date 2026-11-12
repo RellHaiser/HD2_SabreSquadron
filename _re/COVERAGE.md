@@ -964,3 +964,42 @@ particles and the surface marks. Files are served from memory.
   - the head dummy's parent never turned (the same rotation mistake as above). The mutant deleting
     `step *= parent` survived until then;
   - a test that only compares two written files passes when both are empty: the size is checked too.
+
+## Human part 4a (the movement base: dummies and volumes, 2026-11-11)
+
+- **The build:** suite `human.base` (`human/build_base.bat`, `human_base_test.exe`). It is the human harness built
+  with `HUMAN_BASE`: game/human_movement_base.cpp is linked and its fakes are left out, the original's movement base
+  functions run instead of being redirected, and only `human/base_test.inc`'s tests run. The calls take the
+  original's movement (the locomotion's copy - 0xAC0).
+- **The world's volume calls:** the port's AddVolume, RemoveVolume, MoveVolume and SetIgnoredVolume(s) are wrapped
+  with the linker's `--wrap`. On the human's own volumes (stance, hit, trail) they are logged and not done; others
+  go to the real world. The original's are redirected to the same loggers, so both sides log the same calls (with
+  the volumes' place, size, flags and type) and the two logs must agree.
+- **The tests:** 15,000 calls from random humans: UpdateHitSpheres, MoveHitSpheres, UpdateStanceVolumes,
+  GetStanceSpheres, UpdateDummies, UpdateLieDummies, MoveDummies, OnFrozen, SnapToGround, ClearFlags,
+  Remove/RestoreCollision, SetMorph, SetSeatMode, SetPushState, IsLeftFootForward, SetPosition, RelinkJoints and
+  RelinkModel. The model has shot and stance dummies and feet; it is turned and placed on or off the body. The
+  states vary: the counts, the stance change, the push state, frozen or not, the volumes' scales, dead or alive.
+  The volumes and the model's dummies are kept apart per side and compared whole.
+- **New in the harness:**
+  - `g_sharedFrames` (frames each side starts from: the model's dummies move with the model);
+  - the original's joint-name table filled by its own static initialiser (0x7830e0: the test's image never ran its
+    initialisers);
+  - shared words compared within the float tolerance.
+- **The original's undefined behaviour, kept out:** UpdateStanceVolumes gathers the spheres straight into its four,
+  overrunning them with two stances at once, and indexing with the -10000 of a missing dummy. Its count stays
+  unclamped. The port fixes both, and the human_movement_base.cpp comment now says why neither happens in the game:
+  m_nextStance2 is only ever none, and every human model in the game data has all nine stance dummies (checked
+  against H:\HD2_Unpacked\MODELS). The tests keep one stance and all the dummies for UpdateStanceVolumes. Dummies are
+  missing only for the functions that skip them.
+- **Results:** every function agrees (16,000 checks, 0 failures). Lines of part 4a's code: 321 of 326 (the five not
+  run are the excluded cases above, and an AddVolume of hit volumes the function never reaches).
+  `human/mutations/mutate_human4.py`: 230 mutants, 210 killed, 8 don't build, 12 survived (equivalent or a
+  boundary; listed). No port bug found.
+- **Undefined words not compared:** the w of the dummies' places and offsets.
+- **Harness lessons (my mistakes):**
+  - the frames under the model were not restored between the sides: SnapToGround moved them on the port's side,
+    and the original started from there;
+  - the shared words were restored before the port's state was taken;
+  - the shot dummies were one above the other, so a broken direction (a zero vector normalises to straight up)
+    went unseen.

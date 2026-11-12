@@ -131,6 +131,8 @@ SUITES = [
     T("physics", "physics/build.bat", TMP + r"\physics_test.exe", needs=("mingw",)),
     # (The human's movement, every call against the original executable's.)
     T("human", "human/build.bat", TMP + r"\human_test.exe", needs=("mingw", "original_exe")),
+    # (The movement base, the same way: human/build_base.bat, HUMAN_BASE.)
+    T("human.base", "human/build_base.bat", TMP + r"\human_base_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
