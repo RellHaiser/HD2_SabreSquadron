@@ -175,6 +175,7 @@
     S_LayoutField{0xA34, 2608, 4, "m_interaction", 'i'}, \
     S_LayoutField{0xA38, 2612, 4, "m_interactionTime", 'i'}, \
     S_LayoutField{0xA3C, 2616, 4, "m_vehicle", 'p'}, \
+    S_LayoutField{0xA40, 2620, 4, "m_seat", 'i'}, \
     S_LayoutField{0xA44, 2624, 4, "m_seatMode", 'i'}, \
     S_LayoutField{0xA48, 2628, 4, "m_seatStance", 'i'}, \
     S_LayoutField{0xA7C, 2672, 4, "m_clock", 'i'}, \

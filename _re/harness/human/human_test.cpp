@@ -127,6 +127,7 @@ struct S_Script {
     bool activeIsOwner = false;                         // the player team's active player is the test human
     bool headInWater = false;                           // GetHeadWater's answer (headUnderWater: below the surface)
     bool soundPlays = true;                             // C_MovementSounds::Play gives the fake sound
+    bool soundPlaying = true;                           // I3D_sound::IsPlaying's answer
     int soundLength = 900;
 } g_script;
 
@@ -142,6 +143,11 @@ void __stdcall FS_Unexpected(void *)
     std::exit(3);
 }
 void __stdcall FS_SetVolume(S_FakeSound *self, float volume) { Log(self, "SetVolume", {volume}); }
+bool __stdcall FS_IsPlaying(S_FakeSound *self, int unknown)
+{
+    Log(self, "IsPlaying", {double(unknown)});
+    return g_script.soundPlaying;
+}
 int __stdcall FS_GetLength(S_FakeSound *self)
 {
     Log(self, "GetLength");
@@ -154,6 +160,7 @@ void *FakeSound()
             slot = reinterpret_cast<void *>(FS_Unexpected);
         g_soundVt[0x8C / 4] = reinterpret_cast<void *>(FS_SetVolume);
         g_soundVt[0xA8 / 4] = reinterpret_cast<void *>(FS_GetLength);
+        g_soundVt[0x78 / 4] = reinterpret_cast<void *>(FS_IsPlaying);
         g_sound.vt = g_soundVt;
         g_names[&g_sound] = "swimSound";
     }
@@ -527,6 +534,8 @@ const uint32_t O_MP_SETTINGS = 0x008aea30;               // -> the settings (fal
 const uint32_t O_LOCAL_PLAYER_SLOT = 0x00982104;
 const uint32_t O_CAMERA_UNDER_WATER = 0x0098a6ac;     // g_cameraUnderWater (read inline)
 
+// More of the port's state in the original's layout (the containers: base3_test.inc).
+void (*g_toOriginalExtra)();
 // The state of the port's objects in the original's layout (into o_*).
 void ToOriginal()
 {
@@ -553,6 +562,8 @@ void ToOriginal()
     g_controller[0x48] = g_script.localPlayer ? 1 : 0;
     *OriginalAt<float *>(O_MOVE_ITERATIONS) = g_moveIterations;
     *OriginalAt<bool *>(O_CAMERA_UNDER_WATER) = g_script.cameraUnderWater;
+    if (g_toOriginalExtra)
+        g_toOriginalExtra();
 }
 
 // ---- comparing the copies: by field, floats within a tolerance
@@ -637,6 +648,7 @@ namespace {
 #ifdef HUMAN_BASE
 #include "base_test.inc"
 #include "base2_test.inc"
+#include "base3_test.inc"
 #endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
@@ -676,6 +688,7 @@ int main(int argc, char **argv)
     SetUp3();
     TestBase();
     TestBase2();
+    TestBase3();
 #elif defined(HUMAN_PART3_ONLY)
     // (Part 3's mutation runs: its world, then its tests alone.)
     LoadGround();

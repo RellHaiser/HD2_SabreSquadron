@@ -1043,4 +1043,31 @@ particles and the surface marks. Files are served from memory.
   - PlaySound for the active player, UpdateSounds, ProcessRemoteActions, ResetBase, InitBase, DoneBase,
     RestartBase, SaveBase and LoadBase. They grow or free the movement's sound vector and remote action deque: the
     original's MSVC6 containers (its vector is 16 bytes, so the original's fields after +0x194 sit 4 bytes later)
-    allocate through its statically linked C runtime's heap, which the test never starts.
+    allocate through its statically linked C runtime's heap, which the test never starts. (Part 4c below takes most
+    of them.)
+
+## Human part 4c (the movement base: resets and the sound vector, 2026-11-11)
+
+- **The tests:** `human/base3_test.inc`, in the HUMAN_BASE build. 6,000 calls: PlaySound for the active player (the
+  sound kept in the vector), UpdateSounds (finished sounds returned, the last one moved into their place; all of
+  them when stopping), ResetBase, RestartBase, ProcessRemoteActions with no action.
+- **New in the harness:**
+  - the original's operator new and delete (statically linked) are redirected to the test's malloc and free, and
+    its rand (its C runtime's per-thread data) to the test's;
+  - the port's sound vector is copied into the original's MSVC6 vector before its call (allocator, first +0x198,
+    last +0x19C, end +0x1A0; a snapshot taken before the port's call) and compared after it;
+  - the fake sound answers IsPlaying;
+  - `_re/tools/layout_offsets.py` reads an anonymous union's members that have their own offset comments
+    (C_HumanMovement::m_seat, +0xA40, was not copied or compared before).
+- **Results:** every function agrees (47,000 checks with parts 4a and 4b, 0 failures).
+  `human/mutations/mutate_human4c.py`: 139 mutants, 137 killed, 1 doesn't build, 1 survived (an unused
+  computation). No port bug found.
+- **Not exercised:**
+  - InitBase and DoneBase (they allocate and free the body volumes, which the test owns);
+  - SaveBase and LoadBase;
+  - ProcessRemoteActions with actions, which needs the MSVC6 deque rebuilt;
+  - UpdateBreath (the backpack's aqualung and the copy protection test);
+  - the footprints and the body's side of carrying (part 4b's list).
+- **Harness lessons (my mistakes):** the raw copies of the movement restore a std::vector's header, not what it
+  points to (the port's call had already changed it: the original started from a shuffled vector until the snapshot
+  was taken before the port's call); the relink tests cleared joints later tests read.

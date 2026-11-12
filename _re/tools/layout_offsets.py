@@ -40,8 +40,11 @@ def members(header, cls):
     body = class_body(text, cls)
     out = []
     depth = 0
+    union = False   # (inside an anonymous union of the class: its members with their own offset comments count)
     for line in body.splitlines():
         if depth == 0:
+            union = line.strip().startswith("union") and "{" in line and "}" not in line
+        if depth == 0 or (union and depth == 1):
             m = MEMBER.match(line)
             if m and "(" not in m.group("decl") and not m.group("decl").strip().startswith(("return", "using", "typedef")):
                 decl = m.group("decl")

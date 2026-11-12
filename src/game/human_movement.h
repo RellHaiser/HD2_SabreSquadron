@@ -1370,7 +1370,7 @@ public:
     int m_interactionTime = MOVE_NO_TIME;               // +0xA38
     C_Actor *m_vehicle = nullptr;                       // +0xA3C
     union {                                             // +0xA40
-        int m_seat = 0;                                 // the vehicle's seat
+        int m_seat = 0;                                 // +0xA40 the vehicle's seat
         I3D_frame *m_seatFrame;                         // a frame of the scene to sit at
     };
     // How the human sits in the seat: the vehicle's seat flags (SEAT_FLAG_*) until it is in,

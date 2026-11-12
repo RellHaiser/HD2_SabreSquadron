@@ -229,6 +229,9 @@ void RandomHumanBase()
     m->m_joints[HUMAN_JOINT_U].frame = g_footU;
     m->m_joints[HUMAN_JOINT_Q].frame = g_footQ;
     m->m_joints[HUMAN_JOINT_A].frame = g_pelvis;
+    m->m_joints[HUMAN_JOINT_F1].frame = g_jointF1;   // (part 3's: the relink tests clear them)
+    m->m_joints[HUMAN_JOINT_D1].frame = g_jointD1;
+    m->m_joints[HUMAN_JOINT_C1].frame = g_jointC1;
     for (int i = 0; i < STANCE_DUMMY_COUNT; ++i) {
         m->m_dummyPos[i] = {U(-50, 50), U(0, 5), U(-50, 50), 1.0f};
         m->m_dummyOffset[i] = {U(-1, 1), U(0, 2), U(-1, 1), 0.0f};
