@@ -163,9 +163,17 @@ void AddContact(const char *name, int type, const S_vector &at, const S_vector &
     g_collisionWorld.MoveVolume(&c->volume);
     g_contacts.push_back(c);
 }
+// Differences counted but not failed (a test judging their rate itself: the ragdoll's whole steps).
+bool g_softDiff = false;
+// Words of the weapon pose not compared (byte offsets: undefined ones the original writes).
+std::set<size_t> g_poseSkipWords;
+// More of each side's view (the ragdoll's pose: its owner and movement); called with the contacts.
+void (*g_sideHook)(bool original);
 // Each side's view of the frames' data.
 void ContactsFor(bool original)
 {
+    if (g_sideHook)
+        g_sideHook(original);
     for (S_ContactActor *c : g_contacts) {
         c->data.actor = reinterpret_cast<C_Actor *>(original ? c->orig : c->port);
         if (c->type == -1)
@@ -394,6 +402,8 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
             uint32_t x, y;
             std::memcpy(&x, port.data() + i, 4);
             std::memcpy(&y, orig + i, 4);
+            if (orig == g_h.pose && g_poseSkipWords.count(i))
+                continue;
             if (!WordsNear(x, y, 'm'))
                 return std::string(name) + "+" + std::to_string(i);
         }
@@ -438,12 +448,29 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
             why = "frame SetPos / LinkTo count";
     }
     for (size_t i = 0; i < g_sharedWords.size(); ++i) {
-        if (why.empty() && !WordsNear(*g_sharedWords[i].first, sharedPort[i], 'm'))
-            why = g_sharedWords[i].second;
+        bool same;
+        if (g_sharedWords[i].tolerance > 0.0f) {
+            float a, b;
+            std::memcpy(&a, &sharedPort[i], 4);
+            std::memcpy(&b, g_sharedWords[i].first, 4);
+            same = std::fabs(a - b) <= g_sharedWords[i].tolerance * std::max(1.0f, std::fabs(a)) || (a != a && b != b);
+        } else {
+            same = WordsNear(*g_sharedWords[i].first, sharedPort[i], 'm');
+        }
+        if (why.empty() && !same)
+        {
+            float pf, of;
+            std::memcpy(&pf, &sharedPort[i], 4);
+            std::memcpy(&of, g_sharedWords[i].first, 4);
+            char values[96];
+            std::snprintf(values, sizeof values, " (port %08x %g original %08x %g)", sharedPort[i], pf, *g_sharedWords[i].first, of);
+            why = g_sharedWords[i].second + values;
+        }
         *g_sharedWords[i].first = sharedPort[i];
     }
     PutPort(after);
-    CHECK(why.empty());
+    if (!g_softDiff)
+        CHECK(why.empty());
     if (why.empty()) {
         ++st.agree;
     } else {

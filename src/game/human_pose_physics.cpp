@@ -150,7 +150,9 @@ void RagdollLengthCorrection(const S_RagdollBody *body, S_vector4 &start, S_vect
 void ClampLimitAxis(float &value, float &a, float &b, float limit, float sine)
 {
     const float s = std::sqrt(1.0f - value * value);
-    if (s <= 1e-8f) {
+    // (Not above the limit, as the original's x87 test: a value past 1 after an earlier axis's scaling gives a NaN
+    // here, which takes this branch rather than spreading.)
+    if (!(s > 1e-8f)) {
         b = 0.0f;
         a = sine;
     } else {
@@ -719,7 +721,8 @@ void C_HumanWeaponPose::CollideRagdollPoint(S_RagdollPoint *point, S_vector4 &ou
             radius = body->thickness;
     }
     radius *= 0.5f;
-    S_vector from = PoseXYZ(point->oldPos);
+    // (From where it was at the last collision step, +0x100, as the original: not the last integration step.)
+    S_vector from = PoseXYZ(point->lastPos);
     S_vector move = PoseXYZ(point->pos) - from;
     S_vector hit;
     S_vector normal;

@@ -1071,3 +1071,56 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the raw copies of the movement restore a std::vector's header, not what it
   points to (the port's call had already changed it: the original started from a shuffled vector until the snapshot
   was taken before the port's call); the relink tests cleared joints later tests read.
+
+## Human part 5 (the ragdoll, 2026-11-11)
+
+- **The tests:** `human/ragdoll_test.inc`, in the HUMAN_BASE build (build_base.bat now links
+  game/human_pose_physics.cpp, _ragdoll.cpp and _ik.cpp; `-DRAGDOLL_ONLY` runs these tests alone). A 23-bone
+  skeleton under the test human's model, the ragdoll built by the port and kept as the rest state:
+  - **one function at a time** (9,000 calls from random states: placed anywhere, by the contact actors, over the
+    pond; points shaken and moving, flags, normals, materials; pushes and holds, some full; on a vehicle or not;
+    the body's detail): IntegrateRagdollPoints, UpdateRagdollBodies, ConstrainRagdollBody, ApplyRagdollCorrections,
+    CollideRagdoll, CollideRagdollPoint (with the pelvis sweeping through the pond's surface), CollideRagdollBody,
+    SettleRagdoll, AddRagdollPush and AddRagdollHold, ApplyRagdollPushes, Update and ReleaseRagdollContacts (frames
+    moved in x, y, z), PlayRagdollSound and UpdateRagdollSound;
+  - **trajectories:** 300 of 30 StepRagdoll calls each (9,000), each call from the port's state;
+  - **the pose:** RagdollBoneMatrices, SetRagdollBones, PoseFromRagdoll, Store, Reset (from a moved blend start)
+    and BlendRagdollToRest, PlaceRagdollPoint, MeasureRagdollBody, AddRagdollBone; Save and Load of the parts and
+    the points (the files byte for byte, some points on named contact frames; loaded into a ragdoll whose links and
+    quaternions were scrambled first);
+  - **the build:** 1,000 BuildRagdoll and frees per side from a bent skeleton and a moved, turned model, compared
+    in a canonical form (pointers as indices; quaternions within 5e-3, either sign).
+- **New in the harness:** the shared-word comparison takes a tolerance per word; a side hook (the pose's owner,
+  movement and vehicle are each side's own objects); a soft mode for the trajectories; words of the weapon pose left
+  out by offset; the original's _aligned_malloc and _aligned_free redirected for the build; its car, vehicle impulse
+  and settled blood pool calls logged.
+- **Port bugs found and fixed (on main; port mistakes):**
+  - ClampLimitAxis took the square root of 1 - value² and tested it against the limit: a value past 1 (after an
+    earlier axis's scaling) gave a NaN, which spread through the part. The original's x87 test takes the safe branch
+    for the unordered result; the port now tests `!(s > 1e-8)` the same way.
+  - CollideRagdollPoint swept from the point's position before the last integration step (oldPos); the original
+    sweeps from where it was at the last collision step (lastPos, +0x100).
+- **Undefined in the original, not compared:** the w of the vectors the original copies in from stack temps (the
+  parts' savedStart, savedEnd, limits, axis, savedAxis, unknown220; the points' vectors; the pushes' forces;
+  m_gravity.w after the water; the world matrix's m[3][3] after PlaceRagdollPoint, whose children get a temp with no
+  w).
+- **Tolerances:** the points' velocities, steps and smoothed velocities are differences of positions over a 2..10 ms
+  substep (1e-2); StepRagdoll must agree in 99 % of its calls (8,952 of 9,000: float rounding grows chaotically over
+  the substeps' collisions; each call starts from the port's state, so differences do not pile up).
+- **Results:** every function agrees (20,501 checks with -DRAGDOLL_ONLY, 67,501 with the base's; 0 failures). Lines:
+  human_pose_physics.cpp 95.3 % of 827, human_pose_ragdoll.cpp 98.3 % of 718.
+  `human/mutations/mutate_ragdoll1.py` (the physics): 746 mutants, 572 killed, 42 not building, 132 survived (the
+  car pushes, equivalent ones, paths only the soft trajectories meet, boundaries; listed). `mutate_ragdoll2.py` (the
+  build, the pose, saves): 698 mutants, 595 killed, 28 not building, 75 survived (first values set again, frees,
+  equivalent ones; listed).
+- **Not exercised:** the car pushes (no car actor in the test world); human_pose_ik.cpp (linked only); the
+  corrections' fallbacks (unreachable); BuildRagdoll with `reload` (freeing an old ragdoll).
+- **Harness lessons (my mistakes):**
+  - the first skip of undefined w words also hid the matrices' fourth columns; narrowed, it showed PlaceRagdollPoint's
+    undefined world m[3][3];
+  - the parts' skip took every 16th word in +0x160..0x22F, scalars among them: thickness (+0x18C) and two more were
+    never compared, in the build or the calls, until mutation survivors (the parts' thickness factors) pointed at it;
+  - mutation labels are line numbers from when the file was generated: after my two fixes added lines, I tried a
+    different line than the label meant by hand (the runner was right);
+  - 12-byte out-vectors passed to the original's sphere test, which writes 16 (a crash), and a stdcall helper called
+    as thiscall, in a debug build.

@@ -167,15 +167,23 @@ void *FakeSound()
     return g_script.soundPlays ? &g_sound : nullptr;
 }
 // Words of shared objects the code under test writes inline (both sides alike): kept apart per side and compared.
-std::vector<std::pair<uint32_t *, std::string>> g_sharedWords;
+// (`tolerance`: a float's own relative / absolute tolerance; 0: the usual comparison.)
+struct S_SharedWord {
+    uint32_t *first;
+    std::string second;
+    float tolerance = 0.0f;
+};
+std::vector<S_SharedWord> g_sharedWords;
 // RandFloat (the LS3DF port's, std::rand) serves both sides: seeded alike before each side of a call.
 unsigned g_randSeed = 1;
 }  // namespace
 
 // ---- the port's side: the functions outside the locomotion, faked (logged; scripted answers)
 // Constructors: the in-class initializers apply (their own files are not linked).
+#ifndef HUMAN_MOVE   // (the HUMAN_MOVE build links game/human_movement.cpp: its own; the weapon pose's faked there)
 C_HumanMovement::C_HumanMovement() {}
 C_HumanMovement::~C_HumanMovement() {}
+#endif
 C_HumanMorph::C_HumanMorph() {}
 C_HumanWork::C_HumanWork() {}
 
@@ -225,6 +233,7 @@ void C_HumanMovement::DamageByContacts(const S_MoveContacts *contacts, const S_C
     Log(this, "DamageByContacts", {double(contacts ? contacts->count : -1), double(volume != nullptr), double(time)});
 }
 #endif
+#ifndef HUMAN_MOVE
 bool C_HumanMovement::GetHeadWater(bool *underWater, float *surface) const
 {
     Log(this, "GetHeadWater");
@@ -235,6 +244,7 @@ bool C_HumanMovement::GetHeadWater(bool *underWater, float *surface) const
     return g_script.headInWater;
 }
 bool C_HumanMovement::IsCameraUnderWater() { return g_script.cameraUnderWater; }
+#endif
 #ifndef HUMAN_BASE
 void C_HumanMovement::MoveDummies(const S_vector &pos) { LogV(this, "MoveDummies", &pos.x, 3); }
 void C_HumanMovement::MoveHitSpheres(const S_vector &pos) { LogV(this, "MoveHitSpheres", &pos.x, 3); }
@@ -293,6 +303,7 @@ bool C_Ladder::CanUse(const S_vector4 &pos, const S_vector4 &dir, const S_vector
     return g_script.ladderCanUse;
 }
 void C_Ladder::RemoveClimber(C_Human *human) { Log(this, "RemoveClimber", {double(human != nullptr)}); }
+#ifndef HUMAN_MOVE
 I3D_sound *C_MovementSounds::Play(int group, I3D_frame *frame, const S_vector *pos)
 {
     LogV(this, ("SoundsPlay " + NameOf(frame)).c_str(), &pos->x, 3, {double(group)});
@@ -300,6 +311,26 @@ I3D_sound *C_MovementSounds::Play(int group, I3D_frame *frame, const S_vector *p
 }
 void C_MovementSounds::Return(I3D_sound *sound) { Log(this, ("SoundsReturn " + NameOf(sound)).c_str()); }
 C_MovementSounds *GetMovementSounds() { return nullptr; }
+#else
+// (The HUMAN_MOVE build: the sound bank is game/human_movement.cpp's; the other files' calls into it go through the
+// linker's --wrap to these loggers, as the original's to its redirected ones.)
+extern "C" {
+I3D_sound *__attribute__((thiscall)) __wrap__ZN16C_MovementSounds4PlayEiP9I3D_framePK8S_vector(C_MovementSounds *self, int group,
+                                                                                               I3D_frame *frame, const S_vector *pos)
+{
+    LogV(self, ("SoundsPlay " + NameOf(frame)).c_str(), &pos->x, 3, {double(group)});
+    return static_cast<I3D_sound *>(FakeSound());
+}
+void __attribute__((thiscall)) __wrap__ZN16C_MovementSounds6ReturnEP9I3D_sound(C_MovementSounds *self, I3D_sound *sound)
+{
+    Log(self, ("SoundsReturn " + NameOf(sound)).c_str());
+}
+C_MovementSounds *__wrap__Z17GetMovementSoundsv() { return nullptr; }
+}
+// The weapon pose (game/human_weapon_pose.cpp, not linked): the movement's constructor makes one, MakeHuman replaces it.
+C_HumanWeaponPose::C_HumanWeaponPose() {}
+C_HumanWeaponPose::~C_HumanWeaponPose() {}
+#endif
 void *g_portHuman;
 // (Each side gets its own copy of the test human when it is the active player.)
 C_Human *C_Team::GetActivePlayer() const
@@ -318,6 +349,7 @@ uint8_t *g_portPhysicsModule;
 C_PhysicsModuleBase *GetPhysicsModule() { return reinterpret_cast<C_PhysicsModuleBase *>(g_portPhysicsModule); }
 
 // The original's small helpers serve the port too (human_movement*.cpp: later parts).
+#ifndef HUMAN_MOVE
 float AngleBetween2D(const float *a, const float *b)
 {
     typedef float(__fastcall * T)(const float *, const float *);
@@ -336,18 +368,21 @@ void RotateAboutX(S_vector4 &v, float angle)
     typedef void(__fastcall * T)(S_vector4 *, int, float);
     OriginalAt<T>(0x00788950)(&v, 0, angle);
 }
-#ifndef HUMAN_BASE   // (the movement base's own, linked in HUMAN_BASE builds)
+#endif
+#ifndef HUMAN_BASE  // (the movement base's own, linked in HUMAN_BASE builds)
 int GetCollisionMaterial(const S_CollisionVolume *volume)
 {
     typedef int(__stdcall * T)(const S_CollisionVolume *);
     return OriginalAt<T>(0x0075cda0)(volume);
 }
 #endif
+#ifndef HUMAN_MOVE
 void S_HumanAnimRef::Normalize()
 {
     typedef void(__attribute__((thiscall)) * T)(S_HumanAnimRef *);
     OriginalAt<T>(0x00783310)(this);
 }
+#endif
 #ifndef HUMAN_BASE
 bool IsSingleStageAnim(int anim)
 {
@@ -586,15 +621,23 @@ bool WordsNear(uint32_t a, uint32_t b, char kind)
     std::memcpy(&y, &b, 4);
     return std::fabs(x - y) <= g_tol * std::max(1.0f, std::fabs(x));
 }
+// Fields not compared (by name).
+std::set<std::string> g_skipFields;
 // The first field that differs (name and word) between two copies of an object by its table, or "".
 template <size_t N> std::string FieldsDiffer(const S_LayoutField (&fields)[N], const uint8_t *a, const uint8_t *b, const char *object)
 {
     for (const S_LayoutField &f : fields) {
+        if (g_skipFields.count(f.name))
+            continue;
         // (The w of the human's position, direction and velocity, and of the movement's blood pool place and normal:
         // the original often writes an undefined one there; the port keeps the owner's, as human_locomotion.cpp says.)
         const bool anyW = std::strcmp(f.name, "m_position") == 0 || std::strcmp(f.name, "m_direction") == 0 ||
                           std::strcmp(f.name, "m_velocity") == 0 || std::strcmp(f.name, "m_unknown9F0") == 0 ||
-                          std::strcmp(f.name, "m_unknownA00") == 0 || std::strcmp(f.name, "m_dummyPos") == 0 || std::strcmp(f.name, "m_dummyOffset") == 0;
+                          std::strcmp(f.name, "m_unknownA00") == 0 || std::strcmp(f.name, "m_dummyPos") == 0 || std::strcmp(f.name, "m_dummyOffset") == 0 ||
+                          std::strcmp(f.name, "m_hitOffsets") == 0 ||   // (UpdateHitSpheres: from a stack temp's w)
+                          std::strcmp(f.name, "m_unknown240") == 0 ||   // (ResetBase: likewise)
+                          std::strcmp(f.name, "m_unknown9D0") == 0 ||   // (LoadBase: 12 bytes read, 16 copied)
+                          std::strcmp(f.name, "m_unknown940") == 0;     // (likewise)
         const bool locomotion = std::strcmp(f.name, "m_locomotion") == 0;
         const bool request = std::strcmp(f.name, "m_request") == 0;
         for (size_t i = 0; i < f.size; i += 4) {
@@ -649,6 +692,10 @@ namespace {
 #include "base_test.inc"
 #include "base2_test.inc"
 #include "base3_test.inc"
+#include "ragdoll_test.inc"
+#endif
+#ifdef HUMAN_MOVE
+#include "move_test.inc"
 #endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
@@ -661,6 +708,12 @@ LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
     auto *fp = reinterpret_cast<uintptr_t *>(e->ContextRecord->Ebp);
     for (int i = 0; i < 24 && fp && !IsBadReadPtr(fp, 8); ++i, fp = reinterpret_cast<uintptr_t *>(fp[0]))
         std::printf(" %08x", static_cast<unsigned>(rel(fp[1])));
+    // (The stack's top words: a call through a bad pointer leaves its return address there; the original's code is
+    // at its own addresses, 0x004xxxxx..0x007xxxxx.)
+    const auto *sp = reinterpret_cast<const uint32_t *>(e->ContextRecord->Esp);
+    std::printf("\nstack:");
+    for (int i = 0; i < 12 && !IsBadReadPtr(sp + i, 4); ++i)
+        std::printf(" %08x", sp[i]);
     std::printf("\n");
     return EXCEPTION_EXECUTE_HANDLER;
 }
@@ -686,9 +739,20 @@ int main(int argc, char **argv)
     LoadGround();
     MakeContacts();
     SetUp3();
+#if !defined(RAGDOLL_ONLY) && !defined(HUMAN_MOVE)
     TestBase();
     TestBase2();
     TestBase3();
+#else
+    SetUpBase();
+    SetUpBase2();
+    SetUpBase3();
+#endif
+#ifdef HUMAN_MOVE
+    TestMove();
+#else
+    TestRagdoll();
+#endif
 #elif defined(HUMAN_PART3_ONLY)
     // (Part 3's mutation runs: its world, then its tests alone.)
     LoadGround();

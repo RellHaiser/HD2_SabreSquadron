@@ -19,5 +19,12 @@ alignas(16) unsigned char g_temporaryActors[0x100];
 alignas(16) unsigned char g_particlesModule[0x400];
 void *g_materials;
 uint32_t g_materialCount;
+#ifndef HUMAN_MOVE   // (game/human_movement.cpp's own in HUMAN_MOVE builds)
 float g_footprintBrightness = 1.0f;
+#else
+// (The movement's, HUMAN_MOVE builds.)
+alignas(16) unsigned char g_shotManager[0x400];
+alignas(16) unsigned char g_gameProfile[0x1000];
+alignas(16) unsigned char g_soundCache[0x400];
+#endif
 uint32_t g_surfaceMarksEnabled;

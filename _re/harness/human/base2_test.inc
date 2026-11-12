@@ -27,7 +27,7 @@ void __attribute__((thiscall)) OS_SetChannelLimit(void *self, int channel, int l
 }
 void *O_GetSoundModule() { return &g_origSoundModule; }
 bool __attribute__((thiscall)) O_IsFirstPersonView(void *) { return g_firstPerson; }
-void *__attribute__((thiscall)) O_GetModel(void *, int place) { return place >= 0 && place < 4 ? g_equipmentModel[place] : nullptr; }
+void *__attribute__((thiscall)) O_GetModel(void *, int place) { return place >= 0 && place < 16 ? g_equipmentModel[place] : nullptr; }
 void __attribute__((thiscall)) O_OnAnimationEvent(void *self, int event) { Log(self, "OnAnimationEvent", {double(event)}); }
 void __attribute__((thiscall)) O_UpdateModelNames(void *self) { Log(self, "UpdateModelNames"); }
 I3D_frame *g_handsModel, *g_longGunModel;
@@ -61,7 +61,9 @@ void SetUpBase2()
     RedirectOriginal(0x0069a780, reinterpret_cast<const void *>(O_IsFirstPersonView));
     RedirectOriginal(0x007917d0, reinterpret_cast<const void *>(O_GetModel));
     RedirectOriginal(0x00791830, reinterpret_cast<const void *>(O_OnAnimationEvent));
+#ifndef HUMAN_MOVE   // (tested in HUMAN_MOVE builds)
     RedirectOriginal(0x00786b30, reinterpret_cast<const void *>(O_UpdateModelNames));
+#endif
     g_handsModel = NewFrame(FRAME_DUMMY, "handsModel", S_vector(0, 1, 0), Identity(), Box(S_vector(0.1f, 0.1f, 0.1f)), "", g_sector);
     g_longGunModel = NewFrame(FRAME_DUMMY, "longGunModel", S_vector(0, 1, 0), Identity(), Box(S_vector(0.1f, 0.1f, 0.1f)), "", g_sector);
     g_sharedWords.push_back({&g_handsModel->m_frameFlags, "handsModel flags"});

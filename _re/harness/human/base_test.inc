@@ -157,10 +157,12 @@ I3D_frame *ModelDummy(const char *name, const S_vector &at, float radius)
     return f;
 }
 // A whole shared object kept apart per side and compared word by word (exactly).
-void ShareBlock(void *block, size_t size, const std::string &name)
+// (`skipW`: the w words of its 16-byte rows left out: the original copies undefined ones in.)
+void ShareBlock(void *block, size_t size, const std::string &name, bool skipW = false)
 {
     for (size_t i = 0; i + 4 <= size; i += 4)
-        g_sharedWords.push_back({reinterpret_cast<uint32_t *>(static_cast<uint8_t *>(block) + i), name + "+" + std::to_string(i)});
+        if (!(skipW && i % 16 == 12))
+            g_sharedWords.push_back({reinterpret_cast<uint32_t *>(static_cast<uint8_t *>(block) + i), name + "+" + std::to_string(i)});
 }
 void SetUpBase()
 {
@@ -428,7 +430,7 @@ namespace {
 alignas(16) uint8_t g_fakeSoundModule[0x200], g_fakeGEffects[0x200];
 int g_soundSlot = 3;                                    // what C_SoundModule::Play answers (both sides)
 bool g_firstPerson = false;                             // what C_game::IsFirstPersonView answers
-I3D_frame *g_equipmentModel[4];                         // C_HumanEquipment::GetModel's answers by place (a getter: not logged)
+I3D_frame *g_equipmentModel[16];                        // C_HumanEquipment::GetModel's answers by place (a getter: not logged)
 void LogCreateAt(const void *self, int effect, const S_vector &pos, const S_vector &dir, const void *parent, bool faceCamera, bool transient)
 {
     Log(self, ("CreateAt " + NameOf(parent)).c_str(),
@@ -456,10 +458,12 @@ void C_HumanMorph::SetUnknown2(int speed) { Log(this, "MorphSetUnknown2", {doubl
 void C_HumanMorph::SetUnknown3(int speed) { Log(this, "MorphSetUnknown3", {double(speed)}); }
 void C_HumanAnimMixer::Relink(I3D_model *, I3D_model *) { Log(this, "MixerRelink"); }
 void C_HumanEquipment::FindJoints(I3D_frame *) { Log(this, "FindJoints"); }
-I3D_frame *C_HumanEquipment::GetModel(int place) const { return place >= 0 && place < 4 ? g_equipmentModel[place] : nullptr; }
+I3D_frame *C_HumanEquipment::GetModel(int place) const { return place >= 0 && place < 16 ? g_equipmentModel[place] : nullptr; }
 void C_HumanEquipment::OnAnimationEvent(int event) { Log(this, "OnAnimationEvent", {double(event)}); }
+#ifndef HUMAN_MOVE   // (game/human_movement.cpp's own in HUMAN_MOVE builds)
 void C_HumanMovement::UpdateModelNames() { Log(this, "UpdateModelNames"); }
 int C_HumanMovement::UseObject(C_Actor *object) { Log(this, ("UseObject " + NameOf(object)).c_str()); return 0; }
+#endif
 void C_HumanWeaponPose::PickUpBody() { Log(this, "PickUpBody"); }
 void C_HumanWeaponPose::StartDeath(uint32_t hitFlags, const float *force, I3D_animation_set *deathAnim, int kind, C_Human *carrier)
 {

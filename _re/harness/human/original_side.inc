@@ -187,7 +187,9 @@ void InstallOriginalSide()
         {0x007815b0, reinterpret_cast<const void *>(O_SetExhausted)},
         {0x00781770, reinterpret_cast<const void *>(O_ShowDeathFace)},
         {0x0075f5e0, reinterpret_cast<const void *>(O_DamageByContacts)},
+#ifndef HUMAN_MOVE   // (game/human_movement.cpp's own in HUMAN_MOVE builds: the original's runs)
         {0x00786510, reinterpret_cast<const void *>(O_GetHeadWater)},
+#endif
         {0x0075c6b0, reinterpret_cast<const void *>(O_MoveDummies)},
         {0x0075c050, reinterpret_cast<const void *>(O_MoveHitSpheres)},
         {0x0075ebd0, reinterpret_cast<const void *>(O_PlaySound)},
