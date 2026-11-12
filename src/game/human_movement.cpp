@@ -620,7 +620,10 @@ void C_HumanMovement::Ragdoll(bool volumes, bool light)
     if (m_visual.m_sectorTime > interval) {
         I3D_sector *previous = m_visual.m_sector;
         m_visual.m_sectorTime -= interval;
-        m_visual.m_sector = GetGame()->GetScene()->GetSector(m_owner->GetFrame()->GetWorldPos());
+        // (Half a metre above the model's position, as the original: 0x007872b0.)
+        S_vector at = m_owner->GetFrame()->GetWorldPos();
+        at.y += 0.5f;
+        m_visual.m_sector = GetGame()->GetScene()->GetSector(at);
         if (previous != m_visual.m_sector) {
             if (IsClient() && g_teamManager.GetPlayerTeam()->GetActivePlayer() == m_owner)
                 GetGame()->GetCameraModule()->SelectView(0);
@@ -1195,7 +1198,9 @@ void RotateAboutZ(S_vector4 &v, float angle)
 float AngleBetween2D(const float *a, const float *b)
 {
     constexpr float PI = 3.1415927f;
-    float angle = std::atan2(b[1], b[0]) - std::atan2(a[1], a[0]);
+    // (The two FPATANs at the x87's full precision, their difference rounded to float: as the original.)
+    float angle = static_cast<float>(std::atan2(static_cast<double>(b[1]), static_cast<double>(b[0])) -
+                                     std::atan2(static_cast<double>(a[1]), static_cast<double>(a[0])));
     if (angle < -PI)
         angle += 2.0f * PI;
     if (angle > PI)

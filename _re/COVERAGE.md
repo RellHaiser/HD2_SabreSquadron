@@ -1124,3 +1124,61 @@ particles and the surface marks. Files are served from memory.
     different line than the label meant by hand (the runner was right);
   - 12-byte out-vectors passed to the original's sphere test, which writes 16 (a crash), and a stdcall helper called
     as thiscall, in a debug build.
+
+## Human part 6 (the movement, `human_movement.cpp`, 2026-11-11)
+
+- **The build:** `human/build_move.bat` (HUMAN_MOVE): build_base.bat's harness with game/human_movement.cpp linked,
+  `human/move_test.inc`'s tests alone. Its calls into the movement's parts (the idle, the visual and its lighting, the
+  animation player, the special moves, the mixer, the morph, the work, the weapon pose, the equipment) and into the
+  game (the shot manager, the surface marks, the sound module, the camera, the actors) are logged on both sides alike.
+  The other files' calls into the sound bank, InitBase and DoneBase go to loggers through the linker's --wrap.
+- **The tests:**
+  - 6a, the helpers, exact: S_HumanAnimRef::Normalize, RotateAboutX / Y / Z, AngleBetween2D, the camera under water
+    (20,000 each); and IsLowered, GetHeadWater, PlayDubbing, Unknown7865c0, UseObject, SetUnknown94,
+    UpdateModelNames, OnRemoteAction, SetPlayerControlled, AddBloodPool, Ragdoll, OnModelChanged (all 25 joints
+    relinked), ResetToFrame (30,000 calls);
+  - 6b, the updates: UpdateAnimation, UpdatePhysics, UpdatePhysicsParts (9,000 calls: still, frozen, detached,
+    hidden, on a ladder, on dynamic ground, timers running out, a carried body, the head under water, remote humans
+    turning);
+  - 6c, the lifetime: SetOwner, Init (the mission's name: its climate, footprints and variant; the first human's
+    setup, the driver state in network games), Done (the last one's), Reset (6,000 calls; the globals compared);
+  - 6d, saved games: SaveGame (the files byte for byte) and LoadGame with AfterLoad (3,000 each), running the movement
+    base's SaveBase and LoadBase, untested until now; the parts' saves failing;
+  - 6e, the sound bank: 20,000 Play and Return on the port's bank and the original's (its decks, caches, the files it
+    opens, the sounds it makes and their settings); the base's UpdateBreath under water with a backpack (6,000).
+- **New in the harness:** the remote actions rebuilt as the original's MSVC6 deque (blocks of 341, a map of 8) from a
+  snapshot of the port's queue taken before its call, and compared whole after it (ProcessRemoteActions with actions
+  runs for the first time); the sound vector's snapshot taken the same way; the original's sound bank entries
+  restored for 6e (their first five bytes); a fake backpack; the scene's FindFrame; the profile times not compared.
+- **Port bugs found and fixed (on main; port mistakes):**
+  - AngleBetween2D rounded each atan2 to float; the original subtracts the two FPATANs at the x87's precision and rounds
+    the difference (1 ulp off);
+  - Ragdoll (the light and sector update) looked the sector up at the model's position; the original 0.5 m above it.
+- **Undefined in the original, not compared:** the w of m_hitOffsets (UpdateHitSpheres), m_unknown240 (ResetBase),
+  m_unknown940 and m_unknown9D0 (LoadBase: 12 bytes read, 16 copied), all from stack temps. SaveBase's static spheres
+  keep an earlier save's leftovers in the original (cleared before each original save; the port writes zeros).
+- **The port's documented fixes, kept out:** a held ladder animation (the original passes the mixer an uninitialised
+  vector); the sound group without files (16: the original reads through a null deck; the port's side is tested
+  alone).
+- **Results:** every function agrees (222,354 checks, 0 failures). Lines: human_movement.cpp 94 % of 784;
+  human_movement_base.cpp 61 % in this build (its own tests are parts 4a-4c).
+- **Mutations** (`human/mutations/mutate_move1.py`): 682 mutants; 549 killed, 45 not building, 88 survived (classified
+  in its docstring: the profile clock, the constructors and destructors, globals' first values, equivalents, the
+  fakes' blind spots and a few boundaries not reached). 119 survived the first run; the seats, burnt-out cars, hidden
+  models, the head under water and foreign sounds took it to 92, the model frame's flags and the work's changed
+  word (now compared / varied) to 88.
+- **Not exercised:** GetAnimLength (the animation tables are not linked), GetSectorFrame and SetModelVisible (no
+  original address); the movement's and the sound bank's constructors and destructors (not compared with the
+  original's); SaveGame failing part way; the copy protection failing (its tables are zero in the test's image:
+  intact).
+- **Harness lessons (my mistakes):**
+  - the queue and the sound vector live on the heap: restoring the movement's bytes does not undo what the port's call
+    did to them (the original first ran on counted-down actions; part 4c's lesson, again);
+  - crash addresses are printed relocated (rel = address - base + 0x20000000), the original's too: 0x00a1822c was
+    0x0078822c, the original's inline IsFirstPersonView reading the game's +0x5C;
+  - the camera-under-water flag: the real IsCameraUnderWater reads the port's global, the original's from the script;
+  - SaveBase's static buffer is 0x80 bytes, not 0x50 (I cleared too little);
+  - the equipment fake answered places 0..3 and RandomMove wrote place 9 past its table;
+  - the model frame is shared by both sides and was not restored: the port showed a hidden model and the original
+    found it already shown (mutation testing found it);
+  - in a few Python edits through the shell, `\n` in C++ strings became real line breaks again (fixed by hand).

@@ -484,7 +484,8 @@ void C_SoundModule::Stop(int *slot) { LogSoundStop(this, slot); }
 void C_SoundModule::SetChannelLimit(int channel, int limit) { Log(this, "SetChannelLimit", {double(channel), double(limit)}); }
 C_SoundModule *GetSoundModule() { return reinterpret_cast<C_SoundModule *>(g_fakeSoundModule); }
 C_GEffectsModule *GetGEffects() { return reinterpret_cast<C_GEffectsModule *>(g_fakeGEffects); }
-C_Actor *C_ActorsModule::GetActor(int index) const { Log(this, "GetActor", {double(index)}); return nullptr; }
+C_Actor *g_actorAtIndex0 = nullptr;                      // what GetActor(0) answers (move_test.inc's saves: the vehicle)
+C_Actor *C_ActorsModule::GetActor(int index) const { Log(this, "GetActor", {double(index)}); return index == 0 ? g_actorAtIndex0 : nullptr; }
 C_Actor *C_ActorsModule::GetActorById(int id) const { Log(this, "GetActorById", {double(id)}); return nullptr; }
 C_Actor *C_TemporaryActorsList::FindActor(int id) const { Log(this, "FindTemporaryActor", {double(id)}); return nullptr; }
 bool C_game::IsFirstPersonView() const { return g_firstPerson; }
