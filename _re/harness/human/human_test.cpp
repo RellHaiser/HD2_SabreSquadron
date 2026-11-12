@@ -732,6 +732,9 @@ extern int g_lastSeatDeathAnim;
 #ifdef HUMAN_VISUAL
 #include "visual_test.inc"
 #endif
+#ifdef HUMAN_LIGHTING
+#include "lighting_test.inc"
+#endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
 LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
@@ -783,7 +786,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_VISUAL)
+#if defined(HUMAN_LIGHTING)
+    TestLighting();
+#elif defined(HUMAN_VISUAL)
     TestVisual();
 #elif defined(HUMAN_IDLE)
     TestIdle();

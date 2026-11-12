@@ -1400,3 +1400,19 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):**
   - a variable named `near` (windows.h makes it nothing), against my own note;
   - the UpdateLensFlare logger above; ladder state set on one side only; a stray no-op DiffMove left in a test.
+
+## Human part 12 (the lighting, `human_lighting.cpp`, 2026-11-12)
+
+- **The build:** `human/build_lighting.bat` (HUMAN_LIGHTING): build_visual.bat's harness with the lighting linked,
+  `human/lighting_test.inc`'s tests alone (the lighting at the movement's +0xDA4).
+- **The tests (60,000 checks):** Init, Update (every mode, the model drawn in the last frame or not, long steps),
+  Sample (the controller's values or the game's measure, references of 0, the climate), Approach, SetSector over a
+  fake sector's lights (on, ambient or not, colors with each channel strongest and two alike).
+- **New in the harness:** loggers for the game's GetLightIntensity (with the model's on flag: the measure hides it),
+  the human's ControllerUnknown5C, the effects module's SetModelLightLevel (slot 0x54 / the port's); a fake sector
+  with lights and a model with its render stamp and frame data.
+- **Results:** every function agrees (60,000 checks, 0 failures); no port bugs. Lines: all 85.
+- **Mutations** (`human/mutations/mutate_lighting1.py`): 87 mutants; 70 killed, 7 not building, 10 survived
+  (boundaries, mode 3's long interval, an uncounted Update, an equivalent first value). 15 survived the first run.
+- **Harness lessons (my mistake):** one more edit script through a bash heredoc with backslashes (it half applied;
+  rewritten with the Write tool).

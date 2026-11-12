@@ -145,6 +145,8 @@ SUITES = [
     T("human.idle", "human/build_idle.bat", TMP + r"\human_idle_test.exe", needs=("mingw", "original_exe")),
     # (The visual, game/human_visual.cpp: human/build_visual.bat, HUMAN_VISUAL.)
     T("human.visual", "human/build_visual.bat", TMP + r"\human_visual_test.exe", needs=("mingw", "original_exe")),
+    # (The lighting, game/human_lighting.cpp: human/build_lighting.bat, HUMAN_LIGHTING.)
+    T("human.lighting", "human/build_lighting.bat", TMP + r"\human_lighting_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

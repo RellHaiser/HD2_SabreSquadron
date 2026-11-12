@@ -146,6 +146,7 @@ void C_HumanIdle::Reset() { Log(this, "IdleReset"); }
 void C_HumanIdle::Update(int time) { Log(this, "IdleUpdate", {double(time)}); }
 void C_HumanIdle::UpdateInteraction(int time) { Log(this, "IdleUpdateInteraction", {double(time)}); }
 #endif
+#ifndef HUMAN_LIGHTING   // (game/human_lighting.cpp's own in HUMAN_LIGHTING builds)
 void C_HumanLighting::Init() { Log(this, "LightingInit"); }
 void C_HumanLighting::Sample(I3D_sector *sector, I3D_frame *frame, const S_vector &pos, bool now)
 {
@@ -156,6 +157,7 @@ void C_HumanLighting::Update(I3D_frame *frame, int time, int mode)
 {
     Log(this, ("LightingUpdate " + NameOf(frame)).c_str(), {double(time), double(mode)});
 }
+#endif
 bool C_HumanMorph::SaveGame(C_chunk &) { Log(this, "MorphSaveGame"); return g_mv.partSaves; }
 bool C_HumanMorph::LoadGame(C_chunk &) { Log(this, "MorphLoadGame"); return g_mv.partSaves; }
 void C_HumanMorph::Reset() { Log(this, "MorphReset"); }
