@@ -166,6 +166,7 @@ void C_HumanSpecialMoves::Init(C_HumanMovement *m, C_HumanLocomotion *l, C_Human
 }
 int C_HumanSpecialMoves::UseLadder(C_Actor *ladder) { Log(this, ("UseLadder " + NameOf(ladder)).c_str()); return g_mv.useLadder; }
 #endif
+#ifndef HUMAN_VISUAL   // (game/human_visual.cpp's own in HUMAN_VISUAL builds)
 void C_HumanVisual::Done() { Log(this, "VisualDone"); }
 void C_HumanVisual::Init() { Log(this, "VisualInit"); }
 bool C_HumanVisual::SaveGame(C_chunk &) { Log(this, "VisualSaveGame"); return g_mv.partSaves; }
@@ -175,6 +176,7 @@ void C_HumanVisual::SetNetworkDirection(const S_vector4 &dir) { LogV(this, "SetN
 void C_HumanVisual::SetNetworkDriven(bool on) { Log(this, "SetNetworkDriven", {double(on)}); }
 void C_HumanVisual::Update(int time) { Log(this, "VisualUpdate", {double(time)}); }
 void C_HumanVisual::UpdatePosition(int time) { Log(this, "VisualUpdatePosition", {double(time)}); }
+#endif
 void C_HumanWeaponPose::Attach(I3D_frame *frame, C_Human *owner, bool loaded)
 {
     Log(this, ("PoseAttach " + NameOf(frame) + " " + NameOf(owner)).c_str(), {double(loaded)});

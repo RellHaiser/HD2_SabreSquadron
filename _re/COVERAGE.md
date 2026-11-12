@@ -1366,3 +1366,37 @@ particles and the surface marks. Files are served from memory.
     as the car to get out of, and the body itself alive in the seat it takes (Interact recursing for ever);
   - human_anim_mixer.cpp and human_anim_player.cpp changed here: mutate_mixer1.py's and mutate_player1.py's labels
     after the changed lines are a line off (they match by text).
+
+## Human part 11 (the visual, `human_visual.cpp`, 2026-11-12)
+
+- **The build:** `human/build_visual.bat` (HUMAN_VISUAL): build_idle.bat's harness with the visual linked,
+  `human/visual_test.inc`'s tests alone. The lighting (C_HumanLighting) stays part 6's loggers (its own part).
+- **The tests (116,000 checks):** 40,000 small calls (ResetState, UpdateStandingFlag, SetTarget, Glide,
+  UpdatePosition, SetNetworkPosition / Direction, SetPosition / SetDirection with and without a seat, SetNetworkDriven,
+  Unknown7585d0, ProcessAnimEvents over every event kind, Update); 16,000 of the model's life (Init, Done, Reset,
+  InitModel, DoneModel, RebuildShadow, RemoveShadow) and the saved games (the files compared; loads of made-up chunks).
+- **New in the harness:**
+  - loggers for ShowHandsItem, Unknown7938f0, UpdateLensFlare, the morph's Update, FitProneBody, the work's
+    SetViewDir, the effects module's CreateShadow (slot 0x78 / the port's);
+  - the ladder's step sound and frame on both sides' copies; the object of place 7 and the shadow frame restored for
+    the original's call and their state compared (references, flags, links, the shadow's +0x1FC);
+  - call arguments that are whole numbers on both sides are compared exactly: the float tolerance passed 10000
+    against 10001 (all parts rerun: 0 failures).
+- **Port bugs found and fixed (on main; port mistakes):**
+  - Update looked the model's sector up at the model's position; the original looks half a metre above it (a body
+    standing at a sector boundary by the floor got the other sector);
+  - SetNetworkPosition passed the target on with w 0; the original copies all four words.
+- **Also fixed:** human_equipment.h said UpdateLensFlare takes its argument in EDI; it is an ordinary stack argument
+  (RET 4). My first logger followed the comment and unbalanced the original's stack.
+- **Undefined in the original, not compared:** the w of m_unknown70 (ResetState), of m_glideTo / m_step (SetTarget's
+  on-along path), of the targets LoadGame reads (12 bytes copied as 16); the crossfade of track 0's animation in Init
+  and Reset (a stack byte the original never sets; its weight logged and its stages' crossfade skipped in those two
+  tests).
+- **Results:** every function agrees (116,000 checks, 0 failures). Lines: human_visual.cpp 713 of 726 (98.2 %). Not
+  run: a carried body's own lighting (another human), a seat-mode branch under another interaction, the length
+  helper's exact squares, the weapon's drawing with its blend done (reached before the inputs changed).
+- **Mutations** (`human/mutations/mutate_visual1.py`): 527 mutants; 441 killed, 32 not building, 54 survived
+  (classified in its docstring). 67 survived the first run.
+- **Harness lessons (my mistakes):**
+  - a variable named `near` (windows.h makes it nothing), against my own note;
+  - the UpdateLensFlare logger above; ladder state set on one side only; a stray no-op DiffMove left in a test.

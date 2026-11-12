@@ -334,7 +334,7 @@ void C_HumanVisual::UpdatePosition(int time)
 
 void C_HumanVisual::SetNetworkPosition(const S_vector4 &pos)
 {
-    const S_vector4 target = {pos.x, pos.y, pos.z, 0.0f};
+    const S_vector4 target = pos;                       // (all four words, as the original copies them)
     if (IsLocalGame() || m_owner->IsServerSimulated()) {
         m_flags &= ~VISUAL_FLAG_2;
         SetTarget(target, true);
@@ -575,7 +575,9 @@ void C_HumanVisual::Update(int time)
         I3D_sector *previous = m_sector;
         m_sectorTime %= interval;
         I3D_scene *scene = GetGame()->GetScene();
-        m_sector = scene->GetSector(m_owner->GetFrame()->GetWorldPos());
+        // (Half a metre above the model's position, as in the original.)
+        const S_vector at = m_owner->GetFrame()->GetWorldPos();
+        m_sector = scene->GetSector(S_vector(at.x, at.y + 0.5f, at.z));
         if (previous != m_sector) {
             if (IsClient()) {
                 I3D_sector *primary = scene->GetPrimarySector();

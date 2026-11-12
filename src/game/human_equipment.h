@@ -111,7 +111,7 @@ public:
     void SetFlashlight(bool on);                        // 0x00793610
     // The special objects go to the first hand dummy (the second one otherwise; m_unknown2c).
     void SetSpecialHandDummy1(bool on) { m_unknown2c = on; }
-    void UpdateLensFlare(bool on);                      // 0x00793830 (on in DI)
+    void UpdateLensFlare(bool on);                      // 0x00793830
     void Unknown792310();                               // 0x00792310
     // Where a dropped item is put down (EQUIPMENT_PLACE_*; others: the hand).
     S_vector GetDropPosition(int place);                // 0x00792350

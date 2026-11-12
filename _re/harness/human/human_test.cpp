@@ -268,7 +268,9 @@ bool C_HumanSpecialMoves::TryClimbOver(S_HumanAnimState *) { Log(this, "TryClimb
 bool C_HumanSpecialMoves::UpdateWater() { Log(this, "UpdateWater"); return g_script.updateWater; }
 #endif
 
+#ifndef HUMAN_VISUAL
 void C_HumanVisual::SetNetworkPosition(const S_vector4 &pos) { LogV(this, "SetNetworkPosition", &pos.x, 4); }
+#endif
 // (Inline in the original's ChangeStance: its body, human_weapon_pose.cpp's, not a logged call.)
 void C_HumanWeaponPose::SetStanceChange(int stance)
 {
@@ -681,12 +683,17 @@ bool CallsAgree(const std::vector<S_Call> &a, const std::vector<S_Call> &b, std:
             why = "call " + std::to_string(i) + ": port " + (i < a.size() ? a[i].what : "-") + ", original " + (i < b.size() ? b[i].what : "-");
             return false;
         }
-        for (size_t k = 0; k < a[i].nums.size(); ++k)
-            if (std::fabs(a[i].nums[k] - b[i].nums[k]) > g_tol * std::max(1.0, std::fabs(a[i].nums[k]))) {
+        for (size_t k = 0; k < a[i].nums.size(); ++k) {
+            // (Whole numbers on both sides, counts and times, are compared exactly: the float tolerance passed 10000
+            // against 10001.)
+            const double x = a[i].nums[k], y = b[i].nums[k];
+            const bool whole = x == std::floor(x) && y == std::floor(y) && std::fabs(x) < 16777216.0 && std::fabs(y) < 16777216.0;
+            if ((whole && x != y) || std::fabs(x - y) > g_tol * std::max(1.0, std::fabs(x))) {
                 why = "call " + std::to_string(i) + " " + a[i].what + " argument " + std::to_string(k) + ": port " + std::to_string(a[i].nums[k]) +
                       ", original " + std::to_string(b[i].nums[k]);
                 return false;
             }
+        }
     }
     return true;
 }
@@ -721,6 +728,9 @@ extern int g_lastSeatDeathAnim;
 #endif
 #ifdef HUMAN_IDLE
 #include "idle_test.inc"
+#endif
+#ifdef HUMAN_VISUAL
+#include "visual_test.inc"
 #endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
@@ -773,7 +783,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_IDLE)
+#if defined(HUMAN_VISUAL)
+    TestVisual();
+#elif defined(HUMAN_IDLE)
     TestIdle();
 #elif defined(HUMAN_SPECIAL)
     TestSpecial();

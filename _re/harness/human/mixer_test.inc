@@ -73,8 +73,13 @@ bool StageOk(int stage)
     std::printf("stage %d\n", stage);
     std::exit(3);
 }
+// (Set by part 11's Init / Reset tests: the first track's animation is played with a crossfade the original leaves
+// unset, so its weight is undefined there: logged and stored as -1 on both sides.)
+bool g_undefinedTrack0Weight = false;
 void __stdcall FM_SetAnimation(I3D_frame *self, void *anim, int stage, float weight, int flags)
 {
+    if (g_undefinedTrack0Weight && anim && stage < 2)
+        weight = -1.0f;
     Log(self, ("SetAnimation " + NameOf(anim)).c_str(), {double(stage), weight, double(flags)});
     S_ModelStages *s = StagesOf(self);
     StageOk(stage);

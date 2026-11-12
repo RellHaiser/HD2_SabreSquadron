@@ -20,7 +20,9 @@ int C_Door::GetSide(const S_vector4 &pos) const
     return g_idle.doorSide;
 }
 uint32_t C_Human::GetMoveMode() const { Log(this, "GetMoveMode"); return 0x30; }
+#ifndef HUMAN_VISUAL   // (human_visual.cpp's own in HUMAN_VISUAL builds)
 void C_HumanVisual::RemoveShadow() { Log(this, "RemoveShadow"); }
+#endif
 void C_HumanWeaponPose::SetSeat(uint32_t seatFlags, C_Actor *vehicle, int seat)
 {
     Log(this, ("SetSeat " + NameOf(vehicle)).c_str(), {double(seatFlags), double(seat)});
