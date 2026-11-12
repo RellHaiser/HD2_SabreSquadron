@@ -40,6 +40,31 @@ void LoadGround()
     // A pond: a two-sided water surface at y 3 (fall damage looks for water below).
     s.tris.push_back(Tri(S_vector(52, 3, 52), S_vector(60, 3, 52), S_vector(60, 3, 60), COLLISION_FLAG_WATER | COLLISION_TRIANGLE_TWO_SIDED, false));
     s.tris.push_back(Tri(S_vector(52, 3, 52), S_vector(60, 3, 60), S_vector(52, 3, 60), COLLISION_FLAG_WATER | COLLISION_TRIANGLE_TWO_SIDED, false));
+#ifdef HUMAN_SPECIAL
+    // Part 9's (the special moves) only: a shallow pond (0.75 m: where swimming ends) and two low blocks under the low
+    // roof (climbing over with something above).
+    s.tris.push_back(Tri(S_vector(58, 1.75f, 40), S_vector(63, 1.75f, 40), S_vector(63, 1.75f, 48), COLLISION_FLAG_WATER | COLLISION_TRIANGLE_TWO_SIDED, false));
+    s.tris.push_back(Tri(S_vector(58, 1.75f, 40), S_vector(63, 1.75f, 48), S_vector(58, 1.75f, 48), COLLISION_FLAG_WATER | COLLISION_TRIANGLE_TWO_SIDED, false));
+    // A pond over a sloping floor (surface 2.6, the floor rising from 1 to 2.4 along +x): every depth from 1.6 to 0.2.
+    s.tris.push_back(Tri(S_vector(58, 2.6f, 49), S_vector(63, 2.6f, 49), S_vector(63, 2.6f, 56), COLLISION_FLAG_WATER | COLLISION_TRIANGLE_TWO_SIDED, false));
+    s.tris.push_back(Tri(S_vector(58, 2.6f, 49), S_vector(63, 2.6f, 56), S_vector(58, 2.6f, 56), COLLISION_FLAG_WATER | COLLISION_TRIANGLE_TWO_SIDED, false));
+    AddRamp(s, 58, 49, 5, 7, 1.4f);
+    AddBlock(s, S_vector(11, 1, 49), S_vector(12.5f, 1.5f, 55));
+    AddBlock(s, S_vector(15, 1, 49), S_vector(16.5f, 1.7f, 55));
+    // Blocks (0.6 and 0.9 m: above the 0.45 m a climb needs; the lower one the lowest climb) under slabs from 3.0 and
+    // 3.55 m up to 4 m: room over them to climb crouching, or standing. (The slabs hold the start of the climb's
+    // probes, 2.3 m above the feet: a probe leaves through their one-sided bottom unhit and finds the block.)
+    AddBlock(s, S_vector(3, 1, 31), S_vector(4.5f, 1.6f, 37));
+    AddBlock(s, S_vector(1.5f, 3.0f, 30), S_vector(6, 4.0f, 38));
+    AddBlock(s, S_vector(3, 1, 43), S_vector(4.5f, 1.9f, 47));
+    AddBlock(s, S_vector(1.5f, 3.55f, 42), S_vector(6, 4.0f, 48));
+    // (AddBlock makes no bottom: the undersides of the slabs and the low roof, facing down.)
+    AddQuad(s, S_vector(10, 2.4f, 48), S_vector(18, 2.4f, 48), S_vector(18, 2.4f, 56), S_vector(10, 2.4f, 56), S_vector(0, -1, 0));
+    for (const float y : {3.0f, 3.55f}) {
+        const float z0 = y == 3.0f ? 30.0f : 42.0f;
+        AddQuad(s, S_vector(1.5f, y, z0), S_vector(6, y, z0), S_vector(6, y, z0 + 8), S_vector(1.5f, y, z0 + 8), S_vector(0, -1, 0));
+    }
+#endif
     const std::string path = TempFile("ground.klz");
     WriteSynth(s, path);
     g_collisionWorld.Load(path.c_str(), true);
@@ -321,6 +346,8 @@ struct S_Stats {
     std::map<std::string, long> differ;
 };
 std::map<std::string, S_Stats> g_stats;
+// Words of the work left out of the comparison (byte offsets; the original copies undefined ones in: part 9's).
+std::set<size_t> g_workSkipWords;
 // `port` runs the port's call, `original(locomotion copy)` the original's; both return an int (0 when void).
 template <class P, class O> int DiffCall(const char *what, P port, O original)
 {
@@ -388,7 +415,7 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
             uint32_t x, y;
             std::memcpy(&x, bw + i, 4);
             std::memcpy(&y, o_work + i, 4);
-            if (!WordsNear(x, y, 'm')) {
+            if (!WordsNear(x, y, 'm') && !g_workSkipWords.count(i)) {
                 why = "work+" + std::to_string(i);
                 break;
             }

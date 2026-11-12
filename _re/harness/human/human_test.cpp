@@ -261,10 +261,12 @@ void C_HumanMovement::UpdateHitSpheres() { Log(this, "UpdateHitSpheres"); }
 void C_HumanMovement::UpdateStanceVolumes(int stance) { Log(this, "UpdateStanceVolumes", {double(stance)}); }
 #endif
 
+#ifndef HUMAN_SPECIAL   // (the HUMAN_SPECIAL build links game/human_special_moves.cpp)
 bool C_HumanSpecialMoves::CanTurn(float angle) { Log(this, "CanTurn", {angle}); return g_script.canTurn; }
 bool C_HumanSpecialMoves::HasRoomForStance(int change) { Log(this, "HasRoomForStance", {double(change)}); return g_script.hasRoom; }
 bool C_HumanSpecialMoves::TryClimbOver(S_HumanAnimState *) { Log(this, "TryClimbOver"); return g_script.tryClimb; }
 bool C_HumanSpecialMoves::UpdateWater() { Log(this, "UpdateWater"); return g_script.updateWater; }
+#endif
 
 void C_HumanVisual::SetNetworkPosition(const S_vector4 &pos) { LogV(this, "SetNetworkPosition", &pos.x, 4); }
 // (Inline in the original's ChangeStance: its body, human_weapon_pose.cpp's, not a logged call.)
@@ -712,6 +714,11 @@ namespace {
 #ifdef HUMAN_PLAYER
 #include "player_test.inc"
 #endif
+#ifdef HUMAN_SPECIAL
+extern int g_deathSeed;                                 // (game/human_special_moves.cpp's)
+extern int g_lastSeatDeathAnim;
+#include "special_test.inc"
+#endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
 LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
@@ -763,7 +770,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_PLAYER)
+#if defined(HUMAN_SPECIAL)
+    TestSpecial();
+#elif defined(HUMAN_PLAYER)
     TestPlayer();
 #elif defined(HUMAN_MIXER)
     TestMixer();

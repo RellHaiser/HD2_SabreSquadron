@@ -81,7 +81,11 @@ bool __attribute__((thiscall)) F_SetModelTransparency(void *self, I3D_frame *mod
 }
 void __attribute__((thiscall)) F_GEffectsUnexpected(void *)
 {
-    std::printf("unexpected effects module call\n");
+    // (Who called: an address of this image relocated as OnCrash prints them, or the original's own.)
+    const uintptr_t from = reinterpret_cast<uintptr_t>(__builtin_return_address(0));
+    const uintptr_t base = reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr));
+    std::printf("unexpected effects module call from %08x (image %08x)\n", static_cast<unsigned>(from - base + 0x20000000u),
+                static_cast<unsigned>(base));
     std::exit(3);
 }
 void *O_GetGEffects() { return g_fakeGEffects; }
@@ -151,11 +155,13 @@ void C_HumanLighting::Update(I3D_frame *frame, int time, int mode)
 bool C_HumanMorph::SaveGame(C_chunk &) { Log(this, "MorphSaveGame"); return g_mv.partSaves; }
 bool C_HumanMorph::LoadGame(C_chunk &) { Log(this, "MorphLoadGame"); return g_mv.partSaves; }
 void C_HumanMorph::Reset() { Log(this, "MorphReset"); }
+#ifndef HUMAN_SPECIAL   // (game/human_special_moves.cpp's own in HUMAN_SPECIAL builds)
 void C_HumanSpecialMoves::Init(C_HumanMovement *m, C_HumanLocomotion *l, C_HumanAnimPlayer *a, C_HumanIdle *i, C_Human *o)
 {
     Log(this, ("SpecialMovesInit " + NameOf(m) + " " + NameOf(l) + " " + NameOf(a) + " " + NameOf(i) + " " + NameOf(o)).c_str());
 }
 int C_HumanSpecialMoves::UseLadder(C_Actor *ladder) { Log(this, ("UseLadder " + NameOf(ladder)).c_str()); return g_mv.useLadder; }
+#endif
 void C_HumanVisual::Done() { Log(this, "VisualDone"); }
 void C_HumanVisual::Init() { Log(this, "VisualInit"); }
 bool C_HumanVisual::SaveGame(C_chunk &) { Log(this, "VisualSaveGame"); return g_mv.partSaves; }

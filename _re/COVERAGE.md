@@ -1272,3 +1272,51 @@ particles and the surface marks. Files are served from memory.
   - a build failure (a duplicate RandomUpdate) went unseen, and a run used the stale exe;
   - my first crafted LoadGame chunk held a 4-byte vector where the original reads 12: malformed input, not a
     difference.
+
+## Human part 9 (the special moves, `human_special_moves.cpp`, 2026-11-12)
+
+- **The build:** `human/build_special.bat` (HUMAN_SPECIAL): build_player.bat's harness with the special moves linked,
+  `human/special_test.inc`'s tests alone, in part 1's world. The movement base, the mixer and the animation player are
+  the real ones on both sides; the original's special moves, which parts 1 and 6 redirected to loggers, run again
+  (RestoreOriginal). Their thiscall entries take pointers (CanTurn's angle too).
+- **The tests (222,000 checks):**
+  - 30,000 small calls: Init, CanTurn (swimming, leaning, lying; on the ramps), AdjustLean, StartSitting,
+    PushOutOfWalls (before obstacles), UpdateWater (the ponds);
+  - 12,000 ladder calls: UseLadder, EnterLadderFromTop, CanEnterLadderFromBottom, at the foot and the top, the ladder
+    sometimes moved against the 3 m platform, swimming now and then;
+  - 16,000 TryClimbOver before every obstacle (steps, walls, platforms, the truck, blocks under ceilings), standing or
+    not, from a ladder;
+  - 24,000 deaths: HasRoomToFall, and Die for every side, drowning, the special hits, a backstab with its killer,
+    seats and seat weapons, the stances and the swimming, with the death seed and the last seat death synced;
+  - 21,000 HasRoomForStance over the seven modes, moving or not, under the low roof.
+- **New in the harness:**
+  - part 9's world only (`#ifdef HUMAN_SPECIAL` in LoadGround): a shallow pond, a pond over a sloping floor (every
+    depth), blocks under thick slabs with undersides (room to climb crouching), two blocks and an underside for the
+    low roof. The other parts' world is unchanged;
+  - the original's static initialisers of the lying head / feet offsets (0x0074a110..0x0074a170) run in setup: the
+    test's copy of the image never ran them, and lying down and getting up differed on 2,574 of 21,000 calls until
+    then;
+  - loggers for DropCarried, the ladder's AddClimber, the vehicle's LeaveSeat (slot 0x80 / the port's own);
+  - `g_workSkipWords` (words of the work left out); the effects module's catch-all prints its caller.
+- **The port's documented fix, compared as fixed:** PushOutOfWalls on a hit puts the body's collision back; the
+  original's side gets the same restore after its call (RestoreLikeThePort).
+- **Undefined in the original, not compared:** the w of the look-at vector the climbs and the ladders clear (the
+  work's +0x1C) and of the trail spheres they place.
+- **Kept out:** a carried body with its actor in Die (it goes through the effects module and the body's own movement).
+- **Results:** every function agrees (222,000 checks, 0 failures). No port bugs found. Lines: human_special_moves.cpp
+  974 of 1,040 (93.7 %). Not run: Die's side deaths and its crouching tied-up death, push state 5 in HasRoomToFall, a
+  zero lean reach, room to climb standing under something (all unreachable on both sides); the blocked ladder entries
+  (their filter excludes every flagged volume); a static weapon to climb over; a stance outside 0..3 for a death.
+- **Mutations** (`human/mutations/mutate_special1.py`): 907 mutants; 704 killed, 64 not building, 139 survived
+  (classified in its docstring: unreachable code, equivalents, what this world cannot reach, float boundaries). 164
+  survived the quick pass; the sloping pond, slopes, a killer, Die's work blocks and trail, the model moved since its
+  dummies, stance volumes for another stance and the low roof's underside took it to 139.
+- **Harness lessons (my mistakes):**
+  - inputs the game never makes crashed the port (and would the original): a ladder state with no ladder, seat-weapon
+    modes with no vehicle; a dead push state and a zero volume scale from part 3/4's random state left the body
+    without stance volumes, so the climb tests tested nothing near the new blocks until I looked;
+  - the killer I placed was the port's object only: the original reads its own copy (the pointer is mapped);
+  - my first blocks under the ceilings were too low to climb and the slabs had no underside (AddBlock makes none):
+    found by a probe, not by reasoning;
+  - two more edits went through a bash heredoc against the standing rule (one turned `\n` into a line break; fixed
+    with Edit).
