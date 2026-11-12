@@ -1383,7 +1383,9 @@ void C_HumanAnimPlayer::OnCarryStarted(const int *carry, const int *old)
     case 0x4C:
     case 0x4D:
         fromProne = true;
-        PlayItemSound(m_movement->m_owner->GetHandsWeapon(), m_movement->m_owner);
+        // (The original asks for the hands weapon only out of the first person view.)
+        if (!GetGame()->IsFirstPersonView())
+            PlayItemSound(m_movement->m_owner->GetHandsWeapon(), m_movement->m_owner);
         if (IsActivePlayerOnClient(m_owner))
             GetGame()->GetFirstPersonView()->OnInventoryEvent(FPV_EVENT_FIRE, FPV_EVENT_IDLE);
         m_pendingCarry[0] = CARRY_ANIM_PUT_AWAY;

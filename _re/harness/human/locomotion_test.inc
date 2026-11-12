@@ -421,6 +421,10 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
             }
         }
     }
+    // (m_forced, +0xB0, exactly: a bool in the low byte of a word whose upper bytes look like a float passes the word's
+    // float tolerance.)
+    if (why.empty() && bw[0xB0] != o_work[0xB0])
+        why = "work m_forced " + std::to_string(bw[0xB0]) + " / " + std::to_string(o_work[0xB0]);
     if (why.empty() && std::fabs(*OriginalAt<float *>(O_MOVE_ITERATIONS) - portIterations) > 0.0f)
         why = "g_moveIterations";
     // The shared objects (the same layout on both sides): the port's after its call against what the original left.

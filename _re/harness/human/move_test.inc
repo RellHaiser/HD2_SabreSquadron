@@ -131,10 +131,13 @@ bool C_HumanAnimPlayer::LoadGame(C_chunk &) { Log(this, "AnimPlayerLoadGame"); r
 void C_HumanAnimPlayer::Reset() { Log(this, "AnimPlayerReset"); }
 void C_HumanAnimPlayer::Update() { Log(this, "AnimPlayerUpdate"); }
 #endif
+#ifndef HUMAN_IDLE   // (HUMAN_IDLE builds: human_anim_tables.cpp's own, over part 8's tables: idle_test.inc)
 C_HumanAnimTable *GetHumanAnimTable(int) { return nullptr; }
 int C_HumanAnimTable::GetAnimLength(int, int, int) const { return -1; }
+#endif
 void C_HumanEquipment::Unknown793b40() { Log(this, "Unknown793b40"); }
 void C_HumanEquipment::UpdateModelNames() { Log(this, "EquipmentUpdateModelNames"); }
+#ifndef HUMAN_IDLE   // (game/human_idle.cpp's own in HUMAN_IDLE builds)
 bool C_HumanIdle::SaveGame(C_chunk &) { Log(this, "IdleSaveGame"); return g_mv.partSaves; }
 bool C_HumanIdle::LoadGame(C_chunk &) { Log(this, "IdleLoadGame"); return g_mv.partSaves; }
 bool C_HumanIdle::SaveStatics(C_chunk &) { Log(nullptr, "IdleSaveStatics"); return g_mv.partSaves; }
@@ -142,6 +145,7 @@ bool C_HumanIdle::LoadStatics(C_chunk &) { Log(nullptr, "IdleLoadStatics"); retu
 void C_HumanIdle::Reset() { Log(this, "IdleReset"); }
 void C_HumanIdle::Update(int time) { Log(this, "IdleUpdate", {double(time)}); }
 void C_HumanIdle::UpdateInteraction(int time) { Log(this, "IdleUpdateInteraction", {double(time)}); }
+#endif
 void C_HumanLighting::Init() { Log(this, "LightingInit"); }
 void C_HumanLighting::Sample(I3D_sector *sector, I3D_frame *frame, const S_vector &pos, bool now)
 {

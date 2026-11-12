@@ -1320,3 +1320,49 @@ particles and the surface marks. Files are served from memory.
     found by a probe, not by reasoning;
   - two more edits went through a bash heredoc against the standing rule (one turned `\n` into a line break; fixed
     with Edit).
+
+## Human part 10 (the idle and the interactions, `human_idle.cpp`, 2026-11-12)
+
+- **The build:** `human/build_idle.bat` (HUMAN_IDLE): build_special.bat's harness with the idle linked,
+  `human/idle_test.inc`'s tests alone. Everything under it is real on both sides (the movement base, the mixer, the
+  animation player, the special moves); the original's idle functions part 6 redirected run again.
+- **The tests (132,400 checks):**
+  - 20,000 small calls: Reset (and the statics), Update: standing fidgets, the swimming bob at and under the surface,
+    the breath vapour of cold missions (moving and not, first person, faded out);
+  - 40,000 calls of Interact (every interaction code, with and without the body flag: doors, the seats of a car,
+    chairs with and without an exit dummy, healing, manipulating, tying up, cutting, backstabs, their ends with the
+    remote steps at the front of the queue and full queues) and UpdateInteraction (every interaction under way, its
+    timers, the seat's flags and occupant, getting in and out, sitting down and getting up);
+  - 4,000 saved games (the files compared) and loads, with made-up chunks and nothing open.
+- **New in the harness:**
+  - the shared car gets one vtable per side, the original's swapped in for its call: the port's virtual slots sit 4
+    bytes after the original's (g++'s two destructor entries), so one table cannot serve both (the port's LeaveSeat is
+    the original's ExitSeat slot);
+  - part 8's animation tables answer GetAnimLength (part 6's fakes answered none: the doors' times differed);
+  - the original's call runs WithOriginalBody, with the props it copies named on its own count (the player's Update
+    runs inside UpdateInteraction);
+  - loggers for the door's side, the vehicle's seats, RemoveShadow, the weapon pose's seat, the work's ApplyHit, the
+    team's camera target; GetMoveMode; SetSeatStance's body (inline in the original);
+  - SetFacingDir's loggers record the work's m_forced, and DiffCall compares m_forced's byte exactly: a bool in the
+    low byte of a word whose upper bytes look like a float passed the word's float tolerance (all parts rerun: 0
+    failures).
+- **Port bugs found and fixed (on main; port mistakes):**
+  - being tied up: the body turned to face the captor; the original turns it away (owner minus target, as for the
+    backstab);
+  - the mixer's track time past INT_MAX: the original's __ftol converts in 64 bits and keeps the low word (a wrapped
+    time); the port's conversion gave 0x80000000. Only reachable with a track within 2,800 of INT_MAX (about 17 days
+    of one animation), but a difference;
+  - the animation player asked for the hands weapon's sound in the first person view, where the original does not
+    ask for the weapon at all (a getter's call; part 8's tests had not met the first person there).
+- **Not compared:** GetSeatOccupant's calls (a getter: the original calls it up to three times where the port calls
+  it once).
+- **Results:** every function agrees (132,400 checks, 0 failures). Lines: human_idle.cpp 749 of 762 (98.3 %). Not
+  run: a living human in the seat being taken (another human is not part of the harness; a dead occupant is), the
+  wire cutters and a seat weapon's definition (no items), the model outside the primary sector.
+- **Mutations** (`human/mutations/mutate_idle1.py`): 490 mutants; 405 killed, 39 not building, 46 survived
+  (classified in its docstring). 53 survived the first run.
+- **Harness lessons (my mistakes):**
+  - random states the game never makes crashed both sides: getting into a seat without a vehicle, a chair's actor
+    as the car to get out of, and the body itself alive in the seat it takes (Interact recursing for ever);
+  - human_anim_mixer.cpp and human_anim_player.cpp changed here: mutate_mixer1.py's and mutate_player1.py's labels
+    after the changed lines are a line off (they match by text).

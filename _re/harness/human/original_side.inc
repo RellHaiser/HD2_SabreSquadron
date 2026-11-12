@@ -87,7 +87,11 @@ float *OT O_GetViewDir(void *self, float *out)
     return out;
 }
 void OT O_Play(void *self, int animation, int on) { Log(self, "Play", {double(animation), double(B(on))}); }
-void OT O_SetFacingDir(void *self, const float *dir, int on) { LogV(self, "SetFacingDir", dir, 3, {double(B(on))}); }
+// (With the work's m_forced at the call, +0xB0: the callers set it around the request.)
+void OT O_SetFacingDir(void *self, const float *dir, int on)
+{
+    LogV(self, "SetFacingDir", dir, 3, {double(B(on)), double(static_cast<uint8_t *>(self)[0xB0] != 0)});
+}
 void OT O_SetLookAt(void *self, const float *target, int on)
 {
     LogV(self, "SetLookAt", target, 4, {double(B(on))});

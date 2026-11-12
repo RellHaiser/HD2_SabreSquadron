@@ -281,7 +281,7 @@ void C_HumanWeaponPose::SetStanceChange(int stance)
 
 S_vector4 C_HumanWork::GetViewDir() const { Log(this, "GetViewDir"); return {0.0f, g_script.viewDirY, 1.0f, 0.0f}; }
 void C_HumanWork::Play(int animation, bool on) { Log(this, "Play", {double(animation), double(on)}); }
-void C_HumanWork::SetFacingDir(const S_vector &dir, bool on) { LogV(this, "SetFacingDir", &dir.x, 3, {double(on)}); }
+void C_HumanWork::SetFacingDir(const S_vector &dir, bool on) { LogV(this, "SetFacingDir", &dir.x, 3, {double(on), double(m_forced)}); }
 // The move direction the work keeps (m_request.unknown10; the work's layout is the original's, so the original's
 // work takes it the same way): UpdateVelocity reads it back.
 void ApplyLookAt(void *work, const float *target)
@@ -719,6 +719,9 @@ extern int g_deathSeed;                                 // (game/human_special_m
 extern int g_lastSeatDeathAnim;
 #include "special_test.inc"
 #endif
+#ifdef HUMAN_IDLE
+#include "idle_test.inc"
+#endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
 LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
@@ -770,7 +773,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_SPECIAL)
+#if defined(HUMAN_IDLE)
+    TestIdle();
+#elif defined(HUMAN_SPECIAL)
     TestSpecial();
 #elif defined(HUMAN_PLAYER)
     TestPlayer();

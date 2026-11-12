@@ -650,8 +650,9 @@ void C_HumanIdle::Interact(C_Actor *target, uint32_t interaction, int arg)
             return;
         restart();
         if (code == INTERACT_BE_TIED_UP) {
-            // Facing the captor; the hands item goes away.
-            const S_vector dir = towards(target);
+            // Facing away from the captor (it ties the hands behind the back); the hands item goes
+            // away.
+            const S_vector dir = (XYZ(m_owner->GetPosition4()) - XYZ(target->GetPosition4())).Normalized();
             work->SetFacingDir(dir, true);
             movement->m_stanceVolumeScale = 0.45f;
             if (!IsServer()) {

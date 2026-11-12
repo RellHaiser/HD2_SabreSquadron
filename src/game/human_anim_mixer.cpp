@@ -392,8 +392,10 @@ void C_HumanAnimMixer::UpdateStages(int /*time*/, int step, bool start, const S_
         const int other = 2 * track + (trk.current == 0 ? 1 : 0);
         S_MixerStage &stage = m_stages[current];
         if (trk.hold < 1) {
-            // (FIADD in the original: the time is added exactly and the sum rounded to float once.)
-            trk.time = static_cast<int>(static_cast<float>(static_cast<double>(stepTime * MOVE_TIME_SCALE) + trk.time));
+            // (FIADD in the original: the time is added exactly and the sum rounded to float once;
+            // __ftol converts it to 64 bits and the low word is kept, so past INT_MAX it wraps.)
+            trk.time = static_cast<int>(
+                static_cast<int64_t>(static_cast<float>(static_cast<double>(stepTime * MOVE_TIME_SCALE) + trk.time)));
             if (m_holdTime >= 0 && track == 0) {
                 const int holdTime = m_holdTime;
                 if (m_model->GetAnimTime(current) >= holdTime) {
