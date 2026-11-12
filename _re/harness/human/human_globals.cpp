@@ -31,4 +31,11 @@ alignas(16) unsigned char g_soundCache[0x400];
 // (The mixer's, HUMAN_MIXER builds: its Get is the test's.)
 alignas(16) unsigned char g_animationCache[0x400];
 #endif
+#ifdef HUMAN_PLAYER
+// (The animation tables the player reads, HUMAN_PLAYER builds: player_test.inc sets them.)
+void *g_humanAnimTable;
+void *g_humanAnimTable2;
+void *g_carryAnimTables[7];
+void *g_activityAnimTable;
+#endif
 uint32_t g_surfaceMarksEnabled;

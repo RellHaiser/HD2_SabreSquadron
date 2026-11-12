@@ -5,7 +5,9 @@ local .cpp); MUT_PASS: the regex of a passing run's output, bytes (default: "NAM
 Bounded: a test's output is read up to OUTPUT_LIMIT and it is killed beyond that (a mutant that prints for ever once ran the
 machine out of memory through capture_output), or after TIMEOUT. Results print as they finish. The unmutated sources are
 compiled once. Env MUT_DEFS: extra -D options, space separated (-DGAMESPY_BROWSER_ONLY skips the slower earlier tests).
-Env MUT_LDFLAGS: extra link options (space separated); MUT_TIMEOUT: seconds a run may take (default 40)."""
+Env MUT_LDFLAGS: extra link options (space separated); MUT_TIMEOUT: seconds a run may take (default 40). Env MUT_WRAPPER: a
+local source of the bat that #includes the mutated file (through -I src) instead of linking it: a mutant rebuilds that
+source in its place (the human harness's player_statics.cpp)."""
 import concurrent.futures, importlib.util, os, queue, re, shutil, subprocess, sys, threading
 
 # (This repository: the G: checkout it named before is out of date since the move to T:.)
@@ -34,6 +36,7 @@ PASS = os.environ.get("MUT_PASS", r"\w+: \d+ checks, 0 failures").encode()
 EXTRA = os.environ.get("MUT_DEFS", "").split()
 LDFLAGS = os.environ.get("MUT_LDFLAGS", "").split()
 FLAGS = ["-std=c++17", "-faligned-new=8", "-O1", "-msse2", "-mfpmath=sse", "-DLS3D_API=", "-DRW_DATA_API="] + EXTRA
+WRAPPER = os.environ.get("MUT_WRAPPER")
 
 
 def compile_one(source, obj, d, port):
@@ -109,9 +112,15 @@ def run(d, objs, test, port, rebuilt=None):
     if rebuilt:
         source, name = rebuilt
         obj = d + r"\mutant.o"
-        if not compile_one(source, obj, d, port):
-            return "build failed"
-        use[name] = obj
+        if WRAPPER:
+            # (The wrapper includes the mutated copy: rebuilt in its own object's place.)
+            if not compile_one(d + "\\h\\" + WRAPPER, obj, d, port):
+                return "build failed"
+            test = [obj if t == d + "\\test%d.o" % LOCALS.index(WRAPPER) else t for t in test]
+        else:
+            if not compile_one(source, obj, d, port):
+                return "build failed"
+            use[name] = obj
     cmd = [GXX] + list(use.values()) + list(test) + LDFLAGS + ["-lws2_32", "-limm32", "-o", exe]
     linked = subprocess.run(cmd, capture_output=True, text=True, env=env)
     if linked.returncode != 0:

@@ -623,8 +623,9 @@ bool WordsNear(uint32_t a, uint32_t b, char kind)
     std::memcpy(&y, &b, 4);
     return std::fabs(x - y) <= g_tol * std::max(1.0f, std::fabs(x));
 }
-// Fields not compared (by name).
+// Fields not compared (by name), and words of a field not compared for now (name, byte offset).
 std::set<std::string> g_skipFields;
+std::set<std::pair<std::string, size_t>> g_skipWords;
 // The first field that differs (name and word) between two copies of an object by its table, or "".
 template <size_t N> std::string FieldsDiffer(const S_LayoutField (&fields)[N], const uint8_t *a, const uint8_t *b, const char *object)
 {
@@ -655,6 +656,8 @@ template <size_t N> std::string FieldsDiffer(const S_LayoutField (&fields)[N], c
             if (locomotion && i < 0xD0 && i % 16 == 12 && i != 0x4C && i != 0x5C && i != 0x6C && i != 0x8C && i != 0x9C)
                 continue;
             if (mixer && i >= 0x230 && i < 0x320 && i % 16 == 12)
+                continue;
+            if (!g_skipWords.empty() && g_skipWords.count({f.name, i}))
                 continue;
             uint32_t x = 0, y = 0;
             const size_t n = std::min<size_t>(4, f.size - i);
@@ -705,6 +708,9 @@ namespace {
 #endif
 #ifdef HUMAN_MIXER
 #include "mixer_test.inc"
+#endif
+#ifdef HUMAN_PLAYER
+#include "player_test.inc"
 #endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
@@ -757,7 +763,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_MIXER)
+#if defined(HUMAN_PLAYER)
+    TestPlayer();
+#elif defined(HUMAN_MIXER)
     TestMixer();
 #elif defined(HUMAN_MOVE)
     TestMove();

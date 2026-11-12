@@ -137,6 +137,8 @@ SUITES = [
     T("human.move", "human/build_move.bat", TMP + r"\human_move_test.exe", needs=("mingw", "original_exe")),
     # (The animation mixer, game/human_anim_mixer.cpp: human/build_mixer.bat, HUMAN_MIXER.)
     T("human.mixer", "human/build_mixer.bat", TMP + r"\human_mixer_test.exe", needs=("mingw", "original_exe")),
+    # (The animation player, game/human_anim_player.cpp through player_statics.cpp: human/build_player.bat, HUMAN_PLAYER.)
+    T("human.player", "human/build_player.bat", TMP + r"\human_player_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

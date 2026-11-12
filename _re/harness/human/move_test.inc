@@ -116,6 +116,7 @@ void C_Human::SetMoveFlags(uint32_t flags) { Log(this, "SetMoveFlags", {double(f
 bool C_HumanAnimMixer::SaveGame(C_chunk &) { Log(this, "MixerSaveGame"); return g_mv.partSaves; }
 bool C_HumanAnimMixer::LoadGame(C_chunk &) { Log(this, "MixerLoadGame"); return g_mv.partSaves; }
 #endif
+#ifndef HUMAN_PLAYER   // (game/human_anim_player.cpp's own in HUMAN_PLAYER builds)
 void C_HumanAnimPlayer::FindHeadDummy() { Log(this, "FindHeadDummy"); }
 void C_HumanAnimPlayer::Init(C_HumanMovement *m, C_HumanSpecialMoves *s, C_HumanLocomotion *l, C_Human *o)
 {
@@ -125,6 +126,7 @@ bool C_HumanAnimPlayer::SaveGame(C_chunk &) { Log(this, "AnimPlayerSaveGame"); r
 bool C_HumanAnimPlayer::LoadGame(C_chunk &) { Log(this, "AnimPlayerLoadGame"); return g_mv.partSaves; }
 void C_HumanAnimPlayer::Reset() { Log(this, "AnimPlayerReset"); }
 void C_HumanAnimPlayer::Update() { Log(this, "AnimPlayerUpdate"); }
+#endif
 C_HumanAnimTable *GetHumanAnimTable(int) { return nullptr; }
 int C_HumanAnimTable::GetAnimLength(int, int, int) const { return -1; }
 void C_HumanEquipment::Unknown793b40() { Log(this, "Unknown793b40"); }

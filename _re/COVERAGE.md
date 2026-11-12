@@ -1225,3 +1225,50 @@ particles and the surface marks. Files are served from memory.
     was compared until I saw the original reads a stack word there;
   - I edited the tree while a mutation run was building from it (every mutant "failed to build"; rerun), and one
     edit script went through a shell heredoc against the standing rule (it came through intact).
+
+## Human part 8 (the animation player, `human_anim_player.cpp`, 2026-11-12)
+
+- **The build:** `human/build_player.bat` (HUMAN_PLAYER): build_mixer.bat's harness with the player compiled inside
+  `human/player_statics.cpp`, `human/player_test.inc`'s tests alone. The player is the movement's field at 0xC00
+  (176 bytes), compared whole; the original's methods get the original movement's player.
+- **The tests:**
+  - 8a: 40,000 calls of Reset, Init, FindHeadDummy, ReturnToStand, PlayAnimation and the three Adjust*Request
+    (thiscall with pointers in the original); 4,000 SaveGame (the files byte for byte) and 4,000 LoadGame, sometimes
+    of a crafted chunk with the vectors;
+  - 8b: 60,000 starts: OnAnimStarted (with a vehicle and its door handle "klika", the ladder in use with its ends
+    one above the other or apart, a body to pick up), OnCarryStarted, OnActivityStarted (the props copied through
+    the driver's CreateFrame and Duplicate);
+  - 8c: 80,000 updates: Update and its UpdateAnimTrack / UpdateCarryTrack / UpdateActivityTrack, over the real mixer.
+- **New in the harness:**
+  - the player's update statics (27, in an anonymous namespace) are reached by compiling the player inside
+    player_statics.cpp, whose table gives each one's port address, size and original address. DiffPlayer copies the
+    port's statics to the original's before its call and compares them after (S_HumanAnimRef 13 of 16 bytes,
+    S_MixerAnim 17 of 20: padding);
+  - the animation tables are one set of byte buffers in the original's layout, named by both sides' globals;
+  - mutrun.py's MUT_WRAPPER: a mutant rebuilds the wrapper (player_statics.cpp) in its object's place;
+  - g_skipWords skips single words of a compared field (LoadGame's vector w);
+  - the work, equipment, weapon pose and first-person view calls logged on both sides; SetCarryMode logs the work's
+    m_forced and SetModel the equipment's hand dummy flag (the player sets both around those calls).
+- **Undefined in the original, not compared:** the w of m_unknown70 / m_unknown90 after LoadGame and OnAnimStarted
+  (stack temps).
+- **The port's documented fixes, kept out:** no animation table, or a work group other than 1 / 2; a door animation
+  (0..3) without a vehicle; picking up a body frame without an actor; the mixer's ReleaseTrack of a track without a
+  current stage; the locomotion's ladder velocity (0x6A with track 0 held, or no ladder in use).
+- **Inputs outside the tables, kept out (both sides read past them):** activities from 75, carry indices from 273,
+  a 4th stance.
+- **Results:** every function agrees (572,000 checks, 0 failures). No port bugs found. Lines:
+  human_anim_player.cpp 99.2 % of 1,443.
+- **Mutations** (`human/mutations/mutate_player1.py`): 1,269 mutants; 1,114 killed, 74 not building, 81 survived
+  (classified in its docstring: mostly equivalents; the no-table fix; the items). 116 survived the quick pass and 103
+  at full strength. Clearing Init's pointers first, stale statics for Update, model-part frames on the arm joints,
+  the logged m_forced / hand dummy flag, models in the equipment's places 6..8, the ladder's geometry and a few
+  boundary biases took it to 81.
+- **Not exercised:** the items: PlayItemSound with an item (lines 177-187), the grenade's take sound, the belt item's
+  frame for activity 0x41 (line 1800). The harness gives the human no items. Also the working frame's AddRef (the
+  fake frames keep no count).
+- **Harness lessons (my mistakes):**
+  - test code appended through a bash heredoc turned `"anims\\run.i3d"` into `"anims\run.i3d"`, against the standing
+    rule; I fixed it with Edit;
+  - a build failure (a duplicate RandomUpdate) went unseen, and a run used the stale exe;
+  - my first crafted LoadGame chunk held a 4-byte vector where the original reads 12: malformed input, not a
+    difference.
