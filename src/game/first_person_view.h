@@ -120,7 +120,7 @@ public:
     // the camera) and along (camera 1's direction).
     S_vector4 GetAimOrigin() const;                     // 0x00492790 (DS 0x004a78e0)
     S_vector4 GetAimDir() const;                        // 0x00492880
-    bool SaveGame(C_chunk &chunk);                      // 0x00493390 (nothing to save)
+    bool SaveGame(C_chunk &chunk);                      // 0x00493390 (DS 0x004a7a80) (nothing to save)
     bool LoadGame(C_chunk &chunk);                      // 0x004933a0
 
 private:
