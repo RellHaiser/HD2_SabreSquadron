@@ -50,7 +50,7 @@ public:
     void OnStop() override;                             // 0x3C 0x00673b80
     // The equipment screen (kind 3) of a campaign screen: the profile's first stock reset, the
     // screen's items added (those marked: the item's ammunition instead). True.
-    bool OnStart(void *arg) override;                   // 0x40 0x006739d0
+    bool OnStart(void *arg) override;                   // 0x40 0x006739d0 (DS 0x006add70)
 
     // The item controls' notifications: an item clicked twice (from the panel: back to the store, the
     // backpack with its contents, the cursor's input notified as left; from the store: taken, onto

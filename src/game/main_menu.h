@@ -86,7 +86,7 @@ public:
     void OnStop() override;                             // 0x3C 0x00626ad0
     // The lock made, the servers found dropped; the multiplayer settings made (the map list read), the
     // options handler; the date shown on the main screen. True.
-    bool OnStart(void *arg) override;                   // 0x40 0x006264c0
+    bool OnStart(void *arg) override;                   // 0x40 0x006264c0 (DS 0x00655950)
     // The date shown again (when known).
     void OnUpdate(int timeDelta) override;              // 0x48 0x00626b30
 

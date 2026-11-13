@@ -56,7 +56,7 @@ public:
     void OnStop() override;                             // 0x3C 0x0067f760 (DS 0x006bcb80)
     // Whether the player's team has a member in the player slots, the options handler, the sound
     // muted; the network games: the info screen. True.
-    bool OnStart(void *arg) override;                   // 0x40 0x0067f650
+    bool OnStart(void *arg) override;                   // 0x40 0x0067f650 (DS 0x006bcab0)
     // The game's input (none). True.
     bool OnInput(float *held, float *pressed) override; // 0x44 0x00680960
     // The network games: the panel's soldier, the load's button, the game's status; a client: the
