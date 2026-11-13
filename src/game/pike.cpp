@@ -85,7 +85,7 @@ bool C_Pike::LoadGame(C_chunk &chunk)                   // 0x005b8b00
     return true;
 }
 
-bool C_Pike::SetFrame(I3D_frame *frame)                 // 0x005b8e00
+bool C_Pike::SetFrame(I3D_frame *frame)                 // 0x005b8e00 (DS 0x005cbf80)
 {
     if (!frame)
         return false;

@@ -144,22 +144,22 @@ public:
     // (`root`: the screen's frames, passed on).
     virtual bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc);   // +0x2C 0x00661bc0
     // The cursor's input (the argument: the control's id): its notification, not handled.
-    virtual int OnEnter(int id);                        // +0x30 0x0064dd80
-    virtual int OnLeave(int id);                        // +0x34 0x0064dda0
-    virtual int OnClick(int id);                        // +0x38 0x0064ddc0
-    virtual int OnInput02(int id);                      // +0x3C 0x0064dde0
-    virtual int OnInput05(int id);                      // +0x40 0x0064de00
-    virtual int OnRelease(int id);                      // +0x44 0x0064de20
-    virtual int OnPress(int id);                        // +0x48 0x0064de40
+    virtual int OnEnter(int id);                        // +0x30 0x0064dd80 (DS 0x00680f60)
+    virtual int OnLeave(int id);                        // +0x34 0x0064dda0 (DS 0x00680f90)
+    virtual int OnClick(int id);                        // +0x38 0x0064ddc0 (DS 0x00680fc0)
+    virtual int OnInput02(int id);                      // +0x3C 0x0064dde0 (DS 0x00680ff0)
+    virtual int OnInput05(int id);                      // +0x40 0x0064de00 (DS 0x00681020)
+    virtual int OnRelease(int id);                      // +0x44 0x0064de20 (DS 0x00681050)
+    virtual int OnPress(int id);                        // +0x48 0x0064de40 (DS 0x00681080)
     // The mouse wheel's turn by `amount` (the base drops it).
     virtual int OnWheel(int id, int amount);            // +0x4C 0x0064de60
-    virtual int OnInput08(int id);                      // +0x50 0x0064de80
-    virtual int OnInput09(int id);                      // +0x54 0x0064dea0
-    virtual int OnInput0A(int id);                      // +0x58 0x0064dec0
+    virtual int OnInput08(int id);                      // +0x50 0x0064de80 (DS 0x006810e0)
+    virtual int OnInput09(int id);                      // +0x54 0x0064dea0 (DS 0x00681110)
+    virtual int OnInput0A(int id);                      // +0x58 0x0064dec0 (DS 0x00681140)
     // The key's click: its notification, then OnClick's.
-    virtual int OnKeyClick(int id);                     // +0x5C 0x0064dee0
-    virtual int OnInput13(int id);                      // +0x60 0x0064df00
-    virtual int OnInput0B(int id);                      // +0x64 0x0064df20
+    virtual int OnKeyClick(int id);                     // +0x5C 0x0064dee0 (DS 0x00681170)
+    virtual int OnInput13(int id);                      // +0x60 0x0064df00 (DS 0x006811a0)
+    virtual int OnInput0B(int id);                      // +0x64 0x0064df20 (DS 0x006811d0)
     // The editing started (the edit controls'; the screen's answer to CONTROL_MSG_START_EDITING).
     virtual int BeginEdit(int) { return CONTROL_NOT_HANDLED; }   // +0x68 0x0064df40 (DS 0x00681200)
     // A message: a route kept; else its code handled (always true).

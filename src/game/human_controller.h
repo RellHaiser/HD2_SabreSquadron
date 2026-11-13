@@ -301,7 +301,7 @@ public:
     virtual bool OnCollisionEx(C_Actor *other, const S_vector *pos, int a3, int a4, int a5, int a6,
                                int a7);                                     // 0xC8 0x00583230 (DS 0x00589590)
     // AI behaviour (0x100 aggressive, 0x200 defensive, 0x400 zombie).
-    virtual void SetAIMode(int mode);                                       // 0xCC 0x00524d70
+    virtual void SetAIMode(int mode);                                       // 0xCC 0x00524d70 (DS 0x00512a10)
     // Sets the groups of move flags present in `flags` (stance, directions, paces, speed,
     // leaning); 0 clears the directions and the leaning.
     virtual void SetMoveFlags(uint32_t flags);                              // 0xD0 0x00584b60

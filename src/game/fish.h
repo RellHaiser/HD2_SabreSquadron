@@ -27,7 +27,7 @@ public:
     void OnMessage(C_BitStream *) override {}           // 0x1C 0x005dbde0
     void Unknown20(C_BitStream *) override {}           // 0x20 0x005dbdf0
     // A frame only (null: false), then the base's.
-    bool SetFrame(I3D_frame *frame) override { return frame && C_Actor::SetFrame(frame); }   // 0x2C 0x005dbe60
+    bool SetFrame(I3D_frame *frame) override { return frame && C_Actor::SetFrame(frame); }   // 0x2C 0x005dbe60 (DS 0x005f8380)
     // (WriteProperties 0x005b61e0 is the base's.) The top speed, the radius and the count, raw.
     bool ReadProperties(C_chunk &chunk) override;       // 0x34 0x005de300
     // (Null: nothing.) The base's, the top speed, the count, the radius.

@@ -75,7 +75,7 @@ C_MPZone::C_MPZone() : C_Actor(ACTOR_MP_ZONE)           // 0x005ebed0
 {
 }
 
-bool C_MPZone::SetFrame(I3D_frame *frame)               // 0x005ebfd0
+bool C_MPZone::SetFrame(I3D_frame *frame)               // 0x005ebfd0 (DS 0x0060ca60)
 {
     if (!frame)
         return false;

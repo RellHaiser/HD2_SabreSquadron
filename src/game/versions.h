@@ -150,7 +150,7 @@ public:
     ~C_VersionsModule() override;                           // 0x0043dcd0
 
     void StartMission(bool server) override;                // 0x0043dd40
-    void StopMission(bool server) override;                 // 0x0043dd90
+    void StopMission(bool server) override;                 // 0x0043dd90 (DS 0x004626e0)
     // Client: one part changed its stage.
     bool OnMessage(C_BitStream *msg) override;              // 0x0043f1e0
     void RestartMission(bool server) override;              // 0x0043eb50

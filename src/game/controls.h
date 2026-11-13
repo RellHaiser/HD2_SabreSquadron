@@ -202,7 +202,7 @@ public:
     C_LabelControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextControl(scene, id, parent) {}
     ~C_LabelControl() override = default;               // 0x00657980 (0x006579a0)
     // The shown control's box drawn (no children).
-    void Refresh() override;                            // 0x0065c6c0
+    void Refresh() override;                            // 0x0065c6c0 (DS 0x00692b90)
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065c6e0
     // (C_TextControl's, ADD_TEXT and CLEAR handled first.)
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0065c770
@@ -341,7 +341,7 @@ public:
     int OnRelease(int id) override;                     // 0x006645c0
     int OnPress(int id) override;                       // 0x00664590
     // Its notification only (no click).
-    int OnKeyClick(int id) override;                    // 0x006644c0
+    int OnKeyClick(int id) override;                    // 0x006644c0 (DS 0x0069cd90)
     void SetInactive(bool inactive) override;           // 0x00664540
 
 protected:
@@ -634,7 +634,7 @@ public:
     int OnClick(int id) override;                       // 0x00654c40 (DS 0x00689610)
     // To another half: the leave, the enter (nothing before an enter).
     int OnInput05(int id) override;                     // 0x00654c50
-    int OnKeyClick(int id) override;                    // 0x00654c30
+    int OnKeyClick(int id) override;                    // 0x00654c30 (DS 0x006895f0)
     // GET_CHECKED, SET_CHECKED, SET_CHECKED_QUIET; FACE_FRONT turns its frame to (0, 0, -1).
     bool HandleMessage(S_ControlMessage *message) override;   // 0x00654a10
     void SetInactive(bool inactive) override;           // 0x006544c0
@@ -665,7 +665,7 @@ public:
     // The frames (false: fewer than 3 children; both off), no side; posted to be ticked.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006521f0
     // Its notification only.
-    int OnKeyClick(int id) override;                    // 0x00652470
+    int OnKeyClick(int id) override;                    // 0x00652470 (DS 0x006863a0)
     // SET_SIDE, GET_SIDE.
     bool HandleMessage(S_ControlMessage *message) override;   // 0x00652380
 
@@ -728,7 +728,7 @@ public:
     ~C_EditControl() override = default;                // 0x0064e6c0 (0x0064e6e0)
 
     // The shown control's box drawn (no children).
-    void Refresh() override;                            // 0x006624b0
+    void Refresh() override;                            // 0x006624b0 (DS 0x0069a410)
     // While editing: the box's caret.
     void Tick(int time) override;                       // 0x00662500
     // (0x00662a80: Unknown20 false, the base's.)
@@ -1151,7 +1151,7 @@ public:
     // Id 1 (the list's unpick): not picked, the text button's leave, CONTROL_NOTIFY_02.
     int OnInput02(int id) override;                     // 0x00654010
     // CONTROL_NOTIFY_PRESS, then the click.
-    int OnPress(int id) override;                       // 0x00654040
+    int OnPress(int id) override;                       // 0x00654040 (DS 0x00688680)
 
 protected:
     bool m_picked = false;                              // +0x78

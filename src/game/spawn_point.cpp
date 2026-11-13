@@ -70,13 +70,13 @@ void C_SpawnPoint::RestartMission(bool)                 // 0x006117f0
     }
 }
 
-void C_SpawnPoint::StartMission(bool server)            // 0x00611970
+void C_SpawnPoint::StartMission(bool server)            // 0x00611970 (DS 0x0063bb90)
 {
     Activate(server);
     m_free = true;
 }
 
-void C_SpawnPoint::StopMission(bool server)             // 0x00611990
+void C_SpawnPoint::StopMission(bool server)             // 0x00611990 (DS 0x0063bbc0)
 {
     Deactivate(server);
     m_free = true;

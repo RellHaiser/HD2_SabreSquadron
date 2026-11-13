@@ -227,8 +227,8 @@ class C_PhysBox : public C_PhysObject {                     // vtable 0x0080f5d8
 public:
     C_PhysBox(I3D_frame *frame, S_PhysicsHandle *handle);   // 0x0040daa0 (DS 0x0042a270)
     bool Tick(float dt) override;                           // 0x0040bee0
-    void ApplyGravity(float dt) override;                   // 0x0040bea0
-    void Rotate(float dt) override;                         // 0x0040bec0
+    void ApplyGravity(float dt) override;                   // 0x0040bea0 (DS 0x00427f30)
+    void Rotate(float dt) override;                         // 0x0040bec0 (DS 0x00427f60)
 
 private:
     bool TickFlying(float dt);                              // 0x0040bf20
@@ -338,7 +338,7 @@ public:
 
     bool Tick(float dt) override;                           // 0x00405ca0
     // Any push makes it swing.
-    void ApplyImpulse(const S_vector &impulse, const S_vector &point, float factor) override   // 0x004066a0
+    void ApplyImpulse(const S_vector &impulse, const S_vector &point, float factor) override   // 0x004066a0 (DS 0x00420ea0)
     {
         Hit(PHYS_HIT_PUSH, &impulse, nullptr);
     }
@@ -384,7 +384,7 @@ public:
     // Client: doors, debris and swinging objects.
     void Update(int timeDelta) override;                    // 0x004101a0
     void StartMission(bool server) override;                // 0x00410a40
-    void StopMission(bool server) override;                 // 0x00410a70
+    void StopMission(bool server) override;                 // 0x00410a70 (DS 0x0042df60)
     void RestartMission(bool server) override;              // 0x00410a90
     bool SaveGame(C_chunk &chunk) override { return true; } // 0x00410700 (DS 0x0042dad0)
     bool LoadGame(C_chunk &chunk) override { return true; } // 0x00410710 (DS 0x0042daf0)

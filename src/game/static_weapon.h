@@ -42,7 +42,7 @@ public:
     void OnMessage(C_BitStream *msg) override;          // 0x1C 0x00605030
     void Unknown20(C_BitStream *) override {}           // 0x20 0x006050a0
     // A frame only (null: false), then the base's.
-    bool SetFrame(I3D_frame *frame) override { return frame && C_Actor::SetFrame(frame); }   // 0x2C 0x00603040
+    bool SetFrame(I3D_frame *frame) override { return frame && C_Actor::SetFrame(frame); }   // 0x2C 0x00603040 (DS 0x00629720)
     bool WriteProperties(C_chunk &) override { return true; }   // 0x30 0x00604cd0 (DS 0x0062bad0)
     bool ReadProperties(C_chunk &) override { return true; }    // 0x34 0x00604ce0 (DS 0x0062baf0)
     void CopyFrom(const C_Actor *source) override { C_Actor::CopyFrom(source); }   // 0x38 0x00603060
@@ -91,10 +91,10 @@ public:
     {
         m_weapon.GetLimits(up, down, left, right);
     }
-    bool CanSeatWeaponAim(int, float *pos) override { return m_weapon.CanAim(pos); }   // 0xBC 0x006055a0
+    bool CanSeatWeaponAim(int, float *pos) override { return m_weapon.CanAim(pos); }   // 0xBC 0x006055a0 (DS 0x0062c680)
     // Manned seat: the seat weapon's controls.
     void ApplySeatControls(int seat, float *axes, float *buttons) override;   // 0xC0 0x00604cf0
-    void ShowSeatView(int, bool on) override { m_weapon.ShowView(on); }       // 0xC4 0x00604db0
+    void ShowSeatView(int, bool on) override { m_weapon.ShowView(on); }       // 0xC4 0x00604db0 (DS 0x0062bc50)
     bool UnknownC8(int, int *a, int *b, int *c) override { return m_weapon.UnknownC8(a, b, c); }   // 0xC8 0x00604e10
     // "NO3RD" in the dummy's user properties.
     bool IsSeatFirstPersonOnly(int seat) override;      // 0xCC 0x00604e30

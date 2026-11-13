@@ -41,7 +41,7 @@ public:
     void OnMessage(C_BitStream *) override {}           // 0x1C 0x005db770
     void Unknown20(C_BitStream *) override {}           // 0x20 0x005d9500
     // A frame only (null: false), then the base's.
-    bool SetFrame(I3D_frame *frame) override { return frame && C_Actor::SetFrame(frame); }   // 0x2C 0x005d9570
+    bool SetFrame(I3D_frame *frame) override { return frame && C_Actor::SetFrame(frame); }   // 0x2C 0x005d9570 (DS 0x005f4f90)
     // (WriteProperties 0x005b61e0 is the base's.) The top speed and a value not used, raw.
     // Quirk kept: the top speed read is put back to what it was (7 km/h stays).
     bool ReadProperties(C_chunk &chunk) override;       // 0x34 0x005db640

@@ -592,7 +592,7 @@ void C_AnimationActor::Hit(E_HitType, float amount, const S_vector &, const S_ve
     m_destroy = true;
 }
 
-int C_AnimationActor::GetMaterialId(I3D_frame *part)    // 0x005b5f20
+int C_AnimationActor::GetMaterialId(I3D_frame *part)    // 0x005b5f20 (DS 0x005c81b0)
 {
     const int material = GetFrameMaterialId(part);
     return material < 0 ? 11 : material;
