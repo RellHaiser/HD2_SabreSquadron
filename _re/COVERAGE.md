@@ -1663,3 +1663,87 @@ particles and the surface marks. Files are served from memory.
   - three more backslash edits through bash heredocs (one a `\n` in a printf, caught by the build, two by grep), and a
     sed that turned human_pose_dead.cpp's line endings to LF (put back);
   - my first Write of dead_test.inc did not happen (the stub file had not been read), so a build ran the stub.
+
+## Human part 19 (the weapon pose's core, `human_weapon_pose.cpp`, 2026-11-13)
+
+- **The build:** `human/build_core.bat` (HUMAN_CORE): build_dead.bat's harness with the file linked, `human/core_test.inc`'s
+  tests alone. The bone frames answer to the joints' short names ("u", "q", ...) as BindSkeleton finds them. Logged on
+  both sides: the stains (a fake object: Bind, SetVisible, the destructor; the port's constructor too), the ragdoll's
+  sounds at rest (GetSound, slot 0x78, as in part 7). The profile's DETAIL_STAINS is scripted, on only where the pose
+  already has stains (a new one would be each side's own allocation). The animation cache (raw storage under its name)
+  answers nothing; these tests do not call it.
+- **The tests (12,008 checks; the updates judged by their rates):**
+  - BindSkeleton, Attach, Reset, SetStainsVisible (12,000, exact):
+    - a new skeleton after Attach's resets (mode 0);
+    - the bound skeleton bound again (mode 2: the movement's model change; its chain frames kept through their bone
+      numbers);
+    - the frames found again after a saved game (mode 1: chain frames as bone numbers, a dead body laid down again);
+    - Attach without a model (reload or not), and Reset;
+    - each case with cameras or none, stains or none, the detail on or off, and values other than the ones written (the
+      bound rest state already held them);
+  - Update and Refresh of a living body (24,000):
+    - part 16's weapons, modes, blends and timers: raise, lower, pause, the support hand on and off (some running out
+      exactly), the kick, an activity;
+    - KeepsWeapon letting go, the owner dead, swimming, the prone fit;
+    - the cameras kept out of walls, the movement hidden or tiny, Refresh already run this update;
+  - in a seat (12,000): steering, a seat weapon, a passenger, a static weapon (put there by the port's SetSeat);
+  - a dead body (12,000): the dying animation; the ragdoll stepping, blended between its steps, or at rest (its sounds
+    ended); carried.
+- **Judged by their rates:**
+
+  | Update | Threshold | Agreement | Why |
+  |---|---|---|---|
+  | Update, Refresh | 99.9 % | 99.94..99.99 % | the head's look and the holds (parts 16 and 17) |
+  | The seats | 95 % | 96.5..96.7 % | the 16-pass chains (part 17) |
+  | The dying animation, the blend, the rest | 99.9 % | 100 % | |
+  | The ragdoll's step | 96 % at a 1 % tolerance | 97.6 % | chaotic (below) |
+
+  - One ulp of the pelvis moves the port's own 100 ms step past the usual 2e-4 in two thirds of the steps, and past 1 % in
+    4.5 % (`CORE_SENS=2 CORE_TOL=1e-2`). The sides agree more often than the port agrees with itself, so the step is
+    judged at 1 %.
+  - Part 7's steps agree at 2e-4: they are 10..60 ms each, nearer the world's origin.
+  - The step starts from a fall: the ragdoll let go standing and stepped by the port 0..12 times. Part 18's random states
+    (bent, half settled) are worse conditioned (`CORE_SENS=1`: half moved), so they are used for the other paths only.
+- **Test states the game does not make (each crashed one side or both):**
+  - a reload without a model for a dead body (both: the model's Update);
+  - a zero blend length with the raise / lower timers (a division by zero);
+  - a weapon held without a right grip (SetMode clears the mode then);
+  - a rifle-kind weapon without a left grip (the original's Refresh died);
+  - the hand 2 / 3 (HoldProne's direction undefined);
+  - the prone fit on part 16's bent skeletons (an acos past 1 in the original: its CRT's errno crashes, since that CRT
+    never starts here);
+  - an unconscious body's dying animation ending (its ragdoll built again: the bone lists freed with operator delete,
+    which the harness does not keep).
+- **Undefined in the original, not compared:** the w of the smoothed and sampled velocities and of the joints' limits
+  (Attach copies them from a temp).
+- **Port fixes:** none.
+- **Results:** lines: human_weapon_pose.cpp 93.0 % of the 371 lines in the tested functions (345 of 886 in the file).
+  Not run:
+  - the constructor and destructor: the original's allocate through its own CRT heap, never started here;
+  - SaveGame / LoadGame: part 19b;
+  - Attach with a model, and the dying body's reload: the ragdoll built again, in each side's own blocks;
+  - the ragdoll's frees in Attach;
+  - the inline setters SetSeatStance, SetStanceChange and SetBlendLength (the original has no function of their own);
+  - the debug joints;
+  - the contacts let go (part 5's);
+  - the prone fit under a hold in one update (each was tested alone).
+- **Mutations** (`human/mutations/mutate_core1.py`): 345 mutants; 287 killed, 12 not building, 46 survived:
+  - Attach's owner and movement (the side hook sets them);
+  - the ragdoll's frees, Attach with a model;
+  - one out of bounds write past the prone arrays;
+  - equivalent ones, the debug switch, the contacts, float boundaries (classified in its docstring).
+
+  A quick pass left 87; full strength killed none. Scrambling the values Attach and BindSkeleton write, BindSkeleton's
+  mode 2, a weapon to let go of and the timers running out exactly killed 41.
+- **Harness lessons (my mistakes):**
+  - the seat test inherited the living test's last owner state. In the first run that owner was dead, so every seat
+    update returned at once and "agreed" 8,503 of 8,503; the next run (an RNG shift) showed 96.5 %. Every test now sets
+    the owner's health and mode and the movement's flags itself;
+  - a comment in the BindSkeleton test said chain frames were set before the call, and none were: BindSkeleton's
+    conversion of the chain frames was not tested until the mutants showed it (mode 2 was not tested at all);
+  - the step's 2e-4 comparison failed a third of the calls at first; a no-nudge rerun (`CORE_SENS=0`, deterministic) and
+    the nudged one showed conditioning, not a port difference;
+  - a printf's `\n` through a bash heredoc again (the build caught it), two python edits that missed CRLF files, and a
+    sed on human_weapon_pose.cpp for a hand-tested mutant that turned its line endings to LF (put back from a copy);
+  - the first quick mutation pass ran against a failing baseline (the step's rate on the quick sample), so all of its
+    "killed" meant nothing; it was run again after the threshold was set.

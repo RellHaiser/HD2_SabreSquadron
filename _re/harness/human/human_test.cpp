@@ -277,6 +277,7 @@ bool C_HumanSpecialMoves::UpdateWater() { Log(this, "UpdateWater"); return g_scr
 #ifndef HUMAN_VISUAL
 void C_HumanVisual::SetNetworkPosition(const S_vector4 &pos) { LogV(this, "SetNetworkPosition", &pos.x, 4); }
 #endif
+#ifndef HUMAN_CORE   // (game/human_weapon_pose.cpp's own in HUMAN_CORE builds)
 // (Inline in the original's ChangeStance: its body, human_weapon_pose.cpp's, not a logged call.)
 void C_HumanWeaponPose::SetStanceChange(int stance)
 {
@@ -286,6 +287,7 @@ void C_HumanWeaponPose::SetStanceChange(int stance)
         m_proneSettle = 500;
     }
 }
+#endif
 
 #ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 S_vector4 C_HumanWork::GetViewDir() const { Log(this, "GetViewDir"); return {0.0f, g_script.viewDirY, 1.0f, 0.0f}; }
@@ -733,6 +735,9 @@ namespace {
 #ifdef HUMAN_DEAD
 #include "dead_test.inc"
 #endif
+#ifdef HUMAN_CORE
+#include "core_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -814,7 +819,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_DEAD)
+#if defined(HUMAN_CORE)
+    TestCore();
+#elif defined(HUMAN_DEAD)
     TestDead();
 #elif defined(HUMAN_BODY)
     TestBody();

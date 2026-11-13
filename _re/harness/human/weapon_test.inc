@@ -4,9 +4,11 @@
 // models with their grips "LW" / "RW" and stocks "BUTT", an animation set for the arms' activities. The pose is shared
 // (its owner each side's own human), the frames' matrices, flags, links and reference counts compared.
 
+#ifndef HUMAN_CORE
 // The joint names (game/human_weapon_pose.cpp's, not linked in this build).
 const char g_poseBoneNames[POSE_BONE_COUNT][12] = {"u", "q", "t", "p", "e", "f1", "f", "d1", "d", "b", "s", "o",
                                                    "c1", "c", "g", "k", "h", "l", "i", "m", "j", "n", "a"};
+#endif
 float PoseActivityWeight(const S_PoseBone *bone);       // (game/human_pose_weapon.cpp)
 
 namespace {

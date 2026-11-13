@@ -19,6 +19,7 @@ void HarnessAlignedFree(void *p)
 namespace {
 struct S_DeadScript {
     bool ragdollDetail = true;                         // the profile's DETAIL_RAGDOLL
+    bool stainsDetail = true;                          // DETAIL_STAINS
     bool unconscious = false;
     bool cameraModule = true;                          // GetCameraModule answers
     I3D_frame *camera = nullptr;                       // the camera module's camera
@@ -32,7 +33,7 @@ C_PlayerOptions *C_GameProfile::GetDetailSettings() { return reinterpret_cast<C_
 bool C_PlayerOptions::IsEnabled(int option) const
 {
     Log(nullptr, "DetailEnabled", {double(option)});
-    return option == DETAIL_RAGDOLL ? g_dead.ragdollDetail : true;
+    return option == DETAIL_RAGDOLL ? g_dead.ragdollDetail : option == DETAIL_STAINS ? g_dead.stainsDetail : true;
 }
 // g_gameProfile: only its address is used here (GetDetailSettings' this); raw storage under its name, game/profile.cpp
 // (its constructor, its vtable) not linked.
@@ -65,7 +66,7 @@ void *DT OD_GetDetailSettings(void *) { return g_detailBytes; }
 int DT OD_IsEnabled(void *, int option)
 {
     Log(nullptr, "DetailEnabled", {double(option)});
-    return option == DETAIL_RAGDOLL ? g_dead.ragdollDetail : 1;
+    return option == DETAIL_RAGDOLL ? g_dead.ragdollDetail : option == DETAIL_STAINS ? g_dead.stainsDetail : 1;
 }
 int DT OD_IsUnconscious(void *self)
 {
