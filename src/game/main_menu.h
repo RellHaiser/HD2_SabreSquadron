@@ -107,7 +107,7 @@ protected:
 
     // ---- the screens' callbacks (later sub-parts but OnMainShown) ----
     static bool OnMainShown(void *menu, void *argument, C_Control *control, uint32_t notification,
-                            uint32_t value);            // 0x006276a0
+                            uint32_t value);            // 0x006276a0 (DS 0x00656f90)
     // The profile screen shown: refreshed; the name's box, the list's refresh, the difficulties off; create on,
     // rename / delete only with a profile picked; back on. True.
     static bool OnProfileShown(void *menu, void *argument, C_Control *control, uint32_t notification,
@@ -286,7 +286,7 @@ protected:
     // Shown (part 9h-xiv): the settings loaded; the host's name, the game type, internet (the session's listing
     // kind 1), dedicated, the password, the port, the voice codec, the rotation shown. True.
     static bool OnCreateServerShown(void *menu, void *argument, C_Control *control, uint32_t notification,
-                                    uint32_t value);    // 0x0062c2a0
+                                    uint32_t value);    // 0x0062c2a0 (DS 0x0065ced0)
     // Hidden: the settings saved. True.
     static bool OnCreateServerHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
                                      uint32_t value);   // 0x0062c290

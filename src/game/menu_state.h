@@ -99,7 +99,7 @@ public:
     // screens), its camera, the cursor's model, the message box, the menu's screens, the cursor,
     // the light, the click sound, the music (not after a mission, an operation or in the game:
     // none playing, track 0; track 37 crossfaded to 0 in 2 s); running, true.
-    bool Start(void *arg) override;                     // 0x04 0x0066b010
+    bool Start(void *arg) override;                     // 0x04 0x0066b010 (DS 0x006a3db0)
     // OnStop, the screens' stack emptied, the screens deleted (the last first), the models and
     // frames released, the cursor, the camera and the scene released, the queue emptied; true.
     bool Stop() override;                               // 0x08 0x0066b440

@@ -429,6 +429,7 @@ bool C_MenuState::Start(void *arg)
     m_scene->GetPrimarySector()->AddLight(light);
     light->Release();
 
+#ifndef HD2_DEDICATED   // no sounds on the server: no click sound
     auto *sound = static_cast<I3D_sound *>(I3DGetDriver()->CreateFrame(FRAME_SOUND));
     m_clickSound = sound;
     if (ISndGetDriver()->IsInitialized())
@@ -440,6 +441,7 @@ bool C_MenuState::Start(void *arg)
     m_scene->AddFrame(sound);
     m_scene->GetPrimarySector()->AddSound(sound);
     sound->Release();
+#endif
 
     if (m_mode != KIND_DEBRIEFING && m_mode != KIND_OPERATION_END && m_mode != MENU_MODE_GAME) {
         if (GetSoundModule()->GetBackgroundMusic() == -1)
