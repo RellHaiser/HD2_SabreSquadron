@@ -243,10 +243,12 @@ C_AirAttack::S_Dust::S_Dust(const S_vector4 &pos, const S_vector4 &d)   // 0x005
     NormalizeBy(dir, SquareXYZ(dir));
 }
 
-C_AirAttack::S_Dust::~S_Dust()                          // 0x005e94d0
+C_AirAttack::S_Dust::~S_Dust()                          // 0x005e94d0 (DS 0x00609260)
 {
+#ifndef HD2_DEDICATED   // no particles on the server
     if (particle != -1)
         g_particlesModule.Finish(particle);
+#endif
     frame->Release();
 }
 
@@ -481,7 +483,7 @@ void C_AirAttack::Hit(E_HitType, float amount, const S_vector &, const S_vector 
     }
 }
 
-void C_AirAttack::Update(int frameTime)                 // 0x005e5960
+void C_AirAttack::Update(int frameTime)                 // 0x005e5960 (DS 0x00604850)
 {
     if (g_scriptModule.IsCutsceneRunning())
         return;
@@ -575,7 +577,9 @@ void C_AirAttack::Update(int frameTime)                 // 0x005e5960
             if (flat > GONE_SQUARE) {
                 m_gone = true;
                 if (m_smoke != -1) {
+#ifndef HD2_DEDICATED   // no particles on the server (the id is still cleared)
                     g_particlesModule.Finish(m_smoke);
+#endif
                     m_smoke = -1;
                 }
                 for (size_t i = m_dusts.size(); i-- > 0;)
@@ -716,7 +720,9 @@ void C_AirAttack::Update(int frameTime)                 // 0x005e5960
         if (m_bullets[i]->time >= 1)
             continue;
         const S_vector pos = Vec(m_bullets[i]->pos);
+#ifndef HD2_DEDICATED   // no particles on the server
         g_particlesModule.CreateAt(EFFECT_BULLET, pos, S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
+#endif
         BulletHit(pos, Vec(m_bullets[i]->shot));
         if ((std::rand() & 3) == 0)
             PlayImpactSound(pos);

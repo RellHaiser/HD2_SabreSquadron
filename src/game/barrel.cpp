@@ -538,7 +538,7 @@ C_BitStream *C_Barrel::CreateMessage(uint32_t kind)
     return msg;
 }
 
-void C_Barrel::Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *, int part)   // 0x00608e40
+void C_Barrel::Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *, int part)   // 0x00608e40 (DS 0x00630d50)
 {
     if (m_health > 0.0f) {
         m_health = m_health - amount;
@@ -546,11 +546,13 @@ void C_Barrel::Hit(E_HitType type, float amount, const S_vector &pos, const S_ve
             m_health = 0.0f;
             // Destroyed only while the level is over the explosion level.
             if (m_explosionLevel < m_level) {
-                if (!IsClient()) {
-                    Destroy(false);
+#ifndef HD2_DEDICATED   // the server has only the server's side
+                if (IsClient()) {
+                    SendActorMessage(CreateMessage(MSG_DESTROYED));
                     return;
                 }
-                SendActorMessage(CreateMessage(MSG_DESTROYED));
+#endif
+                Destroy(false);
                 return;
             }
         }
@@ -562,26 +564,30 @@ void C_Barrel::Hit(E_HitType type, float amount, const S_vector &pos, const S_ve
     if (!m_surface || reinterpret_cast<intptr_t>(m_surface) != part) {
         if (type != HIT_BULLET)
             return;
-        if (!IsClient()) {
-            HitBody(pos, dir);
+#ifndef HD2_DEDICATED   // the server has only the server's side
+        if (IsClient()) {
+            C_BitStream *msg = CreateMessage(MSG_HIT_BODY);
+            WriteVector(msg, pos);
+            WriteVector(msg, dir);
+            SendActorMessage(msg);
             return;
         }
-        C_BitStream *msg = CreateMessage(MSG_HIT_BODY);
-        WriteVector(msg, pos);
-        WriteVector(msg, dir);
-        SendActorMessage(msg);
+#endif
+        HitBody(pos, dir);
         return;
     }
     S_vector d = dir;
     NormalizeBy(d, (d.x * d.x + d.y * d.y) + d.z * d.z);
-    if (!IsClient()) {
-        HitSurface(pos, d);
+#ifndef HD2_DEDICATED   // the server has only the server's side
+    if (IsClient()) {
+        C_BitStream *msg = CreateMessage(MSG_HIT_SURFACE);
+        WriteVector(msg, pos);
+        WriteVector(msg, d);
+        SendActorMessage(msg);
         return;
     }
-    C_BitStream *msg = CreateMessage(MSG_HIT_SURFACE);
-    WriteVector(msg, pos);
-    WriteVector(msg, d);
-    SendActorMessage(msg);
+#endif
+    HitSurface(pos, d);
 }
 
 void C_Barrel::OnMessage(C_BitStream *msg)              // 0x00609220
