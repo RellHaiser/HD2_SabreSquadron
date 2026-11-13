@@ -44,8 +44,8 @@ public:
     // another chunk), 1 when the chunk failed, 3 without the file.
     int LoadScene2();                                   // 0x006cc280 (DS 0x00710dd0)
     // actors.bin / sounds.bin: their object chunk (the loading screen's stages 2 / 3).
-    void LoadActors();                                  // 0x006d4910
-    void LoadSounds();                                  // 0x006d4bd0
+    void LoadActors();                                  // 0x006d4910 (DS 0x0071b350)
+    void LoadSounds();                                  // 0x006d4bd0 (DS 0x0071b6c0)
     // check2.bin: the walking and the road networks; without it both are cleared (the old
     // check.bin is only opened).
     void LoadCheckpoints();                             // 0x006d45d0

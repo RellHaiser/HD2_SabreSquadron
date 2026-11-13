@@ -245,7 +245,7 @@ private:
     void UpdateSpheres();                               // 0x005c1dc0
     void TurnDir(float *dir);                            // 0x005c89c0
     void CheckGround();                                  // 0x005c88b0
-    void Bite();                                         // 0x005c49a0
+    void Bite();                                         // 0x005c49a0 (DS 0x005da700)
     // Plays the per-animation sounds / effects (barks, growls, the mouth-open frame).
     void PlayAnimSound(int animId);                     // 0x005c5bf0
     // The gravity landing / contact response after the sphere step.

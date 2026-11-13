@@ -748,7 +748,7 @@ protected:
     void StopFiring(uint32_t pause);                    // 0x00572c20
     void PressReload();                                 // 0x00572c00
     void UpdateFiring(int timeDelta);                   // 0x00572af0
-    uint32_t CheckFireOrder();                          // 0x00575d50
+    uint32_t CheckFireOrder();                          // 0x00575d50 (DS 0x00578af0)
     uint32_t CheckReload();                             // 0x005762b0
     uint32_t UpdateFireOrder(int timeDelta);            // 0x00576350
     void UpdateCheckpointStance();                      // 0x00576610

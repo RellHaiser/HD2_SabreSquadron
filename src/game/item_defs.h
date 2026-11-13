@@ -397,7 +397,7 @@ public:
     // its "magazine" frame.
     I3D_frame *GetFpvModel();                           // 0x007df970
     // Inventory picture (<image>.bmp), loaded on first use.
-    IImage *GetImage();                                 // 0x007dfab0
+    IImage *GetImage();                                 // 0x007dfab0 (DS 0x0081b620)
     // Item 231 (the diving gear) only: copies of the mask, fins and tank frames of its
     // model (four entries, any may be null); null for other items.
     I3D_frame **GetDivingGear();                        // 0x007dfcb0

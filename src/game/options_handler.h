@@ -23,7 +23,7 @@ public:
     C_OptionsHandler(const C_OptionsHandler &) = delete;
     C_OptionsHandler &operator=(const C_OptionsHandler &) = delete;
     // The cursor released.
-    ~C_OptionsHandler();                                // 0x0061cfa0 (__fastcall)
+    ~C_OptionsHandler();                                // 0x0061cfa0 (DS 0x00649ce0) (__fastcall)
 
     // True: an options message, handled. Escape on the options screen: leaving it; the options
     // saved and applied (with the key bindings changed); the screen opened (the first time its

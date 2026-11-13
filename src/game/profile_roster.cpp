@@ -173,17 +173,15 @@ void S_SoldierProfile::FixNameEncoding()                // 0x006a10e0
     }
 }
 
-bool S_SoldierProfile::LoadFaceImage()                  // 0x006a1170
+bool S_SoldierProfile::LoadFaceImage()                  // 0x006a1170 (DS 0x006e2ab0)
 {
+#ifndef HD2_DEDICATED   // the server loads no faces
     if (faceImage)
         faceImage->Release();
-#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(faceFile.c_str(), "x_fc_a.bmp", 4, &faceImage) < 0) {
         faceImage = nullptr;
         return false;
     }
-#else
-    faceImage = nullptr;
 #endif
     return true;
 }

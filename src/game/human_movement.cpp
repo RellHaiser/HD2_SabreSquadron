@@ -605,6 +605,9 @@ void C_HumanMovement::Ragdoll(bool volumes, bool light)
             g_collisionWorld.MoveVolume(volume);
         }
     }
+#ifdef HD2_DEDICATED   // no lighting on the server
+    (void)light;
+#else
     if (!light || !IsClient())
         return;
     // The sector is looked up every 300 ms (900 for remote humans moving by the network).
@@ -637,6 +640,7 @@ void C_HumanMovement::Ragdoll(bool volumes, bool light)
         lighting.Update(m_owner->GetFrame(), 100, mode);
     }
     RestoreCollision(false);
+#endif
 }
 
 void C_HumanMovement::SetPlayerControlled(bool on)
@@ -1069,6 +1073,11 @@ int C_MovementSounds::GetCount(int group)
 
 I3D_sound *C_MovementSounds::GetSound(int group, int variant)
 {
+#ifdef HD2_DEDICATED   // no sounds on the server
+    (void)group;
+    (void)variant;
+    return nullptr;
+#else
     if (!ISndGetDriver()->IsInitialized())
         return nullptr;
     const S_MovementSoundFile &file = MOVEMENT_SOUND_FILES[group][variant];
@@ -1100,6 +1109,7 @@ I3D_sound *C_MovementSounds::GetSound(int group, int variant)
     // The group and the file, for Return().
     sound->SetData(reinterpret_cast<S_FrameData *>(static_cast<uintptr_t>(group << 8 | variant)));
     return sound;
+#endif
 }
 
 I3D_sound *C_MovementSounds::Play(int group, I3D_frame *frame, const S_vector *pos)

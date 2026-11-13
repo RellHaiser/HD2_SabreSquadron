@@ -2813,6 +2813,9 @@ bool C_HumanLocomotion::UpdateTurn(int time, bool steady)
 void C_HumanLocomotion::UpdateDetail()
 {
     C_HumanMovement *movement = m_movement;
+#ifdef HD2_DEDICATED   // the server has no camera: full detail
+    movement->m_flags |= MOVE_FLAG_FULL_DETAIL;
+#else
     if (!IsClient()) {
         movement->m_flags |= MOVE_FLAG_FULL_DETAIL;
         return;
@@ -2866,6 +2869,7 @@ void C_HumanLocomotion::UpdateDetail()
     }
     if (extent > 25.0f || farRange < distance)
         movement->m_flags = (movement->m_flags & 0xFFFF2FFF) | MOVE_FLAG_OUT_OF_RANGE;
+#endif
 }
 
 void C_HumanLocomotion::ScaleStanceVolumes(bool enlarged)

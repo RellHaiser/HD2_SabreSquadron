@@ -288,27 +288,24 @@ void C_LoaderScreen::Close()
     if (!IsShown())
         return;
     Draw();
+#ifndef HD2_DEDICATED   // the server only prints the progress: no key to wait for, nothing to let go
     if (m_waitForKey && m_scene) {
         // Single player: "press space" until it is pressed.
         GetGEffects()->Update(100);
         const uint8_t barStyle = static_cast<uint8_t>(LOADER_TEXTS[LOADER_TEXT_BAR].style);
         if (m_texts[LOADER_TEXT_BAR])
             m_texts[LOADER_TEXT_BAR]->SetTextId(TEXT_PRESS_SPACE, barStyle, 0);
-#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
         do {
             GetIGraph()->ProcessWinMessages();
             GetIGraph()->ReadKeyboard();
             Draw();
         } while (GetIGraph()->GetAsciiKey() != KEY_SPACE);
-#endif
         if (m_texts[LOADER_TEXT_BAR])
             m_texts[LOADER_TEXT_BAR]->SetText(C_fstr(""), barStyle, 0);
-#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         for (int i = 0; i < 3; ++i) {
             GetIGraph()->Clear(0, 1.0f, 3);
             GetIGraph()->Flip();
         }
-#endif
     }
     for (int i = TEXT_COUNT; i-- > 0;) {
         if (m_texts[i]) {
@@ -337,6 +334,7 @@ void C_LoaderScreen::Close()
     ClearPlayers();
     m_progress = 0.0f;
     m_shown = false;
+#endif
 }
 
 void C_LoaderScreen::Draw()
@@ -347,11 +345,11 @@ void C_LoaderScreen::Draw()
         g_netGame.PrintLoadProgress(static_cast<int>(m_progress * 100.0f));
         return;
     }
+#ifndef HD2_DEDICATED   // the server only prints the progress
     if (!m_scene)
         return;
     if (m_loadBar)
         m_loadBar->SetScale(S_vector(m_progress, 1.0f, 1.0f));
-#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     m_scene->Render(0);
     IGraph *graph = GetIGraph();
     const int state = graph->GetRenderState(0);

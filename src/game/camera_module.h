@@ -173,7 +173,7 @@ public:
     // 10 the Junkers gunner's in third person, 7 / 9 a passenger's, 1 / 2 an armed seat's), else
     // his "camera3RD*" (1 outdoors, 3 indoors, 4 close indoors, 5 / 6 under water) or "cameraFPV*"
     // (2). A new dummy is held and the camera starts from it. (The argument is not used.)
-    void SelectView(int unused);                        // +0x40 0x0046c370
+    void SelectView(int unused);                        // +0x40 0x0046c370 (DS 0x00487500)
     // Special camera mode `mode` (CAMERA_MODE_*): `on` sets it to whether the third argument is
     // non-zero, else toggles it (CAMERA_MODE_DEBUG, _SPECTATOR, _MOUSE_LOOK); CAMERA_MODE_AIM,
     // _UNDERWATER and _PROJECTILE take `on` itself (the projectile's frame, the water's surface).

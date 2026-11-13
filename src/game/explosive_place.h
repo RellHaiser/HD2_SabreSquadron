@@ -24,7 +24,7 @@ enum : int {
 class alignas(16) C_ExplosivePlace : public C_Actor {   // "Explosive place", vtable 0x008134f0
 public:
     C_ExplosivePlace();                                 // 0x0060c230
-    ~C_ExplosivePlace() override = default;             // 0x0060c2e0 (scalar deleting 0x0060c2c0, DS 0x00634e80)
+    ~C_ExplosivePlace() override = default;             // 0x0060c2e0 (DS 0x00634eb0) (scalar deleting 0x0060c2c0, DS 0x00634e80)
 
     // The script's state (EXPLOSIVE_*), the clients told unless the game is local.
     void SetState(int state);                           // 0x0060d300

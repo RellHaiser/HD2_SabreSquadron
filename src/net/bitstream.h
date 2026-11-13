@@ -12,7 +12,7 @@ public:
     // reports whether it is still within its buffer (`bits` unused). Slot 0 of the vtable,
     // the destructor is slot 1 (WriteBits ignores the result).
     virtual bool Reserve(uint32_t /*bits*/) { return IsValid(); }   // 0x0073d2c0
-    virtual ~C_BitStream() = default;                        // 0x0073d2e0
+    virtual ~C_BitStream() = default;                        // 0x0073d2e0; the body 0x007467e0 (DS 0x007a79d0)
 
     void WriteBits(uint32_t value, int bitCount);            // 0x0073d320
     uint32_t ReadBits(int bitCount);                         // 0x0073d3d0

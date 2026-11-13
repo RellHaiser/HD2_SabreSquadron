@@ -200,7 +200,7 @@ void C_game::RestartMission(bool newRound)          // 0x0069c660 (DS 0x006dd500
 #endif
 }
 
-bool C_game::SaveGame(C_chunk &chunk)               // 0x0069cbb0
+bool C_game::SaveGame(C_chunk &chunk)               // 0x0069cbb0 (DS 0x006dd9a0)
 {
     // (Counted also when nothing is saved.)
     if (g_gameProfile.GetDifficulty() == DIFFICULTY_LIMITED_SAVES)
@@ -230,7 +230,9 @@ bool C_game::SaveGame(C_chunk &chunk)               // 0x0069cbb0
     ModuleManager::SaveGame(chunk);
     chunk.Ascend();
     chunk.Begin(CHUNK_GAME_INTERFACE);
+#ifndef HD2_DEDICATED   // no interface on the server (its chunk is still written, empty)
     m_interface->SaveGame(chunk);
+#endif
     chunk.Ascend();
     chunk.Begin(CHUNK_GAME_TIMED_EVENTS);
     TimedEvents_Save(chunk);

@@ -46,5 +46,5 @@ protected:
     bool DescribeSkills(S_ScreenDesc *desc, I3D_frame *model);   // 0x00697d20
     // A skill's row: "skill01" copied (named after the skill, `index` steps down) into GRSkills (neither
     // found: nothing); its control in the list (its text, the total's control).
-    void AddSkillRow(S_ControlDesc *list, I3D_frame *model, C_str name, int index, float step);   // 0x00698230
+    void AddSkillRow(S_ControlDesc *list, I3D_frame *model, C_str name, int index, float step);   // 0x00698230 (DS 0x006d8ca0)
 };

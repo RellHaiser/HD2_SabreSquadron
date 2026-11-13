@@ -436,7 +436,7 @@ public:
     float QueueAnim(S_HumanAnimRef *anim);              // 0x007741f0
     float QueueCarry(int *carry);                       // 0x007748d0
     void PushCarry(const int *carry);                   // 0x00774e80
-    float QueueActivity(int *activity);                 // 0x00774f70 (nothing)
+    float QueueActivity(int *activity);                 // 0x00774f70 (DS 0x007dfa60) (nothing)
     // Empties the queue of a track (0..2) / locks it until it has run empty.
     void ClearQueue(int track);                         // 0x00775770 (0x00774f80 is an unused copy)
     void LockQueue(int track);                          // 0x007758b0
@@ -625,7 +625,7 @@ public:
 private:
     // Puts the blended weights on the channels (`force`: the target states at once).
     void Apply(bool force);                             // 0x00780f30
-    void UpdateBreathSound(int time);                   // 0x00782000
+    void UpdateBreathSound(int time);                   // 0x00782000 (DS 0x007f00b0)
 };
 
 // Ladders, obstacles, getting into water (C_HumanMovement +0xAA0; 0x20 bytes; role inferred).
@@ -698,7 +698,7 @@ public:
     // Moves the body for `time` ms (the mixer is updated here).
     void Update(int time);                              // 0x00763c30 (DS 0x007caa10)
     // The detail of the body by its size on the screen (MOVE_FLAG_* 0x10..0x2000).
-    void UpdateDetail();                                // 0x00770560
+    void UpdateDetail();                                // 0x00770560 (DS 0x007da570)
     // The direction the work asks the body to face (x / z): the turn towards it starts (the
     // turn in place animations when the angle is large).
     void SetTurnTarget(const S_vector4 &dir, int time); // 0x0076df90
@@ -937,15 +937,15 @@ public:
     void Done() {}                                      // 0x00750b80
     bool SaveGame(C_chunk &chunk);                      // 0x007513f0
     bool LoadGame(C_chunk &chunk);                      // 0x007515c0
-    void Update(int time);                              // 0x00750c00
+    void Update(int time);                              // 0x00750c00 (DS 0x007b4bf0)
     // Advances the interaction under way (C_HumanMovement::m_interaction): into and out of the
     // seats and chairs, the doors' end.
     void UpdateInteraction(int time);                   // 0x00755960 (DS 0x007ba9a0)
     // Starts an interaction with `target` (the original returns true).
     void Interact(C_Actor *target, uint32_t interaction, int arg);   // 0x007518e0
     // Saves / loads the unit's statics (nothing; the original returns true).
-    static bool SaveStatics(C_chunk &chunk);            // 0x00750ae0
-    static bool LoadStatics(C_chunk &chunk);            // 0x00750af0
+    static bool SaveStatics(C_chunk &chunk);            // 0x00750ae0 (DS 0x007b4a00)
+    static bool LoadStatics(C_chunk &chunk);            // 0x00750af0 (DS 0x007b4a20)
 
     C_HumanAnimPlayer *m_animPlayer = nullptr;          // +0x00
     C_HumanMovement *m_movement = nullptr;              // +0x04
@@ -1056,7 +1056,7 @@ private:
     // A new glide toward the target (`restart`) or on along the last step.
     void SetTarget(const S_vector4 &pos, bool restart);   // 0x007586f0
     void Glide(int time);                               // 0x00758a20
-    void ProcessAnimEvents();                           // 0x00759180
+    void ProcessAnimEvents();                           // 0x00759180 (DS 0x007beed0)
 };
 
 // C_HumanVisual::m_flags.
@@ -1087,7 +1087,7 @@ public:
     void UpdatePhysics(int time);                       // 0x007881b0 (DS 0x007f6f30)
     void SetPlayerControlled(bool on);                  // 0x00787530
     // Re-files the hit volumes (`volumes`) and refreshes the sector and the light level (`light`).
-    void Ragdoll(bool volumes, bool light);             // 0x007872b0
+    void Ragdoll(bool volumes, bool light);             // 0x007872b0 (DS 0x007f6290)
     void Unknown7865c0(int arg);                        // 0x007865c0 (passes `arg` on)
     // Uses `ladder` (remote humans that must stand up first queue the action).
     int UseObject(C_Actor *ladder);                     // 0x00786600
@@ -1418,7 +1418,7 @@ public:
     // Number of files of a group (builds the shuffled orders on the first call).
     static int GetCount(int group);                     // 0x007850a0
     // A sound frame of a file (a cached one or a new one; null when it cannot be made).
-    I3D_sound *GetSound(int group, int variant);        // 0x007853c0
+    I3D_sound *GetSound(int group, int variant);        // 0x007853c0 (DS 0x007f3f60)
     // Plays the next file of the group's order at `frame` (null: not linked).
     I3D_sound *Play(int group, I3D_frame *frame, const S_vector *pos);   // 0x007856f0
     // Takes a played sound back (stops it; caches or releases it).

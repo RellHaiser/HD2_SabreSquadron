@@ -647,7 +647,7 @@ void C_Team::OnMemberDied(C_Human *human)               // 0x0045e790 (DS 0x0047
         GetGame()->FailMission(false);
 }
 
-void C_Team::CheckEnvironment()                         // 0x0045ef00
+void C_Team::CheckEnvironment()                         // 0x0045ef00 (DS 0x0047a3b0)
 {
     if (!IsLocalGame())
         return;
@@ -668,7 +668,11 @@ void C_Team::CheckEnvironment()                         // 0x0045ef00
         GetGame()->FailMission(true);
         return;
     }
+#ifdef HD2_DEDICATED   // no interface on the server (the game is still asked for)
+    GetGame();
+#else
     GetGame()->GetInterface()->ShowMessage((flags & HUMAN_ENV_RESTRICTED) ? TEXT_SQUAD_RESTRICTED_AREA : -1);
+#endif
 }
 
 bool C_Team::HasItem(int itemId) const                  // 0x0045e9a0
@@ -1008,10 +1012,12 @@ void C_TeamManager::StopMission(bool server)            // 0x00460b30
         m_coopTeam.Clear();
 }
 
-void C_TeamManager::RestartMission(bool server)         // 0x00460c20
+void C_TeamManager::RestartMission(bool server)         // 0x00460c20 (DS 0x0047c970)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         m_playerTeam.RestartMission(server);
+#endif
     if (!IsLocalGame() && IsServer() && g_gameProfile.IsCooperativeGame())
         m_coopTeam.RestartMission(server);
     for (size_t i = m_formations.size(); i-- > 0;)

@@ -324,7 +324,7 @@ private:
 
 class C_MedkitItem : public C_Item {                    // vtable 0x00816fc8, 0x2C bytes
 public:
-    C_MedkitItem() : C_Item(ITEM_KIND_MEDKIT) {}        // 0x007d45b0
+    C_MedkitItem() : C_Item(ITEM_KIND_MEDKIT) {}        // 0x007d45b0 (DS 0x0080d9b0)
 
     void Init(int typeId) override;                     // 0x007d4640
     void Consume(float amount) override;                // 0x007d45d0
@@ -364,7 +364,7 @@ public:
     // The weapon is busy for the component's reload time; `*ammoUid` receives the uid
     // of the magazine used up (-1 none).
     bool Reload(C_Actor *owner, int container, int *ammoUid, bool keepLastMagazine) override;   // 0x007d4cb0
-    int Fire(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint32_t flags) override;   // 0x007d5430
+    int Fire(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint32_t flags) override;   // 0x007d5430 (DS 0x0080e8e0)
     int FireSecondary(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint8_t flags) override;   // 0x007d5670
     I3D_frame *GetProjectileFrame() override;           // 0x007d4b10
     void AttachProjectile(I3D_frame *hand) override;    // 0x007d57e0
@@ -376,7 +376,7 @@ public:
     void PlayEmptySound(C_Actor *owner);                // 0x007d52f0
     // Plays a shot at `where`: a positional sound frame on clients, and on the server
     // (unless `quiet`) at most once a second a noise for the AI (the squad's melee too).
-    void PlayShotSound(C_Actor *shooter, I3D_frame *where, bool quiet);   // 0x007d5ee0
+    void PlayShotSound(C_Actor *shooter, I3D_frame *where, bool quiet);   // 0x007d5ee0 (DS 0x0080f640)
     // Stops the reload sound if the reload is interrupted more than 200 ms before its end.
     void StopReloadSound();                             // 0x007d6a70
     // Rounds in the weapon (C_Human::DropAllItems fills dropped weapons).

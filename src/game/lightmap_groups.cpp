@@ -32,7 +32,7 @@ I3D_lmap_visual *AsLmap(I3D_frame *frame)
 
 }  // namespace
 
-C_LightMapGroupsModule *GetLightMapGroups()             // 0x0048cb00
+C_LightMapGroupsModule *GetLightMapGroups()             // 0x0048cb00 (DS 0x004a2660)
 {
     return &g_lightMapGroupsModule;
 }

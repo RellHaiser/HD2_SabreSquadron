@@ -1030,6 +1030,7 @@ I3D_frame *C_FirstPersonView::GetBlastDummy()
 S_vector4 C_FirstPersonView::GetAimOrigin() const
 {
     S_vector4 origin;
+#ifndef HD2_DEDICATED   // the server has no first-person view: the camera's position
     if (IsClient()) {
         if (C_ItemDef *def = GetItemDef(m_itemType)) {
             // A grenade: from the first-person model.
@@ -1041,6 +1042,7 @@ S_vector4 C_FirstPersonView::GetAimOrigin() const
             return origin;
         }
     }
+#endif
     GetGame()->GetCameraModule()->GetCameraPos(0, &origin);
     return origin;
 }

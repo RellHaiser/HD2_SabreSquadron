@@ -120,7 +120,7 @@ class alignas(16) C_Shot {
 public:
     C_Shot(const C_Shot &) = delete;
     C_Shot &operator=(const C_Shot &) = delete;
-    virtual ~C_Shot() { Release(); }                        // 0x00 0x0044dba0 (DS 0x0046a2f0) (scalar deleting 0x0044dbd0)
+    virtual ~C_Shot() { Release(); }                        // 0x00 0x0044dba0 (DS 0x0046a2f0) (scalar deleting 0x0044dbd0); its copy 0x00450540 (DS 0x0046aea0)
 
     // Releases the visual.
     virtual void Release();                                 // 0x04 0x00448360
@@ -213,9 +213,9 @@ public:
     // trail particle effect (-1 none); `flySound`: whistle of an incoming shell;
     // `cameraFollow`: the camera may ride along when the local player fired it.
     void Init(C_Actor *shooter, const S_vector &pos, const S_vector &dir, C_ProjectileWeaponComp *weapon,
-              I3D_frame *model, int trailEffect, bool flySound, bool cameraFollow, bool fake);   // 0x00448ce0
+              I3D_frame *model, int trailEffect, bool flySound, bool cameraFollow, bool fake);   // 0x00448ce0 (DS 0x004650b0)
 
-    void Release() override;                                // 0x00448fc0
+    void Release() override;                                // 0x00448fc0 (DS 0x00465220)
     bool Tick(int timeDelta) override;                      // 0x00449290 (DS 0x004655a0)
     void Update(int timeDelta) override;                    // 0x00449030
     void Recycle() override {}                              // 0x00451870
@@ -351,7 +351,7 @@ public:
     // first-person view, those of the HUD weapon). `shellSound`: sound group of the shell
     // bouncing on the ground. Bits 0-7 of `flags` set: a fake shot (C_Shot::m_fake).
     void FireBullet(C_Actor *shooter, C_Item *weapon, const S_vector &pos, const S_vector &dir, bool tracer,
-                    uint32_t flags, int shellSound);        // 0x00451100
+                    uint32_t flags, int shellSound);        // 0x00451100 (DS 0x0046bc80)
     // The same with explicit muzzle and shell dummies (vehicle guns call it directly).
     void FireBulletFrom(C_Human *shooter, C_WeaponItem *weapon, const S_vector &pos, const S_vector &dir,
                         I3D_frame *muzzle, I3D_frame *ejectDummy, bool tracer, uint32_t flags,
@@ -378,7 +378,7 @@ public:
                       bool silentToAI);                     // 0x00451b00
     // Bullet hole and hit effect of a bullet stopping on `frame` (null: level geometry).
     void OnBulletHit(C_Actor *shooter, I3D_frame *frame, int material, const S_vector &pos,
-                     const S_vector &normal);               // 0x00451bc0
+                     const S_vector &normal);               // 0x00451bc0 (DS 0x0046c840)
     // Particle effect of a hit, if it is in front of the camera.
     void PlayHitEffect(int material, const S_vector &pos, const S_vector &normal);   // 0x00451c00 (DS 0x0046c870)
     // Whiz of a bullet passing the local player.

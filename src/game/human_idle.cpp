@@ -257,10 +257,16 @@ void C_HumanIdle::Update(int time)
     if (model->GetParent() != reinterpret_cast<I3D_frame *>(GetGame()->GetScene()->GetPrimarySector()))
         return;
     I3D_frame *head = movement->m_joints[HUMAN_JOINT_F1].frame;
+#ifdef HD2_DEDICATED   // no particles on the server; it still reads the head's matrix
+    (void)moving;
+    (void)head->GetWorldDir();
+    (void)head->GetWorldPos();
+#else
     const S_vector dir = head->GetWorldDir();
     const S_vector pos = head->GetWorldPos() + dir * 0.15f;
     g_particlesModule.CreateAt(moving ? PARTICLE_BREATH_MOVING : PARTICLE_BREATH, pos, dir, moving ? head : nullptr, true,
                                true);
+#endif
 }
 
 // ------------------------------------------------------------------ the interactions

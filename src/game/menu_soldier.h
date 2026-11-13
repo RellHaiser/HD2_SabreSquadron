@@ -51,7 +51,7 @@ public:
     // The face texture of the model (kept for the next model).
     void SetFace(const char *texture);                  // 0x007d3360
     // Turns the soldier, blends the animations, updates the pose and the scene.
-    void Tick(int time);                                // 0x007d3510
+    void Tick(int time);                                // 0x007d3510 (DS 0x0080c3c0)
     void Render();                                      // 0x007d35d0
 
     // The holsters.

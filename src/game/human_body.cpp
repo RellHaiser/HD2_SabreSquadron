@@ -142,13 +142,19 @@ void S_HumanBody::Update(int frameTime)
 
 void S_HumanBody::Tick(int timeDelta)
 {
+#ifdef HD2_DEDICATED   // the server has only the server's side
+    {
+#else
     if (!IsClient()) {
+#endif
         movement->UpdateAnimation(timeDelta);
         equipment->Update(timeDelta);
         return;
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (!owner->IsLocalPlayer())
         movement->UpdateAnimation(timeDelta);
+#endif
 }
 
 void S_HumanBody::SetFacingDir(const S_vector &dir)
@@ -321,11 +327,14 @@ void S_HumanBody::Interact(C_Actor *target, uint32_t interaction, int arg)
 {
     if (IsLocalGame()) {
         work->Interact(target, interaction, arg, true);
+#ifndef HD2_DEDICATED   // the server has no camera to blend
         if ((work->GetUnknownC8() & WORK_REQUEST_INTERACT) == WORK_REQUEST_INTERACT)
             return;
+#endif
     } else {
         movement->Interact(target, interaction, arg);
     }
+#ifndef HD2_DEDICATED   // the server has no camera to blend
     switch (interaction & INTERACT_CODE_MASK) {
     case INTERACT_ENTER_CAR:
     case INTERACT_ENTER_SUBMARINE:
@@ -339,6 +348,7 @@ void S_HumanBody::Interact(C_Actor *target, uint32_t interaction, int arg)
     default:
         break;
     }
+#endif
 }
 
 void S_HumanBody::PlayAnimation(const char *name, int a, int b, int c)

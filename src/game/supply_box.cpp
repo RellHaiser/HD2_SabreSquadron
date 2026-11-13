@@ -788,7 +788,7 @@ void C_SupplyBox::PutAwayDrop()
     m_frame->LinkTo(nullptr, 1);
 }
 
-void C_SupplyBox::SetState(int state)                   // 0x005fcd80
+void C_SupplyBox::SetState(int state)                   // 0x005fcd80 (DS 0x00621940)
 {
     switch (state) {
     case SUPPLY_READY:

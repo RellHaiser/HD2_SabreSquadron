@@ -695,8 +695,10 @@ void C_HumanWork::SetUnknown5C(bool value, bool on)
     if (m_request.unknown5C == static_cast<int>(value))
         return;
     m_request.unknown5C = value;
+#ifndef HD2_DEDICATED   // the server has no first-person view
     if (IsClient() && g_teamManager.GetPlayerTeam()->GetActivePlayer() == *m_owner)
         GetGame()->GetFirstPersonView()->SetPose(value ? FPV_POSE_RAISED : FPV_POSE_LOWERED);
+#endif
     if (on)
         m_request.changed |= WORK_REQUEST_UNKNOWN5C;
 }
@@ -731,7 +733,9 @@ void C_HumanWork::SetViewDir(const S_vector &dir)
         m_refused |= WORK_REQUEST_VIEW_DIR;
         return;
     }
+#ifndef HD2_DEDICATED   // the server has no weapon pose to turn
     m_movement->m_weaponPose->SetViewDir(dir);
+#endif
     // Fix: w is left (the original copies the 4 bytes after `dir`).
     S_vector4 &view = m_movementBase->m_unknown940;
     view.x = dir.x;
@@ -825,7 +829,12 @@ void C_HumanWork::SetLook(uint32_t flags, const S_vector4 *at)
         m_refused |= WORK_REQUEST_LOOK;
         return;
     }
+#ifndef HD2_DEDICATED   // the server has no weapon pose to turn
     m_movementBase->m_weaponPose2->SetLook(flags, at);
+#else
+    (void)flags;
+    (void)at;
+#endif
 }
 
 // ------------------------------------------------------------------ save games

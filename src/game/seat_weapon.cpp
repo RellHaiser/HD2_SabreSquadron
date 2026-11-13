@@ -964,7 +964,7 @@ void C_SeatWeapon::Recoil(const S_vector &dir, float factor)
 
 // --- reloading (part 3b) ----------------------------------------------------------------------------
 
-void C_SeatWeapon::StartReload(C_ItemContainer *store)  // 0x004c6400
+void C_SeatWeapon::StartReload(C_ItemContainer *store)  // 0x004c6400 (DS 0x004ae580)
 {
     (void)store;
     if (m_flags & SEAT_WEAPON_RELOADING)
@@ -978,8 +978,10 @@ void C_SeatWeapon::StartReload(C_ItemContainer *store)  // 0x004c6400
     m_delay = time;
     m_reloadLeft = time;
     m_reloadTime = time;
+#ifndef HD2_DEDICATED   // no sounds on the server
     if (g_gameRole & GAME_ROLE_CLIENT)
         PlayReloadSound();
+#endif
     if (m_sender)
         m_sender(SEAT_WEAPON_MSG_RELOAD, nullptr, nullptr, 0, m_seat, m_senderContext);
 }
@@ -1010,8 +1012,10 @@ void C_SeatWeapon::ShowReload(C_ItemContainer *store)   // 0x004c62e0 (DS 0x004a
     m_delay = time;
     m_reloadLeft = time;
     m_reloadTime = time;
+#ifndef HD2_DEDICATED   // no sounds on the server
     if (g_gameRole & GAME_ROLE_CLIENT)
         PlayReloadSound();
+#endif
 }
 
 void C_SeatWeapon::PlayReloadSound()

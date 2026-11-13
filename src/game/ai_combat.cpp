@@ -472,6 +472,7 @@ uint32_t C_AIController::CheckFireOrder()
     }
     if (m_facing->SetView(dir) == 1)
         return AI_FIRE_MUST_TURN;
+#ifndef HD2_DEDICATED   // the server has only the server's side
     // A client waits until the weapon points along the view.
     if (IsClient() && (m_moveFlags & MOVE_FIRING)) {
         const S_vector4 view = m_facing->view;
@@ -482,6 +483,7 @@ uint32_t C_AIController::CheckFireOrder()
                 return AI_FIRE_NOT_AIMED;
         }
     }
+#endif
     target = m_fireOrder->target;
     // (A friendly target skips the line-of-fire test.)
     if ((!target || !m_human->IsFriendOf(target)) && !Unknown114(&XYZ(m_facing->view)))

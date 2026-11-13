@@ -415,7 +415,7 @@ C_MeleeTrackerScriptedAI::C_MeleeTrackerScriptedAI()    // (SetController's case
     m_script = nullptr;
 }
 
-C_MeleeTrackerScriptedAI::~C_MeleeTrackerScriptedAI() = default;   // 0x005d5bd0 (DS 0x005f0640)
+C_MeleeTrackerScriptedAI::~C_MeleeTrackerScriptedAI() = default;   // 0x005d5bd0 (DS 0x005f0640), its dtor 0x005d5bf0 (DS 0x005f0670)
 
 bool C_MeleeTrackerScriptedAI::Attach(C_MeleeTracker *meleeTracker)   // 0x005cf6c0
 {
@@ -1571,7 +1571,7 @@ C_MeleeTrackerRemote::C_MeleeTrackerRemote()            // (SetController's case
 {
 }
 
-C_MeleeTrackerRemote::~C_MeleeTrackerRemote() = default;   // 0x005d5c40 (DS 0x005f06f0)
+C_MeleeTrackerRemote::~C_MeleeTrackerRemote() = default;   // 0x005d5c40 (DS 0x005f06f0), its dtor 0x005d5c60 (DS 0x005f0720)
 
 bool C_MeleeTrackerRemote::Attach(C_MeleeTracker *meleeTracker)   // 0x005cfc10 (DS 0x005e8c00)
 {

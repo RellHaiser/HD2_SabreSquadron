@@ -53,10 +53,10 @@ public:
     bool BuildScreens() override;                       // 0x38 0x0067fe00
     // The volume restored, the options handler, the popup and the network game's info screen
     // deleted, the panel's soldier, the two stocks emptied and deleted.
-    void OnStop() override;                             // 0x3C 0x0067f760
+    void OnStop() override;                             // 0x3C 0x0067f760 (DS 0x006bcb80)
     // Whether the player's team has a member in the player slots, the options handler, the sound
     // muted; the network games: the info screen. True.
-    bool OnStart(void *arg) override;                   // 0x40 0x0067f650
+    bool OnStart(void *arg) override;                   // 0x40 0x0067f650 (DS 0x006bcab0)
     // The game's input (none). True.
     bool OnInput(float *held, float *pressed) override; // 0x44 0x00680960
     // The network games: the panel's soldier, the load's button, the game's status; a client: the
@@ -104,7 +104,7 @@ private:
     // The main screen's buttons (single player: the tutorial's end, back or the mission's end, the
     // restart, the quick save and load, the options, the quit; a network game: back, the options, the
     // player screen, the quit) and the version's text. True. (The model is not used.)
-    bool BuildMainScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00680980
+    bool BuildMainScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00680980 (DS 0x006be250)
     // The player screen's controls: the panels (the soldiers, the equipment, the store's items, the
     // skills), the screen's shown / hidden callbacks; the soldier types' combo box (its id kept, its
     // items filled), the presets' save and rename buttons, the warmup's and the time's texts (a

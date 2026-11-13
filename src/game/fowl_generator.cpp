@@ -214,7 +214,7 @@ void C_FowlGenerator::CreateBirds()                     // 0x005ba8b0 (DS 0x005c
     model->Release();
 }
 
-void C_FowlGenerator::Start(bool send, int time)        // 0x005bb140
+void C_FowlGenerator::Start(bool send, int time)        // 0x005bb140 (DS 0x005cec60)
 {
     if (m_flown)
         return;
@@ -222,6 +222,9 @@ void C_FowlGenerator::Start(bool send, int time)        // 0x005bb140
         CreateBirds();
     for (size_t i = m_birds.size(); i-- > 0;)
         m_birds[i]->FlyAway();
+#ifdef HD2_DEDICATED   // no sounds on the server
+    (void)time;
+#else
     if (IsClient() && time < SOUND_RECENT) {
         S_SoundRequest request;
         request.chapter = SOUND_CHAPTER_ACTION;
@@ -234,6 +237,7 @@ void C_FowlGenerator::Start(bool send, int time)        // 0x005bb140
         request.flags = SOUND_SILENT_TO_AI;
         GetSoundModule()->Play(request);
     }
+#endif
     m_flown = true;
     m_time = 0;
     if (send)

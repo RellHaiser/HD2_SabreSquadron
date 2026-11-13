@@ -50,7 +50,7 @@ public:
     void OnStop() override;                             // 0x3C 0x00673b80
     // The equipment screen (kind 3) of a campaign screen: the profile's first stock reset, the
     // screen's items added (those marked: the item's ammunition instead). True.
-    bool OnStart(void *arg) override;                   // 0x40 0x006739d0
+    bool OnStart(void *arg) override;                   // 0x40 0x006739d0 (DS 0x006add70)
 
     // The item controls' notifications: an item clicked twice (from the panel: back to the store, the
     // backpack with its contents, the cursor's input notified as left; from the store: taken, onto
@@ -96,7 +96,7 @@ private:
     // screen's middle, back to the store (the backpack with its contents; the place's count). From
     // the store onto the panel: taken and put there (what it displaced back, unless of its type).
     // True.
-    bool DropItem(C_Control *control, uint32_t target); // 0x006771e0
+    bool DropItem(C_Control *control, uint32_t target); // 0x006771e0 (DS 0x006b1f60)
     // The squad soldier shown's stats on the stats panel (its name, its skills' bars and values; no
     // profile: the bars empty, the values and a text of the selection screen blank).
     void ShowSoldierStats();                            // 0x00674d60

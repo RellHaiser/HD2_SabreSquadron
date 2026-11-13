@@ -14,7 +14,9 @@ C_ShadowCache g_shadowCache;
 C_AnimationCache g_animationCache;
 C_SoundCache g_soundCache;
 C_ModelCache g_modelCache;
-C_ModelCache g_versionModelCache;
+// The versions module's: in the original a class of its own (vtable 0x008161e0), its members copies of
+// C_ModelCache's (Create and Duplicate: resource_cache.h).
+C_ModelCache g_versionModelCache;   // dtor 0x006d5d90 (DS 0x0071cf10), ctor 0x006d5f10 (DS 0x0071d0f0), deleting dtor 0x006d6070 (DS 0x0071d2c0)
 
 // Animation sets created by the animation cache (statistics only).
 int g_animationSetsCreated = 0;                          // 0x008aedec
@@ -74,7 +76,7 @@ C_str WithTrailingBackslash(const char *dir)
 }
 
 // I3D_frame::EnumFrames callback: detaches the game data copied along with a
-// duplicated hierarchy (0x006d5310, 0x006d5d00, 0x006d6040).
+// duplicated hierarchy (0x006d5310 (DS 0x0071c0d0), 0x006d5d00 (DS 0x0071ce10), 0x006d6040 (DS 0x0071d270)).
 uint32_t __stdcall ClearFrameData(I3D_frame *frame, void *)
 {
     frame->SetData(nullptr);

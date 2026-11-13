@@ -357,12 +357,12 @@ struct S_HumanBody {                                    // 0x18 bytes
     static bool StartMission(bool server) { (void)server; return true; }   // 0x005aba70 / 0x005aba80 (DS 0x005badf0 / DS 0x005bae10)
     static void StopMission(bool server) { (void)server; }                 // 0x005abb10 / 0x005abb20
     void Update(int frameTime);                         // 0x005abc20 (DS 0x005bb070)
-    void Tick(int timeDelta);                           // 0x005abc70
+    void Tick(int timeDelta);                           // 0x005abc70 (DS 0x005bb0c0)
 
     // Where the human faces / looks / aims (from its controller, every frame).
     void SetFacingDir(const S_vector &dir);             // 0x005ac0a0
     void SetLookAt(const S_vector4 &target);            // 0x005ac080
-    void SetViewDir(const S_vector &dir);               // 0x005ac0c0
+    void SetViewDir(const S_vector &dir);               // 0x005ac0c0 (DS 0x005bb570)
     // Body flags of the work object for the controller; clears the one-frame ones.
     uint32_t TakeFlags();                               // 0x005ac0d0
 
@@ -382,7 +382,7 @@ struct S_HumanBody {                                    // 0x18 bytes
     void DoAction(int action, I3D_frame *frame, void *arg);    // 0x005abe30
     void SetPose(int pose, const void *arg);            // 0x005abf60
     // An interaction with `target` (E_Interaction and flags; `arg`: the seat, the door's open).
-    void Interact(C_Actor *target, uint32_t interaction, int arg);   // 0x005abcc0
+    void Interact(C_Actor *target, uint32_t interaction, int arg);   // 0x005abcc0 (DS 0x005bb0f0)
     void PlayAnimation(const char *name, int a, int b, int c);       // 0x005ac4a0
 
     // (Not called: 0x005abb30, 0x005abb80, 0x005ac230, 0x005ac330.)
@@ -461,7 +461,7 @@ public:
     // What the human can carry: its strength.
     int GetHitPoints() override { return GetStat(STAT_STRENGTH); }   // 0x0059c2b0
     void Update(int frameTime) override;                // 0x0059fe30
-    void Tick(int timeDelta) override;                  // 0x0059ffd0
+    void Tick(int timeDelta) override;                  // 0x0059ffd0 (DS 0x005ac0f0)
     void OnMessage(C_BitStream *msg) override;          // 0x005a5f60 (DS 0x005b3900)
     void Unknown20(C_BitStream *msg) override;          // 0x005a5f70 (DS 0x005b3920)
     bool SetFrame(I3D_frame *frame) override;           // 0x0059e5e0
@@ -587,7 +587,7 @@ public:
     float GetVisibility() const;                        // 0x005a59e0
     // Movement speed in m/s (ejected shells inherit it).
     const S_vector &GetVelocity() const { return reinterpret_cast<const S_vector &>(m_velocity); }
-    float GetUnknown94() const { return m_unknown94; }  // 0x005a97a0
+    float GetUnknown94() const { return m_unknown94; }  // 0x005a97a0 (DS 0x005b81b0)
     void SetUnknown94(float value);                     // 0x005a9760
     // Progress bar of a timed action (lockpicking, a vehicle's weapon, a multiplayer zone).
     bool GetActionProgress(int *time, int *total, int *textId) const;   // 0x005a9830

@@ -274,11 +274,13 @@ bool C_GameMenu::OnStart(void *)
     GetSoundModule()->SetMasterVolume(0.0f);
     if (!IsLocalGame()) {
         m_infoScreen = new C_InfoScreen();
+#ifndef HD2_DEDICATED   // the server's info screen is not initialised (nor done in OnStop)
         // Fix: dropped when it could not be made (the original crashed in Init).
         if (!m_infoScreen->Init(m_scene)) {
             delete m_infoScreen;
             m_infoScreen = nullptr;
         }
+#endif
     }
     return true;
 }
@@ -293,7 +295,9 @@ void C_GameMenu::OnStop()
         m_popup = nullptr;
     }
     if (!IsLocalGame() && m_infoScreen) {
+#ifndef HD2_DEDICATED   // the server's info screen is not done first
         m_infoScreen->Done();
+#endif
         delete m_infoScreen;
         m_infoScreen = nullptr;
     }

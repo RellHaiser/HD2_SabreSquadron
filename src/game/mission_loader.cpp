@@ -70,7 +70,7 @@ void LoadObjectFile(C_MissionLoader &loader, const char *path, int stage)
 
 } // namespace
 
-int C_game::LoadMission(const char *name, C_MissionDef *mission)   // 0x006caad0
+int C_game::LoadMission(const char *name, C_MissionDef *mission)   // 0x006caad0 (DS 0x0070f100)
 {
     m_unknown66 = 0;
     m_unknown68 = 0;
@@ -94,8 +94,10 @@ int C_game::LoadMission(const char *name, C_MissionDef *mission)   // 0x006caad0
     std::sprintf(path, "missions\\%s\\tree.klz", name);
     g_collisionWorld.Load(path, true);
     g_loaderScreen.SetProgress(LOADER_STAGE_STUFF, 0.8f);
+#ifndef HD2_DEDICATED   // no particles on the server
     g_particlesModule.SetScene(m_scene);
     g_particlesModule.LoadStaticEmitters();
+#endif
     g_loaderScreen.SetProgress(LOADER_STAGE_STUFF, 1.0f);
     m_missionLoaded = true;
     g_loaderScreen.FinishLoading();

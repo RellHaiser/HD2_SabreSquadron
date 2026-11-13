@@ -131,8 +131,11 @@ void C_GameProfile::FreeObjects()                       // 0x006b6330
     m_hudOption = nullptr;
 }
 
-C_str C_GameProfile::GetLanguage()                      // 0x006b6ad0
+C_str C_GameProfile::GetLanguage()                      // 0x006b6ad0 (DS 0x006f9be0)
 {
+#ifdef HD2_DEDICATED   // the server's is always English (no registry read, no menu font)
+    m_language = "english";
+#else
     if (!m_language.IsEmpty())
         return m_language;
     HKEY key;
@@ -152,6 +155,7 @@ C_str C_GameProfile::GetLanguage()                      // 0x006b6ad0
     // font.
     m_unicodeFont = IsLanguage("Japan") || IsLanguage("Russian") ||
                     FileExists(C_fstr("%s\\FontConfig.hxml", GetTextDirectory().c_str()));
+#endif
     return m_language;
 }
 

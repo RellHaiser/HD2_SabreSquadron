@@ -330,7 +330,7 @@ protected:
 class C_Button : public C_Control {                     // 0x84 bytes
 public:
     C_Button(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
-    ~C_Button() override;                               // 0x0064f710 (0x0064f730): the cursor released
+    ~C_Button() override;                               // 0x0064f710 (0x0064f730 (DS 0x00682e80)): the cursor released
 
     // The repeated press while held.
     void Tick(int time) override;                       // 0x006645d0 (DS 0x0069cf10)
@@ -390,7 +390,7 @@ public:
 class C_Slider : public C_Control {                     // 0xA0 bytes
 public:
     C_Slider(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
-    ~C_Slider() override;                               // 0x0065e600 (0x0065e620): the cursor released
+    ~C_Slider() override;                               // 0x0065e600 (0x0065e620 (DS 0x006953c0)): the cursor released
 
     // The cursor taken, the frames found (false: one not), the limits set, the value 50.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664680 (DS 0x0069cfc0)
@@ -463,7 +463,7 @@ protected:
     // The position sent to the control the value names (SET_POSITION).
     void SendPosition();                                // 0x006656c0
     // A step toward the cursor's place on the frame (a visual's world bound).
-    void StepToCursor();                                // 0x00665890
+    void StepToCursor();                                // 0x00665890 (DS 0x0069e580)
     // The arrows inactive at the ends, or the slider at the position.
     void Update();                                      // 0x00665ae0
 
@@ -811,7 +811,7 @@ protected:
 class C_SelectList : public C_EditControl {             // 0x98 bytes
 public:
     C_SelectList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_EditControl(scene, id, parent) {}
-    ~C_SelectList() override;                           // 0x006581c0 (0x006581e0): the cursor released
+    ~C_SelectList() override;                           // 0x006581c0 (0x006581e0 (DS 0x0068d510)): the cursor released
 
     // The cursor taken; the frame turned to (0, 0, -1), the select frame to (0, 0, 1) (off, linked
     // to the root); the box placed (false: none).
@@ -1101,7 +1101,7 @@ class C_ListItem;
 class C_ListGroup : public C_ControlGroup {             // 0xA0 bytes
 public:
     C_ListGroup(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
-    ~C_ListGroup() override;                             // 0x0065ea40 (0x0065e840): the origin freed, the extra
+    ~C_ListGroup() override;                             // 0x0065ea40 (0x0065e840 (DS 0x00695670)): the origin freed, the extra
                                                         // control deleted, the cursor released
 
     // The focus' key (taking input); else the navigation keys (true: moved).

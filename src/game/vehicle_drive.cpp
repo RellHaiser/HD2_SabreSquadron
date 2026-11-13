@@ -195,10 +195,12 @@ bool C_Vehicle::SetHandbrake(bool on, bool unknown)                             
     return true;
 }
 
-void C_Vehicle::EnableSounds(bool on)                                           // 0x004f2710
+void C_Vehicle::EnableSounds(bool on)                                           // 0x004f2710 (DS 0x004e3c70)
 {
+#ifndef HD2_DEDICATED   // no sounds on the server
     if (!on && m_soundsOn)
         StopSounds();
+#endif
     m_soundsOn = on;
 }
 

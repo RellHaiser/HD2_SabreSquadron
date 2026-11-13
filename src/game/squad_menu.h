@@ -136,7 +136,7 @@ protected:
     // from the roster's: to be assigned (the assign button's text); a copy of the picture above it (its own
     // visual, in the scene's primary sector), the picture hidden. True.
     static bool OnDragStart(void *menu, void *argument, C_Control *control, uint32_t notification,
-                            uint32_t value);            // 0x00693ae0
+                            uint32_t value);            // 0x00693ae0 (DS 0x006d32e0)
     // Moved (CONTROL_NOTIFY_08): the copy by the cursor's move (none selected: false).
     static bool OnDragMove(void *menu, void *argument, C_Control *control, uint32_t notification,
                            uint32_t value);             // 0x00693e50
@@ -151,7 +151,7 @@ protected:
     // notification 05; a staying slot's soldier on the slots' half: shown again, false. (None selected:
     // false.)
     static bool OnSoldierNotify13(void *menu, void *argument, C_Control *control, uint32_t notification,
-                                  uint32_t value);      // 0x006945c0
+                                  uint32_t value);      // 0x006945c0 (DS 0x006d3ff0)
 
     // The stats' panel "Panel02" (taking no input): the skills' rows (their names 0xA6E + the skill, bars
     // hlcpct00 .. 06, values). True.

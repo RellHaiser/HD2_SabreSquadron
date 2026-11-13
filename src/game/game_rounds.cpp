@@ -311,10 +311,12 @@ void C_game::Tick(int timeDelta)                    // 0x0069b1e0 (DS 0x006dc050
     }
 }
 
-void C_game::Update(int timeDelta)                  // 0x0069b500
+void C_game::Update(int timeDelta)                  // 0x0069b500 (DS 0x006dc3b0)
 {
+#ifndef HD2_DEDICATED   // no interface on the server
     if (IsClient())
         m_interface->FilterInput(nullptr, nullptr);
+#endif
     if (m_inputDelay > 0) {
         m_inputDelay -= timeDelta;
         if (m_inputDelay < 0)
@@ -345,18 +347,25 @@ void C_game::Update(int timeDelta)                  // 0x0069b500
     } else {
         CheckPlayerAreas(timeDelta);
         if (m_roundState == ROUND_WARMUP) {
+#ifndef HD2_DEDICATED   // no interface on the server
             int left = g_mpSettings->warmup * 1000 - static_cast<int>(m_missionTime);
             if (left < 0)
                 left = 0;
             m_interface->ShowCountdown(TEXT_WARMUP, left);
+#endif
         } else {
             if (g_mpSettings->gameType != MP_GAME_DEATHMATCH &&
                 (g_mpSettings->respawnTime + 1) * 1000 < m_respawnWaveTime && g_mpSettings->allowRespawn) {
                 m_respawnWaveTime = m_roundTime % 1000;
                 GetGameApp()->SendGameMessage(GAME_MSG_RESPAWN_WAVE, 0, 0, 0, false);
             }
+#ifdef HD2_DEDICATED   // no interface on the server (the state is still read)
+            if (!IsServer())
+                g_netGame.GetConnectionState();
+#else
             if (!IsServer() && g_netGame.GetConnectionState() == NET_CONNECTION_LOST)
                 GetGame()->GetInterface()->ShowTimer(TEXT_CONNECTION_PROBLEM, 1000);
+#endif
         }
         if (m_roundState == ROUND_CLOSING && m_roundStateTime + 4000 < m_missionTime) {
             m_roundState = ROUND_PLAYING;
@@ -366,10 +375,12 @@ void C_game::Update(int timeDelta)                  // 0x0069b500
         if (m_roundState == ROUND_OVER && m_roundStateTime + 4000 < m_missionTime) {
             m_roundStateTime = m_missionTime;
             m_roundState = ROUND_INTERMISSION;
+#ifndef HD2_DEDICATED   // no interface on the server
             if (IsClient()) {
                 m_interface->ShowScores(true);
                 m_interface->ShowMessage(-1);
             }
+#endif
         }
         g_netGame.UpdateVote(timeDelta);
         if (m_respawnRequest != 0) {
@@ -392,7 +403,11 @@ void C_game::Update(int timeDelta)                  // 0x0069b500
     }
 
     g_collisionWorld.ReleaseEmptyCells();
+#ifdef HD2_DEDICATED   // the server has only the server's side
+    {
+#else
     if (!IsClient()) {
+#endif
         if (m_state == GAME_STATE_STARTING)
             m_state = GAME_STATE_RUNNING;
         for (int id = 0; id < g_actorsModule.GetActorCount(); ++id) {
@@ -402,6 +417,7 @@ void C_game::Update(int timeDelta)                  // 0x0069b500
         }
         return;
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (GetGameApp()->m_state == this) {
         if (!m_interface->IsActive()) {
             // The selected soldier looks where the camera does.
@@ -464,6 +480,7 @@ void C_game::Update(int timeDelta)                  // 0x0069b500
     if (m_quickMessages)
         m_quickMessages->Update(timeDelta);
     UpdateCarEffectEmitters(timeDelta);
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -803,7 +820,7 @@ void C_game::StartNextRound()                       // 0x00699a80
     g_netGame.ResetReplication(true);
 }
 
-void C_game::CheckPlayerAreas(int timeDelta)        // 0x0069f1a0
+void C_game::CheckPlayerAreas(int timeDelta)        // 0x0069f1a0 (DS 0x006e0700)
 {
     g_areaCheckTimer += timeDelta;
     if (g_areaCheckTimer < 500 || m_roundState == ROUND_OVER || m_roundState == ROUND_INTERMISSION ||
@@ -827,6 +844,7 @@ void C_game::CheckPlayerAreas(int timeDelta)        // 0x0069f1a0
         }
         g_netGame.UnlockPlayers();
     }
+#ifndef HD2_DEDICATED   // no interface on the server
     if (IsClient()) {
         // The local player is told about restricted areas.
         C_Human *human = g_netGame.GetLocalHuman();
@@ -841,6 +859,7 @@ void C_game::CheckPlayerAreas(int timeDelta)        // 0x0069f1a0
             }
         }
     }
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -1148,24 +1167,32 @@ void C_game::OnPlayerJoined(int slot, S_SoldierState *state, int *stats)   // 0x
         m_interface->ShowRespawnScreen(false);
 }
 
-void C_game::OnPlayerSpawned(int slot, C_Human *human)   // 0x0069e560
+void C_game::OnPlayerSpawned(int slot, C_Human *human)   // 0x0069e560 (DS 0x006df940)
 {
     if (slot != g_localPlayerSlot)
         return;
     if (m_roundState == ROUND_WARMUP) {
         human->GetController()->SetSpectating(true);
         SetCameraMode(GAME_CAMERA_FREE);
-    } else {
+    }
+#ifndef HD2_DEDICATED   // no interface on the server
+    else {
         GetGame()->GetInterface()->SetScreen(0);
         GetGame()->GetInterface()->ShowSquadMember(nullptr);
     }
+#endif
     m_respawnRequest = 0;
+#ifndef HD2_DEDICATED   // no interface on the server
     m_interface->ShowRespawnScreen(false);
-    if (g_mpSettings->gameType == MP_GAME_OBJECTIVES && human->IsSpectating())
+#endif
+    if (g_mpSettings->gameType == MP_GAME_OBJECTIVES && human->IsSpectating()) {
+#ifndef HD2_DEDICATED   // no interface on the server (the test is still made)
         GetGame()->GetInterface()->ShowTimer(TEXT_SPECTATING, 5000);
+#endif
+    }
 }
 
-void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0
+void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0 (DS 0x006dfe70)
 {
     S_NetPlayerState *players = g_netGame.LockPlayers();
     int slot = -1;
@@ -1182,6 +1209,7 @@ void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0
         player.left = true;
         if (m_vipSlot == slot)
             m_vipSlot = -1;
+#ifndef HD2_DEDICATED   // the server has only the server's side
         if (!IsLocalGame() && IsClient()) {
             if (m_interface->GetShownSquadMember() == player.human)
                 m_interface->ShowSquadMember(nullptr);
@@ -1190,6 +1218,7 @@ void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0
             if (g_netGame.GetLocalHuman() && g_netGame.GetLocalHuman()->GetController() && m_spectatedSlot == slot)
                 m_spectatedSlot = -1;
         }
+#endif
         if (IsServer() && g_gameProfile.IsCooperativeGame())
             g_teamManager.GetCoopTeam()->RemoveMember(player.human);
         g_temporaryActors.DestroyMinesOf(player.human);

@@ -580,7 +580,7 @@ void C_Vehicle::Stop()                                                          
     }
 }
 
-void C_Vehicle::Restart(float speed, bool repair)                               // 0x004e9db0
+void C_Vehicle::Restart(float speed, bool repair)                               // 0x004e9db0 (DS 0x004d95d0)
 {
     // The steered wheels' holders straight (Start's pose: their rest turn by a turn of 0 about the
     // holder's y axis), every holder back in place.
@@ -683,6 +683,7 @@ void C_Vehicle::Restart(float speed, bool repair)                               
     }
     m_unknown228E = 0;
 
+#ifndef HD2_DEDICATED   // no lamps or projectors on the server
     // The lamps' own and the projectors' objects back into the scene (Reset took them out), in the
     // model's parent.
     for (size_t i = m_lamps.size(); i-- > 0;) {
@@ -698,6 +699,7 @@ void C_Vehicle::Restart(float speed, bool repair)                               
         if (m_projectors[i].light)
             m_projectors[i].light->LinkTo(m_unknown544, 0);
     }
+#endif
 
     UpdateWheelSpin(1.0f);
     SetVolumesInWorld(true, true);

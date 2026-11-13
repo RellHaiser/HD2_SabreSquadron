@@ -458,7 +458,7 @@ bool C_Train::LoadGame(C_chunk &chunk)                  // 0x005bf250
 
 // --- the sounds ---------------------------------------------------------------------------------
 
-void C_Train::SetSounds(bool load)                      // 0x005bca90
+void C_Train::SetSounds(bool load)                      // 0x005bca90 (DS 0x005d0a90)
 {
     if (!load) {
         for (size_t i = m_wagons.size(); i-- > 0;)
@@ -478,6 +478,7 @@ void C_Train::SetSounds(bool load)                      // 0x005bca90
     }
     const S_vector origin(0.0f, 0.0f, 0.0f);
     for (size_t i = m_wagons.size(); i-- > 0;) {
+#ifndef HD2_DEDICATED   // no sounds on the server (the loops and the names are still made)
         S_Wagon *wagon = m_wagons[i];
         if (wagon->wheelSound)
             continue;
@@ -491,7 +492,9 @@ void C_Train::SetSounds(bool load)                      // 0x005bca90
             wagon->wheelSoundFrame->baseVolume = 0.0f;
             wagon->wheelSoundFrame->SetSectorFactor(wagon->wheelSoundFrame->sectorFactor);
         }
+#endif
     }
+#ifndef HD2_DEDICATED   // no sounds on the server
     const S_vector top(0.0f, 3.0f, 0.0f);
     const S_vector bottom(0.0f, -1.0f, 0.0f);
     m_steam = LoadSound("l_steam.wav", m_frame, origin, true, true, 4.0f, 20.0f, &m_steamFrame);
@@ -500,6 +503,7 @@ void C_Train::SetSounds(bool load)                      // 0x005bca90
     m_brakeLoop = LoadSound("l_braklp.wav", m_frame, bottom, true, false, 48.0f, 64.0f, &m_brakeLoopFrame);
     m_brake = LoadSound("l_brake.wav", m_frame, bottom, false, false, 32.0f, 48.0f, &m_brakeFrame);
     m_jar = LoadSound("l_jar.wav", m_frame, bottom, false, false, 48.0f, 64.0f, &m_jarFrame);
+#endif
     for (int set = CHUFF_SETS; set-- > 0;) {
         S_ChuffSet &chuffs = m_chuffSets[set];
         int count = 0;
@@ -507,7 +511,9 @@ void C_Train::SetSounds(bool load)                      // 0x005bca90
             chuffs.sounds[i] = nullptr;
             char name[268];
             std::snprintf(name, sizeof name, "l_sts%d%c.wav", set + 1, 'a' + i);
+#ifndef HD2_DEDICATED   // no sounds on the server
             chuffs.sounds[i] = LoadSound(name, m_frame, origin, false, false, 5.0f, 50.0f, &chuffs.frames[i]);
+#endif
             if (chuffs.sounds[i])
                 ++count;
         }

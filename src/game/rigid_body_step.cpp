@@ -388,7 +388,7 @@ void C_RigidBody::StepWheel(float dt)                   // 0x004c94b0
     m_centreWorld = m_pos;
 }
 
-void C_RigidBody::StepBox(float dt)                     // 0x004cb2b0
+void C_RigidBody::StepBox(float dt)                     // 0x004cb2b0 (DS 0x004b6580)
 {
     const float perMass = dt / m_mass;
     m_testTrailing = !m_testTrailing;
@@ -485,8 +485,10 @@ void C_RigidBody::StepBox(float dt)                     // 0x004cb2b0
                 m_velocity.y = m_velocity.y * WATER_SLOWING;
                 m_velocity.z = m_velocity.z * WATER_SLOWING;
             }
+#ifndef HD2_DEDICATED   // no particles on the server
             const S_vector splash(hits[i].x, hits[i].y + SPLASH_HEIGHT, hits[i].z);
             g_particlesModule.CreateAt(SPLASH_EFFECT, splash, S_vector(0.0f, 1.0f, 0.0f), nullptr, false, false);
+#endif
             hit = CollisionRayTest(start, ray, &hitPos, &hitNormal, RAY_EXCLUDE_TYPES, RAY_EXCLUDE_FLAGS_DRY);
             SetXYZ(m_normal, hitNormal);
             SetXYZ(hits[i], hitPos);

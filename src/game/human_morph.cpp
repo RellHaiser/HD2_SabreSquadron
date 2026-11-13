@@ -583,6 +583,9 @@ void C_HumanMorph::Update(int time)
 
 void C_HumanMorph::UpdateBreathSound(int time)
 {
+#ifdef HD2_DEDICATED   // no sounds on the server (its copy still makes an unused sound request)
+    (void)time;
+#else
     if (!IsClient())
         return;
     const int exhaustion = m_exhaustTime == -1 ? m_exhaustion : m_exhaustTime;
@@ -629,6 +632,7 @@ void C_HumanMorph::UpdateBreathSound(int time)
     }
     // Quieter while only a little exhausted.
     m_breathSound->SetVolume(level < 0.2f ? level * m_breathVolume * 5.0f : m_breathVolume);
+#endif
 }
 
 // ------------------------------------------------------------------ saved games

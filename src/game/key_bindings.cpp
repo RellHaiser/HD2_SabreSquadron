@@ -404,16 +404,18 @@ void C_KeyBindings::SetMode(int mode)               // 0x006a8940
     }
 }
 
-void C_KeyBindings::ApplyChanged()                  // 0x006a8970
+void C_KeyBindings::ApplyChanged()                  // 0x006a8970 (DS 0x006ec2a0)
 {
     if (m_mode != BINDING_MODE_GAME && m_mode != BINDING_MODE_COMMAND_MAP)
         return;
+#ifndef HD2_DEDICATED   // no input in LS3DRF.dll: nothing applied
     for (int i = GetCount() - 1; i >= 0; --i) {
         S_KeyBinding &binding = m_bindings[i];
         if (binding.changed && (binding.mode != BINDING_MODE_GAME || m_mode == BINDING_MODE_GAME) &&
             (binding.mode != BINDING_MODE_COMMAND_MAP || m_mode == BINDING_MODE_COMMAND_MAP))
             Apply(binding);
     }
+#endif
 }
 
 bool C_KeyBindings::Save(C_chunk &chunk) const      // 0x006a8a20

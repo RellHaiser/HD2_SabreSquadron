@@ -697,7 +697,9 @@ void C_MenuSoldier::Tick(int time)
     m_model->SetRot(rot);
     m_model->Update();
     UpdateAnims(time);
+#ifndef HD2_DEDICATED   // the server's menu soldier updates no pose
     m_pose->Update(time);
+#endif
     m_scene->Tick(time);
 }
 

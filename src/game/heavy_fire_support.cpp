@@ -166,7 +166,7 @@ C_AirStrike::S_Plane::~S_Plane()                        // 0x00471750
 }
 
 C_AirStrike::C_AirStrike(const S_vector4 &target, const S_vector4 &dir, const S_AirSupportKind &kind, int planes,
-                         int team, C_Human *caller)     // 0x00470530
+                         int team, C_Human *caller)     // 0x00470530 (DS 0x0048c7c0)
 {
     S_vector way = XYZ(dir);
     NormalizeBy(way, (way.y * way.y + way.z * way.z) + way.x * way.x);
@@ -185,12 +185,15 @@ C_AirStrike::C_AirStrike(const S_vector4 &target, const S_vector4 &dir, const S_
     m_damage = kind.damage;
     m_team = team;
     m_caller = caller;
+#ifndef HD2_DEDICATED   // no models or sounds on the server
     // (The original copies the model's name with sprintf, the name as the format.)
     const char *modelName = kind.model.c_str();
+#endif
 
     for (int i = 0; i < planes; ++i) {
         S_Plane *plane = new S_Plane;
         m_planes.push_back(plane);
+#ifndef HD2_DEDICATED   // no models or sounds on the server
         if (!IsClient())
             continue;
         plane->model = I3DGetDriver()->CreateFrame(FRAME_MODEL);
@@ -224,10 +227,12 @@ C_AirStrike::C_AirStrike(const S_vector4 &target, const S_vector4 &dir, const S_
             engine->Play(static_cast<int>(RandFloat() * 1000.0f));
             engine->Update();
         }
+#endif
     }
 
     // The caller's radio: the request.
     m_speech = nullptr;
+#ifndef HD2_DEDICATED   // no sounds on the server
     if (IsClient() && caller && ISndGetDriver()->IsInitialized()) {
         m_speech = static_cast<I3D_sound *>(I3DGetDriver()->CreateFrame(FRAME_SOUND));
         g_soundCache.OpenInto(m_speech, SPEECH_AIR_ATTACK_FILE);
@@ -240,6 +245,7 @@ C_AirStrike::C_AirStrike(const S_vector4 &target, const S_vector4 &dir, const S_
         m_speech->SetOn(true);
         m_speechTimer = GetSoundModule()->GetDubbingSampleSize(SPEECH_AIR_ATTACK) + 1000;
     }
+#endif
 }
 
 C_AirStrike::~C_AirStrike()                             // 0x00471090
@@ -256,7 +262,7 @@ bool C_AirStrike::TickServer(int timeDelta)             // 0x00471150
     return IsClient() ? true : Update(timeDelta);
 }
 
-bool C_AirStrike::Update(int timeDelta)                 // 0x00471170
+bool C_AirStrike::Update(int timeDelta)                 // 0x00471170 (DS 0x0048ccc0)
 {
     const int64_t before = m_time;
     m_time -= timeDelta;
@@ -273,6 +279,7 @@ bool C_AirStrike::Update(int timeDelta)                 // 0x00471170
         m_speechTimer -= timeDelta;
         if (m_speechTimer < 1) {
             m_speechTimer = 0;
+#ifndef HD2_DEDICATED   // no sounds on the server
             if (m_caller && IsClient() && m_speech) {
                 g_soundCache.OpenInto(m_speech, SPEECH_AIR_ARRIVAL_FILE);
                 m_speech->SetSoundType(I3DSOUND_POINT);
@@ -281,6 +288,7 @@ bool C_AirStrike::Update(int timeDelta)                 // 0x00471170
                 m_speech->SetRange(3.0f, 10.0f, 1.0f, 0.0f);
                 m_speech->SetOn(true);
             }
+#endif
         }
     }
 
@@ -314,14 +322,17 @@ bool C_AirStrike::Update(int timeDelta)                 // 0x00471170
     // Over the target (a timer that lands on 0 does it twice: kept).
     if (m_time <= 0 && before >= 0) {
         const S_vector target = XYZ(m_target);
+#ifndef HD2_DEDICATED   // no blasts on the server
         if (IsClient()) {
             m_blastTimer = 0;
             m_blastsLeft = m_bombsPerPlane * static_cast<int>(m_planes.size());
         }
+#endif
         if (IsServer())
             Strike(target, m_range, m_damage, m_caller);
     }
 
+#ifndef HD2_DEDICATED   // no blasts on the server
     // The clients' blasts around the target, 0..300 ms apart.
     if (m_blastsLeft != 0 && IsClient()) {
         m_blastTimer -= timeDelta;
@@ -335,14 +346,16 @@ bool C_AirStrike::Update(int timeDelta)                 // 0x00471170
             Blast(S_vector(x, m_target.y, dz + m_target.z), SOUND_SILENT_TO_AI);
         }
     }
+#endif
     return m_time >= -15000;
 }
 
 // --------------------------------------------------------------------------------- artillery
 
-C_ArtilleryStrike::C_ArtilleryStrike(const S_vector4 &target, int team, C_Human *caller)   // 0x004719f0
+C_ArtilleryStrike::C_ArtilleryStrike(const S_vector4 &target, int team, C_Human *caller)   // 0x004719f0 (DS 0x0048d490)
     : m_target(target), m_team(team), m_caller(caller)
 {
+#ifndef HD2_DEDICATED   // no sounds on the server
     // The caller's radio: the request (by the request file's name; the game is asked for but
     // not used).
     if (IsClient() && caller) {
@@ -357,6 +370,7 @@ C_ArtilleryStrike::C_ArtilleryStrike(const S_vector4 &target, int team, C_Human 
         GetSoundModule()->Play(sound);
         m_speechTimer = GetSoundModule()->GetDubbingSampleSize(SPEECH_ARTILLERY) + 1000;
     }
+#endif
 }
 
 bool C_ArtilleryStrike::TickServer(int timeDelta)       // 0x00471b30
@@ -364,7 +378,7 @@ bool C_ArtilleryStrike::TickServer(int timeDelta)       // 0x00471b30
     return IsClient() ? true : Update(timeDelta);
 }
 
-bool C_ArtilleryStrike::Update(int timeDelta)           // 0x00471b50
+bool C_ArtilleryStrike::Update(int timeDelta)           // 0x00471b50 (DS 0x0048d580)
 {
     const int64_t before = m_time;
     m_time -= timeDelta;
@@ -374,6 +388,7 @@ bool C_ArtilleryStrike::Update(int timeDelta)           // 0x00471b50
         m_speechTimer -= timeDelta;
         if (m_speechTimer < 1) {
             m_speechTimer = 0;
+#ifndef HD2_DEDICATED   // no sounds on the server
             if (m_caller && IsClient()) {
                 // (The original sets the scene's +0x1F8 as the frame first.)
                 S_SoundRequest sound;
@@ -386,6 +401,7 @@ bool C_ArtilleryStrike::Update(int timeDelta)           // 0x00471b50
                 sound.volume = 0.5f;
                 GetSoundModule()->Play(sound);
             }
+#endif
         }
     }
 
@@ -393,13 +409,16 @@ bool C_ArtilleryStrike::Update(int timeDelta)           // 0x00471b50
     // timer that lands on 0 hits twice: kept).
     if (m_time <= 0 && before >= 0) {
         const S_vector target = XYZ(m_target);
+#ifndef HD2_DEDICATED   // no blasts on the server
         if (IsClient()) {
             m_blastTimer = 0;
             m_blastsLeft = m_blastCount;
         }
+#endif
         Strike(target, m_range, m_damage, m_caller);
     }
 
+#ifndef HD2_DEDICATED   // no blasts on the server
     // The clients' blasts around the point, 0..1000 ms apart.
     if (m_blastsLeft != 0 && IsClient()) {
         m_blastTimer -= timeDelta;
@@ -413,6 +432,7 @@ bool C_ArtilleryStrike::Update(int timeDelta)           // 0x00471b50
             Blast(S_vector(x, m_target.y, dz + m_target.z), 0);
         }
     }
+#endif
     return m_time >= -7000;
 }
 
