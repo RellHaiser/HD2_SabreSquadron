@@ -738,6 +738,9 @@ namespace {
 #ifdef HUMAN_CORE
 #include "core_test.inc"
 #endif
+#ifdef HUMAN_SAVE
+#include "save_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -819,7 +822,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_CORE)
+#if defined(HUMAN_SAVE)
+    TestSave();
+#elif defined(HUMAN_CORE)
     TestCore();
 #elif defined(HUMAN_DEAD)
     TestDead();

@@ -1747,3 +1747,37 @@ particles and the surface marks. Files are served from memory.
     sed on human_weapon_pose.cpp for a hand-tested mutant that turned its line endings to LF (put back from a copy);
   - the first quick mutation pass ran against a failing baseline (the step's rate on the quick sample), so all of its
     "killed" meant nothing; it was run again after the threshold was set.
+
+## Human part 19b (the weapon pose's saved games, `human_weapon_pose.cpp`, 2026-11-13)
+
+- **The build:** `human/build_save.bat` (HUMAN_SAVE): build_core.bat's harness, `human/save_test.inc`'s tests alone.
+  - Both sides write and read through the port's C_chunk, as part 7's ragdoll saves do; the original's operator new /
+    delete already go to the harness's heap (part 4c).
+  - The actors module's GetActorById answers on both sides: the human 5, the vehicles 10..13, each side its own
+    vehicle objects. The net ids are set at the original's C_Actor +0x10; the port's are set through SetNetId, since
+    its C_Actor keeps m_netId at offset 4.
+  - The stains' SaveGame, LoadGame and SkipSaved are logged.
+- **The tests (18,150 checks):**
+  - SaveGame (4,500, the files compared byte for byte): living bodies (part 19's), seated ones (chain frames and joints
+    of any bone, the skeleton saved as numbers), dead ones (the dying animation with its bones, the ragdoll, slide
+    points, carried); stains, a vehicle, pushes and holds on points or none; animation names saved;
+  - LoadGame (2,250): each file without animation names, read into another state given other values first (pointers
+    it sets, gunner rotations, the ragdoll's roots); the slide points each side allocates compared apart; another
+    chunk where the pose's should be (150).
+- **Not compared by design:** an animation found by name on a load. The original looks it up in the animation cache
+  inline (its own containers, the driver on a miss), which no redirect reaches. Names are compared when saved.
+- **Port fixes:** none.
+- **Results:** lines: 96.9 % of the 419 lines of SaveGame, LoadGame and the file helpers; with part 19,
+  human_weapon_pose.cpp 84.8 % of 886. Not run: the lookup by name
+  and the dying body's saved bones on a load, and the contacts counted after a load (found by name: part 7's).
+- **Mutations** (`human/mutations/mutate_save1.py`): 461 mutants; 431 killed, 10 not building, 20 survived: the
+  lookup by name and the dying body's bones (15), the contacts (1), equivalent ones (3), an Ascend after another chunk
+  with nothing read after it (1) (classified in its docstring).
+  - A quick pass left 33.
+  - Push and hold points, a contact count, chain frames and joints of any bone, and gunner rotations and ragdoll roots
+    other than the loaded ones killed 13.
+- **Harness lessons (my mistakes):**
+  - the first runs failed every file with a vehicle: I set the port's net ids at +0x10, the original's offset, but
+    the port's C_Actor keeps it at offset 4;
+  - a run took 121 s, past the mutation runner's 120 s limit: halved;
+  - another python edit that missed a CRLF file.

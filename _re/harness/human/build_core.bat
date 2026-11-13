@@ -1,5 +1,5 @@
 @echo off
-rem The weapon pose's core (game/human_weapon_pose.cpp: Attach, BindSkeleton, the saved games, Update, Refresh)
+rem The weapon pose's core (game/human_weapon_pose.cpp: Attach, BindSkeleton, Reset, Update, Refresh)
 rem against the original executable: build_dead.bat's harness with it linked (HUMAN_CORE: core_test.inc's tests
 rem alone); runs human_core_test.exe ("human: N checks, 0 failures"). Intermediates go to %TEMP%.
 set PATH=C:\nim-2.2.6\dist\mingw32\bin;%PATH%
