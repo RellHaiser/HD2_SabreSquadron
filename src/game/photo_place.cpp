@@ -35,7 +35,7 @@ void C_PhotoPlace::StartMission(bool server)            // 0x0060b820 (DS 0x0063
     g_collisionWorld.AddVolume(&m_volume);
 }
 
-void C_PhotoPlace::StopMission(bool server)             // 0x0060bb50
+void C_PhotoPlace::StopMission(bool server)             // 0x0060bb50 (DS 0x006344a0)
 {
     m_started = false;
     g_collisionWorld.RemoveVolume(&m_volume);

@@ -786,7 +786,7 @@ public:
     // The edit control's; the box's hover cleared and selected; the range kept.
     int OnInput02(int id) override;                     // 0x0065b470
     // Its own id, active: the editing stopped (editing) or asked for.
-    int OnKeyClick(int id) override;                    // 0x0065b430
+    int OnKeyClick(int id) override;                    // 0x0065b430 (DS 0x00691430)
     // The edit control's; the range kept.
     int OnInput0B(int id) override;                     // 0x0065b5e0
     // SET_RANGE, SET_NUMBER (digits only: value2 as "%d"), GET_NUMBER, REFRESH and SET_MARGIN (on
@@ -927,7 +927,7 @@ public:
     // The focus' leave (not taken: 0); then handled unless the list is open.
     int OnLeave(int id) override;                       // 0x00659ac0
     // Off the children: the leave; to another: the leave and the enter; else the focus'.
-    int OnInput05(int id) override;                     // 0x00659b10
+    int OnInput05(int id) override;                     // 0x00659b10 (DS 0x0068f3c0)
     // The focus' when it is the child with the id; else outside the box, open: closed (0).
     int OnPress(int id) override;                       // 0x00659b70
     bool HandleMessage(S_ControlMessage *message) override;   // 0x00659480
@@ -984,7 +984,7 @@ public:
 
     // By the id's last 4 bits: 4 the edit box, 8 the label, above 0xc the toggle's frames.
     int FindChild(uint32_t id) const override;          // 0x00657bd0
-    bool Unknown20(int value) override { return FocusUnknown20(value); }   // 0x00657ba0
+    bool Unknown20(int value) override { return FocusUnknown20(value); }   // 0x00657ba0 (DS 0x0068cd10)
     // The parts (each optional; its frame's id cleared); true.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006574d0
     // To the child its target names; the lines to the label (8 kept); TEAM_TOGGLED.
