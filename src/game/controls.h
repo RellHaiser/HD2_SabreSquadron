@@ -1125,7 +1125,7 @@ protected:
     // the selected (false: no step).
     bool Scroll(int direction);                         // 0x00656a20
     // The item at the index selected (scrolled to; the selector behind it; the position posted).
-    void Select(int index);                             // 0x00655e10 (DS 0x0068a7c0)
+    void Select(int index);                             // 0x00655e10
     // The focus moved to the previous / next item taking input (false: none; the focus' leave
     // refused: true, not moved).
     bool FocusPrevious();                               // 0x006556c0
