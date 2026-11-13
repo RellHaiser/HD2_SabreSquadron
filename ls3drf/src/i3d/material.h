@@ -9,6 +9,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/i3d.h"
 
 class ITexture;
@@ -92,9 +93,9 @@ protected:
     // The texture flags (ITC_*) the material's flags and the driver states ask for.
     uint32_t TextureFlags();
 };
-static_assert(sizeof(I3D_material) == 0x60, "I3D_material layout");
-static_assert(offsetof(I3D_material, diffuse) == 0x14, "I3D_material layout");
-static_assert(offsetof(I3D_material, alpha) == 0x5C, "I3D_material layout");
+LS3D_LAYOUT32(sizeof(I3D_material) == 0x60, "I3D_material layout");
+LS3D_LAYOUT32(offsetof(I3D_material, diffuse) == 0x14, "I3D_material layout");
+LS3D_LAYOUT32(offsetof(I3D_material, alpha) == 0x5C, "I3D_material layout");
 
 class I3D_anim_material final : public I3D_material {
 public:
@@ -137,9 +138,9 @@ private:
     // The original's two copies, one per sequence.
     void UpdateSequence(Sequence &seq, ITexture *&current, int start, int period, bool alwaysStamp);
 };
-static_assert(sizeof(I3D_anim_material) == 0xA8, "I3D_anim_material layout");
-static_assert(offsetof(I3D_anim_material, envTextures) == 0x7C, "I3D_anim_material layout");
-static_assert(offsetof(I3D_anim_material, loopStart) == 0x98, "I3D_anim_material layout");
+LS3D_LAYOUT32(sizeof(I3D_anim_material) == 0xA8, "I3D_anim_material layout");
+LS3D_LAYOUT32(offsetof(I3D_anim_material, envTextures) == 0x7C, "I3D_anim_material layout");
+LS3D_LAYOUT32(offsetof(I3D_anim_material, loopStart) == 0x98, "I3D_anim_material layout");
 
 namespace ls3d::i3d {
 

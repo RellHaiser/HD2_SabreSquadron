@@ -84,6 +84,7 @@ python build.py          rem the DLL: build\msvc\LS3DRF.dll (+ .pdb)
 python build.py check    rem compile every file, no link (and check the device boundaries)
 python build.py test     rem the tests: build\compare_*.exe
 python build.py run      rem run the built tests (see Tests)
+python build.py check64  rem compile every source and header for x86-64 with Clang (see below)
 python build.py --debug  rem a debug build
 ```
 
@@ -120,8 +121,21 @@ How the build differs from the Windows one:
 Windows, with 32-bit MinGW GCC 11 (`set CXX=g++` then `python build.py gcc`, which defines
 `LS3D_FORCE_POSIX` for a compiler that targets Windows). That check DLL loads, starts the engine,
 runs `IGraph::Init` and unloads. It is not a drop-in replacement for `LS3DRF.dll`. The differential
-tests need the original DLLs and run on Windows only. A 64-bit build does not compile yet: the
-layout checks hold only for 32-bit pointers.
+tests need the original DLLs and run on Windows only.
+
+### 64-bit builds
+
+The engine's classes have the original's sizes and offsets only where a pointer is 4 bytes. Their
+checks are `LS3D_LAYOUT32` ([core/layout.h](src/core/layout.h)): a `static_assert` in a 32-bit
+build, compiled but not enforced in a 64-bit one, which has its own layouts and no binary to match.
+Plain data (the math types, the Direct3D structures, bounding boxes) keeps its `static_assert`s
+everywhere.
+
+**Status: compiles, does not run yet.** `python build.py check64` compiles every source and every
+header on its own for x86-64 with Clang (on Windows for the Win32 platform and for the POSIX
+types). It runs clean. A few places still store pointers in 32-bit fields: the animation loader's
+in-place offsets, the emitter's colour parameters, the driver's init pointer and the error
+callback's context. Until they are fixed, a 64-bit build would truncate pointers there.
 
 `build.py` checks that every file naming a Win32 type or calling convention includes
 `win_types.h` (MSVC knows `__stdcall` without a header, so only another compiler would notice). It

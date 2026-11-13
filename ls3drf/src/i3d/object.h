@@ -9,6 +9,7 @@
 // A mirror's copy (VISF_MIRRORED) draws the visual it reflects (`data`) with mirrored lights.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/render_helpers.h"
 #include "i3d/visual.h"
 
@@ -49,9 +50,9 @@ public:
     ls3d::i3d::S_visualLights lights;       // +0x1F4
     uint32_t padding20C;
 };
-static_assert(sizeof(I3D_object) == 0x210, "I3D_object layout");
-static_assert(offsetof(I3D_object, mesh) == 0x1E0, "I3D_object layout");
-static_assert(offsetof(I3D_object, lights) == 0x1F4, "I3D_object layout");
+LS3D_LAYOUT32(sizeof(I3D_object) == 0x210, "I3D_object layout");
+LS3D_LAYOUT32(offsetof(I3D_object, mesh) == 0x1E0, "I3D_object layout");
+LS3D_LAYOUT32(offsetof(I3D_object, lights) == 0x1F4, "I3D_object layout");
 
 namespace ls3d::i3d {
 

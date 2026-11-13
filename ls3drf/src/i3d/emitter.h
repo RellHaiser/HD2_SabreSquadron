@@ -21,6 +21,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/visual.h"
 
 class I3D_emitor;
@@ -86,7 +87,7 @@ struct S_emitorGroup {
     int loopStart;                          // +0x34 frameTime x numFrames: the age the loop starts at
     int loopLength;                         // +0x38 (numFrames - loopFrame) x frameTime
 };
-static_assert(sizeof(S_emitorGroup) == 0x3C, "S_emitorGroup layout");
+LS3D_LAYOUT32(sizeof(S_emitorGroup) == 0x3C, "S_emitorGroup layout");
 
 class I3D_emitor : public I3D_visual {
 public:
@@ -182,10 +183,10 @@ public:
 private:
     void FreeGroups();
 };
-static_assert(sizeof(I3D_emitor) == 0x2D0, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, texture) == 0x1F0, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, fixedGroup) == 0x204, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, srcBlend) == 0x214, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, startVelocity) == 0x260, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, startColor) == 0x2A0, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, opacity) == 0x2C0, "I3D_emitor layout");
+LS3D_LAYOUT32(sizeof(I3D_emitor) == 0x2D0, "I3D_emitor layout");
+LS3D_LAYOUT32(offsetof(I3D_emitor, texture) == 0x1F0, "I3D_emitor layout");
+LS3D_LAYOUT32(offsetof(I3D_emitor, fixedGroup) == 0x204, "I3D_emitor layout");
+LS3D_LAYOUT32(offsetof(I3D_emitor, srcBlend) == 0x214, "I3D_emitor layout");
+LS3D_LAYOUT32(offsetof(I3D_emitor, startVelocity) == 0x260, "I3D_emitor layout");
+LS3D_LAYOUT32(offsetof(I3D_emitor, startColor) == 0x2A0, "I3D_emitor layout");
+LS3D_LAYOUT32(offsetof(I3D_emitor, opacity) == 0x2C0, "I3D_emitor layout");

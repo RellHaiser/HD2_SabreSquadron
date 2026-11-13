@@ -7,6 +7,7 @@
 // the channel's weights (normalized to sum 1).
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/object.h"
 
 // A channel: its vertices' indices and their targets (numTargets x (position, normal) each).
@@ -27,7 +28,7 @@ struct S_morphDef {
     int refCount;                           // +0x0C
     I3D_bound_volume bounds;                // +0x10 the morphed mesh's (from the file)
 };
-static_assert(sizeof(S_morphDef) == 0x40, "S_morphDef layout");
+LS3D_LAYOUT32(sizeof(S_morphDef) == 0x40, "S_morphDef layout");
 
 // MORPHF_* (C_morph::morphFlags).
 enum : uint32_t {
@@ -66,7 +67,7 @@ public:
     S_morphDef *def;                        // +0x18
     uint32_t unknown1C;                     // +0x1C
 };
-static_assert(sizeof(C_morph) == 0x20, "C_morph layout");
+LS3D_LAYOUT32(sizeof(C_morph) == 0x20, "C_morph layout");
 
 class I3D_morph : public I3D_object, public C_morph {
 public:
@@ -87,7 +88,7 @@ public:
     I3D_RESULT __stdcall SetMorphWeight(int channel, int target, float weight) override;
     float __stdcall GetMorphWeight(int channel, int target) override;
 };
-static_assert(sizeof(I3D_morph) == 0x230, "I3D_morph layout");
+LS3D_LAYOUT32(sizeof(I3D_morph) == 0x230, "I3D_morph layout");
 
 namespace ls3d::i3d {
 

@@ -16,6 +16,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_area;
@@ -142,7 +143,7 @@ public:
     ls3d::C_vector<I3D_sector *> sectors;   // +0x1B0 the sectors it was added to (AddSound)
     ls3d::C_vector<I3D_area *> areas;       // +0x1C0 the areas it was added to (I3D_area::AddSound)
 };
-static_assert(sizeof(I3D_sound) == 0x1D0, "I3D_sound layout");
-static_assert(offsetof(I3D_sound, sound) == 0x13C, "I3D_sound layout");
-static_assert(offsetof(I3D_sound, envSector) == 0x190, "I3D_sound layout");
-static_assert(offsetof(I3D_sound, sectors) == 0x1B0, "I3D_sound layout");
+LS3D_LAYOUT32(sizeof(I3D_sound) == 0x1D0, "I3D_sound layout");
+LS3D_LAYOUT32(offsetof(I3D_sound, sound) == 0x13C, "I3D_sound layout");
+LS3D_LAYOUT32(offsetof(I3D_sound, envSector) == 0x190, "I3D_sound layout");
+LS3D_LAYOUT32(offsetof(I3D_sound, sectors) == 0x1B0, "I3D_sound layout");

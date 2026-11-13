@@ -13,6 +13,7 @@
 #pragma once
 
 
+#include "core/layout.h"
 #include "i3d/lightmap.h"
 #include "i3d/object.h"
 #include "i3d/vb_manager.h"
@@ -73,7 +74,7 @@ struct S_lightmapLevel {
     bool dirty;                             // +0x44 the vertices made again when next drawn
     uint8_t padding45[3];
 };
-static_assert(sizeof(S_lightmapLevel) == 0x48, "S_lightmapLevel layout");
+LS3D_LAYOUT32(sizeof(S_lightmapLevel) == 0x48, "S_lightmapLevel layout");
 
 // A set of lightmaps (0x38 bytes).
 struct S_lightmapSet {
@@ -84,7 +85,7 @@ struct S_lightmapSet {
     float smoothAngle;                      // +0x0C (45) Construct: degrees between faces sharing a patch
     S_lightmapLevel *levels[10];            // +0x10 per mesh level
 };
-static_assert(sizeof(S_lightmapSet) == 0x38, "S_lightmapSet layout");
+LS3D_LAYOUT32(sizeof(S_lightmapSet) == 0x38, "S_lightmapSet layout");
 
 }  // namespace ls3d::i3d
 
@@ -137,5 +138,5 @@ public:
     ls3d::i3d::S_lightmapSet sets[6];       // +0x214
     uint32_t unknown364[3];                 // +0x364
 };
-static_assert(sizeof(I3D_lit_object) == 0x370, "I3D_lit_object layout");
-static_assert(offsetof(I3D_lit_object, sets) == 0x214, "I3D_lit_object layout");
+LS3D_LAYOUT32(sizeof(I3D_lit_object) == 0x370, "I3D_lit_object layout");
+LS3D_LAYOUT32(offsetof(I3D_lit_object, sets) == 0x214, "I3D_lit_object layout");

@@ -10,6 +10,7 @@
 // then receiverSum, and no projected geometry, sector or build stamp (LS3DF's +0x218 - +0x26B).
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/visual.h"
 
 class I3D_material;
@@ -61,7 +62,7 @@ public:
     // (No projected vertices, faces or buffers, blended center, build stamp, sector or receiver
     // count, LS3DF's +0x218 - +0x26B: LS3DRF has none.)
 };
-static_assert(sizeof(I3D_projector) == 0x220, "I3D_projector layout");
-static_assert(offsetof(I3D_projector, texture) == 0x204, "I3D_projector layout");
-static_assert(offsetof(I3D_projector, projFlags) == 0x214, "I3D_projector layout");
-static_assert(offsetof(I3D_projector, receiverSum) == 0x218, "I3D_projector layout");
+LS3D_LAYOUT32(sizeof(I3D_projector) == 0x220, "I3D_projector layout");
+LS3D_LAYOUT32(offsetof(I3D_projector, texture) == 0x204, "I3D_projector layout");
+LS3D_LAYOUT32(offsetof(I3D_projector, projFlags) == 0x214, "I3D_projector layout");
+LS3D_LAYOUT32(offsetof(I3D_projector, receiverSum) == 0x218, "I3D_projector layout");

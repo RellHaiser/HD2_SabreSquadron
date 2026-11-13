@@ -10,6 +10,7 @@
 // indices (LS3DF's +0x258 - +0x25D).
 #pragma once
 
+#include "core/layout.h"
 #include "dx/d3d8_types.h"
 
 #include "core/c_vector.h"
@@ -123,7 +124,7 @@ public:
     S_lightD3D d3dLight;                    // +0x1F0 in world space (LS3DF: a D3DLIGHT8)
     // (No linkedLight, unknown25A or hardwareIndex, LS3DF's +0x258 - +0x25D: LS3DRF has none.)
 };
-static_assert(sizeof(I3D_light) == 0x230, "I3D_light layout");
-static_assert(offsetof(I3D_light, mode) == 0x160, "I3D_light layout");
-static_assert(offsetof(I3D_light, lightFlags) == 0x190, "I3D_light layout");
-static_assert(offsetof(I3D_light, d3dLight) == 0x1F0, "I3D_light layout");
+LS3D_LAYOUT32(sizeof(I3D_light) == 0x230, "I3D_light layout");
+LS3D_LAYOUT32(offsetof(I3D_light, mode) == 0x160, "I3D_light layout");
+LS3D_LAYOUT32(offsetof(I3D_light, lightFlags) == 0x190, "I3D_light layout");
+LS3D_LAYOUT32(offsetof(I3D_light, d3dLight) == 0x1F0, "I3D_light layout");

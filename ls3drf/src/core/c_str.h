@@ -6,6 +6,8 @@
 #include <cstring>
 #include <new>
 
+#include "core/layout.h"
+
 namespace ls3d {
 
 class C_str {
@@ -65,6 +67,6 @@ private:
     S_rep *m_rep = nullptr;
 };
 
-static_assert(sizeof(C_str) == 4, "C_str layout");
+LS3D_LAYOUT32(sizeof(C_str) == 4, "C_str layout");
 
 }  // namespace ls3d

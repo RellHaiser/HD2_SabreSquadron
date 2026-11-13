@@ -17,6 +17,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/collision.h"
 #include "i3d/frame.h"
 #include "i3d/sector.h"
@@ -41,7 +42,7 @@ struct S_trackedModel {
     I3D_sector *sectorB;                    // +0x14
     float distanceB;                        // +0x18
 };
-static_assert(sizeof(S_trackedModel) == 0x1C, "S_trackedModel layout");
+LS3D_LAYOUT32(sizeof(S_trackedModel) == 0x1C, "S_trackedModel layout");
 
 // A drawn dummy's box as three planes and a sphere (AddDrawnDummy, 0x10049000).
 struct S_dummyBox {
@@ -54,7 +55,7 @@ struct S_dummyBox {
     float extents[3];                       // +0x50 the box's edge lengths
     uint32_t padding5C;
 };
-static_assert(sizeof(S_dummyBox) == 0x60, "S_dummyBox layout");
+LS3D_LAYOUT32(sizeof(S_dummyBox) == 0x60, "S_dummyBox layout");
 
 // Scene weather flags (I3D_scene::weatherFlags).
 enum : uint32_t {
@@ -276,31 +277,31 @@ public:
     S_matrix weatherMatrices[4];            // +0x310 (LS3DF: +0x340)
     ls3d::C_vector<S_dummyBox> drawnDummies{1};  // +0x410 (LS3DF: +0x440; 16-byte aligned blocks)
 };
-static_assert(sizeof(I3D_scene) == 0x420, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, tickFrames) == 0x128, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, animStack) == 0x138, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, activeCamera) == 0x13C, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, screenProjection) == 0x150, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, primarySector) == 0x1D8, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, nearSector) == 0x1E4, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, backgroundColor) == 0x1F0, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, trackedModels) == 0x200, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, trackedCameraSector) == 0x210, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, frames) == 0x214, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, viewportLeft) == 0x224, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, backdropNear) == 0x234, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, portalCount) == 0x23C, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, firstSector) == 0x24C, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, firstOccluder) == 0x258, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, firstArea) == 0x264, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, areasChanged) == 0x268, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, weatherFlags) == 0x26C, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, weatherParticles) == 0x270, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, weatherParam298) == 0x298, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, weatherWind) == 0x2A0, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, weatherColor1) == 0x300, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, weatherMatrices) == 0x310, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, drawnDummies) == 0x410, "I3D_scene layout");
+LS3D_LAYOUT32(sizeof(I3D_scene) == 0x420, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, tickFrames) == 0x128, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, animStack) == 0x138, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, activeCamera) == 0x13C, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, screenProjection) == 0x150, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, primarySector) == 0x1D8, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, nearSector) == 0x1E4, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, backgroundColor) == 0x1F0, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, trackedModels) == 0x200, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, trackedCameraSector) == 0x210, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, frames) == 0x214, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, viewportLeft) == 0x224, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, backdropNear) == 0x234, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, portalCount) == 0x23C, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, firstSector) == 0x24C, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, firstOccluder) == 0x258, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, firstArea) == 0x264, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, areasChanged) == 0x268, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, weatherFlags) == 0x26C, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, weatherParticles) == 0x270, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, weatherParam298) == 0x298, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, weatherWind) == 0x2A0, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, weatherColor1) == 0x300, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, weatherMatrices) == 0x310, "I3D_scene layout");
+LS3D_LAYOUT32(offsetof(I3D_scene, drawnDummies) == 0x410, "I3D_scene layout");
 
 // EnumFrames / FindFrame flags for the special sectors.
 enum : uint32_t {

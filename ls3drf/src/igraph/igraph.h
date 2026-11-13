@@ -11,6 +11,7 @@
 #include "platform/win_types.h"
 
 #include "core/debug.h"
+#include "core/layout.h"
 
 // IGraph::Init parameters (0x38 bytes, copied to 0x100d1d18).
 struct S_IGraphInit {
@@ -27,7 +28,7 @@ struct S_IGraphInit {
     HMENU menu;                         // +0x30 window menu (IG_MENU; 0: resource 123 of LS3D.DLL)
     ls3d::ErrorCallback *errorCallback; // +0x34
 };
-static_assert(sizeof(S_IGraphInit) == 0x38, "S_IGraphInit layout");
+LS3D_LAYOUT32(sizeof(S_IGraphInit) == 0x38, "S_IGraphInit layout");
 
 // S_IGraphInit::flags.
 enum : uint32_t {

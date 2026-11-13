@@ -7,6 +7,7 @@
 // sphere into world space. The renderer looks through the portals that are on (0x10041dc0).
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/i3d.h"
 
 class I3D_scene;
@@ -85,13 +86,13 @@ public:
     static void *operator new(size_t size) noexcept;
     static void operator delete(void *p);
 };
-static_assert(sizeof(I3D_portal) == 0x1C0, "I3D_portal layout");
-static_assert(offsetof(I3D_portal, loadedPlane) == 0x10, "I3D_portal layout");
-static_assert(offsetof(I3D_portal, vertices) == 0x30, "I3D_portal layout");
-static_assert(offsetof(I3D_portal, plane) == 0x130, "I3D_portal layout");
-static_assert(offsetof(I3D_portal, center) == 0x180, "I3D_portal layout");
-static_assert(offsetof(I3D_portal, owner) == 0x194, "I3D_portal layout");
-static_assert(offsetof(I3D_portal, numVertices) == 0x1AC, "I3D_portal layout");
+LS3D_LAYOUT32(sizeof(I3D_portal) == 0x1C0, "I3D_portal layout");
+LS3D_LAYOUT32(offsetof(I3D_portal, loadedPlane) == 0x10, "I3D_portal layout");
+LS3D_LAYOUT32(offsetof(I3D_portal, vertices) == 0x30, "I3D_portal layout");
+LS3D_LAYOUT32(offsetof(I3D_portal, plane) == 0x130, "I3D_portal layout");
+LS3D_LAYOUT32(offsetof(I3D_portal, center) == 0x180, "I3D_portal layout");
+LS3D_LAYOUT32(offsetof(I3D_portal, owner) == 0x194, "I3D_portal layout");
+LS3D_LAYOUT32(offsetof(I3D_portal, numVertices) == 0x1AC, "I3D_portal layout");
 
 namespace ls3d::i3d {
 

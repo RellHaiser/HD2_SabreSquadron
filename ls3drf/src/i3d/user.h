@@ -2,6 +2,7 @@
 // 0x10056ed0 - 0x10056f30): an I3D_frame with one value of the application's.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_user : public I3D_frame {
@@ -14,4 +15,4 @@ public:
     uint32_t userValue;                     // +0x120
     uint32_t unknown124[3];                 // +0x124
 };
-static_assert(sizeof(I3D_user) == 0x130, "I3D_user layout");
+LS3D_LAYOUT32(sizeof(I3D_user) == 0x130, "I3D_user layout");

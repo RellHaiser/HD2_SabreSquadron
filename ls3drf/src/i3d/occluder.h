@@ -13,6 +13,7 @@
 // stay unfilled and the renderer's fields at their Init values.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_scene;
@@ -81,11 +82,11 @@ public:
     float viewDepth;                        // +0x5F0 (renderer) its center along the view direction
     uint32_t padding5F4[3];
 };
-static_assert(sizeof(I3D_occluder) == 0x600, "I3D_occluder layout");
-static_assert(offsetof(I3D_occluder, prevInScene) == 0x134, "I3D_occluder layout");
-static_assert(offsetof(I3D_occluder, silhouettePlanes) == 0x150, "I3D_occluder layout");
-static_assert(offsetof(I3D_occluder, numSilhouettePlanes) == 0x380, "I3D_occluder layout");
-static_assert(offsetof(I3D_occluder, frontPlanes) == 0x390, "I3D_occluder layout");
-static_assert(offsetof(I3D_occluder, nearPlane) == 0x5B0, "I3D_occluder layout");
-static_assert(offsetof(I3D_occluder, center) == 0x5D0, "I3D_occluder layout");
-static_assert(offsetof(I3D_occluder, viewDepth) == 0x5F0, "I3D_occluder layout");
+LS3D_LAYOUT32(sizeof(I3D_occluder) == 0x600, "I3D_occluder layout");
+LS3D_LAYOUT32(offsetof(I3D_occluder, prevInScene) == 0x134, "I3D_occluder layout");
+LS3D_LAYOUT32(offsetof(I3D_occluder, silhouettePlanes) == 0x150, "I3D_occluder layout");
+LS3D_LAYOUT32(offsetof(I3D_occluder, numSilhouettePlanes) == 0x380, "I3D_occluder layout");
+LS3D_LAYOUT32(offsetof(I3D_occluder, frontPlanes) == 0x390, "I3D_occluder layout");
+LS3D_LAYOUT32(offsetof(I3D_occluder, nearPlane) == 0x5B0, "I3D_occluder layout");
+LS3D_LAYOUT32(offsetof(I3D_occluder, center) == 0x5D0, "I3D_occluder layout");
+LS3D_LAYOUT32(offsetof(I3D_occluder, viewDepth) == 0x5F0, "I3D_occluder layout");

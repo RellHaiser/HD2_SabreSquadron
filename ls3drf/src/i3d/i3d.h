@@ -3,7 +3,8 @@
 // The classes are the original's, in the global namespace (two members are exported with their
 // decorated names: I3D_frame::UpdateWMatrixProc, I3D_visual::UpdateWBoundProc). Interface methods
 // are __stdcall (COM style, `this` on the stack), internal virtuals too unless marked; member
-// offsets are the original's (the game reads several inline, through its SDK headers).
+// offsets are the original's in a 32-bit build (the game reads several inline, through its SDK
+// headers; core/layout.h).
 #pragma once
 
 #include <cstddef>

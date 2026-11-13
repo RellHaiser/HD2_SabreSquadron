@@ -8,6 +8,7 @@
 
 #include <cstdint>
 
+#include "core/layout.h"
 #include "dx/d3d8_types.h"
 
 namespace ls3d {
@@ -40,7 +41,7 @@ public:
     uint32_t unknown04;                     // +0x04 0, read by nothing
     uint32_t unknown08;                     // +0x08 (not initialised)
 };
-static_assert(sizeof(C_IndexBuffer) == 0xC, "C_IndexBuffer layout");
+LS3D_LAYOUT32(sizeof(C_IndexBuffer) == 0xC, "C_IndexBuffer layout");
 
 // One allocation's vertices (0x1C bytes).
 class C_VertexBuffer {
@@ -58,7 +59,7 @@ public:
     uint8_t *data;                          // +0x14 16-byte aligned
     uint32_t unknown18;                     // +0x18 (not initialised)
 };
-static_assert(sizeof(C_VertexBuffer) == 0x1C, "C_VertexBuffer layout");
+LS3D_LAYOUT32(sizeof(C_VertexBuffer) == 0x1C, "C_VertexBuffer layout");
 
 class C_IBManager {
 public:

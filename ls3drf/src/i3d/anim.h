@@ -11,6 +11,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/i3d.h"
 
 class I3D_frame;
@@ -81,7 +82,7 @@ public:
     char *name;                             // +0x0C
     uint8_t *data;                          // +0x10 16-byte aligned (the loader's)
 };
-static_assert(sizeof(I3D_animation_set) == 0x14, "I3D_animation_set layout");
+LS3D_LAYOUT32(sizeof(I3D_animation_set) == 0x14, "I3D_animation_set layout");
 
 // ---------------------------------------------------------------- poses
 
@@ -129,7 +130,7 @@ public:
     uint32_t poseFlags;                     // +0x48 POSEF_*
     uint32_t padding4C;
 };
-static_assert(sizeof(I3D_pose) == 0x50, "I3D_pose layout");
+LS3D_LAYOUT32(sizeof(I3D_pose) == 0x50, "I3D_pose layout");
 
 class I3D_pose_set final {
 public:
@@ -147,7 +148,7 @@ public:
     int refCount;                           // +0x04
     ls3d::C_vector<I3D_pose *> poses;       // +0x08
 };
-static_assert(sizeof(I3D_pose_set) == 0x18, "I3D_pose_set layout");
+LS3D_LAYOUT32(sizeof(I3D_pose_set) == 0x18, "I3D_pose_set layout");
 
 // ---------------------------------------------------------------- the animation stack
 
@@ -166,7 +167,7 @@ struct I3D_anim_keys {
     uint16_t flags;                         // +0x18 ANIMTRACK_* of the stage's set
     uint16_t padding1A;
 };
-static_assert(sizeof(I3D_anim_keys) == 0x1C, "I3D_anim_keys layout");
+LS3D_LAYOUT32(sizeof(I3D_anim_keys) == 0x1C, "I3D_anim_keys layout");
 
 // The animation of one frame (vtable 0x1009cac0, 0xF4 bytes).
 class I3D_anim_track final {
@@ -189,7 +190,7 @@ public:
     I3D_frame *frame;                       // +0xEC
     I3D_anim_stack *stack;                  // +0xF0
 };
-static_assert(sizeof(I3D_anim_track) == 0xF4, "I3D_anim_track layout");
+LS3D_LAYOUT32(sizeof(I3D_anim_track) == 0xF4, "I3D_anim_track layout");
 
 // Loop modes (I3D_anim_stack::Stage::mode).
 enum : int {
@@ -210,7 +211,7 @@ public:
         int lastDelta;                      // +0x14 the last advance (negative: backwards)
         float weight;                       // +0x18
     };
-    static_assert(sizeof(Stage) == 0x1C, "I3D_anim_stack::Stage layout");
+    LS3D_LAYOUT32(sizeof(Stage) == 0x1C, "I3D_anim_stack::Stage layout");
 
     explicit I3D_anim_stack(I3D_frame *owner);         // 0x1001ff20 (a model or a scene)
     ~I3D_anim_stack();                                 // 0x1001ff60
@@ -245,5 +246,5 @@ private:
     void PurgeTracks();                                // 0x100206b0: tracks with nothing to do go
     void EndStages();                                  // the end of the Ticks
 };
-static_assert(sizeof(I3D_anim_stack) == 0xF8, "I3D_anim_stack layout");
-static_assert(offsetof(I3D_anim_stack, tracks) == 0xE8, "I3D_anim_stack layout");
+LS3D_LAYOUT32(sizeof(I3D_anim_stack) == 0xF8, "I3D_anim_stack layout");
+LS3D_LAYOUT32(offsetof(I3D_anim_stack, tracks) == 0xE8, "I3D_anim_stack layout");

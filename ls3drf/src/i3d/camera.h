@@ -6,6 +6,7 @@
 // space (plane 0 the view direction, then the four sides).
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_sector;
@@ -84,8 +85,8 @@ public:
     float nearSectorFrustumD[5];            // +0x520
     uint32_t padding534[3];
 };
-static_assert(sizeof(I3D_camera) == 0x540, "I3D_camera layout");
-static_assert(offsetof(I3D_camera, viewMatrix) == 0x150, "I3D_camera layout");
-static_assert(offsetof(I3D_camera, nearHalfWidth) == 0x3D0, "I3D_camera layout");
-static_assert(offsetof(I3D_camera, frustum) == 0x3F0, "I3D_camera layout");
-static_assert(offsetof(I3D_camera, nearSectorFrustumD) == 0x520, "I3D_camera layout");
+LS3D_LAYOUT32(sizeof(I3D_camera) == 0x540, "I3D_camera layout");
+LS3D_LAYOUT32(offsetof(I3D_camera, viewMatrix) == 0x150, "I3D_camera layout");
+LS3D_LAYOUT32(offsetof(I3D_camera, nearHalfWidth) == 0x3D0, "I3D_camera layout");
+LS3D_LAYOUT32(offsetof(I3D_camera, frustum) == 0x3F0, "I3D_camera layout");
+LS3D_LAYOUT32(offsetof(I3D_camera, nearSectorFrustumD) == 0x520, "I3D_camera layout");

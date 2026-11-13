@@ -3,6 +3,7 @@
 // mode: turning about one of the frame's axes, or the camera's orientation.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/object.h"
 
 // I3D_billboard::mode.
@@ -36,5 +37,5 @@ public:
     uint32_t unknown218[2];                 // +0x218
     S_matrix matrix;                        // +0x220 the facing matrix drawn with
 };
-static_assert(sizeof(I3D_billboard) == 0x260, "I3D_billboard layout");
-static_assert(offsetof(I3D_billboard, matrix) == 0x220, "I3D_billboard layout");
+LS3D_LAYOUT32(sizeof(I3D_billboard) == 0x260, "I3D_billboard layout");
+LS3D_LAYOUT32(offsetof(I3D_billboard, matrix) == 0x220, "I3D_billboard layout");

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_scene;
@@ -56,7 +57,7 @@ public:
     uint32_t fadeTime;                    // +0x158 SetFadeTime
     uint32_t padding15C;
 };
-static_assert(sizeof(I3D_area) == 0x160, "I3D_area layout");
-static_assert(offsetof(I3D_area, planes) == 0x13C, "I3D_area layout");
-static_assert(offsetof(I3D_area, sounds) == 0x148, "I3D_area layout");
-static_assert(offsetof(I3D_area, fadeTime) == 0x158, "I3D_area layout");
+LS3D_LAYOUT32(sizeof(I3D_area) == 0x160, "I3D_area layout");
+LS3D_LAYOUT32(offsetof(I3D_area, planes) == 0x13C, "I3D_area layout");
+LS3D_LAYOUT32(offsetof(I3D_area, sounds) == 0x148, "I3D_area layout");
+LS3D_LAYOUT32(offsetof(I3D_area, fadeTime) == 0x158, "I3D_area layout");

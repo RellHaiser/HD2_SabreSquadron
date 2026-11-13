@@ -13,6 +13,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_scene;
@@ -102,11 +103,11 @@ public:
     int lightStamp;                         // +0x208 the light sector's and the frame's changes when lit
     float opacity;                          // +0x20C (0.117)
 };
-static_assert(sizeof(I3D_shadow) == 0x210, "I3D_shadow layout");
-static_assert(offsetof(I3D_shadow, unknown124) == 0x124, "I3D_shadow layout");
-static_assert(offsetof(I3D_shadow, bounds) == 0x150, "I3D_shadow layout");
-static_assert(offsetof(I3D_shadow, lightMatrix) == 0x1B0, "I3D_shadow layout");
-static_assert(offsetof(I3D_shadow, opacity) == 0x20C, "I3D_shadow layout");
+LS3D_LAYOUT32(sizeof(I3D_shadow) == 0x210, "I3D_shadow layout");
+LS3D_LAYOUT32(offsetof(I3D_shadow, unknown124) == 0x124, "I3D_shadow layout");
+LS3D_LAYOUT32(offsetof(I3D_shadow, bounds) == 0x150, "I3D_shadow layout");
+LS3D_LAYOUT32(offsetof(I3D_shadow, lightMatrix) == 0x1B0, "I3D_shadow layout");
+LS3D_LAYOUT32(offsetof(I3D_shadow, opacity) == 0x20C, "I3D_shadow layout");
 
 namespace ls3d::i3d {
 

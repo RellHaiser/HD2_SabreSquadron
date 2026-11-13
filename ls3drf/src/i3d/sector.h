@@ -9,6 +9,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_light;
@@ -166,17 +167,17 @@ public:
     I3D_visual *renderVisuals;              // +0x288 (renderer) its visuals drawn this frame
     uint32_t padding28C;
 };
-static_assert(sizeof(I3D_sector) == 0x290, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, sectorFlags) == 0x160, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, box) == 0x170, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, lightChanges) == 0x198, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, lights) == 0x1A4, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, sounds) == 0x1B8, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, environment) == 0x1D0, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, fogLight) == 0x248, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, portals) == 0x24C, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, scene) == 0x26C, "I3D_sector layout");
-static_assert(offsetof(I3D_sector, occluder) == 0x284, "I3D_sector layout");
+LS3D_LAYOUT32(sizeof(I3D_sector) == 0x290, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, sectorFlags) == 0x160, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, box) == 0x170, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, lightChanges) == 0x198, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, lights) == 0x1A4, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, sounds) == 0x1B8, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, environment) == 0x1D0, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, fogLight) == 0x248, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, portals) == 0x24C, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, scene) == 0x26C, "I3D_sector layout");
+LS3D_LAYOUT32(offsetof(I3D_sector, occluder) == 0x284, "I3D_sector layout");
 
 namespace ls3d::i3d {
 

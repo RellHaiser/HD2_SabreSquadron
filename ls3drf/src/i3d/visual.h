@@ -6,6 +6,7 @@
 // morph visuals implement it.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 // Visual flags (I3D_visual::visualFlags).
@@ -104,7 +105,7 @@ public:
     float depth;                            // +0x1D8 (renderer) view depth (the portal pass; blended items sort by it)
     uint32_t unknown1DC;                    // +0x1DC
 };
-static_assert(sizeof(I3D_visual) == 0x1E0, "I3D_visual layout");
-static_assert(offsetof(I3D_visual, invWorldMatrix) == 0x130, "I3D_visual layout");
-static_assert(offsetof(I3D_visual, worldBound) == 0x170, "I3D_visual layout");
-static_assert(offsetof(I3D_visual, visualFlags) == 0x1D0, "I3D_visual layout");
+LS3D_LAYOUT32(sizeof(I3D_visual) == 0x1E0, "I3D_visual layout");
+LS3D_LAYOUT32(offsetof(I3D_visual, invWorldMatrix) == 0x130, "I3D_visual layout");
+LS3D_LAYOUT32(offsetof(I3D_visual, worldBound) == 0x170, "I3D_visual layout");
+LS3D_LAYOUT32(offsetof(I3D_visual, visualFlags) == 0x1D0, "I3D_visual layout");

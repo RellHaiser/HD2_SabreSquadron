@@ -4,6 +4,8 @@
 
 #include <cstdint>
 
+#include "core/layout.h"
+
 namespace ls3d::i3d {
 
 // A lightmap patch (0x1C bytes). A uniform patch is a 3 x 3 marker with its color instead of
@@ -22,7 +24,7 @@ struct S_lightmapPart {
     };
     void *texels;                           // +0x18 width x height in the atlas texture's format
 };
-static_assert(sizeof(S_lightmapPart) == 0x1C, "S_lightmapPart layout");
+LS3D_LAYOUT32(sizeof(S_lightmapPart) == 0x1C, "S_lightmapPart layout");
 
 // LS3DF's atlas placement of a level's patches. LS3DRF has none; S_lightmapLevel::lightmap stays
 // for the LS3DF layout.

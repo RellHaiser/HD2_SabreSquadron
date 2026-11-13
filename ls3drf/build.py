@@ -7,6 +7,8 @@ Usage: python build.py [dll] [check] [gcc] [test] [run] [--debug] [--m32] [--onl
          (--m32: a 32-bit build, build/gcc32/; %CXXFLAGS% and %LDFLAGS% are added; %RW_DATA_LIB%: the
          rw_data port's shared library to link against). With MinGW it checks the POSIX side on
          Windows (LS3D_FORCE_POSIX) and links build/gcc*/LS3DRF.dll, which is not a drop-in.
+  check64  compile every source and header for x86-64 with Clang (%CLANG%, PATH or LLVM's install),
+         syntax only: the 64-bit build's own layouts (src/core/layout.h)
   test   build tests/*.cpp into build/<name>.exe
   run    run the built tests with their standard arguments (--ops, default 20000, each of --seeds,
          default 1; the originals from %HD2_DIR%), one line each; full output in %TEMP%\\ls3drf_build\\logs
@@ -398,6 +400,60 @@ def gcc_build(debug, m32):
     return r.returncode == 0
 
 
+# ---------------------------------------------------------------- the 64-bit compile check
+
+CLANG_PATHS = [r"C:\Program Files\LLVM\bin\clang++.exe"]
+
+
+def check64():
+    """Compiles (syntax only, Clang) every source and every header on its own for x86-64: the build
+    that has its own layouts (core/layout.h). On Windows two passes: the Win32 platform, and the
+    POSIX types (LS3D_FORCE_POSIX; the POSIX backend itself needs a POSIX system). Elsewhere one pass,
+    the POSIX platform. Errors only: whether the 64-bit build runs is not checked here."""
+    clang = (os.environ.get("CLANG") or shutil.which("clang++")
+             or next((p for p in CLANG_PATHS if os.path.exists(p)), None))
+    if not clang:
+        sys.exit("check64: clang++ not found (set CLANG)")
+    base = ["-std=c++17", "-fsyntax-only", "-ferror-limit=0", "-Wno-everything", "-DLS3D_API=", "-I" + SRC]
+    if os.name == "nt":
+        win = base + ["--target=x86_64-pc-windows-msvc", "-fms-extensions", "-DNOMINMAX", "-DWIN32_LEAN_AND_MEAN",
+                      "-D_CRT_SECURE_NO_WARNINGS"]
+        passes = [("win32", win, "win32"), ("posix types", win + ["-DLS3D_FORCE_POSIX"], None)]
+    else:
+        passes = [("posix", base + ["-m64"], "posix")]
+
+    def files(backend):
+        out = []
+        for d, _, names in os.walk(SRC):
+            for f in names:
+                rel = os.path.relpath(os.path.join(d, f), SRC).replace("\\", "/")
+                if not f.endswith((".cpp", ".h")):
+                    continue
+                if rel.startswith("platform/") and rel.count("/") > 1 and not rel.startswith("platform/%s/" % backend):
+                    continue
+                if rel == "dx/dinput_types.h" and backend != "win32":
+                    continue                    # (over the SDK's dinput.h)
+                out.append(os.path.join(d, f))
+        return sorted(out)
+
+    ok = True
+    for name, flags, backend in passes:
+        def one(path):
+            r = subprocess.run([clang, *flags, "-x", "c++", path], capture_output=True, text=True)
+            return r.returncode == 0, (r.stdout + r.stderr).strip()
+
+        paths = files(backend)
+        errors = 0
+        with ThreadPoolExecutor(max(2, os.cpu_count() or 4)) as ex:
+            for good, text in ex.map(one, paths):
+                if not good:
+                    errors += 1
+                    print(text)
+        print("check64 (%s): %d files, %s" % (name, len(paths), "ok" if not errors else "%d with errors" % errors))
+        ok &= not errors
+    return ok
+
+
 def test_directives(path):
     """`// test-sources: src/igraph/*.cpp ...` lines of a test: port sources it links."""
     import glob
@@ -516,6 +572,8 @@ def main():
         ok &= good and link(objs, debug)
     if "gcc" in targets:
         ok &= gcc_build(debug, "--m32" in sys.argv)
+    if "check64" in targets:
+        ok &= check64()
     if "test" in targets:
         ok &= build_tests(debug, only)
     if "run" in targets and ok:

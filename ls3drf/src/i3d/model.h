@@ -4,6 +4,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_anim_stack;
@@ -71,6 +72,6 @@ public:
 private:
     I3D_anim_stack *Stack();                // the stack, made when missing (null when out of memory)
 };
-static_assert(sizeof(I3D_model) == 0x140, "I3D_model layout");
-static_assert(offsetof(I3D_model, frames) == 0x120, "I3D_model layout");
-static_assert(offsetof(I3D_model, animStack) == 0x130, "I3D_model layout");
+LS3D_LAYOUT32(sizeof(I3D_model) == 0x140, "I3D_model layout");
+LS3D_LAYOUT32(offsetof(I3D_model, frames) == 0x120, "I3D_model layout");
+LS3D_LAYOUT32(offsetof(I3D_model, animStack) == 0x130, "I3D_model layout");

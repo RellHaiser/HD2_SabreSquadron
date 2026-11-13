@@ -11,6 +11,7 @@
 // LS3DF's +0x244 - +0x304: LS3DRF has none.)
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/vb_manager.h"
 #include "i3d/visual.h"
 
@@ -47,10 +48,10 @@ public:
     uint32_t mirrorFlags;                   // +0x240 MIRF_*
     ls3d::S_IBAlloc faces;                  // +0x244 (LS3DF: +0x304)
 };
-static_assert(sizeof(I3D_mirror) == 0x250, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, color) == 0x220, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, range) == 0x230, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, numVertices) == 0x234, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, vertices) == 0x23C, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, mirrorFlags) == 0x240, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, faces) == 0x244, "I3D_mirror layout");
+LS3D_LAYOUT32(sizeof(I3D_mirror) == 0x250, "I3D_mirror layout");
+LS3D_LAYOUT32(offsetof(I3D_mirror, color) == 0x220, "I3D_mirror layout");
+LS3D_LAYOUT32(offsetof(I3D_mirror, range) == 0x230, "I3D_mirror layout");
+LS3D_LAYOUT32(offsetof(I3D_mirror, numVertices) == 0x234, "I3D_mirror layout");
+LS3D_LAYOUT32(offsetof(I3D_mirror, vertices) == 0x23C, "I3D_mirror layout");
+LS3D_LAYOUT32(offsetof(I3D_mirror, mirrorFlags) == 0x240, "I3D_mirror layout");
+LS3D_LAYOUT32(offsetof(I3D_mirror, faces) == 0x244, "I3D_mirror layout");

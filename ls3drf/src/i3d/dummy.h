@@ -2,6 +2,7 @@
 // 0x1001c080). Scenes keep a list of the dummies they draw as boxes (FRMFLAGS_SCENE_DUMMY).
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 // I3D_dummy::boxFlags.
@@ -29,4 +30,4 @@ public:
     uint32_t boxFlags;                      // +0x140 DUMMYF_*
     uint32_t unknown144[3];                 // +0x144
 };
-static_assert(sizeof(I3D_dummy) == 0x150, "I3D_dummy layout");
+LS3D_LAYOUT32(sizeof(I3D_dummy) == 0x150, "I3D_dummy layout");

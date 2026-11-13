@@ -9,6 +9,7 @@
 // Each level is skinned into a vertex buffer of its own (S_skinLevel) when a joint moved since.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/mesh.h"
 #include "i3d/morph.h"
 #include "i3d/object.h"
@@ -35,7 +36,7 @@ struct S_skinData {
     uint8_t *vertexJoints[I3D_mesh::kMaxLevels];
     uint8_t parents[kMaxSkinJoints];        // +0x80 a joint's parent joint (1-based; 0 none)
 };
-static_assert(sizeof(S_skinData) == 0xC0, "S_skinData layout");
+LS3D_LAYOUT32(sizeof(S_skinData) == 0xC0, "S_skinData layout");
 
 // S_skinLevel::flags.
 enum : uint32_t {
@@ -48,7 +49,7 @@ struct S_skinLevel {
     uint32_t flags = 0;                     // +0x04 SKINLEVEL_*
     ls3d::S_VBAlloc vb = {};                // +0x08 the level's render layout
 };
-static_assert(sizeof(S_skinLevel) == 0x14, "S_skinLevel layout");
+LS3D_LAYOUT32(sizeof(S_skinLevel) == 0x14, "S_skinLevel layout");
 
 class I3D_singlemesh : public I3D_object {
 public:
@@ -106,9 +107,9 @@ protected:
     // The joints' skinning matrices into g_jointMatrices (inlined).
     void ComputeJointMatrices();
 };
-static_assert(sizeof(I3D_singlemesh) == 0x250, "I3D_singlemesh layout");
-static_assert(offsetof(I3D_singlemesh, joints) == 0x214, "I3D_singlemesh layout");
-static_assert(offsetof(I3D_singlemesh, levels) == 0x224, "I3D_singlemesh layout");
+LS3D_LAYOUT32(sizeof(I3D_singlemesh) == 0x250, "I3D_singlemesh layout");
+LS3D_LAYOUT32(offsetof(I3D_singlemesh, joints) == 0x214, "I3D_singlemesh layout");
+LS3D_LAYOUT32(offsetof(I3D_singlemesh, levels) == 0x224, "I3D_singlemesh layout");
 
 class I3D_singlemorph : public I3D_singlemesh, public C_morph {
 public:
@@ -133,7 +134,7 @@ public:
     I3D_RESULT __stdcall SetMorphWeight(int channel, int target, float weight) override;
     float __stdcall GetMorphWeight(int channel, int target) override;
 };
-static_assert(sizeof(I3D_singlemorph) == 0x270, "I3D_singlemorph layout");
+LS3D_LAYOUT32(sizeof(I3D_singlemorph) == 0x270, "I3D_singlemorph layout");
 
 namespace ls3d::i3d {
 

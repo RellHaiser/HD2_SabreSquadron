@@ -3,6 +3,7 @@
 // the frame they belong to.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_volume : public I3D_frame {
@@ -21,5 +22,5 @@ public:
     uint32_t unknown154[2];                 // +0x154
     uint32_t unknown15C;                    // +0x15C
 };
-static_assert(sizeof(I3D_volume) == 0x160, "I3D_volume layout");
-static_assert(offsetof(I3D_volume, volumeType) == 0x140, "I3D_volume layout");
+LS3D_LAYOUT32(sizeof(I3D_volume) == 0x160, "I3D_volume layout");
+LS3D_LAYOUT32(offsetof(I3D_volume, volumeType) == 0x140, "I3D_volume layout");

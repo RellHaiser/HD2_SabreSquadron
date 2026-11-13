@@ -2,6 +2,7 @@
 // 0x10020a70 - 0x10020bc0). The I3D_singlemesh it moves keeps it in its joint array.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 class I3D_singlemesh;
@@ -35,5 +36,5 @@ public:
     I3D_singlemesh *mesh;                   // +0x168 the visual it moves
     uint32_t unknown16C;                    // +0x16C
 };
-static_assert(sizeof(I3D_joint) == 0x170, "I3D_joint layout");
-static_assert(offsetof(I3D_joint, jointIndex) == 0x160, "I3D_joint layout");
+LS3D_LAYOUT32(sizeof(I3D_joint) == 0x170, "I3D_joint layout");
+LS3D_LAYOUT32(offsetof(I3D_joint, jointIndex) == 0x160, "I3D_joint layout");

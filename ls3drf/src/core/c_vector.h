@@ -6,6 +6,8 @@
 #include <new>
 #include <type_traits>
 
+#include "core/layout.h"
+
 namespace ls3d {
 
 template <class T> class C_vector {
@@ -116,6 +118,6 @@ private:
     int m_growBy;       // +0x0C
 };
 
-static_assert(sizeof(C_vector<int>) == 16, "C_vector layout");
+LS3D_LAYOUT32(sizeof(C_vector<int>) == 16, "C_vector layout");
 
 }  // namespace ls3d

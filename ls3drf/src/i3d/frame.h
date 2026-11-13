@@ -14,6 +14,7 @@
 // SetWorldDir; the code says world position, world direction and local direction.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/i3d.h"
 
 class I3D_frame {
@@ -176,14 +177,14 @@ public:
     static void *operator new(size_t, void *where) { return where; }
     static void operator delete(void *, void *) {}
 };
-static_assert(sizeof(I3D_frame) == 0x120, "I3D_frame layout");
-static_assert(offsetof(I3D_frame, bound) == 0x10, "I3D_frame layout");
-static_assert(offsetof(I3D_frame, worldMatrix) == 0x40, "I3D_frame layout");
-static_assert(offsetof(I3D_frame, rot) == 0xC0, "I3D_frame layout");
-static_assert(offsetof(I3D_frame, frameFlags) == 0xE0, "I3D_frame layout");
-static_assert(offsetof(I3D_frame, type) == 0xF8, "I3D_frame layout");
-static_assert(offsetof(I3D_frame, parent) == 0x108, "I3D_frame layout");
-static_assert(offsetof(I3D_frame, renderStamp) == 0x11C, "I3D_frame layout");
+LS3D_LAYOUT32(sizeof(I3D_frame) == 0x120, "I3D_frame layout");
+LS3D_LAYOUT32(offsetof(I3D_frame, bound) == 0x10, "I3D_frame layout");
+LS3D_LAYOUT32(offsetof(I3D_frame, worldMatrix) == 0x40, "I3D_frame layout");
+LS3D_LAYOUT32(offsetof(I3D_frame, rot) == 0xC0, "I3D_frame layout");
+LS3D_LAYOUT32(offsetof(I3D_frame, frameFlags) == 0xE0, "I3D_frame layout");
+LS3D_LAYOUT32(offsetof(I3D_frame, type) == 0xF8, "I3D_frame layout");
+LS3D_LAYOUT32(offsetof(I3D_frame, parent) == 0x108, "I3D_frame layout");
+LS3D_LAYOUT32(offsetof(I3D_frame, renderStamp) == 0x11C, "I3D_frame layout");
 
 // LinkTo flags.
 enum : uint32_t {

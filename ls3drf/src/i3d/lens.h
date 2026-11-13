@@ -10,6 +10,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/visual.h"
 
 class I3D_material;
@@ -54,8 +55,8 @@ public:
     float nearScale;                        // +0x244 (1)
     uint32_t padding248[2];
 };
-static_assert(sizeof(I3D_lens) == 0x250, "I3D_lens layout");
-static_assert(offsetof(I3D_lens, lensFlags) == 0x1E8, "I3D_lens layout");
-static_assert(offsetof(I3D_lens, brightness) == 0x1F8, "I3D_lens layout");
-static_assert(offsetof(I3D_lens, elements) == 0x228, "I3D_lens layout");
-static_assert(offsetof(I3D_lens, nearScale) == 0x244, "I3D_lens layout");
+LS3D_LAYOUT32(sizeof(I3D_lens) == 0x250, "I3D_lens layout");
+LS3D_LAYOUT32(offsetof(I3D_lens, lensFlags) == 0x1E8, "I3D_lens layout");
+LS3D_LAYOUT32(offsetof(I3D_lens, brightness) == 0x1F8, "I3D_lens layout");
+LS3D_LAYOUT32(offsetof(I3D_lens, elements) == 0x228, "I3D_lens layout");
+LS3D_LAYOUT32(offsetof(I3D_lens, nearScale) == 0x244, "I3D_lens layout");

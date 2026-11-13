@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/i3d.h"
 
 class I3D_scene;
@@ -82,11 +83,11 @@ public:
     ls3d::C_vector<I3D_scene *> scenes;                                 // +0x18 (LS3DF: +0x38)
     int16_t mirrorStamp;                                                // +0x28 (LS3DF: +0x48) nothing counts: mirrors keep no stamp
 };
-static_assert(sizeof(I3D_driver) == 0x2C, "I3D_driver layout");
-static_assert(offsetof(I3D_driver, unknown04) == 0x04, "I3D_driver layout");
-static_assert(offsetof(I3D_driver, soundFrames) == 0x08, "I3D_driver layout");
-static_assert(offsetof(I3D_driver, scenes) == 0x18, "I3D_driver layout");
-static_assert(offsetof(I3D_driver, mirrorStamp) == 0x28, "I3D_driver layout");
+LS3D_LAYOUT32(sizeof(I3D_driver) == 0x2C, "I3D_driver layout");
+LS3D_LAYOUT32(offsetof(I3D_driver, unknown04) == 0x04, "I3D_driver layout");
+LS3D_LAYOUT32(offsetof(I3D_driver, soundFrames) == 0x08, "I3D_driver layout");
+LS3D_LAYOUT32(offsetof(I3D_driver, scenes) == 0x18, "I3D_driver layout");
+LS3D_LAYOUT32(offsetof(I3D_driver, mirrorStamp) == 0x28, "I3D_driver layout");
 
 namespace ls3d::i3d {
 

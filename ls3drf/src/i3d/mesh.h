@@ -11,6 +11,7 @@
 // The driver makes them (slots 0x64 / 0x68 / 0x6C); the levels and meshes count references.
 #pragma once
 
+#include "core/layout.h"
 #include "i3d/i3d.h"
 #include "i3d/vb_manager.h"
 
@@ -43,7 +44,7 @@ public:
     I3D_face_group *next;                   // +0x0C the level's list
     ls3d::S_IBAlloc faces;                  // +0x10 numFaces * 3 indices
 };
-static_assert(sizeof(I3D_face_group) == 0x1C, "I3D_face_group layout");
+LS3D_LAYOUT32(sizeof(I3D_face_group) == 0x1C, "I3D_face_group layout");
 
 // I3D_mesh_level::flags.
 enum : uint32_t {
@@ -126,9 +127,9 @@ public:
     float envScale;                         // +0x68 2 sqrt(2) / the material's 7 low flag bits
     uint32_t unknown6C;                     // +0x6C
 };
-static_assert(sizeof(I3D_mesh_level) == 0x70, "I3D_mesh_level layout");
-static_assert(offsetof(I3D_mesh_level, vertices) == 0x34, "I3D_mesh_level layout");
-static_assert(offsetof(I3D_mesh_level, faceGroups) == 0x5C, "I3D_mesh_level layout");
+LS3D_LAYOUT32(sizeof(I3D_mesh_level) == 0x70, "I3D_mesh_level layout");
+LS3D_LAYOUT32(offsetof(I3D_mesh_level, vertices) == 0x34, "I3D_mesh_level layout");
+LS3D_LAYOUT32(offsetof(I3D_mesh_level, faceGroups) == 0x5C, "I3D_mesh_level layout");
 
 class I3D_mesh {
 public:
@@ -166,5 +167,5 @@ public:
     uint32_t numLevels;                     // +0x44
     I3D_mesh_level *levels[kMaxLevels];     // +0x48
 };
-static_assert(sizeof(I3D_mesh) == 0x70, "I3D_mesh layout");
-static_assert(offsetof(I3D_mesh, levels) == 0x48, "I3D_mesh layout");
+LS3D_LAYOUT32(sizeof(I3D_mesh) == 0x70, "I3D_mesh layout");
+LS3D_LAYOUT32(offsetof(I3D_mesh, levels) == 0x48, "I3D_mesh layout");

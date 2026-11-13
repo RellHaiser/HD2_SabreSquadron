@@ -4,6 +4,7 @@
 #pragma once
 
 #include "core/c_vector.h"
+#include "core/layout.h"
 #include "i3d/frame.h"
 
 // I3D_target::mode.
@@ -39,8 +40,8 @@ public:
     uint32_t mode;                          // +0x130 TARGETF_*
     uint32_t unknown134[3];                 // +0x134
 };
-static_assert(sizeof(I3D_target) == 0x140, "I3D_target layout");
-static_assert(offsetof(I3D_target, mode) == 0x130, "I3D_target layout");
+LS3D_LAYOUT32(sizeof(I3D_target) == 0x140, "I3D_target layout");
+LS3D_LAYOUT32(offsetof(I3D_target, mode) == 0x130, "I3D_target layout");
 
 namespace ls3d::i3d {
 
