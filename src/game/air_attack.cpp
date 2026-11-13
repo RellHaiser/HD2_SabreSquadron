@@ -321,7 +321,7 @@ void C_AirAttack::SetTarget(bool stop, I3D_frame *target)   // 0x005e7570
     m_idle = true;
 }
 
-void C_AirAttack::StartMission(bool server)             // 0x005e4090
+void C_AirAttack::StartMission(bool server)             // 0x005e4090 (DS 0x00602aa0)
 {
     Activate(server);
     // The direction: the frame's z, levelled.
@@ -394,6 +394,7 @@ void C_AirAttack::StartMission(bool server)             // 0x005e4090
     m_volume.centerW = center.x;
     g_collisionWorld.AddVolume(&m_volume);
     m_target = nullptr;
+#ifndef HD2_DEDICATED   // no sounds on the server
     // The shots' sounds into the cache.
     if (!ISndGetDriver()->IsInitialized())
         return;
@@ -403,9 +404,10 @@ void C_AirAttack::StartMission(bool server)             // 0x005e4090
         g_soundCache.OpenInto(sound, C_fstr("sand%02d.wav", i).c_str());
     }
     sound->Release();
+#endif
 }
 
-void C_AirAttack::StopMission(bool server)              // 0x005e56d0
+void C_AirAttack::StopMission(bool server)              // 0x005e56d0 (DS 0x00604510)
 {
     Deactivate(server);
     if (!m_started)
@@ -413,7 +415,9 @@ void C_AirAttack::StopMission(bool server)              // 0x005e56d0
     m_started = false;
     g_collisionWorld.RemoveVolume(&m_volume);
     if (m_smoke != -1) {
+#ifndef HD2_DEDICATED   // no particles on the server (the id is still cleared)
         g_particlesModule.Destroy(m_smoke);
+#endif
         m_smoke = -1;
     }
     for (I3D_sound *&sound : m_motorSounds) {

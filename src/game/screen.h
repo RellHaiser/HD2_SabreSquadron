@@ -149,7 +149,7 @@ public:
     // The model's "description01" box off at (0.5, -0.375, -0.5), its "text01" and "text02" made (titles,
     // the screen's id | 2) and the "new_medal" place (a dummy) kept; "description" off. True. (The
     // description is not read.)
-    bool Build(const S_ScreenDesc *desc) override;      // +0x8C 0x00669c00
+    bool Build(const S_ScreenDesc *desc) override;      // +0x8C 0x00669c00 (DS 0x006a3220)
 
 private:
     C_TitleControl *m_name = nullptr;                   // +0x84 "text01"

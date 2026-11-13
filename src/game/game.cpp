@@ -126,7 +126,7 @@ C_game::~C_game()                                   // 0x00698b00 (DS 0x006d9810
 // ---------------------------------------------------------------------------
 // The mission's start and end
 
-bool C_game::Start(void *arg)                       // 0x00698c80
+bool C_game::Start(void *arg)                       // 0x00698c80 (DS 0x006d99e0)
 {
     C_MissionDef *mission = static_cast<C_MissionDef *>(arg);
     if (m_state == GAME_STATE_STARTING)
@@ -171,18 +171,24 @@ bool C_game::Start(void *arg)                       // 0x00698c80
     g_netGame.Command(NET_COMMAND_SCAN_LEVEL, nullptr, 0);
     g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.1f);
     SwitchStaticLights(false);
+#ifndef HD2_DEDICATED   // no stains on the server
     if (IsLocalGame() && g_gameProfile.GetDetailSettings()->IsEnabled(DETAIL_STAINS))
         g_stainManager.Init(0);
+#endif
     if (IsServer())
         ModuleManager::BroadcastStartMission(true);
     g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.35f);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient()) {
         m_interface->Init();
         ModuleManager::BroadcastStartMission(false);
     }
+#endif
     g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.5f);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         m_firstPersonView->Init();
+#endif
     g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.8f);
 
     m_state = GAME_STATE_STARTING;
@@ -200,8 +206,10 @@ bool C_game::Start(void *arg)                       // 0x00698c80
             static_cast<C_SpawnPoint *>(spawnPoint)->Spawn(0, squad[i], nullptr);
         }
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         ClearSpeechSlots();
+#endif
     m_paused = false;
     g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.9f);
     if (m_quickMessages)
