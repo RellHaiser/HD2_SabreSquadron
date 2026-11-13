@@ -585,7 +585,7 @@ const char *RandomName(int length);                 // 0x007311b0 (__fastcall)
 void OnBrowserCallback(struct S_ServerBrowser *browser, int reason, struct S_SbServer *server, void *instance);   // 0x00723190
 void AddBrowserServer(struct S_SbServer *server);   // 0x007231b0
 // The server's GameSpy reporting: its keys, the players', the teams', which keys, their counts, the errors.
-void ReportServerKey(int key, struct S_Qr2Buffer *buffer, void *userData);    // 0x007237d0
+void ReportServerKey(int key, struct S_Qr2Buffer *buffer, void *userData);    // 0x007237d0 (DS 0x0077a890)
 void ReportPlayerKey(int key, int index, struct S_Qr2Buffer *buffer, void *userData);   // 0x00723a40
 void ReportTeamKey(int key, int index, struct S_Qr2Buffer *buffer, void *userData);     // 0x00723b70
 void ReportKeyList(int keyType, struct S_Qr2KeyBuffer *keys, void *userData);   // 0x00723bb0

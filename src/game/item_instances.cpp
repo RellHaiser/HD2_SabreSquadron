@@ -464,10 +464,12 @@ bool C_WeaponItem::Reload(C_Actor *owner, int container, int *ammoUid, bool keep
             }
         }
 
+#ifndef HD2_DEDICATED   // no reload sound on the server
         if (owner->GetType() == ACTOR_HUMAN && IsClient()) {
             PlayReloadSound(owner, IsOwnWeaponHeard(owner));
             static_cast<C_Human *>(owner)->SetInventoryChanged(true);
         }
+#endif
         readyTime = Now() + comp->GetReloadTimeMs();
     }
 

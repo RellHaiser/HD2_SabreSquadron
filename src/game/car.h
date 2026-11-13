@@ -402,13 +402,13 @@ public:
     C_Actor *LeaveSeat(int seat) override;              // 0x80 0x004d9a40 (DS 0x004c7320)
     bool ExitSeat(int seat) override;                   // 0x84 0x004d9be0 (DS 0x004c7530)
     int GetSeatCount() override;                        // 0x88 0x004d0e30
-    uint32_t GetSeatFlags(int seat) override;           // 0x8C 0x004d9fc0
+    uint32_t GetSeatFlags(int seat) override;           // 0x8C 0x004d9fc0 (DS 0x004c79d0)
     // The occupant's camera dummy ("camera3RD*", "cameraFPV*" in first person or for an "NO3RD"
     // seat); the driver's, a hidden occupant's and a gunner's are the seat dummy's (or its
     // parent's).
     I3D_frame *GetSeatCamera(int seat) override;        // 0x90 0x004d9e10
-    int GetSeatText(int seat) override;                 // 0x94 0x004d9ff0
-    bool HasSeatWeapon(int seat) override;              // 0x98 0x004da020
+    int GetSeatText(int seat) override;                 // 0x94 0x004d9ff0 (DS 0x004c7a10)
+    bool HasSeatWeapon(int seat) override;              // 0x98 0x004da020 (DS 0x004c7a50)
     int GetSeatWeaponRounds(int seat) override;         // 0x9C 0x004da040 (DS 0x004c7a80)
     S_vector GetSeatWeaponAim(int seat) override;       // 0xA4 0x004da150 (DS 0x004c7be0)
     S_vector GetSeatWeaponOrigin(int seat) override;    // 0xA8 0x004da110 (DS 0x004c7b90)

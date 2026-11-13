@@ -288,7 +288,7 @@ protected:
     int m_container = 0;                                // +0x24
 };
 
-class C_AmmoItem : public C_Item {                      // vtable 0x00816ed8, 0x30 bytes
+class C_AmmoItem : public C_Item {                      // vtable 0x00816ed8, 0x30 bytes; deleting dtor 0x007d37a0 (DS 0x0080c730)
 public:
     C_AmmoItem() : C_Item(ITEM_KIND_AMMO) {}            // 0x007d3680
 
@@ -363,7 +363,7 @@ public:
     // refills the weapon without being used up (as does the infinite ammo cheat).
     // The weapon is busy for the component's reload time; `*ammoUid` receives the uid
     // of the magazine used up (-1 none).
-    bool Reload(C_Actor *owner, int container, int *ammoUid, bool keepLastMagazine) override;   // 0x007d4cb0
+    bool Reload(C_Actor *owner, int container, int *ammoUid, bool keepLastMagazine) override;   // 0x007d4cb0 (DS 0x0080e340)
     int Fire(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint32_t flags) override;   // 0x007d5430 (DS 0x0080e8e0)
     int FireSecondary(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint8_t flags) override;   // 0x007d5670
     I3D_frame *GetProjectileFrame() override;           // 0x007d4b10

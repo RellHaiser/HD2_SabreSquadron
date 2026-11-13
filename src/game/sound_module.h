@@ -183,7 +183,7 @@ public:
     // Plays track `track` once over the (turned down) background music; -1 stops it.
     void PlayMusic(int track);                                      // vtable +0x68 0x00436f60
     // Fades the music out in fadeTime/2 ms, then starts `track` and fades it in.
-    void CrossfadeMusic(int track, int fadeTime, int position);     // vtable +0x6C 0x00436f10
+    void CrossfadeMusic(int track, int fadeTime, int position);     // vtable +0x6C 0x00436f10 (DS 0x0045b1f0)
     int GetBackgroundMusic() const { return m_musicTrack; }         // vtable +0x70 0x00433800
     int GetBackgroundMusicPosition() const;                         // vtable +0x74 0x00433810 (ms)
     float SetMusicVolume(float volume);                             // vtable +0x7C 0x00433510

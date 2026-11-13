@@ -1000,11 +1000,13 @@ void C_TeamManager::StartMission(bool server)           // 0x00460aa0
         GetSquadCommander()->Reset();
 }
 
-void C_TeamManager::StopMission(bool server)            // 0x00460b30
+void C_TeamManager::StopMission(bool server)            // 0x00460b30 (DS 0x0047c840)
 {
     if (!server) {
+#ifndef HD2_DEDICATED   // the server has only the server's side
         if (IsClient())
             m_playerTeam.RestartMission(false);
+#endif
         m_clientRunning = false;
         return;
     }

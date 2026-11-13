@@ -313,7 +313,9 @@ bool C_ItemsModule::SaveGame(C_chunk &chunk)
         return false;
     chunk.WriteChunk(CHUNK_ITEMS_LAST_UID, m_lastUid);
     chunk.Ascend();
+#ifndef HD2_DEDICATED   // no surface marks on the server
     SurfaceMarks_Save(chunk);
+#endif
     chunk.Ascend();
     return true;
 }

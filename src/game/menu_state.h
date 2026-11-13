@@ -102,7 +102,7 @@ public:
     bool Start(void *arg) override;                     // 0x04 0x0066b010 (DS 0x006a3db0)
     // OnStop, the screens' stack emptied, the screens deleted (the last first), the models and
     // frames released, the cursor, the camera and the scene released, the queue emptied; true.
-    bool Stop() override;                               // 0x08 0x0066b440
+    bool Stop() override;                               // 0x08 0x0066b440 (DS 0x006a4210)
     // (Keyboard off: nothing.) OnInput; with a screen: the characters typed to the control
     // editing (taken: done), then the key pressed (none: a held control, alt or shift key, else
     // the controls' escape) to the top's Unknown20; Escape not taken: the drag ended,

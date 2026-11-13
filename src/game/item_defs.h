@@ -429,7 +429,7 @@ protected:
     I3D_frame **m_divingGear = nullptr;                 // +0x50
 };
 
-class C_AmmoItemDef : public C_ItemDef {                // vtable 0x008173e4, 0x58 bytes
+class C_AmmoItemDef : public C_ItemDef {                // vtable 0x008173e4, 0x58 bytes; deleting dtor 0x007e08a0 (DS 0x0081c7e0)
 public:
     explicit C_AmmoItemDef(int id) : C_ItemDef(ITEM_AMMO, id) {}   // 0x007e0850 (DS 0x0081c750)
     void Save(int *ioSize, void *buffer) override;      // 0x007e08d0
@@ -466,7 +466,7 @@ private:
     I3D_frame *m_fpvMagazine = nullptr;                 // +0x64 holds a reference
 };
 
-class C_StaticItemDef : public C_ItemDef {              // vtable 0x0081742c, 0x68 bytes
+class C_StaticItemDef : public C_ItemDef {              // vtable 0x0081742c, 0x68 bytes; deleting dtor 0x007e0b20 (DS 0x0081cb90)
 public:
     explicit C_StaticItemDef(int id) : C_ItemDef(ITEM_STATIC, id) {}   // 0x007e0ac0 (DS 0x0081cae0)
     void Save(int *ioSize, void *buffer) override;      // 0x007e0b50

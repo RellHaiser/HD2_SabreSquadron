@@ -192,7 +192,7 @@ public:
     bool SetFov(float fov);                             // +0x50 0x00465e50
     float GetFov();                                     // +0x54 0x00465e80
     // The view distance of the scene's active camera (its far range; the AI's sight range limit).
-    float GetViewDistance();                            // +0x58 0x00465de0
+    float GetViewDistance();                            // +0x58 0x00465de0 (DS 0x004831b0)
     bool SetNearSectorFov(float fov);                   // +0x5C 0x00465e00
     float GetNearSectorFov();                           // +0x60 0x00465e30
     // Position and view direction of camera `index` (0: the scene's camera, 1: the game camera;
