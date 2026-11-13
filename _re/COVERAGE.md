@@ -1819,3 +1819,29 @@ particles and the surface marks. Files are served from memory.
     destructor slot);
   - an Edit that did not apply (the file had changed since I read it) went unnoticed, so one mutation rerun tested the
     old file.
+
+## Human part 20b (the human's updates, `human.cpp`, 2026-11-13)
+
+- **The build:** part 20a's (`human/build_human.bat`, HUMAN_SELF). Added:
+  - the controller: each side its own object, as the original reads its look-at inline at +0x30. The side hook swaps
+    the human's pointer. Its virtuals Update, Tick, GetFacingDir, GetViewDir and OnBodyFlags are logged (the port's
+    slots by its member pointers, the original's by offset);
+  - logged on both sides: the human's members in other files (OnHandsChanged, UpdateBleeding, UpdateVelocity,
+    TickBleeding, UpdateSeenHumans, ForgetOldSounds, UpdateDisguise), the body's (SetFacingDir, SetLookAt, SetViewDir,
+    Update, Tick, TakeFlags with a scripted answer), the events' and the formation's Tick, the player team's IsMember
+    (scripted), the application's PostCommand;
+  - the original's IsActive (the human's slot 0x64);
+  - a mine's trigger volume, which the human stands on sometimes (its OnSteppedOn logged).
+- **The tests (24,000, all exact):** Update and Tick with the action and chat timers, local, client and server roles,
+  a deathmatch's automatic respawn (dead long enough, allowed, the local player's human or not), active or not, alive
+  or dead, the player's team or not, a formation or none, moving or still, treading on a mine or not; RequestRespawn
+  (the delay reached exactly, the movement blocking it).
+- **Port fixes:** none.
+- **Results:** lines: 100 % of the 62 lines of RequestRespawn, Update and Tick; human.cpp 20.0 % of 819 so far.
+- **Mutations** (`human/mutations/mutate_self2.py`): 66 mutants; 61 killed, 1 not building, 4 survived: 3 equivalent,
+  a float boundary. The first pass left 9; the mine killed 5.
+- **Harness lessons (my mistakes):**
+  - the respawn differed in 1.8 % of the updates at first: I wrote the original's local player slot directly, and
+    ToOriginal overwrote it from g_script.localPlayer. Both sides now take it from that flag;
+  - another `
+` through a bash heredoc in a debug printf (the build caught it).

@@ -33,6 +33,8 @@ struct S_SelfScript {
     int listener = 3;                                   // AddListener
     int periodicLink = 11;                              // PeriodicLinks_Add
     S_SoldierProfile *profile = nullptr;                // GetSoldierProfile
+    uint32_t bodyFlags = 0;                             // S_HumanBody::TakeFlags
+    bool member = false;                                // the player team's IsMember
 } g_self;
 // The debug console's lines (the original's Print is empty: both sides log the text).
 void LogPrint(const char *format, va_list args)
@@ -156,7 +158,7 @@ void C_Interface::SetScreen(int screen) { Log(nullptr, "SetScreen", {double(scre
 bool C_TeamBase::IsMember(const C_Human *human) const
 {
     Log(human, "IsTeamMember");
-    return false;
+    return g_self.member;
 }
 void C_Team::UpdateCameraTarget() { Log(nullptr, "UpdateCameraTarget"); }
 void C_Team::SetWatchedHuman(C_Human *human) { Log(human, "SetWatchedHuman"); }
@@ -219,7 +221,7 @@ void S_HumanBody::SetViewDir(const S_vector &dir) { Log(nullptr, "BodySetViewDir
 uint32_t S_HumanBody::TakeFlags()
 {
     Log(nullptr, "BodyTakeFlags");
-    return 0;
+    return g_self.bodyFlags;
 }
 void S_HumanBody::SetModelVisible(bool on) { Log(nullptr, "BodySetModelVisible", {double(on)}); }
 
@@ -380,8 +382,14 @@ void *OrigProfile(const void *port)
             return g_origProfileBytes[i];
     return const_cast<void *>(port);
 }
+alignas(16) uint8_t g_portController[0x400], g_origController[0x400];   // (part 20b)
 void SelfSide(bool original)
 {
+    void *&controller = *reinterpret_cast<void **>(o_human + 0xB0);
+    if (original && controller == g_portController)
+        controller = g_origController;
+    else if (!original && controller == g_origController)
+        controller = g_portController;
     void *&profile = *reinterpret_cast<void **>(o_human + 0xB8);
     for (int i = 0; i < 2; ++i) {
         if (original && profile == Profile(i))
@@ -585,11 +593,191 @@ void TestSelfNames()
     g_skipFields.erase("m_faceTexture");
 }
 
+// ---- part 20b: the updates (Update every frame, Tick every 100 ms)
+
+// The controller: each side its own object (the original reads the look-at at +0x30, its type at +0x48), its virtuals
+// logged (the port's slots by its member pointers, the original's by their offsets).
+void *g_portControllerVt[128], *g_origControllerVt[128];
+S_vector g_facingDir, g_viewDir;
+void ST CT_Update(void *self, int time) { Log(self, "ControllerUpdate", {double(time)}); }
+void ST CT_Tick(void *self, int time) { Log(self, "ControllerTick", {double(time)}); }
+const S_vector *ST CT_GetFacingDir(void *self)
+{
+    Log(self, "ControllerGetFacingDir");
+    return &g_facingDir;
+}
+const S_vector *ST CT_GetViewDir(void *self)
+{
+    Log(self, "ControllerGetViewDir");
+    return &g_viewDir;
+}
+void ST CT_OnBodyFlags(void *self, uint32_t flags) { Log(self, "ControllerOnBodyFlags", {double(flags)}); }
+void ST CT_Unexpected(void *self)
+{
+    std::printf("unexpected controller call on %s\n", NameOf(self).c_str());
+    std::exit(3);
+}
+
+// The original's calls of the human's other parts, the body, the events, the formation, the team, the application.
+void ST OU_OnHandsChanged(void *self) { Log(self, "OnHandsChanged"); }
+void ST OU_UpdateBleeding(void *self, int time) { Log(self, "UpdateBleeding", {double(time)}); }
+void ST OU_UpdateVelocity(void *self, int time) { Log(self, "UpdateVelocity", {double(time)}); }
+void ST OU_TickBleeding(void *self, int time) { Log(self, "TickBleeding", {double(time)}); }
+void ST OU_UpdateSeenHumans(void *self) { Log(self, "UpdateSeenHumans"); }
+void ST OU_ForgetOldSounds(void *self) { Log(self, "ForgetOldSounds"); }
+void ST OU_UpdateDisguise(void *self, float amount) { Log(self, "UpdateDisguise", {amount}); }
+void ST OU_EventsTick(void *self, int time) { Log(self, "EventsTick", {double(time)}); }
+void ST OU_FormationTick(void *self, int time) { Log(self, "FormationTick", {double(time)}); }
+void ST OU_BodySetFacingDir(void *, const S_vector *dir) { Log(nullptr, "BodySetFacingDir", {dir->x, dir->y, dir->z}); }
+void ST OU_BodySetLookAt(void *, const S_vector4 *t) { Log(nullptr, "BodySetLookAt", {t->x, t->y, t->z, t->w}); }
+void ST OU_BodySetViewDir(void *, const S_vector *dir) { Log(nullptr, "BodySetViewDir", {dir->x, dir->y, dir->z}); }
+void ST OU_BodyUpdate(void *, int time) { Log(nullptr, "BodyUpdate", {double(time)}); }
+void ST OU_BodyTick(void *, int time) { Log(nullptr, "BodyTick", {double(time)}); }
+uint32_t ST OU_BodyTakeFlags(void *)
+{
+    Log(nullptr, "BodyTakeFlags");
+    return g_self.bodyFlags;
+}
+int ST OU_IsMember(void *, const void *human)
+{
+    Log(human, "IsTeamMember");
+    return g_self.member;
+}
+int ST OU_IsActive(void *self) { return *reinterpret_cast<const int *>(static_cast<uint8_t *>(self) + 0x14) >= 0; }
+alignas(16) uint8_t g_fakeApp[64];
+void *OU_GetGameApp() { return g_fakeApp; }
+void ST OU_PostCommand(void *, int command, intptr_t a, intptr_t b, int flush)
+{
+    Log(nullptr, "PostCommand", {double(command), double(a), double(b), double(B(flush))});
+}
+alignas(16) uint8_t g_eventsBytes[0x200], g_formationBytes[0x100];
+// A mine's trigger volume (its actor any object: OnSteppedOn is logged on both sides).
+alignas(16) uint8_t g_mineBytes[0x100];
+const S_vector MINE_AT(40, 1.2f, 40);
+void ST OU_OnSteppedOn(void *, void *actor, int unused) { Log(actor, "MineSteppedOn", {double(unused)}); }
+
+void SetUpUpdate()
+{
+    for (int i = 0; i < 128; ++i)
+        g_portControllerVt[i] = g_origControllerVt[i] = reinterpret_cast<void *>(CT_Unexpected);
+    g_portControllerVt[VSlot(&C_HumanController::Update)] = reinterpret_cast<void *>(CT_Update);
+    g_portControllerVt[VSlot(&C_HumanController::Tick)] = reinterpret_cast<void *>(CT_Tick);
+    g_portControllerVt[VSlot(&C_HumanController::GetFacingDir)] = reinterpret_cast<void *>(CT_GetFacingDir);
+    g_portControllerVt[VSlot(&C_HumanController::GetViewDir)] = reinterpret_cast<void *>(CT_GetViewDir);
+    g_portControllerVt[VSlot(&C_HumanController::OnBodyFlags)] = reinterpret_cast<void *>(CT_OnBodyFlags);
+    g_origControllerVt[0x24 / 4] = reinterpret_cast<void *>(CT_Update);
+    g_origControllerVt[0x28 / 4] = reinterpret_cast<void *>(CT_Tick);
+    g_origControllerVt[0x48 / 4] = reinterpret_cast<void *>(CT_GetFacingDir);
+    g_origControllerVt[0x4C / 4] = reinterpret_cast<void *>(CT_GetViewDir);
+    g_origControllerVt[0x80 / 4] = reinterpret_cast<void *>(CT_OnBodyFlags);
+    *reinterpret_cast<void ***>(g_portController) = g_portControllerVt;
+    *reinterpret_cast<void ***>(g_origController) = g_origControllerVt;
+    g_names[g_portController] = g_names[g_origController] = "controller";
+    g_names[g_eventsBytes] = "events";
+    g_names[g_formationBytes] = "formation";
+    o_humanVt[0x64 / 4] = reinterpret_cast<void *>(OU_IsActive);
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x005a6a90, reinterpret_cast<const void *>(OU_OnHandsChanged)},
+        {0x005a0480, reinterpret_cast<const void *>(OU_UpdateBleeding)},
+        {0x005a0660, reinterpret_cast<const void *>(OU_UpdateVelocity)},
+        {0x005a0420, reinterpret_cast<const void *>(OU_TickBleeding)},
+        {0x005a50a0, reinterpret_cast<const void *>(OU_UpdateSeenHumans)},
+        {0x005a5380, reinterpret_cast<const void *>(OU_ForgetOldSounds)},
+        {0x005a60d0, reinterpret_cast<const void *>(OU_UpdateDisguise)},
+        {0x005ad700, reinterpret_cast<const void *>(OU_EventsTick)},
+        {0x0059ba70, reinterpret_cast<const void *>(OU_FormationTick)},
+        {0x005ac0a0, reinterpret_cast<const void *>(OU_BodySetFacingDir)},
+        {0x005ac080, reinterpret_cast<const void *>(OU_BodySetLookAt)},
+        {0x005ac0c0, reinterpret_cast<const void *>(OU_BodySetViewDir)},
+        {0x005abc20, reinterpret_cast<const void *>(OU_BodyUpdate)},
+        {0x005abc70, reinterpret_cast<const void *>(OU_BodyTick)},
+        {0x005ac0d0, reinterpret_cast<const void *>(OU_BodyTakeFlags)},
+        {0x00461a20, reinterpret_cast<const void *>(OU_IsMember)},
+        {0x006dcd10, reinterpret_cast<const void *>(OU_GetGameApp)},
+        {0x0072b590, reinterpret_cast<const void *>(OU_PostCommand)},
+        {0x005fefb0, reinterpret_cast<const void *>(OU_OnSteppedOn)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    AddContact("mine", -2, MINE_AT, S_vector(0.2f, 0.2f, 0.2f));
+    g_contacts.back()->volume.type = COLLISION_TYPE_MINE;
+    g_contacts.back()->volume.actor = reinterpret_cast<C_Actor *>(g_mineBytes);
+    g_names[g_mineBytes] = "mine";
+}
+
+// The state the updates read: the timers, the role and the network game's respawn, the controller's directions, the
+// body's flags, a team member or not, the velocity (a mine's test), a formation.
+void RandomUpdate()
+{
+    RandomSelf();
+    C_Human *h = g_h.human;
+    h->m_controller = reinterpret_cast<C_HumanController *>(g_portController);
+    h->m_events = reinterpret_cast<C_HumanEvents *>(g_eventsBytes);
+    h->m_formation = P(0.3f) ? reinterpret_cast<C_FormationShape *>(g_formationBytes) : nullptr;
+    h->m_activeIndex = P(0.85f) ? I(0, 20) : -1;
+    h->m_actionTime = P(0.3f) ? 0 : I(-10, 400);
+    h->m_chatTime = P(0.3f) ? 0 : I(-10, 400);
+    std::snprintf(h->m_chatText, sizeof h->m_chatText, "chat %d", I(0, 99));
+    h->m_aliveTime = I(0, 100000);
+    h->m_deadTime = P(0.2f) ? I(-5000, 0) : I(0, 40000);
+    h->m_stats[STAT_HEALTH] = P(0.4f) ? I(-20, 0) : I(1, 100);
+    h->m_velocity = {U(-3, 3), U(-1, 1), U(-3, 3), 0.0f};
+    if (P(0.2f))
+        h->m_velocity = {0.0f, 0.0f, 0.0f, 0.0f};
+    S_MultiplayerSettings *mp = g_mpSettings;
+    mp->gameType = P(0.6f) ? MP_GAME_DEATHMATCH : I(0, 4);
+    mp->respawnTime = I(0, 20);
+    mp->allowRespawn = P(0.7f) ? 1 : 0;
+    // (The original's slot is set by ToOriginal from g_script.localPlayer: the human's net id or 99.)
+    g_script.localPlayer = P(0.6f);
+    g_localPlayerSlot = g_script.localPlayer ? h->m_netId : 99;
+    const auto dir = [] { return S_vector(U(-1, 1), U(-1, 1), U(-1, 1)).Normalized(); };
+    g_facingDir = dir();
+    g_viewDir = dir();
+    const S_vector4 look = {U(-50, 50), U(-5, 5), U(-50, 50), 1.0f};
+    std::memcpy(g_origController + 0x30, &look, 16);
+    reinterpret_cast<C_HumanController *>(g_portController)->m_lookAt = look;
+    g_origController[0x48] = g_controller[0x48];
+    g_self.bodyFlags = P(0.3f) ? 0u : uint32_t(I(0, 0x7FFFFFFF));
+    g_self.member = P(0.5f);
+    g_self.stateFlags = P(0.5f) ? uint32_t(STATE_TREADING) & (P(0.5f) ? 0x2000u : 0x10000u) : g_self.stateFlags;
+    // Standing on the mine sometimes (or near it), elsewhere otherwise.
+    const S_vector at = P(0.4f) ? MINE_AT + S_vector(U(-0.6f, 0.6f), U(-0.4f, 0.4f), U(-0.6f, 0.6f)) : S_vector(U(4, 30), 1.0f, U(4, 30));
+    g_h.frame->SetPosInline(at);
+}
+
+typedef void(ST *T_UInt)(void *, int);
+
+void TestSelfUpdate()
+{
+    C_Human *h = g_h.human;
+    std::printf("self update\n");
+    for (int i = 0; i < 24000 / QUICK; ++i) {
+        RandomUpdate();
+        const int time = P(0.1f) ? 0 : I(1, 150);
+        if (i % 8 == 7) {
+            // Asking for a respawn: dead long enough, the movement not blocking it (dying, or its other flag).
+            h->m_deadTime = P(0.2f) ? 3000 + I(0, 1) : I(0, 6000);
+            g_h.movement->m_unknown1AC = P(0.7f) ? 0 : I(1, 3);
+            g_h.movement->m_unknown9C0 = P(0.7f) ? 0 : 1;
+            DiffCall("RequestRespawn", [&] { h->RequestRespawn(); return 0; },
+                     [&](void *) { OriginalAt<T_SVoid>(0x0059f010)(o_human); return 0; });
+        } else if (i % 2 == 0)
+            DiffCall("Update", [&] { h->C_Human::Update(time); return 0; },
+                     [&](void *) { OriginalAt<T_UInt>(0x0059fe30)(o_human, time); return 0; });
+        else
+            DiffCall("Tick", [&] { h->C_Human::Tick(time); return 0; },
+                     [&](void *) { OriginalAt<T_UInt>(0x0059ffd0)(o_human, time); return 0; });
+    }
+}
+
 void TestSelf()
 {
     SetUpSelf();
+    SetUpUpdate();
     TestSelfSkills();
     TestSelfNames();
+    TestSelfUpdate();
 }
 
 }  // namespace
