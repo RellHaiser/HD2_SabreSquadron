@@ -293,6 +293,10 @@ bool C_PictureControl::Create(I3D_frame *frame, I3D_frame *root, const S_Control
 
 bool C_PictureControl::HandleMessage(S_ControlMessage *message)
 {
+#ifdef HD2_DEDICATED   // the server's copy only returns true
+    (void)message;
+    return true;
+#endif
     if (message->id & CONTROL_NOTIFY_MASK)
         return C_TextControl::HandleMessage(message);
     switch (message->id & CONTROL_MSG_MASK) {
@@ -376,6 +380,10 @@ bool C_ControlGroup::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDe
 
 int C_ControlGroup::OnEnter(int id)
 {
+#ifdef HD2_DEDICATED   // no mouse in LS3DRF.dll: the server's copy returns 0
+    (void)id;
+    return 0;
+#endif
     if (id == GROUP_ENTER_UNKNOWN)
         return Unknown20(GROUP_ENTER_UNKNOWN) ? CONTROL_NOT_HANDLED : 0;
     const int index = FindChild(static_cast<uint32_t>(id));
@@ -3380,6 +3388,10 @@ void C_SkillControl::Refresh()
 
 bool C_SkillControl::Unknown20(int key)
 {
+#ifdef HD2_DEDICATED   // no keyboard in LS3DRF.dll: the server's copy returns true
+    (void)key;
+    return true;
+#endif
     switch (static_cast<uint8_t>(key)) {
     case KEY_MINUS:
     case KEY_PAD_MINUS:
@@ -3927,6 +3939,10 @@ bool C_ListGroup::FocusNext()
 
 bool C_ListGroup::Unknown20(int key)
 {
+#ifdef HD2_DEDICATED   // no keyboard in LS3DRF.dll: the server's copy returns false
+    (void)key;
+    return false;
+#endif
     if (C_Control *focus = Focus()) {
         if (focus->TakesInput() && focus->Unknown20(key))
             return true;
@@ -5410,19 +5426,22 @@ void C_MovieControl::CloseStream()
 
 bool C_MovieControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
 {
+#ifdef HD2_DEDICATED   // no streams in LS3DRF.dll: the server's copy returns false
+    (void)frame;
+    (void)root;
+    (void)desc;
+    return false;
+#else
     m_stream = nullptr;
     if (!C_Control::Create(frame, root, desc))
         return false;
     m_frame->SetOn(false);
-#ifndef HD2_DEDICATED   // no streams in LS3DRF.dll
     m_stream = GetIGraph()->CreateStream();
-#else
-    m_stream = nullptr;
-#endif
     if (!m_stream)
         return false;
     FindArea();
     return true;
+#endif
 }
 
 bool C_MovieControl::FindArea()
@@ -5490,6 +5509,10 @@ void C_MovieControl::Refresh()
 
 bool C_MovieControl::HandleMessage(S_ControlMessage *message)
 {
+#ifdef HD2_DEDICATED   // no streams in LS3DRF.dll: the server's copy returns true
+    (void)message;
+    return true;
+#endif
     if (message->id & CONTROL_NOTIFY_MASK)
         return C_Control::HandleMessage(message);
     switch (message->id & CONTROL_MSG_MASK) {

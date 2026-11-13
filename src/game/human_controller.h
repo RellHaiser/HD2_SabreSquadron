@@ -496,7 +496,7 @@ public:
     void OnEnemySeen(C_Human *human) override;          // 0x005421c0
     void OnEnemyLost(C_Human *human) override;          // 0x005422b0
     // Network clients: the HUD's indicator of the sound's direction.
-    void OnSoundHeard(S_RememberedSound *sound) override;   // 0x005449b0
+    void OnSoundHeard(S_RememberedSound *sound) override;   // 0x005449b0 (DS 0x0053aaf0)
     void OnHit(int type, int zone, int health, C_Actor *attacker, const S_vector &pos,
                const S_vector &dir) override;           // 0x0053db90 (DS 0x005321f0)
     // The server's messages about the human (a client) / a client's (the server).

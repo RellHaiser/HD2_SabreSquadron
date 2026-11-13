@@ -940,8 +940,10 @@ void C_PlayerController::OnSoundHeard(S_RememberedSound *sound)
     const S_vector &pos = m_human->GetFrame()->GetWorldPos();
     S_vector dir(sound->pos.x - pos.x, 0.0f, sound->pos.z - pos.z);
     NormalizeBy(dir, dir.x * dir.x + dir.z * dir.z);
+#ifndef HD2_DEDICATED   // the server has only the server's side (no HUD)
     if (IsClient())
         GetGame()->GetInterface()->ShowSoundDirection(dir, sound->chapter);
+#endif
 }
 
 // ------------------------------------------------------------------------- hits

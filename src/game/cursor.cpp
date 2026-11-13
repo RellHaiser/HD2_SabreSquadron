@@ -8,6 +8,8 @@
 float g_cursorX = -1.0f;                                // 0x00840668
 float g_cursorY = -1.0f;                                // 0x0084066c
 
+#ifndef HD2_DEDICATED   // the server has no cursor (cursor.h): the module is a shell
+
 namespace {
 
 C_Cursor *g_cursor;                                     // 0x008ae558
@@ -99,7 +101,6 @@ bool C_Cursor::Init(I3D_scene *scene)
     m_frame = scene->FindFrame("CURZOR", 0xFFFF);
     if (!m_frame)
         return false;
-#ifndef HD2_DEDICATED   // no mouse in LS3DRF.dll
     IGraph *graph = GetIGraph();
     // (Truncated, as __ftol.)
     if (g_cursorX == -1.0f || g_cursorY == -1.0f)
@@ -111,17 +112,12 @@ bool C_Cursor::Init(I3D_scene *scene)
     m_moveX = static_cast<float>(GetIGraph()->GetMouseDeltaX());
     m_moveY = static_cast<float>(GetIGraph()->GetMouseDeltaY());
     m_wheel = static_cast<float>(GetIGraph()->GetMouseWheel());
-#endif
     PlaceFrame();
     m_frame->SetOn(false);
-#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture("x_kursor.tga", nullptr, TEXTURE_MODE, &m_texture) < 0) {
         m_texture = nullptr;
         return false;
     }
-#else
-    m_texture = nullptr;
-#endif
     return true;
 }
 
@@ -136,22 +132,14 @@ void C_Cursor::PlaceFrame()
 bool C_Cursor::Update(int time)
 {
     m_lastButtons = m_buttons;
-#ifndef HD2_DEDICATED   // no mouse in LS3DRF.dll
     m_buttons = GetIGraph()->GetMouseButtons();
-#else
-    m_buttons = 0;
-#endif
     m_stillTime += time;
     m_pressTime += time;
     m_clicked = false;
     m_doubleClicked = false;
-#ifndef HD2_DEDICATED   // no mouse in LS3DRF.dll
     m_moveX = static_cast<float>(GetIGraph()->GetMouseDeltaX());
     m_moveY = static_cast<float>(GetIGraph()->GetMouseDeltaY());
     m_wheel = static_cast<float>(GetIGraph()->GetMouseWheel());
-#else
-    m_moveX = m_moveY = m_wheel = 0.0f;
-#endif
     if (m_delay > 0) {
         m_delay -= time;
         return false;
@@ -200,7 +188,6 @@ bool C_Cursor::Update(int time)
 
 void C_Cursor::Draw() const
 {
-#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     const float x = g_cursorX, y = g_cursorY;
     const float width = m_screenWidth * (1.0f / 1024.0f) * DRAWN_SIZE;
     const float height = m_screenHeight * (1.0f / 768.0f) * DRAWN_SIZE;
@@ -225,7 +212,6 @@ void C_Cursor::Draw() const
     GetIGraph()->SetTexture(m_texture, 0);
     GetIGraph()->DrawPrimitives(PRIMITIVE_FAN, 2, g_cursorQuad, 1);
     GetIGraph()->EndScene();
-#endif
 }
 
 uint32_t C_Cursor::Pick(I3D_scene *scene, I3D_frame *frame)
@@ -307,3 +293,4 @@ void C_Cursor::SetDelay(int time)
 {
     m_delay = time;
 }
+#endif

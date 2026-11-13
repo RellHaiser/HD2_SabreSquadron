@@ -217,7 +217,7 @@ public:
     ~C_PictureControl() override = default;             // 0x006513d0 (0x006513f0)
     // The face group and its texture taken; the box placed with a margin of 1.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00650a50
-    bool HandleMessage(S_ControlMessage *message) override;   // 0x00650b00
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00650b00 (DS 0x00684730)
     // The visual's alpha 0.4 (inactive) or 1 (the box not dimmed).
     void SetInactive(bool inactive) override;           // 0x00650ad0 (DS 0x006846f0)
 
@@ -239,7 +239,7 @@ public:
     bool Unknown20(int value) override;                 // 0x00656dc0
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00657180
     // The child with the id becomes the focus (it takes input) and gets the enter (id 0xF: Unknown20(0xF)).
-    int OnEnter(int id) override;                       // 0x00656e40
+    int OnEnter(int id) override;                       // 0x00656e40 (DS 0x0068bc50)
     // The focus' leave (handled: no focus).
     int OnLeave(int id) override;                       // 0x00656eb0
     int OnClick(int id) override;                       // 0x00656ef0
@@ -316,8 +316,8 @@ public:
     C_Tooltip(I3D_scene *scene, uint32_t id, C_Control *parent);
     ~C_Tooltip() override;                              // 0x0065f8d0 (0x0065f8f0): the cursor released
 
-    void Tick(int time) override;                       // 0x00651690
-    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00651540
+    void Tick(int time) override;                       // 0x00651690 (DS 0x00685350)
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00651540 (DS 0x006851b0)
     bool HandleMessage(S_ControlMessage *message) override;   // 0x00651640
 
 protected:
@@ -333,9 +333,9 @@ public:
     ~C_Button() override;                               // 0x0064f710 (0x0064f730): the cursor released
 
     // The repeated press while held.
-    void Tick(int time) override;                       // 0x006645d0
+    void Tick(int time) override;                       // 0x006645d0 (DS 0x0069cf10)
     // The cursor taken; the three frames (false: the frame has not 3 children).
-    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664300
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664300 (DS 0x0069cb50)
     int OnEnter(int id) override;                       // 0x00664460
     int OnLeave(int id) override;                       // 0x006644e0
     int OnRelease(int id) override;                     // 0x006645c0
@@ -393,7 +393,7 @@ public:
     ~C_Slider() override;                               // 0x0065e600 (0x0065e620): the cursor released
 
     // The cursor taken, the frames found (false: one not), the limits set, the value 50.
-    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664680
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664680 (DS 0x0069cfc0)
     int OnEnter(int id) override;                       // 0x006647c0
     int OnLeave(int id) override;                       // 0x00664810
     // The cursor's drag: moved with it (CONTROL_NOTIFY_08 when its value changed).
@@ -441,7 +441,7 @@ public:
     // The index of the child whose id's last 4 bits are `id`'s.
     int FindChild(uint32_t id) const override;          // 0x00664e70
     // While held: a step toward the cursor.
-    void Tick(int time) override;                       // 0x00665ce0
+    void Tick(int time) override;                       // 0x00665ce0 (DS 0x0069ead0)
     // The children made (each optional; posted to be ticked, the bar too); inactive.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664eb0
     // The focus' leave (not handled: not), the child with the id's enter.
@@ -815,7 +815,7 @@ public:
 
     // The cursor taken; the frame turned to (0, 0, -1), the select frame to (0, 0, 1) (off, linked
     // to the root); the box placed (false: none).
-    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065c040
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065c040 (DS 0x00692350)
     int OnEnter(int) override { return CONTROL_HANDLED; }   // 0x0065c690 (DS 0x00692b40)
     // The box's hover cleared, the edit control's.
     int OnLeave(int id) override;                       // 0x0065c6a0
@@ -823,7 +823,7 @@ public:
     int OnClick(int id) override;                       // 0x0065c240
     int OnPress(int id) override;                       // 0x0065c440
     // Taking input, not editing: CONTROL_NOTIFY_05, the line under the cursor hovered.
-    int OnInput05(int id) override;                     // 0x0065c630
+    int OnInput05(int id) override;                     // 0x0065c630 (DS 0x00692ad0)
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0065b750
     // The select frame at the selected line's centre (none there: off).
     virtual void UpdateSelectBar();                     // +0x84 0x0065c160
@@ -854,7 +854,15 @@ public:
     bool Unknown20(int value) override { return FocusUnknown20(value); }   // 0x00658370
     // The parts (each optional; its frame's id cleared); true.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00657dd0
-    int OnEnter(int id) override { return EnterChild(id); }   // 0x00658550
+    int OnEnter(int id) override                        // 0x00658550 (DS 0x0068d950)
+    {
+#ifdef HD2_DEDICATED   // no mouse in LS3DRF.dll: the server's copy returns 0
+        (void)id;
+        return 0;
+#else
+        return EnterChild(id);
+#endif
+    }
     // (0x006585e0: the group's leave.)
     // The focus' when it is the child with the id (the list's: CONTROL_NOTIFY_PRESS too).
     int OnPress(int id) override;                       // 0x00658620
@@ -907,7 +915,15 @@ public:
     int FindChild(uint32_t id) const override;          // 0x00659450
     // The parts (each optional; its frame's id cleared); true.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00658a90
-    int OnEnter(int id) override { return EnterChild(id); }   // 0x00659a30
+    int OnEnter(int id) override                        // 0x00659a30 (DS 0x0068f330)
+    {
+#ifdef HD2_DEDICATED   // no mouse in LS3DRF.dll: the server's copy returns 0
+        (void)id;
+        return 0;
+#else
+        return EnterChild(id);
+#endif
+    }
     // The focus' leave (not taken: 0); then handled unless the list is open.
     int OnLeave(int id) override;                       // 0x00659ac0
     // Off the children: the leave; to another: the leave and the enter; else the focus'.
@@ -1001,7 +1017,7 @@ public:
     // The shown control's titles drawn (not the buttons).
     void Refresh() override;                            // 0x00650a30
     // The minus keys (0xc, 0x4a: a point down) and the plus keys (0xd, 0x4e: up): true.
-    bool Unknown20(int key) override;                   // 0x006505e0
+    bool Unknown20(int key) override;                   // 0x006505e0 (DS 0x00684130)
     // The parts (the buttons optional: without one, no input); true.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064fda0
     // The name title's enter; the focus' leave (refused: not handled), the child with the id's.
@@ -1089,7 +1105,7 @@ public:
                                                         // control deleted, the cursor released
 
     // The focus' key (taking input); else the navigation keys (true: moved).
-    bool Unknown20(int key) override;                   // 0x006557d0
+    bool Unknown20(int key) override;                   // 0x006557d0 (DS 0x0068a410)
     // The base's; the selector frame at (0, 0, 0); true.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00655b40
     // The group's; handled: the focus selected.
@@ -1390,7 +1406,7 @@ public:
     // Not while editing (0); the edit box's (handled: HOT_KEY_DONE posted, value 1: keys off).
     int OnClick(int id) override;                        // 0x0064eec0
     // The edit box's (handled: HOT_KEY_DONE posted; else 0).
-    int OnInput02(int id) override;                      // 0x0064edb0
+    int OnInput02(int id) override;                      // 0x0064edb0 (DS 0x006821c0)
     int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064eea0 (DS 0x00682340)
     // The click.
     int OnKeyClick(int id) override { return OnClick(id); }   // 0x0064eeb0 (DS 0x00682360)
@@ -1538,8 +1554,8 @@ public:
     // stopped, fitted again, played again.
     void Refresh() override;                            // 0x00668300
     // The control's (false: not made); the frame off, the stream made (none: false), the area found.
-    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00668140
-    bool HandleMessage(S_ControlMessage *message) override;   // 0x006681a0
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00668140 (DS 0x006a1730)
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x006681a0 (DS 0x006a1750)
 
 protected:
     // The frame visual's world bound on the screen in pixels (its y negated and by 4:3: down; false:
