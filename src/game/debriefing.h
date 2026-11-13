@@ -38,7 +38,7 @@ public:
     void OnStop() override {}                           // 0x3C 0x0068d0e0
     // The campaign's: the diary's entry kept, the debriefing's results applied (kind 5); a single
     // mission's: the diary's entry dropped. True.
-    bool OnStart(void *arg) override;                   // 0x40 0x0068cfe0
+    bool OnStart(void *arg) override;                   // 0x40 0x0068cfe0 (DS 0x006cad70)
 
     // The campaign played, not a single mission.
     static bool IsCampaign();                           // 0x0068c5d0
@@ -46,7 +46,7 @@ public:
 protected:
     // Each squad soldier: a dead one's items back, the experience and the missions counted, a
     // promotion due, the medal due (from the second mission).
-    static void ApplyResults();                         // 0x0068ce60
+    static void ApplyResults();                         // 0x0068ce60 (DS 0x006cac40)
     // The medal `soldier` earned (S_SquadSoldier +0x38): the first campaign's operations' own, the
     // experience's, the missions' (by the rank).
     static void AwardMedal(S_SoldierProfile *profile, S_SquadSoldier *soldier);   // 0x0068cbf0
@@ -87,7 +87,7 @@ protected:
     // The squad's soldier `index` shown (past the squad: nothing): his face, name (his own or the full
     // one), the death frame, the rank or the promotion, the shipped game's debugging line with his
     // experience, the skills, the rank's badge, the medals (part 9g-viii).
-    void ShowSoldier(int index);                        // 0x0068f9f0
+    void ShowSoldier(int index);                        // 0x0068f9f0 (DS 0x006ce130)
     // The skills' bars: the shooting, the 2nd, the 1st (its maximum the stat and the gain), the
     // endurance, the stealth, the first aid, the lockpick; the mission's gain as the upgrade (no soldier:
     // hidden).

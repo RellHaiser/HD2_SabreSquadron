@@ -95,5 +95,5 @@ private:
 // The equipment screen's list: only its pages differ.
 class C_EquipmentStoreList : public C_StoreList {
 public:
-    bool BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group) override;   // 0x00 0x0067cb60
+    bool BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group) override;   // 0x00 0x0067cb60 (DS 0x006b9100)
 };

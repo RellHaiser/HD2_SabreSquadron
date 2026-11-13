@@ -463,7 +463,7 @@ protected:
     // The position sent to the control the value names (SET_POSITION).
     void SendPosition();                                // 0x006656c0
     // A step toward the cursor's place on the frame (a visual's world bound).
-    void StepToCursor();                                // 0x00665890
+    void StepToCursor();                                // 0x00665890 (DS 0x0069e580)
     // The arrows inactive at the ends, or the slider at the position.
     void Update();                                      // 0x00665ae0
 
@@ -1101,7 +1101,7 @@ class C_ListItem;
 class C_ListGroup : public C_ControlGroup {             // 0xA0 bytes
 public:
     C_ListGroup(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
-    ~C_ListGroup() override;                             // 0x0065ea40 (0x0065e840): the origin freed, the extra
+    ~C_ListGroup() override;                             // 0x0065ea40 (0x0065e840 (DS 0x00695670)): the origin freed, the extra
                                                         // control deleted, the cursor released
 
     // The focus' key (taking input); else the navigation keys (true: moved).

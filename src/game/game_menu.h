@@ -53,7 +53,7 @@ public:
     bool BuildScreens() override;                       // 0x38 0x0067fe00
     // The volume restored, the options handler, the popup and the network game's info screen
     // deleted, the panel's soldier, the two stocks emptied and deleted.
-    void OnStop() override;                             // 0x3C 0x0067f760
+    void OnStop() override;                             // 0x3C 0x0067f760 (DS 0x006bcb80)
     // Whether the player's team has a member in the player slots, the options handler, the sound
     // muted; the network games: the info screen. True.
     bool OnStart(void *arg) override;                   // 0x40 0x0067f650

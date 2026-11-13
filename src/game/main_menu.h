@@ -316,11 +316,11 @@ protected:
                                    uint32_t value);     // 0x0062e870
     // Moved (no copy: false): the copy with the cursor; a picked map over another picked line moved there.
     static bool OnMapLineDragMove(void *menu, void *argument, C_Control *control, uint32_t notification,
-                                  uint32_t value);      // 0x0062e9f0
+                                  uint32_t value);      // 0x0062e9f0 (DS 0x0065ff00)
     // Dropped: the copy released; a picked map over the lists taken off, a list's over the picked ones added
     // (moved to the line under the cursor); the drag ended, the picked maps, start. True.
     static bool OnMapLineDrop(void *menu, void *argument, C_Control *control, uint32_t notification,
-                              uint32_t value);          // 0x0062eb60
+                              uint32_t value);          // 0x0062eb60 (DS 0x00660080)
     // The password screen (over the browser: a server's password; over the options: the parental lock's code):
     // the model placed as the quit question's; the question, the box (no blanks, '>', '-', '"'; Return and
     // Escape: OnPasswordInput), yes and no (the same), the two other boxes hidden. True.

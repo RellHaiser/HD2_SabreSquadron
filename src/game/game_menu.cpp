@@ -293,7 +293,9 @@ void C_GameMenu::OnStop()
         m_popup = nullptr;
     }
     if (!IsLocalGame() && m_infoScreen) {
+#ifndef HD2_DEDICATED   // the server's info screen is not done first
         m_infoScreen->Done();
+#endif
         delete m_infoScreen;
         m_infoScreen = nullptr;
     }
