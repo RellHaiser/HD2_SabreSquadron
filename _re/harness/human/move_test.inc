@@ -191,10 +191,12 @@ bool C_HumanWeaponPose::LoadGame(C_chunk &) { Log(this, "PoseLoadGame"); return 
 void C_HumanWeaponPose::Refresh(int arg) { Log(this, "PoseRefresh", {double(arg)}); }
 void C_HumanWeaponPose::Reset() { Log(this, "PoseReset"); }
 void C_HumanWeaponPose::Update(int time) { Log(this, "PoseUpdate", {double(time)}); }
+#ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 bool C_HumanWork::SaveGame(C_chunk &) { Log(this, "WorkSaveGame"); return g_mv.partSaves; }
 bool C_HumanWork::LoadGame(C_chunk &) { Log(this, "WorkLoadGame"); return g_mv.partSaves; }
 void C_HumanWork::Update(int time) { Log(this, "WorkUpdate", {double(time)}); }
 void C_HumanWork::UpdateStanceTimer(int time) { Log(this, "UpdateStanceTimer", {double(time)}); }
+#endif
 void C_ShotManager::AddBloodPool(const S_vector &pos, const S_vector &normal, float size)
 {
     Log(this, "AddBloodPool", {pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, size});

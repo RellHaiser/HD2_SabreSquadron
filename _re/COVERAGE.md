@@ -1440,3 +1440,35 @@ particles and the surface marks. Files are served from memory.
   in its docstring). 50 survived the first run.
 - **Harness lessons (my mistakes):** a no-op placeholder DiffMove written into a test case again (replaced before it
   ran); clearing the owner before Relink crashed both sides (Relink calls Init with it).
+
+## Human part 14 (the work, `human_work.cpp`, 2026-11-13)
+
+- **The build:** `human/build_work.bat` (HUMAN_WORK): build_morph.bat's harness with the work linked,
+  `human/work_test.inc`'s tests alone. Everything the work reaches is real on both sides now (the movement, the mixer,
+  the animation player, the special moves, the idle, the visual, the lighting, the morph); the original's work, which
+  parts 1-11 redirected to loggers, runs again. The work's words are compared after every call (o_work).
+- **The tests (130,434 checks):** every entry, 23 in all: SetMovement, SetGroup, Reset, Update (deaths through the
+  special moves, the special moves' climbs and sitting, stance and gait changes, the carry animations of every action
+  with empty and full hands, the pick-up and carrying states, hit reactions, interactions passed on to the idle),
+  SetStanceTimer, UpdateStanceTimer, GetViewDir, Play (every work mode: ladders, seats, swimming), PlayWorkAnimation,
+  SetStance, SetGait, SetLookAt, SetCarryMode, DoAction, SetUnknown5C, SetFacingDir, SetViewDir, SetWorkingFrame / 2,
+  ApplyHit, Interact, SetLook, the saved games (the files compared; made-up chunks).
+- **New in the harness:** the work's fakes of parts 1-11 off in this build; loggers for the weapon pose's SetViewDir,
+  OnHit and SetLook, the first person view's SetPose, the equipment's GetHandsProjectileKind; the locomotion's and the
+  special moves' links set (part 3's Init test leaves the locomotion's cleared); the working frames' references
+  compared.
+- **Undefined in the original, not compared:** the facing's w (+0x2C) and the pads after the hit's force and position
+  (+0x7C, +0x8C): the original copies the 4 bytes after the vectors it is given (the port's documented fixes).
+- **Kept out:** a morph without its visual in a death (part 13's documented fix).
+- **Results:** every function agrees (130,434 checks, 0 failures); no port bugs. Lines: human_work.cpp 629 of 639
+  (98.4 %). Not run: a remote human taking its hands item (no items).
+- **Mutations** (`human/mutations/mutate_work1.py`): 419 mutants; 363 killed, 28 not building, 28 survived (classified
+  in its docstring). 30 survived the first run.
+- **Harness lessons (my mistakes):**
+  - the death's seed was not synced in these tests: the port's is clock() % 100 at start-up, the original's 0, so the
+    dying animations agreed only when the start-up was quick. The slower coverage build showed 98 differences; the
+    tests now set both and check them after each update;
+  - my random state copied the request into the movement's record whole, so the update always dropped the action
+    and the actions with a hands item never ran until coverage showed it;
+  - the first mutation run was started with the morph's MUT_WRAPPER still set, which rebuilds the wrapper instead of
+    the mutated file (every mutant would have "survived"); stopped and rerun without it.

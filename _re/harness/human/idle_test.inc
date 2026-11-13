@@ -39,11 +39,13 @@ void C_HumanWeaponPose::SetSeatStance(int stance)
     if (stance != POSE_STANCE_PRONE)
         m_proneFit = false;
 }
+#ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 void C_HumanWork::ApplyHit(uint32_t flags, const S_vector &pos, const S_vector &force)
 {
     const float v[6] = {pos.x, pos.y, pos.z, force.x, force.y, force.z};
     LogV(this, "WorkApplyHit", v, 6, {double(flags)});
 }
+#endif
 void C_Team::UpdateCameraTarget() { Log(this, "UpdateCameraTarget"); }
 // The animation lengths from part 8's tables (the original's own, inline in GetAnimLength, reads them): game/
 // human_anim_tables.cpp's code (part 6's fakes answer none).

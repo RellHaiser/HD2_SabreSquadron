@@ -187,7 +187,9 @@ C_HumanMovement::~C_HumanMovement() {}
 #ifndef HUMAN_MORPH   // (game/human_morph.cpp's own in HUMAN_MORPH builds)
 C_HumanMorph::C_HumanMorph() {}
 #endif
+#ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 C_HumanWork::C_HumanWork() {}
+#endif
 
 bool C_Human::AdjustToPathHeight(S_vector *pos) const
 {
@@ -285,9 +287,11 @@ void C_HumanWeaponPose::SetStanceChange(int stance)
     }
 }
 
+#ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 S_vector4 C_HumanWork::GetViewDir() const { Log(this, "GetViewDir"); return {0.0f, g_script.viewDirY, 1.0f, 0.0f}; }
 void C_HumanWork::Play(int animation, bool on) { Log(this, "Play", {double(animation), double(on)}); }
 void C_HumanWork::SetFacingDir(const S_vector &dir, bool on) { LogV(this, "SetFacingDir", &dir.x, 3, {double(on), double(m_forced)}); }
+#endif
 // The move direction the work keeps (m_request.unknown10; the work's layout is the original's, so the original's
 // work takes it the same way): UpdateVelocity reads it back.
 void ApplyLookAt(void *work, const float *target)
@@ -296,6 +300,7 @@ void ApplyLookAt(void *work, const float *target)
     if (current[0] != target[0] || current[1] != target[1] || current[2] != target[2])
         std::memcpy(current, target, 16);
 }
+#ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 void C_HumanWork::SetLookAt(const S_vector4 &target, bool on)
 {
     LogV(this, "SetLookAt", &target.x, 4, {double(on)});
@@ -306,6 +311,7 @@ void C_HumanWork::SetStanceTimer(int time, int stance, uint32_t blocked)
 {
     Log(this, "SetStanceTimer", {double(time), double(stance), double(blocked)});
 }
+#endif
 
 bool C_Ladder::CanUse(const S_vector4 &pos, const S_vector4 &dir, const S_vector &velocity, bool lookingUp) const
 {
@@ -742,6 +748,9 @@ extern int g_lastSeatDeathAnim;
 #ifdef HUMAN_MORPH
 #include "morph_test.inc"
 #endif
+#ifdef HUMAN_WORK
+#include "work_test.inc"
+#endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
 LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
@@ -793,7 +802,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_MORPH)
+#if defined(HUMAN_WORK)
+    TestWork();
+#elif defined(HUMAN_MORPH)
     TestMorph();
 #elif defined(HUMAN_LIGHTING)
     TestLighting();

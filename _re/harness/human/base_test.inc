@@ -473,7 +473,9 @@ void C_HumanWeaponPose::StartDeath(uint32_t hitFlags, const float *force, I3D_an
 {
     LogV(this, "StartDeath", force, 3, {double(hitFlags), double(deathAnim != nullptr), double(kind), double(carrier != nullptr)});
 }
+#ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 void C_HumanWork::PlayWorkAnimation(int animation, bool on) { Log(this, "PlayWorkAnimation", {double(animation), double(on)}); }
+#endif
 int C_ParticlesModule::CreateAt(int effect, const S_vector &pos, const S_vector &dir, I3D_frame *parent, bool faceCamera, bool transient)
 {
     LogCreateAt(this, effect, pos, dir, parent, faceCamera, transient);

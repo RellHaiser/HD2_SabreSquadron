@@ -23,8 +23,10 @@ struct S_PlayerScript {
 }  // namespace
 
 // (With the work's m_forced at the call: the player sets it around its calls.)
+#ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 void C_HumanWork::SetCarryMode(int carryMode, bool notify) { Log(this, "SetCarryMode", {double(carryMode), double(notify), double(m_forced)}); }
 void C_HumanWork::SetWorkingFrame(I3D_frame *frame, bool on) { Log(this, ("SetWorkingFrame " + NameOf(frame)).c_str(), {double(on)}); }
+#endif
 void C_HumanEquipment::SetModel(I3D_frame *model, int place, int uid, int time, int typeId)
 {
     // (With the special objects' hand dummy at the call, m_unknown2c.)
