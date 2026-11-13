@@ -319,7 +319,7 @@ bool C_MPZone::Contains(const S_vector &point, const I3D_bbox &box, const S_vect
     return LengthOf((d.z * d.z + d.y * d.y) + d.x * d.x) < radius;
 }
 
-void C_MPZone::CountPresence(int present[3], const I3D_bbox &box)   // 0x005ecbe0
+void C_MPZone::CountPresence(int present[3], const I3D_bbox &box)   // 0x005ecbe0 (DS 0x0060d770)
 {
     S_matrix inverse;
     inverse.Inverse(m_frame->GetMatrix());
@@ -338,6 +338,9 @@ void C_MPZone::CountPresence(int present[3], const I3D_bbox &box)   // 0x005ecbe
         if (Contains(human->GetFrame()->GetWorldPos() * inverse, box, center, radius))
             ++present[players[slot].human->GetTeam(false)];
     }
+#ifdef HD2_DEDICATED   // the server has no local player
+    m_localInside = false;
+#else
     C_Human *local = nullptr;
     if (IsClient() && players[g_localPlayerSlot].IsConnected())
         local = players[g_localPlayerSlot].human;
@@ -348,6 +351,7 @@ void C_MPZone::CountPresence(int present[3], const I3D_bbox &box)   // 0x005ecbe
     } else {
         m_localInside = false;
     }
+#endif
     g_netGame.UnlockPlayers();
 }
 

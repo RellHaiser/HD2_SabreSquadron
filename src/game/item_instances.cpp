@@ -682,6 +682,7 @@ void C_WeaponItem::PlayShotSound(C_Actor *shooter, I3D_frame *where, bool quiet)
 {
     if (m_shotSoundCount == 0)
         return;
+#ifndef HD2_DEDICATED   // no sounds on the server: only the AI's noise
     if (IsClient()) {
         if (I3D_frame *frame = GetShotSoundFrame(std::rand() % m_shotSoundCount)) {
             I3D_sound *sound = static_cast<I3D_sound *>(frame);
@@ -695,6 +696,7 @@ void C_WeaponItem::PlayShotSound(C_Actor *shooter, I3D_frame *where, bool quiet)
             sound->SetOn(true);
         }
     }
+#endif
     if (IsServer() && !quiet && Now() - m_lastNoiseTime > SHOT_NOISE_INTERVAL) {
         m_lastNoiseTime = Now();
         C_WeaponComp *comp = static_cast<C_WeaponComp *>(m_def->GetComponent());

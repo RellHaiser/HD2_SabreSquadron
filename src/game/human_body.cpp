@@ -142,13 +142,19 @@ void S_HumanBody::Update(int frameTime)
 
 void S_HumanBody::Tick(int timeDelta)
 {
+#ifdef HD2_DEDICATED   // the server has only the server's side
+    {
+#else
     if (!IsClient()) {
+#endif
         movement->UpdateAnimation(timeDelta);
         equipment->Update(timeDelta);
         return;
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (!owner->IsLocalPlayer())
         movement->UpdateAnimation(timeDelta);
+#endif
 }
 
 void S_HumanBody::SetFacingDir(const S_vector &dir)

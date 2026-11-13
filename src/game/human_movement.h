@@ -625,7 +625,7 @@ public:
 private:
     // Puts the blended weights on the channels (`force`: the target states at once).
     void Apply(bool force);                             // 0x00780f30
-    void UpdateBreathSound(int time);                   // 0x00782000
+    void UpdateBreathSound(int time);                   // 0x00782000 (DS 0x007f00b0)
 };
 
 // Ladders, obstacles, getting into water (C_HumanMovement +0xAA0; 0x20 bytes; role inferred).
@@ -698,7 +698,7 @@ public:
     // Moves the body for `time` ms (the mixer is updated here).
     void Update(int time);                              // 0x00763c30 (DS 0x007caa10)
     // The detail of the body by its size on the screen (MOVE_FLAG_* 0x10..0x2000).
-    void UpdateDetail();                                // 0x00770560
+    void UpdateDetail();                                // 0x00770560 (DS 0x007da570)
     // The direction the work asks the body to face (x / z): the turn towards it starts (the
     // turn in place animations when the angle is large).
     void SetTurnTarget(const S_vector4 &dir, int time); // 0x0076df90
@@ -937,7 +937,7 @@ public:
     void Done() {}                                      // 0x00750b80
     bool SaveGame(C_chunk &chunk);                      // 0x007513f0
     bool LoadGame(C_chunk &chunk);                      // 0x007515c0
-    void Update(int time);                              // 0x00750c00
+    void Update(int time);                              // 0x00750c00 (DS 0x007b4bf0)
     // Advances the interaction under way (C_HumanMovement::m_interaction): into and out of the
     // seats and chairs, the doors' end.
     void UpdateInteraction(int time);                   // 0x00755960 (DS 0x007ba9a0)
@@ -1056,7 +1056,7 @@ private:
     // A new glide toward the target (`restart`) or on along the last step.
     void SetTarget(const S_vector4 &pos, bool restart);   // 0x007586f0
     void Glide(int time);                               // 0x00758a20
-    void ProcessAnimEvents();                           // 0x00759180
+    void ProcessAnimEvents();                           // 0x00759180 (DS 0x007beed0)
 };
 
 // C_HumanVisual::m_flags.

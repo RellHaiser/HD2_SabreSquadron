@@ -213,7 +213,7 @@ public:
     // trail particle effect (-1 none); `flySound`: whistle of an incoming shell;
     // `cameraFollow`: the camera may ride along when the local player fired it.
     void Init(C_Actor *shooter, const S_vector &pos, const S_vector &dir, C_ProjectileWeaponComp *weapon,
-              I3D_frame *model, int trailEffect, bool flySound, bool cameraFollow, bool fake);   // 0x00448ce0
+              I3D_frame *model, int trailEffect, bool flySound, bool cameraFollow, bool fake);   // 0x00448ce0 (DS 0x004650b0)
 
     void Release() override;                                // 0x00448fc0 (DS 0x00465220)
     bool Tick(int timeDelta) override;                      // 0x00449290 (DS 0x004655a0)
@@ -351,7 +351,7 @@ public:
     // first-person view, those of the HUD weapon). `shellSound`: sound group of the shell
     // bouncing on the ground. Bits 0-7 of `flags` set: a fake shot (C_Shot::m_fake).
     void FireBullet(C_Actor *shooter, C_Item *weapon, const S_vector &pos, const S_vector &dir, bool tracer,
-                    uint32_t flags, int shellSound);        // 0x00451100
+                    uint32_t flags, int shellSound);        // 0x00451100 (DS 0x0046bc80)
     // The same with explicit muzzle and shell dummies (vehicle guns call it directly).
     void FireBulletFrom(C_Human *shooter, C_WeaponItem *weapon, const S_vector &pos, const S_vector &dir,
                         I3D_frame *muzzle, I3D_frame *ejectDummy, bool tracer, uint32_t flags,

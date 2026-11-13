@@ -376,7 +376,7 @@ public:
     void PlayEmptySound(C_Actor *owner);                // 0x007d52f0
     // Plays a shot at `where`: a positional sound frame on clients, and on the server
     // (unless `quiet`) at most once a second a noise for the AI (the squad's melee too).
-    void PlayShotSound(C_Actor *shooter, I3D_frame *where, bool quiet);   // 0x007d5ee0
+    void PlayShotSound(C_Actor *shooter, I3D_frame *where, bool quiet);   // 0x007d5ee0 (DS 0x0080f640)
     // Stops the reload sound if the reload is interrupted more than 200 ms before its end.
     void StopReloadSound();                             // 0x007d6a70
     // Rounds in the weapon (C_Human::DropAllItems fills dropped weapons).

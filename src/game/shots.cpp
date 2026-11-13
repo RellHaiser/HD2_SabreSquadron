@@ -743,8 +743,12 @@ void C_ProjectileShot::Init(C_Actor *shooter, const S_vector &pos, const S_vecto
         m_visual->SetPos(m_pos);
         m_visual->SetOn(true);
         m_visual->Update();
+#ifdef HD2_DEDICATED   // no particles on the server
+        (void)trailEffect;
+#else
         if (trailEffect >= 0)
             m_trail = g_particlesModule.CreateAt(trailEffect, m_pos, -dir, m_visual, true, true);
+#endif
     }
     m_distance = 0.0f;
     m_traceDistance = 0;
@@ -758,6 +762,9 @@ void C_ProjectileShot::Init(C_Actor *shooter, const S_vector &pos, const S_vecto
     m_allowCameraFollow = cameraFollow;
 
     m_flySound = nullptr;
+#ifdef HD2_DEDICATED   // no sounds on the server
+    (void)flySound;
+#else
     if (!IsClient() || !flySound || !m_visual)
         return;
     // Whistle of an incoming shell, moving with the projectile.
@@ -777,6 +784,7 @@ void C_ProjectileShot::Init(C_Actor *shooter, const S_vector &pos, const S_vecto
     m_flySound->SetName("FollowBulletSound");
     m_flySound->LinkTo(m_visual, 0);
     m_flySound->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
+#endif
 }
 
 void C_ProjectileShot::Release()
@@ -1997,6 +2005,7 @@ void C_ShotManager::FireBullet(C_Actor *shooter, C_Item *weapon, const S_vector 
     auto *gun = static_cast<C_WeaponItem *>(weapon);
     I3D_frame *ejectDummy = nullptr;
     I3D_frame *muzzle = nullptr;
+#ifndef HD2_DEDICATED   // the server shows no shells or flashes
     if (IsClient()) {
         if (human->IsLocalPlayer() && GetGame()->IsFirstPersonView()) {
             // The first-person weapon of the HUD.
@@ -2007,6 +2016,7 @@ void C_ShotManager::FireBullet(C_Actor *shooter, C_Item *weapon, const S_vector 
             muzzle = gun->GetBlastDummy();
         }
     }
+#endif
     FireBulletFrom(human, gun, pos, dir, muzzle, ejectDummy, tracer, flags, shellSound);
 }
 

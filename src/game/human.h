@@ -357,12 +357,12 @@ struct S_HumanBody {                                    // 0x18 bytes
     static bool StartMission(bool server) { (void)server; return true; }   // 0x005aba70 / 0x005aba80 (DS 0x005badf0 / DS 0x005bae10)
     static void StopMission(bool server) { (void)server; }                 // 0x005abb10 / 0x005abb20
     void Update(int frameTime);                         // 0x005abc20 (DS 0x005bb070)
-    void Tick(int timeDelta);                           // 0x005abc70
+    void Tick(int timeDelta);                           // 0x005abc70 (DS 0x005bb0c0)
 
     // Where the human faces / looks / aims (from its controller, every frame).
     void SetFacingDir(const S_vector &dir);             // 0x005ac0a0
     void SetLookAt(const S_vector4 &target);            // 0x005ac080
-    void SetViewDir(const S_vector &dir);               // 0x005ac0c0
+    void SetViewDir(const S_vector &dir);               // 0x005ac0c0 (DS 0x005bb570)
     // Body flags of the work object for the controller; clears the one-frame ones.
     uint32_t TakeFlags();                               // 0x005ac0d0
 

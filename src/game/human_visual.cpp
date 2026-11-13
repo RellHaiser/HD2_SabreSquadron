@@ -649,6 +649,7 @@ void C_HumanVisual::ProcessAnimEvents()
             case ANIM_EVENT_STEP_LEFT:
             case ANIM_EVENT_STEP_6: {
                 movement->Footstep(event == ANIM_EVENT_STEP_LEFT);
+#ifndef HD2_DEDICATED   // no sounds on the server
                 // The active player's clothes rustle now and then (by stance and speed; the
                 // quiet walk by the stealth stat).
                 if (!IsClient() || !IsActivePlayer(m_owner) || m_moveSoundTime <= 329)
@@ -681,6 +682,7 @@ void C_HumanVisual::ProcessAnimEvents()
                     else if (sub == 0 && quietRoll())
                         movement->PlaySound(MOVE_SOUND_MOVE_LOW);
                 }
+#endif
                 break;
             }
             case ANIM_EVENT_DOOR:
@@ -806,10 +808,15 @@ void C_HumanVisual::ProcessAnimEvents()
                 break;
             case ANIM_EVENT_BREATH: {
                 I3D_frame *head = movement->m_joints[HUMAN_JOINT_F1].frame;
+#ifdef HD2_DEDICATED   // no particles on the server; it still reads the head's matrix
+                (void)head->GetWorldDir();
+                (void)head->GetWorldPos();
+#else
                 const S_vector dir = head->GetWorldDir();
                 S_vector pos = head->GetWorldPos() + dir * 0.15f;
                 pos.y += 0.04f;
                 g_particlesModule.CreateAt(PARTICLE_BREATH, pos, dir, nullptr, true, false);
+#endif
                 break;
             }
             case ANIM_EVENT_LADDER_STEP: {
@@ -847,6 +854,7 @@ void C_HumanVisual::ProcessAnimEvents()
                 m_locomotion->m_volumesTime = 0;
                 break;
             case ANIM_EVENT_SOUND: {
+#ifndef HD2_DEDICATED   // no sounds on the server
                 if (!IsClient())
                     break;
                 if (GetGame()->IsFirstPersonView() && IsActivePlayer(m_owner))
@@ -859,6 +867,7 @@ void C_HumanVisual::ProcessAnimEvents()
                 request.chapter = 1;
                 request.group = 0x2E;
                 GetSoundModule()->Play(request);
+#endif
                 break;
             }
             default:
