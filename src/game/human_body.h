@@ -74,7 +74,7 @@ public:
     // change). Ignored while the work is busy unless SetUnknownB0(true) forces it.
     void SetCarryMode(int carryMode, bool notify);      // 0x0077f750
     void DoAction(int action, bool on);                 // 0x0077f7e0
-    void SetUnknown5C(bool value, bool on);             // 0x0077f830
+    void SetUnknown5C(bool value, bool on);             // 0x0077f830 (DS 0x007ece60)
     void SetFacingDir(const S_vector &dir, bool on);    // 0x0077f8c0
     void SetViewDir(const S_vector &dir);               // 0x0077faf0 (DS 0x007ed170)
     void SetWorkingFrame(I3D_frame *frame, bool on);    // 0x0077fb70

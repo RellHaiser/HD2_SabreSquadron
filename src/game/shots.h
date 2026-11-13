@@ -215,7 +215,7 @@ public:
     void Init(C_Actor *shooter, const S_vector &pos, const S_vector &dir, C_ProjectileWeaponComp *weapon,
               I3D_frame *model, int trailEffect, bool flySound, bool cameraFollow, bool fake);   // 0x00448ce0
 
-    void Release() override;                                // 0x00448fc0
+    void Release() override;                                // 0x00448fc0 (DS 0x00465220)
     bool Tick(int timeDelta) override;                      // 0x00449290 (DS 0x004655a0)
     void Update(int timeDelta) override;                    // 0x00449030
     void Recycle() override {}                              // 0x00451870

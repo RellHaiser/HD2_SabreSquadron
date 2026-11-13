@@ -1008,10 +1008,12 @@ void C_TeamManager::StopMission(bool server)            // 0x00460b30
         m_coopTeam.Clear();
 }
 
-void C_TeamManager::RestartMission(bool server)         // 0x00460c20
+void C_TeamManager::RestartMission(bool server)         // 0x00460c20 (DS 0x0047c970)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         m_playerTeam.RestartMission(server);
+#endif
     if (!IsLocalGame() && IsServer() && g_gameProfile.IsCooperativeGame())
         m_coopTeam.RestartMission(server);
     for (size_t i = m_formations.size(); i-- > 0;)

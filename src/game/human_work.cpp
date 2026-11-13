@@ -695,8 +695,10 @@ void C_HumanWork::SetUnknown5C(bool value, bool on)
     if (m_request.unknown5C == static_cast<int>(value))
         return;
     m_request.unknown5C = value;
+#ifndef HD2_DEDICATED   // the server has no first-person view
     if (IsClient() && g_teamManager.GetPlayerTeam()->GetActivePlayer() == *m_owner)
         GetGame()->GetFirstPersonView()->SetPose(value ? FPV_POSE_RAISED : FPV_POSE_LOWERED);
+#endif
     if (on)
         m_request.changed |= WORK_REQUEST_UNKNOWN5C;
 }

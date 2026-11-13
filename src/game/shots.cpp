@@ -786,8 +786,10 @@ void C_ProjectileShot::Release()
         m_flySound = nullptr;
     }
     if (m_visual) {
+#ifndef HD2_DEDICATED   // no particles on the server
         if (m_trail >= 0)
             g_particlesModule.Destroy(m_trail);
+#endif
         m_trail = -1;
         m_visual->Release();
     }
