@@ -154,7 +154,7 @@ void C_HumanWeaponPose::StoreHeldPoints()
 // unconscious body carried off is built again with its saved rolls; parts whose end bone is
 // collapsed are dropped; an unconscious body left lying loses its arms), the points started
 // with the model's speed, the model taken out of its parent, and the hit's push (away from a
-// hit from behind if there is no ground ahead; a slow push also holds the pelvis).
+// hit from behind if there is no ground ahead; a slow push also holds the feet).
 void C_HumanWeaponPose::StartRagdoll(uint32_t hitFlags, const float *force, C_Human *carrier)
 {
     const bool unconscious = m_owner->IsUnconscious();
@@ -188,7 +188,7 @@ void C_HumanWeaponPose::StartRagdoll(uint32_t hitFlags, const float *force, C_Hu
     restore(RAGDOLL_REST_LOWER_BACK);
     restore(RAGDOLL_REST_BACK);
     restore(RAGDOLL_REST_UPPER_CHEST);
-    if (!unconscious || carrier) {
+    if (!m_owner->IsUnconscious() || carrier) {        // (asked again, as the original does, 0x007b1a12)
         restore(RAGDOLL_REST_LEFT_COLLAR);
         restore(RAGDOLL_REST_RIGHT_COLLAR);
     }
@@ -351,10 +351,11 @@ void C_HumanWeaponPose::StartRagdoll(uint32_t hitFlags, const float *force, C_Hu
             }
             push *= magnitude;
             if ((push + PoseXYZ(m_velocity)).Square() < 225.0f) {
-                // A slow push: the pelvis is held where it is (see AddRagdollHold) and the push
-                // made 30.
-                AddRagdollHold(pelvis, pelvis->pos, 300);
-                AddRagdollHold(pelvis, pelvis->pos, 300);
+                // A slow push: the feet are held where they are (see AddRagdollHold; 0x007b3372)
+                // and the push made 30.
+                for (int foot : {RAGDOLL_POINT_LEFT_FOOT, RAGDOLL_POINT_RIGHT_FOOT})
+                    if (S_RagdollPoint *point = p[foot])
+                        AddRagdollHold(point, point->pos, 300);
                 push = push * (1.0f / magnitude) * 30.0f;
                 magnitude = 30.0f;
             }
@@ -668,8 +669,9 @@ const S_CollisionVolume *C_HumanWeaponPose::SlideDeadBody()
             if (!volume || ownVehicle(volume, true))
                 continue;
             const S_vector toHit = hit - points[i];
-            const float along = move.Dot(toHit);
-            const float t = along <= 1e-8f ? 0.0f : toHit.Square() / along;
+            // (Summed (x + z) + y as the original, 0x007b5a64: the rounding picks the first point hit.)
+            const float along = (move.x * toHit.x + toHit.z * move.z) + toHit.y * move.y;
+            const float t = !(along > 1e-8f) ? 0.0f : ((toHit.x * toHit.x + toHit.z * toHit.z) + toHit.y * toHit.y) / along;
             if (t < part) {
                 part = t;
                 first = i;
@@ -681,7 +683,7 @@ const S_CollisionVolume *C_HumanWeaponPose::SlideDeadBody()
         if (1.0f - part < 1e-8f)
             break;
         const S_vector &normal = normals[first];
-        const S_vector slide = normal * normal.Dot(PoseXYZ(m_slideVelocity));
+        const S_vector slide = normal * PoseDotZYX(normal, PoseXYZ(m_slideVelocity));
         m_slideVelocity.x = (m_slideVelocity.x - slide.x) * 0.9f;
         m_slideVelocity.y = (m_slideVelocity.y - slide.y) * 0.9f;
         m_slideVelocity.z = (m_slideVelocity.z - slide.z) * 0.9f;
@@ -734,7 +736,7 @@ const S_CollisionVolume *C_HumanWeaponPose::SlideDeadBody()
     S_vector local = PoseIntoAxes(model, normal);
     if (local.y < 0.9848f) {
         const float s = std::sqrt(1.0f - local.y * local.y);
-        if (s <= 1e-8f) {
+        if (!(s > 1e-8f)) {                              // (a NaN too, as the original, 0x007b7053)
             local.x = 0.1736f;
             local.z = 0.0f;
         } else {

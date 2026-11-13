@@ -468,11 +468,13 @@ void C_HumanEquipment::OnAnimationEvent(int event) { Log(this, "OnAnimationEvent
 void C_HumanMovement::UpdateModelNames() { Log(this, "UpdateModelNames"); }
 int C_HumanMovement::UseObject(C_Actor *object) { Log(this, ("UseObject " + NameOf(object)).c_str()); return 0; }
 #endif
+#ifndef HUMAN_DEAD   // (game/human_pose_dead.cpp's own in HUMAN_DEAD builds)
 void C_HumanWeaponPose::PickUpBody() { Log(this, "PickUpBody"); }
 void C_HumanWeaponPose::StartDeath(uint32_t hitFlags, const float *force, I3D_animation_set *deathAnim, int kind, C_Human *carrier)
 {
     LogV(this, "StartDeath", force, 3, {double(hitFlags), double(deathAnim != nullptr), double(kind), double(carrier != nullptr)});
 }
+#endif
 #ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 void C_HumanWork::PlayWorkAnimation(int animation, bool on) { Log(this, "PlayWorkAnimation", {double(animation), double(on)}); }
 #endif

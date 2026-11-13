@@ -1616,3 +1616,50 @@ particles and the surface marks. Files are served from memory.
     spheres (uninitialised stack);
   - my scratch copy of human_test.cpp in the scratchpad picked up an old body_test.inc of another session (quoted
     includes search the including file's directory first).
+
+## Human part 18 (the dead body, `human_pose_dead.cpp`, 2026-11-13)
+
+- **The build:** `human/build_dead.bat` (HUMAN_DEAD): build_body.bat's harness with the file linked, `human/dead_test.inc`'s
+  tests alone, every source compiled with `-include harness_malloc.h`: the port's _aligned_free goes through the harness
+  (and the original's, 0x007e559c, is redirected likewise), which skips the frees while a call is compared, since the
+  other side's run from the same restored state still reads the parts, points and slide points dropped (leaked).
+  On part 17's skeleton the port builds a ragdoll; its parts, points, pushes and holds are shared and compared, the
+  slide points' block too; a first person camera dummy and the "z" dummy; logged on both sides with scripted answers:
+  the profile's DETAIL_RAGDOLL (g_gameProfile's storage under its name), the camera module and its camera (slot 0x6C),
+  the owner's IsUnconscious, the movement's Ragdoll and AddBloodPool, the stains' AddHit (a fake object), the scene's
+  AddHumanModel and MarkTrackedModel; the base's logger of the original's StartDeath taken off.
+- **The tests (56,002 checks):**
+  - the parts (40,000): ApplyHitImpulse (every zone, parts dropped), AddSettledBloodPool (standing and lying ragdolls,
+    contacts), OnHit (dead or not, a settled ragdoll, stains), SampleDeathAnim (collapsed bones), PickUpBody;
+  - StartDeath (16,000): every kind, with an animation or none, hit zones with the fall / blast / sink bits, slow and
+    fast pushes (from behind, with or without ground ahead), carriers, unconscious bodies, hidden parts, a second death,
+    the camera near, far, behind, the ragdoll detail off, small or hidden bodies; the slide points each side allocates
+    compared after the call;
+  - UpdateDeathAnim (20,000): every kind (a held body's checks falling into the ragdoll, a falling body's slide), the
+    animation's end, lying on an actor, the first person camera.
+- **Judged by their rates (99.9 %):** StartDeath (15,999 of 16,000: a part's measured rotation just past the tolerance,
+  or -0 against a small value) and UpdateDeathAnim (19,998 of 20,000: the slide's speed up to 7 % apart). **Not traced:**
+  the latter, presumably two points hitting at nearly the same fraction of the move with the first one picked
+  differently; the sums' groupings and the NaN branches are the original's.
+- **Undefined in the original, not compared:** the w of the body's place, the slide speed, the camera's place, the
+  gravity and the slide points; the slide points' pointer (each side's own block; their values are compared).
+- **Port fixes (on main):**
+  - a slow push held the pelvis twice; the original holds the two feet, each if it is there (0x007b3372);
+  - StartRagdoll asked the owner's IsUnconscious once for the collars' rest; the original asks again (0x007b1a12)
+    (the same answer; the calls now match);
+  - the slide's hit fraction and its slide off the normal summed x first; the original groups (x + z) + y and
+    (z + y) + x (0x007b5a64): the rounding decided which point hit first (8 of 20,000 updates differed);
+  - the slide's test of a move along the hit (`along <= 1e-8`) and its clamp of the ground's normal (`s <= 1e-8`) took
+    the other branch on a NaN than the original.
+- **Results:** lines: human_pose_dead.cpp 98.3 % of 636. Not run: an unconscious body carried off (its ragdoll built again:
+  new blocks per side, not comparable here), the contacts let go (part 5's), a held body falling with no ground under
+  its knees only, the vertical normal's clamp.
+- **Mutations** (`human/mutations/mutate_dead1.py`): 606 mutants; 446 killed, 40 not building, 120 survived: fields set
+  again later in the same death, the dropped parts' frees (skipped by the harness), paths not reached (the carried
+  unconscious body, a vehicle in the slide's way), equivalent ones, boundaries and the two rate-judged calls
+  (classified in its docstring). The first full-strength rerun killed 3 of 130; random values for the ragdoll state a
+  death sets (they already held the values it writes), a bent ragdoll and the model's links compared killed 7 more.
+- **Harness lessons (my mistakes):**
+  - three more backslash edits through bash heredocs (one a `\n` in a printf, caught by the build, two by grep), and a
+    sed that turned human_pose_dead.cpp's line endings to LF (put back);
+  - my first Write of dead_test.inc did not happen (the stub file had not been read), so a build ran the stub.

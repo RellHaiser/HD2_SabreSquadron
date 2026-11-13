@@ -872,4 +872,6 @@ I3D_sound *C_SoundModule::GetSound(int slot) const
     Log(this, "GetSound", {double(slot)});
     return g_soundGone ? nullptr : static_cast<I3D_sound *>(static_cast<void *>(&g_sound));
 }
+#ifndef HUMAN_DEAD   // (the dead body's build links game/human_pose_dead.cpp: its own)
 void C_HumanWeaponPose::AddSettledBloodPool() { Log(this, "AddSettledBloodPool"); }
+#endif
