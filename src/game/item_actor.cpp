@@ -248,7 +248,7 @@ void C_ItemActor::OnMessage(C_BitStream *stream)        // 0x005b7110
     }
 }
 
-void C_ItemActor::Tick(int timeDelta)                   // 0x005b7320
+void C_ItemActor::Tick(int timeDelta)                   // 0x005b7320 (DS 0x005c9c60)
 {
     if (!m_item)
         return;

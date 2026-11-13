@@ -212,7 +212,7 @@ void C_MeleeTracker::Update(int frameTime)              // 0x005d5810
     GetFrame()->Update();
 }
 
-void C_MeleeTracker::Tick(int timeDelta)                // 0x005d5620
+void C_MeleeTracker::Tick(int timeDelta)                // 0x005d5620 (DS 0x005efed0)
 {
     if (m_optimized || m_movement.m_374 == 4)
         return;
@@ -223,6 +223,7 @@ void C_MeleeTracker::Tick(int timeDelta)                // 0x005d5620
         const S_vector zero(0.0f, 0.0f, 0.0f);
         Hit(HIT_FALL, 1000.0f, zero, zero, nullptr, 0);  // fell out of the level
     }
+#ifndef HD2_DEDICATED   // the server has no controls: no player drives a tracker
     // (Fix: m_ai is null when the frame setup gave up; the original assumes a controller.)
     if (m_ai && m_ai->GetMode() == 1) {
         // The player drives the tracker: the controls' held / pressed values are its behaviour
@@ -234,6 +235,7 @@ void C_MeleeTracker::Tick(int timeDelta)                // 0x005d5620
         m_ai->m_actionA = held;
         m_ai->m_actionB = pressed;
     }
+#endif
     if (m_ai)
         m_ai->Tick(timeDelta);
     m_movement.BuildSequence();

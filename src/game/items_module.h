@@ -59,7 +59,7 @@ public:
     ~C_ItemsModule() override;                          // 0x007dcfd0
 
     void Init() override;                               // 0x007dd180
-    void Done() override;                               // 0x007dd260
+    void Done() override;                               // 0x007dd260 (DS 0x00818270)
     void Tick(int timeDelta) override;                  // 0x007dd7f0
     void Update(int timeDelta) override;                // 0x007dd810
     void LoadMissionData(bool server) override;         // 0x007dd300

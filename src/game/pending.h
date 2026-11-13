@@ -270,7 +270,7 @@ struct S_MultiplayerSettings {
 
     // The defaults (no session, no password, +0x21C "\1\2\3", no listing, not dedicated, the server entry reset,
     // no name, game type 0, port 11001, the rules' defaults, the first map current), the maps deleted (part 9i-ii).
-    void Reset();                                   // 0x006ad600 (__fastcall)
+    void Reset();                                   // 0x006ad600 (DS 0x006ee050) (__fastcall)
     // The rules (+0x228 .. +0x27F) from / to S_MpGameRules (its 22 values in order; the original copies them).
     void SetRules(const S_MpGameRules &rules);
     void GetRules(S_MpGameRules &rules);

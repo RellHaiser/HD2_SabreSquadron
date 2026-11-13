@@ -673,13 +673,15 @@ bool C_PlayerProfile::ReadOptions()                     // 0x006b30a0
     return true;
 }
 
-bool C_PlayerProfile::LoadOptions()                     // 0x006b3060
+bool C_PlayerProfile::LoadOptions()                     // 0x006b3060 (DS 0x006f5250)
 {
     const bool ok = ReadOptions();
     ApplyHardwareOption();
     ApplyGamma();
+#ifndef HD2_DEDICATED   // the server sets no sound volumes
     ApplyVolume();
     ApplyMusicVolume();
+#endif
     ApplyVoiceValue();
     ApplyMouse();
     return ok;

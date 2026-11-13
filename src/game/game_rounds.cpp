@@ -1203,16 +1203,20 @@ void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0
 // ---------------------------------------------------------------------------
 // Spectator camera
 
-void C_game::SetCameraMode(int mode)                // 0x0069ad20
+void C_game::SetCameraMode(int mode)                // 0x0069ad20 (DS 0x006dbd80)
 {
     m_cameraMode = mode;
     if (mode < 0)
         return;
     if (mode < GAME_CAMERA_FREE) {
+#ifndef HD2_DEDICATED   // no interface on the server
         GetGame()->GetInterface()->SetScreen(1);
+#endif
         m_spectatedSlot = -1;
     } else if (mode == GAME_CAMERA_FREE) {
+#ifndef HD2_DEDICATED   // no interface on the server
         GetGame()->GetInterface()->SetScreen(mode);
+#endif
         ::GetCameraModule()->SetSpecialMode(2, true, 1);
     }
 }

@@ -34,7 +34,7 @@ public:
     // The loading screen started for `name` (shown on a client, waiting for space in single
     // player, in two parts), the old mission freed, the name kept (C_game's and the loader's),
     // the car's scene set; the model, shadow and version model caches emptied.
-    void Begin(const char *name, const C_MissionDef *mission);   // 0x006d4270
+    void Begin(const char *name, const C_MissionDef *mission);   // 0x006d4270 (DS 0x0071ab10)
     // "missions\<m>\Scene" into the game's scene (its progress: the loading screen's first
     // stage).
     HRESULT LoadScene();                                // 0x006d44d0

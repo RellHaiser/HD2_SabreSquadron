@@ -80,7 +80,7 @@ public:
     void SetWorkingFrame(I3D_frame *frame, bool on);    // 0x0077fb70
     // (Takes a reference of the frame.)
     void SetWorkingFrame2(I3D_frame *frame, bool on);   // 0x0077fbc0
-    void ApplyHit(uint32_t flags, const S_vector &pos, const S_vector &force);   // 0x0077fc10
+    void ApplyHit(uint32_t flags, const S_vector &pos, const S_vector &force);   // 0x0077fc10 (DS 0x007ed2d0)
     void Die(C_Actor *killer) { m_request.killer = killer; }   // 0x00780000
     void Interact(C_Actor *target, uint32_t interaction, int arg, bool on);   // 0x00780010
     // Where the head looks (C_HumanWeaponPose::SetLook; LOOK_* flags, `at` for LOOK_AT).

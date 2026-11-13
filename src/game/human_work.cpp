@@ -772,9 +772,13 @@ void C_HumanWork::ApplyHit(uint32_t flags, const S_vector &pos, const S_vector &
         m_refused |= WORK_REQUEST_HIT;
         return;
     }
+#ifndef HD2_DEDICATED   // the server's pose takes no hits
     C_HumanWeaponPose *pose = m_movementBase->m_weaponPose2;
+#endif
     if (m_movementBase->m_animState.anim.anim == 0x62) {
+#ifndef HD2_DEDICATED   // the server's pose takes no hits
         pose->OnHit(flags, pos, force);
+#endif
         return;
     }
     // The side the hit came from.
@@ -793,7 +797,9 @@ void C_HumanWork::ApplyHit(uint32_t flags, const S_vector &pos, const S_vector &
     // Fix: the pads after the vectors are left (the original copies the 4 bytes after them).
     m_request.hitPos = pos;
     m_request.hitForce = force;
+#ifndef HD2_DEDICATED   // the server's pose takes no hits
     pose->OnHit(m_request.hitFlags & WORK_HIT_ZONES, m_request.hitPos, m_request.hitForce);
+#endif
 }
 
 void C_HumanWork::Interact(C_Actor *target, uint32_t interaction, int arg, bool on)

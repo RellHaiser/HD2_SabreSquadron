@@ -346,7 +346,7 @@ void C_AnimationActor::StartMission(bool server)        // 0x005b3be0
         m_wings.push_back(new S_Wing(m_frame->FindChildFrame("left_wing", FIND_ANY_FRAME)));
 }
 
-void C_AnimationActor::StopMission(bool server)         // 0x005b5000
+void C_AnimationActor::StopMission(bool server)         // 0x005b5000 (DS 0x005c6fc0)
 {
     Deactivate(server);
     if (server && IsClient())

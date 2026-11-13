@@ -451,7 +451,7 @@ void C_AirAttack::StopMission(bool server)              // 0x005e56d0
     m_dusts.clear();
 }
 
-void C_AirAttack::Hit(E_HitType, float amount, const S_vector &, const S_vector &, C_Actor *, int)   // 0x005e3b80
+void C_AirAttack::Hit(E_HitType, float amount, const S_vector &, const S_vector &, C_Actor *, int)   // 0x005e3b80 (DS 0x00602440)
 {
     if (m_health == 0.0f)
         return;
@@ -470,7 +470,11 @@ void C_AirAttack::Hit(E_HitType, float amount, const S_vector &, const S_vector 
     smoke.m[3][0] = world.m[3][0];
     smoke.m[3][1] = world.m[3][1] - 1.0f;
     smoke.m[3][2] = world.m[3][2];
+#ifdef HD2_DEDICATED   // the server creates no particles (the id is -1)
+    m_smoke = -1;
+#else
     m_smoke = g_particlesModule.Create(EFFECT_SMOKE, smoke, m_frame, true, false);
+#endif
     if (const S_FrameData *data = m_frame->GetData()) {
         if (data->script)
             data->script->OnDeath();

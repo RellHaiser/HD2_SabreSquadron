@@ -129,7 +129,7 @@ bool C_SpawnPoint::ReadProperties(C_chunk &chunk)       // 0x006119b0
     return true;
 }
 
-void C_SpawnPoint::Spawn(int slot, S_SoldierState *state, int *stats)   // 0x00611c90
+void C_SpawnPoint::Spawn(int slot, S_SoldierState *state, int *stats)   // 0x00611c90 (DS 0x0063bf90)
 {
     if (!IsServer())
         return;
@@ -178,8 +178,10 @@ void C_SpawnPoint::Spawn(int slot, S_SoldierState *state, int *stats)   // 0x006
     m_spawned = human;
     if (!human)
         return;
+#ifndef HD2_DEDICATED   // the server names no local player
     if (IsLocalGame())
         g_netGame.SetPlayer(slot, 0, "name");
+#endif
     if (!IsLocalGame() && slot == g_localPlayerSlot && GetGame()->GetRoundState() != ROUND_WARMUP)
         GetGame()->SetCameraMode(GAME_CAMERA_FOLLOW);
     human->StartMission(true);
@@ -321,7 +323,7 @@ void C_SpawnPoint::OnMessage(C_BitStream *stream)       // 0x006125a0
 }
 
 C_Human *C_SpawnPoint::CreateSoldier(int slot, int actorSlot, const S_vector4 &pos, const S_vector4 &dir,
-                                     S_SoldierState *state, const int *stats, int uniform, bool npc)   // 0x00612a60
+                                     S_SoldierState *state, const int *stats, int uniform, bool npc)   // 0x00612a60 (DS 0x0063ca70)
 {
     I3D_frame *frame = I3DGetDriver()->CreateFrame(FRAME_MODEL);
     if (!frame)

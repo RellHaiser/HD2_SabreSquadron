@@ -374,10 +374,10 @@ void C_ExplosivePlace::ExplodeHarmless()                // 0x0060d810
     SendActorMessage(msg);
 }
 
-void C_ExplosivePlace::Explode(int planterId)           // 0x0060d870
+void C_ExplosivePlace::Explode(int planterId)           // 0x0060d870 (DS 0x006369e0)
 {
     // (Copy protection dropped: in single player missions after the 11th the original returned
-    // here when its table check failed.)
+    // here when its table check failed. The server's copy has no table check either.)
     if (planterId < 0) {
         ExplodeHarmless();
         return;

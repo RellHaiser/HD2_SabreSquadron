@@ -94,7 +94,7 @@ bool C_game::LoadSavedGame(C_chunk &chunk)          // 0x0069c610
     return true;
 }
 
-void C_game::RestartMission(bool newRound)          // 0x0069c660
+void C_game::RestartMission(bool newRound)          // 0x0069c660 (DS 0x006dd500)
 {
     if (m_state != GAME_STATE_RUNNING && m_mode != GAME_MODE_LOADING)
         return;
@@ -194,8 +194,10 @@ void C_game::RestartMission(bool newRound)          // 0x0069c660
     m_inputDelay = 2500;
     RestoreMusic(false);
     C_Human::GetSpeechSets()->ResetDelays();
+#ifndef HD2_DEDICATED   // no stains on the server
     if (IsLocalGame() && g_gameProfile.GetDetailSettings()->IsEnabled(DETAIL_STAINS))
         g_stainManager.Reset();
+#endif
 }
 
 bool C_game::SaveGame(C_chunk &chunk)               // 0x0069cbb0
@@ -257,7 +259,7 @@ bool C_game::SaveGame(C_chunk &chunk)               // 0x0069cbb0
     return true;
 }
 
-bool C_game::LoadGame(C_chunk &chunk)               // 0x0069d290
+bool C_game::LoadGame(C_chunk &chunk)               // 0x0069d290 (DS 0x006de1c0)
 {
     if ((m_state != GAME_STATE_RUNNING && m_mode != GAME_MODE_LOADING) || !IsServer() || !chunk.IsOpen())
         return false;
@@ -294,7 +296,9 @@ bool C_game::LoadGame(C_chunk &chunk)               // 0x0069d290
             chunk.Ascend();
             break;
         case CHUNK_GAME_INTERFACE:
+#ifndef HD2_DEDICATED   // the server loads no interface
             m_interface->LoadGame(chunk);
+#endif
             chunk.Ascend();
             break;
         case CHUNK_GAME_MODULES:

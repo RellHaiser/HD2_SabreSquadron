@@ -219,10 +219,15 @@ void C_TSExplosion::WriteState(C_BitStream *msg)        // 0x0060f9a0
 
 void C_TSExplosion::PlayParticles(int effect)
 {
+#ifdef HD2_DEDICATED   // no particles on the server: only the frame's world position is brought up to date
+    (void)effect;
+    m_frame->GetWorldPos();
+#else
     g_particlesModule.CreateAt(effect, m_frame->GetWorldPos(), S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
+#endif
 }
 
-void C_TSExplosion::ReadState(C_BitStream *msg)         // 0x0060f9c0
+void C_TSExplosion::ReadState(C_BitStream *msg)         // 0x0060f9c0 (DS 0x00639470)
 {
     if (!msg->ReadBits(1))
         return;
@@ -258,7 +263,7 @@ void C_TSExplosion::Trigger(int)                        // 0x0060fb10
     ServerStep();
 }
 
-void C_TSExplosion::ClientStep()                        // 0x0060fb60
+void C_TSExplosion::ClientStep()                        // 0x0060fb60 (DS 0x006395f0)
 {
     if (m_clientTime == 0 && m_countdownSound != -1)
         PlaySound(m_frame, m_countdownSound);

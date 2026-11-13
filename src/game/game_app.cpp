@@ -676,7 +676,7 @@ bool C_GameApp::SaveGame(const C_str &fileName, bool inGame)   // 0x006c3d20
     return ok;
 }
 
-bool C_GameApp::LoadGame(const C_str &fileName, bool inGame)   // 0x006c3660
+bool C_GameApp::LoadGame(const C_str &fileName, bool inGame)   // 0x006c3660 (DS 0x007095b0)
 {
     // Dropped: the copy protection's bookkeeping at the start.
     if (!inGame) {
