@@ -155,6 +155,8 @@ SUITES = [
     T("human.ik", "human/build_ik.bat", TMP + r"\human_ik_test.exe", needs=("mingw", "original_exe")),
     # (The weapon in the hands and its holds, game/human_pose_weapon.cpp and _hold.cpp: human/build_weapon.bat, HUMAN_WEAPON.)
     T("human.weapon", "human/build_weapon.bat", TMP + r"\human_weapon_test.exe", needs=("mingw", "original_exe")),
+    # (The prone body, the head and the seats, game/human_pose_body.cpp and _seats.cpp: human/build_body.bat, HUMAN_BODY.)
+    T("human.body", "human/build_body.bat", TMP + r"\human_body_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

@@ -1565,3 +1565,54 @@ particles and the surface marks. Files are served from memory.
     reset. The tests and the survivors ran again (68 more killed);
   - two more edits through bash heredocs with backslashes (caught by Python's escape warning and a check), and a sed
     edit that turned human_pose_hold.cpp's line endings to LF (put back).
+
+## Human part 17 (the prone body, the head and the seats, `human_pose_body.cpp`, `human_pose_seats.cpp`, 2026-11-13)
+
+- **The build:** `human/build_body.bat` (HUMAN_BODY): build_weapon.bat's harness with the two files linked,
+  `human/body_test.inc`'s tests alone. Vehicles: a car with a steering wheel ("LWC" / "RWC") and seat weapon grips
+  ("LWS" / "RWS"), a car without the wheel's grips, a static weapon with grips and one without; each a port object
+  and an original-layout block (type +0x18, frame +0x20, a car's velocity +0x4A0) with its own vtable (GetSeatCount,
+  HasSeatWeapon, GetSeatWeaponAim with its hidden return pointer, GetSeatWeaponLimits; logged), the pose's vehicle
+  pointer translated per side; C_Vehicle::SetSteering logged on both sides. The human's model follows the skeleton's
+  (its lying dummies give the prone spheres), its stance dummies bound as on every model.
+- **The tests (46,005 checks):**
+  - FitProneBody (12,000): the skeleton lying along the model (or standing: the fit gives up), the fit unset, settling,
+    blending, the tests on odd updates, moved or turned since the last fit, over the test world's ground;
+  - the head (40,000): SetLook (every request, a missing point), PickGlance (every side, quick, nervous, once),
+    UpdateHeadLook (looking at a point, glancing, returning, the aim's look while holding), TurnHead;
+  - the seats (40,000): SetSeat (in and out, every vehicle and seat flag, from the steering), UpdateSteering (the
+    wheel turned past 60 degrees either way), UpdateSeat (a seat weapon or only the neck), UpdateStaticWeapon (with
+    the gunner poses or without, aims across the weapon's limits, a grip lost), SetSeatWeaponPose.
+- **Judged by their rates:** the seats' updates solve 16-pass chains (95 %; they agree in 96.4..99.0 %); UpdateHeadLook
+  and FitProneBody (99.9 %; they agree in 99.97 % and 99.99 %). **Not traced:** those head looks all turn the head
+  back towards its own direction (LOOK_RETURNING) through the clamps, differing by up to 0.2; the port's TurnHead aimed
+  at where the original's head ended up reproduces it in some of them and not in others; the sums' groupings, the
+  clamps, the slerp and LS3DF's RotateByMatrix were checked against the original and agree.
+- **Undefined in the original, not compared:** the w of the effectors' targets, the accelerations, the look's
+  direction, start and end, the prone buffers' vectors; the gunner positions' w.
+- **Port fixes (on main):**
+  - the clamps of NotSteeper, KeepForward and the look at a point took `s <= 1e-8`; the original takes that branch on
+    a NaN too (0x007ad659 and others), and KeepForward returns a NaN direction unclamped;
+  - SetLook's and UpdateHeadLook's directions into axes summed x first; the original groups them (y + z) + x, and
+    normalises the direction to the point with the square summed z first;
+  - Capped (the neck's sway) took the SDK's tests as float compares (the integer "below 1e-8", NaN returned);
+  - UpdateStaticWeapon's aim in the weapon's axes summed x first; the original groups (y + z) + x.
+- **Results:** lines: human_pose_body.cpp 96.8 % of 412, human_pose_seats.cpp 99.7 % of 315. Not run: NotSteeper and the
+  look's clamp for exactly vertical normals, KeepForward's clamps of components past 1 (unit inputs only), the zero
+  direction to a point at the head, the velocity of a seat in a vehicle other than a car (the game never has one).
+- **Harness limit:** the original's C runtime was never started in the harness: an acos of a value past 1 sets errno,
+  whose per-thread block it cannot allocate (a crash in calloc). The static weapon's aims are kept off its up axis by
+  1e-5; in the game such an acos returns a NaN and goes on.
+- **Mutations** (`human/mutations/mutate_body1.py`, `_body2.py`): human_pose_body.cpp 467 mutants, 333 killed, 31 not
+  building, 103 survived; human_pose_seats.cpp 264, 198 killed, 23 not building, 43 survived. Many survivors are paths
+  the tests' inputs do not reach (unit directions only, exact boundaries) or that the rate-judged updates absorb; one
+  finding: a static weapon's aim in the left half never blends its poses (the turn is clamped to 0 there, in the
+  original too), so mutants there change nothing. Classified in their docstrings.
+- **Harness lessons (my mistakes):**
+  - my first vehicle fakes assumed the port's C_Actor and C_Car have the original's layout (they do not: static
+    asserts caught it); then port and original objects per side;
+  - random states the game never makes crashed both sides or the port: steering without a vehicle, a body fit without
+    an owner, a static weapon's update without its vehicle; the stance dummies left unbound gave both sides garbage
+    spheres (uninitialised stack);
+  - my scratch copy of human_test.cpp in the scratchpad picked up an old body_test.inc of another session (quoted
+    includes search the including file's directory first).
