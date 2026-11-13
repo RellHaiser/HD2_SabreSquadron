@@ -12,7 +12,7 @@
 class C_Control;
 class I3D_frame;
 
-class C_EquipmentMenuBase : public C_MenuState {       // (its constructor: 0x006c1810 (DS 0x00707160))
+class C_EquipmentMenuBase : public C_MenuState {       // (its constructor: 0x006c1810 (DS 0x00707160); destructor and deleting destructor: 0x0067f1f0 (DS 0x006bc4a0), 0x0067f350 (DS 0x006bc6a0))
 public:
     // The item controls' notifications (the panel's callbacks; the arguments a callback's). The
     // base's answer true.

@@ -133,7 +133,7 @@ class C_MedalDescriptionScreen : public C_Screen {      // 0x98 bytes
 public:
     C_MedalDescriptionScreen(I3D_scene *scene, I3D_frame *frame) : C_Screen(scene, frame) {}
     // The texts deleted.
-    ~C_MedalDescriptionScreen() override;               // 0x00691920 (0x00691900)
+    ~C_MedalDescriptionScreen() override;               // 0x00691920 (DS 0x006d08f0) (0x00691900 (DS 0x006d08c0))
 
     // The texts'.
     void Refresh() override;                            // +0x18 0x0066a2a0
