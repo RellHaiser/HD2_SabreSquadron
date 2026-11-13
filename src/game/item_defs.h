@@ -350,7 +350,7 @@ public:
     C_ItemDef(E_ItemRecordType recordType, int id);     // 0x007df7e0
     C_ItemDef(const C_ItemDef &) = delete;
     C_ItemDef &operator=(const C_ItemDef &) = delete;
-    virtual ~C_ItemDef();                               // 0x00 0x007df890 (DS 0x0081b380)
+    virtual ~C_ItemDef();                               // 0x00 0x007df890 (DS 0x0081b380) (scalar deleting 0x007df870 (DS 0x0081b350))
     // Writes the record stream (layout at Load); *ioSize == 0: only reports its size.
     virtual void Save(int *ioSize, void *buffer);       // 0x04 0x007dff10
     // Reads the record stream; *outSize receives the bytes used by C_ItemDef (the

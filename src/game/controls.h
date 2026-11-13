@@ -214,7 +214,7 @@ public:
 class C_PictureControl : public C_TextControl {         // 0x78 bytes
 public:
     C_PictureControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextControl(scene, id, parent) {}
-    ~C_PictureControl() override = default;             // 0x006513d0 (0x006513f0)
+    ~C_PictureControl() override = default;             // 0x006513d0 (DS 0x00684fd0) (0x006513f0 (DS 0x00685000))
     // The face group and its texture taken; the box placed with a margin of 1.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00650a50
     bool HandleMessage(S_ControlMessage *message) override;   // 0x00650b00 (DS 0x00684730)
@@ -314,7 +314,7 @@ protected:
 class C_Tooltip : public C_TextControl {                // 0x78 bytes
 public:
     C_Tooltip(I3D_scene *scene, uint32_t id, C_Control *parent);
-    ~C_Tooltip() override;                              // 0x0065f8d0 (0x0065f8f0): the cursor released
+    ~C_Tooltip() override;                              // 0x0065f8d0 (DS 0x00696b80) (0x0065f8f0 (DS 0x00696bb0)): the cursor released
 
     void Tick(int time) override;                       // 0x00651690 (DS 0x00685350)
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00651540 (DS 0x006851b0)

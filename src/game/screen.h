@@ -103,7 +103,7 @@ class C_DescriptionScreen : public C_Screen {           // 0x8C bytes, vtable 0x
 public:
     C_DescriptionScreen(I3D_scene *scene, I3D_frame *frame) : C_Screen(scene, frame) {}   // 0x006838a0
     // The text deleted.
-    ~C_DescriptionScreen() override;                    // 0x00676040 (0x00676020)
+    ~C_DescriptionScreen() override;                    // 0x00676040 (DS 0x006b0930) (0x00676020 (DS 0x006b0900))
 
     // The text's.
     void Refresh() override;                            // +0x18 0x00669bf0 (DS 0x006a3200)

@@ -160,7 +160,7 @@ public:
 // An objective of a mission (vtable 0x00815a48, type 4; 0x18 bytes).
 struct S_MissionObjective : public C_CampaignNode {
     S_MissionObjective() : C_CampaignNode(CAMPAIGN_NODE_OBJECTIVE) {}   // 0x006b8c30
-    ~S_MissionObjective() override;                     // 0x006b55f0 (0x006b5610)
+    ~S_MissionObjective() override;                     // 0x006b55f0 (DS 0x006f8060) (0x006b5610 (DS 0x006f8090))
     // id (text) and status.
     bool LoadDefinition(C_chunk &chunk) override;       // 0x006bae20
     bool Load(C_chunk &chunk) override;                 // 0x006bd810

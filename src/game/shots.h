@@ -164,7 +164,7 @@ protected:
 };
 
 // A bullet (vtable 0x0080fa60, 0xC0 bytes). Pooled by the manager.
-class C_BulletShot : public C_Shot {
+class C_BulletShot : public C_Shot {   // scalar deleting dtor 0x0044db80 (DS 0x0046a2c0)
 public:
     C_BulletShot() : C_Shot(SHOT_BULLET) {}                 // 0x0044db40
 
