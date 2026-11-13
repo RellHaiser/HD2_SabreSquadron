@@ -35,6 +35,7 @@ struct S_SelfScript {
     S_SoldierProfile *profile = nullptr;                // GetSoldierProfile
     uint32_t bodyFlags = 0;                             // S_HumanBody::TakeFlags
     bool member = false;                                // the player team's IsMember
+    void *speechSet = nullptr;                          // C_SpeechSets::Acquire
 } g_self;
 // The debug console's lines (the original's Print is empty: both sides log the text).
 void LogPrint(const char *format, va_list args)
@@ -132,7 +133,7 @@ S_SoldierProfile *GetSoldierProfile(int index)
 C_SpeechSet *C_SpeechSets::Acquire(int id)
 {
     Log(nullptr, "SpeechSetAcquire", {double(id)});
-    return nullptr;
+    return static_cast<C_SpeechSet *>(g_self.speechSet);
 }
 void C_SpeechSets::Release(C_SpeechSet *) { Log(nullptr, "SpeechSetRelease"); }
 
@@ -258,7 +259,10 @@ void C_Human::Hit(E_HitType, float, const S_vector &, const S_vector &, C_Actor 
 void C_Human::GetBoxCorners(S_vector4 *) {}
 void C_Human::ForgetOldSounds() { Log(this, "ForgetOldSounds"); }
 void C_Human::ClearContainers() { Log(this, "ClearContainers"); }
-void C_Human::ApplyRemoteHit(int, int, int, int, const S_vector &, const S_vector &) {}
+void C_Human::ApplyRemoteHit(int type, int zone, int health, int killerId, const S_vector &, const S_vector &)
+{
+    Log(this, "ApplyRemoteHit", {double(type), double(zone), double(health), double(killerId)});
+}
 // The actor's base (game/actor.cpp is not linked; the human's calls of its base members logged).
 C_Actor::C_Actor(E_ActorType type) : m_type(type) {}
 C_Actor::~C_Actor() {}
@@ -771,13 +775,310 @@ void TestSelfUpdate()
     }
 }
 
+// ---- part 20c: the mission's start and stop
+
+void ST OM_Activate(void *self, int server) { Log(self, "Activate", {double(B(server))}); }
+void ST OM_Deactivate(void *self, int server) { Log(self, "Deactivate", {double(B(server))}); }
+void ST OM_ShowTimer(void *, int textId, int ms) { Log(nullptr, "ShowTimer", {double(textId), double(ms)}); }
+int ST OM_BodyCreate(void *, void *owner, int group)
+{
+    Log(owner, "BodyCreate", {double(group)});
+    return 1;
+}
+int ST OM_BodyDestroy(void *)
+{
+    Log(nullptr, "BodyDestroy");
+    return 1;
+}
+int ST OM_IsCoop(void *)
+{
+    Log(nullptr, "IsCooperativeGame");
+    return g_self.coop;
+}
+void ST OM_CreateController(void *self, int type) { Log(self, "CreateController", {double(type)}); }
+void ST OM_AssignPlayerController(void *self, int active) { Log(self, "AssignPlayerController", {double(B(active))}); }
+void *ST OM_SpeechAcquire(void *, int id)
+{
+    Log(nullptr, "SpeechSetAcquire", {double(id)});
+    return g_self.speechSet;
+}
+void ST OM_SpeechRelease(void *, void *) { Log(nullptr, "SpeechSetRelease"); }
+int ST OM_AddObserver(void *, I3D_frame *frame, uint32_t mask)
+{
+    Log(nullptr, ("AddObserver " + NameOf(frame)).c_str(), {double(mask)});
+    return g_self.sightId;
+}
+int ST OM_AddTarget(void *, I3D_frame *frame, uint32_t mask)
+{
+    Log(nullptr, ("AddTarget " + NameOf(frame)).c_str(), {double(mask)});
+    return g_self.sightId + 1;
+}
+void ST OM_SetTargetState(void *, int id, int state) { Log(nullptr, "SetTargetState", {double(id), double(state)}); }
+int ST OM_RemoveObserver(void *, int id)
+{
+    Log(nullptr, "RemoveObserver", {double(id)});
+    return 1;
+}
+int ST OM_RemoveTarget(void *, int id)
+{
+    Log(nullptr, "RemoveTarget", {double(id)});
+    return 1;
+}
+int __stdcall OM_PeriodicAdd(void *actor, int arg)   // (stdcall, as the original's)
+{
+    Log(actor, "PeriodicLinks_Add", {double(arg)});
+    return g_self.periodicLink;
+}
+void __stdcall OM_PeriodicRemove(int id) { Log(nullptr, "PeriodicLinks_Remove", {double(id)}); }
+void ST OM_ApplyRemoteHit(void *self, int type, int zone, int health, int killer, const S_vector *, const S_vector *)
+{
+    Log(self, "ApplyRemoteHit", {double(type), double(zone), double(health), double(killer)});
+}
+int ST OM_AddListener(void *self, I3D_frame *frame, void *)
+{
+    Log(self, ("AddListener " + NameOf(frame)).c_str());
+    return g_self.listener;
+}
+int ST OM_RemoveListener(void *self, int index)
+{
+    Log(self, "RemoveListener", {double(index)});
+    return 1;
+}
+// The camera module's human effects (the module's slot 0x88).
+alignas(16) uint8_t g_camModule[64], g_camEffects[64];
+void *g_camModuleVt[64];
+void *ST OM_GetHumanEffects(void *) { return g_camEffects; }
+void *ST OM_GetCameraModule(void *) { return g_camModule; }
+void ST OM_EffectsRemove(void *, void *human) { Log(human, "CameraEffectsRemove"); }
+void ST OM_ClearContainers(void *self) { Log(self, "ClearContainers"); }
+void ST OM_DisbandFormation(void *self) { Log(self, "DisbandFormation"); }
+void ST OM_SetLeader(void *self, void *leader) { Log(self, "SetLeader", {double(leader != nullptr)}); }
+void ST OM_EventsReset(void *self) { Log(self, "EventsReset"); }
+// The controller's Detach and deleting destructor (the port's two destructor slots, the original's 0x18).
+void ST CT_Detach(void *self) { Log(self, "ControllerDetach"); }
+void ST CT_DeletePort(void *self) { Log(self, "ControllerDelete"); }
+void ST CT_DeleteOrig(void *self, int) { Log(self, "ControllerDelete"); }
+
+alignas(16) uint8_t g_aiMemoryBytes[0x120], g_speechSetBytes[16];
+// The player team (raw storage; the original's GetPlayerTeam answers the same object): one vtable for both sides, its
+// members' slots logged (AddMember: the original's 0x08; RemoveMember(C_Human *): its 0x24, g++'s next to it).
+void *g_teamVt[32];
+int ST TM_AddMember(void *, void *human)
+{
+    Log(human, "TeamAddMember");
+    return 1;
+}
+int ST TM_RemoveMember(void *, void *human)
+{
+    Log(human, "TeamRemoveMember");
+    return 1;
+}
+// The scene's sector at a place (an LS3D method: stdcall, this on the stack; slot 0xE0 on both sides).
+I3D_sector *__stdcall SC_GetSector(void *, const S_vector *pos)
+{
+    Log(nullptr, "SceneGetSector", {pos->x, pos->y, pos->z});
+    return reinterpret_cast<I3D_sector *>(g_sector);
+}
+// A vehicle to leave the seat of (one vtable for both sides: LeaveSeat is the original's slot 0x80).
+alignas(16) uint8_t g_vehicleBytes[0x100];
+void *g_vehicleVt[64];
+void *ST VH_LeaveSeat(void *self, int seat)
+{
+    Log(self, "LeaveSeat", {double(seat)});
+    return nullptr;
+}
+// Dummies of the model: the body's frame ("z", sometimes not under the model) and the head ("f"); a parent that is
+// not a sector.
+I3D_frame *g_zFrame, *g_fFrame, *g_notSector;
+S_FrameData g_humanData = {};
+
+void SetUpMission()
+{
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x00610240, reinterpret_cast<const void *>(OM_Activate)},
+        {0x00610510, reinterpret_cast<const void *>(OM_Deactivate)},
+        {0x0049de50, reinterpret_cast<const void *>(OM_ShowTimer)},
+        {0x005ab330, reinterpret_cast<const void *>(OM_BodyCreate)},
+        {0x005aba90, reinterpret_cast<const void *>(OM_BodyDestroy)},
+        {0x006b69d0, reinterpret_cast<const void *>(OM_IsCoop)},
+        {0x005a3f20, reinterpret_cast<const void *>(OM_CreateController)},
+        {0x005a3e60, reinterpret_cast<const void *>(OM_AssignPlayerController)},
+        {0x005afe00, reinterpret_cast<const void *>(OM_SpeechAcquire)},
+        {0x005b0390, reinterpret_cast<const void *>(OM_SpeechRelease)},
+        {0x0046f350, reinterpret_cast<const void *>(OM_AddObserver)},
+        {0x0046f9d0, reinterpret_cast<const void *>(OM_AddTarget)},
+        {0x0046f700, reinterpret_cast<const void *>(OM_SetTargetState)},
+        {0x0046fd50, reinterpret_cast<const void *>(OM_RemoveObserver)},
+        {0x0046fdf0, reinterpret_cast<const void *>(OM_RemoveTarget)},
+        {0x006e0080, reinterpret_cast<const void *>(OM_PeriodicAdd)},
+        {0x006e0220, reinterpret_cast<const void *>(OM_PeriodicRemove)},
+        {0x005a15d0, reinterpret_cast<const void *>(OM_ApplyRemoteHit)},
+        {0x0069a620, reinterpret_cast<const void *>(OM_GetCameraModule)},
+        {0x00463040, reinterpret_cast<const void *>(OM_EffectsRemove)},
+        {0x005a29c0, reinterpret_cast<const void *>(OM_ClearContainers)},
+        {0x005a9120, reinterpret_cast<const void *>(OM_DisbandFormation)},
+        {0x005a91a0, reinterpret_cast<const void *>(OM_SetLeader)},
+        {0x005ae450, reinterpret_cast<const void *>(OM_EventsReset)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    g_origSoundVt[0x44 / 4] = reinterpret_cast<void *>(OM_AddListener);
+    g_origSoundVt[0x40 / 4] = reinterpret_cast<void *>(OM_RemoveListener);
+    for (void *&slot : g_camModuleVt)
+        slot = reinterpret_cast<void *>(CT_Unexpected);
+    g_camModuleVt[0x88 / 4] = reinterpret_cast<void *>(OM_GetHumanEffects);
+    *reinterpret_cast<void ***>(g_camModule) = g_camModuleVt;
+    g_names[g_camEffects] = "cameraEffects";
+    g_portControllerVt[VSlot(&C_HumanController::Detach)] = reinterpret_cast<void *>(CT_Detach);
+    g_portControllerVt[6] = g_portControllerVt[7] = reinterpret_cast<void *>(CT_DeletePort);
+    g_origControllerVt[0x20 / 4] = reinterpret_cast<void *>(CT_Detach);
+    g_origControllerVt[0x18 / 4] = reinterpret_cast<void *>(CT_DeleteOrig);
+    // The speech sets made already (the original's g_speechSets; the port's makes its own on its first call).
+    *OriginalAt<void **>(0x008ac448) = g_speechSetBytes;
+    g_self.speechSet = g_speechSetBytes;
+    g_names[g_speechSetBytes] = "speechSet";
+    g_names[g_aiMemoryBytes] = "aiMemory";
+    g_h.frame->SetData(&g_humanData);
+    for (void *&slot : g_teamVt)
+        slot = reinterpret_cast<void *>(CT_Unexpected);
+    g_teamVt[0x08 / 4] = reinterpret_cast<void *>(TM_AddMember);
+    g_teamVt[0x24 / 4] = reinterpret_cast<void *>(TM_RemoveMember);
+    g_teamVt[VSlot(&C_Team::AddMember)] = reinterpret_cast<void *>(TM_AddMember);
+    g_teamVt[VSlot(static_cast<bool (C_Team::*)(C_Human *)>(&C_Team::RemoveMember))] = reinterpret_cast<void *>(TM_RemoveMember);
+    *reinterpret_cast<void ***>(g_teamManager.GetPlayerTeam()) = g_teamVt;
+    g_sceneVt[0xE0 / 4] = reinterpret_cast<void *>(SC_GetSector);
+    for (void *&slot : g_vehicleVt)
+        slot = reinterpret_cast<void *>(CT_Unexpected);
+    g_vehicleVt[0x80 / 4] = reinterpret_cast<void *>(VH_LeaveSeat);
+    g_vehicleVt[VSlot(&C_Actor::LeaveSeat)] = reinterpret_cast<void *>(VH_LeaveSeat);
+    *reinterpret_cast<void ***>(g_vehicleBytes) = g_vehicleVt;
+    g_names[g_vehicleBytes] = "vehicle";
+    S_quat none;
+    none.Identity();
+    g_zFrame = NewFrame(FRAME_DUMMY, "z", S_vector(0, 1.0f, 0), none, Box(S_vector(0.05f, 0.05f, 0.05f)), "", g_h.frame);
+    g_fFrame = NewFrame(FRAME_DUMMY, "f", S_vector(0, 1.6f, 0), none, Box(S_vector(0.05f, 0.05f, 0.05f)), "", g_h.frame);
+    g_notSector = NewFrame(FRAME_DUMMY, "notSector", S_vector(20, 1, 20), none, Box(S_vector(0.05f, 0.05f, 0.05f)), "", g_sector);
+}
+
+// A human to start or stop: initialised or not, its role and side, the network game's spawn protection, the ids it
+// holds (or none), a script, a profile, a speech set.
+void RandomMission()
+{
+    RandomUpdate();
+    C_Human *h = g_h.human;
+    h->m_initialized = P(0.5f);
+    h->m_aiMemory = reinterpret_cast<C_HumanAIMemory *>(g_aiMemoryBytes);
+    for (size_t k = 0; k < 0x110; ++k)
+        g_aiMemoryBytes[k] = uint8_t(I(0, 255));
+    h->m_stats[STAT_SPEECH_SET] = I(1, 6);
+    h->m_initialStats[STAT_SPEECH_SET] = I(1, 6);
+    h->m_speechSet = P(0.5f) ? reinterpret_cast<C_SpeechSet *>(g_speechSetBytes) : nullptr;
+    h->m_sightId = P(0.4f) ? -1 : I(0, 20);
+    h->m_sightTargetId = P(0.4f) ? -1 : I(0, 20);
+    h->m_soundListener = P(0.4f) ? -1 : I(0, 20);
+    h->m_periodicLink = P(0.4f) ? -1 : I(0, 20);
+    h->m_disguise = U(0, 1);
+    h->m_unknown94 = U(0, 1);
+    h->m_actionText = I(0, 100);
+    h->m_actionTotal = I(0, 1000);
+    h->m_mpZone = I(0, 5);
+    h->m_inPlay = P(0.5f);
+    h->m_unknown200 = I(0, 9);
+    h->m_scale = {U(0.5f, 2), U(0.5f, 2), U(0.5f, 2), 1.0f};
+    g_mpSettings->spawnProtection = P(0.5f) ? 0 : I(1, 10);
+    // The fields a start sets, other values first.
+    h->m_bleeding = U(0, 2);
+    h->m_bloodDropTime = I(0, 900);
+    h->m_unknown1ac = I(0, 9);
+    h->m_carried = P(0.5f) ? reinterpret_cast<C_Actor *>(g_vehicleBytes) : nullptr;
+    h->m_legHits = I(0, 4);
+    h->m_inventoryChanged = P(0.5f);
+    h->m_bodyFrame = P(0.5f) ? g_sector : nullptr;
+    // A seat, the body's dummy or only the head's, the model outside a sector, a speech set missing.
+    h->m_vehicle = P(0.3f) ? reinterpret_cast<C_Actor *>(g_vehicleBytes) : nullptr;
+    h->m_seat = I(-1, 5);
+    g_zFrame->LinkTo(P(0.5f) ? g_h.frame : g_sector, 0);
+    g_h.frame->LinkTo(P(0.2f) ? g_notSector : g_sector, 0);
+    if (P(0.05f))
+        h->m_stats[STAT_SPEECH_SET] = h->m_initialStats[STAT_SPEECH_SET] = 0;
+    g_self.speechSet = P(0.05f) ? nullptr : g_speechSetBytes;
+    g_humanData.script = P(0.3f) ? reinterpret_cast<decltype(g_humanData.script)>(g_eventsBytes) : nullptr;
+    g_self.coop = P(0.5f);
+    for (int i = 0; i < 2; ++i) {
+        const bool dead = P(0.5f);
+        Profile(i)->dead = dead;
+        g_origProfileBytes[i][0x70] = dead;
+    }
+}
+
+// The AI memory's bytes the original's reset writes (inline at the end of StartMission, 0x0059f9a0). The port's
+// Reset also clears the fields the original leaves as they were (its comment says so): those are not compared. (The
+// owner, +0xE8, is each side's own human.)
+const std::vector<std::pair<int, int>> AI_RESET_BYTES = {
+    {0x00, 12}, {0x10, 1}, {0x20, 12}, {0x40, 12}, {0x70, 4}, {0x80, 4}, {0xE0, 2}, {0xEC, 8},
+    {0x100, 4}, {0x104, 3}, {0x109, 2}};
+
+void TestSelfMission()
+{
+    C_Human *h = g_h.human;
+    std::printf("self mission\n");
+    g_skipFields.insert("m_faceTexture");
+    // (The scale's w: the original copies an undefined one from a temp; the port keeps its own.)
+    g_skipWords.insert({"m_scale", 12});
+    for (int i = 0; i < 16000 / QUICK; ++i) {
+        RandomMission();
+        const bool server = P(0.5f);
+        if (i % 2 == 0) {
+            std::vector<uint8_t> portMemory, origMemory;
+            std::string portFace, origFace;
+            DiffCall(server ? "StartMission server" : "StartMission",
+                     [&] {
+                         h->C_Human::StartMission(server);
+                         portMemory.assign(g_aiMemoryBytes, g_aiMemoryBytes + 0x110);
+                         portFace = h->m_faceTexture.c_str();
+                         return 0;
+                     },
+                     [&](void *) {
+                         OriginalAt<T_UInt>(0x0059f2c0)(o_human, server);
+                         origMemory.assign(g_aiMemoryBytes, g_aiMemoryBytes + 0x110);
+                         origFace = OrigStr(o_human + 0xBC);
+                         return 0;
+                     });
+            CHECK(portFace == origFace);
+            const bool reset = !portMemory.empty() && portMemory[0x104] == 1;
+            void *portOwner, *origOwner;
+            std::memcpy(&portOwner, &portMemory[0xE8], 4);
+            std::memcpy(&origOwner, &origMemory[0xE8], 4);
+            CHECK(!reset || (portOwner == h && origOwner == o_human));
+            for (const auto &r : AI_RESET_BYTES)
+                if (std::memcmp(&portMemory[r.first], &origMemory[r.first], r.second) != 0) {
+                    std::printf("  aiMemory +0x%x differs:", r.first);
+                    for (int k = 0; k < r.second; ++k)
+                        std::printf(" %02x/%02x", portMemory[r.first + k], origMemory[r.first + k]);
+                    std::printf("\n");
+                    CHECK(false);
+                }
+        } else
+            DiffCall(server ? "StopMission server" : "StopMission",
+                     [&] { h->C_Human::StopMission(server); return 0; },
+                     [&](void *) { OriginalAt<T_UInt>(0x0059fa60)(o_human, server); return 0; });
+        // (The profile's death flag: each side its own profile.)
+        for (int k = 0; k < 2; ++k)
+            CHECK(Profile(k)->dead == (g_origProfileBytes[k][0x70] != 0));
+    }
+    g_skipFields.erase("m_faceTexture");
+    g_skipWords.erase({"m_scale", 12});
+}
+
 void TestSelf()
 {
     SetUpSelf();
     SetUpUpdate();
+    SetUpMission();
     TestSelfSkills();
     TestSelfNames();
     TestSelfUpdate();
+    TestSelfMission();
 }
 
 }  // namespace

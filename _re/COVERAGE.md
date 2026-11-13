@@ -1843,5 +1843,47 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):**
   - the respawn differed in 1.8 % of the updates at first: I wrote the original's local player slot directly, and
     ToOriginal overwrote it from g_script.localPlayer. Both sides now take it from that flag;
-  - another `
-` through a bash heredoc in a debug printf (the build caught it).
+  - another `\n` through a bash heredoc in a debug printf (the build caught it), and the same in this note's first
+    commit.
+
+## Human part 20c (the human's mission start and stop, `human.cpp`, 2026-11-13)
+
+- **The build:** part 20a's. Added:
+  - logged on both sides: Activate / Deactivate, the interface's ShowTimer, the body's Create and Destroy, the
+    profile's IsCooperativeGame, CreateController and AssignPlayerController, the speech sets' Acquire and Release,
+    the sight module (observers and targets), the sound module's listeners (the original's slots 0x40 / 0x44), the
+    periodic links, ApplyRemoteHit, the camera effects' Remove, ClearContainers, DisbandFormation, SetLeader, the
+    events' Reset, the scene's GetSector;
+  - the controller's Detach and deleting destructor (g++'s two destructor slots, the original's 0x18 with its flag);
+  - the player team: one vtable for both sides (raw storage; the original's GetPlayerTeam answers the same object):
+    AddMember at the original's 0x08, RemoveMember(C_Human *) at its 0x24, g++'s slots beside them;
+  - a vehicle whose LeaveSeat is logged (the original's slot 0x80);
+  - the model's "z" and "f" dummies, and a parent that is not a sector;
+  - the original's speech sets marked as made (0x008ac448): its first use builds them inline.
+  - Two calling conventions I had wrong at first: PeriodicLinks_Add / _Remove are stdcall in the original (RET 8 /
+    RET 4), not cdecl; the unbalanced stack crashed the original's StartMission with no crash report.
+- **The tests (16,000, all exact):** StartMission and StopMission, client and server, initialised or not, every role,
+  a script or none, local, client and server games, co-op or not, spawn protection, the ids held or none, a speech set
+  or none (or missing), the profile's death flag, a seat, the body's dummy or only the head's, the model outside a
+  sector, a dead human joining a network game.
+  - Each side's AI memory is compared on the bytes the original's inline reset writes. The port also clears the
+    fields its comment marks as not in the original; the owner is each side's own human.
+  - The face texture's text is compared.
+- **Port fix (on main):** StartMission asked the profile's IsCooperativeGame before choosing the controller, for every
+  human. The original asks only for the enemies and the neutrals (local, then server, then co-op: 0x0059f5f5). It is
+  now asked there.
+- **Undefined in the original, not compared:** the scale's w (copied from a temp).
+- **Results:** lines: 97.9 % of the 141 lines of StartMission, StopMission and their helpers (not run: freeing heard
+  sounds and pending orders); human.cpp 37.0 % of 816 so far.
+- **Not run:** the human's containers (heard sounds, pending orders, seen humans) holding anything: std:: containers
+  in the port, MSVC6 ones in the original, not mapped between the layouts.
+- **Mutations** (`human/mutations/mutate_self3.py`): 148 mutants; 121 killed, 3 not building, 24 survived:
+  - the containers (12);
+  - the body's empty static calls (8);
+  - the port's own speech sets (2);
+  - a frame update the harness does not see (1);
+  - a debug message (1).
+
+  The first pass left 39; varied start fields, the dummies, the parent, a seat and a missing speech set killed 15.
+- **Harness lessons (my mistakes):** the two stdcall functions I redirected as cdecl (above); and Python edit scripts
+  written through bash heredocs collapsed `\n` again, so the scripts are files now.
