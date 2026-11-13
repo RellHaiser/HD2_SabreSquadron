@@ -1947,3 +1947,39 @@ particles and the surface marks. Files are served from memory.
   - the restarts' test changed the human's net id after the local player's slot was taken from it: the port compared
     a stale slot (ToOriginal sets the original's afresh). Found by Respawn's UpdateCameraTarget differing in 6.6 % of
     the calls.
+
+## Human part 20f (the human's saved games, mission properties, SetFrame and CopyFrom, `human.cpp`, 2026-11-13)
+
+- **The build:** part 20a's. Added:
+  - logged on both sides: the actor base's SaveGame, LoadGame, SetFrame (a scripted answer) and CopyFrom, the body's,
+    the events', the controller's (slots 0x2C / 0x30), the formation's and the AI memory's saves and loads (the
+    formation's save writes a word: its chunk is then not empty), GetActorById, IsUnconscious, the enemy records' Add,
+    the sight module's SetObserverState, the vehicle's SetSeatOccupant (slot 0x74);
+  - the original's _aligned_malloc / _aligned_free (part 7's redirects): a load without a formation makes one;
+  - the original's formation constructor made empty, as the port's fake: the original's builds its slots with code
+    this test does not set up (it crashed the test with no report).
+- **The tests (all exact):**
+  - SaveState and SaveGame inside an outer chunk, the files compared byte for byte;
+  - LoadState and LoadGame from inside it (the port's files), into other states: a seat (id 0 or not), a carried
+    actor, a face, dead or unconscious, a formation and an AI memory or none (made by the load: their pointers are
+    each side's own; whether there is one is compared);
+  - WriteProperties (the files compared), ReadProperties (versions 9..15, short chunks, a text id of 0);
+  - SetFrame (a model or another frame, the actor's answer), CopyFrom (a source human in each layout).
+- **Port fixes:** none.
+- **Results:** lines: 100 % of the 205 lines of these functions; human.cpp 96.4 % of 816. Not run in human.cpp:
+  - the creator, the constructor and the destructor;
+  - freeing heard sounds and pending orders (the containers are not mapped between the layouts);
+  - Setup from a saved soldier's state in RestartSinglePlayer;
+  - SetBodyDetached bringing a body back.
+- **Mutations** (`human/mutations/mutate_self7.py`): 139 mutants; 132 killed, 2 not building, 5 survived (equivalent).
+- **Harness lessons (my mistakes):**
+  - **the first mutation run's 137 "killed" were timeouts.** The whole test had grown to 115 s; mutrun runs six at
+    once and counts a timeout as killed (the baseline runs alone and passed). Mutants on lines the test never ran were
+    "killed". Coverage showed the loads' loops never ran: on a freshly opened file the chunk is "at end" before any
+    chunk is entered, while the game calls the loads inside the human's chunk. The tests now use an outer chunk;
+    SELF_ONLY runs one part's tests, and the file tests run a quarter as often. Parts 20a..20e's lists were rerun with
+    their parts alone: the same results as before (those runs had taken a few seconds per mutant);
+  - the save-and-load test changed the actors' ids between a save and its load (the load then found no vehicle and
+    crashed);
+  - self_test.inc had mixed line endings (CR CR LF in 315 lines) from an edit script that turned LF into CRLF in text
+    that already had CR: normalised to LF.

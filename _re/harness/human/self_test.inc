@@ -7,6 +7,7 @@
 #include "game/profile.h"
 #include "game/team.h"
 #include "game/interface.h"
+#include <chrono>
 
 // ---- the port's side: the modules (raw storage under their names: their constructors and vtables not linked)
 asm(".globl _g_sightModule\n\t.bss\n\t.balign 16\n_g_sightModule:\n\t.space 1024\n\t.text");
@@ -39,6 +40,7 @@ struct S_SelfScript {
     void *speechSet = nullptr;                          // C_SpeechSets::Acquire
     bool uniform = false;                               // the uniform container's GetItem
     bool items = false;                                 // CreateItem makes one
+    bool actorSetFrame = true;                          // C_Actor::SetFrame
 } g_self;
 // The debug console's lines (the original's Print is empty: both sides log the text).
 void LogPrint(const char *format, va_list args)
@@ -206,7 +208,7 @@ bool C_HumanAIMemory::SaveGame(C_chunk &)
 }
 bool C_HumanAIMemory::LoadGame(C_chunk &)
 {
-    Log(this, "AIMemoryLoad");
+    Log(nullptr, "AIMemoryLoad");
     return true;
 }
 bool S_HumanBody::Create(C_Human *owner, int group)
@@ -301,7 +303,7 @@ void C_Actor::Done() { Log(this, "ActorDone"); }
 bool C_Actor::SetFrame(I3D_frame *frame)
 {
     Log(this, ("ActorSetFrame " + NameOf(frame)).c_str());
-    return true;
+    return g_self.actorSetFrame;
 }
 bool C_Actor::SaveGame(C_chunk &)
 {
@@ -326,14 +328,16 @@ void C_CameraHumanEffects::Remove(C_Human *human) { Log(human, "CameraEffectsRem
 void C_EnemyRecords::Add(C_Human *enemy) { Log(enemy, "EnemyRecordsAdd"); }
 C_FormationShape::C_FormationShape() {}
 void C_FormationShape::Tick(int timeDelta) { Log(this, "FormationTick", {double(timeDelta)}); }
-bool C_FormationShape::SaveGame(C_chunk &)
+bool C_FormationShape::SaveGame(C_chunk &chunk)
 {
     Log(this, "FormationSave");
+    const int word = 7;
+    chunk.Write(&word, 4);
     return true;
 }
 bool C_FormationShape::LoadGame(C_chunk &)
 {
-    Log(this, "FormationLoad");
+    Log(nullptr, "FormationLoad");
     return true;
 }
 S_SquadSoldier *C_GameProfile::FindSoldierState(int profileIndex)
@@ -1506,6 +1510,375 @@ void TestSelfRespawn()
     g_skipFields.erase("m_faceTexture");
 }
 
+// ---- part 20g: the saved games, the mission's properties, SetFrame and CopyFrom
+
+alignas(16) uint8_t g_carriedBytes[0x100];   // an actor carried
+// The human's parts' own saves and loads (each logged, nothing written: the file holds the human's own chunks).
+int ST OS_ActorSave(void *self, C_chunk *)
+{
+    Log(self, "ActorSave");
+    return 1;
+}
+int ST OS_ActorLoad(void *self, C_chunk *)
+{
+    Log(self, "ActorLoad");
+    return 1;
+}
+int ST OS_ActorSetFrame(void *self, I3D_frame *frame)
+{
+    Log(self, ("ActorSetFrame " + NameOf(frame)).c_str());
+    return g_self.actorSetFrame;
+}
+void ST OS_ActorCopyFrom(void *self, const void *) { Log(self, "ActorCopyFrom"); }
+int ST OS_BodySave(void *, C_chunk *)
+{
+    Log(nullptr, "BodySave");
+    return 1;
+}
+int ST OS_BodyLoad(void *, C_chunk *)
+{
+    Log(nullptr, "BodyLoad");
+    return 1;
+}
+int ST OS_EventsSave(void *self, C_chunk *)
+{
+    Log(self, "EventsSave");
+    return 1;
+}
+int ST OS_EventsLoad(void *self, C_chunk *)
+{
+    Log(self, "EventsLoad");
+    return 1;
+}
+int ST OS_AIMemorySave(void *self, C_chunk *)
+{
+    Log(self, "AIMemorySave");
+    return 1;
+}
+int ST OS_AIMemoryLoad(void *, C_chunk *)
+{
+    Log(nullptr, "AIMemoryLoad");
+    return 1;
+}
+int ST OS_FormationSave(void *self, C_chunk *chunk)
+{
+    Log(self, "FormationSave");
+    const int word = 7;
+    chunk->Write(&word, 4);
+    return 1;
+}
+void *ST OS_FormationCtor(void *self) { return self; }
+int ST OS_FormationLoad(void *, C_chunk *)
+{
+    Log(nullptr, "FormationLoad");
+    return 1;
+}
+void ST CT_Save(void *self, C_chunk *) { Log(self, "ControllerSave"); }
+void ST CT_Load(void *self, C_chunk *) { Log(self, "ControllerLoad"); }
+int g_vehicleId = 21, g_carriedId = 22;
+void *ST OS_GetActorById(void *, int id)
+{
+    Log(&g_actorsModule, "GetActorById", {double(id)});
+    return id == g_vehicleId ? g_vehicleBytes : id == g_carriedId ? g_carriedBytes : nullptr;
+}
+int ST OS_IsUnconscious(void *) { return g_self.unconscious; }
+void ST OS_EnemyRecordsAdd(void *, void *enemy) { Log(enemy, "EnemyRecordsAdd"); }
+void ST OS_SetObserverState(void *, int id, int state) { Log(nullptr, "SetObserverState", {double(id), double(state)}); }
+void ST VH_SetSeatOccupant(void *self, int seat, void *occupant)
+{
+    Log(self, "SetSeatOccupant", {double(seat), double(occupant != nullptr)});
+}
+
+// The port's: the actor lookup by id (the vehicle 21, a carried actor 22).
+C_Actor *SelfActorById(int id, bool)
+{
+    return id == g_vehicleId ? reinterpret_cast<C_Actor *>(g_vehicleBytes)
+                             : id == g_carriedId ? reinterpret_cast<C_Actor *>(g_carriedBytes) : nullptr;
+}
+
+void SetUpSaves()
+{
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x00610780, reinterpret_cast<const void *>(OS_ActorSave)},
+        {0x00610a80, reinterpret_cast<const void *>(OS_ActorLoad)},
+        {0x00610200, reinterpret_cast<const void *>(OS_ActorSetFrame)},
+        {0x006101f0, reinterpret_cast<const void *>(OS_ActorCopyFrom)},
+        {0x005ab4e0, reinterpret_cast<const void *>(OS_BodySave)},
+        {0x005ab7a0, reinterpret_cast<const void *>(OS_BodyLoad)},
+        {0x005ad040, reinterpret_cast<const void *>(OS_EventsSave)},
+        {0x005ad390, reinterpret_cast<const void *>(OS_EventsLoad)},
+        {0x005641b0, reinterpret_cast<const void *>(OS_AIMemorySave)},
+        {0x005643e0, reinterpret_cast<const void *>(OS_AIMemoryLoad)},
+        {0x005942d0, reinterpret_cast<const void *>(OS_FormationSave)},
+        {0x00594560, reinterpret_cast<const void *>(OS_FormationLoad)},
+        {0x00475d50, reinterpret_cast<const void *>(OS_GetActorById)},
+        {0x005a6380, reinterpret_cast<const void *>(OS_IsUnconscious)},
+        {0x0045e410, reinterpret_cast<const void *>(OS_EnemyRecordsAdd)},
+        {0x0046f8c0, reinterpret_cast<const void *>(OS_SetObserverState)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    g_portControllerVt[VSlot(&C_HumanController::SaveGame)] = reinterpret_cast<void *>(CT_Save);
+    g_portControllerVt[VSlot(&C_HumanController::LoadGame)] = reinterpret_cast<void *>(CT_Load);
+    g_origControllerVt[0x2C / 4] = reinterpret_cast<void *>(CT_Save);
+    g_origControllerVt[0x30 / 4] = reinterpret_cast<void *>(CT_Load);
+    g_vehicleVt[0x74 / 4] = reinterpret_cast<void *>(VH_SetSeatOccupant);
+    g_vehicleVt[VSlot(&C_Actor::SetSeatOccupant)] = reinterpret_cast<void *>(VH_SetSeatOccupant);
+    g_actorById = SelfActorById;
+    // (A load makes a formation with the original's _aligned_malloc: the harness's, as part 7's.)
+    RedirectOriginal(0x007e53c2, reinterpret_cast<const void *>(O_AlignedMalloc));
+    RedirectOriginal(0x007e559c, reinterpret_cast<const void *>(O_AlignedFree));
+    // (Its constructor empty, as the port's fake: the original's builds its slots with code this test does not set up.)
+    RedirectOriginal(0x005949c0, reinterpret_cast<const void *>(OS_FormationCtor));
+    // The vehicle's and the carried actor's net ids (the port's C_Actor at its own offset, the original's at +0x10).
+    reinterpret_cast<C_Actor *>(g_vehicleBytes)->SetNetId(21);
+    reinterpret_cast<C_Actor *>(g_carriedBytes)->SetNetId(22);
+    const int ids[] = {21, 22};
+    std::memcpy(g_vehicleBytes + 0x10, &ids[0], 4);
+    std::memcpy(g_carriedBytes + 0x10, &ids[1], 4);
+    g_names[g_carriedBytes] = "carried";
+}
+
+typedef int(ST *T_GChunk)(void *, C_chunk *);
+typedef void(ST *T_GState)(void *, C_chunk *);
+typedef int(ST *T_GFrame)(void *, I3D_frame *);
+typedef void(ST *T_GCopy)(void *, const void *);
+
+// A human to save: its controller's type, the state's fields, a seat or none, carrying or not, a face texture or none.
+void RandomSave()
+{
+    RandomRestart();
+    C_Human *h = g_h.human;
+    h->m_controller = reinterpret_cast<C_HumanController *>(g_portController);
+    h->m_stamina = U(0, 120);
+    h->m_bleeding = U(0, 3);
+    h->m_bloodDropTime = I(0, 900);
+    h->m_legHits = I(0, 4);
+    h->m_disguise = U(0, 100);
+    h->m_actionTime = I(0, 5000);
+    h->m_actionTotal = I(0, 5000);
+    h->m_actionText = I(0, 9000);
+    h->m_vehicle = P(0.3f) ? reinterpret_cast<C_Actor *>(g_vehicleBytes) : nullptr;
+    h->m_carried = P(0.3f) ? reinterpret_cast<C_Actor *>(g_carriedBytes) : nullptr;
+    KeepStr(h->m_faceTexture, P(0.3f) ? "" : ("face_" + std::to_string(I(0, 99))).c_str());
+    h->m_stats[STAT_HEALTH] = P(0.3f) ? 0 : I(1, 100);
+    g_self.unconscious = P(0.2f);
+    // A formation or none, the AI memory or none (a load makes them), the vehicle or the carried actor at id 0.
+    h->m_formation = P(0.5f) ? reinterpret_cast<C_FormationShape *>(g_formationBytes) : nullptr;
+    h->m_aiMemory = P(0.3f) ? nullptr : reinterpret_cast<C_HumanAIMemory *>(g_aiMemoryBytes);
+    h->m_unknown2b8 = I(0, 99);
+    h->m_unknown2bc = I(0, 99);
+    h->m_group = I(0, 6);
+    h->m_role = static_cast<E_HumanRole>(I(0, 5));
+    h->m_carnage = P(0.5f);
+    h->m_unknown1a5 = P(0.5f);
+    h->m_hostileToPlayers = P(0.5f);
+}
+
+// The vehicle's and the carried actor's net ids, one of them 0 (kept from a save to its load).
+void PickActorIds()
+{
+    const bool vehicleZero = P(0.5f);
+    g_vehicleId = vehicleZero ? 0 : 21;
+    g_carriedId = vehicleZero ? 22 : 0;
+    reinterpret_cast<C_Actor *>(g_vehicleBytes)->SetNetId(g_vehicleId);
+    reinterpret_cast<C_Actor *>(g_carriedBytes)->SetNetId(g_carriedId);
+    std::memcpy(g_vehicleBytes + 0x10, &g_vehicleId, 4);
+    std::memcpy(g_carriedBytes + 0x10, &g_carriedId, 4);
+}
+
+void TestSelfSaves()
+{
+    C_Human *h = g_h.human;
+    std::printf("self saves\n");
+    const std::string portFile = TempFile("human_port.sav"), origFile = TempFile("human_orig.sav");
+    g_skipFields.insert("m_faceTexture");
+    g_skipWords.insert({"m_scale", 12});
+    for (int i = 0; i < 1500 / QUICK; ++i) {
+        PickActorIds();
+        RandomSave();
+        const bool state = i % 3 == 0;
+        std::remove(portFile.c_str());
+        std::remove(origFile.c_str());
+        // Saved: the files compared byte for byte.
+        DiffCall(state ? "SaveState" : "SaveGame",
+                 [&] {
+                     C_chunk c;
+                     c.Open(portFile.c_str(), true);
+                     c.Begin(0x7777);
+                     int r = 0;
+                     if (state)
+                         h->SaveState(c);
+                     else
+                         r = int(h->C_Human::SaveGame(c));
+                     c.Ascend();
+                     return r;
+                 },
+                 [&](void *) {
+                     C_chunk c;
+                     c.Open(origFile.c_str(), true);
+                     c.Begin(0x7777);
+                     int r = 0;
+                     if (state)
+                         OriginalAt<T_GState>(0x0059d190)(o_human, &c);
+                     else
+                         r = OriginalAt<T_GChunk>(0x0059d5d0)(o_human, &c) & 0xFF;
+                     c.Ascend();
+                     return r;
+                 });
+        const std::vector<uint8_t> saved = FileBytes(portFile);
+        CHECK(saved == FileBytes(origFile));
+        // Loaded into another human state from the port's file.
+        RandomSave();
+        std::string portFace, origFace;
+        uint16_t outer = 0;
+        if (state) {
+            // (LoadState reads the chunks inside CHUNK_HUMAN_STATE: the file holds them at its top.)
+            DiffCall("LoadState",
+                     [&] {
+                         C_chunk c;
+                         c.Open(portFile.c_str(), false);
+                         c.Descend(outer);
+                         h->LoadState(c);
+                         return 0;
+                     },
+                     [&](void *) {
+                         C_chunk c;
+                         c.Open(portFile.c_str(), false);
+                         c.Descend(outer);
+                         OriginalAt<T_GState>(0x0059d970)(o_human, &c);
+                         return 0;
+                     });
+        } else {
+            g_skipFields.insert("m_formation");
+            g_skipFields.insert("m_aiMemory");
+            bool portParts[2] = {}, origParts[2] = {};
+            DiffCall("LoadGame",
+                     [&] {
+                         C_chunk c;
+                         c.Open(portFile.c_str(), false);
+                         c.Descend(outer);
+                         const int r = int(h->C_Human::LoadGame(c));
+                         portFace = h->m_faceTexture.c_str();
+                         portParts[0] = h->m_formation != nullptr;
+                         portParts[1] = h->m_aiMemory != nullptr;
+                         return r;
+                     },
+                     [&](void *) {
+                         C_chunk c;
+                         c.Open(portFile.c_str(), false);
+                         c.Descend(outer);
+                         const int r = OriginalAt<T_GChunk>(0x0059ddf0)(o_human, &c) & 0xFF;
+                         origFace = OrigStr(o_human + 0xBC);
+                         origParts[0] = *reinterpret_cast<void **>(o_human + 0x2C8) != nullptr;
+                         origParts[1] = *reinterpret_cast<void **>(o_human + 0x2C4) != nullptr;
+                         return r;
+                     });
+            CHECK(portFace == origFace);
+            CHECK(portParts[0] == origParts[0] && portParts[1] == origParts[1]);
+            g_skipFields.erase("m_formation");
+            g_skipFields.erase("m_aiMemory");
+        }
+    }
+    std::remove(portFile.c_str());
+    std::remove(origFile.c_str());
+    g_skipFields.erase("m_faceTexture");
+    g_skipWords.erase({"m_scale", 12});
+}
+
+// The mission's properties: written (the files compared), read back from properties of every version, short ones too.
+void TestSelfProperties()
+{
+    C_Human *h = g_h.human;
+    std::printf("self properties\n");
+    const std::string portFile = TempFile("human_props_port.chk"), origFile = TempFile("human_props_orig.chk");
+    for (int i = 0; i < 2000 / QUICK; ++i) {
+        RandomSave();
+        h->m_carnage = P(0.5f);
+        h->m_unknown1a5 = P(0.5f);
+        h->m_hostileToPlayers = P(0.5f);
+        if (i % 2 == 0) {
+            std::remove(portFile.c_str());
+            std::remove(origFile.c_str());
+            DiffCall("WriteProperties",
+                     [&] {
+                         C_chunk c;
+                         c.Open(portFile.c_str(), true);
+                         return int(h->C_Human::WriteProperties(c));
+                     },
+                     [&](void *) {
+                         C_chunk c;
+                         c.Open(origFile.c_str(), true);
+                         return OriginalAt<T_GChunk>(0x0059e6c0)(o_human, &c) & 0xFF;
+                     });
+            CHECK(FileBytes(portFile) == FileBytes(origFile));
+            continue;
+        }
+        // A properties chunk: a version 9..15 and as many bytes as it has (or fewer).
+        std::vector<uint8_t> bytes(1 + 4 + 4 + 48 + 4 + 1 + 1 + 1 + 4);
+        for (uint8_t &b : bytes)
+            b = uint8_t(I(0, 255));
+        bytes[0] = uint8_t(I(9, 15));
+        if (P(0.3f))
+            std::memset(&bytes[bytes.size() - 4], 0, 4);           // (a text id of 0: none)
+        if (P(0.3f))
+            bytes.resize(size_t(I(1, int(bytes.size()))));
+        {
+            C_chunk c;
+            std::remove(portFile.c_str());
+            c.Open(portFile.c_str(), true);
+            c.Begin(0x4321);
+            c.Write(bytes.data(), int(bytes.size()));
+            c.Ascend();
+        }
+        uint16_t id = 0;
+        DiffCall("ReadProperties",
+                 [&] {
+                     C_chunk c;
+                     c.Open(portFile.c_str(), false);
+                     c.Descend(id);
+                     return int(h->C_Human::ReadProperties(c));
+                 },
+                 [&](void *) {
+                     C_chunk c;
+                     c.Open(portFile.c_str(), false);
+                     c.Descend(id);
+                     return OriginalAt<T_GChunk>(0x0059e800)(o_human, &c) & 0xFF;
+                 });
+    }
+    std::remove(portFile.c_str());
+    std::remove(origFile.c_str());
+}
+
+// SetFrame (a model or another frame, the actor's own answer) and CopyFrom (another human's properties).
+alignas(16) uint8_t g_portSource[sizeof(C_Human) + 0x100], g_origSource[0x1000];
+void TestSelfFrame()
+{
+    C_Human *h = g_h.human;
+    std::printf("self frame\n");
+    for (int i = 0; i < 8000 / QUICK; ++i) {
+        if (i % 2 == 0) {
+            RandomSave();
+            I3D_frame *frame = P(0.6f) ? g_h.frame : g_zFrame;
+            g_self.actorSetFrame = P(0.8f);
+            DiffCall("SetFrame", [&] { return int(h->C_Human::SetFrame(frame)); },
+                     [&](void *) { return OriginalAt<T_GFrame>(0x0059e5e0)(o_human, frame) & 0xFF; });
+            continue;
+        }
+        // The source: a human in each layout (the same values), then the target given others.
+        RandomSave();
+        h->m_carnage = P(0.5f);
+        h->m_unknown1a5 = P(0.5f);
+        h->m_hostileToPlayers = P(0.5f);
+        ToOriginal();
+        std::memcpy(g_portSource, static_cast<const void *>(h), sizeof(C_Human));
+        std::memcpy(g_origSource, o_human, sizeof g_origSource);
+        RandomSave();
+        DiffCall("CopyFrom", [&] { h->C_Human::CopyFrom(reinterpret_cast<const C_Actor *>(g_portSource)); return 0; },
+                 [&](void *) { OriginalAt<T_GCopy>(0x0059e650)(o_human, g_origSource); return 0; });
+    }
+}
+
 void TestSelf()
 {
     SetUpSelf();
@@ -1514,13 +1887,36 @@ void TestSelf()
     SetUpRestart();
     SetUpEquipment();
     SetUpRespawn();
-    TestSelfSkills();
-    TestSelfNames();
-    TestSelfUpdate();
-    TestSelfMission();
-    TestSelfRestart();
-    TestSelfEquipment();
-    TestSelfRespawn();
+    SetUpSaves();
+    // SELF_ONLY: the tests of one part alone (20a skills, 20b update, 20c mission, 20d restart, 20e equipment,
+    // 20f saves): its mutation list runs them alone (all together take two minutes, past the runner's limit).
+    const char *only = std::getenv("SELF_ONLY");
+    const auto run = [&](const char *part) { return !only || std::strcmp(only, part) == 0; };
+    const auto timed = [](const char *name, void (*test)()) {
+        const auto start = std::chrono::steady_clock::now();
+        test();
+        std::printf("(%s: %.1f s)\n", name,
+                    std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count());
+    };
+    if (run("20a")) {
+        timed("skills", TestSelfSkills);
+        timed("names", TestSelfNames);
+    }
+    if (run("20b"))
+        timed("update", TestSelfUpdate);
+    if (run("20c"))
+        timed("mission", TestSelfMission);
+    if (run("20d"))
+        timed("restart", TestSelfRestart);
+    if (run("20e")) {
+        timed("equipment", TestSelfEquipment);
+        timed("respawn", TestSelfRespawn);
+    }
+    if (run("20f")) {
+        timed("saves", TestSelfSaves);
+        timed("properties", TestSelfProperties);
+        timed("frame", TestSelfFrame);
+    }
 }
 
 }  // namespace
