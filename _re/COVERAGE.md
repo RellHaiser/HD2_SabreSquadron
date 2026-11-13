@@ -1781,3 +1781,41 @@ particles and the surface marks. Files are served from memory.
     the port's C_Actor keeps it at offset 4;
   - a run took 121 s, past the mutation runner's 120 s limit: halved;
   - another python edit that missed a CRLF file.
+
+## Human part 20a (the human's skills, names and profile, `human.cpp`, 2026-11-13)
+
+- **The build:** `human/build_human.bat` (HUMAN_SELF): build_base.bat's harness with game/human.cpp linked,
+  `human/self_test.inc`'s tests alone.
+  - human.cpp emits C_Human's vtable, so every virtual and every module it calls must link. About 100 port-side fakes
+    stand in for them, each logging its call or giving a scripted answer: the sight, sound, items, network and
+    interface modules, the team, the events, the AI memory, the body, and the actor's base members. The module
+    globals are raw storage under their names.
+  - The original's calls go to the same loggers:
+    - Print: empty in the release build, so both sides log the formatted line;
+    - GetShortName / GetFullName, GetMoveMode / GetStateFlags, GetDifficulty;
+    - the soldier store's GetSoldierProfile: a method (ECX 0x008aea1c), not the port's free function;
+    - the texts' Get: its C_str is built by the original's own assignment, since the port's C_str has its layout;
+    - the graphic effects' SwitchFaceTexture: each side its own object, as g++'s slot is not 0xAC.
+  - Two soldier profiles, each side its own (the original's std::vector is 16 bytes, g++'s 12, so its stats are at
+    +0x48); the human's profile pointer is swapped per side by the side hook.
+- **The tests (48,000 checks, all exact):**
+  - the gains (AddEndurance, AddMorale, AddShooting, AddStealth, AddFirstAid, AddLockpick, AddUnknownProgress,
+    AddExperience): local, client and server roles, the caps, the debug lines;
+  - TrainSkills: the move modes and state flags, the timers reaching their thresholds exactly or one past;
+  - ApplyDifficulty: difficulties 0..5;
+  - GetName: every role, a text id or none (the name's text compared);
+  - SetProfile (an index or none, a profile or none), SetTexture, ApplyProfileFace (the face texture's text compared).
+- **Port fixes:** none.
+- **Results:** lines: 100 % of the 102 lines of these functions in human.cpp.
+- **Mutations** (`human/mutations/mutate_self1.py`): 102 mutants; 94 killed, 1 not building, 7 survived: the gains'
+  caps tested with > against >= (equivalent: equal to the cap, either assigns it). The first pass left 10; the timers
+  set to reach their thresholds exactly killed 3.
+- **Harness lessons (my mistakes):**
+  - the test called GetName through the harness's logging vtable (it is virtual): C_Human::GetName is called directly
+    now;
+  - my redirect of GetSoldierProfile was cdecl; the original's is a thiscall method, and the unbalanced stack crashed
+    the test;
+  - one fake effects object for both sides used the original's slot 0xAC on the port's side too (g++ adds a second
+    destructor slot);
+  - an Edit that did not apply (the file had changed since I read it) went unnoticed, so one mutation rerun tested the
+    old file.

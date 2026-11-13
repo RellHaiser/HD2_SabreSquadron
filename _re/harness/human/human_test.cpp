@@ -741,6 +741,9 @@ namespace {
 #ifdef HUMAN_SAVE
 #include "save_test.inc"
 #endif
+#ifdef HUMAN_SELF
+#include "self_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -813,7 +816,7 @@ int main(int argc, char **argv)
     LoadGround();
     MakeContacts();
     SetUp3();
-#if !defined(RAGDOLL_ONLY) && !defined(HUMAN_MOVE) && !defined(HUMAN_IK)
+#if !defined(RAGDOLL_ONLY) && !defined(HUMAN_MOVE) && !defined(HUMAN_IK) && !defined(HUMAN_SELF)
     TestBase();
     TestBase2();
     TestBase3();
@@ -822,7 +825,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_SAVE)
+#if defined(HUMAN_SELF)
+    TestSelf();
+#elif defined(HUMAN_SAVE)
     TestSave();
 #elif defined(HUMAN_CORE)
     TestCore();
