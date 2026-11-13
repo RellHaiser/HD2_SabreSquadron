@@ -61,22 +61,22 @@ void C_HumanWeaponPose::ClampAim(float minForward, float side)
 {
     const S_matrix &model = m_model->GetMatrix();
     S_vector aim = PoseXYZ(m_aimDir);
-    float d = aim.Dot(model(1));
+    float d = PoseDotZYX(aim, model(1));
     if (d > 0.7f || d < -0.7f) {
         const float sign = PoseIsNegative(d) ? -1.0f : 1.0f;
         const S_vector perp = aim - model(1) * d;
         const float s = std::sqrt(1.0f - d * d);
-        if (s <= 1e-8f)
+        if (!(s > 1e-8f))
             aim = model(1) * sign;
         else
             aim = perp * (0.7141f / s) + model(1) * (sign * 0.7f);
         PoseSetXYZ(m_aimDir, aim);
     }
-    d = aim.Dot(model(2));
+    d = PoseDotZYX(aim, model(2));
     if (d < minForward) {
         const S_vector perp = aim - model(2) * d;
         const float s = std::sqrt(1.0f - d * d);
-        if (s <= 1e-8f)
+        if (!(s > 1e-8f))
             m_aimDir = PoseRow4(model, 2);
         else
             PoseSetXYZ(m_aimDir, perp * (side / s) + model(2) * minForward);
@@ -193,7 +193,7 @@ static float SquaredSpeed(const C_Human *owner)
     if (!owner)
         return 0.0f;
     const S_vector &v = owner->GetVelocity();
-    return v.z * v.z + v.y * v.y + v.x * v.x;
+    return v.x * v.x + v.y * v.y + v.z * v.z;   // (x first, as the original sums it)
 }
 
 // 0x007bd420
@@ -256,24 +256,24 @@ void C_HumanWeaponPose::HoldProne()
     S_vector hit;
     CollisionRayTest(from, PoseXYZ(m_proneNow[1]) * -2.0f, &hit, &normal, PRONE_HOLD_TEST_TYPES, PRONE_HOLD_TEST_FLAGS);
     S_vector aim = PoseXYZ(m_aimDir);
-    float d = normal.Dot(aim);
+    float d = PoseDotZYX(aim, normal);
     if (d < -0.5f) {
         const S_vector perp = aim - normal * d;
         const float s = std::sqrt(1.0f - d * d);
-        aim = s <= 1e-8f ? -normal : perp * (0.866f / s) + normal * -0.5f;
+        aim = !(s > 1e-8f) ? -normal : perp * (0.866f / s) + normal * -0.5f;
         PoseSetXYZ(m_aimDir, aim);
     } else if (d > 0.3226f) {
         const S_vector perp = aim - normal * d;
         const float s = std::sqrt(1.0f - d * d);
-        aim = s <= 1e-8f ? normal : perp * (0.9465f / s) + normal * 0.3226f;
+        aim = !(s > 1e-8f) ? normal : perp * (0.9465f / s) + normal * 0.3226f;
         PoseSetXYZ(m_aimDir, aim);
     }
     const S_matrix &model = m_model->GetMatrix();
-    d = aim.Dot(model(2));
+    d = PoseDotZYX(aim, model(2));
     if (d < 0.866f) {
         const S_vector perp = aim - model(2) * d;
         const float s = std::sqrt(1.0f - d * d);
-        if (s <= 1e-8f)
+        if (!(s > 1e-8f))
             m_aimDir = PoseRow4(model, 2);
         else
             PoseSetXYZ(m_aimDir, perp * (0.5f / s) + model(2) * 0.866f);

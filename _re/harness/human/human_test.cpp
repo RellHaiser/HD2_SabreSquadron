@@ -724,6 +724,9 @@ namespace {
 #ifdef HUMAN_IK
 #include "ik_test.inc"
 #endif
+#ifdef HUMAN_WEAPON
+#include "weapon_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -805,7 +808,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_IK)
+#if defined(HUMAN_WEAPON)
+    TestWeapon();
+#elif defined(HUMAN_IK)
     TestIk();
 #elif defined(HUMAN_WORK)
     TestWork();

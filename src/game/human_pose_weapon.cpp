@@ -42,13 +42,15 @@ bool WeightedTurn(const S_vector &from, const S_vector &to, const S_vector &weig
 {
     const S_vector cross = to.Cross(from);
     S_vector axis(cross.x * weights.x, cross.y * weights.y, cross.z * weights.z);
+    // (The SDK's tests as the original has them: below 1e-8 as an integer compare, a NaN takes the
+    // square root and nothing turns then.)
     const float sq = axis.Square();
-    if (sq < 1e-8f)
+    if (PoseBelowEpsilon(sq))
         return false;
     float length = 1.0f;
-    if (std::fabs(sq - 1.0f) >= 1e-8f) {
+    if (!(std::fabs(sq - 1.0f) < 1e-8f)) {
         length = std::sqrt(sq);
-        if (length <= 1e-8f)
+        if (!(length > 1e-8f))
             return false;
     }
     axis *= 1.0f / length;
@@ -74,7 +76,7 @@ bool C_HumanWeaponPose::SolveTwoBone(const S_vector &root, float upper, const S_
 {
     const float lowerSq = lower * lower;
     S_vector d(target.x - root.x, target.y - root.y, target.z - root.z);
-    const float length = d.Magnitude();
+    const float length = PoseMagnitude(d.Square());
     const float inv = 1.0f / length;
     float along = (upper * upper - lowerSq) + length * length;
     const float heightSq = upper * upper - along * along * inv * inv * 0.25f;
@@ -207,6 +209,7 @@ void C_HumanWeaponPose::AimWeapon(const S_vector4 &dir, bool hands, bool place, 
     m.m[3][0] = pos.x;
     m.m[3][1] = pos.y;
     m.m[3][2] = pos.z;
+    // (The original copies row 3 from a stack temp whose w it never sets, 0x007c0d94: the port's 1.)
     m.m[3][3] = 1.0f;
     m_weapon->SetLocalMatrix(m);
     m_weapon->Update();
@@ -468,7 +471,8 @@ void C_HumanWeaponPose::SetViewDir(const S_vector &view)
     const S_vector4 dir = {view.x, view.y, view.z, 0.0f};
     bool atOnce = m_owner && m_owner->IsLocalPlayer();
     if (!atOnce) {
-        float c = m_aimDir.x * dir.x + m_aimDir.y * dir.y + m_aimDir.z * dir.z;
+        // (Summed z first, as the original: its rounding decides the 1e-8 test below.)
+        float c = m_aimDir.z * dir.z + m_aimDir.y * dir.y + m_aimDir.x * dir.x;
         if (c > 1.0f)
             c = 1.0f;
         else if (c < -1.0f)
@@ -586,14 +590,14 @@ void C_HumanWeaponPose::UpdateFree()
         return;
     const S_matrix &model = m_model->GetMatrix();
     S_vector aim = PoseXYZ(m_aimDir);
-    float d = model(1).Dot(aim);
+    float d = PoseDotZYX(aim, model(1));
     if (std::fabs(d) > 0.7f) {
         d -= (PoseIsNegative(d) ? -1.0f : 1.0f) * 0.7f;
         aim -= model(1) * d;
         aim.Normalize();
         PoseSetXYZ(m_aimDir, aim);
     }
-    d = aim.Dot(model(2));
+    d = PoseDotZYX(aim, model(2));
     if (d < 0.34f) {
         d -= 0.34f;
         aim -= model(2) * d;
@@ -712,7 +716,9 @@ void C_HumanWeaponPose::UpdateActivity()
         ApplyAnimation(anim, m_activityPosKey, m_activityRotKey, time, &m_bones[POSE_BONE_PELVIS], weight,
                        PoseActivityWeight);
         m_model->Update();
-        m_activityTime = static_cast<int>(static_cast<double>(m_time) * 1.4f + m_activityTime);
+        // (The x87 rounds the product and the sum to float, 0x007b0122.)
+        const float advanced = static_cast<float>(m_time) * 1.4f + static_cast<float>(m_activityTime);
+        m_activityTime = static_cast<int>(advanced);
         if (m_activityTime <= m_activityAnim->GetEndTime())
             return;
     }

@@ -194,9 +194,15 @@ bool g_softDiff = false;
 std::set<size_t> g_poseSkipWords;
 // The pose's floats both below 1e-6 count as equal (its matrices' and directions' near-zero entries: their rounding is no
 // relative error; the usual word comparison takes floats below 2^-40 as non-floats and compares them exactly).
+// (Only words that read as floats: zero or an exponent of at least 2^-55, 2.8e-17. Small integers, flags and pointers
+// read as denormals or as floats below 1e-18: heap and stack ones below 1e-37, the harness image's, 0x20xxxxxx, near
+// 1e-19. The rounding noise these are for is 1e-13..1e-16.)
 bool g_poseTinyFloats = false;
 bool TinyFloats(uint32_t x, uint32_t y)
 {
+    const auto floatish = [](uint32_t w) { return (w & 0x7FFFFFFFu) == 0 || ((w >> 23) & 0xFF) >= 72; };
+    if (!floatish(x) || !floatish(y))
+        return false;
     float a, b;
     std::memcpy(&a, &x, 4);
     std::memcpy(&b, &y, 4);

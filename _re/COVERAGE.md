@@ -1515,3 +1515,53 @@ particles and the surface marks. Files are served from memory.
   - the original's PoseSlerpDir reads and writes whole S_vector4s; my first test passed a 12-byte output, which the
     original overran into the port's result next to it at -O0 (the coverage build's 1,669 failures);
   - I wrote two edits through bash heredocs with backslashes again (a `\n` became a line break; caught at once).
+
+## Human part 16 (the weapon in the hands and its holds, `human_pose_weapon.cpp`, `human_pose_hold.cpp`, 2026-11-13)
+
+- **The build:** `human/build_weapon.bat` (HUMAN_WEAPON): build_ik.bat's harness with the two files linked,
+  `human/weapon_test.inc`'s tests alone. On part 15's skeleton: the hand dummies hw1 / hw2 under the hands, a third
+  person camera dummy, six weapon models (grips "LW" / "RW" and a stock "BUTT" or not), animation sets for the arms'
+  activities (FindTrack, the position and rotation keys logged), the frames' SetWorldDir (slot 0x1C, logged). The pose's
+  owner is each side's own human; the frames' matrices, flags, links and reference counts are compared.
+- **The tests (87,006 checks):**
+  - the arms (30,000): SolveTwoBone (reachable or not, hints, the joint compared), TurnBone, TurnBoneAbout, AimWeapon
+    (the hands, the placing, the stock to the shoulder), ReachArm (left / right, hints);
+  - the modes (40,000): InitHands, SetModel (any weapon, none, the same), SetMode (0, 1, 2, others), SetSupportHand,
+    RaiseWeapon, LowerWeapon, PauseWeapon, PauseHands, SetViewDir (the same and the opposite view), StartRecoil,
+    PlayActivity, ApplyAnimation (bones without tracks, keys at the same time, one or no key), UpdateActivity;
+  - the holds (48,000): UpdateGrip, UpdateRecoil, and judged by their rates (99.5 %; they agree in 99.65..100 %):
+    UpdateHold, UpdateFree, HoldStanding, HoldCrouching, HoldSeated, HoldProne, from states with every stance, speeds
+    from still to running, pistols and rifles, the support hand, aims anywhere (straight up, down and back too), no owner.
+    The holds chain a dozen turns and slerps and some states are ill-conditioned: moving the aim by 1e-7 alone moves the
+    port's own result past the tolerance in about 0.2 % of them (`WEAPON_SENS`), the rate the sides differ at.
+- **Undefined in the original, not compared:** the w of the hand targets, the weapon's direction, the aim and the hands'
+  offsets (stack temps copied as 16 bytes); the weapon frames' m[3][3] (AimWeapon's row 3 from a temp, 0x007c0d94: the
+  port's 1); the prone normals' w. Hand values 2 and 3 stay out of the holds: SetMode never sets them, and HoldProne's
+  direction starts undefined for them in the original.
+- **Port fixes (on main):**
+  - SetViewDir summed its dot product x first; the original sums z first (0x007b9391), and the rounding decides its
+    "at once" test for views along the aim;
+  - the activity time advanced in double; the original rounds the product and the sum to float (0x007b0122): a
+    millisecond short in a fifth of the updates;
+  - WeightedTurn (TurnBone, TurnBoneAbout) and SolveTwoBone took the SDK's tests as float compares: the original's
+    "below 1e-8" is an integer compare and a NaN takes the square root and then fails the length test (a turn of zero
+    length with no time passed made a NaN aim: the port turned the bones by it, the original left them);
+  - the holds' clamps (ClampAim twice, HoldProne three times) tested `s <= 1e-8`; the original jumps to that branch on
+    "<= or unordered" (0x007bd52a): an aim straight up or down gave the port a NaN aim (7.5 % of such holds differed);
+  - ClampAim's, HoldProne's and UpdateFree's dot products are summed z first and the speed x first, as the original's.
+- **Results:** every function agrees; lines: human_pose_weapon.cpp 99.8 % of 565, human_pose_hold.cpp 98.5 % of 202.
+  Not run: WeightedTurn's length test after a square root (a positive NaN only), HandAxis for hands 2 and 3, the
+  speed without an owner (its callers test the owner first).
+- **Mutations** (`human/mutations/mutate_weapon1.py`, `_weapon2.py`): human_pose_weapon.cpp 537 mutants, 436 killed, 39
+  not building, 62 survived; human_pose_hold.cpp 151, 124 killed, 10 not building, 17 survived (equivalent ones, exact
+  boundaries, and one that only moves a hold's rate: judging by rates lets a change in a rare branch through; classified
+  in their docstrings).
+- **Harness lessons (my mistakes):**
+  - my rule taking the pose's floats below 1e-6 as equal (added in this part, committed with part 15's harness) read
+    small integers, flags and pointers as tiny floats: the stance, the hands, times and the weapon pointers were not
+    compared in this part's tests until a full-strength mutation rerun killed none of 147 survivors and I checked one
+    by hand. My first fix (exponent of at least 2^-67) still let the harness image's pointers through (they read as
+    1e-19); now only words with an exponent of at least 2^-55 count. InitHands' resets also had no random states to
+    reset. The tests and the survivors ran again (68 more killed);
+  - two more edits through bash heredocs with backslashes (caught by Python's escape warning and a check), and a sed
+    edit that turned human_pose_hold.cpp's line endings to LF (put back).
