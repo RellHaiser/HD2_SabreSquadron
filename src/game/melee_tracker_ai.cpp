@@ -314,7 +314,7 @@ C_MeleeTrackerController::C_MeleeTrackerController(int mode)
     m_068 = 0;
 }
 
-C_MeleeTrackerController::~C_MeleeTrackerController() = default;   // 0x005cb360
+C_MeleeTrackerController::~C_MeleeTrackerController() = default;   // 0x005cb360 (DS 0x005e2db0)
 
 bool C_MeleeTrackerController::SetMeleeTracker(C_MeleeTracker *meleeTracker)   // 0x005ce630
 {
@@ -1687,9 +1687,13 @@ void C_MeleeTrackerPlayerControl::FrameUpdate(int /*frameTime*/)   // 0x005cf320
     SendActorMessage(stream);
 }
 
-void C_MeleeTrackerPlayerControl::Tick(int /*timeDelta*/)   // 0x005cf570
+void C_MeleeTrackerPlayerControl::Tick(int /*timeDelta*/)   // 0x005cf570 (DS 0x005e8290)
 {
+#ifdef HD2_DEDICATED   // the server has only the server's side
+    if ((m_flags & 0x800) == 0)
+#else
     if ((m_flags & 0x800) == 0 && !IsClient())          // (a dedicated server counts the ticks)
+#endif
         ++m_068;
 }
 

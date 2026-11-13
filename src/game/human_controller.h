@@ -473,7 +473,7 @@ public:
     void Attach(C_Human *human, C_HumanController *previous) override;   // 0x0053b9a0
     // (Also forgets the human.)
     void Detach() override;                             // 0x0053bc50
-    void Update(int frameTime) override;                // 0x00540090
+    void Update(int frameTime) override;                // 0x00540090 (DS 0x00535080)
     void Tick(int timeDelta) override;                  // 0x00540240
     void SaveGame(C_chunk &chunk) override;             // 0x005461f0
     void LoadGame(C_chunk &chunk) override;             // 0x005464b0
@@ -504,12 +504,12 @@ public:
     void OnMessage2(C_BitStream *msg) override;         // 0x00540db0
     // A ladder touched (network clients: the server is asked to use it).
     bool OnCollisionEx(C_Actor *other, const S_vector *pos, int a3, int a4, int a5, int a6,
-                       int a7) override;                // 0x00544b40
+                       int a7) override;                // 0x00544b40 (DS 0x0053ab40)
     // The command goes to the server (CTRL_MSG_COMMAND).
     void IssueCommand(const S_HumanCommand &command) override;   // 0x0053d340
     // By the stance, the pace and the shooting skill (spread and recoil).
     float GetAimBonus() override;                       // 0x00542b10
-    void FlushMessages(bool toClients) override;        // 0x0053f370
+    void FlushMessages(bool toClients) override;        // 0x0053f370 (DS 0x00534000)
     bool Unknown104() override { return false; }        // 0x005a4250 (DS 0x005b11e0)
 
     // Reads and drops the messages of a human that does not exist (yet) on this side.
@@ -671,7 +671,7 @@ public:
     void SetMoveFlags(uint32_t flags) override;         // 0x0056fc30
     void IssueCommand(const S_HumanCommand &command) override;   // 0x00571c10
     void Freeze(bool on) override;                      // 0x005786c0
-    void FlushMessages(bool toClients) override;        // 0x00577b30
+    void FlushMessages(bool toClients) override;        // 0x00577b30 (DS 0x0057ad00)
     // The fire order's target (S_AIFire::orderTarget).
     C_Actor *GetLastTarget() override { return m_fire.orderTarget; }   // 0x00524dd0 (DS 0x00512ac0)
     std::vector<S_AIWaypoint *> *GetWaypoints() override { return &m_waypoints; }   // 0x00524dc0
@@ -1521,7 +1521,7 @@ public:
     void OnBodySeen(C_Human *human) override;           // 0x0058ffe0
     void OnBodyHeard(C_Actor *source) override;         // 0x00590250
     void OnFriendHeard(C_Actor *source) override;       // 0x00590170
-    void OnLoudSound(C_Actor *source) override;         // 0x005900e0
+    void OnLoudSound(C_Actor *source) override;         // 0x005900e0 (DS 0x00599b90)
     void OnSoundHeard(S_RememberedSound *sound) override;   // 0x005902d0
     void OnShotAt(C_Actor *shooter, const S_vector &velocity) override;   // 0x00590380
     void OnHit(int type, int zone, int health, C_Actor *attacker, const S_vector &pos,
@@ -1694,7 +1694,7 @@ public:
     void Attach(C_Human *human, C_HumanController *previous) override;   // 0x00592140
     // (Also forgets the human.)
     void Detach() override;                             // 0x00592200
-    void Update(int frameTime) override;                // 0x00592a60
+    void Update(int frameTime) override;                // 0x00592a60 (DS 0x0059d040)
     void Tick(int /*timeDelta*/) override {}            // 0x00592e30
     // The requests the client makes on this human (items moved, dropped) go to the server.
     bool RequestMoveItem(int uid, int otherId, int fromContainer, int toContainer, int slot) override;   // 0x00592320

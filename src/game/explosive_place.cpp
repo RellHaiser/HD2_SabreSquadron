@@ -193,16 +193,20 @@ void C_ExplosivePlace::StopMission(bool server)         // 0x0060c6b0
     Deactivate(server);
 }
 
-void C_ExplosivePlace::RestartMission(bool)             // 0x0060cf20
+void C_ExplosivePlace::RestartMission(bool)             // 0x0060cf20 (DS 0x00635e40)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StopMission(false);
+#endif
     if (IsServer()) {
         StopMission(true);
         StartMission(true);
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StartMission(false);
+#endif
 }
 
 bool C_ExplosivePlace::SaveGame(C_chunk &chunk)         // 0x0060cf70

@@ -562,7 +562,7 @@ bool C_CampaignRoot::Save(C_chunk &chunk)               // 0x006be590
     return true;
 }
 
-bool C_CampaignRoot::LoadProgress(C_chunk &chunk)       // 0x006bfc90
+bool C_CampaignRoot::LoadProgress(C_chunk &chunk)       // 0x006bfc90 (DS 0x00705310)
 {
     return LoadCursorProgress(chunk);
 }
@@ -617,7 +617,7 @@ bool C_CampaignOperation::Save(C_chunk &chunk)          // 0x006be090
     return true;
 }
 
-bool C_CampaignOperation::LoadProgress(C_chunk &chunk)  // 0x006bf890
+bool C_CampaignOperation::LoadProgress(C_chunk &chunk)  // 0x006bf890 (DS 0x00704e00)
 {
     return LoadCursorProgress(chunk);
 }

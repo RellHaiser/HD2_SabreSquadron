@@ -693,13 +693,17 @@ void C_TemporaryActorsList::RestartMission(bool server)
     if (!server) {
         if (IsServer())
             CreateBreakables();
+#ifndef HD2_DEDICATED   // the server has only the server's side
         if (IsClient())
             CreateBreakablesOnClient();
+#endif
     } else {
         if (IsServer())
             StartMission(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
         if (IsClient())
             StartMission(false);
+#endif
     }
 }
 

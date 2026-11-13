@@ -219,7 +219,7 @@ public:
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00650a50
     bool HandleMessage(S_ControlMessage *message) override;   // 0x00650b00
     // The visual's alpha 0.4 (inactive) or 1 (the box not dimmed).
-    void SetInactive(bool inactive) override;           // 0x00650ad0
+    void SetInactive(bool inactive) override;           // 0x00650ad0 (DS 0x006846f0)
 
 protected:
     I3D_texture *m_texture = nullptr;                   // +0x70 the face group's own
@@ -299,7 +299,7 @@ public:
     int OnEnter(int id) override;                       // 0x00655570
     int OnLeave(int id) override;                       // 0x006555c0
     // Its notification unless inactive (handled; inactive: not, 0).
-    int OnClick(int id) override;                       // 0x00655610
+    int OnClick(int id) override;                       // 0x00655610 (DS 0x0068a2c0)
     // REFRESH: the box on the normal frame (the children not refreshed); WHITE_TEXT.
     bool HandleMessage(S_ControlMessage *message) override;   // 0x006554f0
 
@@ -598,7 +598,7 @@ public:
     // While over it: the other state's active frame shown (the state kept).
     int OnKeyClick(int id) override;                    // 0x006640f0
     // The normal frames' alpha 0.4 (inactive) or 1.
-    void SetInactive(bool inactive) override;           // 0x00663e20
+    void SetInactive(bool inactive) override;           // 0x00663e20 (DS 0x0069c510)
 
     // Its frames, the empty one its frame (on); true.
     bool Setup(I3D_frame *empty, I3D_frame *full, I3D_frame *activeFull, I3D_frame *activeEmpty);   // 0x00663e80
@@ -882,7 +882,7 @@ public:
     // The box placed on the frame (false: none).
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065aec0
     // Notified (inactive: not handled).
-    int OnEnter(int id) override;                       // 0x0065afd0
+    int OnEnter(int id) override;                       // 0x0065afd0 (DS 0x00690e70)
     // The box's hover cleared (not: 0): CONTROL_NOTIFY_LEAVE, then the edit control's (twice).
     int OnLeave(int id) override;                       // 0x0065aff0
     int OnClick(int) override { return CONTROL_NOT_HANDLED; }   // 0x0065b020 (DS 0x00690ee0)
@@ -949,7 +949,7 @@ public:
     // The parts (false: no combo box; its frame's id cleared).
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00661780
     // (DE)ACTIVATE, SHOW, HIDE; the texts to the title; the rest to the combo box.
-    bool HandleMessage(S_ControlMessage *message) override;   // 0x00661930
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00661930 (DS 0x00699510)
     // The parts too.
     void SetInactive(bool inactive) override;           // 0x00661750
 
@@ -1330,7 +1330,7 @@ public:
     // The list group's (its result dropped); the rows made (false: a frame missing), laid out from
     // the last one's place.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006666f0
-    bool HandleMessage(S_ControlMessage *message) override;   // 0x00666e80
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00666e80 (DS 0x006a0100)
     // The entries past the rows, + 1.
     int ScrollRange() const override;                   // 0x00666cf0
 

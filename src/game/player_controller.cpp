@@ -411,6 +411,7 @@ void C_PlayerController::Update(int frameTime)
         movement->OnFrozen(detached);
         m_human->GetFrame()->SetOn(!detached);
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     // This machine's spectator looks along the view of the player it follows.
     if (m_spectating && IsClient() && g_localPlayerSlot == m_human->GetNetId()) {
         C_game *game = GetGame();
@@ -420,6 +421,7 @@ void C_PlayerController::Update(int frameTime)
                 game->GetCameraModule()->SetViewDir(Dir4(watched->GetViewDir()));
         }
     }
+#endif
     if ((m_moveFlags & MOVE_DEAD) || m_spectating)
         return;
     if (m_throwDelay != 0) {
@@ -437,8 +439,10 @@ void C_PlayerController::Update(int frameTime)
     }
     if (!IsServer())
         UpdateInteraction(frameTime);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         TickLocal(frameTime);
+#endif
     if (IsServer())
         UpdateRemote(frameTime);
 }

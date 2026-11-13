@@ -63,7 +63,7 @@ void C_Radio::StopMission(bool server)                  // 0x0060ac00
     Deactivate(server);
 }
 
-bool C_Radio::WriteProperties(C_chunk &chunk)           // 0x0060ac30
+bool C_Radio::WriteProperties(C_chunk &chunk)           // 0x0060ac30 (DS 0x006330d0)
 {
     chunk.Begin(PROPERTY_SOUND_ITEM);
     chunk.Write(m_sound);

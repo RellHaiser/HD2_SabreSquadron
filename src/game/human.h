@@ -470,13 +470,13 @@ public:
     void CopyFrom(const C_Actor *source) override;      // 0x0059e650
     void StartMission(bool server) override;            // 0x0059f2c0 (DS 0x005ab190)
     void StopMission(bool server) override;             // 0x0059fa60
-    void RestartMission(bool server) override;          // 0x0059d100
+    void RestartMission(bool server) override;          // 0x0059d100 (DS 0x005a87b0)
     bool SaveGame(C_chunk &chunk) override;             // 0x0059d5d0
     bool LoadGame(C_chunk &chunk) override;             // 0x0059ddf0
     void WriteState(C_BitStream *msg) override;         // 0x005a9c40 (0x005aa770)
     void ReadState(C_BitStream *msg) override;          // 0x005aa1b0 (0x005aa780)
     // A car faster than 2 m/s runs the human over (killed by its driver).
-    bool OnCollisionEx(C_Actor *other, const S_vector *pos, int a3, int a4, int a5, int a6, int a7) override;   // 0x005a07c0
+    bool OnCollisionEx(C_Actor *other, const S_vector *pos, int a3, int a4, int a5, int a6, int a7) override;   // 0x005a07c0 (DS 0x005acaf0)
     void Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *attacker,
              int zone) override;                        // 0x005a1c90 (DS 0x005ae520)
     int GetMaterialId(I3D_frame *) override { return 66; }   // 0x0059c2a0 (DS 0x005a7550)

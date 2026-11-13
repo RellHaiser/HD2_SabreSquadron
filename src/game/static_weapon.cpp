@@ -629,7 +629,7 @@ int C_StaticWeapon::FindSeat(const C_Actor *occupant)   // 0x006045e0
     return -1;
 }
 
-C_Actor *C_StaticWeapon::LeaveSeat(int seat)            // 0x00604630
+C_Actor *C_StaticWeapon::LeaveSeat(int seat)            // 0x00604630 (DS 0x0062b270)
 {
     if (!IsSeat(seat))
         return nullptr;

@@ -124,7 +124,7 @@ public:
     void StopMission(bool server) override;                         // 0x00477a90
     bool OnMessage(C_BitStream *msg) override;                      // 0x004788e0
     bool Unknown28(C_BitStream *msg) override;                      // 0x004788a0
-    void RestartMission(bool server) override;                      // 0x00477b00
+    void RestartMission(bool server) override;                      // 0x00477b00 (DS 0x00494840)
     bool SaveGame(C_chunk &chunk) override;                         // 0x00477b90
     bool LoadGame(C_chunk &chunk) override;                         // 0x00477f50
     void WriteState(C_BitStream *msg) override;                     // 0x004782c0

@@ -20,7 +20,7 @@ public:
     // Its age (seconds).
     void Update(float seconds) override { age += seconds; }       // 0x004c13f0
     void Refresh() override {}                                    // 0x004c1400
-    ~C_NetObjectMessage() override = default;                     // 0x004c1450 (scalar deleting)
+    ~C_NetObjectMessage() override = default;                     // 0x004c1450 (DS 0x004a8380) (scalar deleting)
     // Marks it sent to `player`: false when it already was.
     virtual bool MarkSent(int player);                            // 0x004c13c0 (slot 5)
     virtual bool SentToAll() const { return sentTo == -1; }       // 0x0073fb80

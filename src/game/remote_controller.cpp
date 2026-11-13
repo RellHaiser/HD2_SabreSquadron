@@ -49,6 +49,9 @@ void C_RemoteController::Detach()
 void C_RemoteController::Update(int frameTime)
 {
     FlushMessages(false);
+#ifdef HD2_DEDICATED   // the server's copy only sends its messages
+    (void)frameTime;
+#else
     if (m_moveFlags & MOVE_DEAD)
         return;
     // A spectator's human (or one not in play) leaves the world.
@@ -89,6 +92,7 @@ void C_RemoteController::Update(int frameTime)
         value = 0.0f;
     for (float &value : m_controlAxes)
         value = 0.0f;
+#endif
 }
 
 // ------------------------------------------------------------------------- the net object

@@ -284,16 +284,20 @@ void C_AnimationActor::CopyFrom(const C_Actor *source)  // 0x005b3a00
     m_particleId = other->m_particleId;
 }
 
-void C_AnimationActor::RestartMission(bool)             // 0x005b31c0
+void C_AnimationActor::RestartMission(bool)             // 0x005b31c0 (DS 0x005c49c0)
 {
     if (IsServer())
         StopMission(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StopMission(false);
+#endif
     if (IsServer())
         StartMission(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StartMission(false);
+#endif
 }
 
 void C_AnimationActor::StartMission(bool server)        // 0x005b3be0

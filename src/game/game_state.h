@@ -55,7 +55,7 @@ enum : int {
 // (The states are allocated 16-byte aligned.)
 class alignas(16) C_GameState {                     // vtable 0x008158ac
 public:
-    virtual ~C_GameState();                         // 0x0067ef90 (the deleting one)
+    virtual ~C_GameState();                         // 0x0067ef90 (DS 0x006bc040) (the deleting one)
     // Enters the state; `arg` is what it starts with (C_game: the mission's definition,
     // null in multiplayer).
     virtual bool Start(void *arg);                  // 0x04 (the base: 0x0067ef30 (DS 0x006bbf80), false)
