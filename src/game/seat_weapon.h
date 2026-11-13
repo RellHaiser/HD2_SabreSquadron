@@ -263,7 +263,7 @@ public:
 
 // An ammo item the server added to the vehicle's store for the clients (type 3; vtable 0x00810658,
 // 0x38 bytes; queued on the car's net object by C_Car::Tick).
-class C_SeatWeaponAmmoMessage : public C_NetObjectMessage {
+class C_SeatWeaponAmmoMessage : public C_NetObjectMessage {   // deleting dtor and dtor: 0x004c1660 (DS 0x004a8650), 0x004c1680 (DS 0x004a8680)
 public:
     C_SeatWeaponAmmoMessage() : C_NetObjectMessage(SEAT_WEAPON_MSG_AMMO) {}
     // The type (3 bits), the uid (16, read back sign-extended), the item's type (8).

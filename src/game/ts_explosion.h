@@ -22,7 +22,7 @@ enum : uint32_t {
 class alignas(16) C_TSExplosion : public C_Actor {      // "Explosion [TS]", vtable 0x008136d0
 public:
     C_TSExplosion() : C_Actor(ACTOR_TS_EXPLOSION) {}    // 0x0060ee50 (DS 0x00638630)
-    ~C_TSExplosion() override = default;                // 0x0060ee90 (scalar deleting 0x0060ee70, DS 0x00638660)
+    ~C_TSExplosion() override = default;                // 0x0060ee90 (DS 0x00638690) (scalar deleting 0x0060ee70, DS 0x00638660)
 
     // The script's start (the clients told; `unused`: the script VM passes 1).
     void Trigger(int unused);                           // 0x0060fb10

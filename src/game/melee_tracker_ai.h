@@ -59,7 +59,7 @@ public:
     virtual bool Attach(C_MeleeTracker *meleeTracker);  // +0x00 0x005ce630
     // The facing from the tracker; alarm, orders, owner and the buffers cleared.
     virtual void Reset();                               // +0x04 0x005ce5d0
-    virtual ~C_MeleeTrackerController();                // +0x08 (0x005cb360)
+    virtual ~C_MeleeTrackerController();                // +0x08 (0x005cb360); the body 0x005cb220 (DS 0x005e2b40)
     // Unbinds the tracker.
     virtual bool Detach();                              // +0x0C 0x005cb230
     // Takes over the transform and the owner of the controller this one replaces.

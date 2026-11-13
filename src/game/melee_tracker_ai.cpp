@@ -1571,7 +1571,7 @@ C_MeleeTrackerRemote::C_MeleeTrackerRemote()            // (SetController's case
 {
 }
 
-C_MeleeTrackerRemote::~C_MeleeTrackerRemote() = default;   // 0x005d5c40 (DS 0x005f06f0)
+C_MeleeTrackerRemote::~C_MeleeTrackerRemote() = default;   // 0x005d5c40 (DS 0x005f06f0), its dtor 0x005d5c60 (DS 0x005f0720)
 
 bool C_MeleeTrackerRemote::Attach(C_MeleeTracker *meleeTracker)   // 0x005cfc10 (DS 0x005e8c00)
 {

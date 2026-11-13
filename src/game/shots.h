@@ -120,7 +120,7 @@ class alignas(16) C_Shot {
 public:
     C_Shot(const C_Shot &) = delete;
     C_Shot &operator=(const C_Shot &) = delete;
-    virtual ~C_Shot() { Release(); }                        // 0x00 0x0044dba0 (DS 0x0046a2f0) (scalar deleting 0x0044dbd0)
+    virtual ~C_Shot() { Release(); }                        // 0x00 0x0044dba0 (DS 0x0046a2f0) (scalar deleting 0x0044dbd0); its copy 0x00450540 (DS 0x0046aea0)
 
     // Releases the visual.
     virtual void Release();                                 // 0x04 0x00448360
