@@ -29,7 +29,7 @@ enum : uint32_t {
 enum : uint32_t {
     I3DCALLBACK_NOTE16 = 0x200,             // (frame, 0x200, value, time ms)
     I3DCALLBACK_ANIM_END = 0x800,           // (frame, 0x800, stage, 0): a stage reached its end
-    I3DCALLBACK_NOTE32 = 0x1000,            // (frame, 0x1000, value, time ms)
+    I3DCALLBACK_NOTE32 = 0x1000,            // (frame, 0x1000, value, time ms): value points into the blob
 };
 
 // (A frame with an animation track.)
@@ -67,15 +67,24 @@ public:
     // 0x30: the note keys of either kind; `*is16` (when given): ANIMTRACK_NOTES16.
     virtual int __stdcall NumNoteKeys(int track, int *is16);
     virtual I3D_RESULT __stdcall GetNoteKey16(int track, int key, int *time, uint16_t *value);   // 0x34
-    virtual I3D_RESULT __stdcall GetNoteKey32(int track, int key, int *time, uint32_t *value);   // 0x38
+    // (The value is a pointer into the blob: uintptr_t, uint32_t's type in a 32-bit build.)
+    virtual I3D_RESULT __stdcall GetNoteKey32(int track, int key, int *time, uintptr_t *value);  // 0x38
 
     // The blob: uint16 track count, uint16 frame count, then a (name, track) pointer pair per
-    // track (0x10004ed0 returns the pairs).
+    // track (0x10004ed0 returns the pairs). The file has a pair of 32-bit offsets there, which Open
+    // turns into the pointers.
     struct TrackEntry {
         const char *name;
         uint8_t *track;
     };
     const TrackEntry *Tracks() const { return data ? reinterpret_cast<const TrackEntry *>(data + 4) : nullptr; }
+    // How far the rest of the blob is moved up from the file's layout to make room for `numTracks`
+    // pointer pairs: 0 where a pair is 8 bytes like the file's offsets; in a 64-bit build the pairs'
+    // extra size rounded up to 16 bytes, which keeps the rotation keys' alignment (by address).
+    static constexpr size_t TableShift(int numTracks)
+    {
+        return sizeof(TrackEntry) == 8 ? 0 : (numTracks * (sizeof(TrackEntry) - 8) + 15) & ~size_t(15);
+    }
 
     int refCount;                           // +0x04
     int defaultMode;                        // +0x08 (1) I3D_anim_stack's mode when 0 is asked for

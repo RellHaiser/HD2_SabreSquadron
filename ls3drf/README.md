@@ -131,11 +131,27 @@ build, compiled but not enforced in a 64-bit one, which has its own layouts and 
 Plain data (the math types, the Direct3D structures, bounding boxes) keeps its `static_assert`s
 everywhere.
 
-**Status: compiles, does not run yet.** `python build.py check64` compiles every source and every
-header on its own for x86-64 with Clang (on Windows for the Win32 platform and for the POSIX
-types). It runs clean. A few places still store pointers in 32-bit fields: the animation loader's
-in-place offsets, the emitter's colour parameters, the driver's init pointer and the error
-callback's context. Until they are fixed, a 64-bit build would truncate pointers there.
+Where a pointer used to travel in 32 bits, the 64-bit build differs:
+
+- **The animation blob's track table** holds (name, track) pointer pairs where the file has two
+  32-bit offsets. A 64-bit loader moves the rest of the blob up by `I3D_animation_set::TableShift`,
+  a multiple of 16 so the rotation keys keep their alignment. `Open` then writes the wider pairs.
+  The same code writes 8-byte pairs in place in a 32-bit build.
+- **32-bit note values** stay offsets in a 64-bit build. `GetNoteKey32` and the `I3DCALLBACK_NOTE32`
+  callback resolve them to pointers when they are read. A 32-bit build turns them into pointers on
+  load, as the original does.
+- **Parameters that can carry a pointer are `uintptr_t`:** `I3D_emitor::SetParam` / `GetParam`
+  (the colours), the frame callback's first parameter, `GetNoteKey32`'s value, the error
+  callback's context and the driver's `Init` argument (`unknown04`). In a 32-bit build
+  `uintptr_t` is the same type as `uint32_t`, so the 32-bit interfaces have not changed.
+
+**Status: compiles, not yet run in a server.** `python build.py check64` compiles every source and
+every header on its own for x86-64 with Clang (on Windows for the Win32 platform and for the POSIX
+types), and it runs clean. Clang's `-Wshorten-64-to-32` and its pointer/integer cast warnings find
+nothing in a 64-bit build. Every animation file the game ships (2,315 `.5ds` files) was loaded
+through `I3D_animation_set::Open` in a 32-bit and a 64-bit Clang build, and everything the getters
+return was dumped. The two dumps are identical. Nothing else has run as 64-bit code: the
+differential tests need the original 32-bit DLLs.
 
 `build.py` checks that every file naming a Win32 type or calling convention includes
 `win_types.h` (MSVC knows `__stdcall` without a header, so only another compiler would notice). It

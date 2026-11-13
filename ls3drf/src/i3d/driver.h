@@ -77,7 +77,7 @@ public:
     // device resources).
     void __stdcall SlotB4() {}
 
-    uint32_t unknown04;                                                 // +0x04
+    uintptr_t unknown04;                                                // +0x04 Init's argument
     ls3d::C_vector<I3D_frame *> soundFrames;                            // +0x08
     // (No envSectors or lightmapTextures vectors, LS3DF's +0x18 / +0x28: LS3DRF has none.)
     ls3d::C_vector<I3D_scene *> scenes;                                 // +0x18 (LS3DF: +0x38)

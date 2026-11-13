@@ -165,7 +165,8 @@ static_assert(sizeof(I3D_bound_volume) == 0x30, "I3D_bound_volume layout");
 // Frame enumeration callback (EnumFrames): 0 continue, 1 skip the children, 2 stop.
 typedef uint32_t __stdcall I3D_ENUMPROC(I3D_frame *frame, void *context);
 // Frame callback (SetCallback): the frame, a message (FRMFLAGS_CALLBACK_MASK bits), parameters.
-typedef int __stdcall I3D_CALLBACK(I3D_frame *frame, uint32_t message, uint32_t param1, uint32_t param2);
+// (param1 can be a pointer, I3DCALLBACK_NOTE32's: uintptr_t, uint32_t's type in a 32-bit build.)
+typedef int __stdcall I3D_CALLBACK(I3D_frame *frame, uint32_t message, uintptr_t param1, uint32_t param2);
 
 // EnumFrames / FindChildFrame flags (above the 16 type bits).
 enum : uint32_t {

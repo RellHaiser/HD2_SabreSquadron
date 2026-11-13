@@ -105,9 +105,11 @@ public:
     // 0x70 0x1003d6c0: the frame, then the texture (flags as a material's, name, alpha name).
     void Load() override;
     virtual void __stdcall SetTexture(ITexture *newTexture);                  // 0x94 0x1003af50
-    // 0x98 0x1003af80: EMTP_* (I3DERR_INVALIDPARAMS for other indices and null colors).
-    virtual I3D_RESULT __stdcall SetParam(int index, uint32_t value);
-    virtual uint32_t __stdcall GetParam(int index);                            // 0x9C 0x1003b5e0 (0 for others)
+    // 0x98 0x1003af80: EMTP_* (I3DERR_INVALIDPARAMS for other indices and null colors). The
+    // colors are passed as pointers, the rest as 32-bit values: uintptr_t, uint32_t's type in a
+    // 32-bit build.
+    virtual I3D_RESULT __stdcall SetParam(int index, uintptr_t value);
+    virtual uintptr_t __stdcall GetParam(int index);                           // 0x9C 0x1003b5e0 (0 for others)
     virtual void __stdcall SetDefaults();                                      // 0xA0 0x1003b8a0
     // 0xA4 0x1003bfb0: emitting on or off (on: the wait and the emitted count start again).
     virtual void __stdcall EmitOn(bool on);

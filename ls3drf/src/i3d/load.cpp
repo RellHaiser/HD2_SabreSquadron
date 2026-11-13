@@ -273,6 +273,7 @@ HRESULT ReadAnimationFile(const char *fileName, uint8_t **blob, const FILETIME *
         return header;
     int size = 0;
     dtaRead(file, &size, 4);
+#if LS3D_ABI32
     auto *data = static_cast<uint8_t *>(AlignedAlloc(static_cast<size_t>(size), 16));
     if (!data) {
         dtaClose(file);
@@ -280,6 +281,28 @@ HRESULT ReadAnimationFile(const char *fileName, uint8_t **blob, const FILETIME *
         return I3DERR_OUTOFMEM;
     }
     dtaRead(file, data, size);
+#else
+    // A 64-bit build: the track table's pointer pairs are wider than the file's offsets, so what
+    // follows the table goes I3D_animation_set::TableShift bytes further up (Open makes the pairs).
+    uint8_t counts[4] = {};                 // the track and frame counts
+    const int headerSize = size < 0 ? 0 : size < 4 ? size : 4;
+    dtaRead(file, counts, headerSize);
+    const int numTracks = headerSize >= 2 ? counts[0] | counts[1] << 8 : 0;
+    const size_t shift = I3D_animation_set::TableShift(numTracks);
+    auto *data = static_cast<uint8_t *>(AlignedAlloc(static_cast<size_t>(size < 0 ? 0 : size) + shift, 16));
+    if (!data) {
+        dtaClose(file);
+        ReportError(I3DERR_OUTOFMEM, kSevFatal);
+        return I3DERR_OUTOFMEM;
+    }
+    std::memcpy(data, counts, static_cast<size_t>(headerSize));
+    const int tableSize = size - headerSize < 8 * numTracks ? size - headerSize : 8 * numTracks;
+    if (tableSize > 0)
+        dtaRead(file, data + 4, tableSize);
+    const int rest = size - headerSize - (tableSize > 0 ? tableSize : 0);
+    if (rest > 0)
+        dtaRead(file, data + 4 + 8 * numTracks + shift, rest);
+#endif
     dtaClose(file);
     *blob = data;
     return I3D_OK;

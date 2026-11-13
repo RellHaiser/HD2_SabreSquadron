@@ -81,7 +81,7 @@ int I3D_driver::GetTime() { return g_driverTime; }
 // LS3DRF 0x1000ec40 (from LS3DF 0x100152f0): no render buffers, no lightmap material.
 I3D_RESULT I3D_driver::Init(const void *init)
 {
-    unknown04 = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(init));
+    unknown04 = reinterpret_cast<uintptr_t>(init);
     std::memset(g_driverStates, 0, sizeof g_driverStates);
     g_driverTime = 0;
     g_driverStates[DRVSTATE_CLEAR] = 1;

@@ -72,7 +72,7 @@ void LogGuid(const GUID *guid)
 void ReportError(HRESULT code, int severity, const char *text, uintptr_t context)
 {
     if (g_errorCallback)
-        g_errorCallback(static_cast<uint32_t>(code), severity, text ? text : "", static_cast<uint32_t>(context));
+        g_errorCallback(static_cast<uint32_t>(code), severity, text ? text : "", context);
     if (severity > kSevError)
         std::exit(-1);
 }

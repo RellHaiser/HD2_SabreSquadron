@@ -54,6 +54,20 @@ const uint8_t *SkipVectors(const uint8_t *section)
     return VectorKeys(section) + 12 * U16(section);
 }
 
+// Value `key` of a 32-bit note section's `count` values: a pointer. A 32-bit build stores the
+// pointers (Open turns the file's offsets from the end of the values into them, as the original);
+// a 64-bit build keeps the offsets, which have no room for a pointer, and adds them here.
+uintptr_t NoteValue32(const uint8_t *values, int count, int key)
+{
+    const uint32_t v = U32(values + 4 * key);
+#if LS3D_ABI32
+    (void)count;
+    return v;
+#else
+    return reinterpret_cast<uintptr_t>(values) + v + 4u * static_cast<uint32_t>(count);
+#endif
+}
+
 // The sections of a track, by its flags.
 const uint8_t *PositionSection(const uint8_t *track)
 {
@@ -172,13 +186,22 @@ I3D_RESULT I3D_animation_set::Open(const char *fileName, uint32_t)
     if (result < 0)
         return result;
     // The blob's offsets become pointers: the entries', then the 32-bit notes' (offsets from the
-    // end of their value array).
+    // end of their value array). The entries are rewritten in place from the last: pair i, however
+    // wide, only covers file offsets of pairs i and after, already read. (A 64-bit build: the
+    // loader moved the rest of the blob up by TableShift(n), and the notes keep their offsets:
+    // NoteValue32.)
     const int n = U16(data);
-    auto *entries = reinterpret_cast<uint32_t *>(data + 4);
-    for (int i = 0; i < 2 * n; ++i)
-        entries[i] += static_cast<uint32_t>(reinterpret_cast<uintptr_t>(data));
+    const size_t shift = TableShift(n);
+    auto *entries = reinterpret_cast<TrackEntry *>(data + 4);
+    for (int i = n - 1; i >= 0; --i) {
+        const uint32_t nameOffset = U32(data + 4 + 8 * i);
+        const uint32_t trackOffset = U32(data + 4 + 8 * i + 4);
+        entries[i].name = reinterpret_cast<const char *>(data + shift + nameOffset);
+        entries[i].track = data + shift + trackOffset;
+    }
+#if LS3D_ABI32
     for (int t = 0; t < n; ++t) {
-        uint8_t *track = reinterpret_cast<uint8_t *>(static_cast<uintptr_t>(entries[2 * t + 1]));
+        uint8_t *track = entries[t].track;
         if (!(U32(track) & ANIMTRACK_NOTES32))
             continue;
         const uint8_t *section = NoteSection(track);
@@ -190,6 +213,7 @@ I3D_RESULT I3D_animation_set::Open(const char *fileName, uint32_t)
             std::memcpy(values + 4 * k, &pointer, sizeof pointer);
         }
     }
+#endif
     const char *start;
     int length;
     BaseName(fileName, start, length);
@@ -334,7 +358,7 @@ I3D_RESULT I3D_animation_set::GetNoteKey16(int track, int key, int *time, uint16
     return I3D_OK;
 }
 
-I3D_RESULT I3D_animation_set::GetNoteKey32(int track, int key, int *time, uint32_t *value)
+I3D_RESULT I3D_animation_set::GetNoteKey32(int track, int key, int *time, uintptr_t *value)
 {
     if (!data)
         return I3DERR_NOTLOADED;
@@ -347,7 +371,7 @@ I3D_RESULT I3D_animation_set::GetNoteKey32(int track, int key, int *time, uint32
     if (static_cast<uint32_t>(key) >= U16(s))
         return I3DERR_INVALIDPARAMS;
     *time = U16(s + 2 + 2 * key) * kAnimFrameTime;
-    *value = U32(VectorKeys(s) + 4 * key);
+    *value = NoteValue32(VectorKeys(s), U16(s), key);
     return I3D_OK;
 }
 
@@ -706,7 +730,7 @@ void I3D_anim_track::Evaluate()
             else
                 passed = cur > prev ? (t >= cur || t < prev) : (t >= cur && t < prev);
             if (passed) {
-                const uint32_t value = wide ? U32(values + 4 * i) : U16(values + 2 * i);
+                const uintptr_t value = wide ? NoteValue32(values, n, i) : U16(values + 2 * i);
                 frame->callback(frame, message, value, static_cast<uint32_t>(t) * kAnimFrameTime);
             }
         }

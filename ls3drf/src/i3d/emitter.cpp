@@ -135,13 +135,13 @@ void I3D_emitor::Uninit()
 void I3D_emitor::SetTexture(ITexture *) {}
 
 // LS3DRF 0x10022b30 (from LS3DF 0x1003af80)
-I3D_RESULT I3D_emitor::SetParam(int index, uint32_t value)
+I3D_RESULT I3D_emitor::SetParam(int index, uintptr_t value)
 {
     if (index >= EMTP_COUNT) {
         dbgPrintf("!! Invalid index:%u  I3D_emitor::SetParam()", index);
         return I3DERR_INVALIDPARAMS;
     }
-    const float f = FloatBits(value);
+    const float f = FloatBits(static_cast<uint32_t>(value));
     switch (index) {
     case EMTP_INTERVAL:
         intervalMin = static_cast<int>(value);
@@ -168,7 +168,7 @@ I3D_RESULT I3D_emitor::SetParam(int index, uint32_t value)
     case EMTP_END_VELOCITY_X: endVelocity.x = f; break;
     case EMTP_END_VELOCITY_X + 1: endVelocity.y = f; break;
     case EMTP_END_VELOCITY_X + 2: endVelocity.z = f; break;
-    case EMTP_FLAGS: emitFlags = value & EMITF_MASK; break;
+    case EMTP_FLAGS: emitFlags = static_cast<uint32_t>(value) & EMITF_MASK; break;
     case EMTP_MAX_PARTICLES:
         maxEmitted = static_cast<int>(value);
         emitting = true;
@@ -185,7 +185,7 @@ I3D_RESULT I3D_emitor::SetParam(int index, uint32_t value)
     case EMTP_START_SCALE: startScale = f; break;
     case EMTP_START_COLOR:
     case EMTP_END_COLOR: {
-        const auto *c = reinterpret_cast<const S_vector4 *>(static_cast<uintptr_t>(value));
+        const auto *c = reinterpret_cast<const S_vector4 *>(value);
         if (!c)
             return I3DERR_INVALIDPARAMS;
         S_vector4 &dst = index == EMTP_START_COLOR ? startColor : endColor;
@@ -207,7 +207,7 @@ I3D_RESULT I3D_emitor::SetParam(int index, uint32_t value)
 }
 
 // LS3DRF 0x10023190 (from LS3DF 0x1003b5e0): no EMTP_NUM_PARTICLES case (0).
-uint32_t I3D_emitor::GetParam(int index)
+uintptr_t I3D_emitor::GetParam(int index)
 {
     if (index >= EMTP_COUNT) {
         dbgPrintf("!! Invalid index:%u  I3D_emitor::GetParam()", index);
@@ -241,8 +241,8 @@ uint32_t I3D_emitor::GetParam(int index)
     case EMTP_ROTATION_MIN: return BitsOf(rotationMin);
     case EMTP_ROTATION_MAX: return BitsOf(rotationMax);
     case EMTP_START_SCALE: return BitsOf(startScale);
-    case EMTP_START_COLOR: return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&startColor));
-    case EMTP_END_COLOR: return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&endColor));
+    case EMTP_START_COLOR: return reinterpret_cast<uintptr_t>(&startColor);
+    case EMTP_END_COLOR: return reinterpret_cast<uintptr_t>(&endColor);
     case EMTP_OPACITY: return BitsOf(opacity);
     default: return 0;
     }

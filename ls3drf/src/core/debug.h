@@ -24,8 +24,9 @@ void StartLog();
 void LogGuid(const GUID *guid);
 
 // Error callback the application installs (0x100d1d4c, S_IGraphInit::errorCallback; cdecl):
-// (code, severity, text, context).
-using ErrorCallback = void __cdecl(uint32_t code, int severity, const char *text, uint32_t context);
+// (code, severity, text, context). The context can be a pointer (the frame of an unbalanced
+// Release): uintptr_t, uint32_t's type in a 32-bit build.
+using ErrorCallback = void __cdecl(uint32_t code, int severity, const char *text, uintptr_t context);
 extern ErrorCallback *g_errorCallback;
 
 // Severity levels of ReportError. Errors above kSevError terminate the process.
