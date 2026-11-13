@@ -340,9 +340,10 @@ bool C_AirStrike::Update(int timeDelta)                 // 0x00471170
 
 // --------------------------------------------------------------------------------- artillery
 
-C_ArtilleryStrike::C_ArtilleryStrike(const S_vector4 &target, int team, C_Human *caller)   // 0x004719f0
+C_ArtilleryStrike::C_ArtilleryStrike(const S_vector4 &target, int team, C_Human *caller)   // 0x004719f0 (DS 0x0048d490)
     : m_target(target), m_team(team), m_caller(caller)
 {
+#ifndef HD2_DEDICATED   // no sounds on the server
     // The caller's radio: the request (by the request file's name; the game is asked for but
     // not used).
     if (IsClient() && caller) {
@@ -357,6 +358,7 @@ C_ArtilleryStrike::C_ArtilleryStrike(const S_vector4 &target, int team, C_Human 
         GetSoundModule()->Play(sound);
         m_speechTimer = GetSoundModule()->GetDubbingSampleSize(SPEECH_ARTILLERY) + 1000;
     }
+#endif
 }
 
 bool C_ArtilleryStrike::TickServer(int timeDelta)       // 0x00471b30

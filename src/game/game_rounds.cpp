@@ -1148,24 +1148,32 @@ void C_game::OnPlayerJoined(int slot, S_SoldierState *state, int *stats)   // 0x
         m_interface->ShowRespawnScreen(false);
 }
 
-void C_game::OnPlayerSpawned(int slot, C_Human *human)   // 0x0069e560
+void C_game::OnPlayerSpawned(int slot, C_Human *human)   // 0x0069e560 (DS 0x006df940)
 {
     if (slot != g_localPlayerSlot)
         return;
     if (m_roundState == ROUND_WARMUP) {
         human->GetController()->SetSpectating(true);
         SetCameraMode(GAME_CAMERA_FREE);
-    } else {
+    }
+#ifndef HD2_DEDICATED   // no interface on the server
+    else {
         GetGame()->GetInterface()->SetScreen(0);
         GetGame()->GetInterface()->ShowSquadMember(nullptr);
     }
+#endif
     m_respawnRequest = 0;
+#ifndef HD2_DEDICATED   // no interface on the server
     m_interface->ShowRespawnScreen(false);
-    if (g_mpSettings->gameType == MP_GAME_OBJECTIVES && human->IsSpectating())
+#endif
+    if (g_mpSettings->gameType == MP_GAME_OBJECTIVES && human->IsSpectating()) {
+#ifndef HD2_DEDICATED   // no interface on the server (the test is still made)
         GetGame()->GetInterface()->ShowTimer(TEXT_SPECTATING, 5000);
+#endif
+    }
 }
 
-void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0
+void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0 (DS 0x006dfe70)
 {
     S_NetPlayerState *players = g_netGame.LockPlayers();
     int slot = -1;
@@ -1182,6 +1190,7 @@ void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0
         player.left = true;
         if (m_vipSlot == slot)
             m_vipSlot = -1;
+#ifndef HD2_DEDICATED   // the server has only the server's side
         if (!IsLocalGame() && IsClient()) {
             if (m_interface->GetShownSquadMember() == player.human)
                 m_interface->ShowSquadMember(nullptr);
@@ -1190,6 +1199,7 @@ void C_game::OnPlayerLeft(int connection)           // 0x0069e9f0
             if (g_netGame.GetLocalHuman() && g_netGame.GetLocalHuman()->GetController() && m_spectatedSlot == slot)
                 m_spectatedSlot = -1;
         }
+#endif
         if (IsServer() && g_gameProfile.IsCooperativeGame())
             g_teamManager.GetCoopTeam()->RemoveMember(player.human);
         g_temporaryActors.DestroyMinesOf(player.human);

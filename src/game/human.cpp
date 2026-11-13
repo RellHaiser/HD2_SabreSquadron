@@ -1094,7 +1094,9 @@ void C_Human::Tick(int timeDelta)
         m_body.SetViewDir(m_controller->GetViewDir());
     }
     m_body.Tick(timeDelta);
+#ifndef HD2_DEDICATED   // the server's takes the flags without the test
     if (!IsClient())
+#endif
         m_controller->OnBodyFlags(m_body.TakeFlags());
     if (m_stats[STAT_HEALTH] <= 0)
         return;

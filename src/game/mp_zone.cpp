@@ -268,19 +268,22 @@ void C_MPZone::EnableForSide(int team)                  // 0x005ed900
     SendState(MSG_TEAM);
 }
 
-void C_MPZone::ApplyTeam()                              // 0x005ec8b0
+void C_MPZone::ApplyTeam()                              // 0x005ec8b0 (DS 0x0060d590)
 {
     if (m_team == m_newTeam)
         return;
+#ifndef HD2_DEDICATED   // no interface on the server
     if (IsClient() && m_objective == -1 && (!m_spawnFrame || g_mpSettings->gameType != MP_GAME_OBJECTIVES) &&
         !g_gameProfile.IsCooperativeGame())
         GetGame()->GetInterface()->SetObjectiveIcon(m_number, m_newTeam);
+#endif
     for (int i = 0; i < 3; ++i) {
         I3D_frame *flag = m_flags[i];
         if (!flag)
             continue;
         flag->SetOn(m_newTeam == i);
         flag->Update();
+#ifndef HD2_DEDICATED   // no flag animation on the server
         if (m_newTeam != i)
             continue;
         S_VertexAnimation *animation = g_vertexAnimModule.FindAnimation(C_str(FLAG_ANIMATION));
@@ -298,6 +301,7 @@ void C_MPZone::ApplyTeam()                              // 0x005ec8b0
             m_flagAnim->loop = true;
             m_flagAnim->stopped = false;
         }
+#endif
     }
     m_team = m_newTeam;
 }

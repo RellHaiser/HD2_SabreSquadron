@@ -364,7 +364,7 @@ public:
     // The weapon is busy for the component's reload time; `*ammoUid` receives the uid
     // of the magazine used up (-1 none).
     bool Reload(C_Actor *owner, int container, int *ammoUid, bool keepLastMagazine) override;   // 0x007d4cb0
-    int Fire(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint32_t flags) override;   // 0x007d5430
+    int Fire(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint32_t flags) override;   // 0x007d5430 (DS 0x0080e8e0)
     int FireSecondary(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint8_t flags) override;   // 0x007d5670
     I3D_frame *GetProjectileFrame() override;           // 0x007d4b10
     void AttachProjectile(I3D_frame *hand) override;    // 0x007d57e0

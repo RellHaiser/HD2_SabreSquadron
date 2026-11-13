@@ -126,7 +126,7 @@ struct S_SoundFrame {                                   // 0x14 bytes
 
 class C_SoundModule : public C_Module {                 // "Sound", vtable 0x0080f7b8, 0x104 bytes
 public:
-    C_SoundModule(int id, const char *name);            // 0x004336d0
+    C_SoundModule(int id, const char *name);            // 0x004336d0 (DS 0x00459490)
     ~C_SoundModule() override;                          // 0x004335d0 (DS 0x00459340)
 
     void Update(int timeDelta) override;                // 0x004368d0

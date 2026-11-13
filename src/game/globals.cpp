@@ -44,7 +44,7 @@ float RandomFloat(float max)
     return static_cast<float>(std::rand()) * max * 3.05176e-05f;
 }
 
-// (0x006ed2a0) A message box, `flags` 1..4 its buttons: 1 yes or retry, 0 no, 2 cancel, -1 anything else.
+// (0x006ed2a0) (DS 0x00738530) A message box, `flags` 1..4 its buttons: 1 yes or retry, 0 no, 2 cancel, -1 anything else.
 int ShowMessage(const char *text, const char *title, unsigned int flags)
 {
     UINT type = 0;
@@ -59,8 +59,8 @@ int ShowMessage(const char *text, const char *title, unsigned int flags)
         title = "<no title>";
     if (!text)
         text = "<no text>";
-    IGraph *const graph = GetIGraph();
 #ifndef HD2_DEDICATED   // no window in LS3DRF.dll
+    IGraph *const graph = GetIGraph();
     switch (MessageBoxA(graph ? graph->GetHWND() : nullptr, text, title, type)) {
 #else
     switch (MessageBoxA(nullptr, text, title, type)) {

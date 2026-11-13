@@ -230,14 +230,18 @@ std::vector<C_AirAttack *> g_airAttacks;                // 0x008ac9c4 (static in
 
 // --- the dust ---------------------------------------------------------------------------------------
 
-C_AirAttack::S_Dust::S_Dust(const S_vector4 &pos, const S_vector4 &d)   // 0x005e92b0
+C_AirAttack::S_Dust::S_Dust(const S_vector4 &pos, const S_vector4 &d)   // 0x005e92b0 (DS 0x00608fe0)
 {
     frame = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
     frame->LinkTo(Scene()->GetPrimarySector(), 0);
     frame->SetPosInline(Vec(pos));
     frame->SetOn(true);
     frame->Update();
+#ifdef HD2_DEDICATED   // no particles on the server
+    particle = -1;
+#else
     particle = g_particlesModule.CreateAt(EFFECT_DUST, Vec(pos), S_vector(0.0f, 0.0f, -1.0f), frame, true, true);
+#endif
     time = DUST_TIME;
     dir = {d.x, 0.0f, d.z, d.w};
     NormalizeBy(dir, SquareXYZ(dir));

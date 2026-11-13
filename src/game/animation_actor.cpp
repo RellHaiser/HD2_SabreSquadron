@@ -481,7 +481,7 @@ int __stdcall C_AnimationActor::NoteProc(I3D_frame *frame, uint32_t message, uin
     return 0;
 }
 
-void C_AnimationActor::Stop(bool immediately)           // 0x005b55e0
+void C_AnimationActor::Stop(bool immediately)           // 0x005b55e0 (DS 0x005c7730)
 {
     if (m_stopped)
         return;
@@ -493,6 +493,7 @@ void C_AnimationActor::Stop(bool immediately)           // 0x005b55e0
             EnablePrimitives(m_collisionFrame, false);
     }
     DeleteCollisions();
+#ifndef HD2_DEDICATED   // no sounds or particles on the server
     if (IsClient() && !immediately && !s_loading) {
         if (m_explosionSound != -1) {
             S_SoundRequest sound;
@@ -506,6 +507,7 @@ void C_AnimationActor::Stop(bool immediately)           // 0x005b55e0
         if (m_particleId != -1 && m_particleFrame)
             g_particlesModule.Create(m_particleId, m_particleFrame->GetMatrix(), nullptr, true, false);
     }
+#endif
     if (!m_frame)
         return;
     if (m_model) {

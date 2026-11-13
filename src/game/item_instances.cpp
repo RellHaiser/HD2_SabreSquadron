@@ -540,8 +540,12 @@ int C_WeaponItem::Fire(C_Actor *shooter, const S_vector &pos, const S_vector &di
 
     I3D_frame *blast = GetBlastDummy();
     if (blast) {
+#ifdef HD2_DEDICATED   // no particles on the server; it still reads the matrix
+        (void)blast->GetMatrix();
+#else
         const int effect = static_cast<C_WeaponComp *>(m_def->GetComponent())->GetEffect();
         g_particlesModule.Create(effect, blast->GetMatrix(), blast, true, false);
+#endif
     }
     g_shotManager.FireProjectile(shooter, this, pos, dir, GetProjectileFrame(), 0x5B, false, 0, flags);
     if (I3D_frame *projectile = GetProjectileFrame())

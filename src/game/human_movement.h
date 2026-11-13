@@ -1087,7 +1087,7 @@ public:
     void UpdatePhysics(int time);                       // 0x007881b0 (DS 0x007f6f30)
     void SetPlayerControlled(bool on);                  // 0x00787530
     // Re-files the hit volumes (`volumes`) and refreshes the sector and the light level (`light`).
-    void Ragdoll(bool volumes, bool light);             // 0x007872b0
+    void Ragdoll(bool volumes, bool light);             // 0x007872b0 (DS 0x007f6290)
     void Unknown7865c0(int arg);                        // 0x007865c0 (passes `arg` on)
     // Uses `ladder` (remote humans that must stand up first queue the action).
     int UseObject(C_Actor *ladder);                     // 0x00786600

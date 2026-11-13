@@ -382,7 +382,7 @@ struct S_HumanBody {                                    // 0x18 bytes
     void DoAction(int action, I3D_frame *frame, void *arg);    // 0x005abe30
     void SetPose(int pose, const void *arg);            // 0x005abf60
     // An interaction with `target` (E_Interaction and flags; `arg`: the seat, the door's open).
-    void Interact(C_Actor *target, uint32_t interaction, int arg);   // 0x005abcc0
+    void Interact(C_Actor *target, uint32_t interaction, int arg);   // 0x005abcc0 (DS 0x005bb0f0)
     void PlayAnimation(const char *name, int a, int b, int c);       // 0x005ac4a0
 
     // (Not called: 0x005abb30, 0x005abb80, 0x005ac230, 0x005ac330.)
@@ -461,7 +461,7 @@ public:
     // What the human can carry: its strength.
     int GetHitPoints() override { return GetStat(STAT_STRENGTH); }   // 0x0059c2b0
     void Update(int frameTime) override;                // 0x0059fe30
-    void Tick(int timeDelta) override;                  // 0x0059ffd0
+    void Tick(int timeDelta) override;                  // 0x0059ffd0 (DS 0x005ac0f0)
     void OnMessage(C_BitStream *msg) override;          // 0x005a5f60 (DS 0x005b3900)
     void Unknown20(C_BitStream *msg) override;          // 0x005a5f70 (DS 0x005b3920)
     bool SetFrame(I3D_frame *frame) override;           // 0x0059e5e0

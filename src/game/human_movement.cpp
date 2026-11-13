@@ -605,6 +605,9 @@ void C_HumanMovement::Ragdoll(bool volumes, bool light)
             g_collisionWorld.MoveVolume(volume);
         }
     }
+#ifdef HD2_DEDICATED   // no lighting on the server
+    (void)light;
+#else
     if (!light || !IsClient())
         return;
     // The sector is looked up every 300 ms (900 for remote humans moving by the network).
@@ -637,6 +640,7 @@ void C_HumanMovement::Ragdoll(bool volumes, bool light)
         lighting.Update(m_owner->GetFrame(), 100, mode);
     }
     RestoreCollision(false);
+#endif
 }
 
 void C_HumanMovement::SetPlayerControlled(bool on)

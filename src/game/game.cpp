@@ -247,7 +247,7 @@ bool C_game::Start(void *arg)                       // 0x00698c80 (DS 0x006d99e0
     return true;
 }
 
-bool C_game::Stop()                                 // 0x00699250
+bool C_game::Stop()                                 // 0x00699250 (DS 0x006d9f50)
 {
     if (IsLocalGame()) {
         // The squad's soldiers go back to the campaign's records (the players have the
@@ -271,17 +271,23 @@ bool C_game::Stop()                                 // 0x00699250
             squad.pop_back();
         }
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         m_firstPersonView->Done();
+#endif
     SwitchStaticLights(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient()) {
         ModuleManager::BroadcastStopMission(false);
         FreeSpeechSlots();
     }
+#endif
     if (IsServer())
         ModuleManager::BroadcastStopMission(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         m_interface->Done();
+#endif
     g_collisionWorld.Unload(false);
     // The tables LoadMaterialTables() read.
     operator delete(g_materials);
@@ -297,7 +303,9 @@ bool C_game::Stop()                                 // 0x00699250
         m_quickMessages->Done();
     m_checkpoints->ResetState();
     FreeCarEffectEmitters();
+#ifndef HD2_DEDICATED   // no stains on the server
     g_stainManager.Done();
+#endif
     return true;
 }
 
