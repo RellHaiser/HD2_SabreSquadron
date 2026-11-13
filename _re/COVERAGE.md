@@ -1917,3 +1917,33 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** I defined the port's controller object twice (once with the fakes, once in the
   test's namespace): the fakes installed one, the side hook compared the other. And the surface marks' call is
   fastcall, which I first redirected as cdecl.
+
+## Human part 20e (the soldier's setup and equipment, the multiplayer spawn, `human.cpp`, 2026-11-13)
+
+- **The build:** part 20a's. Added:
+  - logged on both sides: the items module's CreateItem (an item or none: scripted; the items' uids at +0x10),
+    ClearActorContainers (a method of the items module in the original, 0x0098b020: I redirected it as cdecl first,
+    and the unbalanced stack crashed the test), the network game's SetPlayerTeam;
+  - the soldier's state: the original gets its own copy (MSVC6 vectors are 16 bytes, g++'s 12). The bytes up to the
+    belt are the same; the belt and backpack lists are MSVC6 vectors over copies of the entries; the load is at
+    +0x8C. The entries' uids the network game's items fill in are compared after each call;
+  - the network replication: the human's net object, its place property, the position track (the original's at the
+    property's +0x30; each side its own track, as g++'s slots of SetValue / SetNetValue / SetRate are not the
+    original's 0x1C / 0x20 / 0x24);
+  - the team's SelectMember, SetWatchedHuman and UpdateCameraTarget, the interface's SetScreen and ShowSquadMember,
+    the camera module's SetSpecialMode (the original's slot 0x44);
+  - the human's own StartMission / StopMission (slots 0x3C / 0x40), logged: tested in part 20c.
+- **The tests (20,000, all exact):**
+  - CreateEquipment (a state or none, items or none);
+  - Setup (every role, stats or the profile's, a speech set or a random one, local and network games, a VIP: its slot
+    on the game compared);
+  - Respawn (a state or none, stats or none, the local player's or another's; the model's local matrix compared).
+- **Port fixes:** none.
+- **Results:** lines: 100 % of the 94 lines of CreateEquipment, Setup and Respawn; human.cpp 71.3 % of 816 so far.
+- **Mutations** (`human/mutations/mutate_self5.py`, `mutate_self6.py`): 72 mutants; 64 killed, 5 not building, 3
+  survived: an equivalent release, the body never detached, and the fake frames' SetDir ignoring the roll.
+- **Harness lessons (my mistakes):**
+  - ClearActorContainers redirected as cdecl (above);
+  - the restarts' test changed the human's net id after the local player's slot was taken from it: the port compared
+    a stale slot (ToOriginal sets the original's afresh). Found by Respawn's UpdateCameraTarget differing in 6.6 % of
+    the calls.

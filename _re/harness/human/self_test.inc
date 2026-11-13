@@ -15,7 +15,8 @@ asm(".globl _g_texts\n\t.bss\n\t.balign 16\n_g_texts:\n\t.space 256\n\t.text");
 asm(".globl _g_netGame\n\t.bss\n\t.balign 16\n_g_netGame:\n\t.space 8192\n\t.text");
 asm(".globl _g_gameProfile\n\t.bss\n\t.balign 16\n_g_gameProfile:\n\t.space 4096\n\t.text");
 int g_localPlayerSlot = 0;
-C_NetReplication *g_netReplication = nullptr;
+alignas(16) uint8_t g_netBytes[0x40], g_netObjectBytes[0x40], g_portTrack[0x100], g_origProperty[0x200];
+C_NetReplication *g_netReplication = reinterpret_cast<C_NetReplication *>(g_netBytes);
 namespace {
 C_ActorCreator *g_creatorTable[64];
 }  // namespace
@@ -37,6 +38,7 @@ struct S_SelfScript {
     bool member = false;                                // the player team's IsMember
     void *speechSet = nullptr;                          // C_SpeechSets::Acquire
     bool uniform = false;                               // the uniform container's GetItem
+    bool items = false;                                 // CreateItem makes one
 } g_self;
 // The debug console's lines (the original's Print is empty: both sides log the text).
 void LogPrint(const char *format, va_list args)
@@ -71,7 +73,8 @@ void C_game::Print(const char *format, ...)
 }
 void C_game::ShowFirstPersonView(bool show) { Log(nullptr, "ShowFirstPersonView", {double(show)}); }
 C_CameraModule *C_game::GetCameraModule() { return nullptr; }
-C_CameraModule *GetCameraModule() { return nullptr; }
+alignas(16) uint8_t g_portCamModule[0x100];
+C_CameraModule *GetCameraModule() { return reinterpret_cast<C_CameraModule *>(g_portCamModule); }
 C_GameApp *GetGameApp() { return nullptr; }
 void C_GameApp::PostCommand(int command, intptr_t a, intptr_t b, bool flush)
 {
@@ -120,10 +123,18 @@ int PeriodicLinks_Add(C_Actor *actor, int arg)
 void PeriodicLinks_Remove(int id) { Log(nullptr, "PeriodicLinks_Remove", {double(id)}); }
 
 // The items.
+alignas(16) uint8_t g_itemBytes[8][0x80];   // (part 20e)
+int g_itemNext = 0;
+void *NextItem()
+{
+    if (!g_self.items)
+        return nullptr;
+    return g_itemBytes[g_itemNext++ % 8];
+}
 C_Item *C_ItemsModule::CreateItem(int typeId, int container, C_Actor *owner, int uid)
 {
     Log(owner, "CreateItem", {double(typeId), double(container), double(uid)});
-    return nullptr;
+    return static_cast<C_Item *>(NextItem());
 }
 void ClearActorContainers(C_Actor *actor) { Log(actor, "ClearActorContainers"); }
 S_SoldierProfile *GetSoldierProfile(int index)
@@ -148,10 +159,14 @@ void C_NetGame::SetPlayerTeam(int slot, int team, bool pending)
 C_NetObject *C_NetReplication::FindObject(int id, bool create)
 {
     Log(nullptr, "FindNetObject", {double(id), double(create)});
-    return nullptr;
+    return reinterpret_cast<C_NetObject *>(g_netObjectBytes);
 }
-C_NetProperty *C_NetObject::GetProperty(int index) { return nullptr; }
-C_NetPositionTrack &C_NetProperty::GetTrack() { return *static_cast<C_NetPositionTrack *>(nullptr); }
+C_NetProperty *C_NetObject::GetProperty(int index)
+{
+    Log(this, "GetNetProperty", {double(index)});
+    return reinterpret_cast<C_NetProperty *>(g_origProperty);
+}
+C_NetPositionTrack &C_NetProperty::GetTrack() { return *reinterpret_cast<C_NetPositionTrack *>(g_portTrack); }
 
 // The interface, the team, the first person view, the surface marks, mines, orders and sounds.
 void C_Interface::ShowTimer(int textId, int ms) { Log(nullptr, "ShowTimer", {double(textId), double(ms)}); }
@@ -303,7 +318,10 @@ void C_Actor::GetBoxCorners(S_vector4 *) {}
 
 // The camera, the team's enemy records, the formation shapes, the squad's soldiers.
 C_CameraHumanEffects *C_CameraModule::GetHumanEffects() { return nullptr; }
-void C_CameraModule::SetSpecialMode(int mode, bool on, I3D_frame *target) { Log(this, "SetSpecialMode", {double(mode), double(on)}); }
+void C_CameraModule::SetSpecialMode(int mode, bool on, I3D_frame *target)
+{
+    Log(nullptr, "SetSpecialMode", {double(mode), double(on), double(target != nullptr)});
+}
 void C_CameraHumanEffects::Remove(C_Human *human) { Log(human, "CameraEffectsRemove"); }
 void C_EnemyRecords::Add(C_Human *enemy) { Log(enemy, "EnemyRecordsAdd"); }
 C_FormationShape::C_FormationShape() {}
@@ -1179,6 +1197,7 @@ void RandomRestart()
     // A player slot or the first id past them; the model switched off sometimes.
     if (P(0.3f))
         h->m_netId = C_ActorsModule::PLAYER_SLOTS - 1 + I(0, 1);
+    g_localPlayerSlot = g_script.localPlayer ? h->m_netId : 99;   // (as ToOriginal sets the original's)
     g_h.frame->SetOn(P(0.7f));
 }
 
@@ -1224,17 +1243,284 @@ void TestSelfRestart()
     g_skipWords.erase({"m_scale", 12});
 }
 
+// ---- part 20e: the soldier's setup and equipment
+
+// The items the items module makes (scripted: an item or none; their uids at +0x10 and at the port's offset).
+void *ST OE_CreateItem(void *, int typeId, int container, void *owner, int uid)
+{
+    Log(owner, "CreateItem", {double(typeId), double(container), double(uid)});
+    return NextItem();
+}
+// (A method of the items module in the original, 0x0098b020.)
+void ST OE_ClearActorContainers(void *, void *actor) { Log(actor, "ClearActorContainers"); }
+void ST OE_SetPlayerTeam(void *, int slot, int team, int pending)
+{
+    Log(nullptr, "SetPlayerTeam", {double(slot), double(team), double(B(pending))});
+}
+
+void SetUpEquipment()
+{
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x007d7c70, reinterpret_cast<const void *>(OE_CreateItem)},
+        {0x007de350, reinterpret_cast<const void *>(OE_ClearActorContainers)},
+        {0x00730510, reinterpret_cast<const void *>(OE_SetPlayerTeam)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    for (int k = 0; k < 8; ++k) {
+        const int uid = 100 + k;
+        reinterpret_cast<C_Item *>(g_itemBytes[k])->SetUid(uid);
+        std::memcpy(g_itemBytes[k] + 0x10, &uid, 4);
+        g_names[g_itemBytes[k]] = "item" + std::to_string(k);
+    }
+}
+
+// A soldier's state, and the original's copy of it: the same bytes up to the belt (+0x6C); the two item lists as
+// MSVC6 vectors (16 bytes: their first and last at +4 and +8) over copies of the entries; the load at +0x8C.
+static_assert(offsetof(S_SoldierState, head) == 0x4C && offsetof(S_SoldierState, belt) == 0x6C, "the original's layout up to the belt");
+struct S_OrigState {
+    alignas(16) uint8_t bytes[0xAC];
+    std::vector<S_SoldierItem> belt, backpack;
+};
+void ToOrigState(const S_SoldierState &port, S_OrigState &orig)
+{
+    std::memset(orig.bytes, 0, sizeof orig.bytes);
+    std::memcpy(orig.bytes, &port, 0x6C);
+    orig.belt = port.belt;
+    orig.backpack = port.backpackContents;
+    const auto vector = [&](size_t at, std::vector<S_SoldierItem> &v) {
+        S_SoldierItem *first = v.data(), *last = v.data() + v.size();
+        std::memcpy(orig.bytes + at + 4, &first, 4);
+        std::memcpy(orig.bytes + at + 8, &last, 4);
+        std::memcpy(orig.bytes + at + 12, &last, 4);
+    };
+    vector(0x6C, orig.belt);
+    vector(0x7C, orig.backpack);
+    std::memcpy(orig.bytes + 0x8C, &port.load, sizeof port.load);
+}
+void RandomItem(S_SoldierItem &e)
+{
+    e.typeId = int16_t(P(0.3f) ? -1 : I(0, 60));
+    e.uid = int16_t(P(0.5f) ? -1 : I(1, 500));
+    e.present = int16_t(I(0, 3));
+}
+void RandomState(S_SoldierState &st)
+{
+    st.spectating = P(0.5f);
+    st.vip = P(0.3f);
+    st.profileIndex = I(-1, 9);
+    st.team = I(0, 3);
+    st.speechSet = I(-1, 6);
+    for (S_SoldierItem *e : {&st.head, &st.uniform, &st.backpack, &st.longGun, &st.hands})
+        RandomItem(*e);
+    st.belt.resize(size_t(I(0, 5)));
+    for (S_SoldierItem &e : st.belt)
+        RandomItem(e);
+    st.backpackContents.resize(size_t(I(0, 4)));
+    for (S_SoldierItem &e : st.backpackContents)
+        RandomItem(e);
+}
+
+typedef void(ST *T_ESetup)(void *, void *, int, int, const int *, int);
+typedef void(ST *T_EEquip)(void *, void *);
+
+void TestSelfEquipment()
+{
+    C_Human *h = g_h.human;
+    std::printf("self equipment\n");
+    g_skipFields.insert("m_faceTexture");
+    for (int i = 0; i < 12000 / QUICK; ++i) {
+        RandomRestart();
+        S_SoldierState state;
+        RandomState(state);
+        S_OrigState orig;
+        ToOrigState(state, orig);
+        g_self.items = P(0.7f);
+        g_itemNext = 0;
+        int stats[12];
+        for (int &v : stats)
+            v = I(0, 120);
+        const bool withStats = P(0.4f);
+        const int role = I(0, 5), group = I(0, 6), slot = I(0, 31);
+        const bool none = P(0.1f);
+        std::string portFace, origFace;
+        if (i % 3 == 0) {
+            DiffCall("CreateEquipment",
+                     [&] {
+                         g_itemNext = 0;
+                         h->CreateEquipment(none ? nullptr : &state);
+                         return 0;
+                     },
+                     [&](void *) {
+                         g_itemNext = 0;
+                         OriginalAt<T_EEquip>(0x0059eb60)(o_human, none ? nullptr : orig.bytes);
+                         return 0;
+                     });
+        } else {
+            // (The VIP's slot: the game's +0x78 on both sides.)
+            int portVip = 0, origVip = 0;
+            DiffCall("Setup",
+                     [&] {
+                         g_itemNext = 0;
+                         GetGame()->m_vipSlot = -1;
+                         h->Setup(state, role, group, withStats ? stats : nullptr, slot);
+                         portFace = h->m_faceTexture.c_str();
+                         portVip = GetGame()->m_vipSlot;
+                         return 0;
+                     },
+                     [&](void *) {
+                         g_itemNext = 0;
+                         *reinterpret_cast<int *>(g_origGame + 0x78) = -1;
+                         OriginalAt<T_ESetup>(0x0059edc0)(o_human, orig.bytes, role, group, withStats ? stats : nullptr, slot);
+                         origFace = OrigStr(o_human + 0xBC);
+                         origVip = *reinterpret_cast<int *>(g_origGame + 0x78);
+                         return 0;
+                     });
+            CHECK(portFace == origFace);
+            CHECK(portVip == origVip);
+        }
+        // The uids the network game's items gave the state's entries.
+        CHECK(std::memcmp(reinterpret_cast<const uint8_t *>(&state) + 0x4C, orig.bytes + 0x4C, 0x1E) == 0);
+        CHECK(state.belt.size() == orig.belt.size() &&
+              std::memcmp(state.belt.data(), orig.belt.data(), state.belt.size() * sizeof(S_SoldierItem)) == 0);
+        CHECK(state.backpackContents.size() == orig.backpack.size() &&
+              std::memcmp(state.backpackContents.data(), orig.backpack.data(),
+                          state.backpackContents.size() * sizeof(S_SoldierItem)) == 0);
+    }
+    g_skipFields.erase("m_faceTexture");
+}
+
+// ---- part 20f: the multiplayer spawn
+
+// The original's: the replication's FindObject and the object's GetProperty answer fakes; the position track is the
+// property's +0x30 (each side its own track object: g++'s slots of SetValue / SetNetValue / SetRate are not the
+// original's 0x1C / 0x20 / 0x24).
+void *ST ON_FindObject(void *, int id, int create)
+{
+    Log(nullptr, "FindNetObject", {double(id), double(B(create))});
+    return g_netObjectBytes;
+}
+void *ST ON_GetProperty(void *self, int index)
+{
+    Log(self, "GetNetProperty", {double(index)});
+    return g_origProperty;
+}
+void ST TR_SetValue(void *self, const S_vector4 *v) { Log(self, "TrackSetValue", {v->x, v->y, v->z, v->w}); }
+void ST TR_SetNetValue(void *self, const S_vector4 *v) { Log(self, "TrackSetNetValue", {v->x, v->y, v->z, v->w}); }
+void ST TR_SetRate(void *self, const S_vector4 *v) { Log(self, "TrackSetRate", {v->x, v->y, v->z, v->w}); }
+void *g_portTrackVt[32], *g_origTrackVt[32];
+// The team's and the interface's members, the camera module (the original's global GetCameraModule; its
+// SetSpecialMode is slot 0x44).
+void ST OP_SelectMember(void *, void *human) { Log(human, "SelectMember"); }
+void ST OP_UpdateCameraTarget(void *) { Log(nullptr, "UpdateCameraTarget"); }
+void ST OP_SetWatchedHuman(void *, void *human) { Log(human, "SetWatchedHuman"); }
+void ST OP_ShowSquadMember(void *, void *human) { Log(human, "ShowSquadMember"); }
+void ST OP_SetScreen(void *, int screen) { Log(nullptr, "SetScreen", {double(screen)}); }
+void *OP_GetCameraModule() { return g_camModule; }
+void ST OP_SetSpecialMode(void *, int mode, int on, void *target)
+{
+    Log(nullptr, "SetSpecialMode", {double(mode), double(B(on)), double(target != nullptr)});
+}
+// The human's own StartMission / StopMission (its slots 0x3C / 0x40; tested in part 20c): logged.
+void ST HV_StartMission(void *self, int server) { Log(self, "VStartMission", {double(B(server))}); }
+void ST HV_StopMission(void *self, int server) { Log(self, "VStopMission", {double(B(server))}); }
+
+void SetUpRespawn()
+{
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x0073f9c0, reinterpret_cast<const void *>(ON_FindObject)},
+        {0x0073e690, reinterpret_cast<const void *>(ON_GetProperty)},
+        {0x0045da60, reinterpret_cast<const void *>(OP_SelectMember)},
+        {0x0045dac0, reinterpret_cast<const void *>(OP_UpdateCameraTarget)},
+        {0x0045e8f0, reinterpret_cast<const void *>(OP_SetWatchedHuman)},
+        {0x0049f100, reinterpret_cast<const void *>(OP_ShowSquadMember)},
+        {0x0049f250, reinterpret_cast<const void *>(OP_SetScreen)},
+        {0x00464e90, reinterpret_cast<const void *>(OP_GetCameraModule)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    *OriginalAt<void **>(0x0097d084) = g_netBytes;
+    for (int k = 0; k < 32; ++k)
+        g_portTrackVt[k] = g_origTrackVt[k] = reinterpret_cast<void *>(CT_Unexpected);
+    g_portTrackVt[VSlot(&C_NetTrack::SetValue)] = reinterpret_cast<void *>(TR_SetValue);
+    g_portTrackVt[VSlot(&C_NetTrack::SetNetValue)] = reinterpret_cast<void *>(TR_SetNetValue);
+    g_portTrackVt[VSlot(static_cast<void (C_NetTrack::*)(const S_vector4 &)>(&C_NetTrack::SetRate))] = reinterpret_cast<void *>(TR_SetRate);
+    g_origTrackVt[0x1C / 4] = reinterpret_cast<void *>(TR_SetValue);
+    g_origTrackVt[0x20 / 4] = reinterpret_cast<void *>(TR_SetNetValue);
+    g_origTrackVt[0x24 / 4] = reinterpret_cast<void *>(TR_SetRate);
+    *reinterpret_cast<void ***>(g_portTrack) = g_portTrackVt;
+    *reinterpret_cast<void ***>(g_origProperty + 0x30) = g_origTrackVt;
+    g_names[g_portTrack] = g_names[g_origProperty + 0x30] = "track";
+    g_names[g_netObjectBytes] = "netObject";
+    g_camModuleVt[0x44 / 4] = reinterpret_cast<void *>(OP_SetSpecialMode);
+    p_humanVt[VSlot(&C_Actor::StartMission)] = reinterpret_cast<void *>(HV_StartMission);
+    p_humanVt[VSlot(&C_Actor::StopMission)] = reinterpret_cast<void *>(HV_StopMission);
+    o_humanVt[0x3C / 4] = reinterpret_cast<void *>(HV_StartMission);
+    o_humanVt[0x40 / 4] = reinterpret_cast<void *>(HV_StopMission);
+}
+
+typedef void(ST *T_FRespawn)(void *, const S_vector4 *, const S_vector4 *, void *, const int *);
+
+// A respawn: a place and a direction, a soldier's state or none, stats or none, the game's roles, the local player's
+// human or another's.
+void TestSelfRespawn()
+{
+    C_Human *h = g_h.human;
+    std::printf("self respawn\n");
+    g_skipFields.insert("m_faceTexture");
+    for (int i = 0; i < 8000 / QUICK; ++i) {
+        RandomRestart();
+        h->m_controller = reinterpret_cast<C_HumanController *>(g_portController);
+        S_SoldierState state;
+        RandomState(state);
+        S_OrigState orig;
+        ToOrigState(state, orig);
+        g_self.items = P(0.5f);
+        int stats[12];
+        for (int &v : stats)
+            v = I(0, 120);
+        const bool withState = P(0.6f), withStats = P(0.4f);
+        const S_vector4 pos = {U(4, 30), U(0.5f, 3), U(4, 30), 1.0f};
+        const S_vector dir3 = S_vector(U(-1, 1), 0.0f, U(-1, 1)).Normalized();
+        const S_vector4 dir = {dir3.x, dir3.y, dir3.z, 0.0f};
+        // (The model's place and turn compared too: its local matrix after each side.)
+        S_matrix portModel, origModel;
+        DiffCall("Respawn",
+                 [&] {
+                     g_itemNext = 0;
+                     h->Respawn(pos, dir, withState ? &state : nullptr, withStats ? stats : nullptr);
+                     portModel = g_h.frame->GetLocalMatrix();
+                     return 0;
+                 },
+                 [&](void *) {
+                     g_itemNext = 0;
+                     OriginalAt<T_FRespawn>(0x0059f050)(o_human, &pos, &dir, withState ? orig.bytes : nullptr,
+                                                        withStats ? stats : nullptr);
+                     origModel = g_h.frame->GetLocalMatrix();
+                     return 0;
+                 });
+        for (int r = 0; r < 4; ++r)
+            for (int c = 0; c < 4; ++c)
+                CHECK(std::fabs(portModel.m[r][c] - origModel.m[r][c]) <= 1e-5f);
+    }
+    g_skipFields.erase("m_faceTexture");
+}
+
 void TestSelf()
 {
     SetUpSelf();
     SetUpUpdate();
     SetUpMission();
     SetUpRestart();
+    SetUpEquipment();
+    SetUpRespawn();
     TestSelfSkills();
     TestSelfNames();
     TestSelfUpdate();
     TestSelfMission();
     TestSelfRestart();
+    TestSelfEquipment();
+    TestSelfRespawn();
 }
 
 }  // namespace
