@@ -1472,3 +1472,46 @@ particles and the surface marks. Files are served from memory.
     and the actions with a hands item never ran until coverage showed it;
   - the first mutation run was started with the morph's MUT_WRAPPER still set, which rebuilds the wrapper instead of
     the mutated file (every mutant would have "survived"); stopped and rerun without it.
+
+## Human part 15 (the weapon pose's skeleton and chains, `human_pose_ik.cpp`, 2026-11-13)
+
+- **The build:** `human/build_ik.bat` (HUMAN_IK): build_base.bat's harness, `human/ik_test.inc`'s tests alone. A model of
+  23 jointed bone frames, each under its parent bone as the human models have them (the ragdoll's standing places),
+  bound the way BindSkeleton binds it (the port's AddBone, SetLimitAxes, SetLimitStiffness, PoseAimZ; BindSkeleton itself
+  is part 19's). The pose is shared and compared word by word; the bone frames' world and local matrices, rotations,
+  scales and flags too.
+- **The tests (63,005 checks):**
+  - the matrix helpers from random input (24,000): PoseTransposed, TurnedAround, Orthonormalize, AimZ (with an axis
+    exactly along the direction, a skewed matrix), FrameFromZ (straight up / down), FrameFromZ rolled, FrameFromZX,
+    RotationBetween (nearly parallel and opposite: the reflection), TurnZTo / TurnYTo, GetRoll, SlerpDir (the dot past
+    1, parallel, opposite);
+  - the skeleton (24,000): AddBone (out of range, a parent's three children taken), SetLimitAxes, SetLimitStiffness,
+    AimBone (out of range, the pelvis under the model, weights negative, -0, 0..1), SetHandRotations (null hands, other
+    frames), SetHandMatrices, BendJoint (any bone, the joint on its limb's line, the direction along it), ClearChains;
+  - the chains (40,000 rounds): BuildChain (no effectors), RefreshChain, SolveChain (a pass), ApplyChain, from random
+    chains as the seats make them (the spine to the hands and the neck) and others (other roots, the feet, the head,
+    the elbows; weights; stiffness over 1; limits changed), the model somewhere and turned, the bones bent, the world
+    matrices up to date or not, the pelvis locked; whole solves one pass at a time from the port's state; the seats'
+    sequence over three updates.
+- **Judged by their rates (the float rounding grows):** single passes 99.95 % (71,954 of 71,955; 2 or 3 in 72,000
+  differ by 3e-4..1.3e-3 in a word, not traced: presumably ill-conditioned passes), the seats' sequence 99 %, whole
+  16-pass solves 97 % and three of them 88 % (0 differences after one pass in 6,667 solves, 2 after two, 36 after five,
+  150 after sixteen: the rounding grows with the passes).
+- **Undefined in the original, not compared:** the solved matrices' m[3][3] (ComputeSolved's own-joint branch copies
+  the tip into row 3 as 16 bytes from a stack temp whose w it never stores, 0x007a6634); the frames' scale w (+0xDC: the
+  inline SetLocalMatrix copies GetScale's 12-byte result as 16 bytes).
+- **Port fixes (on main):**
+  - SolveChain's comment claimed the original returns `this` after moving the pelvis: it returns the passes, as the
+    port does (comment corrected);
+  - the SDK's "below 1e-8" test is an integer compare of the float's bits in the original (CMP ...,0x322bcc77): a
+    negative NaN counts as below; and a NaN takes the square root in its unit test, then fails the length test. The
+    port's float compares sent a NaN the other way in BendJoint (twice) and SolveChainBone (found by part 16's tests,
+    where a NaN aim reached the same test in TurnBone): PoseBelowEpsilon and NaN-aware compares now.
+- **Results:** every function agrees; lines: human_pose_ik.cpp 99.1 % of 545. Not run: the length tests after a square
+  root of at least 1e-8 (unreachable but for a positive NaN), LinkChain's dead ends (a pin's bone always in the tree).
+- **Mutations** (`human/mutations/mutate_ik1.py`): 520 mutants; 407 killed, 48 not building, 65 survived (equivalent
+  ones, exact float boundaries; classified in its docstring).
+- **Harness lessons (my mistakes):**
+  - the original's PoseSlerpDir reads and writes whole S_vector4s; my first test passed a 12-byte output, which the
+    original overran into the port's result next to it at -O0 (the coverage build's 1,669 failures);
+  - I wrote two edits through bash heredocs with backslashes again (a `\n` became a line break; caught at once).

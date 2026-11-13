@@ -721,6 +721,9 @@ namespace {
 #include "base2_test.inc"
 #include "base3_test.inc"
 #include "ragdoll_test.inc"
+#ifdef HUMAN_IK
+#include "ik_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -793,7 +796,7 @@ int main(int argc, char **argv)
     LoadGround();
     MakeContacts();
     SetUp3();
-#if !defined(RAGDOLL_ONLY) && !defined(HUMAN_MOVE)
+#if !defined(RAGDOLL_ONLY) && !defined(HUMAN_MOVE) && !defined(HUMAN_IK)
     TestBase();
     TestBase2();
     TestBase3();
@@ -802,7 +805,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_WORK)
+#if defined(HUMAN_IK)
+    TestIk();
+#elif defined(HUMAN_WORK)
     TestWork();
 #elif defined(HUMAN_MORPH)
     TestMorph();
