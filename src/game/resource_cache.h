@@ -94,15 +94,15 @@ private:
     T *m_spare = nullptr;                                               // +0x38 next object Get() loads into
 };
 
-class C_ModelCache : public C_ResourceCache<I3D_model> {               // vtable 0x00815fc8
+class C_ModelCache : public C_ResourceCache<I3D_model> {               // vtable 0x00815fc8; deleting dtor 0x006d5340 (DS 0x0071c120)
 protected:
-    I3D_model *Create() override;                                       // 0x006d5330
-    void Duplicate(I3D_model *dest, I3D_model *source) override;       // 0x006d52e0
+    I3D_model *Create() override;                                       // 0x006d5330 (DS 0x0071c100)
+    void Duplicate(I3D_model *dest, I3D_model *source) override;       // 0x006d52e0 (DS 0x0071c090)
 };
 
 class C_SoundCache : public C_ResourceCache<I3D_sound> {               // vtable 0x00816068
 protected:
-    I3D_sound *Create() override;                                       // 0x006d5660
+    I3D_sound *Create() override;                                       // 0x006d5660 (DS 0x0071c520)
     // Re-opens the source's file (sounds share their sample data in the engine).
     void Duplicate(I3D_sound *dest, I3D_sound *source) override;       // 0x006d5620
 };
@@ -117,13 +117,13 @@ public:
     }
 
 protected:
-    I3D_animation_set *Create() override;                               // 0x006d5970
+    I3D_animation_set *Create() override;                               // 0x006d5970 (DS 0x0071c950)
     void Duplicate(I3D_animation_set *, I3D_animation_set *) override {}   // 0x006d5960
 };
 
 class C_ShadowCache : public C_ResourceCache<I3D_shadow> {             // vtable 0x008161a8
 protected:
-    I3D_shadow *Create() override;                                      // 0x006d5d20
+    I3D_shadow *Create() override;                                      // 0x006d5d20 (DS 0x0071ce40)
     // Only detaches the game data from the destination's frames.
     void Duplicate(I3D_shadow *dest, I3D_shadow *source) override;     // 0x006d5c70
 };
@@ -145,4 +145,4 @@ extern C_ShadowCache g_shadowCache;                                     // 0x008
 extern C_AnimationCache g_animationCache;                               // 0x008aed28 (data dir 3)
 extern C_SoundCache g_soundCache;                                       // 0x008aed64 (data dir 2)
 extern C_ModelCache g_modelCache;                                       // 0x008aeda0 (data dir 1)
-extern C_ModelCache g_versionModelCache;                                // 0x008aecb0 (data dir 5, versions module)
+extern C_ModelCache g_versionModelCache;                                // 0x008aecb0 (data dir 5, versions module); its class's Create 0x006d6060 (DS 0x0071d2a0), Duplicate 0x006d6010 (DS 0x0071d230)

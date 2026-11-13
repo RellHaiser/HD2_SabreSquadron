@@ -49,8 +49,8 @@ public:
 private:
     bool IsShown() const { return m_shown; }            // 0x006ca610
     // At 1 (drawn), the wait for the key, then everything let go.
-    void Close();                                       // 0x006ca620
-    void Draw();                                        // 0x006ca7c0
+    void Close();                                       // 0x006ca620 (DS 0x0070ee30)
+    void Draw();                                        // 0x006ca7c0 (DS 0x0070ee60)
     void ClearPlayers();                                // 0x006ca9c0
 
     float m_progress = 0.0f;                            // +0x00 0..1
