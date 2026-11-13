@@ -1069,6 +1069,11 @@ int C_MovementSounds::GetCount(int group)
 
 I3D_sound *C_MovementSounds::GetSound(int group, int variant)
 {
+#ifdef HD2_DEDICATED   // no sounds on the server
+    (void)group;
+    (void)variant;
+    return nullptr;
+#else
     if (!ISndGetDriver()->IsInitialized())
         return nullptr;
     const S_MovementSoundFile &file = MOVEMENT_SOUND_FILES[group][variant];
@@ -1100,6 +1105,7 @@ I3D_sound *C_MovementSounds::GetSound(int group, int variant)
     // The group and the file, for Return().
     sound->SetData(reinterpret_cast<S_FrameData *>(static_cast<uintptr_t>(group << 8 | variant)));
     return sound;
+#endif
 }
 
 I3D_sound *C_MovementSounds::Play(int group, I3D_frame *frame, const S_vector *pos)

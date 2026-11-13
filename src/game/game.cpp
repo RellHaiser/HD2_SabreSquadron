@@ -558,11 +558,15 @@ void C_game::ShowBinocularsView(bool show)                // 0x0069a7a0
     m_firstPersonView->ShowBinoculars(show);
 }
 
-bool C_game::IsBinocularsView() const                // 0x0069a7b0
+bool C_game::IsBinocularsView() const                // 0x0069a7b0 (DS 0x006db7c0)
 {
+#ifdef HD2_DEDICATED   // the server has no view
+    return false;
+#else
     if (!IsClient())
         return false;
     return m_firstPersonView->IsBinocularsShown();
+#endif
 }
 
 void C_game::Print(const char *, ...)               // 0x0069c2b0

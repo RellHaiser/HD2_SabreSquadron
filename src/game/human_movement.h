@@ -1418,7 +1418,7 @@ public:
     // Number of files of a group (builds the shuffled orders on the first call).
     static int GetCount(int group);                     // 0x007850a0
     // A sound frame of a file (a cached one or a new one; null when it cannot be made).
-    I3D_sound *GetSound(int group, int variant);        // 0x007853c0
+    I3D_sound *GetSound(int group, int variant);        // 0x007853c0 (DS 0x007f3f60)
     // Plays the next file of the group's order at `frame` (null: not linked).
     I3D_sound *Play(int group, I3D_frame *frame, const S_vector *pos);   // 0x007856f0
     // Takes a played sound back (stops it; caches or releases it).

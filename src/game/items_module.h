@@ -72,7 +72,7 @@ public:
 
     // --- definitions --------------------------------------------------------------
     // Loads Tables\items.sav on first use.
-    void EnsureItemsLoaded();                           // 0x007dc940
+    void EnsureItemsLoaded();                           // 0x007dc940 (DS 0x008176c0)
     C_ItemDef *GetItemDef(int typeId) const;            // 0x007df190
 
     // --- instances ----------------------------------------------------------------

@@ -549,6 +549,9 @@ I3D_frame *C_ItemDef::GetFpvModel()
 
 IImage *C_ItemDef::GetImage()
 {
+#ifdef HD2_DEDICATED   // no images on the server
+    return nullptr;
+#else
     if (m_image || !m_imageName)
         return m_image;
     I3D_driver *driver = I3DGetDriver();
@@ -559,15 +562,12 @@ IImage *C_ItemDef::GetImage()
     char path[128];
     std::strcpy(path, m_imageName);
     std::strcat(path, ".bmp");
-#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (GetIGraph()->LoadTexture(path, 0, 0, &m_image) != 0)
         m_image = nullptr;
-#else
-    m_image = nullptr;
-#endif
     driver->SetState(DRIVER_STATE_15, state15);
     driver->SetState(DRIVER_STATE_19, state19);
     return m_image;
+#endif
 }
 
 I3D_frame **C_ItemDef::GetDivingGear()
