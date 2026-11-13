@@ -5,7 +5,7 @@
 // Direct3D 8 ABI.
 #pragma once
 
-#include <windows.h>
+#include "platform/win_types.h"
 
 // ---------------------------------------------------------------- basic types
 

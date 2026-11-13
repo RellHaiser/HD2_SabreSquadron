@@ -1,7 +1,7 @@
 // C_VBManager, C_VertexBuffer (LS3DRF 0x10030000 - 0x1003009d).
 #include "i3d/vb_manager.h"
 
-#include <malloc.h>
+#include "i3d/i3d.h"
 
 namespace ls3d {
 
@@ -14,7 +14,7 @@ bool C_VBManager::Alloc(uint32_t usage, uint32_t stride, uint32_t count, S_VBAll
     b->format = format;
     b->stride = stride;
     b->usage = usage;
-    b->data = static_cast<uint8_t *>(_aligned_malloc(stride * count, 16));
+    b->data = static_cast<uint8_t *>(i3d::AlignedAlloc(stride * count, 16));
     alloc->buffer = b;
     alloc->offset = 0;
     alloc->vb = b->data;
@@ -28,7 +28,7 @@ void FreeVB(S_VBAlloc *alloc)
     if (!b)
         return;
     if (b->data)
-        _aligned_free(b->data);
+        i3d::AlignedFree(b->data);
     delete b;
     alloc->buffer = nullptr;
 }

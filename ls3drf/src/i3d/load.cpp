@@ -104,7 +104,8 @@ HRESULT ReadHeader(int file, const char *magic, int version, const FILETIME *tim
     }
     FILETIME ft;
     dtaRead(file, &ft, 8);
-    if (time && CompareFileTime(time, &ft)) {
+    // (CompareFileTime's "not equal".)
+    if (time && (time->dwLowDateTime != ft.dwLowDateTime || time->dwHighDateTime != ft.dwHighDateTime)) {
         dtaClose(file);
         return I3DERR_BADTIMESTAMP;
     }
@@ -297,7 +298,7 @@ I3D_RESULT OpenModelFile(const char *fileName, uint32_t flags, void *callback, v
         return I3DERR_GENERIC;
     s_modelLoading = true;
     s_callbackContext = context;
-    s_callback = static_cast<LoadCallback *>(callback);
+    s_callback = reinterpret_cast<LoadCallback *>(callback);
     s_loadFlags = flags;
     if (!callback)
         s_loadFlags = flags & 1;

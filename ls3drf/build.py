@@ -1,8 +1,12 @@
-"""Builds the LS3DRF.dll port (x86, MSVC).
+"""Builds the LS3DRF.dll port (x86, MSVC), or the shared library with GCC or Clang.
 
-Usage: python build.py [dll] [check] [test] [run] [--debug] [--only SUBSTR] [--ops N] [--seeds 1,2]
+Usage: python build.py [dll] [check] [gcc] [test] [run] [--debug] [--m32] [--only SUBSTR] [--ops N] [--seeds 1,2]
   dll    (default) compile everything and link build/msvc/LS3DRF.dll with ls3drf.def
   check  compile every translation unit, no link (fast syntax/type check while porting)
+  gcc    compile with %CXX% (default g++) and the POSIX platform, link build/gcc/libls3drf.so
+         (--m32: a 32-bit build, build/gcc32/; %CXXFLAGS% and %LDFLAGS% are added; %RW_DATA_LIB%: the
+         rw_data port's shared library to link against). With MinGW it checks the POSIX side on
+         Windows (LS3D_FORCE_POSIX) and links build/gcc*/LS3DRF.dll, which is not a drop-in.
   test   build tests/*.cpp into build/<name>.exe
   run    run the built tests with their standard arguments (--ops, default 20000, each of --seeds,
          default 1; the originals from %HD2_DIR%), one line each; full output in %TEMP%\\ls3drf_build\\logs
@@ -13,6 +17,7 @@ or a common install) for the import libraries of lib/*.def.
 """
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -32,13 +37,20 @@ DLLTOOL_PATHS = [r"C:\msys64\mingw32\bin\dlltool.exe", r"C:\mingw32\bin\dlltool.
                  r"C:\nim-2.2.6\dist\mingw32\bin\dlltool.exe"]
 
 
-def sources(only=None):
+# The platform backends (src/platform/<name>/): a build compiles one of them.
+PLATFORMS = ("win32", "posix")
+
+
+def sources(only=None, platform="win32"):
     out = []
     for d, _, files in os.walk(SRC):
         for f in files:
             if f.endswith(".cpp"):
                 p = os.path.join(d, f)
-                if not only or only in p.replace("\\", "/"):
+                rel = os.path.relpath(p, SRC).replace("\\", "/")
+                if any(rel.startswith("platform/%s/" % other) for other in PLATFORMS if other != platform):
+                    continue
+                if not only or only in rel:
                     out.append(p)
     return sorted(out)
 
@@ -109,7 +121,9 @@ SEAMS = [
     # DirectShow base classes keep theirs: they belong to the video backend. The window and the
     # threads are cut from this build.)
     ("the Win32 platform", ("platform/win32/", "dshow/"),
-     re.compile(r'#include <mmsystem\.h>|\b(timeGetTime|GetTickCount|Sleep|CreateWindowExA|RegisterClassExA|'
+     re.compile(r'#include <(mmsystem|objbase)\.h>|\b(timeGetTime|GetTickCount|Sleep|QueryPerformanceFrequency|'
+                r'QueryPerformanceCounter|GetCommandLineA|_splitpath(_s)?|_strdate(_s)?|_strtime(_s)?|'
+                r'MessageBoxA|CoInitialize|GetVersionExA|CreateWindowExA|RegisterClassExA|'
                 r'DefWindowProcA|PeekMessageA|DispatchMessageA|TranslateMessage|IsDialogMessageA|WaitMessage|'
                 r'SetWindowTextA|SetFocus|UpdateWindow|GetWindowRect|GetSystemMetrics|ClipCursor|SetCursorPos|'
                 r'SystemParametersInfoA|PostQuitMessage|GetForegroundWindow|IsChild|LoadMenuA|LoadCursorA|'
@@ -117,6 +131,14 @@ SEAMS = [
                 r'ResumeThread|TerminateThread|SetThreadPriority|WaitForSingleObject|InitializeCriticalSection|'
                 r'DeleteCriticalSection|EnterCriticalSection|LeaveCriticalSection|CreateEventA|CloseHandle|'
                 r'MsgWaitForMultipleObjects)\s*\(')),
+    # Its POSIX counterpart.
+    ("the POSIX platform", ("platform/posix/",),
+     re.compile(r'#include <(unistd|sched|sys/utsname|mach-o/dyld)\.h>|\b(clock_gettime|nanosleep|sched_yield|'
+                r'uname|readlink|_NSGetExecutablePath)\s*\(')),
+    # <windows.h> itself: platform/win_types.h brings it in on Windows (dinput_types.h is Windows-only,
+    # over the SDK's dinput.h).
+    ("<windows.h>", ("platform/win_types.h", "platform/win32/", "dx/dinput_types.h", "dshow/"),
+     re.compile(r'#include <windows\.h>')),
 ]
 
 
@@ -161,6 +183,68 @@ def check_seams():
                 for n, line in lines:
                     if pattern.search(line.split("//", 1)[0]):   # (comments may name them)
                         bad.append("%s(%d): uses %s: %s" % (rel, n, name, line.strip()))
+    for line in bad:
+        print(line)
+    return not bad
+
+
+# The Win32 terms platform/win_types.h provides off Windows. MSVC knows the calling conventions
+# without a header and <windows.h> used to come in sideways, so a file that names one of these
+# without reaching win_types.h through its includes builds on Windows and breaks elsewhere.
+WIN_TYPES = "platform/win_types.h"
+WIN_TERMS = re.compile(r"\b(__stdcall|__cdecl|__fastcall|__thiscall|WINAPI|HRESULT|DWORD|WORD|BYTE|BOOL|UINT|"
+                       r"LONG|INT|LPVOID|HWND|HINSTANCE|HMENU|GUID|LARGE_INTEGER|FILETIME|SUCCEEDED|FAILED|LS3D_EXPORT|"
+                       r"LS3D_POSIX)\b")
+INCLUDE = re.compile(r'^\s*#\s*include\s*"([^"]+)"')
+
+
+def check_win_types():
+    """Files that use a Win32 term without including win_types.h (printed); True when none."""
+    files, code, includes = {}, {}, {}
+    for d, _, names in os.walk(SRC):
+        for f in names:
+            if f.endswith((".cpp", ".h")):
+                rel = os.path.relpath(os.path.join(d, f), SRC).replace("\\", "/")
+                files[rel] = os.path.join(d, f)
+    for rel, path in files.items():
+        text = open(path, encoding="utf-8", errors="replace").read()
+        text = re.sub(r"/\*.*?\*/", " ", text, flags=re.S)
+        lines = [l.split("//", 1)[0] for l in text.splitlines()]
+        code[rel] = lines
+        here = os.path.dirname(rel)
+        inc = []
+        for l in lines:
+            m = INCLUDE.match(l)
+            if m:
+                name = m.group(1)
+                local = os.path.normpath(os.path.join(here, name)).replace("\\", "/")
+                inc.append(local if local in files else name)
+        includes[rel] = inc
+
+    reach = {}
+
+    def reaches(rel, seen=()):
+        if rel == WIN_TYPES:
+            return True
+        if rel in reach:
+            return reach[rel]
+        if rel in seen:
+            return False
+        result = any(reaches(i, seen + (rel,)) for i in includes.get(rel, ()) if i in files)
+        reach[rel] = result
+        return result
+
+    bad = []
+    for rel in sorted(files):
+        # (dinput_types.h is Windows-only, over the SDK's dinput.h; rw_data.h, the rw_data port's
+        # public header, guards its own.)
+        if rel.startswith("platform/win32/") or rel in (WIN_TYPES, "dx/dinput_types.h", "external/rw_data.h"):
+            continue
+        for n, line in enumerate(code[rel], 1):
+            m = WIN_TERMS.search(line)
+            if m and not reaches(rel):
+                bad.append("%s(%d): uses %s without including %s" % (rel, n, m.group(1), WIN_TYPES))
+                break
     for line in bad:
         print(line)
     return not bad
@@ -227,6 +311,91 @@ def link(objs, debug):
             shutil.copyfile(os.path.join(WORK, name), os.path.join(out, name))
     print("link: ok ->", os.path.join(out, "LS3DRF.dll"))
     return True
+
+
+# ---------------------------------------------------------------- GCC / Clang (the POSIX build)
+
+def gcc_targets_windows(cxx):
+    """True when `cxx` builds for Windows (MinGW): the build is then only a check of the POSIX side."""
+    try:
+        r = subprocess.run([cxx, "-dM", "-E", "-x", "c++", os.devnull], capture_output=True, text=True)
+    except OSError:
+        sys.exit("gcc: cannot run %s (set CXX)" % cxx)
+    if r.returncode:
+        sys.exit("gcc: %s failed: %s" % (cxx, r.stderr.strip()))
+    return re.search(r"^#define _WIN32\b", r.stdout, re.M) is not None
+
+
+def gcc_flags(debug, m32, windows):
+    # -fno-strict-aliasing: the port reads floats' bits through other types, as the original's code
+    # did; MSVC never optimises on aliasing, GCC and Clang do. -Wno-invalid-offsetof: the layout
+    # checks take offsetof of classes with virtual tables. -Wno-delete-non-virtual-dtor: the engine's
+    # classes keep the original's virtual tables, without a virtual destructor, and are deleted as
+    # what they are.
+    flags = ["-c", "-std=c++17", "-g", "-O0" if debug else "-O2", "-fno-strict-aliasing", "-Wall", "-Wextra",
+             "-Wno-unused-parameter", "-Wno-invalid-offsetof", "-Wno-delete-non-virtual-dtor", "-DLS3D_API=",
+             "-I" + SRC]
+    if not debug:
+        flags.append("-DNDEBUG")
+    if m32:
+        flags.append("-m32")
+    if windows:
+        flags += ["-DLS3D_FORCE_POSIX", "-D_CRT_SECURE_NO_WARNINGS"]
+    else:
+        flags.append("-fPIC")
+    return flags + shlex.split(os.environ.get("CXXFLAGS", ""))
+
+
+def gcc_build(debug, m32):
+    """Compiles the port with $CXX (default g++) and the POSIX platform and links the shared library:
+    build/gcc/libls3drf.so. A compiler that targets Windows (MinGW) builds the POSIX side as a check
+    (LS3D_FORCE_POSIX), linked against rw_data's import library: build/gcc/LS3DRF.dll, which has
+    neither the original's exports nor its ordinals."""
+    cxx = os.environ.get("CXX", "g++")
+    windows = gcc_targets_windows(cxx)
+    work = os.path.join(WORK, "gcc" + ("32" if m32 else ""), "obj")
+    os.makedirs(work, exist_ok=True)
+    flags = gcc_flags(debug, m32, windows)
+
+    def one(src):
+        rel = os.path.relpath(src, SRC)
+        obj = os.path.join(work, re.sub(r"[\\/]", "_", rel)[:-4] + ".o")
+        r = subprocess.run([cxx, *flags, "-o", obj, src], capture_output=True, text=True)
+        return src, obj, r.returncode == 0, (r.stdout + r.stderr).strip()
+
+    srcs = sources(platform="posix")
+    ok, objs = True, []
+    with ThreadPoolExecutor(max(2, os.cpu_count() or 4)) as ex:
+        for src, obj, good, text in ex.map(one, srcs):
+            if text:
+                print(text)
+            ok &= good
+            objs.append(obj)
+    print("gcc: compiled %d files with %s%s: %s" % (len(srcs), cxx, " -m32" if m32 else "", "ok" if ok else "ERRORS"))
+    if not ok:
+        return False
+    # The engine's start-up object (core/engine.cpp) must initialise after every other global: ELF's
+    # .init_array (and Mach-O's) runs in link order, so it goes last; MinGW's .ctors runs backwards,
+    # so there it goes first.
+    objs.sort(key=lambda o: (os.path.basename(o) == "core_engine.o") != windows)
+    out = os.path.join(ROOT, "build", "gcc" + ("32" if m32 else ""))
+    os.makedirs(out, exist_ok=True)
+    target = os.path.join(out, "LS3DRF.dll" if windows else "libls3drf.so")
+    cmd = [cxx, "-shared", *(["-m32"] if m32 else []), "-o", target, *objs]
+    if windows:
+        # (Every symbol exported, as an ELF library's are: a client finds I3DGetDriver and the rest.)
+        cmd += [*import_libs(), "-lpthread", "-static-libgcc", "-static-libstdc++", "-Wl,--export-all-symbols"]
+    elif os.environ.get("RW_DATA_LIB"):
+        # rw_data's port as a shared library: link it and let nothing stay undefined. (Without it the
+        # dta* functions stay undefined until the server loads the library next to librw_data.so.)
+        cmd += [os.environ["RW_DATA_LIB"], "-Wl,--no-undefined"]
+    cmd += shlex.split(os.environ.get("LDFLAGS", ""))
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    text = (r.stdout + r.stderr).strip()
+    if text:
+        print(text)
+    print("gcc: link %s" % ("ok -> " + target if r.returncode == 0 else "FAILED"))
+    return r.returncode == 0
 
 
 def test_directives(path):
@@ -336,14 +505,17 @@ def main():
     seeds = option("--seeds", "1").split(",")
     targets = args or ["dll"]
     ok = True
-    if "check" in targets or "dll" in targets:
+    if "check" in targets or "dll" in targets or "gcc" in targets:
         ok &= check_seams()
+        ok &= check_win_types()
     if "check" in targets:
         ok &= check_ls3df()
         ok &= compile_all(debug, only)[0]
     if "dll" in targets:
         good, objs = compile_all(debug)
         ok &= good and link(objs, debug)
+    if "gcc" in targets:
+        ok &= gcc_build(debug, "--m32" in sys.argv)
     if "test" in targets:
         ok &= build_tests(debug, only)
     if "run" in targets and ok:

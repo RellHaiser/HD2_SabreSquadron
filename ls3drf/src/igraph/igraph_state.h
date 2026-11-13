@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-#include <windows.h>
+#include "platform/win_types.h"
 
 #include "igraph/igraph.h"
 

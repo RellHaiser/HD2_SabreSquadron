@@ -93,12 +93,23 @@ bool MatchWildcard(const char *mask, const char *name, bool caseSensitive)
     return true;
 }
 
+// _stricmp(a, b) == 0 in the "C" locale the engine runs in: ASCII letters fold, nothing else.
+bool EqualNoCase(const char *a, const char *b)
+{
+    for (;; ++a, ++b) {
+        if (AsciiUpper(*a) != AsciiUpper(*b))
+            return false;
+        if (!*a)
+            return true;
+    }
+}
+
 bool MatchName(const char *mask, const char *name, uint32_t flags)
 {
     const bool caseSensitive = (flags & ENUMF_CASESENSITIVE) != 0;
     if (flags & ENUMF_WILDMASK)
         return MatchWildcard(mask, name, caseSensitive);
-    return (caseSensitive ? std::strcmp(mask, name) : _stricmp(mask, name)) == 0;
+    return caseSensitive ? std::strcmp(mask, name) == 0 : EqualNoCase(mask, name);
 }
 
 // Removes `child` from the child list of `parent`; false if it is not in it.

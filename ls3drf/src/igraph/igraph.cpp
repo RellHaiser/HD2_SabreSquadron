@@ -4,7 +4,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <objbase.h>
 
 #include "core/cpu.h"
 #include "core/debug.h"
@@ -101,7 +100,7 @@ HRESULT __stdcall IGraph::SetFlags(uint32_t flags)
 // window, device, display modes or textures, and no DirectX 8.1 check.
 HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
 {
-    CoInitialize(nullptr);
+    platform::InitSystem();
     if (!init)
         return I3DERR_INVALIDPARAMS;
     g_init = *init;
@@ -112,26 +111,9 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
 
     S_cpuInfo cpu = {};
     _cpuid(&cpu);
-    OSVERSIONINFOA os = {};
-    os.dwOSVersionInfoSize = sizeof os;
-#pragma warning(suppress : 4996)  // GetVersionExA is deprecated (and lies about newer Windows)
-    GetVersionExA(&os);
-    const char *osName = "Windows ??";
-    if (os.dwMajorVersion == 3) {
-        if (os.dwMinorVersion == 0)
-            osName = "Windows NT 3.0";
-        else if (os.dwMinorVersion == 1)
-            osName = "Windows 3.1";
-    } else if (os.dwMajorVersion == 4) {
-        osName = os.dwMinorVersion == 0 ? "Windows NT 4.0" : "Windows 9x/ME";
-    } else if (os.dwMajorVersion == 5) {
-        if (os.dwMinorVersion == 0)
-            osName = "Windows 2000";
-        else if (os.dwMinorVersion == 1)
-            osName = "Windows XP";
-    }
-    dbgPrintf("\nDetected OS: %s ver. %i.%i.%i %s", osName, os.dwMajorVersion, os.dwMinorVersion,
-              os.dwBuildNumber & 0xffff, os.szCSDVersion);
+    const platform::OsVersion os = platform::GetOsVersion();
+    dbgPrintf("\nDetected OS: %s ver. %i.%i.%i %s", os.name.c_str(), os.major, os.minor, os.build,
+              os.extra.c_str());
     const uint32_t mhz = GetCpuSpeed();
     dbgPrintf("Detected CPU: %s, %s %iMHz, family:%i, model:%i, stepping:%i", cpu.vendor, cpu.name, mhz,
               cpu.family, cpu.model, cpu.stepping);

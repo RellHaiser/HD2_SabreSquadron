@@ -29,7 +29,7 @@
 //
 // Usage: compare_frame.exe [original LS3DRF.dll] [operations] [seed]
 //
-// test-sources: src/i3d/frame.cpp src/i3d/user.cpp src/i3d/dummy.cpp src/i3d/target.cpp src/i3d/volume.cpp src/i3d/camera.cpp src/i3d/light.cpp src/i3d/sector.cpp src/i3d/portal.cpp src/i3d/occluder.cpp src/i3d/render_state.cpp src/i3d/area.cpp src/i3d/model.cpp src/i3d/anim.cpp src/i3d/visual.cpp src/i3d/driver_frames.cpp src/math/math.cpp src/core/debug.cpp
+// test-sources: src/i3d/frame.cpp src/i3d/user.cpp src/i3d/dummy.cpp src/i3d/target.cpp src/i3d/volume.cpp src/i3d/camera.cpp src/i3d/light.cpp src/i3d/sector.cpp src/i3d/portal.cpp src/i3d/occluder.cpp src/i3d/render_state.cpp src/i3d/area.cpp src/i3d/model.cpp src/i3d/anim.cpp src/i3d/visual.cpp src/i3d/driver_frames.cpp src/math/math.cpp src/core/debug.cpp src/platform/win32/*.cpp
 #include <windows.h>
 
 #include <float.h>

@@ -1,6 +1,6 @@
 // I3D_driver: construction, Init / Close, states, time, statistics, the frame factory and the
 // type names (0x100151c0 - 0x10015c40, 0x10018e40 - 0x1001a0f0).
-#include <windows.h>
+#include "platform/win_types.h"
 
 #include <cstdio>
 #include <cstring>

@@ -38,7 +38,7 @@
 // Usage: compare_collision.exe [original LS3DRF.dll] [operations] [seed] [diagnosis: 1 each visual's
 //        ray, 2 the targeted rays' hit rate]
 //
-// test-sources: src/i3d/collision_ray.cpp src/i3d/collision_sphere.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
+// test-sources: src/i3d/collision_ray.cpp src/i3d/collision_sphere.cpp src/math/math.cpp src/core/debug.cpp src/platform/win32/*.cpp src/dx/dxerr8.cpp
 #include <windows.h>
 
 #include <float.h>

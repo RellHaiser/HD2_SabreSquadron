@@ -3,12 +3,12 @@
 
 #include <cstdint>
 
-#include <windows.h>
+#include "platform/win_types.h"
 
 // Exported debug output (cdecl, printf style).
-extern "C" __declspec(dllexport) int dbgPrintf(const char *format, ...);      // line + newline
-extern "C" __declspec(dllexport) int dbgPrintf1(const char *format, ...);     // no newline
-extern "C" __declspec(dllexport) int dbgPrintf2(const char *text, ...);       // the text as is
+extern "C" LS3D_EXPORT int dbgPrintf(const char *format, ...);      // line + newline
+extern "C" LS3D_EXPORT int dbgPrintf1(const char *format, ...);     // no newline
+extern "C" LS3D_EXPORT int dbgPrintf2(const char *text, ...);       // the text as is
 
 namespace ls3d {
 

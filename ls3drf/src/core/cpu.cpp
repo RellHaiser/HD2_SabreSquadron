@@ -2,15 +2,55 @@
 #include "core/cpu.h"
 
 #include <cstring>
-#include <intrin.h>
 
-#include <windows.h>
+#if defined(_MSC_VER)
+#include <intrin.h>
+#elif defined(__i386__) || defined(__x86_64__)
+#include <cpuid.h>
+#include <x86intrin.h>
+#endif
+
+#include "platform/win_types.h"
 
 #include "platform/platform.h"
 
 namespace ls3d {
 
 namespace {
+
+#if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
+constexpr bool kX86 = true;
+#else
+constexpr bool kX86 = false;
+#endif
+
+// CPUID `leaf` into eax, ebx, ecx, edx (zeros on a processor without it: not an x86).
+void Cpuid(int regs[4], int leaf)
+{
+#if defined(_MSC_VER)
+    __cpuid(regs, leaf);
+#elif defined(__i386__) || defined(__x86_64__)
+    unsigned a, b, c, d;
+    __cpuid_count(static_cast<unsigned>(leaf), 0, a, b, c, d);
+    regs[0] = static_cast<int>(a);
+    regs[1] = static_cast<int>(b);
+    regs[2] = static_cast<int>(c);
+    regs[3] = static_cast<int>(d);
+#else
+    (void)leaf;
+    regs[0] = regs[1] = regs[2] = regs[3] = 0;
+#endif
+}
+
+// The time-stamp counter (0 without one).
+uint64_t ReadTsc()
+{
+#if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
+    return __rdtsc();
+#else
+    return 0;
+#endif
+}
 
 // 0x10068620: the names the original knows, by vendor, family and model. Families it does not
 // list leave the name empty; known families with an unknown model give "Unknown".
@@ -74,19 +114,19 @@ uint32_t _cpuid(S_cpuInfo *info)
     // (The original probes CPUID under a structured exception handler; every processor that can
     // run this port has it.)
     int regs[4];
-    __cpuid(regs, 0);
+    Cpuid(regs, 0);
     char vendor[13];
     std::memcpy(vendor + 0, &regs[1], 4);       // ebx
     std::memcpy(vendor + 4, &regs[3], 4);       // edx
     std::memcpy(vendor + 8, &regs[2], 4);       // ecx
     vendor[12] = 0;
-    __cpuid(regs, 1);
+    Cpuid(regs, 1);
     const uint32_t version = static_cast<uint32_t>(regs[0]);
     const uint32_t features = static_cast<uint32_t>(regs[3]);
     uint32_t extFeatures = 0;
-    __cpuid(regs, 0x80000000);
+    Cpuid(regs, static_cast<int>(0x80000000u));
     if (static_cast<uint32_t>(regs[0]) >= 0x80000000u) {
-        __cpuid(regs, 0x80000001);
+        Cpuid(regs, static_cast<int>(0x80000001u));
         extFeatures = static_cast<uint32_t>(regs[3]);
     }
     uint32_t flags = 0;
@@ -113,19 +153,21 @@ uint32_t _cpuid(S_cpuInfo *info)
 
 uint32_t GetCpuSpeed()
 {
+    if (!kX86)
+        return 0;                               // (no time-stamp counter to count with)
     DWORD t0 = platform::Milliseconds(), t1;
     do
         t1 = platform::Milliseconds();
     while (static_cast<int>(t1 - t0) < 2);
     int regs[4];
-    __cpuid(regs, 0);                           // (serializes, as the original)
-    const uint32_t c0 = static_cast<uint32_t>(__rdtsc());
+    Cpuid(regs, 0);                             // (serializes, as the original)
+    const uint32_t c0 = static_cast<uint32_t>(ReadTsc());
     DWORD t2;
     do
         t2 = platform::Milliseconds();
     while (static_cast<int>(t2 - t1) < 1001);
-    __cpuid(regs, 0);
-    const uint32_t c1 = static_cast<uint32_t>(__rdtsc());
+    Cpuid(regs, 0);
+    const uint32_t c1 = static_cast<uint32_t>(ReadTsc());
     return (c1 - c0) / 1000000;
 }
 

@@ -10,8 +10,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <time.h>
 #include <string>
+
+#include "platform/platform.h"
 
 namespace ls3d {
 
@@ -29,30 +30,25 @@ FILE *OpenLog(const char *mode)
 
 }  // namespace
 
-// The log goes next to the executable: drive and directory of the command line (whose leading
-// quote is skipped) plus "log.txt". As in the original, the directory is whatever _splitpath
-// takes from the whole command line, arguments included.
+// The log goes next to the executable (platform::LogDirectory: on Windows, as in the original, the
+// drive and directory _splitpath takes from the whole command line) plus "log.txt".
 const char *LogPath()
 {
-    if (g_logPath.empty()) {
-        char drive[_MAX_DRIVE] = {}, dir[_MAX_DIR] = {};
-        const char *cmd = GetCommandLineA();
-        char line[_MAX_PATH * 4];
-        std::snprintf(line, sizeof line, "%s", cmd);
-        _splitpath_s(line, drive, sizeof drive, dir, sizeof dir, nullptr, 0, nullptr, 0);
-        g_logPath = drive;
-        g_logPath += dir[0] == '"' ? dir + 1 : dir;
-        g_logPath += "log.txt";
-    }
+    if (g_logPath.empty())
+        g_logPath = platform::LogDirectory() + "log.txt";
     return g_logPath.c_str();
 }
 
 void StartLog()
 {
     if (FILE *f = OpenLog("wt")) {
-        char date[16], time[16];
-        _strdate_s(date, sizeof date);
-        _strtime_s(time, sizeof time);
+        // _strdate's and _strtime's formats: "MM/DD/YY" and "hh:mm:ss".
+        char date[16] = {}, time[16] = {};
+        const std::time_t now = std::time(nullptr);
+        if (const std::tm *local = std::localtime(&now)) {
+            std::strftime(date, sizeof date, "%m/%d/%y", local);
+            std::strftime(time, sizeof time, "%H:%M:%S", local);
+        }
         std::fprintf(f, "Date: %s    time:%s\n", date, time);
         std::fclose(f);
         dbgPrintf("LS3D Engine V5.59.5           %s    GetVer:%d\n", "Aug 16 2004", 0x22f);

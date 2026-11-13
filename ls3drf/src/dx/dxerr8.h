@@ -2,6 +2,6 @@
 // DirectX result code ("D3DERR_DEVICELOST", ...), "Unknown" if none.
 #pragma once
 
-#include <windows.h>
+#include "platform/win_types.h"
 
 const char *__stdcall DXGetErrorString8A(HRESULT hr);

@@ -13,8 +13,10 @@
 
 #include <cstdint>
 
+// (Off Windows there is no original DLL to match: no import declaration and the compiler's own
+// calling conventions.)
 #ifndef RW_DATA_API
-#ifdef RW_DATA_BUILD
+#if defined(RW_DATA_BUILD) || !defined(_WIN32)
 #define RW_DATA_API
 #else
 #define RW_DATA_API __declspec(dllimport)
@@ -22,10 +24,14 @@
 #endif
 
 #ifndef RW_DATA_CALL
+#ifdef _WIN32
 #define RW_DATA_CALL __stdcall
+#else
+#define RW_DATA_CALL
+#endif
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || !defined(_WIN32)
 #define RW_DATA_THISCALL
 #else
 #define RW_DATA_THISCALL __attribute__((thiscall))

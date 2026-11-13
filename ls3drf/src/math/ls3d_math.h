@@ -14,8 +14,14 @@
 #include <cstdint>
 #include <cstring>
 
+#include "platform/win_types.h"
+
 #ifndef LS3D_API
+#if LS3D_POSIX
+#define LS3D_API
+#else
 #define LS3D_API __declspec(dllimport)
+#endif
 #endif
 
 struct S_matrix;

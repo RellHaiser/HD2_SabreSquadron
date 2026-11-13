@@ -1,7 +1,7 @@
 // The model loader (load.cpp, 0x1005d5b0 - 0x1005edc0): state the frames' Load methods share.
 #pragma once
 
-#include <windows.h>
+#include "platform/win_types.h"
 
 #include "core/c_vector.h"
 

@@ -12,7 +12,7 @@
 //
 // Usage: compare_billboard.exe [original LS3DRF.dll] [operations] [seed]
 //
-// test-sources: src/i3d/billboard.cpp src/math/math.cpp src/core/debug.cpp
+// test-sources: src/i3d/billboard.cpp src/math/math.cpp src/core/debug.cpp src/platform/win32/*.cpp
 #include <windows.h>
 
 #include <float.h>

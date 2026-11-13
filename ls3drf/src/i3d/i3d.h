@@ -8,9 +8,12 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#ifdef _WIN32
 #include <malloc.h>
+#endif
 
-#include <windows.h>
+#include "platform/win_types.h"
 
 #include "core/i3d_result.h"
 #include "math/ls3d_math.h"
@@ -173,8 +176,19 @@ enum : uint32_t {
 namespace ls3d::i3d {
 
 // The engine's 16-byte aligned blocks: the statically linked CRT's _aligned_malloc (0x1008d42a)
-// and _aligned_free (0x1008d472).
+// and _aligned_free (0x1008d472). (Without the Windows C runtime posix_memalign, asked for at least
+// a byte: like _aligned_malloc, a 0-byte block is a block, not a failure.)
+#ifdef _WIN32
 inline void *AlignedAlloc(size_t size, size_t alignment) { return _aligned_malloc(size, alignment); }
 inline void AlignedFree(void *p) { _aligned_free(p); }
+#else
+inline void *AlignedAlloc(size_t size, size_t alignment)
+{
+    void *p = nullptr;
+    return posix_memalign(&p, alignment < sizeof(void *) ? sizeof(void *) : alignment, size ? size : 1) == 0 ? p
+                                                                                                          : nullptr;
+}
+inline void AlignedFree(void *p) { std::free(p); }
+#endif
 
 }  // namespace ls3d::i3d

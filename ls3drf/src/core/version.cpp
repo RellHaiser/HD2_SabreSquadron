@@ -2,7 +2,8 @@
 #include <cstdint>
 #include <cstdio>
 
-#include <windows.h>
+#include "platform/platform.h"
+#include "platform/win_types.h"
 
 namespace {
 
@@ -12,24 +13,24 @@ char g_unknownResult[256];                  // 0x100d1530
 }  // namespace
 
 // 0x10068f20
-extern "C" __declspec(dllexport) uint32_t GetEngineVersion()
+extern "C" LS3D_EXPORT uint32_t GetEngineVersion()
 {
     return kEngineVersion;
 }
 
 // 0x10068f30: checks the version the client was built for. The original returns 0x201 on a match
 // and otherwise the message box result with its low byte cleared (callers test AL).
-extern "C" __declspec(dllexport) uint32_t TEV(const char *who, int version)
+extern "C" LS3D_EXPORT uint32_t TEV(const char *who, int version)
 {
     if (version == kEngineVersion)
         return 0x201;
     char text[128];
     std::snprintf(text, sizeof text, "Bad version - engine:%d  client:%d", kEngineVersion, version);
-    return static_cast<uint32_t>(MessageBoxA(nullptr, text, who, MB_ICONHAND | MB_SYSTEMMODAL)) & 0xFFFFFF00u;
+    return static_cast<uint32_t>(ls3d::platform::StopMessage(who, text)) & 0xFFFFFF00u;
 }
 
 // 0x10068fc0: text of an I3D result code.
-extern "C" __declspec(dllexport) const char *I3DGetResultMessage(int32_t result)
+extern "C" LS3D_EXPORT const char *I3DGetResultMessage(int32_t result)
 {
     static const char *const kErrors[] = {
         "File not found",                       // 0x80000001

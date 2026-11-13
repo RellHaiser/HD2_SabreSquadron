@@ -90,6 +90,43 @@ python build.py --debug  rem a debug build
 Intermediate files go to `%TEMP%\ls3drf_build` (a synced source folder such as Google Drive or
 OneDrive locks freshly written files and breaks the compiler).
 
+### Linux and other POSIX systems
+
+```sh
+python3 build.py gcc --m32    # build/gcc32/libls3drf.so: 32-bit, the original's layouts
+python3 build.py gcc          # build/gcc/libls3drf.so: the compiler's default target
+```
+
+`CXX` picks the compiler (default `g++`; Clang works the same way), `CXXFLAGS` and `LDFLAGS` are
+added, and `RW_DATA_LIB` names the [rw_data port](https://github.com/RellHaiser/rw_data) built as a
+shared library: it is then linked, and nothing may stay undefined. Without it the `dta*` functions
+stay undefined until the library is loaded next to `librw_data.so`.
+
+How the build differs from the Windows one:
+
+- The Win32 types the interfaces are written in (`HRESULT`, `DWORD`, `GUID`, ...) come from
+  [platform/win_types.h](src/platform/win_types.h), with their Win32 sizes. `__stdcall` and the
+  other calling conventions expand to the compiler's default. No Windows binary is involved, and
+  the engine and its client are built with the same headers.
+- The operating system calls are in [platform/posix](src/platform/posix): monotonic clocks, no
+  cursor, a message on `stderr` instead of the version check's message box. The log goes next to
+  the executable on Linux and macOS, and to the current directory elsewhere.
+- There is no `DllMain`. A static object in [core/engine.cpp](src/core/engine.cpp) starts and stops
+  the engine, and `build.py` links it where it initialises after every other global.
+- Every symbol is exported with its Itanium C++ name: there are no ordinals and no `ls3drf.def`.
+- `-fno-strict-aliasing`: the code reads floats' bits through other types, as MSVC allows.
+
+**Status: not yet built on Linux.** The POSIX side has only been compiled, linked and loaded on
+Windows, with 32-bit MinGW GCC 11 (`set CXX=g++` then `python build.py gcc`, which defines
+`LS3D_FORCE_POSIX` for a compiler that targets Windows). That check DLL loads, starts the engine,
+runs `IGraph::Init` and unloads. It is not a drop-in replacement for `LS3DRF.dll`. The differential
+tests need the original DLLs and run on Windows only. A 64-bit build does not compile yet: the
+layout checks hold only for 32-bit pointers.
+
+`build.py` checks that every file naming a Win32 type or calling convention includes
+`win_types.h` (MSVC knows `__stdcall` without a header, so only another compiler would notice). It
+also checks that the Windows and POSIX calls stay in their backends, like the device boundaries.
+
 ## Tests
 
 The tests in [tests/](tests) are differential: each loads an **original** DLL from your copy of
@@ -125,11 +162,11 @@ first difference (exit code 1).
 
 | Path | What |
 |---|---|
-| `src/core` | log and errors, version, CPU detection, engine start-up (`DllMain`), containers |
+| `src/core` | log and errors, version, CPU detection, engine start-up (`DllMain`, or a static object off Windows), containers |
 | `src/math` | the math exports |
 | `src/i3d` | the scene graph, collision, loaders, buffer managers |
 | `src/igraph` | IGraph and the texture flags |
-| `src/platform` | time and the few Win32 calls left |
+| `src/platform` | the Win32 types on every system (`win_types.h`); the operating system calls: `win32/` and `posix/` |
 | `src/dx` | the Direct3D 8 and DirectInput types the engine's interfaces still name; DXGetErrorString8 |
 | `src/external` | the interface of `rw_data.dll` |
 | `tests` | the differential tests, their fake Direct3D device and the Direct3D 8 backend |
