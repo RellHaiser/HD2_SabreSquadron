@@ -44,7 +44,7 @@ enum : uint32_t {
 class alignas(16) C_NetTrack : public C_NetQuantized {
 public:
     C_NetTrack();                                                 // 0x0073fbe0
-    ~C_NetTrack() override = default;                             // 0x0073fe40 (DS 0x0079f140)
+    ~C_NetTrack() override = default;                             // 0x0073fe40 (DS 0x0079f140) (scalar deleting 0x0073fe20 (DS 0x0079f110))
 
     // The defaults (the flags 7, the vectors' x, y, z 0, the speed 40, the lag 0.035, the snap 3; the
     // quantisations dropped); also the update period g_netUpdatePeriod back to 0.1.

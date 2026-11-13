@@ -34,7 +34,7 @@ public:
     // Kind (3 bits) 0 a shot through the body, 1 a bump (the body too with its bit), 2 destroyed,
     // 3 a shot into the surface.
     void OnMessage(C_BitStream *msg) override;          // 0x1C 0x00609220
-    bool SetFrame(I3D_frame *frame) override { return C_Actor::SetFrame(frame); }   // 0x2C 0x00606360
+    bool SetFrame(I3D_frame *frame) override { return C_Actor::SetFrame(frame); }   // 0x2C 0x00606360 (DS 0x0062d850)
     // Chunks 2000 the surface's name, 3000 the full level, 4000 the empty level, 5000 the leak
     // rate, 6000 the leak effect, 7000 the body's name, 8000 the destroyed model, 9000 the hit
     // points, 10000 the box out when destroyed, 11000 the explosion effect, 12000 the explosion

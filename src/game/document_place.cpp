@@ -82,7 +82,7 @@ void C_DocumentPlace::StopMission(bool server)          // 0x0060df20
     Deactivate(server);
 }
 
-bool C_DocumentPlace::WriteProperties(C_chunk &chunk)   // 0x0060df50
+bool C_DocumentPlace::WriteProperties(C_chunk &chunk)   // 0x0060df50 (DS 0x00637300)
 {
     chunk.Begin(PROPERTY_TEXT_ITEM);
     chunk.Write(m_nameTextId);
@@ -133,16 +133,20 @@ void C_DocumentPlace::ReadState(C_BitStream *msg)       // 0x0060e510
         ShowDocuments();
 }
 
-void C_DocumentPlace::RestartMission(bool)              // 0x0060e560
+void C_DocumentPlace::RestartMission(bool)              // 0x0060e560 (DS 0x00637ac0)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StopMission(false);
+#endif
     if (IsServer()) {
         StopMission(true);
         StartMission(true);
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StartMission(false);
+#endif
 }
 
 bool C_DocumentPlace::SaveGame(C_chunk &chunk)          // 0x0060e5b0

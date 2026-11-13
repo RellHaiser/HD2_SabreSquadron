@@ -115,10 +115,12 @@ S_SoldierProfile::S_SoldierProfile()                    // (C_HumanStore::Add 0x
     UpdateNames();
 }
 
-S_SoldierProfile::~S_SoldierProfile()                   // 0x0069fd30
+S_SoldierProfile::~S_SoldierProfile()                   // 0x0069fd30 (DS 0x006e1170)
 {
+#ifndef HD2_DEDICATED   // the server makes no face images
     if (faceImage)
         faceImage->Release();
+#endif
     faceImage = nullptr;
 }
 

@@ -303,17 +303,21 @@ void C_Submarine::StopMission(bool server)              // 0x005dfca0
     }
 }
 
-void C_Submarine::RestartMission(bool)                  // 0x005de7c0
+void C_Submarine::RestartMission(bool)                  // 0x005de7c0 (DS 0x005fb810)
 {
     m_engineSound = m_diveSound = m_riseSound = m_surfaceSound = m_underwaterSound = -1;
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StopMission(false);
+#endif
     if (IsServer()) {
         StopMission(true);
         StartMission(true);
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StartMission(false);
+#endif
 }
 
 bool C_Submarine::SaveGame(C_chunk &chunk)              // 0x005de830
@@ -563,9 +567,13 @@ bool C_Submarine::PutOutside(C_Actor *actor)            // 0x005e0b30
 
 // --- the movement ---------------------------------------------------------------------------------
 
-void C_Submarine::Tick(int timeDelta)                   // 0x005e0e00
+void C_Submarine::Tick(int timeDelta)                   // 0x005e0e00 (DS 0x005fe900)
 {
+#ifdef HD2_DEDICATED   // the server has only the server's side
+    if (IsServer())
+#else
     if (!IsClient() && IsServer())
+#endif
         Update(timeDelta);
 }
 

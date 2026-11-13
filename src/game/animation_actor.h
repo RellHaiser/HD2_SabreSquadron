@@ -82,7 +82,7 @@ private:
     // A wing of "#mchescape" (0x20 bytes, 16-byte aligned): its bound's sphere swept along its moves.
     struct alignas(16) S_Wing {
         explicit S_Wing(I3D_frame *frame);              // 0x005b5f40
-        ~S_Wing();                                      // 0x005b5f60
+        ~S_Wing();                                      // 0x005b5f60 (DS 0x005c8210)
         void Reset();                                   // 0x005b5f70
         // Moved over 0.2 m: the sphere swept from the last place, a car met (or a human in one)
         // destroyed; true when that was a car.

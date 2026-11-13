@@ -221,7 +221,9 @@ void C_ItemsModule::Init()
 
 void C_ItemsModule::Done()
 {
+#ifndef HD2_DEDICATED   // no surface marks on the server
     SurfaceMarks_Free();
+#endif
     for (C_ItemDef *&def : m_items) {
         delete def;
         def = nullptr;

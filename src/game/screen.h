@@ -69,7 +69,7 @@ public:
     void Tick(int time) override;                       // +0x1C 0x00668a50
     // A key (its DirectInput code's low byte): the active focus' (taken: true); else Enter, Space
     // or the keypad's Enter: the focus' click (its id); else false.
-    bool Unknown20(int key) override;                   // +0x20 0x00668970
+    bool Unknown20(int key) override;                   // +0x20 0x00668970 (DS 0x006a1eb0)
     // The base's for the screen's own (target 0) and the notifications; CONTROL_MSG_EDIT: the
     // focus left (OnLeave with its index), then the target's enter; then the target's child's
     // (none: false).
@@ -103,7 +103,7 @@ class C_DescriptionScreen : public C_Screen {           // 0x8C bytes, vtable 0x
 public:
     C_DescriptionScreen(I3D_scene *scene, I3D_frame *frame) : C_Screen(scene, frame) {}   // 0x006838a0
     // The text deleted.
-    ~C_DescriptionScreen() override;                    // 0x00676040 (0x00676020)
+    ~C_DescriptionScreen() override;                    // 0x00676040 (DS 0x006b0930) (0x00676020 (DS 0x006b0900))
 
     // The text's.
     void Refresh() override;                            // +0x18 0x00669bf0 (DS 0x006a3200)
@@ -149,7 +149,7 @@ public:
     // The model's "description01" box off at (0.5, -0.375, -0.5), its "text01" and "text02" made (titles,
     // the screen's id | 2) and the "new_medal" place (a dummy) kept; "description" off. True. (The
     // description is not read.)
-    bool Build(const S_ScreenDesc *desc) override;      // +0x8C 0x00669c00
+    bool Build(const S_ScreenDesc *desc) override;      // +0x8C 0x00669c00 (DS 0x006a3220)
 
 private:
     C_TitleControl *m_name = nullptr;                   // +0x84 "text01"
@@ -197,7 +197,7 @@ public:
     int GetKind() const { return m_kind; }
 
     // None shown or a text alone: taken (true). Escape: closed, the second answer; else the screen's.
-    bool Unknown20(int key) override;                   // +0x20 0x006694b0
+    bool Unknown20(int key) override;                   // +0x20 0x006694b0 (DS 0x006a2c40)
     // Its controls added to the description first: the text ("text", text 2004), the yes / no / ok
     // buttons ("byes*", "bno*", "bok"; texts 2001, 2000, 2013; ok hidden), their clicks to OnButton.
     bool Build(const S_ScreenDesc *desc) override;      // +0x8C 0x00668a90

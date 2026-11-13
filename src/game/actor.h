@@ -168,8 +168,8 @@ public:
     // Rounds left for the weapon of `seat` in the vehicle's item store.
     virtual int GetSeatAmmoCount(int seat);                                     // 0xA0 0x00611140
     // The direction the weapon of `seat` points, and where it is (the world's).
-    virtual S_vector GetSeatWeaponAim(int /*seat*/) { return S_vector(0.0f, 0.0f, 0.0f); }   // 0xA4 0x0059c3d0
-    virtual S_vector GetSeatWeaponOrigin(int /*seat*/) { return S_vector(0.0f, 0.0f, 0.0f); }  // 0xA8 0x0059c3f0
+    virtual S_vector GetSeatWeaponAim(int /*seat*/) { return S_vector(0.0f, 0.0f, 0.0f); }   // 0xA4 0x0059c3d0 (DS 0x005a7790)
+    virtual S_vector GetSeatWeaponOrigin(int /*seat*/) { return S_vector(0.0f, 0.0f, 0.0f); }  // 0xA8 0x0059c3f0 (DS 0x005a77c0)
     // A float of the seat (vehicles: the seat weapon's, which is 0; pi without one).
     virtual float UnknownAC(int /*seat*/) { return 3.14159265f; }               // 0xAC 0x0059c410 (DS 0x005a77f0)
     // The text (name) of the seat weapon's item, -1 without one.

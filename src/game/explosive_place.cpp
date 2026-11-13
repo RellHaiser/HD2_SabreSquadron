@@ -193,16 +193,20 @@ void C_ExplosivePlace::StopMission(bool server)         // 0x0060c6b0
     Deactivate(server);
 }
 
-void C_ExplosivePlace::RestartMission(bool)             // 0x0060cf20
+void C_ExplosivePlace::RestartMission(bool)             // 0x0060cf20 (DS 0x00635e40)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StopMission(false);
+#endif
     if (IsServer()) {
         StopMission(true);
         StartMission(true);
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StartMission(false);
+#endif
 }
 
 bool C_ExplosivePlace::SaveGame(C_chunk &chunk)         // 0x0060cf70
@@ -374,10 +378,10 @@ void C_ExplosivePlace::ExplodeHarmless()                // 0x0060d810
     SendActorMessage(msg);
 }
 
-void C_ExplosivePlace::Explode(int planterId)           // 0x0060d870
+void C_ExplosivePlace::Explode(int planterId)           // 0x0060d870 (DS 0x006369e0)
 {
     // (Copy protection dropped: in single player missions after the 11th the original returned
-    // here when its table check failed.)
+    // here when its table check failed. The server's copy has no table check either.)
     if (planterId < 0) {
         ExplodeHarmless();
         return;

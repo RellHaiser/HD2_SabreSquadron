@@ -526,9 +526,11 @@ void C_SupplyBox::Update(int frameTime)                 // 0x005fb380
         SetState(SUPPLY_LANDED);
 }
 
-void C_SupplyBox::Tick(int timeDelta)                   // 0x005fbd20
+void C_SupplyBox::Tick(int timeDelta)                   // 0x005fbd20 (DS 0x00620490)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (!IsClient())
+#endif
         Update(timeDelta);
 }
 

@@ -27,7 +27,7 @@ public:
     // dummy gets a dummy `name` with the highlight's copy and the "vi_template" visual; an entry
     // "frame_<type>" per item type of the group, cloned from the template; group 1 the page shown
     // first). False without the frames.
-    virtual bool BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group);   // 0x00 0x0067b070
+    virtual bool BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group);   // 0x00 0x0067b070 (DS 0x006b6f10)
     virtual ~C_StoreList() = default;                   // 0x04 0x0067f3a0 (0x0067f370; another module's copies (masked bytes equal): 0x006c1d30 (DS 0x00707810), 0x006c1d60 (DS 0x00707850))
 
     // The count of an item type in the stock (none: 0).

@@ -158,7 +158,7 @@ void C_WireCut::ReadState(C_BitStream *msg)             // 0x005e29a0
     OnCut(dir);
 }
 
-int C_WireCut::GetMaterialId(I3D_frame *part)           // 0x005e2910
+int C_WireCut::GetMaterialId(I3D_frame *part)           // 0x005e2910 (DS 0x00600bb0)
 {
     const int id = GetFrameMaterialId(part);
     return id < 0 ? 11 : id;

@@ -243,10 +243,12 @@ C_AirAttack::S_Dust::S_Dust(const S_vector4 &pos, const S_vector4 &d)   // 0x005
     NormalizeBy(dir, SquareXYZ(dir));
 }
 
-C_AirAttack::S_Dust::~S_Dust()                          // 0x005e94d0
+C_AirAttack::S_Dust::~S_Dust()                          // 0x005e94d0 (DS 0x00609260)
 {
+#ifndef HD2_DEDICATED   // no particles on the server
     if (particle != -1)
         g_particlesModule.Finish(particle);
+#endif
     frame->Release();
 }
 
@@ -319,7 +321,7 @@ void C_AirAttack::SetTarget(bool stop, I3D_frame *target)   // 0x005e7570
     m_idle = true;
 }
 
-void C_AirAttack::StartMission(bool server)             // 0x005e4090
+void C_AirAttack::StartMission(bool server)             // 0x005e4090 (DS 0x00602aa0)
 {
     Activate(server);
     // The direction: the frame's z, levelled.
@@ -392,6 +394,7 @@ void C_AirAttack::StartMission(bool server)             // 0x005e4090
     m_volume.centerW = center.x;
     g_collisionWorld.AddVolume(&m_volume);
     m_target = nullptr;
+#ifndef HD2_DEDICATED   // no sounds on the server
     // The shots' sounds into the cache.
     if (!ISndGetDriver()->IsInitialized())
         return;
@@ -401,9 +404,10 @@ void C_AirAttack::StartMission(bool server)             // 0x005e4090
         g_soundCache.OpenInto(sound, C_fstr("sand%02d.wav", i).c_str());
     }
     sound->Release();
+#endif
 }
 
-void C_AirAttack::StopMission(bool server)              // 0x005e56d0
+void C_AirAttack::StopMission(bool server)              // 0x005e56d0 (DS 0x00604510)
 {
     Deactivate(server);
     if (!m_started)
@@ -411,7 +415,9 @@ void C_AirAttack::StopMission(bool server)              // 0x005e56d0
     m_started = false;
     g_collisionWorld.RemoveVolume(&m_volume);
     if (m_smoke != -1) {
+#ifndef HD2_DEDICATED   // no particles on the server (the id is still cleared)
         g_particlesModule.Destroy(m_smoke);
+#endif
         m_smoke = -1;
     }
     for (I3D_sound *&sound : m_motorSounds) {
@@ -451,7 +457,7 @@ void C_AirAttack::StopMission(bool server)              // 0x005e56d0
     m_dusts.clear();
 }
 
-void C_AirAttack::Hit(E_HitType, float amount, const S_vector &, const S_vector &, C_Actor *, int)   // 0x005e3b80
+void C_AirAttack::Hit(E_HitType, float amount, const S_vector &, const S_vector &, C_Actor *, int)   // 0x005e3b80 (DS 0x00602440)
 {
     if (m_health == 0.0f)
         return;
@@ -470,14 +476,18 @@ void C_AirAttack::Hit(E_HitType, float amount, const S_vector &, const S_vector 
     smoke.m[3][0] = world.m[3][0];
     smoke.m[3][1] = world.m[3][1] - 1.0f;
     smoke.m[3][2] = world.m[3][2];
+#ifdef HD2_DEDICATED   // the server creates no particles (the id is -1)
+    m_smoke = -1;
+#else
     m_smoke = g_particlesModule.Create(EFFECT_SMOKE, smoke, m_frame, true, false);
+#endif
     if (const S_FrameData *data = m_frame->GetData()) {
         if (data->script)
             data->script->OnDeath();
     }
 }
 
-void C_AirAttack::Update(int frameTime)                 // 0x005e5960
+void C_AirAttack::Update(int frameTime)                 // 0x005e5960 (DS 0x00604850)
 {
     if (g_scriptModule.IsCutsceneRunning())
         return;
@@ -571,7 +581,9 @@ void C_AirAttack::Update(int frameTime)                 // 0x005e5960
             if (flat > GONE_SQUARE) {
                 m_gone = true;
                 if (m_smoke != -1) {
+#ifndef HD2_DEDICATED   // no particles on the server (the id is still cleared)
                     g_particlesModule.Finish(m_smoke);
+#endif
                     m_smoke = -1;
                 }
                 for (size_t i = m_dusts.size(); i-- > 0;)
@@ -712,7 +724,9 @@ void C_AirAttack::Update(int frameTime)                 // 0x005e5960
         if (m_bullets[i]->time >= 1)
             continue;
         const S_vector pos = Vec(m_bullets[i]->pos);
+#ifndef HD2_DEDICATED   // no particles on the server
         g_particlesModule.CreateAt(EFFECT_BULLET, pos, S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
+#endif
         BulletHit(pos, Vec(m_bullets[i]->shot));
         if ((std::rand() & 3) == 0)
             PlayImpactSound(pos);

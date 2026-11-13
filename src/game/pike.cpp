@@ -85,7 +85,7 @@ bool C_Pike::LoadGame(C_chunk &chunk)                   // 0x005b8b00
     return true;
 }
 
-bool C_Pike::SetFrame(I3D_frame *frame)                 // 0x005b8e00
+bool C_Pike::SetFrame(I3D_frame *frame)                 // 0x005b8e00 (DS 0x005cbf80)
 {
     if (!frame)
         return false;
@@ -180,10 +180,14 @@ bool C_Pike::Turn(int)                                  // 0x005b8f00 (DS 0x005c
     return blocked;
 }
 
-void C_Pike::Tick(int timeDelta)                        // 0x005b9340
+void C_Pike::Tick(int timeDelta)                        // 0x005b9340 (DS 0x005cc620)
 {
-    if (m_state == PIKE_DOWN || m_state == PIKE_UP || IsClient())
+    if (m_state == PIKE_DOWN || m_state == PIKE_UP)
         return;
+#ifndef HD2_DEDICATED   // the server has only the server's side
+    if (IsClient())
+        return;
+#endif
     const float angle = m_angle;
     if (m_blockedTime != 0) {
         m_blockedTime -= timeDelta;

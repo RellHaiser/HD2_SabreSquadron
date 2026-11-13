@@ -242,6 +242,8 @@ void C_ResourceCache<T>::Forget()
 template <class T>
 void C_ResourceCache<T>::AddDir(const char *dir)
 {
+    // models 0x006d78e0 (DS 0x0071f190), sounds 0x006d88a0 (DS 0x00720590), animations 0x006d9990 (DS 0x00721b10),
+    // shadows 0x006d6ed0 (DS 0x0071e4b0)
     RemoveDir(dir);
     m_dirs.push_back(WithTrailingBackslash(dir));
 }
@@ -360,7 +362,7 @@ void AddSearchDir(const char *dir, E_DataDirectory type)
 
 void AddSubdirectories(const char *dir, E_DataDirectory type);
 
-// One directory entry found below `dir` (0x006ed940).
+// One directory entry found below `dir` (0x006ed940, DS 0x00738d50).
 void AddDirectoryEntry(const char *dir, const char *name, uint32_t attributes, E_DataDirectory type)
 {
     char path[0x200];

@@ -356,11 +356,13 @@ void C_Human::RestartMission(bool server)
         RestartMultiplayer();
     else
         RestartCoop();
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (server && IsClient()) {
         if (C_Item *uniform = GetContainer(ITEM_CONTAINER_UNIFORM)->GetItem())
             PutOnUniform(uniform->GetUid());
         UpdateDisguise(100.0f);
     }
+#endif
 }
 
 // The body leaves / rejoins the world: the movement stops and the model is hidden (inline

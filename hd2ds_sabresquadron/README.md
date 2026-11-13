@@ -60,7 +60,9 @@ body (a default return; `true` for `Init` / `Done` / `LoadGame` / `SaveGame`). `
   `HD2_DEDICATED` blocks) of the human, shots, items and equipment, vehicles and the car, the Junkers 88, the game's
   tick, input, objectives and round end, the cutscenes, the net game and the controllers, among others.
 - Each function of `src/` that the server also has carries the server's address as `(DS 0x...)` after the client's.
-  By that count about 87% of the server's own game functions are ported (compiler library code and static
-  initialisers left out). Menus and UI controls are not ported for the server: it reads cursor data it never sets up.
-- Other client paths (fonts, movie controls, faces and decals with null textures, a message box with no window) may
+  By that count about 89% of the server's own game functions are ported (compiler library code and static
+  initialisers left out). The UI controls have their server variants too: the server has no cursor (none of the
+  client's cursor functions is in it), so `C_Cursor` is an inline stub there whose `Acquire` gives null, and the
+  controls' key and mouse handlers return what the server's return.
+- Other client paths (fonts, faces and decals with null textures, a message box with no window) may
   still fail or block at run time. The server exits with code 1 on WM_CLOSE.

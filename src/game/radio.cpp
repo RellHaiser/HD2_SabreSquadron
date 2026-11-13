@@ -56,14 +56,14 @@ void C_Radio::StartMission(bool server)                 // 0x0060a930 (DS 0x0063
     m_state = STATE_ON;
 }
 
-void C_Radio::StopMission(bool server)                  // 0x0060ac00
+void C_Radio::StopMission(bool server)                  // 0x0060ac00 (DS 0x00633090)
 {
     m_started = false;
     g_collisionWorld.RemoveVolume(&m_volume);
     Deactivate(server);
 }
 
-bool C_Radio::WriteProperties(C_chunk &chunk)           // 0x0060ac30
+bool C_Radio::WriteProperties(C_chunk &chunk)           // 0x0060ac30 (DS 0x006330d0)
 {
     chunk.Begin(PROPERTY_SOUND_ITEM);
     chunk.Write(m_sound);

@@ -284,19 +284,23 @@ void C_AnimationActor::CopyFrom(const C_Actor *source)  // 0x005b3a00
     m_particleId = other->m_particleId;
 }
 
-void C_AnimationActor::RestartMission(bool)             // 0x005b31c0
+void C_AnimationActor::RestartMission(bool)             // 0x005b31c0 (DS 0x005c49c0)
 {
     if (IsServer())
         StopMission(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StopMission(false);
+#endif
     if (IsServer())
         StartMission(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient())
         StartMission(false);
+#endif
 }
 
-void C_AnimationActor::StartMission(bool server)        // 0x005b3be0
+void C_AnimationActor::StartMission(bool server)        // 0x005b3be0 (DS 0x005c5670)
 {
     m_animating = false;
     m_destroy = false;
@@ -305,9 +309,11 @@ void C_AnimationActor::StartMission(bool server)        // 0x005b3be0
     m_refreshes = 0;
     m_name = m_nameTextId == -1 ? C_str("") : g_texts.Get(m_nameTextId);
     Activate(server);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     // (On a listen server the client side does the rest.)
     if (server && IsClient())
         return;
+#endif
     m_collisionFrame = nullptr;
     m_particleFrame = m_frame->FindChildFrame("particle", FIND_ANY_FRAME);
     CreateCollisions(m_frame);
@@ -346,7 +352,7 @@ void C_AnimationActor::StartMission(bool server)        // 0x005b3be0
         m_wings.push_back(new S_Wing(m_frame->FindChildFrame("left_wing", FIND_ANY_FRAME)));
 }
 
-void C_AnimationActor::StopMission(bool server)         // 0x005b5000
+void C_AnimationActor::StopMission(bool server)         // 0x005b5000 (DS 0x005c6fc0)
 {
     Deactivate(server);
     if (server && IsClient())
@@ -592,7 +598,7 @@ void C_AnimationActor::Hit(E_HitType, float amount, const S_vector &, const S_ve
     m_destroy = true;
 }
 
-int C_AnimationActor::GetMaterialId(I3D_frame *part)    // 0x005b5f20
+int C_AnimationActor::GetMaterialId(I3D_frame *part)    // 0x005b5f20 (DS 0x005c81b0)
 {
     const int material = GetFrameMaterialId(part);
     return material < 0 ? 11 : material;

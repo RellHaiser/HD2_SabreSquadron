@@ -228,16 +228,20 @@ C_Junkers88::~C_Junkers88()                             // 0x005ef470
     // (The lists' items are StopMission's.)
 }
 
-void C_Junkers88::RestartMission(bool)                  // 0x005edde0
+void C_Junkers88::RestartMission(bool)                  // 0x005edde0 (DS 0x0060ece0)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (g_gameRole & GAME_ROLE_CLIENT)
         StopMission(false);
+#endif
     if (g_gameRole & GAME_ROLE_SERVER) {
         StopMission(true);
         StartMission(true);
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (g_gameRole & GAME_ROLE_CLIENT)
         StartMission(false);
+#endif
 }
 
 bool C_Junkers88::ReadProperties(C_chunk &chunk)        // 0x005f29f0
@@ -274,7 +278,7 @@ bool C_Junkers88::ReadProperties(C_chunk &chunk)        // 0x005f29f0
     return true;
 }
 
-void C_Junkers88::StartMission(bool server)             // 0x005ef6d0
+void C_Junkers88::StartMission(bool server)             // 0x005ef6d0 (DS 0x00610c60)
 {
     Activate(server);
     if (server)

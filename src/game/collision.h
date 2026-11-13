@@ -323,7 +323,7 @@ extern float g_moveIterations;                              // 0x008441e4 (10 in
 // volumes and primitives; -1 = no static geometry; COLLISION_FLAG_DISABLED is always added).
 class C_CollisionWorld {                                    // 0x42C bytes
 public:
-    C_CollisionWorld() = default;                           // 0x006ee010
+    C_CollisionWorld() = default;                           // 0x006ee010 (DS 0x007396a0)
     ~C_CollisionWorld();                                    // 0x006ee0c0
     C_CollisionWorld(const C_CollisionWorld &) = delete;
     C_CollisionWorld &operator=(const C_CollisionWorld &) = delete;

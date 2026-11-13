@@ -618,12 +618,14 @@ void C_PlayerController::SendSoldierClass(int soldierClass)
 
 bool C_PlayerController::OnCollisionEx(C_Actor *other, const S_vector * /*pos*/, int, int, int, int, int)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     // A client's human touching a ladder asks the server to use it.
     if (other->GetType() == ACTOR_LADDER && IsClient()) {
         S_MsgUseObject *message = new S_MsgUseObject;
         message->actor = other->GetNetId();
         SendToServer(message);
     }
+#endif
     return true;
 }
 

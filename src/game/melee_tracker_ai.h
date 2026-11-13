@@ -139,7 +139,7 @@ public:
 // The full AI (vtable 0x00811fd0, 0xC0 bytes; abstract in the original -- only its two variants
 // are made): sensing, the target and the attack, heel, the checkpoint paths. Its own vtable's
 // save / load (0x005d25b0 / 0x005d28b0) are unreachable and not ported.
-class C_MeleeTrackerAI : public C_MeleeTrackerController {
+class C_MeleeTrackerAI : public C_MeleeTrackerController {   // deleting dtor and dtor: 0x005cb3c0 (DS 0x005e2e60), 0x005cb3e0 (DS 0x005e2e90)
 public:
     // --- script commands (C_MeleeTrackerScript::ExecuteCommand calls them directly) ----------
     void MoveTo(uint16_t checkpoint);                   // 0x005cf700

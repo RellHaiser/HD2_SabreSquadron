@@ -11,6 +11,37 @@ class I3D_frame;
 class I3D_scene;
 class IImage;
 
+#ifdef HD2_DEDICATED
+// The server has no cursor: none of the client's C_Cursor functions is in it. Acquire gives null and
+// the controls make their calls through that null pointer, which read and change nothing (inline
+// constants), as the original server's controls show: Acquire null (C_Button / C_SelectList /
+// C_Tooltip::Create), IsButtonDown false and GetStillTime 0 (C_Button / C_ScrollBar::Tick),
+// GetScreenPosition writing nothing (C_SelectList::OnInput05). The other constants: MEDIUM.
+class C_Cursor {
+public:
+    static C_Cursor *Acquire(I3D_scene *) { return nullptr; }
+    void Release() {}
+    bool Update(int) { return false; }
+    void Draw() const {}
+    uint32_t Pick(I3D_scene *, I3D_frame *) { return 0; }
+    bool IsButtonDown(uint32_t) const { return false; }
+    bool WasButtonDown(uint32_t) const { return false; }
+    bool IsPressed(uint32_t) const { return false; }
+    bool IsReleased(uint32_t) const { return false; }
+    void GetPosition(S_vector *) const {}
+    void GetMove(S_vector *) const {}
+    void GetScreenPosition(float *, float *, float *) const {}
+    bool HasMoved() const { return false; }
+    float GetWheel() const { return 0.0f; }
+    bool HasWheel() const { return false; }
+    int GetStillTime() const { return 0; }
+    void SetDelay(int) {}
+    void SetClicksOff(bool) {}
+    uint32_t GetHoveredId() const { return 0; }
+    bool IsClicked() const { return false; }
+    bool IsDoubleClicked() const { return false; }
+};
+#else
 class C_Cursor {
 public:
     virtual ~C_Cursor();                                // 0x0066aa50 (the scalar deleting one)
@@ -94,6 +125,7 @@ protected:
     uint32_t m_pressedId;                               // +0x4C
     uint32_t m_clickedId;                               // +0x50 the last click's (for the double click)
 };
+#endif
 
 // The cursor's place on the screen in pixels (-1 before the first: the screen's centre), kept
 // across cursors.

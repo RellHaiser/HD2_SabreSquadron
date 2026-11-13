@@ -593,7 +593,7 @@ void C_Door::CopyFrom(const C_Actor *source)            // 0x005ff3e0
         m_sounds[i] = door->m_sounds[i];
 }
 
-void C_Door::StartMission(bool server)                  // 0x00600cc0
+void C_Door::StartMission(bool server)                  // 0x00600cc0 (DS 0x00626ae0)
 {
     Activate(server);
     if (!m_hasPortals)

@@ -103,12 +103,14 @@ bool C_Screen::Unknown20(int key)
         if (!focus->IsInactive() && focus->Unknown20(key))
             return true;
     }
+#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
     const uint8_t code = static_cast<uint8_t>(key);
     if ((code == KEY_RETURN || code == KEY_SPACE || code == KEY_NUMPAD_ENTER) && IsChild(m_focus)) {
         C_Control *focus = m_children[m_focus];
         focus->OnClick(static_cast<int>(focus->GetId()));
         return true;
     }
+#endif
     return false;
 }
 
@@ -234,6 +236,9 @@ void C_MessageBox::Close()
 
 bool C_MessageBox::Unknown20(int key)
 {
+#ifdef HD2_DEDICATED   // no keyboard in LS3DRF.dll: the server's copy is the screen's
+    return C_Screen::Unknown20(key);
+#endif
     if (m_kind == MESSAGE_BOX_TEXT || m_kind == MESSAGE_BOX_NONE)
         return true;
     if (static_cast<uint8_t>(key) != KEY_ESCAPE)
