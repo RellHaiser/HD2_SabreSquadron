@@ -36,6 +36,7 @@ struct S_SelfScript {
     uint32_t bodyFlags = 0;                             // S_HumanBody::TakeFlags
     bool member = false;                                // the player team's IsMember
     void *speechSet = nullptr;                          // C_SpeechSets::Acquire
+    bool uniform = false;                               // the uniform container's GetItem
 } g_self;
 // The debug console's lines (the original's Print is empty: both sides log the text).
 void LogPrint(const char *format, va_list args)
@@ -227,12 +228,22 @@ uint32_t S_HumanBody::TakeFlags()
 void S_HumanBody::SetModelVisible(bool on) { Log(nullptr, "BodySetModelVisible", {double(on)}); }
 
 // The human's members in other files.
-void C_Human::CreateController(E_HumanController type) { Log(this, "CreateController", {double(type)}); }
+// The port's controller object (parts 20b..: the fakes that make a controller install it).
+alignas(16) uint8_t g_portController[0x400];
+void C_Human::CreateController(E_HumanController type)
+{
+    Log(this, "CreateController", {double(type)});
+    m_controller = reinterpret_cast<C_HumanController *>(g_portController);
+}
 const char *C_Human::GetShortName() const { return "shortName"; }
 const char *C_Human::GetFullName() const { return "fullName"; }
 void C_Human::OnHandsChanged() { Log(this, "OnHandsChanged"); }
 void __stdcall C_Human::OnSoundHeard(const S_HeardSound *) {}
-void C_Human::AssignPlayerController(bool active) { Log(this, "AssignPlayerController", {double(active)}); }
+void C_Human::AssignPlayerController(bool active)
+{
+    Log(this, "AssignPlayerController", {double(active)});
+    m_controller = reinterpret_cast<C_HumanController *>(g_portController);
+}
 void C_Human::SetLeader(C_Human *leader) { Log(this, "SetLeader", {double(leader != nullptr)}); }
 bool C_Human::PutOnUniform(int uid)
 {
@@ -386,7 +397,7 @@ void *OrigProfile(const void *port)
             return g_origProfileBytes[i];
     return const_cast<void *>(port);
 }
-alignas(16) uint8_t g_portController[0x400], g_origController[0x400];   // (part 20b)
+alignas(16) uint8_t g_origController[0x400];   // (part 20b; the port's is defined with the fakes above)
 void SelfSide(bool original)
 {
     void *&controller = *reinterpret_cast<void **>(o_human + 0xB0);
@@ -1070,15 +1081,160 @@ void TestSelfMission()
     g_skipWords.erase({"m_scale", 12});
 }
 
+// ---- part 20d: the restarts (single player, co-op, multiplayer)
+
+void ST OR_Reactivate(void *self, int server) { Log(self, "Reactivate", {double(B(server))}); }
+void ST OR_ShowFirstPersonView(void *, int show) { Log(nullptr, "ShowFirstPersonView", {double(B(show))}); }
+void ST OR_FirstPersonRefresh(void *) { Log(nullptr, "FirstPersonRefresh"); }
+// (fastcall in the original: the human in ECX, the flag in DL.)
+void __attribute__((fastcall)) OR_SetHumanVisible(void *human, int hide)
+{
+    Log(human, "SurfaceMarks_SetHumanVisible", {double(B(hide))});
+}
+void ST OR_BodyReset(void *) { Log(nullptr, "BodyReset"); }
+void ST OR_BodySetModelVisible(void *, int on) { Log(nullptr, "BodySetModelVisible", {double(B(on))}); }
+void *ST OR_FindSoldierState(void *, int profileIndex)
+{
+    Log(nullptr, "FindSoldierState", {double(profileIndex)});
+    return nullptr;
+}
+int ST OR_PutOnUniform(void *self, int uid)
+{
+    Log(self, "PutOnUniform", {double(uid)});
+    return 1;
+}
+void ST GE_FadeHuman(void *self, void *human, int time, int in)
+{
+    Log(self, "FadeHuman", {double(human != nullptr), double(time), double(B(in))});
+}
+// The controller a restart makes (each side its own object, of the scripted type) and its SetSpectating.
+void ST OR_CreateController(void *self, int type)
+{
+    Log(self, "CreateController", {double(type)});
+    *reinterpret_cast<void **>(static_cast<uint8_t *>(self) + 0xB0) = g_origController;
+}
+void ST OR_AssignPlayerController(void *self, int active)
+{
+    Log(self, "AssignPlayerController", {double(B(active))});
+    *reinterpret_cast<void **>(static_cast<uint8_t *>(self) + 0xB0) = g_origController;
+}
+void ST CT_SetSpectating(void *self, int on) { Log(self, "ControllerSetSpectating", {double(B(on))}); }
+// The uniform's container and item (their slot 0x40 GetItem: one vtable for both sides; the item's uid at +0x10).
+alignas(16) uint8_t g_uniformContainer[0x80], g_uniformItem[0x80];
+void *g_containerVt[64];
+C_ItemContainer *g_selfContainers[16];
+void *ST IC_GetItem(void *self)
+{
+    Log(self, "ContainerGetItem");
+    return g_self.uniform ? g_uniformItem : nullptr;
+}
+
+void SetUpRestart()
+{
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x00610710, reinterpret_cast<const void *>(OR_Reactivate)},
+        {0x0069a770, reinterpret_cast<const void *>(OR_ShowFirstPersonView)},
+        {0x004922a0, reinterpret_cast<const void *>(OR_FirstPersonRefresh)},
+        {0x0078b5e0, reinterpret_cast<const void *>(OR_SetHumanVisible)},
+        {0x005ab4c0, reinterpret_cast<const void *>(OR_BodyReset)},
+        {0x005ac0f0, reinterpret_cast<const void *>(OR_BodySetModelVisible)},
+        {0x006b76b0, reinterpret_cast<const void *>(OR_FindSoldierState)},
+        {0x005a6930, reinterpret_cast<const void *>(OR_PutOnUniform)},
+        {0x005a3f20, reinterpret_cast<const void *>(OR_CreateController)},
+        {0x005a3e60, reinterpret_cast<const void *>(OR_AssignPlayerController)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    g_origGeVt[0x74 / 4] = reinterpret_cast<void *>(GE_FadeHuman);
+    g_selfGeVt[VSlot(&C_GEffectsModule::FadeHuman)] = reinterpret_cast<void *>(GE_FadeHuman);
+    g_portControllerVt[VSlot(&C_HumanController::SetSpectating)] = reinterpret_cast<void *>(CT_SetSpectating);
+    g_origControllerVt[0x60 / 4] = reinterpret_cast<void *>(CT_SetSpectating);
+    for (void *&slot : g_containerVt)
+        slot = reinterpret_cast<void *>(CT_Unexpected);
+    g_containerVt[0x40 / 4] = reinterpret_cast<void *>(IC_GetItem);
+    g_containerVt[VSlot(&C_ItemContainer::GetItem)] = reinterpret_cast<void *>(IC_GetItem);
+    *reinterpret_cast<void ***>(g_uniformContainer) = g_containerVt;
+    g_selfContainers[ITEM_CONTAINER_UNIFORM] = reinterpret_cast<C_ItemContainer *>(g_uniformContainer);
+    g_names[g_uniformContainer] = "uniformContainer";
+}
+
+// A human to restart: its controller of a scripted type, faded out or not, a uniform or none, a script or none.
+void RandomRestart()
+{
+    RandomMission();
+    C_Human *h = g_h.human;
+    h->m_fadedOut = P(0.3f);
+    h->m_containers = g_selfContainers;
+    g_self.uniform = P(0.5f);
+    const int uid = I(1, 900);
+    reinterpret_cast<C_Item *>(g_uniformItem)->SetUid(uid);
+    std::memcpy(g_uniformItem + 0x10, &uid, 4);
+    // The type of the controller the restart makes (and of the one it had).
+    static const E_HumanController types[] = {HUMAN_CONTROLLER_PLAYER, HUMAN_CONTROLLER_REMOTE, HUMAN_CONTROLLER_ENEMY,
+                                              HUMAN_CONTROLLER_SQUAD};
+    const E_HumanController type = types[I(0, 3)];
+    reinterpret_cast<C_HumanController *>(g_portController)->m_type = type;
+    std::memcpy(g_origController + 0x48, &type, 4);
+    g_firstPerson = P(0.5f);
+    // A player slot or the first id past them; the model switched off sometimes.
+    if (P(0.3f))
+        h->m_netId = C_ActorsModule::PLAYER_SLOTS - 1 + I(0, 1);
+    g_h.frame->SetOn(P(0.7f));
+}
+
+void TestSelfRestart()
+{
+    C_Human *h = g_h.human;
+    std::printf("self restart\n");
+    g_skipFields.insert("m_faceTexture");
+    g_skipWords.insert({"m_scale", 12});
+    for (int i = 0; i < 16000 / QUICK; ++i) {
+        RandomRestart();
+        const bool server = P(0.5f);
+        std::string portFace, origFace;
+        bool portOn = false, origOn = false;
+        const auto faces = [&](bool original) {
+            (original ? origFace : portFace) = original ? OrigStr(o_human + 0xBC) : std::string(h->m_faceTexture.c_str());
+            (original ? origOn : portOn) = g_h.frame->IsOn();
+        };
+        switch (i % 4) {
+        case 0:
+            DiffCall(server ? "RestartSinglePlayer server" : "RestartSinglePlayer",
+                     [&] { h->RestartSinglePlayer(server); faces(false); return 0; },
+                     [&](void *) { OriginalAt<T_UInt>(0x0059c4d0)(o_human, server); faces(true); return 0; });
+            break;
+        case 1:
+            DiffCall("RestartCoop", [&] { h->RestartCoop(); faces(false); return 0; },
+                     [&](void *) { OriginalAt<T_SVoid>(0x0059ca00)(o_human); faces(true); return 0; });
+            break;
+        case 2:
+            DiffCall("RestartMultiplayer", [&] { h->RestartMultiplayer(); faces(false); return 0; },
+                     [&](void *) { OriginalAt<T_SVoid>(0x0059cec0)(o_human); faces(true); return 0; });
+            break;
+        default:
+            DiffCall(server ? "RestartMission server" : "RestartMission",
+                     [&] { h->C_Human::RestartMission(server); faces(false); return 0; },
+                     [&](void *) { OriginalAt<T_UInt>(0x0059d100)(o_human, server); faces(true); return 0; });
+            break;
+        }
+        CHECK(portFace == origFace);
+        CHECK(portOn == origOn);
+    }
+    g_skipFields.erase("m_faceTexture");
+    g_skipWords.erase({"m_scale", 12});
+}
+
 void TestSelf()
 {
     SetUpSelf();
     SetUpUpdate();
     SetUpMission();
+    SetUpRestart();
     TestSelfSkills();
     TestSelfNames();
     TestSelfUpdate();
     TestSelfMission();
+    TestSelfRestart();
 }
 
 }  // namespace

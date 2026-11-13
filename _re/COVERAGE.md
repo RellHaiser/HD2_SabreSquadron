@@ -1887,3 +1887,33 @@ particles and the surface marks. Files are served from memory.
   The first pass left 39; varied start fields, the dummies, the parent, a seat and a missing speech set killed 15.
 - **Harness lessons (my mistakes):** the two stdcall functions I redirected as cdecl (above); and Python edit scripts
   written through bash heredocs collapsed `\n` again, so the scripts are files now.
+
+## Human part 20d (the human's restarts, `human.cpp`, 2026-11-13)
+
+- **The build:** part 20a's. Added:
+  - the fakes that make a controller (CreateController, AssignPlayerController) install each side's controller
+    object, of a scripted type; its SetSpectating is logged (the original's slot 0x60);
+  - logged on both sides: Reactivate, ShowFirstPersonView, the first person view's Refresh, the surface marks'
+    SetHumanVisible (fastcall in the original: the human in ECX, the flag in DL), the body's Reset and
+    SetModelVisible, FindSoldierState (answers none), PutOnUniform, the graphic effects' FadeHuman (slot 0x74);
+  - the uniform's container with GetItem (slot 0x40, one vtable for both sides) and an item whose uid is at +0x10.
+- **The tests (16,000, all exact):** RestartSinglePlayer (client and server), RestartCoop, RestartMultiplayer,
+  RestartMission:
+  - every role and controller type, faded out or not, a script or none;
+  - local, client and server games, co-op or not;
+  - a uniform or none;
+  - a net id at the end of the player slots;
+  - the model switched off.
+
+  The face texture's text and the model's on flag are compared.
+- **Port fixes:** none.
+- **Results:** lines: 97.9 % of the 189 lines of the restarts and SetBodyDetached; human.cpp 59.7 % of 816 so far.
+  Not run:
+  - Setup from a saved soldier's state (part 20e tests Setup itself);
+  - SetBodyDetached bringing a detached body back: its movement's OnFrozen needs the hit spheres only the movement
+    harness sets up (part 5 tests it there).
+- **Mutations** (`human/mutations/mutate_self4.py`): 34 mutants (the restarts repeat most lines); 31 killed, 3
+  survived: Setup from the saved state (2), an equivalent condition (1). The first pass left 6.
+- **Harness lessons (my mistakes):** I defined the port's controller object twice (once with the fakes, once in the
+  test's namespace): the fakes installed one, the side hook compared the other. And the surface marks' call is
+  fastcall, which I first redirected as cdecl.
