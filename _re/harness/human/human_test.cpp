@@ -184,7 +184,9 @@ unsigned g_randSeed = 1;
 C_HumanMovement::C_HumanMovement() {}
 C_HumanMovement::~C_HumanMovement() {}
 #endif
+#ifndef HUMAN_MORPH   // (game/human_morph.cpp's own in HUMAN_MORPH builds)
 C_HumanMorph::C_HumanMorph() {}
+#endif
 C_HumanWork::C_HumanWork() {}
 
 bool C_Human::AdjustToPathHeight(S_vector *pos) const
@@ -226,8 +228,10 @@ void C_HumanAnimMixer::Update(int time) { Log(this, "MixerUpdate", {double(time)
 #endif
 
 void C_HumanEquipment::PutAwayHandsItem(bool putAway) { Log(this, "PutAwayHandsItem", {double(putAway)}); }
+#ifndef HUMAN_MORPH   // (game/human_morph.cpp's own in HUMAN_MORPH builds)
 void C_HumanMorph::SetExhausted(bool start, bool cap) { Log(this, "SetExhausted", {double(start), double(cap)}); }
 void C_HumanMorph::ShowDeathFace() { Log(this, "ShowDeathFace"); }
+#endif
 
 #ifndef HUMAN_BASE   // (the HUMAN_BASE build links game/human_movement_base.cpp: its functions are tested)
 void C_HumanMovement::DamageByContacts(const S_MoveContacts *contacts, const S_CollisionVolume *volume, int time)
@@ -735,6 +739,9 @@ extern int g_lastSeatDeathAnim;
 #ifdef HUMAN_LIGHTING
 #include "lighting_test.inc"
 #endif
+#ifdef HUMAN_MORPH
+#include "morph_test.inc"
+#endif
 
 // A crash: its address and the frame chain (relative to this image; addr2line -e human_test.exe 0x2000xxxx).
 LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
@@ -786,7 +793,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_LIGHTING)
+#if defined(HUMAN_MORPH)
+    TestMorph();
+#elif defined(HUMAN_LIGHTING)
     TestLighting();
 #elif defined(HUMAN_VISUAL)
     TestVisual();

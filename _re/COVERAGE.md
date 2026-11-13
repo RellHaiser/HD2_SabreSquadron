@@ -1416,3 +1416,27 @@ particles and the surface marks. Files are served from memory.
   (boundaries, mode 3's long interval, an uncounted Update, an equivalent first value). 15 survived the first run.
 - **Harness lessons (my mistake):** one more edit script through a bash heredoc with backslashes (it half applied;
   rewritten with the Write tool).
+
+## Human part 13 (the morph, `human_morph.cpp`, 2026-11-12)
+
+- **The build:** `human/build_morph.bat` (HUMAN_MORPH): build_lighting.bat's harness with the morph compiled inside
+  `human/morph_statics.cpp` (its tables of Tables\morph.sav are file-local: the wrapper gives their places),
+  `human/morph_test.inc`'s tests alone (the morph at the movement's +0x610).
+- **The tests (86,666 checks):** Init and Relink, Done, Reset, SetBlinking, SetUnknown1..3, SetExhausted, ShowDeathFace
+  (the camera near and far, the eyes turned), Apply (forced or by the blends under way), Update (blinks, panting,
+  expressions, grips, their ends), UpdateBreathSound (the active player, holding breath, the sound's length and
+  volume), the saved games (the files compared; made-up chunks).
+- **New in the harness:**
+  - both sides' morph tables filled with the same random weights, valid flags and channel flags;
+  - the original's static initialisers of the morph's times (0x00780cb0..0x00780dd0) run in setup;
+  - a morph visual under the model ('SMMR' through its own vtable copy) with its morph interface at +0x120 (COM,
+    stdcall): the weights set logged; the eyes (Leye / Reye) restored for the original's call and their matrices
+    compared; loggers for GetStaminaPercent and IsPlayerHoldingBreath.
+- **Kept out:** ShowDeathFace and Apply without a morph visual (the port's documented fix: the original reads near
+  null).
+- **Results:** every function agrees (86,666 checks, 0 failures); no port bugs. Lines: human_morph.cpp 484 of 491
+  (98.6 %). Not run: loading morph.sav (the tables are filled by the test), Init without a model, a model without eyes.
+- **Mutations** (`human/mutations/mutate_morph1.py`): 435 mutants; 378 killed, 25 not building, 32 survived (classified
+  in its docstring). 50 survived the first run.
+- **Harness lessons (my mistakes):** a no-op placeholder DiffMove written into a test case again (replaced before it
+  ran); clearing the owner before Relink crashed both sides (Relink calls Init with it).

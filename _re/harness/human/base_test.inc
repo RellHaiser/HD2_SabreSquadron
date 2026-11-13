@@ -449,6 +449,7 @@ void LogSoundStop(const void *self, int *slot)
     *slot = -1;
 }
 }  // namespace
+#ifndef HUMAN_MORPH   // (game/human_morph.cpp's own in HUMAN_MORPH builds)
 void C_HumanMorph::Init(C_Human *) { Log(this, "MorphInit"); }
 void C_HumanMorph::Done() { Log(this, "MorphDone"); }
 void C_HumanMorph::SetBlinking(bool on) { Log(this, "SetBlinking", {double(on)}); }
@@ -456,6 +457,7 @@ void C_HumanMorph::Relink(I3D_frame *) { Log(this, "MorphRelink"); }
 void C_HumanMorph::SetUnknown1(int speed) { Log(this, "MorphSetUnknown1", {double(speed)}); }
 void C_HumanMorph::SetUnknown2(int speed) { Log(this, "MorphSetUnknown2", {double(speed)}); }
 void C_HumanMorph::SetUnknown3(int speed) { Log(this, "MorphSetUnknown3", {double(speed)}); }
+#endif
 #ifndef HUMAN_MIXER   // (game/human_anim_mixer.cpp's own in HUMAN_MIXER builds)
 void C_HumanAnimMixer::Relink(I3D_model *, I3D_model *) { Log(this, "MixerRelink"); }
 #endif

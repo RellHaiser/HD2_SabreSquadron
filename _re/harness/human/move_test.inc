@@ -158,9 +158,11 @@ void C_HumanLighting::Update(I3D_frame *frame, int time, int mode)
     Log(this, ("LightingUpdate " + NameOf(frame)).c_str(), {double(time), double(mode)});
 }
 #endif
+#ifndef HUMAN_MORPH   // (game/human_morph.cpp's own in HUMAN_MORPH builds)
 bool C_HumanMorph::SaveGame(C_chunk &) { Log(this, "MorphSaveGame"); return g_mv.partSaves; }
 bool C_HumanMorph::LoadGame(C_chunk &) { Log(this, "MorphLoadGame"); return g_mv.partSaves; }
 void C_HumanMorph::Reset() { Log(this, "MorphReset"); }
+#endif
 #ifndef HUMAN_SPECIAL   // (game/human_special_moves.cpp's own in HUMAN_SPECIAL builds)
 void C_HumanSpecialMoves::Init(C_HumanMovement *m, C_HumanLocomotion *l, C_HumanAnimPlayer *a, C_HumanIdle *i, C_Human *o)
 {

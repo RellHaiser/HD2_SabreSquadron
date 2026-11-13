@@ -11,7 +11,9 @@ bool C_HumanEquipment::ShowHandsItem(bool show, int unused, bool toggle)
 }
 void C_HumanEquipment::Unknown7938f0(int arg) { Log(this, "Unknown7938f0", {double(arg)}); }
 void C_HumanEquipment::UpdateLensFlare(bool on) { Log(this, "UpdateLensFlare", {double(on)}); }
+#ifndef HUMAN_MORPH   // (game/human_morph.cpp's own in HUMAN_MORPH builds)
 void C_HumanMorph::Update(int time) { Log(this, "MorphUpdate", {double(time)}); }
+#endif
 void C_HumanWeaponPose::FitProneBody() { Log(this, "FitProneBody"); }
 void C_HumanWork::SetViewDir(const S_vector &dir) { LogV(this, "SetViewDir", &dir.x, 3); }
 namespace {
