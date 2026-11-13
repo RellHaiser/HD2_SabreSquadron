@@ -372,11 +372,12 @@ void C_HumanWeaponPose::BendJoint(int index, const S_vector &dir, float weight)
     const S_vector toJoint = bone.frame->GetWorldPos() - upper->frame->GetWorldPos();
     const S_vector along = axis * toJoint.Dot(axis);
     const S_vector perp = toJoint - along;
+    // (The SDK's tests: below 1e-8 as an integer compare; a NaN takes the square root.)
     const float perpSq = perp.Square();
-    if (perpSq < 1e-8f)
+    if (PoseBelowEpsilon(perpSq))
         return;
     float perpLength = 1.0f;
-    if (std::fabs(perpSq - 1.0f) >= 1e-8f) {
+    if (!(std::fabs(perpSq - 1.0f) < 1e-8f)) {
         perpLength = std::sqrt(perpSq);
         if (perpLength < 1e-8f)
             return;
@@ -384,10 +385,10 @@ void C_HumanWeaponPose::BendJoint(int index, const S_vector &dir, float weight)
     const S_vector wanted = dir - axis * axis.Dot(dir);
     const S_vector mixed = wanted * weight + perp * (1.0f - weight);
     const float mixedSq = mixed.Square();
-    if (mixedSq < 1e-8f)
+    if (PoseBelowEpsilon(mixedSq))
         return;
     float mixedLength = 1.0f;
-    if (std::fabs(mixedSq - 1.0f) >= 1e-8f) {
+    if (!(std::fabs(mixedSq - 1.0f) < 1e-8f)) {
         mixedLength = std::sqrt(mixedSq);
         if (mixedLength < 1e-8f)
             return;
@@ -612,14 +613,15 @@ static void SolveChainBone(const S_PoseChain &chain, S_PoseBone *bone)
                       (axes & POSE_AXIS_Z) ? cross.z : 0.0f);
         axis *= limit->stiffness;
         const float sq = axis.Square();
-        if (sq < 1e-8f)
+        if (PoseBelowEpsilon(sq))
             continue;
         // sin of the angle (axis is the cross product of unit vectors), at most 1; an axis
-        // longer than 1 (stiffness over 1) is left as it is.
+        // longer than 1 (stiffness over 1) is left as it is. (A NaN takes the square root and
+        // is skipped there, as the original's tests have it.)
         float length = 1.0f;
-        if (std::fabs(sq - 1.0f) >= 1e-8f) {
+        if (!(std::fabs(sq - 1.0f) < 1e-8f)) {
             length = std::sqrt(sq);
-            if (length <= 1e-8f)
+            if (!(length > 1e-8f))
                 continue;
             if (length > 1.0f)
                 length = 1.0f;
@@ -647,7 +649,7 @@ static void SolveChainBone(const S_PoseChain &chain, S_PoseBone *bone)
 
 // 0x007a6c40: up to `iterations` passes until every effector is within 1 cm of its target;
 // when they did not get there and `moveRoot`, the pelvis moves by the average miss. Returns
-// the passes made (the original returns `this` after moving the pelvis).
+// the passes made.
 int C_HumanWeaponPose::SolveChain(S_PoseChain &chain, int iterations, bool moveRoot)
 {
     int pass = 0;

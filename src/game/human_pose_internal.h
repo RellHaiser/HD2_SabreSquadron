@@ -64,16 +64,29 @@ inline float PoseUnset()
 // The original's sign tests of float bits (-0 counts as negative).
 inline bool PoseIsNegative(float value) { return std::signbit(value); }
 
+// A dot product summed z first, (a.z b.z + a.y b.y) + a.x b.x, as the original's inline copies in the holds and
+// UpdateFree sum it: the rounding decides their clamps' branches for aims straight up, down or back.
+inline float PoseDotZYX(const S_vector &a, const S_vector &b) { return (a.z * b.z + a.y * b.y) + a.x * b.x; }
+
 // The direction of `v` in the axes of `m` (dotted with its rows).
 inline S_vector PoseIntoAxes(const S_matrix &m, const S_vector &v)
 {
     return S_vector(v.Dot(m(0)), v.Dot(m(1)), v.Dot(m(2)));
 }
 
+// The SDK's "below 1e-8" test of a squared length as the original inlines it: an integer compare of the float's bits
+// (CMP ...,0x322bcc77 / SETL), so a NaN with its sign bit set (the x87's and SSE's default NaN) counts as below.
+inline bool PoseBelowEpsilon(float squared)
+{
+    int32_t bits;
+    std::memcpy(&bits, &squared, sizeof(bits));
+    return bits < 0x322BCC77;
+}
+
 // The SDK's magnitude test as the original inlines it: 0 below 1e-8, exactly 1 for unit lengths.
 inline float PoseMagnitude(float squared)
 {
-    if (squared < 1e-8f)
+    if (PoseBelowEpsilon(squared))
         return 0.0f;
     if (std::fabs(squared - 1.0f) < 1e-8f)
         return 1.0f;

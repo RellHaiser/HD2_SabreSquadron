@@ -1440,3 +1440,179 @@ particles and the surface marks. Files are served from memory.
   in its docstring). 50 survived the first run.
 - **Harness lessons (my mistakes):** a no-op placeholder DiffMove written into a test case again (replaced before it
   ran); clearing the owner before Relink crashed both sides (Relink calls Init with it).
+
+## Human part 14 (the work, `human_work.cpp`, 2026-11-13)
+
+- **The build:** `human/build_work.bat` (HUMAN_WORK): build_morph.bat's harness with the work linked,
+  `human/work_test.inc`'s tests alone. Everything the work reaches is real on both sides now (the movement, the mixer,
+  the animation player, the special moves, the idle, the visual, the lighting, the morph); the original's work, which
+  parts 1-11 redirected to loggers, runs again. The work's words are compared after every call (o_work).
+- **The tests (130,434 checks):** every entry, 23 in all: SetMovement, SetGroup, Reset, Update (deaths through the
+  special moves, the special moves' climbs and sitting, stance and gait changes, the carry animations of every action
+  with empty and full hands, the pick-up and carrying states, hit reactions, interactions passed on to the idle),
+  SetStanceTimer, UpdateStanceTimer, GetViewDir, Play (every work mode: ladders, seats, swimming), PlayWorkAnimation,
+  SetStance, SetGait, SetLookAt, SetCarryMode, DoAction, SetUnknown5C, SetFacingDir, SetViewDir, SetWorkingFrame / 2,
+  ApplyHit, Interact, SetLook, the saved games (the files compared; made-up chunks).
+- **New in the harness:** the work's fakes of parts 1-11 off in this build; loggers for the weapon pose's SetViewDir,
+  OnHit and SetLook, the first person view's SetPose, the equipment's GetHandsProjectileKind; the locomotion's and the
+  special moves' links set (part 3's Init test leaves the locomotion's cleared); the working frames' references
+  compared.
+- **Undefined in the original, not compared:** the facing's w (+0x2C) and the pads after the hit's force and position
+  (+0x7C, +0x8C): the original copies the 4 bytes after the vectors it is given (the port's documented fixes).
+- **Kept out:** a morph without its visual in a death (part 13's documented fix).
+- **Results:** every function agrees (130,434 checks, 0 failures); no port bugs. Lines: human_work.cpp 629 of 639
+  (98.4 %). Not run: a remote human taking its hands item (no items).
+- **Mutations** (`human/mutations/mutate_work1.py`): 419 mutants; 363 killed, 28 not building, 28 survived (classified
+  in its docstring). 30 survived the first run.
+- **Harness lessons (my mistakes):**
+  - the death's seed was not synced in these tests: the port's is clock() % 100 at start-up, the original's 0, so the
+    dying animations agreed only when the start-up was quick. The slower coverage build showed 98 differences; the
+    tests now set both and check them after each update;
+  - my random state copied the request into the movement's record whole, so the update always dropped the action
+    and the actions with a hands item never ran until coverage showed it;
+  - the first mutation run was started with the morph's MUT_WRAPPER still set, which rebuilds the wrapper instead of
+    the mutated file (every mutant would have "survived"); stopped and rerun without it.
+
+## Human part 15 (the weapon pose's skeleton and chains, `human_pose_ik.cpp`, 2026-11-13)
+
+- **The build:** `human/build_ik.bat` (HUMAN_IK): build_base.bat's harness, `human/ik_test.inc`'s tests alone. A model of
+  23 jointed bone frames, each under its parent bone as the human models have them (the ragdoll's standing places),
+  bound the way BindSkeleton binds it (the port's AddBone, SetLimitAxes, SetLimitStiffness, PoseAimZ; BindSkeleton itself
+  is part 19's). The pose is shared and compared word by word; the bone frames' world and local matrices, rotations,
+  scales and flags too.
+- **The tests (63,005 checks):**
+  - the matrix helpers from random input (24,000): PoseTransposed, TurnedAround, Orthonormalize, AimZ (with an axis
+    exactly along the direction, a skewed matrix), FrameFromZ (straight up / down), FrameFromZ rolled, FrameFromZX,
+    RotationBetween (nearly parallel and opposite: the reflection), TurnZTo / TurnYTo, GetRoll, SlerpDir (the dot past
+    1, parallel, opposite);
+  - the skeleton (24,000): AddBone (out of range, a parent's three children taken), SetLimitAxes, SetLimitStiffness,
+    AimBone (out of range, the pelvis under the model, weights negative, -0, 0..1), SetHandRotations (null hands, other
+    frames), SetHandMatrices, BendJoint (any bone, the joint on its limb's line, the direction along it), ClearChains;
+  - the chains (40,000 rounds): BuildChain (no effectors), RefreshChain, SolveChain (a pass), ApplyChain, from random
+    chains as the seats make them (the spine to the hands and the neck) and others (other roots, the feet, the head,
+    the elbows; weights; stiffness over 1; limits changed), the model somewhere and turned, the bones bent, the world
+    matrices up to date or not, the pelvis locked; whole solves one pass at a time from the port's state; the seats'
+    sequence over three updates.
+- **Judged by their rates (the float rounding grows):** single passes 99.95 % (71,954 of 71,955; 2 or 3 in 72,000
+  differ by 3e-4..1.3e-3 in a word, not traced: presumably ill-conditioned passes), the seats' sequence 99 %, whole
+  16-pass solves 97 % and three of them 88 % (0 differences after one pass in 6,667 solves, 2 after two, 36 after five,
+  150 after sixteen: the rounding grows with the passes).
+- **Undefined in the original, not compared:** the solved matrices' m[3][3] (ComputeSolved's own-joint branch copies
+  the tip into row 3 as 16 bytes from a stack temp whose w it never stores, 0x007a6634); the frames' scale w (+0xDC: the
+  inline SetLocalMatrix copies GetScale's 12-byte result as 16 bytes).
+- **Port fixes (on main):**
+  - SolveChain's comment claimed the original returns `this` after moving the pelvis: it returns the passes, as the
+    port does (comment corrected);
+  - the SDK's "below 1e-8" test is an integer compare of the float's bits in the original (CMP ...,0x322bcc77): a
+    negative NaN counts as below; and a NaN takes the square root in its unit test, then fails the length test. The
+    port's float compares sent a NaN the other way in BendJoint (twice) and SolveChainBone (found by part 16's tests,
+    where a NaN aim reached the same test in TurnBone): PoseBelowEpsilon and NaN-aware compares now.
+- **Results:** every function agrees; lines: human_pose_ik.cpp 99.1 % of 545. Not run: the length tests after a square
+  root of at least 1e-8 (unreachable but for a positive NaN), LinkChain's dead ends (a pin's bone always in the tree).
+- **Mutations** (`human/mutations/mutate_ik1.py`): 520 mutants; 407 killed, 48 not building, 65 survived (equivalent
+  ones, exact float boundaries; classified in its docstring).
+- **Harness lessons (my mistakes):**
+  - the original's PoseSlerpDir reads and writes whole S_vector4s; my first test passed a 12-byte output, which the
+    original overran into the port's result next to it at -O0 (the coverage build's 1,669 failures);
+  - I wrote two edits through bash heredocs with backslashes again (a `\n` became a line break; caught at once).
+
+## Human part 16 (the weapon in the hands and its holds, `human_pose_weapon.cpp`, `human_pose_hold.cpp`, 2026-11-13)
+
+- **The build:** `human/build_weapon.bat` (HUMAN_WEAPON): build_ik.bat's harness with the two files linked,
+  `human/weapon_test.inc`'s tests alone. On part 15's skeleton: the hand dummies hw1 / hw2 under the hands, a third
+  person camera dummy, six weapon models (grips "LW" / "RW" and a stock "BUTT" or not), animation sets for the arms'
+  activities (FindTrack, the position and rotation keys logged), the frames' SetWorldDir (slot 0x1C, logged). The pose's
+  owner is each side's own human; the frames' matrices, flags, links and reference counts are compared.
+- **The tests (87,006 checks):**
+  - the arms (30,000): SolveTwoBone (reachable or not, hints, the joint compared), TurnBone, TurnBoneAbout, AimWeapon
+    (the hands, the placing, the stock to the shoulder), ReachArm (left / right, hints);
+  - the modes (40,000): InitHands, SetModel (any weapon, none, the same), SetMode (0, 1, 2, others), SetSupportHand,
+    RaiseWeapon, LowerWeapon, PauseWeapon, PauseHands, SetViewDir (the same and the opposite view), StartRecoil,
+    PlayActivity, ApplyAnimation (bones without tracks, keys at the same time, one or no key), UpdateActivity;
+  - the holds (48,000): UpdateGrip, UpdateRecoil, and judged by their rates (99.5 %; they agree in 99.65..100 %):
+    UpdateHold, UpdateFree, HoldStanding, HoldCrouching, HoldSeated, HoldProne, from states with every stance, speeds
+    from still to running, pistols and rifles, the support hand, aims anywhere (straight up, down and back too), no owner.
+    The holds chain a dozen turns and slerps and some states are ill-conditioned: moving the aim by 1e-7 alone moves the
+    port's own result past the tolerance in about 0.2 % of them (`WEAPON_SENS`), the rate the sides differ at.
+- **Undefined in the original, not compared:** the w of the hand targets, the weapon's direction, the aim and the hands'
+  offsets (stack temps copied as 16 bytes); the weapon frames' m[3][3] (AimWeapon's row 3 from a temp, 0x007c0d94: the
+  port's 1); the prone normals' w. Hand values 2 and 3 stay out of the holds: SetMode never sets them, and HoldProne's
+  direction starts undefined for them in the original.
+- **Port fixes (on main):**
+  - SetViewDir summed its dot product x first; the original sums z first (0x007b9391), and the rounding decides its
+    "at once" test for views along the aim;
+  - the activity time advanced in double; the original rounds the product and the sum to float (0x007b0122): a
+    millisecond short in a fifth of the updates;
+  - WeightedTurn (TurnBone, TurnBoneAbout) and SolveTwoBone took the SDK's tests as float compares: the original's
+    "below 1e-8" is an integer compare and a NaN takes the square root and then fails the length test (a turn of zero
+    length with no time passed made a NaN aim: the port turned the bones by it, the original left them);
+  - the holds' clamps (ClampAim twice, HoldProne three times) tested `s <= 1e-8`; the original jumps to that branch on
+    "<= or unordered" (0x007bd52a): an aim straight up or down gave the port a NaN aim (7.5 % of such holds differed);
+  - ClampAim's, HoldProne's and UpdateFree's dot products are summed z first and the speed x first, as the original's.
+- **Results:** every function agrees; lines: human_pose_weapon.cpp 99.8 % of 565, human_pose_hold.cpp 98.5 % of 202.
+  Not run: WeightedTurn's length test after a square root (a positive NaN only), HandAxis for hands 2 and 3, the
+  speed without an owner (its callers test the owner first).
+- **Mutations** (`human/mutations/mutate_weapon1.py`, `_weapon2.py`): human_pose_weapon.cpp 537 mutants, 436 killed, 39
+  not building, 62 survived; human_pose_hold.cpp 151, 124 killed, 10 not building, 17 survived (equivalent ones, exact
+  boundaries, and one that only moves a hold's rate: judging by rates lets a change in a rare branch through; classified
+  in their docstrings).
+- **Harness lessons (my mistakes):**
+  - my rule taking the pose's floats below 1e-6 as equal (added in this part, committed with part 15's harness) read
+    small integers, flags and pointers as tiny floats: the stance, the hands, times and the weapon pointers were not
+    compared in this part's tests until a full-strength mutation rerun killed none of 147 survivors and I checked one
+    by hand. My first fix (exponent of at least 2^-67) still let the harness image's pointers through (they read as
+    1e-19); now only words with an exponent of at least 2^-55 count. InitHands' resets also had no random states to
+    reset. The tests and the survivors ran again (68 more killed);
+  - two more edits through bash heredocs with backslashes (caught by Python's escape warning and a check), and a sed
+    edit that turned human_pose_hold.cpp's line endings to LF (put back).
+
+## Human part 17 (the prone body, the head and the seats, `human_pose_body.cpp`, `human_pose_seats.cpp`, 2026-11-13)
+
+- **The build:** `human/build_body.bat` (HUMAN_BODY): build_weapon.bat's harness with the two files linked,
+  `human/body_test.inc`'s tests alone. Vehicles: a car with a steering wheel ("LWC" / "RWC") and seat weapon grips
+  ("LWS" / "RWS"), a car without the wheel's grips, a static weapon with grips and one without; each a port object
+  and an original-layout block (type +0x18, frame +0x20, a car's velocity +0x4A0) with its own vtable (GetSeatCount,
+  HasSeatWeapon, GetSeatWeaponAim with its hidden return pointer, GetSeatWeaponLimits; logged), the pose's vehicle
+  pointer translated per side; C_Vehicle::SetSteering logged on both sides. The human's model follows the skeleton's
+  (its lying dummies give the prone spheres), its stance dummies bound as on every model.
+- **The tests (46,005 checks):**
+  - FitProneBody (12,000): the skeleton lying along the model (or standing: the fit gives up), the fit unset, settling,
+    blending, the tests on odd updates, moved or turned since the last fit, over the test world's ground;
+  - the head (40,000): SetLook (every request, a missing point), PickGlance (every side, quick, nervous, once),
+    UpdateHeadLook (looking at a point, glancing, returning, the aim's look while holding), TurnHead;
+  - the seats (40,000): SetSeat (in and out, every vehicle and seat flag, from the steering), UpdateSteering (the
+    wheel turned past 60 degrees either way), UpdateSeat (a seat weapon or only the neck), UpdateStaticWeapon (with
+    the gunner poses or without, aims across the weapon's limits, a grip lost), SetSeatWeaponPose.
+- **Judged by their rates:** the seats' updates solve 16-pass chains (95 %; they agree in 96.4..99.0 %); UpdateHeadLook
+  and FitProneBody (99.9 %; they agree in 99.97 % and 99.99 %). **Not traced:** those head looks all turn the head
+  back towards its own direction (LOOK_RETURNING) through the clamps, differing by up to 0.2; the port's TurnHead aimed
+  at where the original's head ended up reproduces it in some of them and not in others; the sums' groupings, the
+  clamps, the slerp and LS3DF's RotateByMatrix were checked against the original and agree.
+- **Undefined in the original, not compared:** the w of the effectors' targets, the accelerations, the look's
+  direction, start and end, the prone buffers' vectors; the gunner positions' w.
+- **Port fixes (on main):**
+  - the clamps of NotSteeper, KeepForward and the look at a point took `s <= 1e-8`; the original takes that branch on
+    a NaN too (0x007ad659 and others), and KeepForward returns a NaN direction unclamped;
+  - SetLook's and UpdateHeadLook's directions into axes summed x first; the original groups them (y + z) + x, and
+    normalises the direction to the point with the square summed z first;
+  - Capped (the neck's sway) took the SDK's tests as float compares (the integer "below 1e-8", NaN returned);
+  - UpdateStaticWeapon's aim in the weapon's axes summed x first; the original groups (y + z) + x.
+- **Results:** lines: human_pose_body.cpp 96.8 % of 412, human_pose_seats.cpp 99.7 % of 315. Not run: NotSteeper and the
+  look's clamp for exactly vertical normals, KeepForward's clamps of components past 1 (unit inputs only), the zero
+  direction to a point at the head, the velocity of a seat in a vehicle other than a car (the game never has one).
+- **Harness limit:** the original's C runtime was never started in the harness: an acos of a value past 1 sets errno,
+  whose per-thread block it cannot allocate (a crash in calloc). The static weapon's aims are kept off its up axis by
+  1e-5; in the game such an acos returns a NaN and goes on.
+- **Mutations** (`human/mutations/mutate_body1.py`, `_body2.py`): human_pose_body.cpp 467 mutants, 333 killed, 31 not
+  building, 103 survived; human_pose_seats.cpp 264, 198 killed, 23 not building, 43 survived. Many survivors are paths
+  the tests' inputs do not reach (unit directions only, exact boundaries) or that the rate-judged updates absorb; one
+  finding: a static weapon's aim in the left half never blends its poses (the turn is clamped to 0 there, in the
+  original too), so mutants there change nothing. Classified in their docstrings.
+- **Harness lessons (my mistakes):**
+  - my first vehicle fakes assumed the port's C_Actor and C_Car have the original's layout (they do not: static
+    asserts caught it); then port and original objects per side;
+  - random states the game never makes crashed both sides or the port: steering without a vehicle, a body fit without
+    an owner, a static weapon's update without its vehicle; the stance dummies left unbound gave both sides garbage
+    spheres (uninitialised stack);
+  - my scratch copy of human_test.cpp in the scratchpad picked up an old body_test.inc of another session (quoted
+    includes search the including file's directory first).

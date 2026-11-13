@@ -192,6 +192,22 @@ void AddContact(const char *name, int type, const S_vector &at, const S_vector &
 bool g_softDiff = false;
 // Words of the weapon pose not compared (byte offsets: undefined ones the original writes).
 std::set<size_t> g_poseSkipWords;
+// The pose's floats both below 1e-6 count as equal (its matrices' and directions' near-zero entries: their rounding is no
+// relative error; the usual word comparison takes floats below 2^-40 as non-floats and compares them exactly).
+// (Only words that read as floats: zero or an exponent of at least 2^-55, 2.8e-17. Small integers, flags and pointers
+// read as denormals or as floats below 1e-18: heap and stack ones below 1e-37, the harness image's, 0x20xxxxxx, near
+// 1e-19. The rounding noise these are for is 1e-13..1e-16.)
+bool g_poseTinyFloats = false;
+bool TinyFloats(uint32_t x, uint32_t y)
+{
+    const auto floatish = [](uint32_t w) { return (w & 0x7FFFFFFFu) == 0 || ((w >> 23) & 0xFF) >= 72; };
+    if (!floatish(x) || !floatish(y))
+        return false;
+    float a, b;
+    std::memcpy(&a, &x, 4);
+    std::memcpy(&b, &y, 4);
+    return std::fabs(a) < 1e-6f && std::fabs(b) < 1e-6f;
+}
 // More of each side's view (the ragdoll's pose: its owner and movement); called with the contacts.
 void (*g_sideHook)(bool original);
 // Each side's view of the frames' data.
@@ -433,10 +449,16 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
             uint32_t x, y;
             std::memcpy(&x, port.data() + i, 4);
             std::memcpy(&y, orig + i, 4);
-            if (orig == g_h.pose && g_poseSkipWords.count(i))
+            if (orig == g_h.pose && (g_poseSkipWords.count(i) || (g_poseTinyFloats && TinyFloats(x, y))))
                 continue;
-            if (!WordsNear(x, y, 'm'))
-                return std::string(name) + "+" + std::to_string(i);
+            if (!WordsNear(x, y, 'm')) {
+                float a, b;
+                std::memcpy(&a, &x, 4);
+                std::memcpy(&b, &y, 4);
+                char values[96];
+                std::snprintf(values, sizeof values, " (port %08x %g original %08x %g)", x, a, y, b);
+                return std::string(name) + "+" + std::to_string(i) + values;
+            }
         }
         return "";
     };

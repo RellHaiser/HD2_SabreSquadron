@@ -149,6 +149,14 @@ SUITES = [
     T("human.lighting", "human/build_lighting.bat", TMP + r"\human_lighting_test.exe", needs=("mingw", "original_exe")),
     # (The morph, game/human_morph.cpp through morph_statics.cpp: human/build_morph.bat, HUMAN_MORPH.)
     T("human.morph", "human/build_morph.bat", TMP + r"\human_morph_test.exe", needs=("mingw", "original_exe")),
+    # (The work, game/human_work.cpp: human/build_work.bat, HUMAN_WORK.)
+    T("human.work", "human/build_work.bat", TMP + r"\human_work_test.exe", needs=("mingw", "original_exe")),
+    # (The weapon pose's skeleton and chains, game/human_pose_ik.cpp: human/build_ik.bat, HUMAN_IK.)
+    T("human.ik", "human/build_ik.bat", TMP + r"\human_ik_test.exe", needs=("mingw", "original_exe")),
+    # (The weapon in the hands and its holds, game/human_pose_weapon.cpp and _hold.cpp: human/build_weapon.bat, HUMAN_WEAPON.)
+    T("human.weapon", "human/build_weapon.bat", TMP + r"\human_weapon_test.exe", needs=("mingw", "original_exe")),
+    # (The prone body, the head and the seats, game/human_pose_body.cpp and _seats.cpp: human/build_body.bat, HUMAN_BODY.)
+    T("human.body", "human/build_body.bat", TMP + r"\human_body_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

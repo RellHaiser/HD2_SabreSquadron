@@ -38,7 +38,7 @@ S_vector NotSteeper(S_vector n, float minY, float xz)
 {
     if (n.y < minY) {
         const float s = std::sqrt(1.0f - n.y * n.y);
-        if (s <= 1e-8f) {
+        if (!(s > 1e-8f)) {
             n.x = xz;
             n.z = 0.0f;
         } else {
@@ -301,10 +301,35 @@ void C_HumanWeaponPose::FitProneBody()
 
 namespace {
 
-// A direction in the axes of `m` (its 3x3 part).
+// A direction in the axes of `m` (its 3x3 part), each product summed (y + z) + x as the original's inline copies in
+// SetLook and UpdateHeadLook sum them (the rounding decides KeepForward's clamps at +-1).
 S_vector IntoAxes(const S_vector &v, const S_matrix &m)
 {
-    return S_vector(v.Dot(m(0)), v.Dot(m(1)), v.Dot(m(2)));
+    const auto dot = [&](int r) { return (v.y * m.m[r][1] + v.z * m.m[r][2]) + v.x * m.m[r][0]; };
+    return S_vector(dot(0), dot(1), dot(2));
+}
+
+// The same summed (z + y) + x (the point looked at, 0x007ad427).
+S_vector IntoAxesZYX(const S_vector &v, const S_matrix &m)
+{
+    const auto dot = [&](int r) { return (v.z * m.m[r][2] + v.y * m.m[r][1]) + v.x * m.m[r][0]; };
+    return S_vector(dot(0), dot(1), dot(2));
+}
+
+// The SDK's Normalize with the square summed (z + y) + x and a NaN scaled (as UpdateHeadLook inlines it, 0x007ad2fb).
+void NormalizeZYX(S_vector &v)
+{
+    const float sq = (v.z * v.z + v.y * v.y) + v.x * v.x;
+    if (std::fabs(sq - 1.0f) < 1e-8f)
+        return;
+    if (!(sq < 1e-8f))
+        v *= 1.0f / std::sqrt(sq);
+    else if (v.x != 0.0f)
+        v.x = v.x >= 0.0f ? 1.0f : -1.0f;
+    else if (v.z != 0.0f)
+        v.z = v.z >= 0.0f ? 1.0f : -1.0f;
+    else
+        v.y = v.y >= 0.0f ? 1.0f : -1.0f;
 }
 
 // The head's direction in the chest's axes kept forward: x and y within [-1, 1], z at least
@@ -325,10 +350,10 @@ S_vector KeepForward(S_vector c, float minZ, float xy)
     }
     if (c.z < -1.0f)
         c.z = -1.0f;
-    else if (c.z >= minZ)
+    else if (!(c.z < minZ))                             // (a NaN returned as it is, as the original's test has it)
         return c;
     const float s = std::sqrt(1.0f - c.z * c.z);
-    if (s <= 1e-8f) {
+    if (!(s > 1e-8f)) {
         c.x = xy;
         c.y = 0.0f;
     } else {
@@ -534,8 +559,8 @@ void C_HumanWeaponPose::UpdateHeadLook(int time)
             }
         }
         S_vector d = PoseXYZ(m_lookAt) - m_bones[POSE_BONE_HEAD].frame->GetWorldPos();
-        d.Normalize();
-        PoseSetXYZ(m_lookTo, IntoAxes(d, model->GetMatrix()));
+        NormalizeZYX(d);
+        PoseSetXYZ(m_lookTo, IntoAxesZYX(d, model->GetMatrix()));
     }
     const float w = LookEase(m_lookTime, m_lookLength, m_lookPower);
     m_lookWeight = w;
@@ -544,7 +569,7 @@ void C_HumanWeaponPose::UpdateHeadLook(int time)
     S_vector c = KeepForward(IntoAxes(v, chest->GetMatrix()), 0.707f, 0.707f);
     if (c.y < -0.342f) {
         const float s = std::sqrt(1.0f - c.y * c.y);
-        if (s <= 1e-8f) {
+        if (!(s > 1e-8f)) {
             c.x = 0.0f;
             c.z = 0.9396f;
         } else {

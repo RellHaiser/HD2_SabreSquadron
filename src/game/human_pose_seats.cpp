@@ -40,16 +40,17 @@ S_vector MirrorAbout(const S_matrix &grip, const S_vector &point)
     return grip(3) + grip(3) - point;
 }
 
-// `v` scaled down to `max` when longer.
+// `v` scaled down to `max` when longer. (The SDK's tests as the original inlines them, 0x007af436: below 1e-8 as an
+// integer compare; a NaN takes the square root and is returned as it is.)
 S_vector Capped(S_vector v, float max)
 {
     const float sq = v.Square();
-    if (sq < 1e-8f)
+    if (PoseBelowEpsilon(sq))
         return v;
     float length = 1.0f;
-    if (std::fabs(sq - 1.0f) >= 1e-8f) {
+    if (!(std::fabs(sq - 1.0f) < 1e-8f)) {
         length = std::sqrt(sq);
-        if (length <= max)
+        if (!(length > max))
             return v;
     }
     return v * (max / length);
@@ -329,9 +330,10 @@ void C_HumanWeaponPose::UpdateStaticWeapon()
         PoseSetXYZ(m_aimDir, m_vehicle->GetSeatWeaponAim(m_seat));
         // The aim in the weapon's axes.
         const S_vector aim = PoseXYZ(m_aimDir);
-        const float x = aim.Dot(m_vehicle->GetFrame()->GetMatrix()(0));
-        const float y = aim.Dot(m_vehicle->GetFrame()->GetMatrix()(1));
-        const float z = aim.Dot(m_vehicle->GetFrame()->GetMatrix()(2));
+        // (Summed z first, as the original: the turn's and the pitch's tests at +-1 and 0 depend on the rounding.)
+        const float x = PoseDotZYX(aim, m_vehicle->GetFrame()->GetMatrix()(0));
+        const float y = PoseDotZYX(aim, m_vehicle->GetFrame()->GetMatrix()(1));
+        const float z = PoseDotZYX(aim, m_vehicle->GetFrame()->GetMatrix()(2));
         float up = 0.0f;
         float down = 0.0f;
         float left = 0.0f;

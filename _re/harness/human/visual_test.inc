@@ -15,7 +15,9 @@ void C_HumanEquipment::UpdateLensFlare(bool on) { Log(this, "UpdateLensFlare", {
 void C_HumanMorph::Update(int time) { Log(this, "MorphUpdate", {double(time)}); }
 #endif
 void C_HumanWeaponPose::FitProneBody() { Log(this, "FitProneBody"); }
+#ifndef HUMAN_WORK   // (game/human_work.cpp's own in HUMAN_WORK builds)
 void C_HumanWork::SetViewDir(const S_vector &dir) { LogV(this, "SetViewDir", &dir.x, 3); }
+#endif
 namespace {
 #define VT __attribute__((thiscall))
 int VT OV_ShowHandsItem(void *self, int show, int unused, int toggle)
