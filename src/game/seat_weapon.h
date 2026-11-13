@@ -225,7 +225,7 @@ enum : int {
 // A shot of a seat weapon (type 0; vtable 0x008105e0, 0x60 bytes): a client's to the server, which
 // fires it and sends it on. The type (3 bits), the seat (3), the barrel (2); a client's also the
 // direction (the floats' bits) and the position (quantised with the sender's settings).
-class C_SeatWeaponShotMessage : public C_NetObjectMessage {
+class C_SeatWeaponShotMessage : public C_NetObjectMessage {   // deleting dtor and dtor: 0x004c1420 (DS 0x004a8330), 0x004c1440 (DS 0x004a8360)
 public:
     C_SeatWeaponShotMessage() : C_NetObjectMessage(SEAT_WEAPON_MSG_SHOT) {}
     void Write(C_BitStream *stream) override;           // 0x004c1760
@@ -239,7 +239,7 @@ public:
 
 // A reload of a seat weapon (type 1; vtable 0x00810608, 0x34 bytes), likewise: the type (3 bits), the
 // seat (3).
-class C_SeatWeaponReloadMessage : public C_NetObjectMessage {
+class C_SeatWeaponReloadMessage : public C_NetObjectMessage {   // deleting dtor and dtor: 0x004c1480 (DS 0x004a83d0), 0x004c14a0 (DS 0x004a8400)
 public:
     C_SeatWeaponReloadMessage() : C_NetObjectMessage(SEAT_WEAPON_MSG_RELOAD) {}
     void Write(C_BitStream *stream) override;           // 0x004c1920
@@ -250,7 +250,7 @@ public:
 
 // The weapon's rounds as the server sends them to the clients (type 2; vtable 0x00810680, 0x38
 // bytes; queued on the car's net object by C_Car::SetSeatOccupant).
-class C_SeatWeaponRoundsMessage : public C_NetObjectMessage {
+class C_SeatWeaponRoundsMessage : public C_NetObjectMessage {   // deleting dtor and dtor: 0x004c16a0 (DS 0x004a86c0), 0x004c16c0 (DS 0x004a86f0)
 public:
     C_SeatWeaponRoundsMessage() : C_NetObjectMessage(SEAT_WEAPON_MSG_ROUNDS) {}
     // The type (3 bits), the seat (3), the rounds (10).

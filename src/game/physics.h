@@ -254,7 +254,7 @@ private:
 };
 
 // Type 4: falling debris (0x180 bytes).
-class C_PhysFallingObject : public C_PhysObject {           // vtable 0x0080f5b0
+class C_PhysFallingObject : public C_PhysObject {           // vtable 0x0080f5b0; deleting dtor and dtor: 0x0040be40 (DS 0x00427e90), 0x0040be60 (DS 0x00427ec0)
 public:
     C_PhysFallingObject(I3D_frame *frame, S_PhysicsHandle *handle);   // 0x0040bd70
     bool Tick(float dt) override;                           // 0x0040b910
