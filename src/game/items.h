@@ -324,7 +324,7 @@ private:
 
 class C_MedkitItem : public C_Item {                    // vtable 0x00816fc8, 0x2C bytes
 public:
-    C_MedkitItem() : C_Item(ITEM_KIND_MEDKIT) {}        // 0x007d45b0
+    C_MedkitItem() : C_Item(ITEM_KIND_MEDKIT) {}        // 0x007d45b0 (DS 0x0080d9b0)
 
     void Init(int typeId) override;                     // 0x007d4640
     void Consume(float amount) override;                // 0x007d45d0

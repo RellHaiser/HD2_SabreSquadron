@@ -436,7 +436,7 @@ public:
     float QueueAnim(S_HumanAnimRef *anim);              // 0x007741f0
     float QueueCarry(int *carry);                       // 0x007748d0
     void PushCarry(const int *carry);                   // 0x00774e80
-    float QueueActivity(int *activity);                 // 0x00774f70 (nothing)
+    float QueueActivity(int *activity);                 // 0x00774f70 (DS 0x007dfa60) (nothing)
     // Empties the queue of a track (0..2) / locks it until it has run empty.
     void ClearQueue(int track);                         // 0x00775770 (0x00774f80 is an unused copy)
     void LockQueue(int track);                          // 0x007758b0
@@ -944,8 +944,8 @@ public:
     // Starts an interaction with `target` (the original returns true).
     void Interact(C_Actor *target, uint32_t interaction, int arg);   // 0x007518e0
     // Saves / loads the unit's statics (nothing; the original returns true).
-    static bool SaveStatics(C_chunk &chunk);            // 0x00750ae0
-    static bool LoadStatics(C_chunk &chunk);            // 0x00750af0
+    static bool SaveStatics(C_chunk &chunk);            // 0x00750ae0 (DS 0x007b4a00)
+    static bool LoadStatics(C_chunk &chunk);            // 0x00750af0 (DS 0x007b4a20)
 
     C_HumanAnimPlayer *m_animPlayer = nullptr;          // +0x00
     C_HumanMovement *m_movement = nullptr;              // +0x04

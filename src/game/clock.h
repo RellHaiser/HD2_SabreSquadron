@@ -10,7 +10,7 @@
 
 class alignas(16) C_Clock : public C_Actor {            // "Clock", vtable 0x00811b98
 public:
-    C_Clock() : C_Actor(ACTOR_CLOCK) {}                 // 0x005b8270
+    C_Clock() : C_Actor(ACTOR_CLOCK) {}                 // 0x005b8270 (DS 0x005cb000)
     ~C_Clock() override = default;                      // 0x005b82b0 (DS 0x005cb060) (scalar deleting 0x005b8290, DS 0x005cb030)
 
     // The time runs on by `frameTime` ms; with a second hand, once over a second has gathered,

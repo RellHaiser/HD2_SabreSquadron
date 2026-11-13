@@ -104,7 +104,7 @@ private:
     // The main screen's buttons (single player: the tutorial's end, back or the mission's end, the
     // restart, the quick save and load, the options, the quit; a network game: back, the options, the
     // player screen, the quit) and the version's text. True. (The model is not used.)
-    bool BuildMainScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00680980
+    bool BuildMainScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00680980 (DS 0x006be250)
     // The player screen's controls: the panels (the soldiers, the equipment, the store's items, the
     // skills), the screen's shown / hidden callbacks; the soldier types' combo box (its id kept, its
     // items filled), the presets' save and rename buttons, the warmup's and the time's texts (a

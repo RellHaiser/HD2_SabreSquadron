@@ -330,7 +330,7 @@ protected:
 class C_Button : public C_Control {                     // 0x84 bytes
 public:
     C_Button(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
-    ~C_Button() override;                               // 0x0064f710 (0x0064f730): the cursor released
+    ~C_Button() override;                               // 0x0064f710 (0x0064f730 (DS 0x00682e80)): the cursor released
 
     // The repeated press while held.
     void Tick(int time) override;                       // 0x006645d0 (DS 0x0069cf10)
@@ -390,7 +390,7 @@ public:
 class C_Slider : public C_Control {                     // 0xA0 bytes
 public:
     C_Slider(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
-    ~C_Slider() override;                               // 0x0065e600 (0x0065e620): the cursor released
+    ~C_Slider() override;                               // 0x0065e600 (0x0065e620 (DS 0x006953c0)): the cursor released
 
     // The cursor taken, the frames found (false: one not), the limits set, the value 50.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664680 (DS 0x0069cfc0)
@@ -811,7 +811,7 @@ protected:
 class C_SelectList : public C_EditControl {             // 0x98 bytes
 public:
     C_SelectList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_EditControl(scene, id, parent) {}
-    ~C_SelectList() override;                           // 0x006581c0 (0x006581e0): the cursor released
+    ~C_SelectList() override;                           // 0x006581c0 (0x006581e0 (DS 0x0068d510)): the cursor released
 
     // The cursor taken; the frame turned to (0, 0, -1), the select frame to (0, 0, 1) (off, linked
     // to the root); the box placed (false: none).
@@ -1125,7 +1125,7 @@ protected:
     // the selected (false: no step).
     bool Scroll(int direction);                         // 0x00656a20
     // The item at the index selected (scrolled to; the selector behind it; the position posted).
-    void Select(int index);                             // 0x00655e10
+    void Select(int index);                             // 0x00655e10 (DS 0x0068a7c0)
     // The focus moved to the previous / next item taking input (false: none; the focus' leave
     // refused: true, not moved).
     bool FocusPrevious();                               // 0x006556c0

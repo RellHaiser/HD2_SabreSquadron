@@ -415,7 +415,7 @@ C_MeleeTrackerScriptedAI::C_MeleeTrackerScriptedAI()    // (SetController's case
     m_script = nullptr;
 }
 
-C_MeleeTrackerScriptedAI::~C_MeleeTrackerScriptedAI() = default;   // 0x005d5bd0 (DS 0x005f0640)
+C_MeleeTrackerScriptedAI::~C_MeleeTrackerScriptedAI() = default;   // 0x005d5bd0 (DS 0x005f0640), its dtor 0x005d5bf0 (DS 0x005f0670)
 
 bool C_MeleeTrackerScriptedAI::Attach(C_MeleeTracker *meleeTracker)   // 0x005cf6c0
 {

@@ -587,7 +587,7 @@ public:
     float GetVisibility() const;                        // 0x005a59e0
     // Movement speed in m/s (ejected shells inherit it).
     const S_vector &GetVelocity() const { return reinterpret_cast<const S_vector &>(m_velocity); }
-    float GetUnknown94() const { return m_unknown94; }  // 0x005a97a0
+    float GetUnknown94() const { return m_unknown94; }  // 0x005a97a0 (DS 0x005b81b0)
     void SetUnknown94(float value);                     // 0x005a9760
     // Progress bar of a timed action (lockpicking, a vehicle's weapon, a multiplayer zone).
     bool GetActionProgress(int *time, int *total, int *textId) const;   // 0x005a9830

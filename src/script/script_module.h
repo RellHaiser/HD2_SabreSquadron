@@ -128,7 +128,7 @@ public:
     void SetPauseSoundsPaused(bool paused);                        // 0x00428f00
     void BroadcastGlobalAlarm();                                   // 0x00428b00
 
-    bool IsCutsceneRunning() const { return m_cutsceneRunning; }   // 0x0041d5d0
+    bool IsCutsceneRunning() const { return m_cutsceneRunning; }   // 0x0041d5d0 (DS 0x0043dfd0)
     // The cutscene running (RunCutscene's; -1: the scripts' own camera).
     int GetCutscene() const { return m_cutscene; }
     void SetFakeCutscene(bool on) { m_fakeCutscene = on; }         // 0x0041d5c0
