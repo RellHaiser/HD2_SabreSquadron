@@ -267,7 +267,7 @@ protected:
     // The options from the current rules; inverse damage / the respawn time on by friendly fire / respawning;
     // the rows of the game type on (deathmatch, team play, hidden maps: 2 .. 32 players; cooperative: 2 .. 6,
     // respawning forced, its difficulty, lives, team lives).
-    void ShowServerOptions(int type);                   // 0x0062d950
+    void ShowServerOptions(int type);                   // 0x0062d950 (DS 0x0065eb50)
     // A titled edit box's text (none, another kind: empty).
     C_str GetEditText(uint32_t id);                     // 0x0062c6d0
     // The hosted session from the create server screen (OnNetworkMessage's start): the settings reset, hosting;

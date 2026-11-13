@@ -399,7 +399,7 @@ public:
     C_CommandProcessor();                           // 0x007426a0 (the settings' set-up made)
     ~C_CommandProcessor();                          // 0x007426e0
     // A line of keywords and their values (net/net_console_commands.cpp). False: a word that is no keyword.
-    bool Execute(const char *command);              // 0x00742850
+    bool Execute(const char *command);              // 0x00742850 (DS 0x007a2810)
 
 private:
     // A file of commands, a line each ("exec").

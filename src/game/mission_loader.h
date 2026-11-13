@@ -54,7 +54,7 @@ public:
     // the objects (chunk 0x4000), the shifting textures, the actors, the checkpoints, the lightmap
     // groups, the shadows' parameters. False when a chunk header does not read (or an object
     // fails).
-    bool LoadObjects(C_chunk &chunk, int stage);        // 0x006ccab0
+    bool LoadObjects(C_chunk &chunk, int stage);        // 0x006ccab0 (DS 0x00711840)
     // An object (chunk 0x4010; part 8f-iv).
     bool LoadObject(C_chunk &chunk);                    // 0x006cdc90 (DS 0x00712e50)
 

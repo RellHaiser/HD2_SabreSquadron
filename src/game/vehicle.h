@@ -822,7 +822,7 @@ public:
     // VEHICLE_PARAMS_FIX it stops at the first invalid value (false; what came before is
     // applied); with it an invalid value is replaced in `params` (from the vehicle or its
     // stored block) and applying goes on. At the end the block becomes the stored one.
-    bool ApplyParams(S_VehicleParams &params, uint8_t flags);   // 0x004ed270
+    bool ApplyParams(S_VehicleParams &params, uint8_t flags);   // 0x004ed270 (DS 0x004dd2a0)
     // A copy of the stored block (false for a null target).
     bool GetParams(S_VehicleParams *params) const;      // 0x004f2000
     // Loads the sounds the block names (both sound groups; every name in its handle slot; true).

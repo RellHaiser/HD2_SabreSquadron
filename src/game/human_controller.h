@@ -561,7 +561,7 @@ private:
     // --- player_weapons.cpp ------------------------------------------------------------------
     void UpdateWeaponReady(int timeDelta);              // 0x00545b90
     void UpdateZoom();                                  // 0x005457e0
-    void WeaponControls(int timeDelta);                 // 0x005433b0
+    void WeaponControls(int timeDelta);                 // 0x005433b0 (DS 0x00539010)
     // The throw being charged: released, it goes (true: the charge is going on or ended).
     bool UpdateCharge(int timeDelta);                   // 0x00542e20
     void MeleeStrike();                                 // 0x00542b80 (__fastcall)

@@ -2298,7 +2298,9 @@ void C_MainMenu::ShowServerOptions(int type)
         EnableRow(ROW_TEAM_BALANCE, teams);
         EnableRow(ROW_ROUND_LIMIT, true);
     } else if (type == GAME_TYPE_COOPERATIVE) {
+#ifndef HD2_DEDICATED   // the server's copy leaves the respawn box as it is
         PostTo(ROW_ALLOW_RESPAWN, CONTROL_MSG_SET_CHECKED_QUIET, 1);
+#endif
         EnableRow(ROW_RESPAWN_TIME, true);
         PostTo(ROW_PLAYERS, CONTROL_MSG_SET_RANGE, MIN_PLAYERS, MAX_COOP_PLAYERS);
         EnableRow(ROW_DIFFICULTY, true);

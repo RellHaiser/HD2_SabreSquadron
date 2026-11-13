@@ -137,7 +137,7 @@ public:
     // A message: kept back or the kept ones posted / dropped (MENU_MSG_DEFER, MENU_MSG_DEFERRED);
     // to a screen by the target's top 6 bits; else the menu's (MENU_MSG_*, the message box's,
     // CONTROL_MSG_NOTIFY's cursor input to the top, the editing), the rest to OnMessage.
-    void HandleMessage(S_ControlMessage *message);      // 0x0066cc50
+    void HandleMessage(S_ControlMessage *message);      // 0x0066cc50 (DS 0x006a53d0)
     // The queued messages handled, the first first (those posted meanwhile too).
     void HandleMessages();                              // 0x0066ca70
     // The control with the id in its screen (by its top 6 bits; none, id 0: null).

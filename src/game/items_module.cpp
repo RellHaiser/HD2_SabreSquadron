@@ -411,7 +411,7 @@ C_Item *C_ItemsModule::NewItem(int typeId) const
     if (def->GetRecordType() == ITEM_ANIMATED)
         item = new C_WeaponItem;                        // 0x007dd9c0
     else if (def->GetRecordType() == ITEM_AMMO)
-        item = new C_AmmoItem;                          // 0x007dd860
+        item = new C_AmmoItem;                          // 0x007dd860 (DS 0x00818a10)
     else if (def->GetComponentKind() != ICK_BACKPACK)
         item = new C_MedkitItem;                        // 0x007dd950 (DS 0x00818b50) (every other static item)
     else

@@ -407,7 +407,7 @@ protected:
     void SetLimits();                                   // 0x00664890
     // The frame at the cursor's place along the base (when the cursor moved that way): its value
     // changed (true).
-    bool Drag();                                        // 0x00664b30
+    bool Drag();                                        // 0x00664b30 (DS 0x0069d4d0)
     void MoveTo(const S_vector &position);              // 0x00664b10
     // The value from the place along the base (changed: true).
     bool SetValueFrom(float place);                     // 0x00664ca0

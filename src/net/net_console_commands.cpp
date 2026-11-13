@@ -283,7 +283,9 @@ bool C_CommandProcessor::Execute(const char *command)
     S_MultiplayerSettings *settings = g_gameProfile.m_mpSettings;
     char *const keywords = g_votableCommands[0];
     const bool server = (g_gameRole & GAME_ROLE_SERVER) != 0;
+#ifndef HD2_DEDICATED   // the server's quit and asay test no client role
     const bool client = (g_gameRole & GAME_ROLE_CLIENT) != 0;
+#endif
     const bool local = (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL;
     char word[WORD_SIZE];
     // (Fix: 0 until a number is read; the original printed an uninitialised value for a rule without one.)
@@ -373,13 +375,22 @@ bool C_CommandProcessor::Execute(const char *command)
             ShowWindow(GetIGraph()->GetHWND(), settings->dedicated ? SW_HIDE : SW_SHOW);
 #endif
             settings->sessionType = 2;
+#ifdef HD2_DEDICATED   // the server's state is set at once
+            GetGameApp()->m_state->SetState(GAME_STATE_HOST_SESSION);
+#else
             GetGameApp()->m_state->SetPendingState(GAME_STATE_HOST_SESSION);
+#endif
             break;
         case KEY_DEDICATED:
+#ifdef HD2_DEDICATED   // the server is always dedicated (the value read and not used)
+            ReadConsoleToken(&command, word, &value, nullptr);
+            settings->dedicated = true;
+#else
             if (ReadConsoleToken(&command, word, &value, nullptr) != TOKEN_NUMBER)
                 Print(C_fstr("dedicated  %d", settings->dedicated ? 1 : 0).c_str());
             else if (server)
                 settings->dedicated = value != 0;
+#endif
             break;
         case KEY_JOIN:
             if (!local)
@@ -464,7 +475,10 @@ bool C_CommandProcessor::Execute(const char *command)
             }
             break;
         case KEY_QUIT:
-            if (!client || local) {
+#ifndef HD2_DEDICATED   // the server always quits
+            if (!client || local)
+#endif
+            {
                 Print("Closing game. Wait please.");
                 GetGameApp()->m_state->SetPendingState(GAME_STATE_QUIT);
             }
@@ -532,7 +546,9 @@ bool C_CommandProcessor::Execute(const char *command)
                 std::strncpy(line, command, CHAT_TEXT_SIZE - 1);
                 command += std::strlen(command);
                 GetGameApp()->SendGameMessage(4, 0, reinterpret_cast<intptr_t>(line), 0, false);
+#ifndef HD2_DEDICATED   // the server always shows it
                 if (!client)
+#endif
                     GetConsole()->AddLine(C_fstr("ADMIN: %s", line).c_str());
             }
             break;
