@@ -378,7 +378,7 @@ public:
                       bool silentToAI);                     // 0x00451b00
     // Bullet hole and hit effect of a bullet stopping on `frame` (null: level geometry).
     void OnBulletHit(C_Actor *shooter, I3D_frame *frame, int material, const S_vector &pos,
-                     const S_vector &normal);               // 0x00451bc0
+                     const S_vector &normal);               // 0x00451bc0 (DS 0x0046c840)
     // Particle effect of a hit, if it is in front of the camera.
     void PlayHitEffect(int material, const S_vector &pos, const S_vector &normal);   // 0x00451c00 (DS 0x0046c870)
     // Whiz of a bullet passing the local player.

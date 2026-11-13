@@ -2153,7 +2153,11 @@ void C_ShotManager::OnBulletHit(C_Actor *, I3D_frame *frame, int material, const
 {
     if (material == MATERIAL_NONE)
         return;
+#ifndef HD2_DEDICATED   // no bullet decals on the server
     AddBulletDecal(material, pos, normal, frame);
+#else
+    (void)frame;
+#endif
     PlayHitEffect(material, pos, normal);
 }
 

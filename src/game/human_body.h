@@ -76,7 +76,7 @@ public:
     void DoAction(int action, bool on);                 // 0x0077f7e0
     void SetUnknown5C(bool value, bool on);             // 0x0077f830
     void SetFacingDir(const S_vector &dir, bool on);    // 0x0077f8c0
-    void SetViewDir(const S_vector &dir);               // 0x0077faf0
+    void SetViewDir(const S_vector &dir);               // 0x0077faf0 (DS 0x007ed170)
     void SetWorkingFrame(I3D_frame *frame, bool on);    // 0x0077fb70
     // (Takes a reference of the frame.)
     void SetWorkingFrame2(I3D_frame *frame, bool on);   // 0x0077fbc0
@@ -84,7 +84,7 @@ public:
     void Die(C_Actor *killer) { m_request.killer = killer; }   // 0x00780000
     void Interact(C_Actor *target, uint32_t interaction, int arg, bool on);   // 0x00780010
     // Where the head looks (C_HumanWeaponPose::SetLook; LOOK_* flags, `at` for LOOK_AT).
-    void SetLook(uint32_t flags, const S_vector4 *at);  // 0x00780090
+    void SetLook(uint32_t flags, const S_vector4 *at);  // 0x00780090 (DS 0x007ed830)
     // The movement's view direction (C_HumanMovement +0x940).
     S_vector4 GetViewDir() const;                       // 0x0077f030
 
