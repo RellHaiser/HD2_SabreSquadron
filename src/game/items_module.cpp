@@ -247,7 +247,9 @@ void C_ItemsModule::Update(int timeDelta)
         return;
     g_clientMarksTime += timeDelta;
     if (g_clientMarksTime >= CLIENT_MARKS_STEP) {
+#ifndef HD2_DEDICATED   // no surface marks on the server
         SurfaceMarks_Tick(CLIENT_MARKS_STEP);
+#endif
         g_clientMarksTime -= CLIENT_MARKS_STEP;
     }
 }

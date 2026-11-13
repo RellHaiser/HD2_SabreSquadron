@@ -61,7 +61,7 @@ public:
     void Init() override;                               // 0x007dd180
     void Done() override;                               // 0x007dd260 (DS 0x00818270)
     void Tick(int timeDelta) override;                  // 0x007dd7f0
-    void Update(int timeDelta) override;                // 0x007dd810
+    void Update(int timeDelta) override;                // 0x007dd810 (DS 0x008189b0)
     void LoadMissionData(bool server) override;         // 0x007dd300
     void FreeMissionData(bool server) override;         // 0x007dd410
     void StartMission(bool server) override;            // 0x007dd470

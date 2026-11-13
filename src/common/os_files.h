@@ -10,11 +10,11 @@ bool FileExists(const char *path);                  // 0x006edc30
 int MakeDirectory(const char *path);                // 0x006edc60 (_mkdir: 0 or -1)
 int ChangeDirectory(const char *path);              // 0x006edc70 (_chdir: 0 or -1)
 // The current directory into `buffer` (_getcwd; null when it does not fit; part 9i-v).
-char *GetCurrentDir(char *buffer, int size);        // 0x006edc80
+char *GetCurrentDir(char *buffer, int size);        // 0x006edc80 (DS 0x00739140)
 bool RenameFile(const char *from, const char *to);  // 0x006edc90 (MoveFileA)
 // RemoveDirectoryA, DeleteFileA, SetFileAttributesA: done (part 9i-v).
 bool RemoveDir(const char *path);                   // 0x006edca0 (DS 0x00739180)
-bool DeleteFileAt(const char *path);                // 0x006edcb0
+bool DeleteFileAt(const char *path);                // 0x006edcb0 (DS 0x007391a0)
 bool SetAttributes(const char *path, uint32_t attributes);   // 0x006edcc0 (DS 0x007391c0)
 // _findfirst / _findnext / _findclose.
 intptr_t FileFindFirst(const char *pattern, _finddata_t *data);   // 0x006edcd0

@@ -46,7 +46,7 @@ public:
     // The countdowns from 0; the client side loads the decal's texture (and is not activated
     // when that fails).
     void StartMission(bool server) override;            // 0x3C 0x0060eef0
-    void StopMission(bool server) override;             // 0x40 0x0060ef60
+    void StopMission(bool server) override;             // 0x40 0x0060ef60 (DS 0x00638760)
     void RestartMission(bool server) override;          // 0x44 0x0060f3c0
     // Chunk 0xBE: chunk 0 the state, 1 a client's time, 2 the server's.
     bool SaveGame(C_chunk &chunk) override;             // 0x48 0x0060f420

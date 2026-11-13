@@ -268,7 +268,7 @@ class C_ScopeComp : public C_ItemComponent {            // vtable 0x00817304
 public:
     C_ScopeComp() : C_ItemComponent(ICK_SCOPE) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df560 (DS 0x0081af00)
-    void Load(int size, const void *data) override;     // 0x007df5a0
+    void Load(int size, const void *data) override;     // 0x007df5a0 (DS 0x0081af50)
 
     int GetAimMode() const { return m_aimMode; }
     float GetAimedFovFactor() const { return m_aimedFovFactor; }
@@ -282,7 +282,7 @@ class C_UniformComp : public C_ItemComponent {          // vtable 0x008172f4
 public:
     C_UniformComp() : C_ItemComponent(ICK_UNIFORM) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df5d0 (DS 0x0081af90)
-    void Load(int size, const void *data) override;     // 0x007df610
+    void Load(int size, const void *data) override;     // 0x007df610 (DS 0x0081afe0)
 
     int GetDisguiseSide() const { return m_disguiseSide; }
 
@@ -294,7 +294,7 @@ class C_MedkitComp : public C_ItemComponent {           // vtable 0x008172e4
 public:
     C_MedkitComp() : C_ItemComponent(ICK_MEDKIT) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df640 (DS 0x0081b020)
-    void Load(int size, const void *data) override;     // 0x007df680
+    void Load(int size, const void *data) override;     // 0x007df680 (DS 0x0081b070)
 
     float GetHealingCapacity() const { return m_healingCapacity; }
 
@@ -327,7 +327,7 @@ class C_HeadgearComp : public C_ItemComponent {         // vtable 0x008172c4
 public:
     C_HeadgearComp() : C_ItemComponent(ICK_HEADGEAR) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df720 (DS 0x0081b140)
-    void Load(int size, const void *data) override;     // 0x007df760
+    void Load(int size, const void *data) override;     // 0x007df760 (DS 0x0081b190)
 
     int GetHeadgearType() const { return m_headgearType; }
     float GetProtection() const { return m_protection; }

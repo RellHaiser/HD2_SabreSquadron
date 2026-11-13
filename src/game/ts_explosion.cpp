@@ -90,10 +90,12 @@ void C_TSExplosion::RemoveScorch()
 void C_TSExplosion::StopMission(bool server)            // 0x0060ef60
 {
     RemoveScorch();
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
     if (m_texture) {
         m_texture->Release();
         m_texture = nullptr;
     }
+#endif
     Deactivate(server);
 }
 

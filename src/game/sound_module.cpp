@@ -236,7 +236,9 @@ void C_SoundModule::StartMission(bool server)
     InitSectorAcoustics();
     m_listenerSector = nullptr;
     m_fadeInTime = FADE_IN_TIME;
+#ifndef HD2_DEDICATED   // no sounds on the server
     ISndGetDriver()->SetVolume(0.0f);
+#endif
 }
 
 void C_SoundModule::StopMission(bool server)
@@ -252,15 +254,19 @@ void C_SoundModule::RestartMission(bool)
     StopAll(false, false);
     m_listenerSector = nullptr;
     m_fadeInTime = FADE_IN_TIME;
+#ifndef HD2_DEDICATED   // no sounds on the server
     ISndGetDriver()->SetVolume(0.0f);
+#endif
 }
 
 bool C_SoundModule::SaveGame(C_chunk &chunk)
 {
     chunk.Begin(CHUNK_SOUND_MODULE);
     int position = 0;
+#ifndef HD2_DEDICATED   // no sounds on the server
     if (IsMusicPlaying())
         m_music->GetPosition(&position);
+#endif
     chunk.WriteChunk(CHUNK_MUSIC_TRACK, m_musicTrack);
     chunk.WriteChunk(CHUNK_MUSIC_POSITION, position);
     chunk.Ascend();

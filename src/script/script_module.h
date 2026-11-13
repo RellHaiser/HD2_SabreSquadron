@@ -100,7 +100,7 @@ public:
     void FreeMissionData(bool server) override;                // 0x004285d0
     void StartMission(bool server) override;                   // 0x004270d0 (DS 0x0044a580)
     void StopMission(bool server) override;                    // 0x00427b80
-    void RestartMission(bool server) override;                 // 0x00424900
+    void RestartMission(bool server) override;                 // 0x00424900 (DS 0x004473e0)
     bool OnMessage(C_BitStream *msg) override;                 // 0x00424590
     bool SaveGame(C_chunk &chunk) override;                    // 0x00424970
     bool LoadGame(C_chunk &chunk) override;                    // 0x004257b0 (DS 0x00448610)

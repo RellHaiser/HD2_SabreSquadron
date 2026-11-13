@@ -145,7 +145,9 @@ void C_MPZone::StartMission(bool server)                // 0x005ed110
             if (m_flags[i])
                 m_flags[i]->AddRef();
         }
+#ifndef HD2_DEDICATED   // no flag animation on the server
         m_flagAnim = new S_VertexAnimPlayer();
+#endif
         // Fix: the name is not copied into a 28-byte buffer.
         const std::string spawnName = std::string(m_frame->GetName()) + "spawn";
         m_spawnFrame = scene->FindFrame(spawnName.c_str(), FRAME_MASK_DUMMY);

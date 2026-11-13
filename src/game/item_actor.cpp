@@ -333,8 +333,10 @@ int __fastcall C_ItemActor::OnContact(int event, int, void *context, const S_Rig
         const S_CollisionVolume *volume = contact->volume;
         if ((volume->flags & COLLISION_FLAG_DYNAMIC) && (volume->type & HUMAN_VOLUME_TYPES))
             return RIGID_BODY_REFUSE;
+#ifndef HD2_DEDICATED   // no sounds on the server
         if (actor && IsClient())
             actor->PlayHitSound();
+#endif
         return 2;                                       // (counts: any value but 1)
     }
     if (event == RIGID_BODY_EVENT_REST && !IsLocalGame() && IsServer())

@@ -132,10 +132,10 @@ public:
     void Update(int timeDelta) override;                // 0x004368d0
     void LoadMissionData(bool server) override;         // 0x004338d0
     void FreeMissionData(bool server) override;         // 0x004338f0
-    void StartMission(bool server) override;            // 0x00433840
+    void StartMission(bool server) override;            // 0x00433840 (DS 0x00459680)
     void StopMission(bool server) override;             // 0x004338a0
-    void RestartMission(bool server) override;          // 0x00433910
-    bool SaveGame(C_chunk &chunk) override;             // 0x00433950
+    void RestartMission(bool server) override;          // 0x00433910 (DS 0x00459790)
+    bool SaveGame(C_chunk &chunk) override;             // 0x00433950 (DS 0x004597d0)
     bool LoadGame(C_chunk &chunk) override;             // 0x00433b10 (DS 0x004599f0)
 
     // --- AI hearing (server) -------------------------------------------------------

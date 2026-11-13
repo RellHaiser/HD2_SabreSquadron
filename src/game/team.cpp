@@ -356,7 +356,11 @@ bool C_Team::AddMember(C_Human *human)                  // 0x0045e5d0
         UpdateCameraTarget();
     }
     // (Also for a human that is a member already: the panel of the last slot gets it.)
+#ifdef HD2_DEDICATED   // no interface on the server (the game is still asked for)
+    GetGame();
+#else
     GetGame()->GetInterface()->AddSquadMember(human, GetMemberCount() - 1);
+#endif
     if (added)
         CollectVolumes(GetMemberCount() - 1);
     return added;

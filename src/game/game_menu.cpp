@@ -326,8 +326,10 @@ void C_GameMenu::OnUpdate(int timeDelta)
         UpdateLoadButton();
         UpdateNetStatus();
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if ((g_gameRole & GAME_ROLE_CLIENT) && m_game)
         m_game->Update(timeDelta);
+#endif
 }
 
 void C_GameMenu::OnTick(int timeDelta)

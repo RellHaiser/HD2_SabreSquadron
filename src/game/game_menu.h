@@ -61,7 +61,7 @@ public:
     bool OnInput(float *held, float *pressed) override; // 0x44 0x00680960
     // The network games: the panel's soldier, the load's button, the game's status; a client: the
     // game's update.
-    void OnUpdate(int timeDelta) override;              // 0x48 0x006808d0
+    void OnUpdate(int timeDelta) override;              // 0x48 0x006808d0 (DS 0x006be180)
     // The menu time; the server: the game's tick.
     void OnTick(int timeDelta) override;                // 0x4C 0x00680920
     // By the top screen: the equipment screen's (index 3, or the message box over it) or the game's

@@ -238,7 +238,7 @@ public:
     // Also the selection, the records, the volumes and the meleeTrackers.
     void Clear() override;                              // 0x0045d3a0
     // Also the interface's member panel and the member's collision volumes.
-    bool AddMember(C_Human *human) override;            // 0x0045e5d0
+    bool AddMember(C_Human *human) override;            // 0x0045e5d0 (DS 0x00479840)
     using C_TeamBase::RemoveMember;
     // Forgets enemies nobody has seen for a while.
     void Update(int timeDelta) override;                // 0x0045ddc0
