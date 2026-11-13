@@ -446,7 +446,7 @@ const char *FindProfileDirectory(const char *name);     // 0x006aefe0
 // was removed (an empty name: whether PlayersProfiles itself was). (Not ported yet.)
 // A profile's directory deleted with what it holds, its name forgotten (no name: every profile's contents deleted;
 // part 9i-v). False when it was not emptied or (unicode font) is not known.
-bool DeleteProfile(const char *name);                   // 0x006aef40 (__stdcall)
+bool DeleteProfile(const char *name);                   // 0x006aef40 (DS 0x006f0030) (__stdcall)
 // A profile name's directory forgotten (none: false).
 bool ForgetProfileName(const char *name);               // 0x006af0f0 (__fastcall)
 // Finds the profiles in PlayersProfiles (the name map anew) and calls `callback` with each

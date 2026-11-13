@@ -76,7 +76,7 @@ public:
     // popup closed; on the quit question likewise (its own ids); else back. MAIN_MSG_PLAY_MOVIE: the
     // movie's state; MAIN_MSG_LOAD_GAME: the saved game picked loaded (none: the application's load
     // command alone).
-    void OnMessage(S_ControlMessage *message) override; // 0x34 0x00626ca0
+    void OnMessage(S_ControlMessage *message) override; // 0x34 0x00626ca0 (DS 0x00656330)
     // The screens described (Describe), their models loaded (none: skipped), each described further by
     // its kind (the quit question's model moved to (0.5, -0.375, -0.5)), made and built; the main screen
     // opened. True.
@@ -148,7 +148,7 @@ protected:
     // shown; load on, its picture, the description: the heading, the mission's texts (its text id 0x1194 on:
     // the title, the lines after it up to six more found), carnage's note. True.
     static bool OnMissionPick(void *menu, void *argument, C_Control *control, uint32_t notification,
-                              uint32_t value);          // 0x0063b310
+                              uint32_t value);          // 0x0063b310 (DS 0x0066fc00)
     // The play mode's save slot: its file the saved game picked; "load the last save" on only when the slot's
     // mission is `mission` (another mode: nothing).
     void ShowSaveSlot(int mission);                     // 0x0063b0f0

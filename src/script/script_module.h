@@ -85,7 +85,7 @@ struct S_FrameRotation {                                       // 0x20 bytes, 16
     float speed = 0.0f;                 // +0x1C radians per second
 
     S_FrameRotation(I3D_frame *frame, int axis, int angleDeg, int speedDeg);   // 0x00428cc0
-    ~S_FrameRotation();                 // 0x00428d00
+    ~S_FrameRotation();                 // 0x00428d00 (DS 0x0044c960)
     // Rotates for `timeDelta` ms; false once the angle is reached.
     bool Update(int timeDelta);         // 0x00427200
 };
@@ -96,15 +96,15 @@ public:
     ~C_ScriptModule() override;                                // 0x00424770
 
     void Tick(int timeDelta) override;                         // 0x00428490
-    void Update(int timeDelta) override;                       // 0x00428b30
+    void Update(int timeDelta) override;                       // 0x00428b30 (DS 0x0044c700)
     void FreeMissionData(bool server) override;                // 0x004285d0
-    void StartMission(bool server) override;                   // 0x004270d0
+    void StartMission(bool server) override;                   // 0x004270d0 (DS 0x0044a580)
     void StopMission(bool server) override;                    // 0x00427b80
     void RestartMission(bool server) override;                 // 0x00424900
     bool OnMessage(C_BitStream *msg) override;                 // 0x00424590
     bool SaveGame(C_chunk &chunk) override;                    // 0x00424970
     bool LoadGame(C_chunk &chunk) override;                    // 0x004257b0 (DS 0x00448610)
-    void WriteState(C_BitStream *msg) override;                // 0x0042aff0
+    void WriteState(C_BitStream *msg) override;                // 0x0042aff0 (DS 0x0044f740)
     void ReadState(C_BitStream *msg) override;                 // 0x0042b330
 
     // Runs `scriptName` on `frame`. With an empty name, or when the frame already

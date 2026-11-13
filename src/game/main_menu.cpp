@@ -1019,7 +1019,9 @@ bool C_MainMenu::OnMissionPick(void *menu, void *, C_Control *control, uint32_t,
     const C_str image = campaign->GetMissionImage(campaignIndex, missionNumber);
     self->m_operationPicked = false;
     self->m_mission = index;
+#ifndef HD2_DEDICATED   // the server has only the server's side
     self->ShowSaveSlot(index);
+#endif
     const uint32_t base = screen << SCREEN_INDEX_SHIFT;
     PostTo(base | MISSIONS_LOAD, CONTROL_MSG_ACTIVATE, 0);
     PostTo(base | MISSIONS_TEXT, CONTROL_MSG_CLEAR, 0);

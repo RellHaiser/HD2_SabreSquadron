@@ -57,7 +57,7 @@ S_LightmapChange::~S_LightmapChange()                   // 0x0048d250
     frame->Release();
 }
 
-C_LightMapGroupsModule::C_LightMapGroupsModule(int id, const char *name) : C_Module(id, name)   // 0x0048cb10
+C_LightMapGroupsModule::C_LightMapGroupsModule(int id, const char *name) : C_Module(id, name)   // 0x0048cb10 (DS 0x004a2680)
 {
 }
 
@@ -79,7 +79,7 @@ void C_LightMapGroupsModule::DeleteChanges()
     m_changes.clear();
 }
 
-void C_LightMapGroupsModule::RestartMission(bool)       // 0x0048c790
+void C_LightMapGroupsModule::RestartMission(bool)       // 0x0048c790 (DS 0x004a2200)
 {
     for (size_t i = m_changes.size(); i-- > 0;) {
         S_LightmapChange *change = m_changes[i];
@@ -102,7 +102,7 @@ bool C_LightMapGroupsModule::SaveGame(C_chunk &chunk)   // 0x0048c820
     return true;
 }
 
-bool C_LightMapGroupsModule::LoadGame(C_chunk &chunk)   // 0x0048c920
+bool C_LightMapGroupsModule::LoadGame(C_chunk &chunk)   // 0x0048c920 (DS 0x004a2400)
 {
     int count = 0;
     chunk.Read(count);

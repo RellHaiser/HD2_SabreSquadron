@@ -649,7 +649,7 @@ constexpr int VEHICLE_GEARS = 15;                       // forward gears at most
 
 // Setup's EnumFrames callback for the damage parts (game/vehicle_parts.cpp): a S_VehiclePart in the
 // std::vector<S_VehiclePart> `parts` per visual with a "[DEFORM ..]" property.
-uint32_t __stdcall AddVehiclePart(I3D_frame *frame, void *parts);              // 0x004fa520
+uint32_t __stdcall AddVehiclePart(I3D_frame *frame, void *parts);              // 0x004fa520 (DS 0x004ecc70)
 
 class C_Vehicle {                                       // car physics/driving state (C_Car +0x90)
 public:

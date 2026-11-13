@@ -52,7 +52,7 @@ public:
     // a client shows the team again.
     void StartMission(bool server) override;            // 0x3C 0x005ed110
     // (Not deactivated.) The frames let go.
-    void StopMission(bool server) override;             // 0x40 0x005ed260
+    void StopMission(bool server) override;             // 0x40 0x005ed260 (DS 0x0060ddf0)
     // Its starting team again, the spawn points from the first.
     void RestartMission(bool server) override;          // 0x44 0x005ed8b0
     // (Nothing saved: false.)

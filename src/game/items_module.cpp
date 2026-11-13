@@ -327,7 +327,9 @@ bool C_ItemsModule::LoadGame(C_chunk &chunk)
         id == CHUNK_ITEMS_LAST_UID) {
         m_lastUid = ReadInt(chunk);
         chunk.Ascend();
+#ifndef HD2_DEDICATED   // no surface marks on the server
         SurfaceMarks_Load(chunk);
+#endif
         chunk.Ascend();
         return true;
     }

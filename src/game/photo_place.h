@@ -35,7 +35,7 @@ public:
     bool SaveGame(C_chunk &chunk) override;             // 0x48 0x0060be90
     bool LoadGame(C_chunk &chunk) override;             // 0x4C 0x0060bf90
     // The part's "matid", else the frame's, else 11.
-    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x0060be40
+    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x0060be40 (DS 0x00634870)
 
 private:
     bool m_started = false;                             // +0x90

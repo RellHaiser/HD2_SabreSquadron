@@ -312,7 +312,7 @@ public:
     C_ContainerItem();                                  // 0x007d3c60
     ~C_ContainerItem() override;                        // 0x007d3d30
 
-    void Init(int typeId) override;                     // 0x007d3da0
+    void Init(int typeId) override;                     // 0x007d3da0 (DS 0x0080cf30)
     int Fire(C_Actor *, const S_vector &, const S_vector &, uint32_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d3cf0 (DS 0x0080ce30)
     int FireSecondary(C_Actor *, const S_vector &, const S_vector &, uint8_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d3d00 (DS 0x0080ce50)
 

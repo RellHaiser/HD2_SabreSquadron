@@ -68,7 +68,7 @@ public:
     void StopMission(bool server) override;             // 0x007dd6a0
     void RestartMission(bool server) override;          // 0x007ddbb0
     bool SaveGame(C_chunk &chunk) override;             // 0x007ddef0
-    bool LoadGame(C_chunk &chunk) override;             // 0x007de110
+    bool LoadGame(C_chunk &chunk) override;             // 0x007de110 (DS 0x00819510)
 
     // --- definitions --------------------------------------------------------------
     // Loads Tables\items.sav on first use.

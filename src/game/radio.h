@@ -44,7 +44,7 @@ public:
     bool SaveGame(C_chunk &chunk) override;             // 0x48 0x0060b1c0
     bool LoadGame(C_chunk &chunk) override;             // 0x4C 0x0060b2c0
     // The part's "matid", else the frame's, else 11.
-    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x0060b170
+    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x0060b170 (DS 0x00633790)
 
 private:
     // `human` carries the item and is of the side (Use, CanUse).

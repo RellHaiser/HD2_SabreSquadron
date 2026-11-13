@@ -345,10 +345,10 @@ public:
     void Unknown20(C_BitStream *msg) override;          // 0x20 0x004db760
     // Clears the seat weapons, binds the frame, sets the vehicle up from the model (false: not a
     // car model), hands the vehicle the car's callbacks and sets the damage parts up.
-    bool SetFrame(I3D_frame *frame) override;           // 0x2C 0x004d10a0
+    bool SetFrame(I3D_frame *frame) override;           // 0x2C 0x004d10a0 (DS 0x004bdc60)
     // The parameter block as the mission file keeps it (version 3, the packed blob's size, the
     // blob; game/vehicle_params.h).
-    bool WriteProperties(C_chunk &chunk) override;      // 0x30 0x004d1280
+    bool WriteProperties(C_chunk &chunk) override;      // 0x30 0x004d1280 (DS 0x004bdef0)
     bool ReadProperties(C_chunk &chunk) override;       // 0x34 0x004d55c0
     // The source's frame; a car's actor state and parameter block.
     void CopyFrom(const C_Actor *source) override;      // 0x38 0x004d1220
@@ -375,7 +375,7 @@ public:
     // nothing reads it.) LoadGame makes the charge's visual again and shows the wreck (its glass
     // shattered out of sight).
     bool SaveGame(C_chunk &chunk) override;             // 0x48 0x004dd350
-    bool LoadGame(C_chunk &chunk) override;             // 0x4C 0x004dd750
+    bool LoadGame(C_chunk &chunk) override;             // 0x4C 0x004dd750 (DS 0x004cbff0)
     // A joining client's state (game/car_net.cpp): the frame's place and rotation (axis and angle;
     // raw floats), the item store, the engine's health (+0x610), the wreck shown, each wheel
     // (from the last) off, the fuel as its message's. Read back: the place and rotation to the
@@ -391,16 +391,16 @@ public:
     // second; else TakePush). (The original returns true.)
     void OnCollision(C_Actor *other, const S_vector *pos, int a3, int a4, int a5, int a6) override;   // 0x58 0x004d3ef0
     // The seats (game/car_seats.cpp): the vehicle's (S_VehicleSeat, +0xFA8), their weapons.
-    bool IsSeatBlocked(int seat) override;              // 0x6C 0x004d93c0
-    bool SetSeatBlocked(int seat, bool blocked) override;   // 0x70 0x004d93e0
+    bool IsSeatBlocked(int seat) override;              // 0x6C 0x004d93c0 (DS 0x004c6b30)
+    bool SetSeatBlocked(int seat, bool blocked) override;   // 0x70 0x004d93e0 (DS 0x004c6b60)
     // Seats `occupant` (a human; a seat taken by another is left alone): out of the seats it
     // has, linked to the seat's frame facing the seat's z axis; the driver's seat makes it the
     // driver and starts the engine. The server tells the clients the seat weapon's rounds.
     void SetSeatOccupant(int seat, C_Actor *occupant) override;   // 0x74 0x004d9430 (DS 0x004c6bd0)
-    C_Actor *GetSeatOccupant(int seat) override;        // 0x78 0x004d99d0
-    int FindSeat(const C_Actor *occupant) override;     // 0x7C 0x004d9a00
-    C_Actor *LeaveSeat(int seat) override;              // 0x80 0x004d9a40
-    bool ExitSeat(int seat) override;                   // 0x84 0x004d9be0
+    C_Actor *GetSeatOccupant(int seat) override;        // 0x78 0x004d99d0 (DS 0x004c7290)
+    int FindSeat(const C_Actor *occupant) override;     // 0x7C 0x004d9a00 (DS 0x004c72d0)
+    C_Actor *LeaveSeat(int seat) override;              // 0x80 0x004d9a40 (DS 0x004c7320)
+    bool ExitSeat(int seat) override;                   // 0x84 0x004d9be0 (DS 0x004c7530)
     int GetSeatCount() override;                        // 0x88 0x004d0e30
     uint32_t GetSeatFlags(int seat) override;           // 0x8C 0x004d9fc0
     // The occupant's camera dummy ("camera3RD*", "cameraFPV*" in first person or for an "NO3RD"
@@ -409,18 +409,18 @@ public:
     I3D_frame *GetSeatCamera(int seat) override;        // 0x90 0x004d9e10
     int GetSeatText(int seat) override;                 // 0x94 0x004d9ff0
     bool HasSeatWeapon(int seat) override;              // 0x98 0x004da020
-    int GetSeatWeaponRounds(int seat) override;         // 0x9C 0x004da040
-    S_vector GetSeatWeaponAim(int seat) override;       // 0xA4 0x004da150
-    S_vector GetSeatWeaponOrigin(int seat) override;    // 0xA8 0x004da110
-    float UnknownAC(int seat) override;                 // 0xAC 0x004da190
-    int GetSeatWeaponText(int seat) override;           // 0xB0 0x004da1b0
-    C_ItemDef *GetSeatWeaponDef(int seat) override;     // 0xB4 0x004da1d0
-    void GetSeatWeaponLimits(int seat, float *a, float *b, float *c, float *d) override;   // 0xB8 0x004da1f0
-    bool CanSeatWeaponAim(int seat, float *pos) override;   // 0xBC 0x004da240
-    void ApplySeatControls(int seat, float *axes, float *buttons) override;   // 0xC0 0x004da060
-    void ShowSeatView(int seat, bool on) override;      // 0xC4 0x004da090
-    bool UnknownC8(int seat, int *a, int *b, int *c) override;   // 0xC8 0x004da270
-    bool IsSeatFirstPersonOnly(int seat) override;      // 0xCC 0x004da2a0
+    int GetSeatWeaponRounds(int seat) override;         // 0x9C 0x004da040 (DS 0x004c7a80)
+    S_vector GetSeatWeaponAim(int seat) override;       // 0xA4 0x004da150 (DS 0x004c7be0)
+    S_vector GetSeatWeaponOrigin(int seat) override;    // 0xA8 0x004da110 (DS 0x004c7b90)
+    float UnknownAC(int seat) override;                 // 0xAC 0x004da190 (DS 0x004c7c30)
+    int GetSeatWeaponText(int seat) override;           // 0xB0 0x004da1b0 (DS 0x004c7c60)
+    C_ItemDef *GetSeatWeaponDef(int seat) override;     // 0xB4 0x004da1d0 (DS 0x004c7c90)
+    void GetSeatWeaponLimits(int seat, float *a, float *b, float *c, float *d) override;   // 0xB8 0x004da1f0 (DS 0x004c7cc0)
+    bool CanSeatWeaponAim(int seat, float *pos) override;   // 0xBC 0x004da240 (DS 0x004c7d30)
+    void ApplySeatControls(int seat, float *axes, float *buttons) override;   // 0xC0 0x004da060 (DS 0x004c7ab0)
+    void ShowSeatView(int seat, bool on) override;      // 0xC4 0x004da090 (DS 0x004c7af0)
+    bool UnknownC8(int seat, int *a, int *b, int *c) override;   // 0xC8 0x004da270 (DS 0x004c7d70)
+    bool IsSeatFirstPersonOnly(int seat) override;      // 0xCC 0x004da2a0 (DS 0x004c7db0)
     void UnknownD0(int, int, int, int) override {}      // 0xD0 0x004dba00
     // A shot or blast (game/car_hits.cpp): not from an enemy without anyone hostile to them
     // aboard, nor an explosion on a wreck. The attacker remembered; the damage part the shot's ray
@@ -430,7 +430,7 @@ public:
     void Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *attacker,
              int flags) override;                       // 0xD4 0x004dba10
     // The frame's "matid" (11 without one).
-    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x004dbee0
+    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x004dbee0 (DS 0x004ca150)
 
     // --- the car's own -------------------------------------------------------------------------
     // The engine's health (the vehicle's +0x610) is 0.
@@ -513,7 +513,7 @@ public:
     bool GetSeatEntry(int seat, S_vector4 *pos, S_vector4 *dir);   // 0x004da420
     // The car's driver (+0x24AC) and the vehicle's m_driven.
     void SetDriver(C_Human *driver);                    // 0x004d11c0
-    void SetDriven(bool driven) { m_vehicle.m_driven = driven; }   // 0x004d1200
+    void SetDriven(bool driven) { m_vehicle.m_driven = driven; }   // 0x004d1200 (DS 0x004bde30)
     // Puts `occupant` out at its seat's way out, else at another seat's (false: no room).
     bool PutOutside(C_Actor *occupant);                 // 0x004da2f0
     // The weapon of seat `seat`, null without one (and past the ten).
@@ -682,7 +682,7 @@ class C_CarCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x004d04f0
     const char *GetName() override { return "Car"; }    // 0x004d0560 (0x0083bdc8)
-    void Destroy(C_Actor *actor) override;              // 0x004d0570
+    void Destroy(C_Actor *actor) override;              // 0x004d0570 (DS 0x004bcd90)
 };
 
 // Every car (0x0089bd34; the constructor adds, the destructor removes).

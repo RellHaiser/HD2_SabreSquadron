@@ -907,7 +907,11 @@ void C_SoundModule::Stop(int *slotIndex)
         return;
     if (index >= 0 && index < static_cast<int>(m_slots.size()) && m_slots[index] && m_slots[index]->active) {
         S_SoundSlot *slot = m_slots[index];
+#ifdef HD2_DEDICATED   // the server does not ask for a sound device
+        if (slot->sound) {
+#else
         if (ISndGetDriver()->IsInitialized() && slot->sound) {
+#endif
             slot->sound->SetOn(false);
             slot->sound->SetVolume(0.0f);
             if (slot->sample) {

@@ -136,7 +136,7 @@ public:
     void StopMission(bool server) override;             // 0x004338a0
     void RestartMission(bool server) override;          // 0x00433910
     bool SaveGame(C_chunk &chunk) override;             // 0x00433950
-    bool LoadGame(C_chunk &chunk) override;             // 0x00433b10
+    bool LoadGame(C_chunk &chunk) override;             // 0x00433b10 (DS 0x004599f0)
 
     // --- AI hearing (server) -------------------------------------------------------
     // `callback` is called for every sound `frame` can hear; returns the listener
@@ -151,7 +151,7 @@ public:
     // definition: free slots never keep a sound, so in practice this fails).
     int PlayTableSound(void *owner, const S_SoundRequest &request);   // vtable +0x58 0x00435240
     // Stops the sound in `*slot` and sets `*slot` to -1.
-    void Stop(int *slot);                                           // vtable +0x5C 0x00437340
+    void Stop(int *slot);                                           // vtable +0x5C 0x00437340 (DS 0x0045b2c0)
     I3D_sound *GetSound(int slot) const;                            // vtable +0x78 0x004374a0
     // Stops every sound; `releaseTableSounds` also frees the samples' loaded
     // copies, `keepMusic` leaves the background music running.

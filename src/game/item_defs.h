@@ -168,7 +168,7 @@ class C_MeleeComp : public C_WeaponComp {               // vtable 0x008173b0
 public:
     C_MeleeComp() : C_WeaponComp(ICK_MELEE) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df330
-    void Load(int size, const void *data) override;     // 0x007df370
+    void Load(int size, const void *data) override;     // 0x007df370 (DS 0x0081ac70)
 
 private:
     float m_idealRange = 0.0f;                          // +0x24 (MeleeAttack uses a fixed 1.2 m reach)
@@ -179,7 +179,7 @@ public:
     C_MineComp() : C_WeaponComp(ICK_MINE) {}
     int GetUnknownVf00() override { return m_unknown24; }   // 0x007e0760 (DS 0x0081c570)
     void Save(int *ioSize, void *buffer) override;      // 0x007df3a0
-    void Load(int size, const void *data) override;     // 0x007df3e0
+    void Load(int size, const void *data) override;     // 0x007df3e0 (DS 0x0081ad00)
 
     float GetExplosionRadius() const { return m_explosionRadius; }
 
@@ -307,7 +307,7 @@ class C_BackpackComp : public C_ItemComponent {         // vtable 0x008172d4
 public:
     C_BackpackComp() : C_ItemComponent(ICK_BACKPACK) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df6b0
-    void Load(int size, const void *data) override;     // 0x007df6f0
+    void Load(int size, const void *data) override;     // 0x007df6f0 (DS 0x0081b100)
 
     // 0: a real backpack, whose contents are worn as ITEM_CONTAINER_BACKPACK_CONTENTS.
     int GetSubtype() const { return m_subtype; }

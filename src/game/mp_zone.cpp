@@ -174,7 +174,9 @@ void C_MPZone::StopMission(bool)                        // 0x005ed260
     }
     // Fix: the player is let go even when it was never shown (the original deletes it only when
     // the module has it).
+#ifndef HD2_DEDICATED   // no flag animation on the server
     g_vertexAnimModule.RemovePlayer(m_flagAnim, false);
+#endif
     delete m_flagAnim;
     m_flagAnim = nullptr;
     if (m_spawnFrame) {

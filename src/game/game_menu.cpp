@@ -394,7 +394,9 @@ void C_GameMenu::OnMessage(S_ControlMessage *message)
     switch (message->id & CONTROL_MSG_MASK) {
     case MENU_MSG_ESCAPE: {
         if (m_infoScreen && m_infoScreen->IsShown()) {
+#ifndef HD2_DEDICATED   // the server has only the server's side
             m_infoScreen->Show(false);
+#endif
             return;
         }
         C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();

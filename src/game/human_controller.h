@@ -485,9 +485,9 @@ public:
     // The requests go to the server (CTRL_MSG_*).
     void OnUniformChanged(int uid) override;            // 0x0053e0b0
     void RequestPickUpItem(int actorId, int container) override;   // 0x0053e440
-    void RequestThrowItem(int uid, const S_vector &velocity) override;   // 0x0053e9d0
-    bool RequestMoveItem(int uid, int otherId, int fromContainer, int toContainer, int slot) override;   // 0x0053e610
-    bool RequestTransferItem(int uid, int arg, int otherId, int otherUid, int container) override;      // 0x0053e7f0
+    void RequestThrowItem(int uid, const S_vector &velocity) override;   // 0x0053e9d0 (DS 0x005333f0)
+    bool RequestMoveItem(int uid, int otherId, int fromContainer, int toContainer, int slot) override;   // 0x0053e610 (DS 0x00532f30)
+    bool RequestTransferItem(int uid, int arg, int otherId, int otherUid, int container) override;      // 0x0053e7f0 (DS 0x00533190)
     void RequestTakeFromBox(int boxId, int index) override;   // 0x0053e270
     void OnDeath() override;                            // 0x0053bd00
     void OnKilled() override;                           // 0x0053be10 (DS 0x0052fd20)
@@ -939,7 +939,7 @@ public:
 
     // --- slots of the base -------------------------------------------------------------
     void ControlVehicle() override;                     // 0x00531930
-    void EndInteraction(bool completed) override;       // 0x005324a0
+    void EndInteraction(bool completed) override;       // 0x005324a0 (DS 0x00523970)
     void Attach(C_Human *human, C_HumanController *previous) override;   // 0x00524e70
     void Detach() override;                             // 0x00525110
     void Update(int frameTime) override;                // 0x00525da0
@@ -960,7 +960,7 @@ public:
     void IssueCommand(const S_HumanCommand &command) override { C_HumanController::IssueCommand(command); }   // 0x005263f0
     S_HumanEvent *HandleEvent(S_HumanEvent *event) override;   // 0x00528580
     // Not while holding (flag 1); else the base's.
-    bool Unknown104() override;                         // 0x00532880
+    bool Unknown104() override;                         // 0x00532880 (DS 0x00523e50)
     // Nobody of the team in the line of fire along `dir` (200 m).
     bool Unknown114(const S_vector *dir) override;      // 0x114 0x0052f1f0
 
@@ -1697,8 +1697,8 @@ public:
     void Update(int frameTime) override;                // 0x00592a60 (DS 0x0059d040)
     void Tick(int /*timeDelta*/) override {}            // 0x00592e30
     // The requests the client makes on this human (items moved, dropped) go to the server.
-    bool RequestMoveItem(int uid, int otherId, int fromContainer, int toContainer, int slot) override;   // 0x00592320
-    bool RequestTransferItem(int uid, int arg, int otherId, int otherUid, int container) override;      // 0x00592500
+    bool RequestMoveItem(int uid, int otherId, int fromContainer, int toContainer, int slot) override;   // 0x00592320 (DS 0x0059c720)
+    bool RequestTransferItem(int uid, int arg, int otherId, int otherUid, int container) override;      // 0x00592500 (DS 0x0059c980)
     void RequestThrowItem(int uid, const S_vector &velocity) override;   // 0x005926e0
     void OnMessage(C_BitStream *msg) override;          // 0x00592fe0
     // The body's weapon state from its flags (raised: bit 6, bit 8 to +0xAC).

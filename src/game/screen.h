@@ -61,7 +61,7 @@ public:
     // No parent, no id (the description's, Build); the shared cursor acquired.
     C_Screen(I3D_scene *scene, I3D_frame *frame);       // 0x00668420
     // The cursor released.
-    ~C_Screen() override;                               // 0x00668550 (0x00668530)
+    ~C_Screen() override;                               // 0x00668550 (DS 0x006a1980) (0x00668530 (DS 0x006a1950))
 
     // The frame shown: off, the focus left (OnLeave(0)), CONTROL_NOTIFY_HIDDEN.
     void Hide() override;                               // +0x14 0x00668740

@@ -132,7 +132,7 @@ public:
     virtual bool OnRender() { return false; }           // 0x50 0x0067edb0 (DS 0x006bbd70)
     virtual bool OnDrawScreens() { return false; }      // 0x54 0x0067edc0 (DS 0x006bbd90)
     // The top screen and the one under its popup drawn, the menu's, the popup, the hint (9d-ii-b).
-    virtual void DrawScreens();                         // 0x58 0x0066e300
+    virtual void DrawScreens();                         // 0x58 0x0066e300 (DS 0x006a6df0)
 
     // A message: kept back or the kept ones posted / dropped (MENU_MSG_DEFER, MENU_MSG_DEFERRED);
     // to a screen by the target's top 6 bits; else the menu's (MENU_MSG_*, the message box's,
