@@ -2321,3 +2321,35 @@ particles and the surface marks. Files are served from memory.
   killed, 12 not building, 9 survived (equivalent or not comparable: listed there).
 - **Harness lessons (my mistakes):** the test first took 57 s alone (over a third of the mutation timeout): fewer
   iterations; SayNow first ran without a speech set and the endurance with an initial value of 0.
+
+## Human part 23e (the controller's weapons, `human_controller.cpp`, 2026-11-14)
+
+- **The build:** part 23d's. Added:
+  - a gun and a grenade on each side (each side's vtable; the time, rounds, attack time, flags and throw strength at
+    each side's offsets), their Fire, FireSecondary, Reload and GetAmount logged; the weapon component's attack
+    delay at each side's offset; the attack time and flags compared after each call;
+  - the shot dummy as the original's own lookup (a cache, else the model's "shdum" child; each side's cache): its
+    UseItem inlines that lookup, so a plain fake could not give both sides the same calls;
+  - the hands item each side's (the worn hands container is shared: the original's weapon put in by ToOriginal);
+    the belt grenade, the first-person view's aim (the original's return the vector through a hidden pointer);
+  - the vehicles' HasSeatWeapon and ApplySeatControls (the actors of part 23c; the original's slots 0x98, 0xC0);
+  - RequestAction and AdjustAim logged by the test class and the original's base vtable slots (the base's do
+    nothing: their arguments otherwise unseen).
+- **The tests (40,000, all exact):** OnBodyFlags (every flag alone or together, the hands item's time against the
+  mission time, the local player or not, a network game), UseItem and UseItemAt (fire or secondary, the local
+  player's aim from the camera or the shot dummy, the grenade thrown upward, the first-person view or not),
+  RaiseWeapon, LowerWeapon, ApplyWeaponControls (no controls, a vehicle's seat weapon, the driver, the belt grenade,
+  each behaviour, fire held or pressed, reloading from the belt or an empty weapon, the weapon lowered, marching, the
+  attack time at the mission time).
+- **Kept out:** what the original does not survive or reads past an object and the port checks: firing through no
+  item (UseItem, OnBodyFlags' flag 0x20000 with empty hands), the shot dummy of an item that is not a weapon.
+- **Not compared:** Reload's ammo uid going in (the original's unset, the port's -1), the grenade direction's last
+  bits (logged and compared within the float tolerance: x87 against SSE rounding of its normalization).
+- **Port fixes:** none.
+- **Results:** lines: 100 % of these functions' 130; human_controller.cpp 99.9 % of 1045, done: the one line not run
+  is the stamina clamp after a dive (part 23b; unreachable in both).
+- **Mutations** (`human/mutations/mutate_controller5.py`): 126 mutants (108 generated, 18 for repeated lines); 114
+  killed, 10 not building, 2 survived (equivalent: the grenade's 0.7 boundaries).
+- **Harness lessons (my mistakes):** my first hands item was a plain worn item with a firearm's behaviour (no vtable:
+  a crash); I kept the non-weapon kinds and null items that only the port survives; the shot-dummy fake did not do
+  what the original inlines; I hashed float outputs bit for bit.

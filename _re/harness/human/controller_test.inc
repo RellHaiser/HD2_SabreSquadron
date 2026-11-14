@@ -288,10 +288,15 @@ I3D_frame *C_Item::GetFrame(int index)
     Log(this, "ItemGetFrame", {double(index)});
     return g_cs.itemFrame;
 }
+// (As the original's 0x0058ba80, which its UseItem also inlines: a cache, else the model's "shdum" child found and
+// kept; the port's cache in a table, the original's at +0xA4.)
+std::map<const void *, I3D_frame *> g_portShotDummy;
 I3D_frame *C_WeaponItem::GetShotDummy()
 {
-    Log(this, "ItemGetShotDummy");
-    return g_cs.shotDummy;
+    I3D_frame *&dummy = g_portShotDummy[this];
+    if (!dummy)
+        dummy = GetFrame(0)->FindChildFrame("shdum", 0x20);
+    return dummy;
 }
 void C_NetReplication::RemoveObject(C_NetObject *object) { Log(object, "NetRemoveObject"); }
 void C_game::SetAlarm(bool on) { Log(nullptr, "GameSetAlarm", {double(on)}); }
@@ -419,8 +424,30 @@ void *g_defVt[64];
 // (UseMedkit logged while g_fakeMedkit: part 23c's interactions; the real one in part 23d. The original's: its
 // vtable's slot 0x14 switched alike.)
 bool g_fakeMedkit = false;
+// (RequestAction and AdjustAim logged while g_fakeActions (part 23e: the base's do nothing, the derived controllers'
+// send and scatter); the original's vtable slots 0x08 and 0x04 alike.)
+bool g_fakeActions = false;
+void LogAction(const void *self, int action, const S_vector4 *pos, const S_vector4 *dir, float strength, int ammoUid,
+               int rounds)
+{
+    Log(self, "RequestAction", {double(action), pos->x, pos->y, pos->z, dir->x, dir->y, dir->z, strength, double(ammoUid),
+                                double(rounds)});
+}
+bool LogAim(const void *self, S_vector *dir)
+{
+    Log(self, "AdjustAim", {dir->x, dir->y, dir->z});
+    dir->x += 0.125f;
+    return true;
+}
 struct S_TestController : C_HumanController {
     using C_HumanController::C_HumanController;
+    void RequestAction(int action, const S_vector4 *pos, const S_vector4 *dir, float strength, int ammoUid,
+                       int rounds) override
+    {
+        if (g_fakeActions)
+            LogAction(this, action, pos, dir, strength, ammoUid, rounds);
+    }
+    bool AdjustAim(S_vector *dir) override { return g_fakeActions ? LogAim(this, dir) : C_HumanController::AdjustAim(dir); }
     bool UseMedkit(int humanId, int itemUid) override
     {
         if (!g_fakeMedkit)
@@ -433,6 +460,19 @@ uint32_t CT_ OC_UseMedkit(void *self, int humanId, int itemUid)
 {
     Log(self, "UseMedkit", {double(humanId), double(itemUid)});
     return true;
+}
+void CT_ OC_RequestAction(void *self, int action, const S_vector4 *pos, const S_vector4 *dir, float strength,
+                          int ammoUid, int rounds)
+{
+    LogAction(self, action, pos, dir, strength, ammoUid, rounds);
+}
+uint32_t CT_ OC_AdjustAim(void *self, S_vector *dir) { return LogAim(self, dir); }
+void FakeActions(bool on)
+{
+    g_fakeActions = on;
+    void **vt = OriginalAt<void **>(0x00810fb8);
+    vt[0x08 / 4] = on ? reinterpret_cast<void *>(OC_RequestAction) : OriginalAt<void *>(0x005830a0);
+    vt[0x04 / 4] = on ? reinterpret_cast<void *>(OC_AdjustAim) : OriginalAt<void *>(0x00583090);
 }
 void FakeMedkit(bool on)
 {
@@ -1869,6 +1909,317 @@ void TestControllerSaves()
     }
 }
 
+// ---- part 23e: the weapons (OnBodyFlags, UseItem, the raised weapon, ApplyWeaponControls)
+
+// A weapon and a grenade on each side (each side's vtable and offsets: the rounds +0x50, the attack time +0x58, the
+// flags +0x60, the throw strength +0x98 in the original's), their Fire, FireSecondary, Reload and GetAmount logged.
+alignas(16) uint8_t g_weaponPort[2][0x200], g_weaponOrig[2][0x200];
+void *g_weaponPortVt[64], *g_weaponOrigVt[64];
+struct S_WeaponScript {
+    int fire = 0;                                       // Fire / FireSecondary
+    bool reload = true;                                 // Reload
+    float amount = 10.0f;                               // GetAmount
+} g_ws;
+int CT_ WP_Fire(void *self, void *shooter, const S_vector *pos, const S_vector *dir, uint32_t flags)
+{
+    Log(self, ("WeaponFire " + NameOf(shooter)).c_str(), {pos->x, pos->y, pos->z, dir->x, dir->y, dir->z, double(flags)});
+    return g_ws.fire;
+}
+int CT_ WP_FireSecondary(void *self, void *shooter, const S_vector *pos, const S_vector *dir, uint32_t flags)
+{
+    Log(self, ("WeaponFireSecondary " + NameOf(shooter)).c_str(),
+        {pos->x, pos->y, pos->z, dir->x, dir->y, dir->z, double(flags & 0xFF)});
+    return g_ws.fire;
+}
+uint32_t CT_ WP_Reload(void *self, void *owner, int container, int *ammoUid, int keep)
+{
+    // (The uid's starting value not logged: the original passes it unset, the port -1.)
+    Log(self, ("WeaponReload " + NameOf(owner)).c_str(), {double(container), double(B(keep))});
+    *ammoUid = 17;
+    return g_ws.reload;
+}
+float CT_ WP_GetAmount(void *self)
+{
+    Log(self, "WeaponGetAmount");
+    return g_ws.amount;
+}
+void *CT_ OW_GetShotDummy(void *self)
+{
+    I3D_frame *&dummy = *reinterpret_cast<I3D_frame **>(static_cast<uint8_t *>(self) + 0xA4);
+    if (!dummy) {
+        typedef void *(CT_ *T_GetFrame)(void *, int);
+        dummy = static_cast<I3D_frame *>(OriginalAt<T_GetFrame>(0x007d3f00)(self, 0))->FindChildFrame("shdum", 0x20);
+    }
+    return dummy;
+}
+// The first-person view's aim (the original's return the vector through a hidden pointer).
+S_vector4 *CT_ OW_GetAimDir(void *, S_vector4 *ret)
+{
+    Log(nullptr, "ViewGetAimDir");
+    *ret = g_cs.aimDir;
+    return ret;
+}
+S_vector4 *CT_ OW_GetAimOrigin(void *, S_vector4 *ret)
+{
+    Log(nullptr, "ViewGetAimOrigin");
+    *ret = g_cs.aimOrigin;
+    return ret;
+}
+void *OrigWeapon(const void *p)
+{
+    for (int k = 0; k < 2; ++k)
+        if (p == g_weaponPort[k])
+            return g_weaponOrig[k];
+    return OrigItem(p);
+}
+void *CT_ OW_FindBeltItem(void *self, int behaviour)
+{
+    Log(self, "FindBeltItem", {double(behaviour)});
+    return OrigWeapon(g_cs.beltItem);
+}
+// The vehicles' seat weapons (the actors of part 23c: the original's slots 0x98, 0xC0).
+bool g_seatWeapon = false;
+uint32_t CT_ AC_HasSeatWeapon(void *self, int seat)
+{
+    Log(self, "HasSeatWeapon", {double(seat)});
+    return g_seatWeapon;
+}
+void CT_ AC_ApplySeatControls(void *self, int seat, float *axes, float *buttons)
+{
+    Log(self, ("ApplySeatControls " + NameOf(axes) + " " + NameOf(buttons)).c_str(), {double(seat)});
+}
+// The hands item each side's (the worn hands container is shared: the original's weapon put in before it runs).
+void *g_handsWeapon = nullptr;
+void (*g_toOriginalBeforeWeapons)() = nullptr;
+void WeaponsToOriginal()
+{
+    if (g_toOriginalBeforeWeapons)
+        g_toOriginalBeforeWeapons();
+    g_wornContainers[ITEM_CONTAINER_HANDS].item = OrigWeapon(g_handsWeapon);
+}
+// (The definition's protected component through a derived accessor.)
+struct S_CompAccess : C_ItemDef {
+    static void Set(void *def, void *comp)
+    {
+        static_cast<S_CompAccess *>(static_cast<C_ItemDef *>(def))->m_component = static_cast<C_ItemComponent *>(comp);
+    }
+};
+// The weapon component's attack delay (shared: the port's offset found through its getter, the original's +0x18).
+alignas(16) uint8_t g_weaponCompBytes[0x80];
+size_t g_attackDelayAt = 0;
+
+I3D_frame *g_shdumParent;                               // a model with a "shdum" child
+void SetUpWeapons()
+{
+    {
+        S_quat none;
+        none.Identity();
+        g_shdumParent = NewFrame(FRAME_DUMMY, "gunModel", S_vector(1, 1, 1), none, Box(S_vector(0.05f, 0.05f, 0.05f)), "",
+                                 g_sector);
+        NewFrame(FRAME_DUMMY, "shdum", S_vector(0, 0, 0.5f), none, Box(S_vector(0.05f, 0.05f, 0.05f)), "", g_shdumParent);
+    }
+    RedirectOriginal(0x0058ba80, FAKE(OW_GetShotDummy));
+    RedirectOriginal(0x005a6730, FAKE(OW_FindBeltItem));
+    RedirectOriginal(0x00492880, FAKE(OW_GetAimDir));
+    RedirectOriginal(0x00492790, FAKE(OW_GetAimOrigin));
+    g_actPortVt[VSlot(&C_Actor::HasSeatWeapon)] = reinterpret_cast<void *>(AC_HasSeatWeapon);
+    g_actPortVt[VSlot(&C_Actor::ApplySeatControls)] = reinterpret_cast<void *>(AC_ApplySeatControls);
+    g_actOrigVt[0x98 / 4] = reinterpret_cast<void *>(AC_HasSeatWeapon);
+    g_actOrigVt[0xC0 / 4] = reinterpret_cast<void *>(AC_ApplySeatControls);
+    for (int i = 0; i < 64; ++i)
+        g_weaponPortVt[i] = g_weaponOrigVt[i] = reinterpret_cast<void *>(CT_Unexpected);
+    g_weaponPortVt[VSlot(&C_Item::Fire)] = reinterpret_cast<void *>(WP_Fire);
+    g_weaponPortVt[VSlot(&C_Item::FireSecondary)] = reinterpret_cast<void *>(WP_FireSecondary);
+    g_weaponPortVt[VSlot(&C_Item::Reload)] = reinterpret_cast<void *>(WP_Reload);
+    g_weaponPortVt[VSlot(&C_Item::GetAmount)] = reinterpret_cast<void *>(WP_GetAmount);
+    g_weaponOrigVt[0x24 / 4] = reinterpret_cast<void *>(WP_Fire);
+    g_weaponOrigVt[0x28 / 4] = reinterpret_cast<void *>(WP_FireSecondary);
+    g_weaponOrigVt[0x18 / 4] = reinterpret_cast<void *>(WP_Reload);
+    g_weaponOrigVt[0x0C / 4] = reinterpret_cast<void *>(WP_GetAmount);
+    // (A float: found by a float marker.)
+    for (size_t off = 4; off + 4 <= sizeof g_weaponCompBytes && !g_attackDelayAt; off += 4) {
+        std::memset(g_weaponCompBytes, 0, sizeof g_weaponCompBytes);
+        const float marker = 1234.5f;
+        std::memcpy(g_weaponCompBytes + off, &marker, 4);
+        if (reinterpret_cast<C_WeaponComp *>(g_weaponCompBytes)->GetAttackDelay() == marker)
+            g_attackDelayAt = off;
+    }
+    CHECK(g_attackDelayAt != 0);
+    std::memset(g_weaponCompBytes, 0, sizeof g_weaponCompBytes);
+    S_CompAccess::Set(g_wornDefs[0], g_weaponCompBytes);
+    void *comp = g_weaponCompBytes;
+    std::memcpy(g_wornDefs[0] + 0x48, &comp, 4);
+    for (int k = 0; k < 2; ++k) {
+        *reinterpret_cast<void ***>(g_weaponPort[k]) = g_weaponPortVt;
+        *reinterpret_cast<void ***>(g_weaponOrig[k]) = g_weaponOrigVt;
+        S_ItemAccess::SetDef(g_weaponPort[k], g_wornDefs[0]);
+        void *def = g_wornDefs[0];
+        std::memcpy(g_weaponOrig[k] + 0x04, &def, 4);
+        g_names[g_weaponPort[k]] = g_names[g_weaponOrig[k]] = k ? "grenade" : "gun";
+        g_extraPointers.push_back({g_weaponPort[k], g_weaponOrig[k]});
+    }
+    g_names[g_weaponCompBytes] = "weaponComp";
+}
+// Each weapon's state on both sides (the item kind +0x08, the time +0x14, the rounds, attack time, flags, throw strength).
+void SetWeapon(int k, int kind, uint32_t time, float rounds, uint32_t attackTime, uint32_t flags, float strength)
+{
+    auto *w = reinterpret_cast<C_WeaponItem *>(g_weaponPort[k]);
+    std::memcpy(g_weaponPort[k] + 0x08, &kind, 4);
+    std::memcpy(g_weaponOrig[k] + 0x08, &kind, 4);
+    w->SetTime(time);
+    std::memcpy(g_weaponOrig[k] + 0x14, &time, 4);
+    w->SetLoadedRounds(rounds);
+    std::memcpy(g_weaponOrig[k] + 0x50, &rounds, 4);
+    w->SetAttackTime(attackTime);
+    std::memcpy(g_weaponOrig[k] + 0x58, &attackTime, 4);
+    w->SetFlags(flags);
+    std::memcpy(g_weaponOrig[k] + 0x60, &flags, 4);
+    w->SetThrowStrength(strength);
+    std::memcpy(g_weaponOrig[k] + 0x98, &strength, 4);
+}
+// After a call: the weapons' attack time and flags alike.
+bool WeaponsAgree()
+{
+    for (int k = 0; k < 2; ++k) {
+        const auto *w = reinterpret_cast<const C_WeaponItem *>(g_weaponPort[k]);
+        if (w->GetAttackTime() != *reinterpret_cast<const uint32_t *>(g_weaponOrig[k] + 0x58) ||
+            w->GetFlags() != *reinterpret_cast<const uint32_t *>(g_weaponOrig[k] + 0x60))
+            return false;
+    }
+    return true;
+}
+
+// The state: the hands item (the gun, the grenade, another item, none), the belt grenade, the weapons, the controls,
+// the vehicle and its seat weapon, the local player and the first-person view, the mission time.
+void RandomWeapons()
+{
+    RandomInteractions();
+    C_Human *h = g_h.human;
+    GetGame()->m_missionTime = uint32_t(I(0, 6000));
+    for (int k = 0; k < 2; ++k)
+        // (Weapons only: the original reads any item's shot dummy at +0xA4; the port checks the kind.)
+        SetWeapon(k, ITEM_KIND_WEAPON, uint32_t(P(0.3f) ? GetGame()->m_missionTime + I(-1, 1) : I(0, 6000)), P(0.2f) ? 0.0f : float(I(1, 30)),
+                  uint32_t(P(0.3f) ? GetGame()->m_missionTime + I(-1, 1) : I(0, 6000)), uint32_t(I(0, 7)), U(0.5f, 3.0f));
+    const int hands = I(0, 2);
+    g_handsWeapon = hands == 0 ? g_weaponPort[0] : hands == 1 ? g_weaponPort[1] : nullptr;
+    g_wornContainers[ITEM_CONTAINER_HANDS].item = g_handsWeapon;
+    h->m_containers = g_wornTable;
+    g_pc->m_handsItem = P(0.8f) ? static_cast<C_Item *>(g_handsWeapon) : nullptr;
+    g_cs.beltItem = P(0.3f) ? nullptr : reinterpret_cast<C_Item *>(g_weaponPort[1]);
+    static const int behaviours[] = {ITEM_BEHAVIOUR_THROWN, ITEM_BEHAVIOUR_SIDEARM, ITEM_BEHAVIOUR_RIFLE,
+                                     ITEM_BEHAVIOUR_LAUNCHER, ITEM_BEHAVIOUR_SMG, ITEM_BEHAVIOUR_LMG, 7,
+                                     ITEM_BEHAVIOUR_ASSAULT, ITEM_BEHAVIOUR_MEDKIT, 0};
+    g_behaviour = behaviours[I(0, 9)];
+    g_ws.fire = I(0, 5);
+    g_ws.reload = P(0.6f);
+    g_ws.amount = P(0.3f) ? 0.0f : float(I(1, 30));
+    const float delay = P(0.3f) ? 0.0f : U(50, 900);
+    std::memcpy(g_weaponCompBytes + g_attackDelayAt, &delay, 4);
+    std::memcpy(g_weaponCompBytes + 0x18, &delay, 4);
+    g_cs.shotDummy = P(0.5f) ? g_targetFrame : nullptr;
+    for (int k = 0; k < 2; ++k) {
+        I3D_frame *cached = P(0.5f) ? g_cs.shotDummy : nullptr;
+        g_portShotDummy[g_weaponPort[k]] = cached;
+        std::memcpy(g_weaponOrig[k] + 0xA4, &cached, 4);
+    }
+    g_cs.itemFrame = P(0.5f) ? g_cameraFrame : g_shdumParent;
+
+    g_cs.aimDir = {U(-1, 1), U(-1, 1), U(-1, 1), 0.0f};
+    g_cs.aimOrigin = {U(-5, 5), U(0, 3), U(-5, 5), 1.0f};
+    g_firstPerson = P(0.5f);
+    for (float &a : g_axes)
+        a = P(0.6f) ? 0.0f : 1.0f;
+    for (float &b : g_buttons)
+        b = P(0.8f) ? 0.0f : 1.0f;
+    if (P(0.1f))
+        g_pc->m_axes = nullptr;
+    if (P(0.1f))
+        g_pc->m_buttons = nullptr;
+    g_pc->m_weaponRaised = P(0.6f);
+    g_seatWeapon = P(0.5f);
+    if (P(0.6f))
+        h->m_vehicle = nullptr;
+    g_pc->m_viewDir = {U(-1, 1), U(-1, 1), U(-1, 1), 0.0f};
+}
+
+void TestControllerWeapons()
+{
+    C_Human *h = g_h.human;
+    std::printf("controller weapons\n");
+    g_toOriginalBeforeWeapons = g_toOriginalExtra;
+    g_toOriginalExtra = WeaponsToOriginal;
+    FakeActions(true);
+    for (int i = 0; i < 40000 / QUICK; ++i) {
+        RandomWeapons();
+        switch (i % 6) {
+        case 0: {
+            uint32_t flags = 0;
+            for (uint32_t bit : {0x100u, 0x10000u, 0x1000u, 0x2000u, 0x4000u, 0x20000u, 0x8u})
+                if (P(0.25f))
+                    flags |= bit;
+            // (Not 0x20000 alone with nothing in the hands: the original fires through a null item; the port checks.)
+            if (!g_handsWeapon && !(flags & 0x7000))
+                flags &= ~0x20000u;
+            ControllerCall("OnBodyFlags", [&] { g_pc->OnBodyFlags(flags); return 0; },
+                           [&](void *) { OCtl<void>(0x005839d0, flags); return 0; });
+            break;
+        }
+        case 1:
+        case 2: {
+            const bool fire = P(0.6f);
+            const uint32_t flags = uint32_t(I(0, 0x1FF));
+            // (Not without an item: the original fires through a null one; the port checks.)
+            C_Item *item = g_handsWeapon ? static_cast<C_Item *>(g_handsWeapon) : reinterpret_cast<C_Item *>(g_weaponPort[0]);
+            void *origItem = OrigWeapon(item);
+            if (!item)
+                origItem = nullptr;
+            const bool at = i % 6 == 2 && item;
+            // (The origin and direction logged: compared within the float tolerance, the grenade's normalized
+            // direction rounding apart in its last bits.)
+            const auto hash = [](const S_vector4 &o, const S_vector4 &d) {
+                Log(nullptr, "UseItemOut", {o.x, o.y, o.z, d.x, d.y, d.z});
+                return 0;
+            };
+            if (at) {
+                const S_vector4 origin = g_cs.aimOrigin, dir = g_cs.aimDir;
+                ControllerCall("UseItemAt", [&] { return g_pc->UseItemAt(item, fire, flags, origin, dir); },
+                               [&](void *) { return OCtl<int>(0x0058bab0, origItem, int(fire), flags, &origin, &dir); });
+            } else {
+                ControllerCall("UseItem",
+                               [&] {
+                                   S_vector4 origin = {}, dir = {};
+                                   const int r = g_pc->UseItem(item, fire, flags, &origin, &dir);
+                                   return r * 7 + hash(origin, dir);
+                               },
+                               [&](void *) {
+                                   S_vector4 origin = {}, dir = {};
+                                   const int r = OCtl<int>(0x0058b6c0, origItem, int(fire), flags, &origin, &dir);
+                                   return r * 7 + hash(origin, dir);
+                               });
+            }
+            break;
+        }
+        case 3:
+            if (P(0.5f))
+                ControllerCall("RaiseWeapon", [&] { g_pc->RaiseWeapon(); return 0; }, [&](void *) { OCtl<void>(0x0058c330); return 0; });
+            else
+                ControllerCall("LowerWeapon", [&] { g_pc->LowerWeapon(); return 0; }, [&](void *) { OCtl<void>(0x0058c400); return 0; });
+            break;
+        default: {
+            const int time = I(0, 200);
+            const uint32_t flags = uint32_t(I(0, 0xFF));
+            ControllerCall("ApplyWeaponControls", [&] { g_pc->ApplyWeaponControls(time, flags); return 0; },
+                           [&](void *) { OCtl<void>(0x0058baf0, time, flags); return 0; });
+            break;
+        }
+        }
+        CHECK(WeaponsAgree());
+        (void)h;
+    }
+    g_toOriginalExtra = g_toOriginalBeforeWeapons;
+    FakeActions(false);
+}
+
 void TestController()
 {
     SetUpCombat();
@@ -1895,6 +2246,14 @@ void TestController()
         SetUpSpeech();
         TestControllerSpeech();
         TestControllerSaves();
+    }
+    if (run("23e")) {
+        if (!run("23c"))
+            SetUpInteractions();
+        if (!run("23d"))
+            SetUpSpeech();
+        SetUpWeapons();
+        TestControllerWeapons();
     }
 }
 
