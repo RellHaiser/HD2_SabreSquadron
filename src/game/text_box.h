@@ -112,7 +112,7 @@ public:
 
     // The line scrolled into the box (false when it is higher than the box or in it already).
     bool ScrollToLine(int line);                        // 0x00643e40
-    int GetScroll() const { return m_scroll; }          // 0x00644270
+    int GetScroll() const { return m_scroll; }          // 0x00644270 (DS 0x006762e0)
     int16_t GetScrollRange();                           // 0x00644230 (after the layout)
     // A line's centre in the interface's coordinates (x of the box's centre; the line outside the
     // box: 0, 0).

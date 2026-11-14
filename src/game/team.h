@@ -67,7 +67,7 @@ public:
     ~C_FormationShape();                                // 0x00594a70 (SetType(FORMATION_NONE))
     void SetType(E_FormationType type);                 // 0x00597420
     void SetScale(const S_vector &scale);               // 0x005977f0
-    E_FormationType GetType() const { return m_type; }  // 0x00597b40 (+0x78)
+    E_FormationType GetType() const { return m_type; }  // 0x00597b40 (DS 0x005a1b90) (+0x78)
     int GetMemberCount() const { return m_memberCount; }   // +0x7C
     bool AddMember(C_Human *member);                    // 0x00597f80
     bool RemoveMember(C_Human *member);                 // 0x005981c0

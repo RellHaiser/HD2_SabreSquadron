@@ -288,9 +288,9 @@ protected:
     int m_container = 0;                                // +0x24
 };
 
-class C_AmmoItem : public C_Item {                      // vtable 0x00816ed8, 0x30 bytes; deleting dtor 0x007d37a0 (DS 0x0080c730)
+class C_AmmoItem : public C_Item {                      // vtable 0x00816ed8, 0x30 bytes; deleting dtor 0x007d37a0 (DS 0x0080c730), dtor 0x007d37c0 (DS 0x0080c760)
 public:
-    C_AmmoItem() : C_Item(ITEM_KIND_AMMO) {}            // 0x007d3680
+    C_AmmoItem() : C_Item(ITEM_KIND_AMMO) {}            // 0x007d3680 (DS 0x0080c510)
 
     void Init(int typeId) override;                     // 0x007d37d0
     float GetAmount() override { return m_rounds; }     // 0x007d3780
