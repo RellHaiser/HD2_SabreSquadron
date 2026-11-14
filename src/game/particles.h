@@ -311,13 +311,13 @@ struct S_ActiveEmitter {
     bool transient;                                         // +0x0C not stored in saved games
 };
 
-class C_ParticlesModule : public C_Module {                 // "Particles", vtable 0x0080f9a0, 0x1048 bytes
+class C_ParticlesModule : public C_Module {                 // "Particles", vtable 0x0080f9a0, 0x1048 bytes; deleting dtor 0x00443e00 (DS 0x004642d0)
 public:
     // Free emitters are kept for this many effects.
     static constexpr int MAX_POOLED_EFFECTS = 256;
 
-    C_ParticlesModule(int id, const char *name);            // 0x00443d30
-    ~C_ParticlesModule() override;                          // 0x00443e40
+    C_ParticlesModule(int id, const char *name);            // 0x00443d30 (DS 0x00464180)
+    ~C_ParticlesModule() override;                          // 0x00443e40 (DS 0x00464300)
 
     void Tick(int timeDelta) override {}                    // 0x004455a0
     // Advances all emitters (they are only redrawn while the game is paused).
@@ -327,8 +327,8 @@ public:
     void StartMission(bool server) override;                // 0x00443f30
     void StopMission(bool server) override;                 // 0x00443fe0
     void RestartMission(bool server) override;              // 0x00447730
-    bool SaveGame(C_chunk &chunk) override;                 // 0x004478f0
-    bool LoadGame(C_chunk &chunk) override;                 // 0x00447c20
+    bool SaveGame(C_chunk &chunk) override;                 // 0x004478f0 (DS 0x00464250)
+    bool LoadGame(C_chunk &chunk) override;                 // 0x00447c20 (DS 0x00464270)
 
     // Starts effect `effect` at `matrix` (see C_ParticleEmitter::Init); returns its
     // handle, -1 if the effect does not exist or is incomplete. `transient` effects
