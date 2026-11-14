@@ -316,7 +316,7 @@ public:
     // Free emitters are kept for this many effects.
     static constexpr int MAX_POOLED_EFFECTS = 256;
 
-    C_ParticlesModule(int id, const char *name);            // 0x00443d30 (DS 0x00464180)
+    C_ParticlesModule(int id, const char *name);            // 0x00443d30
     ~C_ParticlesModule() override;                          // 0x00443e40 (DS 0x00464300)
 
     void Tick(int timeDelta) override {}                    // 0x004455a0
