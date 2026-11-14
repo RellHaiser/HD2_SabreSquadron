@@ -172,7 +172,7 @@ protected:
     // The frames (their trees) and the models released, the last first.
     void ReleaseModels();                               // 0x0066c9c0 (__fastcall)
     // The cursor's input to the top screen (Update; the input lock -1 only).
-    void CursorInput(int timeDelta);                    // 0x0066bc90
+    void CursorInput(int timeDelta);                    // 0x0066bc90 (DS 0x006a45c0)
 
     uint32_t m_hoveredId = 0xFFFFFFFF;                  // +0x0C the id under the cursor last update
     C_Control *m_editing = nullptr;                     // +0x10 the control the keys go to

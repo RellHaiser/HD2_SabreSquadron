@@ -139,7 +139,7 @@ protected:
                             uint32_t value);            // 0x00693ae0 (DS 0x006d32e0)
     // Moved (CONTROL_NOTIFY_08): the copy by the cursor's move (none selected: false).
     static bool OnDragMove(void *menu, void *argument, C_Control *control, uint32_t notification,
-                           uint32_t value);             // 0x00693e50
+                           uint32_t value);             // 0x00693e50 (DS 0x006d3710)
     // Dropped (CONTROL_NOTIFY_09): the copy released. On the slots' half: a roster soldier onto a removable
     // slot's soldier replaces him; a slot's soldier swaps places with the slot under the cursor (its
     // picture clicked; none, itself: shown again). Else assigned (a roster soldier; back on the roster's
