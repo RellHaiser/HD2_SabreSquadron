@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 // ---- darray.c ----------------------------------------------------------------------------------------------------------
 
@@ -868,4 +869,90 @@ char *StatsPlayerBucketString(S_StatsGame *game, const char *name, BucketOpFn op
     char full[64];
     std::sprintf(full, "%s_%d", name, StatsPlayerNumber(game, index));
     return StatsBucketString(game, full, op, value);
+}
+
+// ---- gutil.c: the SDK's random numbers (Park and Miller's minimal standard) and the machine's unique id ------------------------
+
+namespace {
+
+int32_t s_randomNumber = 1;                             // 0x008455f0
+
+int32_t NextLongRand(int32_t seed)                      // 0x007381f0 (DS 0x00794cb0)
+{
+    uint32_t lo = 16807 * (static_cast<uint32_t>(seed) & 0xFFFF);
+    const uint32_t hi = 16807 * (static_cast<uint32_t>(seed) >> 16);
+    lo += (hi & 0x7FFF) << 16;
+    if (lo > 0x7FFFFFFF) {
+        lo &= 0x7FFFFFFF;
+        ++lo;
+    }
+    lo += hi >> 15;
+    if (lo > 0x7FFFFFFF) {
+        lo &= 0x7FFFFFFF;
+        ++lo;
+    }
+    return static_cast<int32_t>(lo);
+}
+
+int32_t LongRand()                                      // 0x007381d0 (DS 0x00794c80)
+{
+    s_randomNumber = NextLongRand(s_randomNumber);
+    return s_randomNumber;
+}
+
+}  // namespace
+
+void RandomSeed(uint32_t seed)                       // 0x00738190 (DS 0x00794c20)
+{
+    s_randomNumber = seed ? static_cast<int32_t>(seed & 0x7FFFFFFF) : 1;
+}
+
+// low .. high - 1 (the SDK's check for an empty range is not in this build).
+int RandomInt(int low, int high)                     // 0x007381b0 (DS 0x00794c50)
+{
+    return LongRand() % (high - low) + low;
+}
+
+namespace {
+
+// A new id: 19 letters and digits at random, '-' at 4, 9 and 14.
+void GenerateUniqueId(char *id)                         // 0x007380f0 (DS 0x00794b50)
+{
+    const char chars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    LARGE_INTEGER counter;
+    const uint32_t counterSeed = QueryPerformanceCounter(&counter) ? counter.HighPart ^ counter.LowPart : 0;
+    RandomSeed(static_cast<uint32_t>(std::time(nullptr)) ^ static_cast<uint32_t>(std::clock()) ^ GetTickCount() ^ counterSeed);
+    for (int i = 0; i < 19; ++i)
+        id[i] = (i == 4 || i == 9 || i == 14) ? '-' : chars[RandomInt(0, 62)];
+    id[19] = 0;
+}
+
+char s_uniqueId[0x104];                                 // 0x00982bb8
+
+}  // namespace
+
+// The id kept in HKCU\Software\GameSpy\GameSpy 3D\Registration "Crypt" (a new one written when it is missing or not 19 long),
+// without its dashes: 16 characters.
+const char *GetUniqueId()                               // 0x00737fd0 (DS 0x007949e0)
+{
+    static const char KEY[] = "Software\\GameSpy\\GameSpy 3D\\Registration";
+    HKEY key;
+    DWORD type = REG_SZ;
+    DWORD size = sizeof(s_uniqueId);
+    DWORD disposition;
+    const bool create = RegOpenKeyExA(HKEY_CURRENT_USER, KEY, 0, KEY_ALL_ACCESS, &key) != ERROR_SUCCESS;
+    if (RegQueryValueExA(key, "Crypt", nullptr, &type, reinterpret_cast<BYTE *>(s_uniqueId), &size) != ERROR_SUCCESS ||
+        std::strlen(s_uniqueId) != 19) {
+        GenerateUniqueId(s_uniqueId);
+        if (create)
+            RegCreateKeyExA(HKEY_CURRENT_USER, KEY, 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &key, &disposition);
+        RegSetValueExA(key, "Crypt", 0, REG_SZ, reinterpret_cast<const BYTE *>(s_uniqueId),
+                       static_cast<DWORD>(std::strlen(s_uniqueId) + 1));
+    }
+    RegCloseKey(key);
+    std::memmove(s_uniqueId + 4, s_uniqueId + 5, 4);
+    std::memmove(s_uniqueId + 8, s_uniqueId + 10, 4);
+    std::memmove(s_uniqueId + 12, s_uniqueId + 15, 4);
+    s_uniqueId[16] = 0;
+    return s_uniqueId;
 }
