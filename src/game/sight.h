@@ -162,8 +162,8 @@ public:
     C_MeleeTrackerSightObserver(C_MeleeTracker *meleeTracker, uint32_t mask, int index);   // 0x0046d760
     void Update(uint32_t mask, int target, int timeDelta) override;   // 0x0046dea0
     bool WantsTest(int target) override;                // 0x0046dc70
-    bool TestNow(int) override { return true; }         // 0x0046d790
-    int CanSee(int, int *, bool *) override { return 0; }   // 0x0046d7a0
+    bool TestNow(int) override { return true; }         // 0x0046d790 (DS 0x00488c60)
+    int CanSee(int, int *, bool *) override { return 0; }   // 0x0046d7a0 (DS 0x00488c80)
     // No parts (a static empty vector; the bits untouched).
     const std::vector<I3D_frame *> *GetVisibleParts(int target, uint32_t *parts) override;   // 0x0046d7b0
 
