@@ -311,13 +311,13 @@ struct S_ActiveEmitter {
     bool transient;                                         // +0x0C not stored in saved games
 };
 
-class C_ParticlesModule : public C_Module {                 // "Particles", vtable 0x0080f9a0, 0x1048 bytes; deleting dtor 0x00443e00 (DS 0x004642d0)
+class C_ParticlesModule : public C_Module {                 // "Particles", vtable 0x0080f9a0, 0x1048 bytes; deleting dtor 0x00443e00
 public:
     // Free emitters are kept for this many effects.
     static constexpr int MAX_POOLED_EFFECTS = 256;
 
     C_ParticlesModule(int id, const char *name);            // 0x00443d30
-    ~C_ParticlesModule() override;                          // 0x00443e40 (DS 0x00464300)
+    ~C_ParticlesModule() override;                          // 0x00443e40
 
     void Tick(int timeDelta) override {}                    // 0x004455a0
     // Advances all emitters (they are only redrawn while the game is paused).
