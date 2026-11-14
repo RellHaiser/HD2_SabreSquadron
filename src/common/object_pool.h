@@ -27,7 +27,7 @@ public:
         m_free.pop_back();
         return object;
     }
-    void Put(T *object) { m_free.push_back(object); }   // (the list's spare cells, 0x00533de0 (DS 0x00525990), 0x0058b3f0 (DS 0x005939b0), 0x0058b420 (DS 0x005939f0), 0x005cb000 (DS 0x005e2860), 0x005ce250 (DS 0x005e6970), are the vector here)
+    void Put(T *object) { m_free.push_back(object); }   // (the list's spare cells, 0x00533de0 (DS 0x00525990), 0x0058b3f0 (DS 0x005939b0), 0x0058b420 (DS 0x005939f0), 0x005cb000 (DS 0x005e2860), 0x005ce250 (DS 0x005e6970), 0x00453460 (DS 0x0046d700), are the vector here)
     // Makes `growBy` new objects.
     void Grow()                                         // (0x0058a360 (DS 0x00592310), 0x0058a3f0 (DS 0x005923d0), 0x005cef90 (DS 0x005e7aa0), 0x005cf000 (DS 0x005e7b30))
     {

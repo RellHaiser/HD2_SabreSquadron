@@ -444,8 +444,13 @@ void C_SoundModule::Update(int timeDelta)
 
 void C_SoundModule::StopAll(bool releaseTableSounds, bool keepMusic)
 {
+#ifdef HD2_DEDICATED   // the server's copy tests only the game type
+    if (!g_gameProfile.IsCooperativeGame())
+        return;
+#else
     if (!IsClient() && !g_gameProfile.IsCooperativeGame())
         return;
+#endif
 
     for (int channel = 0; channel < SOUND_CHANNELS; ++channel) {
         for (int &slot : m_channelSlots[channel])
@@ -465,6 +470,7 @@ void C_SoundModule::StopAll(bool releaseTableSounds, bool keepMusic)
     m_freeSlots.clear();
     m_listeners.clear();
 
+#ifndef HD2_DEDICATED   // no music streams on the server
     if (m_music && !keepMusic) {
         SetBackgroundMusic(-1, 0);
         m_music->Release();
@@ -474,6 +480,7 @@ void C_SoundModule::StopAll(bool releaseTableSounds, bool keepMusic)
         m_overlay->Release();
         m_overlay = nullptr;
     }
+#endif
     if (!keepMusic) {
         m_musicFade = 1.0f;
         m_musicFadeTarget = 1.0f;
@@ -889,11 +896,15 @@ int C_SoundModule::PlayTableSound(void *owner, const S_SoundRequest &request)
     std::snprintf(fileName, sizeof(fileName), "%s", sample->fileName.c_str());
     if (!std::strstr(fileName, ".wav"))
         std::strncat(fileName, ".wav", sizeof(fileName) - std::strlen(fileName) - 1);
+#ifndef HD2_DEDICATED   // no sound device on the server: the slot's sound is set up without its file
     if (!ISndGetDriver()->IsInitialized())
         return -1;
+#endif
 
     I3D_sound *sound = slot->sound;
+#ifndef HD2_DEDICATED
     g_soundCache.OpenInto(sound, fileName);
+#endif
     I3D_sector *outdoor = GetGame()->GetScene()->GetPrimarySector();
     outdoor->AddSound(sound);
     sound->LinkTo(outdoor, 0);

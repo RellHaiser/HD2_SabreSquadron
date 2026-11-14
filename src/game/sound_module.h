@@ -111,7 +111,7 @@ uint32_t __stdcall AddSectorHopEntry(I3D_frame *frame, void *table);   // 0x0043
 // A sound frame of the scene whose volume follows the listener's sector.
 struct S_SoundFrame {                                   // 0x14 bytes
     S_SoundFrame(I3D_sound *sound, bool trackSector);   // 0x00432420
-    ~S_SoundFrame();                                    // 0x00432480
+    ~S_SoundFrame();                                    // 0x00432480 (DS 0x00457d80)
     S_SoundFrame(const S_SoundFrame &) = delete;
     S_SoundFrame &operator=(const S_SoundFrame &) = delete;
     // Sets the sector damping and applies it to the sound's volume.
@@ -149,13 +149,13 @@ public:
     int Play(const S_SoundRequest &request);                        // vtable +0x54 0x00433fa0
     // Replays a table sample into the sound object of a recycled slot (see the
     // definition: free slots never keep a sound, so in practice this fails).
-    int PlayTableSound(void *owner, const S_SoundRequest &request);   // vtable +0x58 0x00435240
+    int PlayTableSound(void *owner, const S_SoundRequest &request);   // vtable +0x58 0x00435240 (DS 0x0045a010)
     // Stops the sound in `*slot` and sets `*slot` to -1.
     void Stop(int *slot);                                           // vtable +0x5C 0x00437340 (DS 0x0045b2c0)
     I3D_sound *GetSound(int slot) const;                            // vtable +0x78 0x004374a0
     // Stops every sound; `releaseTableSounds` also frees the samples' loaded
     // copies, `keepMusic` leaves the background music running.
-    void StopAll(bool releaseTableSounds, bool keepMusic);          // vtable +0x48 0x004361f0
+    void StopAll(bool releaseTableSounds, bool keepMusic);          // vtable +0x48 0x004361f0 (DS 0x0045ade0)
     // At most `limit` sounds of `channel` play at once.
     void SetChannelLimit(int channel, int limit);                   // vtable +0x90 0x004324c0
     S_SoundGroup *GetGroup(int chapter, int group) const;           // vtable +0x8C 0x004326d0
