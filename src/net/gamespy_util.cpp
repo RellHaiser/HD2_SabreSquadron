@@ -548,6 +548,54 @@ void FreeBucketSet(S_BucketSet *set)                    // 0x00733400 (DS 0x0078
     free(set);
 }
 
+namespace {
+
+struct S_BucketText {
+    char *text;
+    int size;                                           // +0x04 allocated
+    int length;                                         // +0x08 used
+};
+
+// A bucket appended as "\name\value" (a double as %f).
+void AppendBucket(void *element, void *data)           // 0x00733870 (DS 0x0078ed80)
+{
+    const S_Bucket *bucket = static_cast<const S_Bucket *>(element);
+    S_BucketText *out = static_cast<S_BucketText *>(data);
+    int needed = static_cast<int>(std::strlen(bucket->name)) + 3;
+    if (bucket->type == BUCKET_INT || bucket->type == BUCKET_DOUBLE)
+        needed += out->length + 16;
+    else if (bucket->type == BUCKET_STRING)
+        needed += static_cast<int>(std::strlen(bucket->value.asString)) + out->length;
+    // Quirk kept: the text grows once, to twice its size, however much more the bucket needs.
+    if (out->size <= needed) {
+        out->size = out->size ? out->size * 2 : needed * 2;
+        out->text = static_cast<char *>(realloc(out->text, out->size));
+    }
+    char *end = out->text + out->length;
+    if (bucket->type == BUCKET_INT)
+        out->length += std::sprintf(end, "\\%s\\%d", bucket->name, bucket->value.asInt);
+    else if (bucket->type == BUCKET_DOUBLE)
+        out->length += std::sprintf(end, "\\%s\\%f", bucket->name, bucket->value.asDouble);
+    else if (bucket->type == BUCKET_STRING)
+        out->length += std::sprintf(end, "\\%s\\%s", bucket->name, bucket->value.asString);
+}
+
+}  // namespace
+
+// Every bucket of the set (null: the default set) as "\name\value" pairs, in a block the caller frees.
+char *BucketSetToString(S_BucketSet *set)              // 0x00733420 (DS 0x0078e7c0)
+{
+    if (!set)
+        set = g_bucketSet;
+    S_BucketText out;
+    out.text = static_cast<char *>(malloc(0x80));
+    out.text[0] = 0;
+    out.size = 0x80;
+    out.length = 0;
+    TableMap(set->buckets, AppendBucket, &out);
+    return out.text;
+}
+
 void *BucketNew(S_BucketSet *set, const char *name, int type, const void *value)    // 0x00733470 (DS 0x0078e830)
 {
     if (!set)
