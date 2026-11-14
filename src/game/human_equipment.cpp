@@ -1158,7 +1158,11 @@ void C_HumanEquipment::PutAwayHandsItem(bool putAway)
 {
     C_HumanMovement *movement = m_owner->GetMovement();
     C_HumanWork *work = m_owner->GetWork();
+#ifdef HD2_DEDICATED   // no first-person view on the server
+    const bool hudForThis = false;
+#else
     const bool hudForThis = IsClient() && g_teamManager.GetPlayerTeam()->GetActivePlayer() == m_owner;
+#endif
     if (!putAway) {
         if (!(m_flags & EQUIPMENT_HANDS_PUT_AWAY))
             return;

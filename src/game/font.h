@@ -195,13 +195,13 @@ public:
     void Load();                                        // 0x0063e000
     void Free();                                        // 0x0063edd0
     // A texture font (a table: C_TextureFont; by code: C_MapFont) added when it loads.
-    bool AddTextureFont(const char *texture, const char *table, int id);   // 0x0063f590
-    bool AddMapFont(const char *texture, const char *table, int id);       // 0x0063f400
+    bool AddTextureFont(const char *texture, const char *table, int id);   // 0x0063f590 (DS 0x006724f0)
+    bool AddMapFont(const char *texture, const char *table, int id);       // 0x0063f400 (DS 0x006724d0)
 
     // FontConfig.hxml's GDI fonts for `language` and the screen's resolution (part 9a-ii).
     bool LoadConfig(const char *path, const char *language);   // 0x0063eae0
     // A GDI font `face` drawn into a texture (part 9a-iii).
-    bool AddGdiFont(const char *face, int textureWidth, int textureHeight, int size, int id, bool unknown);   // 0x0063ee20
+    bool AddGdiFont(const char *face, int textureWidth, int textureHeight, int size, int id, bool unknown);   // 0x0063ee20 (DS 0x00672490)
     // The text boxes' quads gathered in their fonts (SetFontBatching), not drawn glyph by glyph.
     bool IsBatching() const { return m_batching; }
 

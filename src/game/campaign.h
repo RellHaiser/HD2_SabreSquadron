@@ -298,6 +298,15 @@ public:
     S_MissionObjective *GetObjective(int index) const;
     // Every objective becomes OBJECTIVE_INACTIVE.
     void DeactivateObjectives();                        // 0x006b86e0
+    // Every objective is OBJECTIVE_INACTIVE (also when there are none).
+    bool AreObjectivesInactive() const                  // (DS 0x0047a4a0)
+    {
+        for (const S_MissionObjective *objective : m_objectives) {
+            if (objective->status != OBJECTIVE_INACTIVE)
+                return false;
+        }
+        return true;
+    }
     // Some objective is active and none is still open (the in-game menu's code: game/game_menu.cpp).
     bool AreObjectivesDecided() const;                  // 0x0067fda0
     // (+0x2C; the in-game menu shows its button 6 for it.)

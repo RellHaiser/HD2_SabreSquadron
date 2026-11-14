@@ -239,17 +239,14 @@ bool IsLocalGame()
 
 bool C_MissionDef::AreObjectivesDecided() const
 {
+    if (AreObjectivesInactive())
+        return false;
+    // Some objective active: none of them open.
     for (const S_MissionObjective *objective : m_objectives) {
-        if (objective->status == OBJECTIVE_INACTIVE)
-            continue;
-        // Some objective active: none of them open.
-        for (const S_MissionObjective *other : m_objectives) {
-            if (other->status == OBJECTIVE_OPEN)
-                return false;
-        }
-        return true;
+        if (objective->status == OBJECTIVE_OPEN)
+            return false;
     }
-    return false;
+    return true;
 }
 
 // ---- the menu
