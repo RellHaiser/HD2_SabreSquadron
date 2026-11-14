@@ -2145,7 +2145,8 @@ particles and the surface marks. Files are served from memory.
     car's, the network game's player names, the squad commander, the hands weapon with its definition and component:
     logged on both sides, their answers scripted;
   - the human's OnMessage / Unknown20 real in both vtables (HandleMessage calls them through it).
-- **The tests (76,000, all exact):** CreateController, AssignPlayerController, SetScripted, StartScriptedController
+- **The tests (69,953 calls, all exact; 76,000 iterations, those without a controller skipped where the original
+  reads it):** CreateController, AssignPlayerController, SetScripted, StartScriptedController
   (every type the original knows, the same type again, no controller); the wrappers: the controller's type, commands,
   directions, accuracy (no weapon, equipment, a weapon), the move, state, AI and stance flags, the speed class, MakeNoise
   at the 1 s quiet time, unconscious, in play, DetachFromWorld, spectating, remote, the move speed, water, surrendered,
@@ -2158,7 +2159,45 @@ particles and the surface marks. Files are served from memory.
 - **Port fixes:** none.
 - **Results:** lines: 261 of these functions' 264 (the three not run: the unknown type's case).
 - **Mutations** (`human/mutations/mutate_control1.py`): 127 mutants; 122 killed, 4 not building, 1 survived
-  (equivalent: the unknown type's case).
+  (equivalent: the unknown type's case). Added in part 22b: 6 mutants of the repeated condition lines, all killed.
 - **Harness lessons (my mistakes):** the new controllers were named after their constructors logged (the names differed
   in the first run); the original's deleting destructor's flag was logged where the port has none; the other human was
   never made, so HandleMessage reached a zeroed object.
+
+## Human part 22b (the human's body, names, formations and the scripts' commands, `human_control.cpp`, 2026-11-14)
+
+- **The build:** part 22a's. Added:
+  - the network game's players for GetProfileUnknown24: the port's LockPlayers answers a table (part 20's fake answered
+    none), its player vector found by probing GetPlayerCount; the original's LockPlayers answers a vector in its
+    layout; UnlockPlayers counted on both sides;
+  - the formations: each side its own objects (the port's made with its constructor, freed by its delete; the
+    original's through its aligned allocation), the members in the slots each side's humans, ToOriginal mapping the
+    port's to the original's; their AddMember, RemoveMember, SetLeader, SetType, SetScale kept as the original's
+    layout keeps them;
+  - the profile's names in both layouts (each side's own strings), the other human and the car mapped by ToOriginal.
+- **The tests (80,000, all exact):**
+  - the body's command, carry mode, animation, foot; GetEnvironmentFlags (no vehicle with the ground or none, a car,
+    a static weapon), SetUnknown94 (the same value or not);
+  - the names: last, first, short, full (no profile: the frame's or the human's own; a custom name or none, empty
+    names), the player name, the multiplayer rank (local, or the player's slot in a table of 1..4);
+  - SetLeader, DisbandFormation, GetFormationType: nobody leading, the other leading the tested human or the tested
+    one leading the other, the leader and its follower in any two slots, the member count sometimes more than the
+    slots hold, a formation without slots; the new leader none, the other, the human itself; compared by a summary of
+    both humans' leaders and formations (members by slot, count, type, leader);
+  - the scripts' 41 commands with the scripted controller or another, SetSniper.
+- **Port fixes:** none.
+- **Results:** lines: 100 % of these functions' 252; human_control.cpp 99.4 % of 516, done: the three lines not run are
+  CreateController's unknown type (part 22a).
+- **Mutations** (`human/mutations/mutate_control2.py`): 123 mutants (77 generated, 46 written for the condition lines
+  found more than once in the file, which the generator skips); 116 killed, 6 not building, 1 survived (equivalent:
+  SeesFriend's type test, false either way).
+- **Harness lessons (my mistakes):**
+  - the formation constructor's fake returned nothing; the original's SetLeader uses the `this` it returns: a stack
+    of crashes until found;
+  - my first formation states were ones the game never makes (humans leading themselves, followers whose leader has no
+    formation): nested disbands freed formations still in use; the formation's pointers were not mapped by ToOriginal
+    either, so the original ran on the port's objects;
+  - my own summary and AddMember fakes read a formation without slots;
+  - debug prints written through a bash heredoc lost their backslashes; the build failed and two runs used the old
+    executable before I noticed;
+  - UnlockPlayers was not checked at all until a mutant survived.

@@ -154,8 +154,11 @@ C_SpeechSet *C_SpeechSets::Acquire(int id)
 void C_SpeechSets::Release(C_SpeechSet *) { Log(nullptr, "SpeechSetRelease"); }
 
 // The network game.
-S_NetPlayerState *C_NetGame::LockPlayers() { return nullptr; }
-void C_NetGame::UnlockPlayers() {}
+// (Part 22b: a table of players; none before.)
+S_NetPlayerState *g_lockedPlayers = nullptr;
+S_NetPlayerState *C_NetGame::LockPlayers() { return g_lockedPlayers; }
+int g_unlockedPlayers = 0;   // (part 22b: counted)
+void C_NetGame::UnlockPlayers() { ++g_unlockedPlayers; }
 void C_NetGame::SetPlayerTeam(int slot, int team, bool pending)
 {
     Log(nullptr, "SetPlayerTeam", {double(slot), double(team), double(pending)});

@@ -262,7 +262,7 @@ bool FormationAdd(void *f, void *member)
 {
     Log(f, ("FormationAddMember " + NameOf(member)).c_str());
     uint8_t *slots = FormationSlots(f);
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 6 && slots; ++i) {
         void *&m = *reinterpret_cast<void **>(slots + i * 0xA0 + 0x70);
         if (!m) {
             m = member;
@@ -276,7 +276,7 @@ bool FormationRemove(void *f, void *member)
 {
     Log(f, ("FormationRemoveMember " + NameOf(member)).c_str());
     uint8_t *slots = FormationSlots(f);
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 6 && slots; ++i) {
         void *&m = *reinterpret_cast<void **>(slots + i * 0xA0 + 0x70);
         if (m == member) {
             m = nullptr;
@@ -527,10 +527,12 @@ float CT_ WC_GetAimedDispersion(void *self)
     return g_ctl.dispersion;
 }
 // The formations.
-void CT_ OF_Ctor(void *self)
+// (Returns `this`: SetLeader uses it.)
+void *CT_ OF_Ctor(void *self)
 {
     Log(nullptr, "FormationNew");
     FormationInit(self);
+    return self;
 }
 void CT_ OF_Dtor(void *self) { Log(self, "FormationDelete"); }
 uint32_t CT_ OF_AddMember(void *self, void *member) { return FormationAdd(self, member); }
@@ -1382,6 +1384,458 @@ void TestControlWrappers()
     }
 }
 
+// ---- part 22b: the body, the names, the formations, the scripts' commands
+
+// The network game's players (GetProfileUnknown24's ranks): the port's in its layout, the original's (0xC4 bytes each,
+// the stats at +0x40) behind its LockPlayers' vector (first at +4).
+// (Raw storage: its constructor is not linked.)
+alignas(16) uint8_t g_ctlPlayersBytes[4 * sizeof(S_NetPlayerState)];
+S_NetPlayerState *const g_ctlPlayers = reinterpret_cast<S_NetPlayerState *>(g_ctlPlayersBytes);
+alignas(16) uint8_t g_origPlayers[4][0xC4];
+uint32_t g_origPlayersVector[4];
+size_t g_portPlayersOffset = 0;
+void *CT_ ON_LockPlayers(void *) { return g_origPlayersVector; }
+void CT_ ON_UnlockPlayers(void *) { ++g_unlockedPlayers; }
+void SetPlayerCount(int count)
+{
+    // (The port's m_players: its begin and end words in the network game's raw storage.)
+    uint8_t *net = reinterpret_cast<uint8_t *>(&g_netGame);
+    S_NetPlayerState *begin = g_ctlPlayers, *end = g_ctlPlayers + count;
+    std::memcpy(net + g_portPlayersOffset, &begin, 4);
+    std::memcpy(net + g_portPlayersOffset + 4, &end, 4);
+    std::memcpy(net + g_portPlayersOffset + 8, &end, 4);
+}
+
+// The formations' summary on each side: the humans' leaders, their formations (members by slot, count, type, leader).
+std::string FormationText(const void *f)
+{
+    if (!f)
+        return "none";
+    const uint8_t *b = static_cast<const uint8_t *>(f);
+    std::string s = NameOf(f) + "[" + NameOf(*reinterpret_cast<void *const *>(b + 0x74)) + " type " +
+                    std::to_string(*reinterpret_cast<const int *>(b + 0x78)) + " count " +
+                    std::to_string(*reinterpret_cast<const int *>(b + 0x7C));
+    for (int i = 0; i < 6 && FormationSlots(f); ++i)
+        s += " " + NameOf(*reinterpret_cast<void *const *>(FormationSlots(f) + i * 0xA0 + 0x70));
+    return s + "]";
+}
+std::string g_portFormations, g_origFormations;
+size_t g_formationPairs = 0;   // (this iteration's formations at the end of g_extraPointers)
+int FormationsHash(bool original)
+{
+    const uint8_t *self = original ? o_human : reinterpret_cast<const uint8_t *>(g_h.human);
+    const uint8_t *other = original ? g_origOther : g_portOther;
+    const size_t leader = original ? 0x2CC : offsetof(C_Human, m_leader);
+    const size_t formation = original ? 0x2C8 : offsetof(C_Human, m_formation);
+    std::string &s = original ? g_origFormations : g_portFormations;
+    s = "self " + NameOf(*reinterpret_cast<void *const *>(self + leader)) + " " +
+        FormationText(*reinterpret_cast<void *const *>(self + formation)) + ", other " +
+        NameOf(*reinterpret_cast<void *const *>(other + leader)) + " " +
+        FormationText(*reinterpret_cast<void *const *>(other + formation));
+    return int(std::hash<std::string>()(s) & 0x7FFFFFFF);
+}
+// A formation in both layouts (each side its own object; the members each side's humans), named.
+std::pair<C_FormationShape *, void *> MakeFormations(const char *name, int members, int count)
+{
+    C_FormationShape *port = new C_FormationShape();
+    void *orig = OC_AlignedNew(0xA0, 16);
+    FormationInit(orig);
+    g_names[port] = g_names[orig] = name;
+    // Members: 1 the tested human, 2 the other one (in slots 0..5), the count as given (it may disagree).
+    for (int i = 0; i < 6; ++i) {
+        const int who = members >> (2 * i) & 3;
+        void *p = who == 1 ? static_cast<void *>(g_h.human) : who == 2 ? static_cast<void *>(g_portOther) : nullptr;
+        void *o = who == 1 ? static_cast<void *>(o_human) : who == 2 ? static_cast<void *>(g_origOther) : nullptr;
+        std::memcpy(FormationSlots(port) + i * 0xA0 + 0x70, &p, 4);
+        std::memcpy(FormationSlots(orig) + i * 0xA0 + 0x70, &o, 4);
+    }
+    FormationCount(port) = FormationCount(orig) = count;
+    // (ToOriginal maps the human's pointer to it.)
+    g_extraPointers.push_back({port, orig});
+    ++g_formationPairs;
+    const int type = I(0, 6);
+    std::memcpy(reinterpret_cast<uint8_t *>(port) + 0x78, &type, 4);
+    std::memcpy(static_cast<uint8_t *>(orig) + 0x78, &type, 4);
+    return {port, orig};
+}
+void SetFormation(C_Human *portHuman, void *origHuman, const std::pair<C_FormationShape *, void *> &f)
+{
+    portHuman->m_formation = f.first;
+    std::memcpy(static_cast<uint8_t *>(origHuman) + 0x2C8, &f.second, 4);
+}
+void SetLeaderOf(C_Human *portHuman, void *origHuman, int who)
+{
+    C_Human *p = who == 1 ? g_h.human : who == 2 ? PortOther() : nullptr;
+    void *o = who == 1 ? static_cast<void *>(o_human) : who == 2 ? static_cast<void *>(g_origOther) : nullptr;
+    portHuman->m_leader = p;
+    std::memcpy(static_cast<uint8_t *>(origHuman) + 0x2CC, &o, 4);
+}
+// The formations: the tested human's own (it leads), the other's (it leads the tested one, or not), their slots.
+void RandomFormations()
+{
+    C_Human *h = g_h.human;
+    g_extraPointers.resize(g_extraPointers.size() - g_formationPairs);
+    g_formationPairs = 0;
+    // As the game keeps them: nobody leads, the other one leads the tested one, or the tested one leads the other one
+    // (the leader and its follower in two of the formation's slots; the count sometimes more: an absent member).
+    const std::pair<C_FormationShape *, void *> none{nullptr, nullptr};
+    SetFormation(h, o_human, none);
+    SetFormation(PortOther(), g_origOther, none);
+    SetLeaderOf(h, o_human, 0);
+    SetLeaderOf(PortOther(), g_origOther, 0);
+    const int state = I(0, 2);
+    if (state == 0)
+        return;
+    const int leaderCode = state == 1 ? 2 : 1, followerCode = state == 1 ? 1 : 2;
+    int s1 = I(0, 5), s2 = I(0, 4);
+    if (s2 >= s1)
+        ++s2;
+    const int members = leaderCode << (2 * s1) | followerCode << (2 * s2);
+    const auto f = MakeFormations(state == 1 ? "formOther" : "formSelf", members, P(0.7f) ? 2 : I(3, 4));
+    if (state == 1) {
+        SetFormation(PortOther(), g_origOther, f);
+        SetLeaderOf(h, o_human, 2);
+    } else {
+        SetFormation(h, o_human, f);
+        SetLeaderOf(PortOther(), g_origOther, 1);
+        // (A slot array or none.)
+        if (P(0.1f)) {
+            std::memset(reinterpret_cast<uint8_t *>(f.first) + 0x90, 0, 4);
+            std::memset(static_cast<uint8_t *>(f.second) + 0x90, 0, 4);
+        }
+    }
+}
+
+// The profile's names on both sides (each side's own strings), the frame's.
+typedef void(CT_ *T_StrSet)(void *, const char *);
+void SetNames()
+{
+    static const char *texts[] = {"", "Smith", "J. Smith", "John (Jack) Smith", "Custom"};
+    for (int i = 0; i < 2; ++i) {
+        S_SoldierProfile *p = Profile(i);
+        // first, last, nick, full, short, custom (+0x00 .. +0x14)
+        C_str *fields[] = {&p->firstName, &p->lastName, &p->nickname, &p->fullName, &p->shortName, &p->customName};
+        for (int k = 0; k < 6; ++k) {
+            const char *t = k == 5 ? (P(0.6f) ? "" : texts[4]) : texts[I(0, 3)];
+            *fields[k] = t;
+            OriginalAt<T_StrSet>(0x00405180)(g_origProfileBytes[i] + 4 * k, t);
+        }
+        p->unknown24 = I(0, 9);
+        std::memcpy(g_origProfileBytes[i] + 0x24, &p->unknown24, 4);
+    }
+}
+
+void SetUpNames()
+{
+    RedirectOriginal(0x0072f040, FAKE(ON_LockPlayers));
+    RedirectOriginal(0x0072f100, FAKE(ON_UnlockPlayers));
+    for (uint32_t at : {0x005a81c0u, 0x005a8220u, 0x005a8380u, 0x005a9960u})
+        RestoreOriginal(at);
+    g_lockedPlayers = g_ctlPlayers;
+    for (int k = 0; k < 4; ++k)
+        g_origPlayersVector[k] = 0;
+    void *first = g_origPlayers[0], *last = g_origPlayers[4];
+    std::memcpy(&g_origPlayersVector[1], &first, 4);
+    std::memcpy(&g_origPlayersVector[2], &last, 4);
+    std::memcpy(&g_origPlayersVector[3], &last, 4);
+    // (The port's player vector: found by its GetPlayerCount.)
+    uint8_t *net = reinterpret_cast<uint8_t *>(&g_netGame);
+    for (size_t off = 0; off + 12 <= 8192; off += 4) {
+        uint8_t saved[12];
+        std::memcpy(saved, net + off, 12);
+        g_portPlayersOffset = off;
+        SetPlayerCount(3);
+        const bool found = g_netGame.GetPlayerCount() == 3;
+        std::memcpy(net + off, saved, 12);
+        if (found)
+            break;
+    }
+    CHECK(g_netGame.GetPlayerCount() == 0);
+    SetPlayerCount(1);
+    CHECK(g_netGame.GetPlayerCount() == 1);
+    SetPlayerCount(0);
+    // Each side's other human and car.
+    g_extraPointers.push_back({g_portOther, g_origOther});
+    g_extraPointers.push_back({g_portCar, g_origCar});
+    g_names[g_portCar] = g_names[g_origCar] = "car";
+    // (GetShortName without a profile makes the name: each side's own string rep, as in part 21c.)
+    g_skipFields.insert("m_name");
+}
+
+int TextHash(const char *s) { return int(std::hash<std::string>()(s ? s : "(null)") & 0x7FFFFFFF); }
+typedef const char *(CT_ *T_CText)(void *);
+
+void TestControlBody()
+{
+    C_Human *h = g_h.human;
+    std::printf("control body and names\n");
+    for (int i = 0; i < 24000 / QUICK; ++i) {
+        RandomWrappers();
+        if (!h->m_controller)
+            h->m_controller = reinterpret_cast<C_HumanController *>(g_cPort);
+        const int a = I(-2, 40), b = I(-2, 40), c = I(-2, 40);
+        switch (i % 12) {
+        case 0: {
+            alignas(16) uint8_t command[0x40] = {};
+            g_names[command] = "bodyCommand";
+            DiffCall("ExecuteBodyCommand", [&] { h->ExecuteBodyCommand(*reinterpret_cast<const S_BodyCommand *>(command)); return 0; },
+                     [&](void *) { OH<void>(0x005a45f0, static_cast<void *>(command)); return 0; });
+            g_names.erase(command);
+            break;
+        }
+        case 1:
+            DiffCall("SetCarryMode", [&] { h->SetCarryMode(a); return 0; }, [&](void *) { OH<void>(0x005a5e40, a); return 0; });
+            break;
+        case 2:
+            DiffCall("PlayAnimation", [&] { h->PlayAnimation("anim1", a, b, c); return 0; },
+                     [&](void *) { OH<void>(0x005a9c20, "anim1", a, b, c); return 0; });
+            break;
+        case 3:
+            DiffCall("IsLeftFootForward", [&] { return int(h->IsLeftFootForward()); }, [&](void *) { return OB(0x005a8160); });
+            break;
+        case 4: {
+            // The vehicle: none (the ground's flags, or no ground), a car, another kind.
+            const int v = I(0, 2);
+            const int carType = P(0.5f) ? ACTOR_CAR : ACTOR_STATIC_WEAPON;
+            reinterpret_cast<C_Actor *>(g_portCar)->m_type = static_cast<E_ActorType>(carType);
+            std::memcpy(g_origCar + 0x18, &carType, 4);
+            h->m_vehicle = v ? reinterpret_cast<C_Actor *>(g_portCar) : nullptr;
+            g_combat.groundOn = P(0.8f);
+            g_combat.ground[0] = uint32_t(I(0, 0xFFFF));
+            g_ctl.carEnv = uint32_t(I(0, 0xFFFF));
+            DiffCall("GetEnvironmentFlags", [&] { return int(h->GetEnvironmentFlags()); },
+                     [&](void *) { return OH<int>(0x005a9720); });
+            break;
+        }
+        case 5: {
+            const float value = P(0.3f) ? h->m_unknown94 : U(-2, 2);
+            DiffCall("SetUnknown94", [&] { h->SetUnknown94(value); return 0; },
+                     [&](void *) { OH<void>(0x005a9760, value); return 0; });
+            break;
+        }
+        case 6:
+        case 7:
+        case 8:
+        case 9: {
+            SetNames();
+            static const uint32_t at[] = {0x005a81c0, 0x005a8220, 0x005a82c0, 0x005a8320};
+            static const char *names[] = {"GetLastName", "GetFirstName", "GetShortName", "GetFullName"};
+            const int k = i % 12 - 6;
+            DiffCall(names[k],
+                     [&] {
+                         const char *s = k == 0 ? h->GetLastName() : k == 1 ? h->GetFirstName() : k == 2 ? h->GetShortName()
+                                                                                                     : h->GetFullName();
+                         return TextHash(s);
+                     },
+                     [&](void *) { return TextHash(OriginalAt<T_CText>(at[k])(o_human)); });
+            break;
+        }
+        case 10:
+            DiffCall("GetPlayerName", [&] { return TextHash(h->GetPlayerName()); },
+                     [&](void *) { return TextHash(OriginalAt<T_CText>(0x005a81b0)(o_human)); });
+            break;
+        default: {
+            SetNames();
+            // A network game: the player's slot in the table (the original reads past it otherwise).
+            const int count = I(1, 4);
+            SetPlayerCount(count);
+            h->m_netId = I(0, count - 1);
+            for (int k = 0; k < 4; ++k) {
+                g_ctlPlayers[k].stats[NET_STAT_RANK] = I(0, 7);
+                std::memcpy(g_origPlayers[k] + 0x40 + 4 * NET_STAT_RANK, &g_ctlPlayers[k].stats[NET_STAT_RANK], 4);
+            }
+            // (With the number of UnlockPlayers calls.)
+            DiffCall("GetProfileUnknown24",
+                     [&] {
+                         g_unlockedPlayers = 0;
+                         const int rank = h->GetProfileUnknown24();
+                         return rank * 16 + g_unlockedPlayers;
+                     },
+                     [&](void *) {
+                         g_unlockedPlayers = 0;
+                         const int rank = OH<int>(0x005a8380);
+                         return rank * 16 + g_unlockedPlayers;
+                     });
+            break;
+        }
+        }
+    }
+}
+
+void TestControlFormations()
+{
+    C_Human *h = g_h.human;
+    std::printf("control formations\n");
+    g_skipFields.insert("m_leader");
+    g_skipFields.insert("m_formation");
+    for (int i = 0; i < 16000 / QUICK; ++i) {
+        RandomWrappers();
+        RandomFormations();
+        const auto report = [&](const char *what) {
+            static int shown;
+            if (g_portFormations != g_origFormations && shown++ < 10)
+                std::printf("  %s formations: port %s\n    original %s\n", what, g_portFormations.c_str(),
+                            g_origFormations.c_str());
+        };
+        switch (i % 3) {
+        case 0: {
+            const int who = P(0.2f) ? 0 : P(0.85f) ? 2 : 1;
+            C_Human *portLeader = who == 1 ? h : who == 2 ? PortOther() : nullptr;
+            void *origLeader = who == 1 ? static_cast<void *>(o_human) : who == 2 ? static_cast<void *>(g_origOther) : nullptr;
+            DiffCall("SetLeader", [&] { h->SetLeader(portLeader); return FormationsHash(false); },
+                     [&](void *) { OH<void>(0x005a91a0, origLeader); return FormationsHash(true); });
+            report("SetLeader");
+            break;
+        }
+        case 1:
+            DiffCall("DisbandFormation", [&] { h->DisbandFormation(); return FormationsHash(false); },
+                     [&](void *) { OH<void>(0x005a9120); return FormationsHash(true); });
+            report("DisbandFormation");
+            break;
+        default:
+            DiffCall("GetFormationType", [&] { return h->GetFormationType(); }, [&](void *) { return OH<int>(0x005a9960); });
+            break;
+        }
+    }
+    g_skipFields.erase("m_leader");
+    g_skipFields.erase("m_formation");
+}
+
+void TestControlScripts()
+{
+    C_Human *h = g_h.human;
+    std::printf("control scripts\n");
+    I3D_frame *frame = g_h.frame;
+    C_Actor *actor = reinterpret_cast<C_Actor *>(g_vehicleBytes);
+    for (int i = 0; i < 40000 / QUICK; ++i) {
+        RandomWrappers();
+        if (!h->m_controller)
+            h->m_controller = reinterpret_cast<C_HumanController *>(g_cPort);
+        // The scripted controller half the time.
+        if (P(0.5f))
+            SetControllerType(HUMAN_CONTROLLER_AI);
+        g_ctl.playActivity = I(-1, 3000);
+        g_ctl.seesEnemy = P(0.5f);
+        g_ctl.hasAIMode = P(0.5f);
+        g_ctl.checkpoint = P(0.2f) ? 0xFFFF : I(0, 0x8000);
+        const int a = P(0.2f) ? I(-40000, 70000) : I(-2, 40), b = I(-2, 40), c = I(-2, 40);
+        const bool flag = P(0.5f), flag2 = P(0.5f);
+        const float f1 = U(0, 100), f2 = U(0, 100);
+        const int which = I(0, 41);
+        switch (which) {
+#define VOID0(k, name, at)                                                                                             \
+    case k:                                                                                                            \
+        DiffCall(#name, [&] { h->name(); return 0; }, [&](void *) { OH<void>(at); return 0; });                         \
+        break;
+            VOID0(0, SetMoveModeRun, 0x005af270)
+            VOID0(1, SetMoveModeWalk, 0x005af290)
+            VOID0(2, SetMoveModeSilence, 0x005af2b0)
+            VOID0(3, SetMoveModeGuard, 0x005af2d0)
+            VOID0(4, SetMoveModeLie, 0x005af2f0)
+            VOID0(5, SetMoveModeCrouch, 0x005af310)
+            VOID0(6, SetMoveModeStand, 0x005af330)
+            VOID0(7, SetMoveModeStandFast, 0x005af350)
+            VOID0(8, ActivityTurk, 0x005af390)
+            VOID0(9, DisableEvents, 0x005af3b0)
+            VOID0(10, EnableEvents, 0x005af3d0)
+            VOID0(11, StopAction, 0x005af430)
+            VOID0(12, ResetAI, 0x005af450)
+            VOID0(13, DropObject, 0x005af490)
+            VOID0(14, TakeWeapon, 0x005af4b0)
+            VOID0(15, HolsterWeapon, 0x005af4d0)
+            VOID0(16, Reload, 0x005af4f0)
+#undef VOID0
+#define INT1(k, name, at)                                                                                              \
+    case k:                                                                                                            \
+        DiffCall(#name, [&] { h->name(a); return 0; }, [&](void *) { OH<void>(at, a); return 0; });                     \
+        break;
+            INT1(17, SetAIMode, 0x005af3f0)
+            INT1(18, SetAIOptimized, 0x005af5c0)
+            INT1(19, MoveToAlarm, 0x005af6e0)
+            INT1(20, ScriptedPlaySpeech, 0x005af550)
+            INT1(21, ScriptedLookAround1, 0x005af6c0)
+#undef INT1
+        case 22:
+            DiffCall("SetAlarmType", [&] { h->SetAlarmType(uint32_t(a), flag); return 0; },
+                     [&](void *) { OH<void>(0x005af150, uint32_t(a), int(flag)); return 0; });
+            break;
+        case 23:
+            DiffCall("GetAlarmType", [&] { return int(h->GetAlarmType()); }, [&](void *) { return OH<int>(0x005af170); });
+            break;
+        case 24:
+            DiffCall("SetAlarm", [&] { h->SetAlarm(flag); return 0; }, [&](void *) { OH<void>(0x005af190, int(flag)); return 0; });
+            break;
+        case 25:
+            DiffCall("AttackMoveTo", [&] { h->AttackMoveTo(a, b); return 0; },
+                     [&](void *) { OH<void>(0x005af1b0, a, b); return 0; });
+            break;
+        case 26:
+            DiffCall("MoveTo", [&] { h->MoveTo(a, b); return 0; }, [&](void *) { OH<void>(0x005af1d0, a, b); return 0; });
+            break;
+        case 27:
+            // (A 16-bit result: the original leaves EAX's high word as it was.)
+            DiffCall("FindCheckpoint", [&] { return h->FindCheckpoint("cp1") & 0xFFFF; },
+                     [&](void *) { return OH<int>(0x005af210, "cp1") & 0xFFFF; });
+            break;
+        case 28: {
+            C_Actor *target = P(0.2f) ? nullptr : actor;
+            DiffCall("AttackActor", [&] { h->AttackActor(target, a, flag, b); return 0; },
+                     [&](void *) { OH<void>(0x005af230, static_cast<void *>(target), a, int(flag), b); return 0; });
+            break;
+        }
+        case 29:
+            DiffCall("AttackFrame", [&] { h->AttackFrame(frame, a, flag, b); return 0; },
+                     [&](void *) { OH<void>(0x005af250, static_cast<void *>(frame), a, int(flag), b); return 0; });
+            break;
+        case 30:
+            DiffCall("Sit", [&] { h->Sit(frame); return 0; }, [&](void *) { OH<void>(0x005af370, static_cast<void *>(frame)); return 0; });
+            break;
+        case 31:
+            DiffCall("PickObject", [&] { h->PickObject(frame, flag); return 0; },
+                     [&](void *) { OH<void>(0x005af470, static_cast<void *>(frame), int(flag)); return 0; });
+            break;
+        case 32:
+            DiffCall("PlayActivity", [&] { return h->PlayActivity(a); }, [&](void *) { return OH<int>(0x005af510, a); });
+            break;
+        case 33:
+            DiffCall("PlayActivityAt", [&] { return h->PlayActivity(a, frame); },
+                     [&](void *) { return OH<int>(0x005af530, a, static_cast<void *>(frame)); });
+            break;
+        case 34:
+            DiffCall("SetWaitForPlayer", [&] { h->SetWaitForPlayer(flag, f1, f2, flag2); return 0; },
+                     [&](void *) { OH<void>(0x005af5e0, int(flag), f1, f2, int(flag2)); return 0; });
+            break;
+        case 35:
+            DiffCall("SeesEnemy", [&] { return int(h->SeesEnemy()); }, [&](void *) { return OB(0x005af620); });
+            break;
+        case 36:
+            DiffCall("SeesFriend", [&] { return int(h->SeesFriend()); }, [&](void *) { return OB(0x005af640); });
+            break;
+        case 37:
+            DiffCall("TurnAt", [&] { h->TurnAt(frame); return 0; }, [&](void *) { OH<void>(0x005af660, static_cast<void *>(frame)); return 0; });
+            break;
+        case 38:
+            DiffCall("ScriptedAdvanceScript", [&] { h->ScriptedAdvanceScript(a, b); return 0; },
+                     [&](void *) { OH<void>(0x005af1f0, a, b); return 0; });
+            break;
+        case 39:
+            DiffCall("ScriptedHasAIMode", [&] { return int(h->ScriptedHasAIMode()); }, [&](void *) { return OB(0x005af410); });
+            break;
+        case 40:
+            DiffCall("SetAnimation", [&] { h->SetAnimation("anim2", a, b, flag); return 0; },
+                     [&](void *) { OH<void>(0x005af780, "anim2", a, b, int(flag)); return 0; });
+            break;
+        default: {
+            h->m_events = reinterpret_cast<C_HumanEvents *>(g_eventsBytes);
+            DiffCall("SetSniper", [&] { h->SetSniper(flag, f1); return 0; },
+                     [&](void *) { OH<void>(0x005af700, int(flag), f1); return 0; });
+            break;
+        }
+        }
+        (void)c;
+    }
+}
+
 void TestControl()
 {
     SetUpCombat();
@@ -1394,6 +1848,12 @@ void TestControl()
     if (run("22a")) {
         TestControlCreate();
         TestControlWrappers();
+    }
+    if (run("22b")) {
+        SetUpNames();
+        TestControlBody();
+        TestControlFormations();
+        TestControlScripts();
     }
 }
 

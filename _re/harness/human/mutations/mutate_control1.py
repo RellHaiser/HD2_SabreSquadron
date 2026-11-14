@@ -6,7 +6,8 @@ _re/harness/shots/gen_mutations.py (lines unique in the file) for CreateControll
 
 Result (2026-11-14): 127 mutants; 122 killed, 4 not building, 1 survived: 47 del, CreateController's default case
 (an unknown type: the port's fix; the original crashes there, so it is not tested).
-The first pass gave these results.
+The first pass gave these results. Added afterwards (labels R): 6 mutants of the condition lines found more than once
+in the file (gen_mutations skips them), each with its function's first lines as context: all killed.
 """
 import os
 
@@ -141,4 +142,10 @@ MUTATIONS = [
     (T, 'T 449 del', '    static_cast<C_SquadController *>(m_controller)->RemoveOrder(index, true);\r\n', '    ;\r\n'),
     (T, 'T 449 bool', '    static_cast<C_SquadController *>(m_controller)->RemoveOrder(index, true);\r\n', '    static_cast<C_SquadController *>(m_controller)->RemoveOrder(index, false);\r\n'),
     (T, 'T 466 cmp', '    if (m_controller->GetType() != HUMAN_CONTROLLER_SQUAD)\r\n', '    if (m_controller->GetType() == HUMAN_CONTROLLER_SQUAD)\r\n'),
+    (T, 'R 73 cmp', "void C_Human::AssignPlayerController(bool active)\r\n{\r\n    if (!IsLocalGame()) {\r\n        if (m_netId == g_localPlayerSlot) {\r\n            CreateController(HUMAN_CONTROLLER_PLAYER);\r\n            m_body.SetPlayerControlled(true);\r\n            return;\r\n        }\r\n        // The server runs every player's input; clients only show the others.\r\n        CreateController(IsServer() ? HUMAN_CONTROLLER_PLAYER : HUMAN_CONTROLLER_REMOTE);\r\n        m_body.SetPlayerControlled(false);\r\n        return;\r\n    }\r\n    if (active) {\r\n        if (m_controller->GetType() == HUMAN_CONTROLLER_SQUAD)\r\n", "void C_Human::AssignPlayerController(bool active)\r\n{\r\n    if (!IsLocalGame()) {\r\n        if (m_netId == g_localPlayerSlot) {\r\n            CreateController(HUMAN_CONTROLLER_PLAYER);\r\n            m_body.SetPlayerControlled(true);\r\n            return;\r\n        }\r\n        // The server runs every player's input; clients only show the others.\r\n        CreateController(IsServer() ? HUMAN_CONTROLLER_PLAYER : HUMAN_CONTROLLER_REMOTE);\r\n        m_body.SetPlayerControlled(false);\r\n        return;\r\n    }\r\n    if (active) {\r\n        if (m_controller->GetType() != HUMAN_CONTROLLER_SQUAD)\r\n"),
+    (T, 'R 89 cmp', 'void C_Human::SetScripted(bool on)\r\n{\r\n    if (!m_controller)\r\n        return;\r\n    if (on) {\r\n        if (m_controller->GetType() == HUMAN_CONTROLLER_SQUAD)\r\n', 'void C_Human::SetScripted(bool on)\r\n{\r\n    if (!m_controller)\r\n        return;\r\n    if (on) {\r\n        if (m_controller->GetType() != HUMAN_CONTROLLER_SQUAD)\r\n'),
+    (T, 'R 101 cmp', 'void C_Human::StartScriptedController()\r\n{\r\n    CreateController(HUMAN_CONTROLLER_AI);\r\n    if (m_controller->GetType() == HUMAN_CONTROLLER_AI)\r\n', 'void C_Human::StartScriptedController()\r\n{\r\n    CreateController(HUMAN_CONTROLLER_AI);\r\n    if (m_controller->GetType() != HUMAN_CONTROLLER_AI)\r\n'),
+    (T, 'R 408 cmp', 'void C_Human::PlayerRequestDamage(int type, int damage, int attackerId, int zone)\r\n{\r\n    if (!IsLocalGame() && m_role == HUMAN_ROLE_PLAYER)\r\n', 'void C_Human::PlayerRequestDamage(int type, int damage, int attackerId, int zone)\r\n{\r\n    if (!IsLocalGame() && m_role != HUMAN_ROLE_PLAYER)\r\n'),
+    (T, 'R 478 cmp', 'int C_Human::GetSquadStatusIcon() const\r\n{\r\n    if (!m_controller || m_controller->GetType() != HUMAN_CONTROLLER_SQUAD)\r\n', 'int C_Human::GetSquadStatusIcon() const\r\n{\r\n    if (!m_controller || m_controller->GetType() == HUMAN_CONTROLLER_SQUAD)\r\n'),
+    (T, 'R 485 cmp', 'int C_Human::GetSquadModeIcon() const\r\n{\r\n    if (!m_controller || m_controller->GetType() != HUMAN_CONTROLLER_SQUAD)\r\n', 'int C_Human::GetSquadModeIcon() const\r\n{\r\n    if (!m_controller || m_controller->GetType() == HUMAN_CONTROLLER_SQUAD)\r\n'),
 ]
