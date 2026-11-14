@@ -107,7 +107,7 @@ public:
     // editing (taken: done), then the key pressed (none: a held control, alt or shift key, else
     // the controls' escape) to the top's Unknown20; Escape not taken: the drag ended,
     // MENU_MSG_ESCAPE; Ctrl + Alt + Shift + N: MENU_MSG_SECRET_KEY. True.
-    bool HandleInput(float *held, float *pressed) override;   // 0x0C 0x0066b6e0
+    bool HandleInput(float *held, float *pressed) override;   // 0x0C 0x0066b6e0 (DS 0x006a4500)
     // The menu's OnTick.
     void Tick(int timeDelta) override { OnTick(timeDelta); }   // 0x10 0x0066c190 (DS 0x006a4650)
     // OnUpdate and the sound module's update (twice: the first not in the network game's menu),

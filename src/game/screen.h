@@ -110,7 +110,7 @@ public:
     // Shown and the cursor still (500 ms, button 0 up): the box on at the cursor (+0.15, +0.015;
     // its own depth kept), placed, the text refreshed; else the box off (when it was shown or on).
     // (Not the screen's: no tick notification.)
-    void Tick(int time) override;                       // +0x1C 0x00669aa0
+    void Tick(int time) override;                       // +0x1C 0x00669aa0 (DS 0x006a3180)
     // CONTROL_MSG_SHOW / HIDE: shown / hidden (the box with it); the others the text's.
     bool HandleMessage(S_ControlMessage *message) override;   // +0x6C 0x00669a50
     // The box shown.
@@ -139,7 +139,7 @@ public:
     void Refresh() override;                            // +0x18 0x0066a2a0
     // Shown and the cursor still: the box on at the cursor (C_DescriptionScreen::Tick's), both texts
     // refreshed; else the box off.
-    void Tick(int time) override;                       // +0x1C 0x0066a100
+    void Tick(int time) override;                       // +0x1C 0x0066a100 (DS 0x006a3870)
     // CONTROL_MSG_SHOW / HIDE: shown / hidden (the box with it); MEDAL_POPUP_MSG_SHOW: the medal `value`
     // (its frame value2, in the "new_medal" place; the one before unlinked, the texts cleared), its name
     // and description (g_rosterTexts' 0x2774 + 2 * value, + 1; style 3). True; the others ignored.

@@ -62,7 +62,7 @@ public:
     // ("DESCRIPTION") made. True.
     bool BuildScreens() override;                       // 0x38 0x00691570
     // The description popup deleted.
-    void OnStop() override;                             // 0x3C 0x00693a50
+    void OnStop() override;                             // 0x3C 0x00693a50 (DS 0x006d32a0)
     // The roster loaded when empty (tables\HumanStore.def; failing: false). A campaign's kind 2 screen:
     // the operation's soldiers given the Defence Medal (the living without it), the squad's items back
     // to the stock. True.
