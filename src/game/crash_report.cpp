@@ -6,6 +6,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #include "game/game_texts.h"
@@ -345,7 +346,7 @@ bool GetLogicalAddress(const void *address, char *module, DWORD moduleSize, int 
     return false;
 }
 
-LONG WINAPI ReportUnhandledException(EXCEPTION_POINTERS *exception)
+LONG WINAPI ReportUnhandledException(EXCEPTION_POINTERS *exception)   // 0x006e3400 (DS 0x0072d880)
 {
     ClearCrashReport();
     ReportLine("\n%s", LINE_OF_HASHES);
@@ -355,9 +356,13 @@ LONG WINAPI ReportUnhandledException(EXCEPTION_POINTERS *exception)
     ReportLine("%s", LINE_OF_HASHES);
     if (g_fatalErrorHandler)
         g_fatalErrorHandler(s_report);
+#ifdef HD2_DEDICATED   // the server ends there, without the previous filter
+    _exit(1);
+#else
     if (s_previousFilter)
         return s_previousFilter(exception);
     return EXCEPTION_CONTINUE_SEARCH;
+#endif
 }
 
 void OnFatalError(const char *report)
