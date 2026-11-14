@@ -23,6 +23,8 @@ struct S_CombatScript {
     uint32_t ground[4] = {};                            // S_HumanBody::GetGround
     S_vector viewDir = S_vector(0, 0, 1);               // C_Human::GetViewDir
     C_Actor *human[64] = {};                            // C_ActorsModule::GetHuman by id
+    bool groundOn = true;                               // S_HumanBody::GetGround answers the ground (else none)
+    float cover = 1.0f;                                 // the graphic effects' GetGroundCover
 } g_combat;
 }  // namespace
 
@@ -140,7 +142,7 @@ void S_HumanBody::Die(C_Actor *killer) { Log(killer, "BodyDie"); }
 void S_HumanBody::PlayDeath() { Log(nullptr, "BodyPlayDeath"); }
 void S_HumanBody::Ragdoll() { Log(nullptr, "BodyRagdoll"); }
 void S_HumanBody::ResetMovement() { Log(nullptr, "BodyResetMovement"); }
-const uint32_t *S_HumanBody::GetGround() const { return g_combat.ground; }
+const uint32_t *S_HumanBody::GetGround() const { return g_combat.groundOn ? g_combat.ground : nullptr; }
 float S_HumanBody::GetVisibilityFactor() const { return g_combat.visibility; }
 
 namespace {
@@ -224,7 +226,7 @@ void SetUpCombat()
     SetUpRespawn();
     SetUpSaves();
     // The real ones on both sides (part 20's tests scripted or logged them).
-    for (uint32_t at : {0x005a6600u, 0x005a0890u, 0x005aa790u, 0x005a60d0u})
+    for (uint32_t at : {0x005a6600u, 0x005a0890u, 0x005aa790u, 0x005a60d0u, 0x005a0420u, 0x005a0480u, 0x005a0660u, 0x005a15d0u})
         RestoreOriginal(at);
     RedirectOriginal(0x00461a20, reinterpret_cast<const void *>(OC_IsMember));
     RedirectOriginal(0x00730900, reinterpret_cast<const void *>(OC_GetPlayerTeam));
@@ -442,11 +444,193 @@ void TestCombatStats()
     }
 }
 
+// ---- part 21b: bleeding, motion, visibility, the bones shots aim at, the box, fading
+
+float CT_ OB_VisibilityFactor(void *) { return g_combat.visibility; }
+const uint32_t *CT_ OB_GetGround(void *) { return g_combat.groundOn ? g_combat.ground : nullptr; }
+void CT_ OB_GetVisibleParts(void *, int observer, int target, uint32_t *parts)
+{
+    Log(nullptr, "GetVisibleParts", {double(observer), double(target)});
+    *parts = g_combat.visibleParts;
+}
+void CT_ OB_SprayBloodRandom(void *, const S_vector *pos, const S_vector *dir)
+{
+    Log(nullptr, "SprayBloodRandom", {pos->x, pos->y, pos->z, dir->x, dir->y, dir->z});
+}
+void *OB_GetCoopTeam(void *) { return g_teamManager.GetCoopTeam(); }
+float CT_ GE_GetGroundCover(void *self, int material)
+{
+    Log(self, "GetGroundCover", {double(material)});
+    return g_combat.cover;
+}
+
+// The body's visual "a" under the model: its joints (+0x214), 25 dummies around it; its local box.
+I3D_frame *g_bodyVisual, *g_joints[25], *g_otherFrame;
+
+void SetUpMotion()
+{
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x005ac350, reinterpret_cast<const void *>(OB_VisibilityFactor)},
+        {0x005ac430, reinterpret_cast<const void *>(OB_GetGround)},
+        {0x0046f2a0, reinterpret_cast<const void *>(OB_GetVisibleParts)},
+        {0x0044f4f0, reinterpret_cast<const void *>(OB_SprayBloodRandom)},
+        {0x00461420, reinterpret_cast<const void *>(OB_GetCoopTeam)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    g_origGeVt[0x94 / 4] = reinterpret_cast<void *>(GE_GetGroundCover);
+    g_selfGeVt[VSlot(&C_GEffectsModule::GetGroundCover)] = reinterpret_cast<void *>(GE_GetGroundCover);
+    S_quat none;
+    none.Identity();
+    // (The base harness's model has its body visual "a" already: its joints set here.)
+    g_bodyVisual = FindIn(g_h.frame, "a");
+    if (!g_bodyVisual) {
+        I3D_bbox box;
+        box.min = S_vector(-0.3f, -0.9f, -0.2f);
+        box.max = S_vector(0.35f, 0.95f, 0.25f);
+        g_bodyVisual = NewFrame(FRAME_VISUAL, "a", S_vector(0, 0.9f, 0), none, box, "", g_h.frame);
+    }
+    for (int k = 0; k < 25; ++k)
+        g_joints[k] = NewFrame(FRAME_DUMMY, "joint" + std::to_string(k), S_vector(U(-0.4f, 0.4f), U(-0.9f, 0.9f), U(-0.2f, 0.2f)),
+                               none, Box(S_vector(0.02f, 0.02f, 0.02f)), "", g_bodyVisual);
+    g_otherFrame = NewFrame(FRAME_DUMMY, "otherModel", S_vector(20, 1, 20), none, Box(S_vector(0.3f, 0.9f, 0.3f)), "", g_sector);
+    I3D_frame **joints = g_joints;
+    std::memcpy(reinterpret_cast<uint8_t *>(g_bodyVisual) + 0x214, &joints, 4);
+}
+
+// The motion state: bleeding, its drops' timer, the model's place (moving or not), a seat; the controller's move
+// flags and quiet time; the body's visibility, the ground's material and cover; the parts a shooter sees.
+void RandomMotion()
+{
+    RandomSide();
+    C_Human *h = g_h.human;
+    h->m_bleeding = P(0.3f) ? 0.0f : U(0, 3);
+    h->m_bloodDropTime = P(0.3f) ? I(1400, 2600) : I(0, 3000);
+    h->m_vehicle = P(0.2f) ? reinterpret_cast<C_Actor *>(g_vehicleBytes) : nullptr;
+    const S_vector at(U(4, 30), U(0.5f, 2), U(4, 30));
+    g_h.frame->SetPosInline(at);
+    UpdateTree(g_h.frame);
+    const S_vector last = P(0.3f) ? at : at + S_vector(U(-0.3f, 0.3f), U(-0.1f, 0.1f), U(-0.3f, 0.3f));
+    h->m_lastPos = {last.x, last.y, last.z, 1.0f};
+    h->m_velocity = P(0.3f) ? S_vector4{0, 0, 0, 0} : S_vector4{U(-3, 3), U(-1, 1), U(-3, 3), 0.0f};
+    C_HumanController *c = reinterpret_cast<C_HumanController *>(g_portController);
+    static const uint32_t stances[] = {MOVE_LYING, MOVE_CROUCHING, MOVE_STANDING, 0};
+    static const uint32_t paces[] = {0, MOVE_PACE_1, MOVE_PACE_2, MOVE_PACE_3, MOVE_PACE_4};
+    c->m_moveFlags = stances[I(0, 3)] | (P(0.6f) ? uint32_t(0x8 << I(0, 4)) : 0u) | paces[I(0, 4)];
+    c->m_quietTime = P(0.2f) ? (P(0.5f) ? 7000 : 8000) + I(0, 1) : P(0.3f) ? I(6900, 8100) : I(0, 20000);
+    std::memcpy(g_origController + 0x50, &c->m_moveFlags, 4);
+    std::memcpy(g_origController + 0xB0, &c->m_quietTime, 4);
+    g_combat.visibility = P(0.2f) ? 1.0f : U(0, 1.5f);
+    g_combat.groundOn = P(0.7f);
+    for (uint32_t &g : g_combat.ground)
+        g = uint32_t(I(0, 0x7FFFFFFF));
+    g_combat.cover = P(0.3f) ? 1.0f : U(0, 1);
+    g_combat.visibleParts = P(0.2f) ? 0u : uint32_t(I(1, 63));
+    for (I3D_frame *j : g_joints)
+        j->SetPosInline(S_vector(U(-0.4f, 0.4f), U(-0.9f, 0.9f), U(-0.2f, 0.2f)));
+    // The body visual's own box (each corner apart).
+    I3D_bound_volume &bound = reinterpret_cast<I3D_visual *>(g_bodyVisual)->Field<I3D_bound_volume>(0x1A0);
+    bound.bbox.min = S_vector(-U(0.1f, 0.5f), -U(0.5f, 1.0f), -U(0.1f, 0.4f));
+    bound.bbox.max = S_vector(U(0.1f, 0.5f), U(0.5f, 1.0f), U(0.1f, 0.4f));
+    reinterpret_cast<I3D_visual *>(g_bodyVisual)->VisualFlags() |= VISFLAGS_BOUND_VALID;
+    UpdateTree(g_h.frame);
+}
+
+typedef float(CT_ *T_BFloat)(void *);
+typedef const S_vector *(CT_ *T_BBone)(void *);
+typedef const S_vector *(CT_ *T_BAim)(void *, const void *);
+typedef void(CT_ *T_BCorners)(void *, S_vector4 *);
+
+int FloatBits(float f)
+{
+    int bits;
+    std::memcpy(&bits, &f, 4);
+    return bits;
+}
+int VectorHash(const S_vector &v) { return FloatBits(v.x) ^ (FloatBits(v.y) * 3) ^ (FloatBits(v.z) * 7); }
+
+void TestCombatMotion()
+{
+    C_Human *h = g_h.human;
+    std::printf("combat motion\n");
+    for (int i = 0; i < 24000 / QUICK; ++i) {
+        RandomMotion();
+        const int time = P(0.1f) ? 0 : I(1, 150);
+        switch (i % 9) {
+        case 0:
+            DiffCall("TickBleeding", [&] { h->TickBleeding(time); return 0; },
+                     [&](void *) { OriginalAt<T_KInt>(0x005a0420)(o_human, time); return 0; });
+            break;
+        case 1:
+            DiffCall("UpdateBleeding", [&] { h->UpdateBleeding(time); return 0; },
+                     [&](void *) { OriginalAt<T_KInt>(0x005a0480)(o_human, time); return 0; });
+            break;
+        case 2: {
+            const int t = I(1, 150);
+            DiffCall("UpdateVelocity", [&] { h->UpdateVelocity(t); return 0; },
+                     [&](void *) { OriginalAt<T_KInt>(0x005a0660)(o_human, t); return 0; });
+            break;
+        }
+        case 3:
+            if (P(0.1f))
+                h->m_controller = nullptr;
+            DiffCall("GetVisibility", [&] { return FloatBits(h->GetVisibility()); },
+                     [&](void *) { return FloatBits(OriginalAt<T_BFloat>(0x005a59e0)(o_human)); });
+            break;
+        case 4:
+            DiffCall("GetRandomBonePos", [&] { return VectorHash(h->GetRandomBonePos()); },
+                     [&](void *) { return VectorHash(*OriginalAt<T_BBone>(0x005a3cc0)(o_human)); });
+            break;
+        case 5: {
+            const bool none = P(0.1f);
+            RandomOther();
+            RandomMotion();
+            // (A shooter whose sight sees some parts: never only other bits, where the original divides by zero.)
+            if (g_combat.visibleParts != 0 && !(g_combat.visibleParts & 0x1F))
+                g_combat.visibleParts |= 1u << I(0, 4);
+            // The shooter on its own model, 0..25 m away (the leg bones depend on the distance).
+            g_otherFrame->SetPosInline(g_h.frame->GetWorldPos() + S_vector(U(-1, 1), 0, U(-1, 1)).Normalized() * U(0, 25));
+            UpdateTree(g_otherFrame);
+            PortOther()->m_frame = g_otherFrame;
+            std::memcpy(g_origOther + 0x20, &g_otherFrame, 4);
+            DiffCall("GetAimPoint", [&] { return VectorHash(h->GetAimPoint(none ? nullptr : PortOther())); },
+                     [&](void *) { return VectorHash(*OriginalAt<T_BAim>(0x005a3ab0)(o_human, none ? nullptr : g_origOther)); });
+            break;
+        }
+        case 6: {
+            S_vector4 portCorners[8] = {}, origCorners[8] = {};
+            DiffCall("GetBoxCorners", [&] { h->C_Human::GetBoxCorners(portCorners); return 0; },
+                     [&](void *) { OriginalAt<T_BCorners>(0x005a85f0)(o_human, origCorners); return 0; });
+            for (int k = 0; k < 8; ++k)
+                for (int c = 0; c < 3; ++c)
+                    CHECK(std::fabs((&portCorners[k].x)[c] - (&origCorners[k].x)[c]) <= 1e-5f);
+            break;
+        }
+        case 7:
+            DiffCall("FadeOut", [&] { h->FadeOut(time); return 0; },
+                     [&](void *) { OriginalAt<T_KInt>(0x005a86f0)(o_human, time); return 0; });
+            break;
+        default:
+            DiffCall("FadeIn", [&] { h->FadeIn(time); return 0; },
+                     [&](void *) { OriginalAt<T_KInt>(0x005a8740)(o_human, time); return 0; });
+            break;
+        }
+    }
+}
+
 void TestCombat()
 {
     SetUpCombat();
-    TestCombatSides();
-    TestCombatStats();
+    SetUpMotion();
+    // COMBAT_ONLY: one part's tests alone (21a, 21b ...), for its mutation list.
+    const char *only = std::getenv("COMBAT_ONLY");
+    const auto run = [&](const char *part) { return !only || std::strcmp(only, part) == 0; };
+    if (run("21a")) {
+        TestCombatSides();
+        TestCombatStats();
+    }
+    if (run("21b"))
+        TestCombatMotion();
 }
 
 }  // namespace

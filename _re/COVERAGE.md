@@ -2018,3 +2018,37 @@ particles and the surface marks. Files are served from memory.
     crash on it); only local games pass one now;
   - a rerun of the survivors ran against a failing baseline (GetHealthPercent's infinity, found by the new random
     values) and reported every mutant killed: the baseline line must be read first.
+
+## Human part 21b (the human's bleeding, motion, visibility, aim points, box and fading, `human_combat.cpp`, 2026-11-14)
+
+- **The build:** part 21a's. Added:
+  - the original's TickBleeding, UpdateBleeding, UpdateVelocity and ApplyRemoteHit run real again (part 20 logged
+    them);
+  - logged or scripted on both sides: the body's GetVisibilityFactor and GetGround, the sight module's
+    GetVisibleParts, the shot manager's SprayBloodRandom, the graphic effects' GetGroundCover (slot 0x94), the coop
+    team (the original's GetCoopTeam answers the port's);
+  - the model's body visual "a": its joints (+0x214: 25 dummies) and its own box (random, each corner apart);
+  - a model for the shooter at 0..25 m.
+  - COMBAT_ONLY runs one part's tests (21a, 21b ...).
+- **The tests (24,000, all exact; the box's corners within 1e-5):**
+  - TickBleeding, UpdateBleeding (the drops' timer at its edges, moving or not), UpdateVelocity (a seat or none);
+  - GetVisibility: every stance and pace, the quiet time at the alert windows, the coop team on a server, the body's
+    factor, the ground's cover, no controller;
+  - GetRandomBonePos, GetAimPoint (the parts seen, the shooter a player or not, near or far, no shooter);
+  - GetBoxCorners, FadeOut, FadeIn.
+- **Kept out:** GetAimPoint with only other part bits seen: the original divides by zero there (the port's fix returns
+  a random bone instead: its one line not run).
+- **Port fixes:** none.
+- **Results:** lines: 99.4 % of these functions' 156; human_combat.cpp 44.5 % of 622 so far.
+- **Mutations** (`human/mutations/mutate_combat2.py`): 151 mutants; 107 killed, 9 not building, 35 survived:
+  - GetVisibility's minimum clamps, which can never act (dead in the original too: 26);
+  - exact float boundaries (3);
+  - equivalent ones (4);
+  - out-of-bounds writes of a ninth corner (2).
+- **Harness lessons (my mistakes):**
+  - the first visual "a" I made was never found: the base harness's model has one already (FindChildFrame found it
+    first, without joints);
+  - that visual's box was degenerate, so every GetBoxCorners mutant survived the first run;
+  - the other human shared the tested one's model, so the aim points' distances were all 0;
+  - another edit script through a heredoc collapsed its backslashes, and one converted line ends twice (CR CR LF):
+    fixed with Edit and normalised.
