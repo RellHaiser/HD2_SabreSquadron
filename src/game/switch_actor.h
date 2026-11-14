@@ -55,6 +55,6 @@ private:
 class C_SwitchCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x00613200
-    const char *GetName() override { return "Switch"; } // 0x00613260
-    void Destroy(C_Actor *actor) override;              // 0x00613270
+    const char *GetName() override { return "Switch"; } // 0x00613260 (DS 0x0063d4a0)
+    void Destroy(C_Actor *actor) override;              // 0x00613270 (DS 0x0063d4c0)
 };

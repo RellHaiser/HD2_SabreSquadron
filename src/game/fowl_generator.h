@@ -68,6 +68,6 @@ private:
 class C_FowlGeneratorCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005ba130
-    const char *GetName() override { return "FowlGenerator"; }   // 0x005ba190
-    void Destroy(C_Actor *actor) override;              // 0x005ba1a0
+    const char *GetName() override { return "FowlGenerator"; }   // 0x005ba190 (DS 0x005cd850)
+    void Destroy(C_Actor *actor) override;              // 0x005ba1a0 (DS 0x005cd870)
 };

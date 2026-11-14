@@ -76,6 +76,6 @@ private:
 class C_MineCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005fde30
-    const char *GetName() override { return "Mine"; }   // 0x005fde90
-    void Destroy(C_Actor *actor) override;              // 0x005fdea0
+    const char *GetName() override { return "Mine"; }   // 0x005fde90 (DS 0x00623010)
+    void Destroy(C_Actor *actor) override;              // 0x005fdea0 (DS 0x00623030)
 };

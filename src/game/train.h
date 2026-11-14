@@ -146,6 +146,6 @@ private:
 class C_TrainCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005bbde0
-    const char *GetName() override { return "Train"; }  // 0x005bbe40
-    void Destroy(C_Actor *actor) override;              // 0x005bbe50
+    const char *GetName() override { return "Train"; }  // 0x005bbe40 (DS 0x005cfc40)
+    void Destroy(C_Actor *actor) override;              // 0x005bbe50 (DS 0x005cfc60)
 };

@@ -144,8 +144,8 @@ private:
 class C_AirAttackCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005e2c30
-    const char *GetName() override { return "AirAttack"; }   // 0x005e2c90
-    void Destroy(C_Actor *actor) override;              // 0x005e2ca0
+    const char *GetName() override { return "AirAttack"; }   // 0x005e2c90 (DS 0x00601110)
+    void Destroy(C_Actor *actor) override;              // 0x005e2ca0 (DS 0x00601130)
 };
 extern C_AirAttackCreator g_airAttackCreator;           // 0x008ac9d4
 

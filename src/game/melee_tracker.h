@@ -222,6 +222,6 @@ class C_MeleeTrackerCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005d4a60
     // The original's type name (game data, kept); nothing in the game reads it.
-    const char *GetName() override { return "Dog"; }    // 0x005d4ad0
-    void Destroy(C_Actor *actor) override;              // 0x005d4ae0
+    const char *GetName() override { return "Dog"; }    // 0x005d4ad0 (DS 0x005ef030)
+    void Destroy(C_Actor *actor) override;              // 0x005d4ae0 (DS 0x005ef050)
 };

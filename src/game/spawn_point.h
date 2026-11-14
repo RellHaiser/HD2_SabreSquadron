@@ -67,6 +67,6 @@ private:
 class C_SpawnPointCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x00611760
-    const char *GetName() override { return "SpawnPoint"; }   // 0x006117c0
-    void Destroy(C_Actor *actor) override;              // 0x006117d0
+    const char *GetName() override { return "SpawnPoint"; }   // 0x006117c0 (DS 0x0063b910)
+    void Destroy(C_Actor *actor) override;              // 0x006117d0 (DS 0x0063b930)
 };

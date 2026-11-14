@@ -126,6 +126,6 @@ private:
 class C_BarrelCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x006062b0
-    const char *GetName() override { return "Barrel"; } // 0x00606310
-    void Destroy(C_Actor *actor) override;              // 0x00606320
+    const char *GetName() override { return "Barrel"; } // 0x00606310 (DS 0x0062d7d0)
+    void Destroy(C_Actor *actor) override;              // 0x00606320 (DS 0x0062d7f0)
 };

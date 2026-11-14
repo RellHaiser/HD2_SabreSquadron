@@ -156,6 +156,6 @@ enum : int {
 class C_StaticWeaponCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x00602a70
-    const char *GetName() override { return "StaticWeapon"; }   // 0x00602ad0
-    void Destroy(C_Actor *actor) override;              // 0x00602ae0
+    const char *GetName() override { return "StaticWeapon"; }   // 0x00602ad0 (DS 0x00629000)
+    void Destroy(C_Actor *actor) override;              // 0x00602ae0 (DS 0x00629020)
 };

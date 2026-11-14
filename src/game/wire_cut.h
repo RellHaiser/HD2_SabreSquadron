@@ -59,6 +59,6 @@ private:
 class C_WireCutCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005e20a0
-    const char *GetName() override { return "WireCut"; }   // 0x005e2100
-    void Destroy(C_Actor *actor) override;              // 0x005e2110
+    const char *GetName() override { return "WireCut"; }   // 0x005e2100 (DS 0x00600110)
+    void Destroy(C_Actor *actor) override;              // 0x005e2110 (DS 0x00600130)
 };

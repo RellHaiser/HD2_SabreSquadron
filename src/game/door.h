@@ -199,6 +199,6 @@ private:
 class C_DoorCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005ff180
-    const char *GetName() override { return "Door"; }   // 0x005ff1e0
-    void Destroy(C_Actor *actor) override;              // 0x005ff1f0
+    const char *GetName() override { return "Door"; }   // 0x005ff1e0 (DS 0x00624900)
+    void Destroy(C_Actor *actor) override;              // 0x005ff1f0 (DS 0x00624920)
 };

@@ -106,6 +106,6 @@ private:
 class C_ExplosivePlaceCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x0060c1a0
-    const char *GetName() override { return "Explosive place"; }   // 0x0060c200
-    void Destroy(C_Actor *actor) override;              // 0x0060c210
+    const char *GetName() override { return "Explosive place"; }   // 0x0060c200 (DS 0x00634d70)
+    void Destroy(C_Actor *actor) override;              // 0x0060c210 (DS 0x00634d90)
 };

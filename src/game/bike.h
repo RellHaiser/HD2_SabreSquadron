@@ -85,6 +85,6 @@ private:
 class C_BikeCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005d87f0
-    const char *GetName() override { return "Bike"; }   // 0x005d8850
-    void Destroy(C_Actor *actor) override;              // 0x005d8860
+    const char *GetName() override { return "Bike"; }   // 0x005d8850 (DS 0x005f3ed0)
+    void Destroy(C_Actor *actor) override;              // 0x005d8860 (DS 0x005f3ef0)
 };

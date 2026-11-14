@@ -94,6 +94,6 @@ private:
 class C_ItemActorCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005b6740
-    const char *GetName() override { return "Item"; }   // 0x005b67a0
-    void Destroy(C_Actor *actor) override;              // 0x005b67b0
+    const char *GetName() override { return "Item"; }   // 0x005b67a0 (DS 0x005c8d40)
+    void Destroy(C_Actor *actor) override;              // 0x005b67b0 (DS 0x005c8d60)
 };

@@ -360,6 +360,6 @@ C_Actor *FindJunkersTargetFor(C_Human *human, I3D_frame **frame);   // 0x005f0e4
 class C_Junkers88Creator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005edd20
-    const char *GetName() override { return "Junkers88"; }   // 0x005edd90
-    void Destroy(C_Actor *actor) override;              // 0x005edda0
+    const char *GetName() override { return "Junkers88"; }   // 0x005edd90 (DS 0x0060ec60)
+    void Destroy(C_Actor *actor) override;              // 0x005edda0 (DS 0x0060ec80)
 };

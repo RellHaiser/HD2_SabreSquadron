@@ -136,8 +136,8 @@ private:
 class C_AnimationActorCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005b3130
-    const char *GetName() override { return "Animation"; }   // 0x005b3190
-    void Destroy(C_Actor *actor) override;              // 0x005b31a0
+    const char *GetName() override { return "Animation"; }   // 0x005b3190 (DS 0x005c4970)
+    void Destroy(C_Actor *actor) override;              // 0x005b31a0 (DS 0x005c4990)
 };
 
 // The mission editor's description of the actor's properties (ReadProperties' chunks): filled by

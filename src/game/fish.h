@@ -74,6 +74,6 @@ private:
 class C_FishCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005db7e0
-    const char *GetName() override { return "Fish"; }   // 0x005db840
-    void Destroy(C_Actor *actor) override;              // 0x005db850
+    const char *GetName() override { return "Fish"; }   // 0x005db840 (DS 0x005f7b90)
+    void Destroy(C_Actor *actor) override;              // 0x005db850 (DS 0x005f7bb0)
 };
