@@ -258,13 +258,15 @@ bool C_HumanController::Unknown5C(float * /*intensity*/, float * /*reference*/)
     return false;
 }
 
-void C_HumanController::SetSpectating(bool /*on*/)
+void C_HumanController::SetSpectating(bool on)
 {
+    m_spectating = on;
 }
 
 bool C_HumanController::IsSpectating()
 {
-    return false;
+    // (The original's constructor leaves the flag as the allocation had it; the port's starts false.)
+    return m_spectating;
 }
 
 bool C_HumanController::OnCollisionEx(C_Actor * /*other*/, const S_vector * /*pos*/, int, int, int, int, int)

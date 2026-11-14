@@ -764,6 +764,9 @@ namespace {
 #ifdef HUMAN_CONTROL
 #include "control_test.inc"
 #endif
+#ifdef HUMAN_CONTROLLER
+#include "controller_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -845,7 +848,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_CONTROL)
+#if defined(HUMAN_CONTROLLER)
+    TestController();
+#elif defined(HUMAN_CONTROL)
     TestControl();
 #elif defined(HUMAN_COMBAT)
     TestCombat();

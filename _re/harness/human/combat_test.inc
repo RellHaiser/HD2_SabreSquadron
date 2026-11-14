@@ -52,11 +52,13 @@ bool C_Human::HasSeenEnemy(const C_Human *human) const
 bool C_Human::IsSurrendered() const { return g_combat.surrendered; }
 #endif
 void C_Human::OnSightEvent(int lost, int targetId) { Log(this, "OnSightEvent", {double(lost), double(targetId)}); }
+#ifndef HUMAN_CONTROLLER   // (the controller build links game/human_controller.cpp's)
 int C_HumanController::Say(int sentence, int delay, uint32_t flags, bool force)
 {
     Log(this, "ControllerSay", {double(sentence), double(delay), double(flags), double(force)});
     return 0;
 }
+#endif
 void C_Interface::FlashDamage() { Log(nullptr, "FlashDamage"); }
 int C_NetGame::GetLocalTeam() { return g_combat.localTeam; }
 int C_NetGame::GetPlayerTeam(int slot, bool pending)
