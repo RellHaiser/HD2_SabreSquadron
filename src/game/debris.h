@@ -51,6 +51,6 @@ private:
 class C_DebrisCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005fda20
-    const char *GetName() override { return "Debris"; } // 0x005fda80
-    void Destroy(C_Actor *actor) override;              // 0x005fda90
+    const char *GetName() override { return "Debris"; } // 0x005fda80 (DS 0x006229f0)
+    void Destroy(C_Actor *actor) override;              // 0x005fda90 (DS 0x00622a10)
 };

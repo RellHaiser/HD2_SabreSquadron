@@ -28,6 +28,6 @@ public:
 class C_NullActorCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005e2a40
-    const char *GetName() override { return "NullActor"; }   // 0x005e2aa0
-    void Destroy(C_Actor *actor) override;              // 0x005e2ab0
+    const char *GetName() override { return "NullActor"; }   // 0x005e2aa0 (DS 0x00600de0)
+    void Destroy(C_Actor *actor) override;              // 0x005e2ab0 (DS 0x00600e00)
 };

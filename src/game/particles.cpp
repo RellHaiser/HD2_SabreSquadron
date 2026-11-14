@@ -1023,7 +1023,9 @@ C_ParticlesModule::~C_ParticlesModule()
 {
     // Emitters left at exit are not deleted (their visuals belong to the engine,
     // which is gone by then).
+#ifndef HD2_DEDICATED   // the server has no particles: its destructor is the base's
     FreeEffects();
+#endif
 }
 
 void C_ParticlesModule::DeleteFreeEmitters()
@@ -1304,6 +1306,9 @@ void C_ParticlesModule::LoadStaticEmitterList(C_chunk &chunk, bool relativeToPar
 
 bool C_ParticlesModule::SaveGame(C_chunk &chunk)
 {
+#ifdef HD2_DEDICATED    // the server has no particles: nothing is saved
+    return true;
+#endif
     chunk.WriteChunk(CHUNK_SAVE_LAST_HANDLE, m_lastHandle);
     // Both lists are written last to first.
     for (auto it = m_active.rbegin(); it != m_active.rend(); ++it) {
@@ -1326,6 +1331,9 @@ bool C_ParticlesModule::SaveGame(C_chunk &chunk)
 
 bool C_ParticlesModule::LoadGame(C_chunk &chunk)
 {
+#ifdef HD2_DEDICATED    // the server has no particles: nothing is read
+    return true;
+#endif
     uint16_t id;
     while (chunk.RemainingSize() > 0 && chunk.Descend(id)) {
         if (id == CHUNK_SAVE_EFFECT || id == CHUNK_SAVE_STATIC) {

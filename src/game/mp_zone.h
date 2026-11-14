@@ -121,6 +121,6 @@ enum : int {
 class C_MPZoneCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005ebe40
-    const char *GetName() override { return "MPZone"; } // 0x005ebea0
-    void Destroy(C_Actor *actor) override;              // 0x005ebeb0
+    const char *GetName() override { return "MPZone"; } // 0x005ebea0 (DS 0x0060c8a0)
+    void Destroy(C_Actor *actor) override;              // 0x005ebeb0 (DS 0x0060c8c0)
 };

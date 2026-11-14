@@ -88,6 +88,6 @@ private:
 class C_PikeCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005b88f0
-    const char *GetName() override { return "Pike"; }   // 0x005b8950
-    void Destroy(C_Actor *actor) override;              // 0x005b8960
+    const char *GetName() override { return "Pike"; }   // 0x005b8950 (DS 0x005cb950)
+    void Destroy(C_Actor *actor) override;              // 0x005b8960 (DS 0x005cb970)
 };

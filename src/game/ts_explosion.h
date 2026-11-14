@@ -88,6 +88,6 @@ private:
 class C_TSExplosionCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x0060edc0
-    const char *GetName() override { return "Explosion [TS]"; }   // 0x0060ee20
-    void Destroy(C_Actor *actor) override;              // 0x0060ee30
+    const char *GetName() override { return "Explosion [TS]"; }   // 0x0060ee20 (DS 0x006385e0)
+    void Destroy(C_Actor *actor) override;              // 0x0060ee30 (DS 0x00638600)
 };

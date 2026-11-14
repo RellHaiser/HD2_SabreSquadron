@@ -49,6 +49,6 @@ private:
 class C_PhotoPlaceCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x0060b640
-    const char *GetName() override { return "Photo place"; }   // 0x0060b6a0
-    void Destroy(C_Actor *actor) override;              // 0x0060b6b0
+    const char *GetName() override { return "Photo place"; }   // 0x0060b6a0 (DS 0x00633e60)
+    void Destroy(C_Actor *actor) override;              // 0x0060b6b0 (DS 0x00633e80)
 };

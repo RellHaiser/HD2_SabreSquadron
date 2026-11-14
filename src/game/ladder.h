@@ -84,8 +84,8 @@ private:
 class C_LadderCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005ea330
-    const char *GetName() override { return "Ladder"; } // 0x005ea3a0
-    void Destroy(C_Actor *actor) override;              // 0x005ea3b0
+    const char *GetName() override { return "Ladder"; } // 0x005ea3a0 (DS 0x0060a600)
+    void Destroy(C_Actor *actor) override;              // 0x005ea3b0 (DS 0x0060a620)
 };
 
 // The human movement code holds the ladder it uses as an actor.

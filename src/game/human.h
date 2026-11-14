@@ -1035,6 +1035,6 @@ private:
 class C_HumanCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x0059be60
-    const char *GetName() override { return "Human"; }  // 0x0059bed0
-    void Destroy(C_Actor *actor) override;              // 0x0059bee0
+    const char *GetName() override { return "Human"; }  // 0x0059bed0 (DS 0x005a7070)
+    void Destroy(C_Actor *actor) override;              // 0x0059bee0 (DS 0x005a7090)
 };

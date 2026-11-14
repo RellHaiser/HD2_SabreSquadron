@@ -199,6 +199,6 @@ private:
 class C_SupplyBoxCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005f9730
-    const char *GetName() override { return "SupplyBox"; }   // 0x005f97a0
-    void Destroy(C_Actor *actor) override;              // 0x005f97b0
+    const char *GetName() override { return "SupplyBox"; }   // 0x005f97a0 (DS 0x0061d530)
+    void Destroy(C_Actor *actor) override;              // 0x005f97b0 (DS 0x0061d550)
 };

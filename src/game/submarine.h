@@ -137,6 +137,6 @@ const std::vector<C_Actor *> &GetSubmarines();          // 0x005de7b0
 class C_SubmarineCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005de6c0
-    const char *GetName() override { return "Submarine"; }   // 0x005de720
-    void Destroy(C_Actor *actor) override;              // 0x005de730
+    const char *GetName() override { return "Submarine"; }   // 0x005de720 (DS 0x005fb700)
+    void Destroy(C_Actor *actor) override;              // 0x005de730 (DS 0x005fb720)
 };

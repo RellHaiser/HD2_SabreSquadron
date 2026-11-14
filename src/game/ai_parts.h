@@ -299,7 +299,7 @@ struct alignas(16) S_AIFire {
 // base fields.
 struct alignas(16) S_AITask {
     explicit S_AITask(int t) : type(t) {}
-    virtual ~S_AITask() = default;                      // slot 0
+    virtual ~S_AITask() = default;                      // slot 0 (vtable 0x008110e4; deleting 0x0058a640 (DS 0x005926e0))
     virtual bool SaveGame(C_chunk &chunk) const;        // slot 1 0x0054fc40
     virtual bool LoadGame(C_chunk &chunk);              // slot 2 0x0054fcd0
 

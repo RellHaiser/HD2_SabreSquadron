@@ -63,6 +63,6 @@ private:
 class C_RadioCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x0060a720
-    const char *GetName() override { return "Radio"; }  // 0x0060a780
-    void Destroy(C_Actor *actor) override;              // 0x0060a790
+    const char *GetName() override { return "Radio"; }  // 0x0060a780 (DS 0x00632a90)
+    void Destroy(C_Actor *actor) override;              // 0x0060a790 (DS 0x00632ab0)
 };

@@ -1526,8 +1526,8 @@ public:
     void OnShotAt(C_Actor *shooter, const S_vector &velocity) override;   // 0x00590380
     void OnHit(int type, int zone, int health, C_Actor *attacker, const S_vector &pos,
                const S_vector &dir) override;           // 0x00590400
-    bool Unknown104() override { return false; }        // 0x005a42a0
-    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a4290
+    bool Unknown104() override { return false; }        // 0x005a42a0 (DS 0x005b1270)
+    bool Unknown114(const S_vector * /*dir*/) override { return true; }         // 0x005a4290 (DS 0x005b1250)
 
     // --- the script's commands (C_Human's HUMAN_* forwarders) ----------------------------
     void SetScript(C_Script *script) { m_script = script; }   // 0x005907c0

@@ -194,11 +194,11 @@ public:
     void Save(int *ioSize, void *buffer) override;      // 0x007df410
     void Load(int size, const void *data) override;     // 0x007df490
     int GetProjectileType() override { return m_projectileType; }       // 0x007e07b0 (DS 0x0081c610)
-    float GetAimedDispersion() override { return m_aimedDispersion; }   // 0x007e0770
-    float GetMuzzleVelocity() override { return m_muzzleVelocity; }     // 0x007e0780
-    int GetReloadSound() override { return m_reloadSound; }             // 0x007e0790
+    float GetAimedDispersion() override { return m_aimedDispersion; }   // 0x007e0770 (DS 0x0081c590)
+    float GetMuzzleVelocity() override { return m_muzzleVelocity; }     // 0x007e0780 (DS 0x0081c5b0)
+    int GetReloadSound() override { return m_reloadSound; }             // 0x007e0790 (DS 0x0081c5d0)
     int GetReloadTimeMs() override { return static_cast<int>(m_reloadTime); }   // 0x007e07a0
-    float GetUnknownVf2C() override { return m_unknown48; }             // 0x007e07c0
+    float GetUnknownVf2C() override { return m_unknown48; }             // 0x007e07c0 (DS 0x0081c630)
 
     // Grenades: ms from the throw to the explosion, 0 = on impact.
     int GetFuseTime() const { return m_fuseTime; }
@@ -235,13 +235,13 @@ public:
     void Save(int *ioSize, void *buffer) override;      // 0x007df4b0
     void Load(int size, const void *data) override;     // 0x007df540
     int GetProjectileType() override { return m_projectileType; }       // 0x007e0810 (DS 0x0081c6d0)
-    float GetAimedDispersion() override { return m_aimedDispersion; }   // 0x007e07d0
-    float GetMuzzleVelocity() override { return m_muzzleVelocity; }     // 0x007e07e0
-    int GetReloadSound() override { return m_reloadSound; }             // 0x007e07f0
+    float GetAimedDispersion() override { return m_aimedDispersion; }   // 0x007e07d0 (DS 0x0081c650)
+    float GetMuzzleVelocity() override { return m_muzzleVelocity; }     // 0x007e07e0 (DS 0x0081c670)
+    int GetReloadSound() override { return m_reloadSound; }             // 0x007e07f0 (DS 0x0081c690)
     int GetReloadTimeMs() override { return static_cast<int>(m_reloadTime); }   // 0x007e0800
-    int GetLastShotSound() override { return m_lastShotSound; }         // 0x007e0820
-    int GetBoltSound() override { return m_boltSound; }                 // 0x007e0830
-    float GetUnknownVf2C() override { return m_unknown44; }             // 0x007e0840
+    int GetLastShotSound() override { return m_lastShotSound; }         // 0x007e0820 (DS 0x0081c6f0)
+    int GetBoltSound() override { return m_boltSound; }                 // 0x007e0830 (DS 0x0081c710)
+    float GetUnknownVf2C() override { return m_unknown44; }             // 0x007e0840 (DS 0x0081c730)
 
     // Bullets keep their full power up to the ideal range (m) and lose
     // GetDamageFalloff() per metre beyond it.

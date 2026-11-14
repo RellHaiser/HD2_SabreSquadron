@@ -48,6 +48,6 @@ private:
 class C_ClockCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x005b8040
-    const char *GetName() override { return "Clock"; }  // 0x005b80a0
-    void Destroy(C_Actor *actor) override;              // 0x005b80b0
+    const char *GetName() override { return "Clock"; }  // 0x005b80a0 (DS 0x005cad90)
+    void Destroy(C_Actor *actor) override;              // 0x005b80b0 (DS 0x005cadb0)
 };

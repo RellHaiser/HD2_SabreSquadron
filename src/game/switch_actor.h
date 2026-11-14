@@ -26,7 +26,7 @@ public:
     bool Unknown24(C_chunk &chunk) override;            // 0x24 0x006133a0
     bool Unknown28(C_chunk &chunk) override;            // 0x28 0x006133d0
     // The state frames counted and placed at "1"; state 0 (that is 1) set.
-    bool SetFrame(I3D_frame *frame) override;           // 0x2C 0x00613550 (the rest split off at 0x00613567)
+    bool SetFrame(I3D_frame *frame) override;           // 0x2C 0x00613550 (the rest split off at 0x00613567 (DS 0x0063d8b7))
     bool WriteProperties(C_chunk &chunk) override;      // 0x30 0x00613c10
     bool ReadProperties(C_chunk &chunk) override;       // 0x34 0x00613e10
     void CopyFrom(const C_Actor *source) override;      // 0x38 0x006136c0
@@ -55,6 +55,6 @@ private:
 class C_SwitchCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x00613200
-    const char *GetName() override { return "Switch"; } // 0x00613260
-    void Destroy(C_Actor *actor) override;              // 0x00613270
+    const char *GetName() override { return "Switch"; } // 0x00613260 (DS 0x0063d4a0)
+    void Destroy(C_Actor *actor) override;              // 0x00613270 (DS 0x0063d4c0)
 };

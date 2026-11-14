@@ -80,6 +80,6 @@ private:
 class C_DocumentPlaceCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x0060dae0
-    const char *GetName() override { return "Document place"; }   // 0x0060db40
-    void Destroy(C_Actor *actor) override;              // 0x0060db50
+    const char *GetName() override { return "Document place"; }   // 0x0060db40 (DS 0x00636d90)
+    void Destroy(C_Actor *actor) override;              // 0x0060db50 (DS 0x00636db0)
 };
