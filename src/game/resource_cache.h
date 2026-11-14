@@ -104,7 +104,7 @@ class C_SoundCache : public C_ResourceCache<I3D_sound> {               // vtable
 protected:
     I3D_sound *Create() override;                                       // 0x006d5660 (DS 0x0071c520)
     // Re-opens the source's file (sounds share their sample data in the engine).
-    void Duplicate(I3D_sound *dest, I3D_sound *source) override;       // 0x006d5620
+    void Duplicate(I3D_sound *dest, I3D_sound *source) override;       // 0x006d5620 (DS 0x0071c4f0)
 };
 
 class C_AnimationCache : public C_ResourceCache<I3D_animation_set> {   // vtable 0x00816108

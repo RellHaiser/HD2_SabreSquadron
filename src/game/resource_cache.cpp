@@ -147,6 +147,7 @@ HRESULT C_ResourceCache<T>::OpenFromDirs(T *object, const char *fileName, uint32
 }
 
 template <class T>
+// sounds 0x0044a1c0 (DS 0x004b03c0)
 HRESULT C_ResourceCache<T>::OpenInto(T *object, const char *fileName, uint32_t flags, void *callback,
                                      void * /*context*/, int /*unused*/)
 {

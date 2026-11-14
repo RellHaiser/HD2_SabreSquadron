@@ -4,8 +4,8 @@
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 
-// Not in the server.
-bool InitCarEffects()                                                          // 0x004d5a50
+// The server's copy only returns true (DS 0x004c3530): C_game::Start's call, no emitters made.
+bool InitCarEffects()                                                         // 0x004d5a50
 {
     return true;
 }

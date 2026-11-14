@@ -327,7 +327,7 @@ protected:
     bool DescribePasswordScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x00637890
     // The box's and the buttons' callback: a server's password while m_step is 7, else the parental lock's.
     static bool OnPasswordInput(void *menu, void *argument, C_Control *control, uint32_t notification,
-                                uint32_t value);        // 0x00637a40
+                                uint32_t value);        // 0x00637a40 (DS 0x0066b620)
     // A server's password (none: false; another control: false): Return in the box / yes: a password typed
     // kept (g_mpSettings, g_sessionPasswordSet), the connection started (the popup replaced by the connect
     // screen); Escape / no: the kept messages dropped, the popup closed. The step ended (yes with no password:

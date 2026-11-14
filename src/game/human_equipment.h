@@ -101,7 +101,7 @@ public:
     void SetModel(I3D_frame *model, int place, int uid, int time, int typeId);   // 0x007916f0
     I3D_frame *GetModel(int place) const;               // 0x007917d0
     // Puts the hands item away for an action (true) / takes it back.
-    void PutAwayHandsItem(bool putAway);                // 0x007920c0
+    void PutAwayHandsItem(bool putAway);                // 0x007920c0 (DS 0x008004f0)
     bool ShowHandsItem(bool show, int unused, bool toggle);   // 0x00791f20
     // C_Item::GetProjectileKind() of the hands item, 0 without one.
     int GetHandsProjectileKind();                       // 0x00792070

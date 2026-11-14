@@ -350,6 +350,8 @@ struct S_QuickDialog {
     int line = -1;                                      // +0x00 the line shown
     int id = -1;                                        // +0x04
     std::vector<S_Line> lines;                          // +0x08
+
+    ~S_QuickDialog() = default;                         // 0x0048efc0 (DS 0x004a5630)
 };
 
 // Quick chat messages (C_game +0x60, 0x28 bytes).

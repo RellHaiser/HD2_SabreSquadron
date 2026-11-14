@@ -277,6 +277,9 @@ void C_FontManager::Free()
 
 bool C_FontManager::AddTextureFont(const char *texture, const char *table, int id)
 {
+#ifdef HD2_DEDICATED   // no fonts on the server: nothing is drawn
+    return true;
+#endif
     auto *font = new C_TextureFont();
     if (!font->Load(texture, table, id)) {
         delete font;
@@ -288,6 +291,9 @@ bool C_FontManager::AddTextureFont(const char *texture, const char *table, int i
 
 bool C_FontManager::AddMapFont(const char *texture, const char *table, int id)
 {
+#ifdef HD2_DEDICATED   // no fonts on the server: nothing is drawn
+    return true;
+#endif
     auto *font = new C_MapFont();
     if (!font->Load(texture, table, id)) {
         delete font;
@@ -683,6 +689,9 @@ void C_GdiFont::Touch(S_GlyphCell *cell)
 
 bool C_FontManager::AddGdiFont(const char *face, int textureWidth, int textureHeight, int size, int id, bool bold)
 {
+#ifdef HD2_DEDICATED   // no fonts on the server: nothing is drawn
+    return true;
+#endif
     auto *font = new C_GdiFont();
     if (!font->Init(nullptr, face, textureWidth, textureHeight, size, bold)) {
         font->Close();
