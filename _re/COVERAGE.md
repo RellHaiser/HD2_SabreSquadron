@@ -2094,3 +2094,38 @@ particles and the surface marks. Files are served from memory.
   - the seen lists were empty on both sides, so OnKilledHuman's search never ran: 13 survivors until they were
     filled;
   - two more edit scripts through heredocs collapsed their backslashes; fixed with files written by Write.
+
+## Human part 21d (the human's hits and collisions, `human_combat.cpp`, 2026-11-14)
+
+- **The build:** part 21c's. Added:
+  - the original's calls of Hit logged as the port's are: GetCheatValue (the index in ECX), IsHumanSpeaking
+    (fastcall), the controller's Say, the body's Die, Cripple, Ragdoll and ResetMovement, the human's GetViewDir, the
+    frame script's OnDeath;
+  - the controller's OnHit (slot 0xBC) and OnCollisionEx (slot 0xC8) on both sides;
+  - Hit itself real in both vtables (the original's slot 0xD4; the port's slot calls the member): a reflected team
+    hit and a run-over call it again;
+  - a car for each side (its driver and crew are that side's humans), its seats through its own vtable; the port's
+    vehicle speed written at the offset GetSpeed reads (found by probing: the port's C_Vehicle is not laid out as the
+    original's);
+  - the original's integrity check made to pass (its two table entries equal), as the port assumes;
+  - the frame's data: none, without a script, with one.
+- **The tests (24,000, all exact):**
+  - Hit (16,000): every hit type (bullets more often) and zone, past the table too; amounts whole, fractional, 0 and
+    -1; the attacker none, the human itself or the other; local, client and server games, co-op or not, team games or
+    deathmatch; the sniper cheat, every difficulty, no team damage with the human in the player's team or not; friendly
+    fire with its share, the spawn protection at its edge; the leg hits 0..3, a dead human, a zero direction;
+  - OnCollisionEx (8,000): a car or a static weapon at 2 m/s exactly, faster, slower or NaN; a driver or none; 0..4
+    seats with the human, the other or nobody in each; no controller; the controller's answer.
+  - After each, the other human's health, leg hits and disguise are compared too (a hit reflected onto it, its
+    disguise as a crew member).
+- **Kept out:** the original's failing integrity check (its own shots hurt the player 1 % of the time): the port
+  has no check.
+- **Port fixes:** none.
+- **Results:** lines: 100 % of these functions' 113; human_combat.cpp 99.8 % of 623, done: the one line not run is
+  GetAimPoint's fix for a case where the original divides by zero (part 21b). Hit type 15's flag (HitTypeFlags) was
+  added to the tests after the mutation run, which covered Hit and OnCollisionEx only.
+- **Mutations** (`human/mutations/mutate_combat4.py`): 124 mutants; 113 killed, 7 not building, 4 survived, all
+  equivalent (the integrity check's branch, the helmet's draw at exactly 0.3).
+- **Harness lessons (my mistakes):** I wrote the port car's speed at the original's offset; the port's vehicle is laid
+  out differently, so GetSpeed read 0 every time. A check against GetSpeed showed it, and the offset is now found by
+  probing.

@@ -972,6 +972,224 @@ void TestCombatDeaths()
     }
 }
 
+// ---- part 21d: hits and collisions
+
+// The original's calls Hit makes (the port's fakes are above): logged as the port's are.
+int CT_ OH_GetCheatValue(int index)
+{
+    Log(nullptr, "GetCheatValue", {double(index)});
+    return g_combat.cheat;
+}
+int CT_ OH_IsHumanSpeaking(const void *human)
+{
+    Log(human, "IsHumanSpeaking");
+    return g_combat.speaking;
+}
+int CT_ OH_Say(void *self, int sentence, int delay, uint32_t flags, int force)
+{
+    Log(self, "ControllerSay", {double(sentence), double(delay), double(flags), double(B(force))});
+    return 0;
+}
+void CT_ OH_BodyDie(void *, void *killer) { Log(killer, "BodyDie"); }
+void CT_ OH_BodyCripple(void *) { Log(nullptr, "BodyCripple"); }
+void CT_ OH_BodyRagdoll(void *) { Log(nullptr, "BodyRagdoll"); }
+void CT_ OH_BodyResetMovement(void *) { Log(nullptr, "BodyResetMovement"); }
+const S_vector *CT_ OH_GetViewDir(void *) { return &g_combat.viewDir; }
+void CT_ OH_ScriptOnDeath(void *self) { Log(self, "ScriptOnDeath"); }
+// The controller's OnHit and OnCollisionEx (both sides: the port's references are pointers).
+void CT_ CT_OnHit(void *self, int type, int zone, int health, void *attacker, const S_vector *pos, const S_vector *dir)
+{
+    Log(self, ("ControllerOnHit " + NameOf(attacker)).c_str(),
+        {double(type), double(zone), double(health), pos->x, pos->y, pos->z, dir->x, dir->y, dir->z});
+}
+bool g_collisionAnswer = false;
+int CT_ CT_OnCollisionEx(void *self, void *other, const S_vector *pos, int a3, int a4, int a5, int a6, int a7)
+{
+    Log(self, ("ControllerOnCollisionEx " + NameOf(other)).c_str(),
+        {pos->x, pos->y, pos->z, double(a3), double(a4), double(a5), double(a6), double(a7)});
+    return g_collisionAnswer;
+}
+// The human's Hit: the real one on both sides (the port's slot calls the member).
+void CT_ PH_Hit(C_Human *self, E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *attacker,
+                int zone)
+{
+    self->C_Human::Hit(type, amount, pos, dir, attacker, zone);
+}
+
+// The car that runs a human over: each side its own (the driver and the seats' occupants are each side's humans).
+alignas(16) uint8_t g_portCar[sizeof(C_Car) + 0x100], g_origCar[0x2600];
+void *g_portCarVt[128], *g_origCarVt[64];
+size_t g_portSpeedOffset = 0;
+int g_seatCount = 0;
+int g_seats[4] = {};    // 0 none, 1 the tested human, 2 the other
+int CT_ CAR_GetSeatCount(void *self)
+{
+    Log(self, "GetSeatCount");
+    return g_seatCount;
+}
+void *CT_ CAR_GetSeatOccupant(void *self, int seat)
+{
+    Log(self, "GetSeatOccupant", {double(seat)});
+    const bool port = self == g_portCar;
+    const int who = seat >= 0 && seat < 4 ? g_seats[seat] : 0;
+    if (who == 1)
+        return port ? static_cast<void *>(g_h.human) : static_cast<void *>(o_human);
+    if (who == 2)
+        return port ? static_cast<void *>(g_portOther) : static_cast<void *>(g_origOther);
+    return nullptr;
+}
+
+// The frame's data (its script's OnDeath), shared: both sides read the same frame.
+alignas(16) uint8_t g_scriptBytes[0x40];
+S_FrameData g_hitFrameData;
+
+void SetUpHits()
+{
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x00720f50, reinterpret_cast<const void *>(OH_GetCheatValue)},
+        {0x0071f090, reinterpret_cast<const void *>(OH_IsHumanSpeaking)},
+        {0x005882f0, reinterpret_cast<const void *>(OH_Say)},
+        {0x005abbe0, reinterpret_cast<const void *>(OH_BodyDie)},
+        {0x005ac370, reinterpret_cast<const void *>(OH_BodyCripple)},
+        {0x005ac420, reinterpret_cast<const void *>(OH_BodyRagdoll)},
+        {0x005ac440, reinterpret_cast<const void *>(OH_BodyResetMovement)},
+        {0x005a80e0, reinterpret_cast<const void *>(OH_GetViewDir)},
+        {0x0041d920, reinterpret_cast<const void *>(OH_ScriptOnDeath)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    p_humanVt[VSlot(&C_Actor::Hit)] = reinterpret_cast<void *>(PH_Hit);
+    o_humanVt[0xD4 / 4] = OriginalAt<void *>(0x005a1c90);
+    g_portControllerVt[VSlot(&C_HumanController::OnHit)] = reinterpret_cast<void *>(CT_OnHit);
+    g_portControllerVt[VSlot(&C_HumanController::OnCollisionEx)] = reinterpret_cast<void *>(CT_OnCollisionEx);
+    g_origControllerVt[0xBC / 4] = reinterpret_cast<void *>(CT_OnHit);
+    g_origControllerVt[0xC8 / 4] = reinterpret_cast<void *>(CT_OnCollisionEx);
+    // The original's integrity check passes (the port has none): its two table entries equal.
+    *OriginalAt<uint16_t *>(0x008cac84) = 0;
+    *OriginalAt<uint16_t *>(0x008cb384) = 0;
+    *OriginalAt<uint32_t *>(0x008caf40) = *OriginalAt<uint32_t *>(0x008ca840);
+    // The cars: one combined vtable each side would do, but the slots are per side anyway.
+    for (void *&slot : g_portCarVt)
+        slot = reinterpret_cast<void *>(P_Unexpected);
+    for (void *&slot : g_origCarVt)
+        slot = reinterpret_cast<void *>(P_Unexpected);
+    g_portCarVt[VSlot(&C_Actor::GetSeatCount)] = reinterpret_cast<void *>(CAR_GetSeatCount);
+    g_portCarVt[VSlot(&C_Actor::GetSeatOccupant)] = reinterpret_cast<void *>(CAR_GetSeatOccupant);
+    g_origCarVt[0x88 / 4] = reinterpret_cast<void *>(CAR_GetSeatCount);
+    g_origCarVt[0x78 / 4] = reinterpret_cast<void *>(CAR_GetSeatOccupant);
+    // (C_Vehicle's m_speed is private, and the port's vehicle is not laid out as the original's: its offset found
+    // through GetSpeed.)
+    for (size_t off = 4; off + 4 <= sizeof(C_Car); off += 4) {
+        std::memset(g_portCar, 0, sizeof g_portCar);
+        const float marker = 1234.5f;
+        std::memcpy(g_portCar + off, &marker, 4);
+        if (reinterpret_cast<C_Car *>(g_portCar)->GetSpeed() == marker) {
+            g_portSpeedOffset = off;
+            break;
+        }
+    }
+    std::memset(g_portCar, 0, sizeof g_portCar);
+    CHECK(g_portSpeedOffset != 0);
+    *reinterpret_cast<void ***>(g_portCar) = g_portCarVt;
+    *reinterpret_cast<void ***>(g_origCar) = g_origCarVt;
+    g_names[g_portCar] = g_names[g_origCar] = "car";
+    g_names[g_scriptBytes] = "script";
+}
+
+void RandomHit()
+{
+    RandomDeath();
+    C_Human *h = g_h.human;
+    g_combat.cheat = P(0.3f) ? I(1, 2) : 0;
+    g_self.difficulty = I(1, 4);
+    const bool noTeamDamage = P(0.3f);
+    GetGame()->SetNoTeamDamage(noTeamDamage);
+    g_origGame[0x35] = noTeamDamage;
+    g_mpSettings->friendlyFire = P(0.5f) ? 1 : 0;
+    g_mpSettings->inverseDamage = P(0.3f) ? 0 : I(1, 100);
+    g_mpSettings->spawnProtection = P(0.5f) ? 0 : I(1, 10);
+    // The time since the spawn at the protection's edge, or anywhere.
+    h->m_aliveTime = P(0.3f) ? g_mpSettings->spawnProtection * 1000 + I(-1, 1) : I(0, 20000);
+    h->m_legHits = I(0, 3);
+    if (P(0.15f))
+        h->m_stats[STAT_HEALTH] = I(-5, 0);
+    g_combat.viewDir = S_vector(U(-1, 1), U(-1, 1), U(-1, 1));
+    // The frame's data: none, without a script, with one.
+    const int data = I(0, 2);
+    g_hitFrameData = S_FrameData();
+    g_hitFrameData.script = data == 2 ? reinterpret_cast<C_Script *>(g_scriptBytes) : nullptr;
+    g_h.frame->SetData(data ? &g_hitFrameData : nullptr);
+}
+
+typedef void(CT_ *T_HHit)(void *, int, float, const S_vector *, const S_vector *, void *, int);
+typedef int(CT_ *T_HCollision)(void *, void *, const S_vector *, int, int, int, int, int);
+
+void TestCombatHits()
+{
+    C_Human *h = g_h.human;
+    I3D_frame *const frame = g_h.frame;
+    S_FrameData *const frameData = frame->GetData();
+    // (The name's rep each side's own, as in part 21c.)
+    g_skipFields.insert("m_name");
+    std::printf("combat hits\n");
+    for (int i = 0; i < 24000 / QUICK; ++i) {
+        RandomHit();
+        static const int types[] = {HIT_FALL, HIT_BULLET, HIT_BULLET, HIT_BULLET, HIT_EXPLOSION, HIT_MELEE,
+                                    HIT_SCRIPT_KILL, HIT_THROWN_OBJECT, HIT_BACKSTAB, HIT_SUICIDE, HIT_RUN_OVER,
+                                    HIT_SCRIPT_KILL_EX, HIT_DROWNING, 9, 10, 15};
+        const int type = types[I(0, 15)];
+        const S_vector pos(U(-1, 1), U(0, 2), U(-1, 1));
+        const S_vector dir = P(0.05f) ? S_vector(0, 0, 0) : S_vector(U(-1, 1), U(-1, 1), U(-1, 1));
+        // The attacker: none, the tested human itself, the other one.
+        const int who = P(0.2f) ? 0 : P(0.15f) ? 1 : 2;
+        C_Actor *portAttacker = who == 0 ? nullptr
+                              : who == 1 ? reinterpret_cast<C_Actor *>(h)
+                                         : reinterpret_cast<C_Actor *>(g_portOther);
+        void *origAttacker = who == 0 ? nullptr : who == 1 ? static_cast<void *>(o_human) : g_origOther;
+        if (i % 3 != 2) {
+            const float amount = P(0.15f) ? -1.0f : P(0.05f) ? 0.0f : P(0.5f) ? float(I(0, 300)) : U(0, 300);
+            const int zone = I(-1, 14);
+            DiffCall("Hit", [&] { h->C_Human::Hit(E_HitType(type), amount, pos, dir, portAttacker, zone); return 0; },
+                     [&](void *) {
+                         OriginalAt<T_HHit>(0x005a1c90)(o_human, type, amount, &pos, &dir, origAttacker, zone);
+                         return 0;
+                     });
+        } else {
+            // A car (or a static weapon) running into the human: its speed at 2 m/s, a NaN, any; its driver and
+            // crew; the controller's answer; no controller.
+            const bool car = P(0.8f);
+            reinterpret_cast<C_Actor *>(g_portCar)->m_type = car ? ACTOR_CAR : ACTOR_STATIC_WEAPON;
+            const int carType = car ? ACTOR_CAR : ACTOR_STATIC_WEAPON;
+            std::memcpy(g_origCar + 0x18, &carType, 4);
+            const float speed = P(0.2f) ? 2.0f : P(0.05f) ? std::numeric_limits<float>::quiet_NaN() : U(0, 5);
+            std::memcpy(g_portCar + g_portSpeedOffset, &speed, 4);
+            std::memcpy(g_origCar + 0x958, &speed, 4);
+            reinterpret_cast<C_Car *>(g_portCar)->m_driver = reinterpret_cast<C_Human *>(portAttacker);
+            std::memcpy(g_origCar + 0x24AC, &origAttacker, 4);
+            g_seatCount = I(0, 4);
+            for (int &seat : g_seats)
+                seat = I(0, 2);
+            g_collisionAnswer = P(0.5f);
+            if (P(0.1f))
+                h->m_controller = nullptr;
+            const int a3 = I(0, 1000), a4 = I(0, 1000), a5 = I(-5, 5), a6 = I(-5, 5), a7 = I(-5, 5);
+            DiffCall("OnCollisionEx",
+                     [&] {
+                         return int(h->C_Human::OnCollisionEx(reinterpret_cast<C_Actor *>(g_portCar), &pos, a3, a4, a5,
+                                                              a6, a7));
+                     },
+                     [&](void *) {
+                         return OriginalAt<T_HCollision>(0x005a07c0)(o_human, g_origCar, &pos, a3, a4, a5, a6, a7) & 0xFF;
+                     });
+        }
+        // The other human (hit back, a crew member): its health, leg hits and disguise alike.
+        CHECK(PortOther()->m_stats[STAT_HEALTH] == *reinterpret_cast<const int *>(g_origOther + 0xEC));
+        CHECK(PortOther()->m_legHits == *reinterpret_cast<const int *>(g_origOther + 0x15C));
+        CHECK(std::memcmp(&PortOther()->m_disguise, g_origOther + 0x16C, 4) == 0);
+    }
+    frame->SetData(frameData);
+}
+
 void TestCombat()
 {
     SetUpCombat();
@@ -988,6 +1206,10 @@ void TestCombat()
         TestCombatMotion();
     if (run("21c"))
         TestCombatDeaths();
+    if (run("21d")) {
+        SetUpHits();
+        TestCombatHits();
+    }
 }
 
 }  // namespace
