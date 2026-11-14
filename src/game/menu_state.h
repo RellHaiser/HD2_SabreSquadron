@@ -148,7 +148,7 @@ public:
     void CloseMessage();                                // 0x0066dac0 (__fastcall)
 
     // The frame the cursor is over in the top screen (a ray from it, along +z).
-    I3D_frame *PickFrame();                             // 0x0066bb80
+    I3D_frame *PickFrame();                             // 0x0066bb80 (DS 0x006a4520)
     // The menus' frames, released by Stop: a copy of a visual (its own mesh), of a frame tree,
     // named and linked to `parent`; a new frame of a type, linked, named and placed.
     I3D_frame *CloneVisual(const C_str &name, I3D_frame *parent, I3D_frame *source);   // 0x0066dad0

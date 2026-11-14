@@ -653,6 +653,9 @@ void C_MenuState::DrawScreens()
 
 I3D_frame *C_MenuState::PickFrame()
 {
+#ifdef HD2_DEDICATED   // no cursor on the server: nothing picked
+    return nullptr;
+#else
     S_vector from;
     m_cursor->GetPosition(&from);
     from.z += 0.1f;
@@ -660,6 +663,7 @@ I3D_frame *C_MenuState::PickFrame()
     I3D_collision_info info;
     // (Quirk kept: the top read unchecked when the stack is empty.)
     return m_scene->IntersectFrame(from, dir, g_menuScreens.back()->GetScreenFrame(), &info, 0x140000, 0, 0, 0);
+#endif
 }
 
 I3D_frame *C_MenuState::CloneVisual(const C_str &name, I3D_frame *parent, I3D_frame *source)

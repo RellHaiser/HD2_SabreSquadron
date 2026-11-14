@@ -10,16 +10,16 @@ bool InitCarEffects()                                                         //
     return true;
 }
 
-// Not in the server.
+// The server's copy only returns false (DS 0x004c3550): the car's SetFrame still hands it to the vehicle.
 bool __fastcall SetupCarEmitter(S_CarEmitter *emitter, uint32_t effect)        // 0x004d5b10
 {
-    return {};
+    return false;
 }
 
-// Not in the server.
+// The server's copy only returns -1, no slot reused (DS 0x004c3570): the car's SetFrame still hands it to the vehicle.
 int __fastcall ReuseCarEmitter(int slot, uint32_t effect)                      // 0x004d62c0
 {
-    return {};
+    return -1;
 }
 
 S_CarEffectDef *g_carEffects;                           // (LoadMaterialTables fills them)
