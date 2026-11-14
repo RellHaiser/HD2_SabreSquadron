@@ -81,7 +81,7 @@ public:
     virtual bool TakeChanged() { return false; }        // +0x2C 0x005cb290 (DS 0x005e2c20)
     // The owner the tracker keeps to (and the "has owner" order bit 0x10).
     virtual void SetOwnerActor(C_Actor *owner);         // +0x30 0x005cb2a0
-    C_Actor *GetOwner() const { return m_owner; }       // +0x34 0x005cb2c0 (the same in every variant)
+    C_Actor *GetOwner() const { return m_owner; }       // +0x34 0x005cb2c0 (DS 0x005e2c70) (the same in every variant)
     // Raises (value != 0) or clears (0) the alarm, without telling a script.
     virtual void SetAlarm(int value);                   // +0x38 0x005ce700
     // The script lets go of the tracker.
