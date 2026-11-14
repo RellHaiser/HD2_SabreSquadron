@@ -193,8 +193,7 @@ bool C_ScriptModule::SaveGame(C_chunk &chunk)
         if (remembered->frame->GetRefCount() != 1 && scene->FindFrame(remembered->frame->GetName(), FIND_ANY_WITH_MODELS))
             continue;
         remembered->Restore();
-        remembered->~S_RememberedFrame();
-        _aligned_free(remembered);
+        delete remembered;
         m_rememberedFrames[i] = m_rememberedFrames.back();
         m_rememberedFrames.pop_back();
     }
@@ -406,8 +405,7 @@ bool C_ScriptModule::LoadGame(C_chunk &chunk)
     for (size_t i = m_rememberedFrames.size(); i-- > 0;) {
         if (S_RememberedFrame *remembered = m_rememberedFrames[i]) {
             remembered->Restore();
-            remembered->~S_RememberedFrame();
-            _aligned_free(remembered);
+            delete remembered;
         }
     }
     m_rememberedFrames.clear();

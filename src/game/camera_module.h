@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "game/module.h"
 #include "ls3d/math.h"
@@ -345,6 +346,14 @@ enum : int {
 // below) and turns it to look down along the vehicle's motion.
 class alignas(16) C_CameraFrameKeeper {
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x004d25a0 (DS 0x004bf680)
+    {
+        _aligned_free(p);
+    }
+
     C_CameraFrameKeeper(C_Actor *owner, I3D_frame *frame);   // 0x00465f00
     // Restore (0x00466000, a JMP to it; its two callers, the car's StopMission and 0x005dfca0,
     // _aligned_free the keeper after it).

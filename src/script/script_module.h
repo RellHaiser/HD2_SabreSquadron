@@ -12,6 +12,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "common/c_str.h"
 #include "game/module.h"
@@ -74,6 +75,14 @@ struct S_RememberedFrame {                                     // 0x50 bytes, 16
     bool on = false;                    // +0x40
 
     void Restore();                     // 0x00423bf0
+
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x00423970 (DS 0x004460b0)
+    {
+        _aligned_free(p);
+    }
 };
 
 // FRM_RotateX/Y/Z in progress.
@@ -88,6 +97,14 @@ struct S_FrameRotation {                                       // 0x20 bytes, 16
     ~S_FrameRotation();                 // 0x00428d00 (DS 0x0044c960)
     // Rotates for `timeDelta` ms; false once the angle is reached.
     bool Update(int timeDelta);         // 0x00427200
+
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x004276f0 (DS 0x0044ad30)
+    {
+        _aligned_free(p);
+    }
 };
 
 class C_ScriptModule : public C_Module {                       // "Script", vtable 0x0080f750

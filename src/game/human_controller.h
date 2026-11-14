@@ -12,6 +12,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "game/ai_parts.h"
 #include "game/controller_messages.h"
@@ -205,6 +206,14 @@ uint32_t EncodeControlBits(const float *axes, uint32_t moveFlags);   // 0x005ac5
 // controllers (ApplyMoveControls / ApplyWeaponControls).
 class alignas(16) C_HumanController {
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x00524d20 (DS 0x00512970)
+    {
+        _aligned_free(p);
+    }
+
     explicit C_HumanController(E_HumanController type);   // 0x00582ff0
     C_HumanController(const C_HumanController &) = delete;
     C_HumanController &operator=(const C_HumanController &) = delete;

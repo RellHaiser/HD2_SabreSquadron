@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "common/c_str.h"
 #include "game/actor.h"
@@ -90,6 +91,14 @@ private:
 
         S_vector4 lastPos;                              // +0x00 the bound's centre (w: its radius)
         I3D_frame *frame;                               // +0x10 (holds a reference)
+
+        // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+        // constructor frees with this delete).
+        static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+        static void operator delete(void *p)            // 0x005b45a0 (DS 0x005c6280)
+        {
+            _aligned_free(p);
+        }
     };
 
     // The animation, the collision boxes and the wings (Update; Tick on servers).

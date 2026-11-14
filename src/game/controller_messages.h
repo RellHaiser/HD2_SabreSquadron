@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "ls3d/math.h"
 
@@ -239,6 +240,14 @@ struct S_MsgAction : S_ControllerMessage {
     void Write(C_NetMessage &msg) override;             // 0x005b13f0
     S_vector4 pos = {};                                 // +0x10
     S_ActionCommand command;                            // +0x20
+
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x0053db80 (DS 0x005321d0)
+    {
+        _aligned_free(p);
+    }
 };
 
 // CTRL_MSG_INVENTORY_CHECK (vtable 0x00810cf4): the items the human carries, by container;
