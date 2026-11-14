@@ -434,9 +434,9 @@ public:
     explicit C_AmmoItemDef(int id) : C_ItemDef(ITEM_AMMO, id) {}   // 0x007e0850 (DS 0x0081c750)
     void Save(int *ioSize, void *buffer) override;      // 0x007e08d0
     void Load(int *outSize, const void *data) override; // 0x007e0910
-    int GetCarryMode() override { return ITEM_CARRY_AMMO; }   // 0x007e0880
+    int GetCarryMode() override { return ITEM_CARRY_AMMO; }   // 0x007e0880 (DS 0x0081c7a0)
     int GetBehaviour() override { return ITEM_BEHAVIOUR_AMMO; }   // 0x007e0890
-    float GetAmmoAmount() override { return m_ammoAmount; }       // 0x007e0870
+    float GetAmmoAmount() override { return m_ammoAmount; }       // 0x007e0870 (DS 0x0081c780)
 
 private:
     float m_ammoAmount = 0.0f;                          // +0x54
@@ -471,10 +471,10 @@ public:
     explicit C_StaticItemDef(int id) : C_ItemDef(ITEM_STATIC, id) {}   // 0x007e0ac0 (DS 0x0081cae0)
     void Save(int *ioSize, void *buffer) override;      // 0x007e0b50
     void Load(int *outSize, const void *data) override; // 0x007e0bb0
-    int GetCarryMode() override { return m_carryMode; } // 0x007e0ae0
-    int GetBehaviour() override { return m_behaviour; } // 0x007e0af0
-    int GetHeadgearItemId() override { return m_headgearItemId; }   // 0x007e0b00
-    int GetUnknown64() override { return m_unknown64; } // 0x007e0b10
+    int GetCarryMode() override { return m_carryMode; } // 0x007e0ae0 (DS 0x0081cb10)
+    int GetBehaviour() override { return m_behaviour; } // 0x007e0af0 (DS 0x0081cb30)
+    int GetHeadgearItemId() override { return m_headgearItemId; }   // 0x007e0b00 (DS 0x0081cb50)
+    int GetUnknown64() override { return m_unknown64; } // 0x007e0b10 (DS 0x0081cb70)
 
 private:
     int m_carryMode = 0;                                // +0x54

@@ -328,9 +328,9 @@ public:
 
     void Init(int typeId) override;                     // 0x007d4640
     void Consume(float amount) override;                // 0x007d45d0
-    float GetCharges() override { return m_charges; }   // 0x007d4600
-    int Fire(C_Actor *, const S_vector &, const S_vector &, uint32_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d4680
-    int FireSecondary(C_Actor *, const S_vector &, const S_vector &, uint8_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d4690
+    float GetCharges() override { return m_charges; }   // 0x007d4600 (DS 0x0080da20)
+    int Fire(C_Actor *, const S_vector &, const S_vector &, uint32_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d4680 (DS 0x0080dae0)
+    int FireSecondary(C_Actor *, const S_vector &, const S_vector &, uint8_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d4690 (DS 0x0080db00)
     bool SaveGame(C_chunk &chunk) override;             // 0x007d46a0
     bool LoadGame(C_chunk &chunk) override;             // 0x007d47b0
 
