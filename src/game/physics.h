@@ -385,7 +385,7 @@ public:
     void Update(int timeDelta) override;                    // 0x004101a0
     void StartMission(bool server) override;                // 0x00410a40
     void StopMission(bool server) override;                 // 0x00410a70 (DS 0x0042df60)
-    void RestartMission(bool server) override;              // 0x00410a90
+    void RestartMission(bool server) override;              // 0x00410a90 (DS 0x0042df90)
     bool SaveGame(C_chunk &chunk) override { return true; } // 0x00410700 (DS 0x0042dad0)
     bool LoadGame(C_chunk &chunk) override { return true; } // 0x00410710 (DS 0x0042daf0)
     // Opening doors (sent to joining clients as hits).

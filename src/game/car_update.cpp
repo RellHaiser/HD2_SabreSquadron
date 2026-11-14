@@ -2,7 +2,7 @@
 // 0x004d3110 Update, 0x004d2790 Tick and their helpers 0x004d38f0 UpdateVehicle, 0x004d3970
 // UpdateDetail, 0x004d2c50 CheckWater, 0x004d2dc0 GetEngineNoise; 0x004d5430 IsDrivable,
 // 0x004dd090 GetEnvironmentFlags; 0x004db2a0 Restart, 0x004db2b0 / 0x004db2e0 SendMessage(Ex),
-// 0x004e0760 / 0x004e0770 and 0x004e07b0 / 0x004e07c0 the kind-only messages' slots).
+// 0x004e0760 / 0x004e0770, 0x004e07b0 / 0x004e07c0 and 0x004e0710 / 0x004e0720 the kind-only messages' slots).
 #include "game/car.h"
 
 #include <cfloat>
@@ -64,7 +64,7 @@ float C_Car::GetUprightness() const
 
 // --- the messages ------------------------------------------------------------------------------------
 
-void C_CarMessage::Write(C_BitStream *stream)           // 0x004e0770 (0x004e07c0 the same)
+void C_CarMessage::Write(C_BitStream *stream)           // 0x004e0770 (DS 0x004cfd90) (0x004e07c0 (DS 0x004cfe00), 0x004e0720 (DS 0x004cfd20) the same)
 {
     stream->WriteBits(static_cast<uint32_t>(m_kind), CAR_MSG_KIND_BITS);
 }

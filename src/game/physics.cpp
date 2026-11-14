@@ -821,15 +821,19 @@ void C_PhysicsModule::StopMission(bool server)
 
 void C_PhysicsModule::RestartMission(bool server)
 {
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (g_gameRole & GAME_ROLE_CLIENT)
         StopMission(false);
+#endif
     if (g_gameRole & GAME_ROLE_SERVER)
         StopMission(true);
     g_temporaryActors.ClearBreakables();
     if (g_gameRole & GAME_ROLE_SERVER)
         StartMission(true);
+#ifndef HD2_DEDICATED
     if (g_gameRole & GAME_ROLE_CLIENT)
         StartMission(false);
+#endif
 }
 
 uint32_t __stdcall CreatePhysicsObjectProc(I3D_frame *frame, void *context)   // 0x00410b40

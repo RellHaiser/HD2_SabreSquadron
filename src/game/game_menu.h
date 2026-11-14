@@ -66,9 +66,9 @@ public:
     void OnTick(int timeDelta) override;                // 0x4C 0x00680920
     // By the top screen: the equipment screen's (index 3, or the message box over it) or the game's
     // behind the menu; no screen: the game's scene alone (the game behind; else false).
-    bool OnRender() override;                           // 0x50 0x006824f0
+    bool OnRender() override;                           // 0x50 0x006824f0 (DS 0x006c03e0)
     // The info screen drawn when shown; false.
-    bool OnDrawScreens() override;                      // 0x54 0x00682770
+    bool OnDrawScreens() override;                      // 0x54 0x00682770 (DS 0x006c0420)
 
     // The item controls' notifications: an item clicked twice (from the panel: back to the store, the
     // backpack with its contents; from the store: taken, onto the soldier where it goes, a large

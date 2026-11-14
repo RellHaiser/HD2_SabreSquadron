@@ -41,13 +41,13 @@ public:
     // message), the weights within the soldiers' strength (else the overloaded message), someone
     // unarmed asked about; then done: no soldier left to equip automatically, the campaign's next
     // step, the profile's second stock reset.
-    void OnMessage(S_ControlMessage *message) override; // 0x34 0x006740d0
+    void OnMessage(S_ControlMessage *message) override; // 0x34 0x006740d0 (DS 0x006ae230)
     // The items screen (its squad first: four soldiers in a new one; the equipment panel, the squad's
     // list, the store, the stats panel, the buttons and texts; the soldiers to equip equipped) and
     // the selection screen described, made; the first opened, the stats, the item's popup. True.
     bool BuildScreens() override;                       // 0x38 0x00675c80
     // The popup deleted, the panel's soldier, the store's pages emptied.
-    void OnStop() override;                             // 0x3C 0x00673b80
+    void OnStop() override;                             // 0x3C 0x00673b80 (DS 0x006ade60)
     // The equipment screen (kind 3) of a campaign screen: the profile's first stock reset, the
     // screen's items added (those marked: the item's ammunition instead). True.
     bool OnStart(void *arg) override;                   // 0x40 0x006739d0 (DS 0x006add70)

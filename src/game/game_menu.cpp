@@ -1657,6 +1657,9 @@ bool C_GameMenu::OnSide(void *menu, void *, C_Control *control, uint32_t, uint32
 
 bool C_GameMenu::OnRender()
 {
+#ifdef HD2_DEDICATED   // nothing drawn on the server
+    return false;
+#else
     C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();
     if (top) {
         const uint32_t index = top->GetId() >> SCREEN_INDEX_SHIFT;
@@ -1675,6 +1678,7 @@ bool C_GameMenu::OnRender()
         return true;
     }
     return false;
+#endif
 }
 
 bool C_GameMenu::RenderGame()
@@ -1746,8 +1750,10 @@ bool C_GameMenu::RenderEquipment()
 
 bool C_GameMenu::OnDrawScreens()
 {
+#ifndef HD2_DEDICATED   // nothing drawn on the server
     if (m_infoScreen && m_infoScreen->IsShown())
         m_infoScreen->Render();
+#endif
     return false;
 }
 

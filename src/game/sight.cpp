@@ -130,7 +130,7 @@ C_HumanSightTarget::C_HumanSightTarget(C_Human *human_, uint32_t mask_, int inde
     Refresh();
 }
 
-C_Actor *C_HumanSightTarget::GetActor()                 // 0x0046ecb0
+C_Actor *C_HumanSightTarget::GetActor()                 // 0x0046ecb0 (DS 0x0048a790)
 {
     return human;
 }
@@ -149,7 +149,7 @@ C_MeleeTrackerSightTarget::C_MeleeTrackerSightTarget(C_MeleeTracker *meleeTracke
     FindParts(parts, meleeTracker ? meleeTracker->GetFrame() : nullptr, MELEE_TRACKER_PARTS);
 }
 
-C_Actor *C_MeleeTrackerSightTarget::GetActor()          // 0x0046edc0
+C_Actor *C_MeleeTrackerSightTarget::GetActor()          // 0x0046edc0 (DS 0x0048a910)
 {
     return meleeTracker;
 }
@@ -186,7 +186,7 @@ C_HumanSightObserver::C_HumanSightObserver(C_Human *human_, uint32_t mask_, int 
 {
 }
 
-bool C_HumanSightObserver::WantsTest(int target)        // 0x0046d840
+bool C_HumanSightObserver::WantsTest(int target)        // 0x0046d840 (DS 0x00488d80)
 {
     const C_SightTarget *t = ValidTarget(target);
     if (!t)
@@ -393,7 +393,7 @@ C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver(C_MeleeTracker *meleeTr
 {
 }
 
-bool C_MeleeTrackerSightObserver::WantsTest(int target) // 0x0046dc70
+bool C_MeleeTrackerSightObserver::WantsTest(int target) // 0x0046dc70 (DS 0x004892d0)
 {
     const C_SightTarget *t = ValidTarget(target);
     if (!t)

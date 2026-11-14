@@ -1049,6 +1049,9 @@ void C_Human::Update(int frameTime)
     }
     if (!IsLocalGame()) {
         m_aliveTime += frameTime;
+#ifdef HD2_DEDICATED   // the server never asks for a respawn
+        m_deadTime = 0;
+#else
         if (m_stats[STAT_HEALTH] < 1 && IsClient()) {
             // Deathmatch with automatic respawn: the local player asks for it after the
             // respawn delay.
@@ -1061,6 +1064,7 @@ void C_Human::Update(int frameTime)
         } else {
             m_deadTime = 0;
         }
+#endif
     }
     if (!C_Actor::IsActive())
         return;

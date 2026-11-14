@@ -9,6 +9,7 @@
 #include <cstdlib>
 
 #include "common/c_str.h"
+#include "common/radix_sort.h"
 #include "game/actor.h"
 #include "game/actors_module.h"
 #include "game/game.h"
@@ -510,8 +511,7 @@ void C_ExplosiveTimer::Update(int /*timeDelta*/)
         if (place->GetState() == 1 && place->GetTimeLeft() > 0)
             pairs.push_back({static_cast<uint32_t>(place->GetTimeLeft()), static_cast<int>(i)});
     }
-    // (A radix sort of the times in the original: stable.)
-    std::stable_sort(pairs.begin(), pairs.end(), [](const S_Pair &a, const S_Pair &b) { return a.time < b.time; });
+    RadixSortPairs(reinterpret_cast<S_RadixPair *>(pairs.data()), static_cast<int>(pairs.size()));
     for (int i = 0; i < TIMERS; ++i) {
         if (i < static_cast<int>(pairs.size())) {
             const int seconds = static_cast<int>(pairs[i].time) / 1000;

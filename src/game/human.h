@@ -460,7 +460,7 @@ public:
     void Done() override;                               // 0x005a2a40
     // What the human can carry: its strength.
     int GetHitPoints() override { return GetStat(STAT_STRENGTH); }   // 0x0059c2b0
-    void Update(int frameTime) override;                // 0x0059fe30
+    void Update(int frameTime) override;                // 0x0059fe30 (DS 0x005abf80)
     void Tick(int timeDelta) override;                  // 0x0059ffd0 (DS 0x005ac0f0)
     void OnMessage(C_BitStream *msg) override;          // 0x005a5f60 (DS 0x005b3900)
     void Unknown20(C_BitStream *msg) override;          // 0x005a5f70 (DS 0x005b3920)

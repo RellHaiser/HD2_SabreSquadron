@@ -313,7 +313,9 @@ bool C_ItemsModule::SaveGame(C_chunk &chunk)
         return false;
     chunk.WriteChunk(CHUNK_ITEMS_LAST_UID, m_lastUid);
     chunk.Ascend();
+#ifndef HD2_DEDICATED   // no surface marks on the server
     SurfaceMarks_Save(chunk);
+#endif
     chunk.Ascend();
     return true;
 }
@@ -559,8 +561,10 @@ void C_ItemsModule::NotifyMove(C_Item *item, C_Actor *fromHuman, C_ItemContainer
         else
             EquipmentOf(target)->OnItemAdded(item, toContainer, fromHuman, fromContainer, false);
     }
+#ifndef HD2_DEDICATED   // no inventory screen or HUD on the server
     if (IsClient() && target == ActivePlayer())
         GetGame()->GetInterface()->RefreshInventory();
+#endif
     if (target)
         AsHuman(target)->SetInventoryChanged(true);
     if (fromHuman) {
@@ -571,16 +575,20 @@ void C_ItemsModule::NotifyMove(C_Item *item, C_Actor *fromHuman, C_ItemContainer
             if (toContainer == ITEM_CONTAINER_LONG_GUN)
                 dest->SetLockTime(Now() + ITEM_BUSY_TIME);
             AsHuman(fromHuman)->OnHandsChanged();
+#ifndef HD2_DEDICATED   // no HUD on the server
             if (IsClient() && ActivePlayer() == fromHuman && notify)
                 Hud()->OnInventoryEvent(FPV_EVENT_CLEARED, 0);
+#endif
         }
     }
     if (target && toContainer == ITEM_CONTAINER_HANDS) {
         dest->SetLockTime(Now() + ITEM_BUSY_TIME);
         AsHuman(target)->OnHandsChanged();
+#ifndef HD2_DEDICATED   // no HUD on the server
         C_HumanEquipment *equipment = EquipmentOf(target);
         if (IsClient() && ActivePlayer() == target && equipment && !(equipment->GetFlags() & EQUIPMENT_HANDS_PUT_AWAY) && notify)
             Hud()->OnInventoryEvent(FPV_EVENT_DRAW, 0);
+#endif
     }
 }
 
@@ -823,8 +831,10 @@ int C_ItemsModule::MoveItem(C_Item *item, C_Item **replaced, C_Actor *from, int 
         from->SetContainer(ITEM_CONTAINER_BACKPACK_CONTENTS, nullptr);
     if (m_missionActive)
         NotifyMove(item, fromHuman, source, fromContainer, receiver, dest, toContainer, fromNew, notify);
+#ifndef HD2_DEDICATED   // no HUD on the server
     if (dropped && IsClient() && carrier == ActivePlayer() && fromContainer == ITEM_CONTAINER_HANDS)
         Hud()->OnInventoryEvent(FPV_EVENT_CLEARED, 0);
+#endif
     item->SetTime(Now() + ITEM_BUSY_TIME);
     return result;
 }
@@ -962,13 +972,17 @@ int C_ItemsModule::TransferItem(C_Item *item, C_Actor *from, int fromContainer, 
     if (!replaced) {
         if (fromHuman) {
             EquipmentOf(fromHuman)->OnItemRemoved(item, fromContainer, toHuman, toContainer);
+#ifndef HD2_DEDICATED   // no HUD on the server
             if (IsClient() && fromHuman == ActivePlayer() && fromContainer == ITEM_CONTAINER_HANDS)
                 Hud()->OnInventoryEvent(FPV_EVENT_PUT_AWAY, 0);
+#endif
         }
         if (toHuman) {
             EquipmentOf(toHuman)->OnItemAdded(item, toContainer, fromHuman, fromContainer, false);
+#ifndef HD2_DEDICATED   // no HUD on the server
             if (IsClient() && toHuman == ActivePlayer() && toContainer == ITEM_CONTAINER_HANDS)
                 Hud()->OnInventoryEvent(FPV_EVENT_DRAW, 0);
+#endif
         }
         return ITEM_RESULT_OK;
     }
@@ -996,8 +1010,10 @@ int C_ItemsModule::TransferItem(C_Item *item, C_Actor *from, int fromContainer, 
         if (toHuman) {
             EquipmentOf(toHuman)->OnItemRemoved(replaced, toContainer, nullptr, fromContainer);
             EquipmentOf(toHuman)->OnItemAdded(item, toContainer, nullptr, fromContainer, false);
+#ifndef HD2_DEDICATED   // no HUD on the server
             if (IsClient() && toHuman == ActivePlayer() && toContainer == ITEM_CONTAINER_HANDS)
                 Hud()->OnInventoryEvent(FPV_EVENT_DRAW, 0);
+#endif
         }
         return ITEM_RESULT_OK;
     }
@@ -1019,8 +1035,10 @@ int C_ItemsModule::TransferItem(C_Item *item, C_Actor *from, int fromContainer, 
     if (fromContainer == ITEM_CONTAINER_HANDS && toContainer == ITEM_CONTAINER_HANDS) {
         fromEquipment->OnAnimationEvent(EQUIPMENT_EVENT_1);
         toEquipment->OnAnimationEvent(EQUIPMENT_EVENT_1);
+#ifndef HD2_DEDICATED   // no HUD on the server
         if (IsClient() && (fromHuman == ActivePlayer() || toHuman == ActivePlayer()))
             Hud()->OnInventoryEvent(FPV_EVENT_PUT_AWAY, FPV_EVENT_DRAW);
+#endif
     }
     if ((fromContainer == ITEM_CONTAINER_HANDS) == (toContainer == ITEM_CONTAINER_HANDS)) {
         fromEquipment->OnItemAdded(replaced, replacedTo, toHuman, toContainer, AsHuman(toHuman)->IsDead());
@@ -1029,6 +1047,7 @@ int C_ItemsModule::TransferItem(C_Item *item, C_Actor *from, int fromContainer, 
     }
 
     // One side is the hands.
+#ifndef HD2_DEDICATED   // no HUD on the server
     if (IsClient()) {
         if (fromContainer == ITEM_CONTAINER_HANDS) {
             if (fromHuman == ActivePlayer())
@@ -1043,6 +1062,7 @@ int C_ItemsModule::TransferItem(C_Item *item, C_Actor *from, int fromContainer, 
                 Hud()->OnInventoryEvent(FPV_EVENT_DRAW, 0);
         }
     }
+#endif
     if (fromContainer == ITEM_CONTAINER_HANDS) {
         fromEquipment->OnItemAdded(replaced, replacedTo, toHuman, toContainer, true);
     } else {

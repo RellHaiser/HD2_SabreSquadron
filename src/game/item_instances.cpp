@@ -464,10 +464,12 @@ bool C_WeaponItem::Reload(C_Actor *owner, int container, int *ammoUid, bool keep
             }
         }
 
+#ifndef HD2_DEDICATED   // no reload sound on the server
         if (owner->GetType() == ACTOR_HUMAN && IsClient()) {
             PlayReloadSound(owner, IsOwnWeaponHeard(owner));
             static_cast<C_Human *>(owner)->SetInventoryChanged(true);
         }
+#endif
         readyTime = Now() + comp->GetReloadTimeMs();
     }
 
@@ -485,8 +487,10 @@ void C_WeaponItem::SetRounds(C_Actor *owner, int ammoUid, int rounds)
         static_cast<C_Human *>(owner)->RemoveItem(ammoUid, true);
     m_rounds = static_cast<float>(rounds);
     m_flags &= ~WEAPON_RELOAD_PENDING;
+#ifndef HD2_DEDICATED   // no sounds on the server
     if (IsClient())
         PlayReloadSound(owner, false);
+#endif
 }
 
 void C_WeaponItem::PlayEmptySound(C_Actor *owner)

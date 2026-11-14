@@ -1534,6 +1534,88 @@ double SBServerGetFloatValue(S_SbServer *server, const char *key, double fallbac
     return value ? atof(value) : fallback;
 }
 
+#ifdef HD2_DEDICATED   // the server's SDK keeps the list's sort and count (the game calls neither)
+namespace {
+
+S_SbServerList *g_sortList;                             // (DS 0x009dd974) the list being sorted
+
+// The comparisons by the sort key's value: an int, a float, a string with case, one without; descending when not ascending.
+int CompareIntKey(const void *a, const void *b)         // (DS 0x0079acf0)
+{
+    const int difference = SBServerGetIntValue(*static_cast<S_SbServer *const *>(a), g_sortList->sortKey, 0) -
+                           SBServerGetIntValue(*static_cast<S_SbServer *const *>(b), g_sortList->sortKey, 0);
+    return g_sortList->sortAscending ? difference : -difference;
+}
+
+int CompareFloatKey(const void *a, const void *b)       // (DS 0x0079ad60)
+{
+    double difference = SBServerGetFloatValue(*static_cast<S_SbServer *const *>(a), g_sortList->sortKey, 0.0) -
+                        SBServerGetFloatValue(*static_cast<S_SbServer *const *>(b), g_sortList->sortKey, 0.0);
+    if (!g_sortList->sortAscending)
+        difference = -difference;
+    if (difference > 0.0)
+        return 1;
+    if (difference < 0.0)
+        return -1;
+    return 0;
+}
+
+int CompareStringKey(const void *a, const void *b)      // (DS 0x0079ae20)
+{
+    const int order = std::strcmp(SBServerGetStringValue(*static_cast<S_SbServer *const *>(a), g_sortList->sortKey, ""),
+                                  SBServerGetStringValue(*static_cast<S_SbServer *const *>(b), g_sortList->sortKey, ""));
+    return g_sortList->sortAscending ? order : -order;
+}
+
+int CompareStringKeyNoCase(const void *a, const void *b)   // (DS 0x0079aee0)
+{
+    const int order = _stricmp(SBServerGetStringValue(*static_cast<S_SbServer *const *>(a), g_sortList->sortKey, ""),
+                               SBServerGetStringValue(*static_cast<S_SbServer *const *>(b), g_sortList->sortKey, ""));
+    return g_sortList->sortAscending ? order : -order;
+}
+
+}  // namespace
+
+// type 0: int, 1: float, 2: string, any other: string without case.
+void SBServerListSort(S_SbServerList *list, int ascending, const char *key, int type)   // (DS 0x0079ac70)
+{
+    ArrayCompareFn compare;
+    switch (type) {
+    case 0:
+        compare = CompareIntKey;
+        break;
+    case 1:
+        compare = CompareFloatKey;
+        break;
+    case 2:
+        compare = CompareStringKey;
+        break;
+    default:
+        compare = CompareStringKeyNoCase;
+        break;
+    }
+    list->sortKey = key;
+    list->sortAscending = ascending;
+    g_sortList = list;
+    ArraySort(list->servers, compare);
+}
+
+int SBServerListCount(const S_SbServerList *list)       // (DS 0x0079b0f0)
+{
+    return ArrayLength(list->servers);
+}
+
+void ServerBrowserSort(S_ServerBrowser *browser, int ascending, const char *key, int type)   // (DS 0x00798e60)
+{
+    SBServerListSort(&browser->list, ascending, key, type);
+}
+
+int ServerBrowserCount(const S_ServerBrowser *browser)  // (DS 0x00798e40)
+{
+    return SBServerListCount(&browser->list);
+}
+#endif
+
 // Sends to the master server, reconnecting once.
 int ListSendData(S_SbServerList *list, const char *data, int size)  // 0x0073bc60 (DS 0x00799a30)
 {

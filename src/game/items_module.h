@@ -67,7 +67,7 @@ public:
     void StartMission(bool server) override;            // 0x007dd470
     void StopMission(bool server) override;             // 0x007dd6a0
     void RestartMission(bool server) override;          // 0x007ddbb0
-    bool SaveGame(C_chunk &chunk) override;             // 0x007ddef0
+    bool SaveGame(C_chunk &chunk) override;             // 0x007ddef0 (DS 0x00819270)
     bool LoadGame(C_chunk &chunk) override;             // 0x007de110 (DS 0x00819510)
 
     // --- definitions --------------------------------------------------------------
@@ -100,7 +100,7 @@ public:
     // Returns ITEM_RESULT_OK or an error (ITEM_RESULT_*).
     int MoveItem(C_Item *item, C_Item **replaced, C_Actor *from, int fromContainer, C_Actor *to,
                  int toContainer, int index, C_Actor *carrier, bool notify, bool ignoreLocks,
-                 bool keepWeights, bool testOnly);      // 0x007d8fa0
+                 bool keepWeights, bool testOnly);      // 0x007d8fa0 (DS 0x008132f0)
     // Puts a free item into the container of `actor` its kind suggests (*container
     // receives it, ITEM_CONTAINER_DROPPED if none).
     int PutItem(C_Item *item, C_Actor *actor, int *container, bool notify);   // 0x007d9fa0
@@ -110,7 +110,7 @@ public:
     // goes back to the source (its old container, any free one, or dropped:
     // *replacedContainer). Updates the equipment models and the HUD itself.
     int TransferItem(C_Item *item, C_Actor *from, int fromContainer, C_Actor *to, int toContainer,
-                     C_Item **replaced, int *toContainerOut, int *replacedContainer);   // 0x007da240
+                     C_Item **replaced, int *toContainerOut, int *replacedContainer);   // 0x007da240 (DS 0x008148e0)
     // TransferItem into the container of `to` the item's kind suggests.
     int TransferItemAuto(C_Item *item, C_Actor *from, int fromContainer, C_Actor *to,
                          int *toContainer);             // 0x007da850

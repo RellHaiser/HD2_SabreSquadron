@@ -25,6 +25,7 @@ struct S_DArray {                                       // 0x18 bytes
 S_DArray *ArrayNew(int elementSize, int initial, ArrayElementFreeFn freeElement);   // 0x00732e70
 void ArrayFree(S_DArray *array);                        // 0x00732ed0
 int ArrayLength(const S_DArray *array);                 // 0x00732f80
+void ArraySort(S_DArray *array, ArrayCompareFn compare); // 0x00733140
 void *ArrayNth(const S_DArray *array, int index);       // 0x00732f90
 void ArrayAppend(S_DArray *array, const void *element); // 0x00732fa0
 void ArrayInsertAt(S_DArray *array, const void *element, int index);   // 0x00732fb0
@@ -164,6 +165,8 @@ struct S_SbServerList {                                 // 0x5C0 bytes
     int expected;                                       // +0x47C the part's count, -1: not read yet
     SbListCallback callback;                            // +0x480
     void *instance;                                     // +0x484
+    const char *sortKey;                                // +0x488 the last sort's (the server's SBServerListSort)
+    int sortAscending;                                  // +0x48C
     uint32_t publicIp;                                  // +0x490 ours, as the master server saw it
     uint32_t sourceIp;                                  // +0x494
     u_short defaultPort;                                // +0x498

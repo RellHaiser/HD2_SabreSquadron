@@ -1455,7 +1455,7 @@ void C_MeleeTrackerScriptedAI::OnHeardSound(S_MeleeTrackerSighting *sighting)   
     SetAlarm(sighting->type != 0 ? 1 : 4);
 }
 
-void C_MeleeTrackerScriptedAI::OnSpottedEnemy(C_Actor * /*target*/)   // 0x005cfba0 (the target is unread)
+void C_MeleeTrackerScriptedAI::OnSpottedEnemy(C_Actor * /*target*/)   // 0x005cfba0 (DS 0x005e8b50) (the target is unread)
 {
     SetAlarm(0x20);
 }

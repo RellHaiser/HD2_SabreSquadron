@@ -29,8 +29,8 @@ enum : int {
 
 class C_SessionMenu : public C_MenuState {
 public:
-    // (Inline in C_GameApp::UpdateClient; the destructor is the base's: 0x006c3200.)
-    C_SessionMenu() = default;
+    C_SessionMenu() = default;                          // (inline in C_GameApp::UpdateClient)
+    ~C_SessionMenu() override = default;                // 0x006c3200 (DS 0x007090d0), 0x006c3220 (DS 0x00709100): the base's body only
 
     int GetTypeId() const override { return GAME_STATE_TYPE_SESSION_MENU; }   // 0x1C 0x006c31f0
 
@@ -46,7 +46,7 @@ public:
     // The console's text style made; its first step. True.
     bool OnStart(void *arg) override;                   // 0x40 0x0068a680
     void OnUpdate(int) override {}                      // 0x48 0x0068a730
-    bool OnRender() override { return false; }          // 0x50 0x0068a740
+    bool OnRender() override { return false; }          // 0x50 0x0068a740 (DS 0x006c7a10)
 
     // The console's screen tick (its own screen shown only, else false): a wait counted down by the
     // tick's time, else the step (the texts added to the console's; true).
