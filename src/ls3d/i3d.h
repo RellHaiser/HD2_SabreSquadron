@@ -1084,10 +1084,14 @@ public:
     // File of the sound source (inline 0x0051c0d0), "" without a source.
     const char *GetFileName() const
     {
+#ifdef HD2_DEDICATED   // LS3DRF.dll's sound has no source (+0x140 stays null)
+        return "";
+#else
         const uint8_t *source = Field<const uint8_t *>(0x140);
         // The source keeps its name as a C_str (pointer to { refCount, length, chars }).
         const uint8_t *name = source ? *reinterpret_cast<const uint8_t *const *>(source + 0xC) : nullptr;
         return name ? reinterpret_cast<const char *>(name + 8) : "";
+#endif
     }
     // Flags the sound was opened with.
     uint32_t GetOpenFlags() const { return Field<uint32_t>(0x178); }
