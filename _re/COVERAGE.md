@@ -2239,3 +2239,21 @@ particles and the surface marks. Files are served from memory.
   original); the TakeFromSupplyBox fake logged out-parameters the original leaves unset; Attach first ran on a
   controller that already had the human and its events; another heredoc collapsed backslashes (a suite line came out
   right only by chance).
+
+## Human part 23b (the controller's controls, `human_controller.cpp`, 2026-11-14)
+
+- **The build:** part 23a's. Added: the car's ApplyControls and the submarine's SetControls logged on both sides.
+- **The tests (40,000, all exact):** ControlVehicle (a car, a submarine, another kind; the local player or not, the
+  driver's seat or another), ApplyMoveControls (the axes and buttons on, off or partly, the flags and the pace asked
+  for, the walk speed or none, diving gear, the stamina at the dive's 10, a vehicle seat; the climb command it issues
+  runs ExecuteCommand on both sides), EncodeControlBits, DecodeControls (no velocity, a vertical one, climbing or not,
+  every bit pattern; the arrays each side's own copy).
+- **Not compared:** the look-at's w after ApplyMoveControls (the original leaves a stack value there, as the port's
+  comment says).
+- **Port fixes:** none.
+- **Results:** lines: 176 of these functions' 177 (the one not run: the stamina clamp after a dive, unreachable in both).
+- **Mutations** (`human/mutations/mutate_controller2.py`): 181 mutants (175 generated, 6 for repeated lines); 160
+  killed, 9 not building, 12 survived (equivalent: listed there).
+- **Harness lessons (my mistakes):** I called the original's EncodeControlBits as the port's (returning the bits); it
+  writes them through a second argument and pops two, so the call unbalanced the stack and overwrote the test's own
+  locals: the crash looked like a null vehicle until the locals were printed.

@@ -530,6 +530,9 @@ std::string ControllerDiffers(const C_HumanController *pc, const uint8_t *oc, bo
                 x = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(ToOrig(reinterpret_cast<void *>(x))));
             if (onlyWritten && (y == 0xCDCDCDCDu || (n == 1 && y == 0xCDu)))
                 continue;
+            // (ApplyMoveControls: the original leaves a stack value in the look-at's w.)
+            if (std::strcmp(f.name, "m_lookAt") == 0 && i == 12)
+                continue;
             if (!WordsNear(x, y, f.kind)) {
                 char text[160];
                 std::snprintf(text, sizeof text, "controller.%s+%u (port %08x original %08x)", f.name, unsigned(i), x, y);
@@ -955,6 +958,110 @@ void TestControllerLife()
     }
 }
 
+// ---- part 23b: the controls
+
+void CT_ OV_CarApplyControls(void *self, float *axes, float *buttons)
+{
+    Log(self, "CarApplyControls", {double(axes != nullptr), double(buttons != nullptr)});
+}
+void CT_ OV_SubmarineSetControls(void *self, float forward, float side, float up)
+{
+    Log(self, "SubmarineSetControls", {forward, side, up});
+}
+// (The original's writes the bits through its second argument; the port's returns them.)
+typedef void(CT_ *T_Encode)(const float *, uint32_t, uint32_t *);
+
+// The controls: the axes and buttons (most of them off), the flags, the pace asked for, the walk speed, the stamina.
+void RandomControls()
+{
+    RandomController();
+    C_Human *h = g_h.human;
+    for (float &a : g_axes)
+        a = P(0.6f) ? 0.0f : P(0.5f) ? 1.0f : U(-1, 1);
+    for (float &b : g_buttons)
+        b = P(0.85f) ? 0.0f : 1.0f;
+    g_pc->m_moveFlags = (P(0.5f) ? uint32_t(1u << I(0, 2)) : 0u) | (P(0.5f) ? uint32_t(I(0, 0xF)) << 3 : 0u) |
+                        (P(0.4f) ? uint32_t(I(1, 3)) << 24 : 0u) | (P(0.3f) ? uint32_t(1u << I(12, 16)) : 0u) |
+                        (P(0.1f) ? uint32_t(I(0, 0xFFFF)) << 16 : 0u);
+    g_pc->m_stateFlags = P(0.2f) ? 0u : P(0.2f) ? (g_pc->m_moveFlags & MOVE_PACE_MASK) : uint32_t(1u << I(12, 16));
+    g_pc->m_walkSpeed = P(0.3f) ? 0.0f : U(0, 8);
+    g_pc->m_netObject = nullptr;
+    h->m_stamina = P(0.2f) ? 10.0f + U(-0.01f, 0.01f) : U(0, 100);
+    g_script.divingGear = P(0.3f);
+    g_cs.workState5 = P(0.3f);
+    g_cs.climbState = P(0.7f) ? 0 : I(1, 3);
+    h->m_seat = P(0.5f) ? 0 : I(1, 3);
+}
+
+void TestControllerControls()
+{
+    C_Human *h = g_h.human;
+    std::printf("controller controls\n");
+    for (int i = 0; i < 40000 / QUICK; ++i) {
+        RandomControls();
+        switch (i % 4) {
+        case 0:
+            if (!h->m_vehicle)
+                h->m_vehicle = reinterpret_cast<C_Actor *>(g_vehicleBytes);
+            ControllerCall("ControlVehicle", [&] { g_pc->ControlVehicle(); return 0; },
+                           [&](void *) { OCtl<void>(0x00583bc0); return 0; });
+            break;
+        case 1:
+            ControllerCall("ApplyMoveControls", [&] { g_pc->ApplyMoveControls(); return 0; },
+                           [&](void *) { OCtl<void>(0x00583c30); return 0; });
+            break;
+        case 2: {
+            const uint32_t flags = g_pc->m_moveFlags;
+            DiffCall("EncodeControlBits", [&] { return int(EncodeControlBits(g_axes, flags)); },
+                     [&](void *) {
+                         uint32_t bits = 0xDEAD;
+                         OriginalAt<T_Encode>(0x005ac550)(g_axes, flags, &bits);
+                         return int(bits);
+                     });
+            break;
+        }
+        default: {
+            // The arrays written: each side its own copy, compared after.
+            float velocity[3] = {U(-3, 3), U(-1, 1), U(-3, 3)}, viewDir[3] = {U(-1, 1), U(-1, 1), U(-1, 1)};
+            if (P(0.15f))
+                velocity[0] = velocity[1] = velocity[2] = 0.0f;
+            else if (P(0.1f))
+                velocity[0] = velocity[2] = 0.0f;
+            if (P(0.1f))
+                velocity[1] = 0.0f;
+            const uint32_t bits = uint32_t(I(0, 0x1FF));
+            float axes0[CONTROL_COUNT], buttons0[CONTROL_COUNT];
+            for (float &a : axes0)
+                a = P(0.7f) ? 0.0f : 1.0f;
+            for (float &b : buttons0)
+                b = P(0.7f) ? 0.0f : 1.0f;
+            const auto hash = [](const float *a, const float *b) {
+                int x = 0;
+                for (int k = 0; k < CONTROL_COUNT; ++k)
+                    x = x * 31 + FloatBits(a[k]) * 7 + FloatBits(b[k]);
+                return x;
+            };
+            ControllerCall("DecodeControls",
+                           [&] {
+                               float axes[CONTROL_COUNT], buttons[CONTROL_COUNT];
+                               std::memcpy(axes, axes0, sizeof axes);
+                               std::memcpy(buttons, buttons0, sizeof buttons);
+                               g_pc->DecodeControls(axes, buttons, 0, velocity, viewDir, 0, bits);
+                               return hash(axes, buttons);
+                           },
+                           [&](void *) {
+                               float axes[CONTROL_COUNT], buttons[CONTROL_COUNT];
+                               std::memcpy(axes, axes0, sizeof axes);
+                               std::memcpy(buttons, buttons0, sizeof buttons);
+                               OCtl<void>(0x00584c00, axes, buttons, 0, velocity, viewDir, 0, bits);
+                               return hash(axes, buttons);
+                           });
+            break;
+        }
+        }
+    }
+}
+
 void TestController()
 {
     SetUpCombat();
@@ -966,6 +1073,11 @@ void TestController()
     const auto run = [&](const char *part) { return !only || std::strcmp(only, part) == 0; };
     if (run("23a"))
         TestControllerLife();
+    if (run("23b")) {
+        RedirectOriginal(0x004d9050, FAKE(OV_CarApplyControls));
+        RedirectOriginal(0x005e0dd0, FAKE(OV_SubmarineSetControls));
+        TestControllerControls();
+    }
 }
 
 }  // namespace
