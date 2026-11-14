@@ -6,12 +6,14 @@
 // waypoints) differ. The waypoints and the checkpoint network are shared: a network made by the test (points about
 // the humans, circles of 0.5..4 m, links to near points), the port's game and the original's (+0x54) both pointing at
 // it; the network's Get and FindNearestPoint (checkpoints.cpp, not linked) are fakes on both sides, the latter logged.
-// After each call the memories are compared word by word (floats within the usual tolerance: the file's own note says
-// sums are not always in the original's order), their pointers by what they name, and the routes.
+// After each call the memories are compared word by word (floats within the usual tolerance; CROWD_EXACT=1: bit for
+// bit), their pointers by what they name, and the routes.
 //
 // Part 25a: the geometry (AddPush, KeepInsideStrip, KeepOnNetwork, SortCorners) and a memory's own steps
 // (AdvanceWaypoint, MoveOneStep, PushFromHuman, PushTargetFromHuman, PushOntoNetwork, HoldOnNetwork, TurnPushAside,
 // UpdateStuckTimer), the memory's saved games.
+// Part 25b: the planner (FindPointNear, IsPointBlocked, FindBlocker, Replan with ExpandNode, AddSideWay, CollectBest):
+// the crowd objects' node arrays, results and scratch lists compared as well. CROWD_ONLY=25a or 25b: that part alone.
 #include "game/ai_parts.h"
 #include "game/checkpoints.h"
 #include "game/human_crowd.h"
@@ -82,7 +84,12 @@ S_AIWaypoint *AllocWaypoint(int checkpoint, const S_vector4 &pos, uint16_t flags
 {
     return NewWaypoint(checkpoint, &pos, flags, type, radius);
 }
-void ReleaseWaypoint(S_AIWaypoint *waypoint) { Log(nullptr, ("ReleaseWaypoint " + NameOf(waypoint)).c_str()); }
+// (Released ones noted in order, not logged: the original's inline release is read from its pool's list after the
+// call, its order with the logged calls lost.)
+namespace {
+std::vector<std::string> g_releasedPort;
+}  // namespace
+void ReleaseWaypoint(S_AIWaypoint *waypoint) { g_releasedPort.push_back(NameOf(waypoint)); }
 
 // The network's members the crowd calls (the port's; the original's redirected to the same).
 S_Checkpoint *C_CheckpointNetwork::Get(int index) { return PointAt(index); }
@@ -104,18 +111,79 @@ int CT_ CR_FindNearestPoint(void *self, float x, float y, float z, float maxDist
 // ---- the memories: each side's two (the human's and another's), their routes; the shared waypoints
 const int WAYPOINTS = 12;
 alignas(16) S_AIWaypoint g_wp[WAYPOINTS];
-alignas(16) uint8_t g_memPortBytes[2][sizeof(C_HumanAIMemory)], g_memOrig[2][0x110];
-std::vector<S_AIWaypoint *> g_routePort[2];
-alignas(16) uint8_t g_routeOrig[2][16];
+// (Four: the human's and the three other humans'.)
+const int MEMS = 4;
+alignas(16) uint8_t g_memPortBytes[MEMS][sizeof(C_HumanAIMemory)], g_memOrig[MEMS][0x110];
+std::vector<S_AIWaypoint *> g_routePort[MEMS];
+alignas(16) uint8_t g_routeOrig[MEMS][16];
 alignas(16) uint8_t g_origCrowd[0x8000];                // the original's crowd object (its methods' this; zeroed)
 C_HumanAIMemory &MemPort(int k) { return *reinterpret_cast<C_HumanAIMemory *>(g_memPortBytes[k]); }
 // What the port's memories were before the call (the original's built from them).
-uint8_t g_memBefore[2][0x110];
-std::vector<S_AIWaypoint *> g_routeBefore[2];
+uint8_t g_memBefore[MEMS][0x110];
+std::vector<S_AIWaypoint *> g_routeBefore[MEMS];
 uint8_t g_wpBefore[sizeof g_wp];
 
-void *MemOwnerOrig(int k) { return k == 0 ? static_cast<void *>(o_human) : static_cast<void *>(g_otherOrig[0]); }
-C_Human *MemOwnerPort(int k) { return k == 0 ? g_h.human : OtherPort(0); }
+void *MemOwnerOrig(int k) { return k == 0 ? static_cast<void *>(o_human) : static_cast<void *>(g_otherOrig[k - 1]); }
+C_Human *MemOwnerPort(int k) { return k == 0 ? g_h.human : OtherPort(k - 1); }
+
+// ---- part 25b's: the crowd objects (the port's g_humanCrowd; the original's: its node and result arrays through
+// pointers at +0x40 and +0x4C, its vectors in MSVC6 form from +0x00, +0x10, +0x20, +0x30: the header's offsets of them are their
+// first elements'), two standing cars, the other humans' controller
+const int CARS = 2;
+alignas(16) uint8_t g_carsPort[CARS][sizeof(C_Car) + 0x100], g_carsOrig[CARS][0x1000];
+I3D_frame *g_carFrame[CARS];
+C_Car *CarPort(int k) { return reinterpret_cast<C_Car *>(g_carsPort[k]); }
+alignas(16) uint8_t g_origNodes[CROWD_MAX_NODES][0x50], g_origResults[CROWD_MAX_PATH][0x50];
+struct S_PlannerScript {
+    bool unknown108 = false;                            // the controller's Unknown108
+    int cars = 0;                                       // in the crowd's list
+} g_pl;
+int g_newWaypointStart = 0;
+const uint32_t O_WAYPOINT_POOL_HEAD = 0x008ab18c, O_WAYPOINT_POOL_COUNT = 0x008ab198;
+uint32_t CT_ CR_Unknown108(void *self)
+{
+    Log(self, "ControllerUnknown108");
+    return g_pl.unknown108;
+}
+void *CT_ CR_AllocWaypoint(void *, int checkpoint, const S_vector4 *pos, int flags, int type, float radius)
+{
+    return NewWaypoint(checkpoint, pos, flags, type, radius);
+}
+void SetUpPlanner()
+{
+    RedirectOriginal(0x00582670, FAKE(CR_AllocWaypoint));
+    for (uint32_t at : {0x00569890u, 0x0056be90u, 0x0056a8e0u, 0x0056a6d0u, 0x0056a0f0u, 0x0056c230u, 0x005a5d30u})
+        RestoreOriginal(at);
+    SetSlot(g_cPortVt, g_cOrigVt, &C_HumanController::Unknown108, 0x108, FAKE(CR_Unknown108));
+    // The other humans' controller: part 22's second one (each side's).
+    for (int k = 0; k < OTHERS; ++k) {
+        OtherPort(k)->m_controller = reinterpret_cast<C_HumanController *>(g_cPort2);
+        void *ctl = g_cOrig2;
+        std::memcpy(g_otherOrig[k] + 0xB0, &ctl, 4);
+    }
+    S_quat none;
+    none.Identity();
+    for (int k = 0; k < CARS; ++k) {
+        g_carFrame[k] = NewFrame(FRAME_DUMMY, ("crowdCar" + std::to_string(k)).c_str(), S_vector(20, 1, 20), none,
+                                 Box(S_vector(0.1f, 0.1f, 0.1f)), "", g_sector);
+        C_Car *car = CarPort(k);
+        car->m_type = ACTOR_CAR;
+        car->m_frame = g_carFrame[k];
+        const int type = ACTOR_CAR;
+        std::memcpy(g_carsOrig[k] + 0x18, &type, 4);
+        std::memcpy(g_carsOrig[k] + 0x20, &g_carFrame[k], 4);
+        g_names[g_carsPort[k]] = g_names[g_carsOrig[k]] = "crowdCar" + std::to_string(k);
+        g_extraPointers.push_back({g_carsPort[k], g_carsOrig[k]});
+    }
+    void *nodes = g_origNodes, *results = g_origResults;
+    std::memcpy(g_origCrowd + 0x40, &nodes, 4);
+    std::memcpy(g_origCrowd + 0x4C, &results, 4);
+    // (The node array's size, +0x44: the constructor's 200, the port's CROWD_MAX_NODES.)
+    const int capacity = CROWD_MAX_NODES;
+    std::memcpy(g_origCrowd + 0x44, &capacity, 4);
+    for (int k = 0; k < 64; ++k)
+        g_names[&g_newWaypoints[k]] = "newWaypoint" + std::to_string(k);
+}
 
 void SetUpCrowd()
 {
@@ -136,6 +204,8 @@ void SetUpCrowd()
             g_points[i].pos = S_vector(std::floor(g_points[i].pos.x), 1.0f, std::floor(g_points[i].pos.z));
             g_points[i].radius = uint8_t(8 * std::uniform_int_distribution<int>(1, 6)(rng));
         }
+        // (Some ladders and the like, types 3..6, and a 7: FindPointNear does not go through the first.)
+        g_points[i].type = i % 7 == 2 ? uint8_t(3 + (i / 7) % 4) : i % 13 == 6 ? 7 : 0;
     }
     for (int i = 0; i < POINTS; ++i) {
         std::vector<std::pair<float, int>> nearest;
@@ -159,14 +229,21 @@ void SetUpCrowd()
     std::memcpy(g_origGame + 0x54, &netWord, 4);
     g_names[g_networkBytes] = "network";
     g_names[g_origCrowd] = "crowd";
-    for (int k = 0; k < 2; ++k) {
+    for (int k = 0; k < MEMS; ++k) {
         new (g_memPortBytes[k]) C_HumanAIMemory(MemOwnerPort(k));
         g_names[g_memPortBytes[k]] = g_names[g_memOrig[k]] = "memory" + std::to_string(k);
         g_names[&g_routePort[k]] = g_names[g_routeOrig[k]] = "route" + std::to_string(k);
         MemOwnerPort(k)->m_aiMemory = &MemPort(k);
+        // (The original's humans' +0x2C4: the other humans' set here, the human's through ToOriginal.)
+        if (k > 0) {
+            void *mem = g_memOrig[k];
+            std::memcpy(static_cast<uint8_t *>(MemOwnerOrig(k)) + 0x2C4, &mem, 4);
+        }
+        g_extraPointers.push_back({&MemPort(k), g_memOrig[k]});
     }
     for (int k = 0; k < WAYPOINTS; ++k)
         g_names[&g_wp[k]] = "waypoint" + std::to_string(k);
+    SetUpPlanner();
     for (int i = 0; i < POINTS; ++i)
         g_names[&g_points[i]] = "point" + std::to_string(i);
 }
@@ -246,7 +323,7 @@ void RandomCrowd()
         w.type = uint8_t(I(0, 20));
         w.radius = U(0.5f, 4);
     }
-    for (int k = 0; k < 2; ++k)
+    for (int k = 0; k < MEMS; ++k)
         RandomMemory(MemPort(k), k);
     // The two close now and then.
     if (P(0.5f)) {
@@ -312,20 +389,22 @@ std::string MemDiffers(int k, const uint8_t *port, const std::vector<S_AIWaypoin
         return "route" + std::to_string(k) + ": port " + ListText(Words(portRoute)) + "/ original " + ListText(MsvcVectorGet(g_routeOrig[k]));
     return "";
 }
-uint8_t g_memAfter[2][0x110];
-std::vector<S_AIWaypoint *> g_routeAfter[2];
+uint8_t g_memAfter[MEMS][0x110];
+std::vector<S_AIWaypoint *> g_routeAfter[MEMS];
 uint8_t g_wpAfter[sizeof g_wp];
 template <class P, class O> void CrowdCall(const char *what, P port, O original)
 {
-    for (int k = 0; k < 2; ++k) {
+    for (int k = 0; k < MEMS; ++k) {
         std::memcpy(g_memBefore[k], g_memPortBytes[k], 0x110);
         g_routeBefore[k] = g_routePort[k];
     }
     std::memcpy(g_wpBefore, g_wp, sizeof g_wp);
+    // (The events too: the nearby humans are read from them.)
+    NoteEventsBefore();
     DiffCall(what,
              [&] {
                  const int r = port();
-                 for (int k = 0; k < 2; ++k) {
+                 for (int k = 0; k < MEMS; ++k) {
                      std::memcpy(g_memAfter[k], g_memPortBytes[k], 0x110);
                      g_routeAfter[k] = g_routePort[k];
                  }
@@ -333,13 +412,14 @@ template <class P, class O> void CrowdCall(const char *what, P port, O original)
                  return r;
              },
              [&](void *x) {
-                 for (int k = 0; k < 2; ++k)
+                 for (int k = 0; k < MEMS; ++k)
                      MemToOrig(k);
+                 EventsToOriginal();
                  std::memcpy(g_wp, g_wpBefore, sizeof g_wp);
                  return original(x);
              });
     std::string why;
-    for (int k = 0; k < 2 && why.empty(); ++k)
+    for (int k = 0; k < MEMS && why.empty(); ++k)
         why = MemDiffers(k, g_memAfter[k], g_routeAfter[k]);
     if (why.empty() && std::memcmp(g_wpAfter, g_wp, sizeof g_wp) != 0)
         why = "waypoints";
@@ -349,11 +429,11 @@ template <class P, class O> void CrowdCall(const char *what, P port, O original)
         std::printf("  %s: %s\n", what, why.c_str());
         // (CROWD_DUMP: both memories before the call, as words.)
         if (std::getenv("CROWD_DUMP"))
-            for (int k = 0; k < 2; ++k)
+            for (int k = 0; k < MEMS; ++k)
                 std::printf("    before%d %s\n", k, Hex(g_memBefore[k], 0x110).c_str());
     }
     // (The port's state after its call, for the next one.)
-    for (int k = 0; k < 2; ++k) {
+    for (int k = 0; k < MEMS; ++k) {
         std::memcpy(g_memPortBytes[k], g_memAfter[k], 0x110);
         g_routePort[k] = g_routeAfter[k];
     }
@@ -367,7 +447,9 @@ uint32_t FloatsHash(const float *f, int n)
         // (Rounded to 12 bits of mantissa: the last bits may differ.)
         uint32_t w;
         std::memcpy(&w, &f[i], 4);
-        h = h * 31 + ((w + 0x400u) & ~0x7FFu);
+        // (CROWD_EXACT: bit for bit, to find where the original's order of operations differs.)
+        static const bool exact = std::getenv("CROWD_EXACT") != nullptr;
+        h = h * 31 + (exact ? w : ((w + 0x400u) & ~0x7FFu));
     }
     return h;
 }
@@ -699,6 +781,428 @@ void TestCrowdSteps()
     }
 }
 
+// ---- part 25b: the planner (FindPointNear, IsPointBlocked, Replan with ExpandNode, FindBlocker, AddSideWay and
+// CollectBest)
+}  // namespace
+namespace crowd {
+S_vector CarHalfSize(const C_Car *car);                 // (human_crowd.cpp's)
+}  // namespace crowd
+namespace {
+
+// The port's car speed's offset (private in C_Vehicle): found once by what GetSpeed reads.
+size_t CarSpeedOffset()
+{
+    static size_t at = 0;
+    if (!at) {
+        alignas(16) static uint8_t probe[sizeof(C_Car) + 0x100];
+        for (size_t i = 0x90; i + 4 <= sizeof(C_Car); i += 4) {
+            std::memset(probe, 0, sizeof probe);
+            const float mark = 12345.5f;
+            std::memcpy(probe + i, &mark, 4);
+            if (reinterpret_cast<const C_Car *>(probe)->GetSpeed() == mark) {
+                at = i;
+                break;
+            }
+        }
+    }
+    return at;
+}
+void RandomPlanner()
+{
+    RandomCrowd();
+    C_Human *h = g_h.human;
+    h->m_events = g_portEvents;
+    // The others' controller: any type (the AI's suspended or not), Unknown108's answer.
+    auto *ctl2 = reinterpret_cast<C_HumanController *>(g_cPort2);
+    const int type = P(0.4f) ? HUMAN_CONTROLLER_AI : CONTROLLER_TYPES[I(0, 6)];
+    ctl2->m_type = static_cast<E_HumanController>(type);
+    std::memcpy(g_cOrig2 + 0x48, &type, 4);
+    const bool suspended = P(0.3f);
+    reinterpret_cast<C_ScriptedController *>(g_cPort2)->m_suspended = suspended;
+    g_cOrig2[0x1D2] = suspended;
+    g_pl.unknown108 = P(0.15f);
+    // The nearby humans: some of the others (rarely the human itself).
+    std::vector<int> nearby;
+    for (int k = 0; k < OTHERS; ++k)
+        if (P(0.7f))
+            nearby.push_back(ActorNetId(k));
+    if (P(0.05f))
+        nearby.push_back(ActorNetId(ACTOR_SELF_INDEX));
+    g_portEvents->m_nearbyActors = nearby;
+    // The others' memories: often on the way from the human to its waypoint, blocking it or not.
+    C_HumanAIMemory &self = MemPort(0);
+    for (int k = 1; k < MEMS; ++k) {
+        C_HumanAIMemory &m = MemPort(k);
+        m.flags = uint8_t(P(0.75f) ? 0 : 1 << I(0, 5));
+        if (self.route && !self.route->empty() && P(0.7f)) {
+            const S_vector4 &goal = (*self.route)[size_t(I(0, int(self.route->size()) - 1))]->pos;
+            const float t = U(0.1f, 0.9f);
+            m.pos = {self.pos.x + (goal.x - self.pos.x) * t + U(-0.6f, 0.6f), self.pos.y + U(-0.3f, 0.3f),
+                     self.pos.z + (goal.z - self.pos.z) * t + U(-0.6f, 0.6f), 0.0f};
+        }
+        // (Now and then a floor above or below: a lying one counts up to 2 m away.)
+        if (P(0.12f))
+            m.pos.y += (P(0.5f) ? 1.0f : -1.0f) * U(1.5f, 3.5f);
+    }
+    // The cars: standing (or not), turned, about the way; their boxes.
+    g_pl.cars = I(0, CARS);
+    g_humanCrowd.m_cars.clear();
+    g_humanCrowd.m_carHalves.clear();
+    for (int k = 0; k < CARS; ++k) {
+        C_Car *car = CarPort(k);
+        S_vector at(U(15, 25), 1.0f + U(-0.5f, 0.5f), U(15, 25));
+        if (self.route && !self.route->empty() && P(0.6f)) {
+            const S_vector4 &goal = (*self.route)[0]->pos;
+            const float t = U(0.2f, 0.8f);
+            at = S_vector(self.pos.x + (goal.x - self.pos.x) * t, self.pos.y, self.pos.z + (goal.z - self.pos.z) * t);
+        }
+        S_quat q;
+        // (Some tilted, on a slope: their up axis not straight up.)
+        S_vector axis(0, 1, 0);
+        if (P(0.3f)) {
+            axis = S_vector(U(-0.3f, 0.3f), 1.0f, U(-0.3f, 0.3f));
+            axis = axis * (1.0f / axis.Magnitude());
+        }
+        q.Make(axis, U(0, 6.2831853f));
+        g_carFrame[k]->SetRot(q);
+        g_carFrame[k]->SetPos(at);
+        g_carFrame[k]->Update();
+        float box[8] = {-U(0.8f, 1.2f), -U(0.2f, 0.5f), -U(1.8f, 2.6f), 0, U(0.8f, 1.2f), U(1.2f, 2.0f), U(1.8f, 2.6f), 0};
+        std::memcpy(g_carsPort[k] + 0x210, box, 32);
+        std::memcpy(g_carsOrig[k] + 0x210, box, 32);
+        const float speed = P(0.75f) ? 0.0f : P(0.5f) ? 1e-9f : U(0.1f, 5);
+        std::memcpy(g_carsPort[k] + CarSpeedOffset(), &speed, 4);
+        std::memcpy(g_carsOrig[k] + 0x958, &speed, 4);
+        if (k < g_pl.cars) {
+            g_humanCrowd.m_cars.push_back(car);
+            g_humanCrowd.m_carHalves.push_back(crowd::CarHalfSize(car));
+        }
+    }
+    if (g_pl.cars && P(0.15f))
+        h->m_vehicle = CarPort(0);
+    g_humanCrowd.m_scratch.clear();
+}
+
+// The crowd's state, described alike for both sides: names and counts as text, the floats apart (compared within the
+// tolerance). Nodes by their index in each side's node array.
+struct S_CrowdState {
+    std::string text;
+    std::vector<float> floats;
+};
+std::string NodeRef(uint32_t word, const uint8_t *base)
+{
+    const uint32_t p = word & ~1u;
+    if (!p)
+        return "none";
+    const intptr_t at = intptr_t(p) - intptr_t(uintptr_t(base));
+    if (at < 0 || at >= intptr_t(CROWD_MAX_NODES * 0x50) || at % 0x50)
+        return "?" + NameOf(reinterpret_cast<void *>(uintptr_t(p)));
+    return "n" + std::to_string(at / 0x50) + ((word & 1) ? "*" : "");
+}
+void NodeState(const uint8_t *node, const uint8_t *base, S_CrowdState &s)
+{
+    // (x, y, z: the w of the original's corners and goal is a stack temporary's.)
+    for (int i = 0; i < 3; ++i) {
+        float f;
+        std::memcpy(&f, node + 4 * i, 4);
+        s.floats.push_back(f);
+    }
+    uint32_t w[0x14];
+    std::memcpy(w, node, 0x50);
+    s.text += "[" + NameOf(reinterpret_cast<void *>(uintptr_t(w[4]))) + " " + std::to_string(int(w[13])) + ":";
+    for (int i = 0; i < int(w[13]) && i < CROWD_MAX_CHILDREN; ++i)
+        s.text += " " + NodeRef(w[5 + i], base);
+    s.text += " avoid " + std::to_string(int(w[18])) + ":";
+    for (int i = 0; i < int(w[18]) && i < CROWD_MAX_AVOIDED; ++i)
+        s.text += " " + NameOf(reinterpret_cast<void *>(uintptr_t(w[14 + i])));
+    s.text += " car " + NameOf(reinterpret_cast<void *>(uintptr_t(w[19]))) + "]";
+}
+// (`crowd`: its header words from +0x48, `nodes`, `results`: the arrays; `scratch`, `released`: as lists.)
+S_CrowdState CrowdState(const uint8_t *header, const uint8_t *nodes, const uint8_t *results, const std::vector<uint32_t> &scratch,
+                        const std::vector<std::string> &released)
+{
+    S_CrowdState s;
+    int nodeCount, resultCount;
+    std::memcpy(&nodeCount, header + 0x48, 4);
+    std::memcpy(&resultCount, header + 0x50, 4);
+    float f[6];
+    std::memcpy(&f[0], header + 0x54, 8);
+    std::memcpy(&f[2], header + 0x60, 12);
+    s.floats.assign(f, f + 5);
+    uint32_t goalPoint;
+    std::memcpy(&goalPoint, header + 0x5C, 4);
+    s.text = "nodes " + std::to_string(nodeCount) + " results " + std::to_string(resultCount) + " goal " +
+             NameOf(reinterpret_cast<void *>(uintptr_t(goalPoint))) + "\n";
+    for (int i = 0; i < nodeCount && i < CROWD_MAX_NODES; ++i)
+        NodeState(nodes + 0x50 * i, nodes, s);
+    s.text += "\nresults:";
+    for (int i = 0; i < resultCount && i < CROWD_MAX_PATH; ++i)
+        NodeState(results + 0x50 * i, nodes, s);
+    s.text += "\nscratch: " + ListText(scratch) + "\nreleased:";
+    for (const std::string &r : released)
+        s.text += " " + r;
+    return s;
+}
+// The port's crowd header in the original's layout (the scalars only).
+void PortHeader(uint8_t *out)
+{
+    const C_HumanCrowd &c = g_humanCrowd;
+    std::memcpy(out + 0x48, &c.m_nodeCount, 4);
+    std::memcpy(out + 0x50, &c.m_resultCount, 4);
+    std::memcpy(out + 0x54, &c.m_bestCost, 4);
+    std::memcpy(out + 0x58, &c.m_bestDistance, 4);
+    std::memcpy(out + 0x5C, &c.m_goalPoint, 4);
+    std::memcpy(out + 0x60, &c.m_goal, 16);
+}
+std::vector<std::string> OrigReleasedWaypoints()
+{
+    std::vector<uint32_t> list = OrigReleased(O_WAYPOINT_POOL_HEAD);
+    std::vector<std::string> out;
+    for (size_t i = list.size(); i-- > 0;)
+        out.push_back(NameOf(reinterpret_cast<void *>(uintptr_t(list[i]))));
+    return out;
+}
+// The port's node and result arrays into the original's: node pointers to the original's array (their mark kept), the
+// avoided humans and car to the original's.
+uint8_t g_nodesBefore[CROWD_MAX_NODES][0x50], g_resultsBefore[CROWD_MAX_PATH][0x50];
+void NoteNodesBefore()
+{
+    std::memcpy(g_nodesBefore, g_humanCrowd.m_nodes, sizeof g_nodesBefore);
+    std::memcpy(g_resultsBefore, g_humanCrowd.m_results, sizeof g_resultsBefore);
+}
+void NodeToOriginal(const uint8_t *port, uint8_t *orig)
+{
+    std::memcpy(orig, port, 0x50);
+    uint32_t w[0x14];
+    std::memcpy(w, port, 0x50);
+    const uintptr_t base = reinterpret_cast<uintptr_t>(g_humanCrowd.m_nodes);
+    for (int i = 5; i < 13; ++i) {
+        const uintptr_t p = w[i] & ~1u;
+        if (p >= base && p < base + sizeof g_origNodes)
+            w[i] = Word(g_origNodes[0] + (p - base)) | (w[i] & 1u);
+    }
+    for (int i = 14; i < 18; ++i) {
+        const int k = ActorIndex(reinterpret_cast<void *>(uintptr_t(w[i])));
+        if (k >= 0)
+            w[i] = Word(ActorOrig(k));
+    }
+    for (int k = 0; k < CARS; ++k)
+        if (w[19] == Word(g_carsPort[k]))
+            w[19] = Word(g_carsOrig[k]);
+    std::memcpy(orig, w, 0x50);
+}
+void NodesToOriginal()
+{
+    for (int i = 0; i < CROWD_MAX_NODES; ++i)
+        NodeToOriginal(g_nodesBefore[i], g_origNodes[i]);
+    for (int i = 0; i < CROWD_MAX_PATH; ++i)
+        NodeToOriginal(g_resultsBefore[i], g_origResults[i]);
+}
+S_CrowdState g_portCrowd, g_origCrowdState;
+uint8_t g_newWpPort[sizeof g_newWaypoints];
+template <class P, class O> void PlannerCall(const char *what, P port, O original)
+{
+    g_newWaypointStart = g_newWaypointNext;
+    // (The port's crowd state before: the original's gets its scalars.)
+    alignas(16) uint8_t header[0x80] = {};
+    PortHeader(header);
+    NoteNodesBefore();
+    CrowdCall(what,
+              [&] {
+                  g_newWaypointNext = g_newWaypointStart;
+                  g_releasedPort.clear();
+                  const int r = port();
+                  alignas(16) uint8_t after[0x80] = {};
+                  PortHeader(after);
+                  g_portCrowd = CrowdState(after, reinterpret_cast<const uint8_t *>(g_humanCrowd.m_nodes),
+                                           reinterpret_cast<const uint8_t *>(g_humanCrowd.m_results), Words(g_humanCrowd.m_scratch),
+                                           g_releasedPort);
+                  std::memcpy(g_newWpPort, g_newWaypoints, sizeof g_newWaypoints);
+                  return r;
+              },
+              [&](void *x) {
+                  g_newWaypointNext = g_newWaypointStart;
+                  // (Around the result array's pointer at +0x4C.)
+                  std::memcpy(g_origCrowd + 0x48, header + 0x48, 4);
+                  std::memcpy(g_origCrowd + 0x50, header + 0x50, 0x20);
+                  NodesToOriginal();
+                  std::vector<uint32_t> cars;
+                  std::vector<float> halves;
+                  for (size_t k = 0; k < g_humanCrowd.m_cars.size(); ++k) {
+                      cars.push_back(Word(g_carsOrig[k]));
+                      const S_vector &half = crowd::CarHalfSize(CarPort(int(k)));
+                      halves.insert(halves.end(), {half.x, half.y, half.z, 0.0f});
+                  }
+                  MsvcVectorPut(g_origCrowd + 0x10, cars, size_t(I(0, 1)));
+                  std::vector<uint32_t> halfWords(halves.size());
+                  std::memcpy(halfWords.data(), halves.data(), halves.size() * 4);
+                  // (The original's elements are 16 bytes: its loops index them by i << 4.)
+                  MsvcVectorPut(g_origCrowd + 0x20, halfWords, 0);
+                  MsvcVectorPut(g_origCrowd + 0x30, {}, size_t(I(0, 3)));
+                  *OriginalAt<void **>(O_WAYPOINT_POOL_HEAD) = nullptr;
+                  *OriginalAt<int *>(O_WAYPOINT_POOL_COUNT) = 0;
+                  const int r = original(x);
+                  g_origCrowdState = CrowdState(g_origCrowd, g_origNodes[0], g_origResults[0], MsvcVectorGet(g_origCrowd + 0x30),
+                                                OrigReleasedWaypoints());
+                  return r;
+              });
+    std::string why;
+    if (g_portCrowd.text != g_origCrowdState.text)
+        why = "crowd:\n--- port\n" + g_portCrowd.text + "\n--- original\n" + g_origCrowdState.text;
+    for (size_t i = 0; why.empty() && i < g_portCrowd.floats.size() && i < g_origCrowdState.floats.size(); ++i) {
+        uint32_t a, b;
+        std::memcpy(&a, &g_portCrowd.floats[i], 4);
+        std::memcpy(&b, &g_origCrowdState.floats[i], 4);
+        if (!WordsNear(a, b, 'f'))
+            why = "crowd float " + std::to_string(i) + ": port " + std::to_string(g_portCrowd.floats[i]) + " original " +
+                  std::to_string(g_origCrowdState.floats[i]);
+    }
+    for (size_t i = 0; why.empty() && i < sizeof g_newWaypoints; i += 4) {
+        uint32_t a, b;
+        std::memcpy(&a, g_newWpPort + i, 4);
+        std::memcpy(&b, reinterpret_cast<const uint8_t *>(g_newWaypoints) + i, 4);
+        // (Not the w of pos and pos2, +0x0C and +0x1C: the original's come from stack temporaries.)
+        if ((i % 0x30 == 0x0C || i % 0x30 == 0x1C))
+            continue;
+        if (!WordsNear(a, b, 'm'))
+            why = "new waypoint word " + std::to_string(i / 4);
+    }
+    CHECK(why.empty());
+    static int shown;
+    if (!why.empty() && shown++ < 8)
+        std::printf("  %s: %s\n", what, why.c_str());
+}
+
+void TestCrowdPlanner()
+{
+    std::printf("crowd: the planner\n");
+    for (int i = 0; i < 40000 / QUICK; ++i) {
+        RandomPlanner();
+        C_HumanAIMemory &self = MemPort(0);
+        switch (i % 4) {
+        case 0: {
+            // A point near a place, from a start point (or none), with a hint (none, the start, another, a neighbour).
+            const S_Checkpoint *start = P(0.05f) ? nullptr : &g_points[I(0, POINTS - 1)];
+            const S_Checkpoint *hint = P(0.4f) ? nullptr : P(0.2f) ? start : &g_points[I(0, POINTS - 1)];
+            if (start && P(0.3f) && (start->flags & CHECKPOINT_LINK_COUNT))
+                hint = &g_points[start->links[I(0, (start->flags & CHECKPOINT_LINK_COUNT) - 1)].target];
+            const S_vector4 place = Place();
+            S_vector pos(place.x, place.y, place.z);
+            if (start && P(0.4f))
+                pos = start->pos + S_vector(U(-6, 6), U(-0.5f, 0.5f), U(-6, 6));
+            // (Now and then the hint linked back to the start and the place between the two, outside both circles.)
+            if (P(0.25f)) {
+                const S_Checkpoint *h = &g_points[I(0, POINTS - 1)];
+                if (h->flags & CHECKPOINT_LINK_COUNT) {
+                    hint = h;
+                    start = &g_points[h->links[I(0, (h->flags & CHECKPOINT_LINK_COUNT) - 1)].target];
+                    const float f = P(0.3f) ? U(1.0f, 1.5f) : U(0.3f, 0.7f);
+                    pos = start->pos + (h->pos - start->pos) * f + S_vector(U(-0.3f, 0.3f), 0.0f, U(-0.3f, 0.3f));
+                }
+            }
+            const int depth = I(0, 5);
+            const S_Checkpoint *pointA = start, *pointB = start;
+            PlannerCall("FindPointNear",
+                        [&] { return g_humanCrowd.FindPointNear(Network(), &pointA, pos, depth, hint) + 4 * int(pointA ? pointA - g_points : -1); },
+                        [&](void *) {
+                            alignas(16) float p4[4] = {pos.x, pos.y, pos.z, 0};
+                            const int r = int(OCall<uint32_t>(0x00569890, static_cast<void *>(g_origCrowd), static_cast<void *>(g_networkBytes),
+                                                              static_cast<void *>(&pointB), static_cast<void *>(p4), depth, hint) & 0xFF);
+                            return r + 4 * int(pointB ? pointB - g_points : -1);
+                        });
+            break;
+        }
+        case 1: {
+            alignas(16) S_vector4 point = P(0.5f) ? MemPort(I(1, MEMS - 1)).pos : Place();
+            point.x += U(-1, 1);
+            point.z += U(-1, 1);
+            if (g_pl.cars && P(0.3f)) {
+                const S_vector c = g_carFrame[I(0, g_pl.cars - 1)]->GetWorldPos();
+                point = {c.x + U(-2, 2), c.y + U(-0.5f, 0.5f), c.z + U(-3, 3), 0.0f};
+            }
+            PlannerCall("IsPointBlocked", [&] { return int(g_humanCrowd.IsPointBlocked(self, point)); },
+                        [&](void *) {
+                            return int(OCall<uint32_t>(0x0056be90, static_cast<void *>(g_origCrowd), static_cast<void *>(g_memOrig[0]),
+                                                       static_cast<void *>(&point)) & 0xFF);
+                        });
+            break;
+        }
+        case 2: {
+            // FindBlocker between two nodes as Replan makes them: from the human to its waypoint.
+            if (!self.route || self.route->empty())
+                break;
+            S_PlanNode *nodes = g_humanCrowd.m_nodes;
+            std::memset(static_cast<void *>(nodes), 0, 2 * sizeof(S_PlanNode));
+            nodes[0].pos = self.pos;
+            nodes[0].point = P(0.1f) ? nullptr : &g_points[I(0, POINTS - 1)];
+            nodes[1].pos = (*self.route)[0]->pos;
+            nodes[1].point = P(0.4f) ? nullptr : &g_points[I(0, POINTS - 1)];
+            g_humanCrowd.m_nodeCount = 2;
+            alignas(16) S_vector4 leftA[4] = {}, rightA[4] = {}, leftB[4] = {}, rightB[4] = {};
+            int lcA = 0, rcA = 0, lcB = 0, rcB = 0;
+            C_Human *humanA = nullptr;
+            C_Car *carA = nullptr;
+            void *humanB = nullptr, *carB = nullptr;
+            float timeB = 0;
+            const auto out = [](int r, const S_vector4 *l, int lc, const S_vector4 *rt, int rc, const void *human, const void *car) {
+                std::vector<float> f;
+                for (int q = 0; q < lc && q < 4; ++q)
+                    f.insert(f.end(), {l[q].x, l[q].y, l[q].z});
+                for (int q = 0; q < rc && q < 4; ++q)
+                    f.insert(f.end(), {rt[q].x, rt[q].y, rt[q].z});
+                return int(FloatsHash(f.data(), int(f.size())) * 31u + uint32_t(r * 1000 + lc * 100 + rc * 10) +
+                           uint32_t(ActorIndex(human) + 1) * 7u + uint32_t(car ? 3 : 0));
+            };
+            PlannerCall("FindBlocker",
+                        [&] {
+                            const int r = g_humanCrowd.FindBlocker(self, &nodes[0], &nodes[1], leftA, &lcA, rightA, &rcA, &humanA, &carA);
+                            return out(r, leftA, lcA, rightA, rcA, humanA, carA);
+                        },
+                        [&](void *) {
+                            typedef uint32_t(CT_ * T)(void *, void *, void *, void *, void *, int *, void *, int *, void **, void **, float *);
+                            const int r = int(OriginalAt<T>(0x0056c230)(g_origCrowd, g_memOrig[0], g_origNodes[0], g_origNodes[1], leftB, &lcB,
+                                                                       rightB, &rcB, &humanB, &carB, &timeB) & 0xFFFF);
+                            return out(r, leftB, lcB, rightB, rcB, humanB, carB);
+                        });
+            // (CROWD_EXACT: where they differ, both sides' corners, the blocker and the stance.)
+            if (std::getenv("CROWD_EXACT") && std::memcmp(rightA, rightB, 12) != 0) {
+                static int shown;
+                if (shown++ < 4) {
+                    std::printf("    stance %d human %s/%s car %s/%s counts %d %d / %d %d\n", g_ctl.bodyStance, NameOf(humanA).c_str(),
+                                NameOf(humanB).c_str(), NameOf(carA).c_str(), NameOf(carB).c_str(), lcA, rcA, lcB, rcB);
+                    for (int q = 0; q < 4; ++q)
+                        std::printf("    right %a %a %a / %a %a %a\n", rightA[q].x, rightA[q].y, rightA[q].z, rightB[q].x, rightB[q].y,
+                                    rightB[q].z);
+                }
+            }
+            break;
+        }
+        default:
+            // (A route with points, the human near the network.)
+            if (!self.route || self.route->empty())
+                break;
+            if (P(0.7f))
+                self.nearPoint = &g_points[I(0, POINTS - 1)];
+            // (The root's and the goal's old contents: what Replan sets anew. Null children: walking them crashes.)
+            for (int n = 0; n < 2; ++n) {
+                S_PlanNode &old = g_humanCrowd.m_nodes[n];
+                old.avoidedCount = I(0, CROWD_MAX_AVOIDED);
+                for (int q = 0; q < CROWD_MAX_AVOIDED; ++q)
+                    old.avoided[q] = OtherPort(I(0, OTHERS - 1));
+                old.avoidedCar = CarPort(I(0, CARS - 1));
+                old.childCount = I(0, 3);
+                for (int q = 0; q < CROWD_MAX_CHILDREN; ++q)
+                    old.children[q] = 0;
+            }
+            PlannerCall("Replan", [&] { return int(g_humanCrowd.Replan(self)); },
+                        [&](void *) {
+                            return int(OCall<uint32_t>(0x0056a0f0, static_cast<void *>(g_origCrowd), static_cast<void *>(g_memOrig[0])) & 0xFF);
+                        });
+            break;
+        }
+    }
+}
+
 void TestCrowd()
 {
     SetUpCombat();
@@ -713,6 +1217,8 @@ void TestCrowd()
         TestCrowdGeometry();
         TestCrowdSteps();
     }
+    if (run("25b"))
+        TestCrowdPlanner();
 }
 
 }  // namespace

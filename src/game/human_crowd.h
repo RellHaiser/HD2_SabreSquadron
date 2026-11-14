@@ -49,7 +49,8 @@ public:
     bool Replan(C_HumanAIMemory &memory);               // 0x0056a0f0
     bool IsPointBlocked(const C_HumanAIMemory &memory, const S_vector4 &point);   // 0x0056be90
     void ExpandNode(C_HumanAIMemory &memory, S_PlanNode *node, int depth);   // 0x0056a8e0
-    void AddSideWay(S_PlanNode *node, S_PlanNode *child, int blockKind, const S_vector4 *corners, int cornerCount, C_Human *human, C_Car *car);
+    // True when a node was wanted with the node array full.
+    bool AddSideWay(S_PlanNode *node, S_PlanNode *child, int blockKind, const S_vector4 *corners, int cornerCount, C_Human *human, C_Car *car);
     // (0x0056c230; the original also returns the time of the hit, which nobody reads)
     int FindBlocker(C_HumanAIMemory &memory, const S_PlanNode *from, S_PlanNode *to, S_vector4 *left, int *leftCount, S_vector4 *right, int *rightCount, C_Human **human, C_Car **car);
     void CollectBest(C_HumanAIMemory &memory, const S_PlanNode *node, float cost, bool notRoot, S_PlanNode **path, int depth);   // 0x0056a6d0

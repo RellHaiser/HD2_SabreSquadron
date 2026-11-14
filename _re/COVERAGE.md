@@ -2416,8 +2416,8 @@ particles and the surface marks. Files are served from memory.
 - **The build:** `human/build_crowd.bat` (HUMAN_CROWD, `crowd_test.inc`): part 24's harness with human_crowd.cpp linked.
   - The AI memories (C_HumanAIMemory, the same layout on both sides) are each side's own: their owner (the human or
     one of part 24's other humans) and route (the port's std::vector, the original's MSVC6 vector of the same
-    waypoints) differ. After each call both memories are compared word by word (floats within the usual tolerance:
-    the file's own note says its sums are not always in the original's order), pointers by what they name.
+    waypoints) differ. After each call both memories are compared word by word (floats within the usual tolerance;
+    bit for bit with CROWD_EXACT=1 since part 25b), pointers by what they name.
   - The checkpoint network is the test's: 40 points about the humans (every fourth on whole metres with a radius of
     whole halves, for exact ties), linked to their nearest few. Both games point at it (the original's +0x54); its
     count and points are at the original's offsets. Get and FindNearestPoint (checkpoints.cpp is not linked) are
@@ -2438,8 +2438,47 @@ particles and the surface marks. Files are served from memory.
   test; the original asks first (no effect: the calls now agree).
 - **Results:** 60,653 checks; lines: 95.9 % of these functions' 386 (the rest: the car helpers, PointRate and
   IsInvalid, part 25b's, and FirstRootAhead's both-roots-behind case, unreachable).
-- **Mutations** (`human/mutations/mutate_crowd1.py`): 412 mutants (393 generated, 19 for repeated lines); 332 killed,
-  19 not building, 61 survived: 20 in part 25b's helpers, 19 equivalent, 22 float ties at exact equality.
+- **Mutations** (`human/mutations/mutate_crowd1.py`, regenerated after part 25b): 415 mutants (396 generated, 19 for
+  repeated lines); 335 killed, 19 not building, 61 survived: 21 in helpers 25a does not call (9 killed by 25b's
+  tests, the rest part 25c's), 18 equivalent, 22 float ties at exact equality.
 - **Harness lessons (my mistakes):** my network Get fake took the whole index word (the original passes 16 bits);
   `near` is a windows.h macro (again); I aimed a human exactly at another for a mutant and made the side it gives way
   to rounding noise; the original's undefined w words.
+
+## Human part 25b (the crowd's planner, `human_crowd.cpp`, 2026-11-14)
+
+- **The build:** part 25a's (`human/build_crowd.bat`, `crowd_test.inc`, CROWD_ONLY=25b for these tests alone).
+  - Four memories now: the human's and the three other humans' (each one's +0x2C4 points at its memory).
+  - The crowd object: the port's g_humanCrowd; the original's its own, in MSVC6 form: the car vector at +0x10 (its
+    slack random), the cars' half sizes at +0x20 (16-byte elements: its loops index them by i << 4), the scratch vector
+    at +0x30, its node array (+0x40, capacity +0x44 = 200) and result array (+0x4C) the test's. Before each call the
+    port's nodes (node pointers to the original's array, marks kept; avoided humans and car to the original's) and
+    header scalars are copied in; after it both node arrays, results, scratch lists and header are described alike and
+    compared (nodes by index).
+  - The others' controller (any type, the scripted one's suspended flag, Unknown108's answer), two crowd cars (frames
+    turned, some tilted, standing or moving; the port's private speed found by probing GetSpeed), the waypoint pool
+    (AllocWaypoint logged; the released ones read from each side's list), the events rebuilt for the original before
+    each call.
+- **The tests (bit for bit with CROWD_EXACT=1; within the float tolerance otherwise):** FindPointNear (no start, a
+  hint: none, the start, another, a linked neighbour with the place between or beyond the two; ladders not gone
+  through), IsPointBlocked (near the others, standing or lying, on other floors; near the cars, the human's own
+  vehicle), FindBlocker directly (from the human to its waypoint: humans standing or lying, cars, nodes with no point),
+  Replan (whole plans: ExpandNode, AddSideWay, CollectBest; the root's and goal's old contents filled first).
+- **Not compared:** the w of node positions and of new waypoints' positions (the original's corners and goal take a
+  stack temporary's).
+- **Port fixes** (the first four found with CROWD_EXACT=1: the last bits decided which side of a blocker a plan went):
+  - AddSideWay/ExpandNode: the original's ExpandNode returns at once when a node is wanted with the node array full;
+    the port filled the array and went on with the other side and the other children. AddSideWay now says so.
+  - S_Ellipsoid::Local: the original multiplies by the reciprocal of the half size, summing z + y + x; the port divided.
+  - AddPush: the original's dot product is (x + z) + y in its own operand order; the port's x + y + z.
+  - FindBlocker's car corners: the original scales (v * half) * 1.05 per axis; the port scaled the corner first, (v * 1.05) * half.
+- **Results:** 103,471 checks (25b alone); lines: 99.5 % of 833..1386 (not run: 1147, a node with no point near it,
+  and 1219, a negative discriminant only rounding reaches).
+- **Mutations** (`human/mutations/mutate_crowd2.py`): 381 mutants (319 generated, 62 for repeated lines); 311 killed,
+  21 not building, 49 survived: 14 equivalent, 7 not reached (rare plan shapes, narrow distance windows), 28 float
+  ties at exact equality. Part 25a's list regenerated for the changed file (its helpers Local and CarEllipsoid: all 9
+  killed by these tests).
+- **Harness lessons (my mistakes):** the original crowd's vector offsets off by 4; its events never rebuilt for the
+  crowd calls and its nodes never copied in at first; the car half sizes need a 16-byte stride; the original's node
+  capacity (+0x44) left 0 (it returned early or crashed); my header copy overwrote its result pointer (a crash); the
+  mutation baseline then failed under mutrun's SSE math.cpp (real last-bit ties, which led to the order fixes above).

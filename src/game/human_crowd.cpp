@@ -3,7 +3,8 @@
 // network (its circles and the strips between them). What comes out is the step C_HumanAIMemory gives the AI (C_AIController walks along it).
 // A route blocked by a human or a standing car is planned around it (FindBlocker, ExpandNode, Replan).
 //
-// Sums of squares etc. are not always in the original's order: only the last bits of a float can differ.
+// The float sums are in the original's order: the last bits decide which way round a blocker a plan goes (the tests of parts 25a and 25b
+// find the functions agreeing bit for bit).
 #include <cmath>
 #include <cstring>
 #include <vector>
@@ -95,9 +96,12 @@ struct S_Ellipsoid {
     S_vector axis[3];
     S_vector half;
 
+    // (As the original: by the half sizes' reciprocals, z + y + x. A plan node on a lying body's corner is taken back
+    // to that corner of the unit square: which side of the way it lies on is decided by the last bits.)
     S_vector Local(const S_vector &v) const
     {
-        return S_vector(Dot(v, axis[0]) / half.x, Dot(v, axis[1]) / half.y, Dot(v, axis[2]) / half.z);
+        const auto local = [&v](const S_vector &a, float h) { return ((v.z * a.z + v.y * a.y) + v.x * a.x) * (1.0f / h); };
+        return S_vector(local(axis[0], half.x), local(axis[1], half.y), local(axis[2], half.z));
     }
     S_vector World(const S_vector &v) const
     {
@@ -145,7 +149,8 @@ void AddPush(S_vector4 &total, const S_vector &push)
         total = Xyzw(push, total.w);
         return;
     }
-    const float along = Dot(push, sum) / sq;
+    // (In the original's order, x + z + y.)
+    const float along = ((sum.x * push.x + push.z * sum.z) + push.y * sum.y) / sq;
     if (IsNegative(along)) {
         total.x += push.x;
         total.y += push.y;
@@ -1063,21 +1068,23 @@ void C_HumanCrowd::CollectBest(C_HumanAIMemory &memory, const S_PlanNode *node, 
 }
 
 // The way past a blocker on one side: new nodes along the corners, the old way going on from the last (the two like blocks of 0x0056a8e0).
-void C_HumanCrowd::AddSideWay(S_PlanNode *node, S_PlanNode *child, int blockKind, const S_vector4 *corners, int cornerCount, C_Human *human, C_Car *car)
+// True when a node was wanted with the array full: the original's ExpandNode then returns at once (filling its last node does not stop
+// it).
+bool C_HumanCrowd::AddSideWay(S_PlanNode *node, S_PlanNode *child, int blockKind, const S_vector4 *corners, int cornerCount, C_Human *human, C_Car *car)
 {
     if (cornerCount == 0 || node->childCount >= CROWD_MAX_CHILDREN)
-        return;
+        return false;
     // Known already?
     for (int i = node->childCount - 1; i >= 0; --i) {
         const S_PlanNode *const known = reinterpret_cast<const S_PlanNode *>(node->children[i] & ~static_cast<uintptr_t>(1));
         if (Sq(Sub4(corners[0], known->pos)) < 1e-16f)
-            return;
+            return false;
     }
     S_PlanNode *added = nullptr;
     S_PlanNode *parent = nullptr;
     for (int i = 0; i < cornerCount; ++i) {
         if (m_nodeCount >= CROWD_MAX_NODES)
-            return;
+            return true;
         added = &m_nodes[m_nodeCount++];
         added->pos = corners[i];
         added->point = nullptr;
@@ -1101,6 +1108,7 @@ void C_HumanCrowd::AddSideWay(S_PlanNode *node, S_PlanNode *child, int blockKind
         added->children[1] = child->children[1];
         added->childCount = child->childCount;
     }
+    return false;
 }
 
 void C_HumanCrowd::ExpandNode(C_HumanAIMemory &memory, S_PlanNode *node, int depth)
@@ -1126,12 +1134,10 @@ void C_HumanCrowd::ExpandNode(C_HumanAIMemory &memory, S_PlanNode *node, int dep
         if (kind == 0) {
             node->children[i] = value | 1;
         } else if (human || car) {
-            const int nodesBefore = m_nodeCount;
-            AddSideWay(node, child, kind, s_left, leftCount, human, car);
-            if (m_nodeCount >= CROWD_MAX_NODES && nodesBefore < CROWD_MAX_NODES)
+            // (Out only when a node was wanted with the array full.)
+            if (AddSideWay(node, child, kind, s_left, leftCount, human, car))
                 return;
-            AddSideWay(node, child, kind, s_right, rightCount, human, car);
-            if (m_nodeCount >= CROWD_MAX_NODES)
+            if (AddSideWay(node, child, kind, s_right, rightCount, human, car))
                 return;
             node->children[i] = value | 1;
         } else {
@@ -1365,7 +1371,11 @@ int C_HumanCrowd::FindBlocker(C_HumanAIMemory &memory, const S_PlanNode *from, S
         SortCorners(l, side, r, corners, negative, positive, &negativeCount, &positiveCount);
         const auto worldCorner = [&](int index) {
             const S_vector v(l.x + corners[index].x, l.y + corners[index].y, l.z + corners[index].z);
-            const S_vector world = shape.World(S_vector(v.x * 1.05f, v.y * 1.05f, v.z * 1.05f));
+            // (World of the corner 1.05 times as far: in the original's order, (v * half) * 1.05.)
+            const S_vector x = shape.axis[0] * ((v.x * shape.half.x) * 1.05f);
+            const S_vector y = shape.axis[1] * ((v.y * shape.half.y) * 1.05f);
+            const S_vector z = shape.axis[2] * ((v.z * shape.half.z) * 1.05f);
+            const S_vector world(x.x + y.x + z.x, x.y + y.y + z.y, x.z + y.z + z.z);
             return Xyzw(S_vector(world.x + carPos.x, world.y + carPos.y, world.z + carPos.z));
         };
         for (int k = 0; k < positiveCount; ++k)
