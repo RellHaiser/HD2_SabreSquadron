@@ -130,11 +130,12 @@ int HashString(const char *text, int buckets)           // 0x0073a9d0
         hash = static_cast<uint32_t>(tolower(*text)) + hash * 0x9CCF9319u;
     return static_cast<int>(hash % static_cast<uint32_t>(buckets));
 }
-// (Both tables' hash and compare, 0x0073a290 and 0x0073aac0, 0x0073a2a0 and 0x0073aad0: by the first field, a string.)
+// (Both tables' hash, 0x0073a290 (DS 0x00797700) and 0x0073aac0 (DS 0x00798270): by the first field, a string.)
 int HashFirstField(const void *element, int buckets)
 {
     return HashString(*static_cast<char *const *>(element), buckets);
 }
+// (Both tables' compare, 0x0073a2a0 (DS 0x00797720) and 0x0073aad0 (DS 0x00798290).)
 int CompareFirstField(const void *a, const void *b)
 {
     return _stricmp(*static_cast<char *const *>(a), *static_cast<char *const *>(b));
