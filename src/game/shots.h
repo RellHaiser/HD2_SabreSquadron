@@ -335,7 +335,7 @@ public:
     ~C_ShotManager() override;                              // 0x0044dc30
 
     // Runs the shots (server, and clients through Update).
-    void Tick(int timeDelta) override;                      // 0x00451ec0
+    void Tick(int timeDelta) override;                      // 0x00451ec0 (DS 0x0046c950)
     // Clients: 100 ms ticks of their own, client bullets, interpolation and the effects.
     void Update(int timeDelta) override;                    // 0x00451fb0
     void StartMission(bool server) override;                // 0x0044dde0

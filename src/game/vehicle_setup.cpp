@@ -152,7 +152,7 @@ uint32_t __stdcall StoreFoundFrame(I3D_frame *frame, void *found)              /
     return 0;
 }
 
-uint32_t __stdcall CollectFrame(I3D_frame *frame, void *list)                  // 0x004f9cc0
+uint32_t __stdcall CollectFrame(I3D_frame *frame, void *list)                  // 0x004f9cc0 (DS 0x004ec1d0)
 {
     static_cast<std::vector<I3D_frame *> *>(list)->push_back(frame);
     return 0;

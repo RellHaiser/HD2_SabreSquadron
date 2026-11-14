@@ -65,7 +65,7 @@ public:
     void ReadState(C_BitStream *msg) override;          // 0x54 0x0060cea0
     void Hit(E_HitType, float, const S_vector &, const S_vector &, C_Actor *, int) override {}   // 0xD4 0x0060da70
     // The part's material, else the frame's, else 11.
-    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x0060cee0
+    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x0060cee0 (DS 0x00635df0)
 
 private:
     // The state's frames, volume and name (only the state stored without the two frames; nothing

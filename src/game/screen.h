@@ -61,7 +61,7 @@ public:
     // No parent, no id (the description's, Build); the shared cursor acquired.
     C_Screen(I3D_scene *scene, I3D_frame *frame);       // 0x00668420
     // The cursor released.
-    ~C_Screen() override;                               // 0x00668550 (0x00668530)
+    ~C_Screen() override;                               // 0x00668550 (DS 0x006a1980) (0x00668530 (DS 0x006a1950))
 
     // The frame shown: off, the focus left (OnLeave(0)), CONTROL_NOTIFY_HIDDEN.
     void Hide() override;                               // +0x14 0x00668740
@@ -133,7 +133,7 @@ class C_MedalDescriptionScreen : public C_Screen {      // 0x98 bytes
 public:
     C_MedalDescriptionScreen(I3D_scene *scene, I3D_frame *frame) : C_Screen(scene, frame) {}
     // The texts deleted.
-    ~C_MedalDescriptionScreen() override;               // 0x00691920 (0x00691900)
+    ~C_MedalDescriptionScreen() override;               // 0x00691920 (DS 0x006d08f0) (0x00691900 (DS 0x006d08c0))
 
     // The texts'.
     void Refresh() override;                            // +0x18 0x0066a2a0

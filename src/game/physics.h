@@ -380,7 +380,7 @@ public:
     ~C_PhysicsModule() override;                            // 0x00410740
 
     // Server: everything but debris, doors (when also a client) and swinging objects.
-    void Tick(int timeDelta) override;                      // 0x00410100
+    void Tick(int timeDelta) override;                      // 0x00410100 (DS 0x0042d3a0)
     // Client: doors, debris and swinging objects.
     void Update(int timeDelta) override;                    // 0x004101a0
     void StartMission(bool server) override;                // 0x00410a40

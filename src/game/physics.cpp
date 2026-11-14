@@ -746,8 +746,12 @@ void C_PhysicsModule::Tick(int timeDelta)
         return;
     StepObjects(timeDelta, [](const C_PhysObject &object) {
         const int type = object.GetType();
+#ifdef HD2_DEDICATED   // the server has only the server's side
+        return type != PHYS_FALLING && type != PHYS_SWINGING;
+#else
         return type != PHYS_FALLING && type != PHYS_SWINGING &&
                (type != PHYS_DOOR || !(g_gameRole & GAME_ROLE_CLIENT));
+#endif
     });
 }
 

@@ -76,7 +76,7 @@ public:
     // popup closed; on the quit question likewise (its own ids); else back. MAIN_MSG_PLAY_MOVIE: the
     // movie's state; MAIN_MSG_LOAD_GAME: the saved game picked loaded (none: the application's load
     // command alone).
-    void OnMessage(S_ControlMessage *message) override; // 0x34 0x00626ca0
+    void OnMessage(S_ControlMessage *message) override; // 0x34 0x00626ca0 (DS 0x00656330)
     // The screens described (Describe), their models loaded (none: skipped), each described further by
     // its kind (the quit question's model moved to (0.5, -0.375, -0.5)), made and built; the main screen
     // opened. True.
@@ -107,7 +107,7 @@ protected:
 
     // ---- the screens' callbacks (later sub-parts but OnMainShown) ----
     static bool OnMainShown(void *menu, void *argument, C_Control *control, uint32_t notification,
-                            uint32_t value);            // 0x006276a0
+                            uint32_t value);            // 0x006276a0 (DS 0x00656f90)
     // The profile screen shown: refreshed; the name's box, the list's refresh, the difficulties off; create on,
     // rename / delete only with a profile picked; back on. True.
     static bool OnProfileShown(void *menu, void *argument, C_Control *control, uint32_t notification,
@@ -148,7 +148,7 @@ protected:
     // shown; load on, its picture, the description: the heading, the mission's texts (its text id 0x1194 on:
     // the title, the lines after it up to six more found), carnage's note. True.
     static bool OnMissionPick(void *menu, void *argument, C_Control *control, uint32_t notification,
-                              uint32_t value);          // 0x0063b310
+                              uint32_t value);          // 0x0063b310 (DS 0x0066fc00)
     // The play mode's save slot: its file the saved game picked; "load the last save" on only when the slot's
     // mission is `mission` (another mode: nothing).
     void ShowSaveSlot(int mission);                     // 0x0063b0f0
@@ -267,7 +267,7 @@ protected:
     // The options from the current rules; inverse damage / the respawn time on by friendly fire / respawning;
     // the rows of the game type on (deathmatch, team play, hidden maps: 2 .. 32 players; cooperative: 2 .. 6,
     // respawning forced, its difficulty, lives, team lives).
-    void ShowServerOptions(int type);                   // 0x0062d950
+    void ShowServerOptions(int type);                   // 0x0062d950 (DS 0x0065eb50)
     // A titled edit box's text (none, another kind: empty).
     C_str GetEditText(uint32_t id);                     // 0x0062c6d0
     // The hosted session from the create server screen (OnNetworkMessage's start): the settings reset, hosting;
@@ -286,7 +286,7 @@ protected:
     // Shown (part 9h-xiv): the settings loaded; the host's name, the game type, internet (the session's listing
     // kind 1), dedicated, the password, the port, the voice codec, the rotation shown. True.
     static bool OnCreateServerShown(void *menu, void *argument, C_Control *control, uint32_t notification,
-                                    uint32_t value);    // 0x0062c2a0
+                                    uint32_t value);    // 0x0062c2a0 (DS 0x0065ced0)
     // Hidden: the settings saved. True.
     static bool OnCreateServerHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
                                      uint32_t value);   // 0x0062c290

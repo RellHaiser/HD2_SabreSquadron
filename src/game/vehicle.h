@@ -649,7 +649,7 @@ constexpr int VEHICLE_GEARS = 15;                       // forward gears at most
 
 // Setup's EnumFrames callback for the damage parts (game/vehicle_parts.cpp): a S_VehiclePart in the
 // std::vector<S_VehiclePart> `parts` per visual with a "[DEFORM ..]" property.
-uint32_t __stdcall AddVehiclePart(I3D_frame *frame, void *parts);              // 0x004fa520
+uint32_t __stdcall AddVehiclePart(I3D_frame *frame, void *parts);              // 0x004fa520 (DS 0x004ecc70)
 
 class C_Vehicle {                                       // car physics/driving state (C_Car +0x90)
 public:
@@ -822,7 +822,7 @@ public:
     // VEHICLE_PARAMS_FIX it stops at the first invalid value (false; what came before is
     // applied); with it an invalid value is replaced in `params` (from the vehicle or its
     // stored block) and applying goes on. At the end the block becomes the stored one.
-    bool ApplyParams(S_VehicleParams &params, uint8_t flags);   // 0x004ed270
+    bool ApplyParams(S_VehicleParams &params, uint8_t flags);   // 0x004ed270 (DS 0x004dd2a0)
     // A copy of the stored block (false for a null target).
     bool GetParams(S_VehicleParams *params) const;      // 0x004f2000
     // Loads the sounds the block names (both sound groups; every name in its handle slot; true).

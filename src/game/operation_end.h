@@ -21,7 +21,7 @@ struct S_OperationEnd {                                 // 0x18 bytes
     int unknown14;                                      // +0x14 (-1; not read)
 };
 
-class C_OperationEndMenu : public C_MenuState {
+class C_OperationEndMenu : public C_MenuState {   // destructor and deleting destructor: 0x006c2190 (DS 0x00707df0), 0x006c2170 (DS 0x00707dc0)
 public:
     // (Inline in C_GameApp::StartStep; the destructor is the base's: 0x006c2170.)
     C_OperationEndMenu() = default;

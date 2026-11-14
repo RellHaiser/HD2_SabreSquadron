@@ -123,7 +123,7 @@ private:
     // occupants unlinked meanwhile).
     void ShowDestroyed();                               // 0x00605bb0
     void ShowIntact();                                  // 0x00605c80
-    static uint32_t __stdcall CopyPart(I3D_frame *frame, void *model);   // 0x00605d80
+    static uint32_t __stdcall CopyPart(I3D_frame *frame, void *model);   // 0x00605d80 (DS 0x0062d090)
     // The box moved with the frame (while in the world).
     void UpdateVolume();                                // 0x00604e90 (__fastcall)
     // The way out: the walking point at the weapon, else half a metre behind it.

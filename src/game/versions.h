@@ -153,7 +153,7 @@ public:
     void StopMission(bool server) override;                 // 0x0043dd90 (DS 0x004626e0)
     // Client: one part changed its stage.
     bool OnMessage(C_BitStream *msg) override;              // 0x0043f1e0
-    void RestartMission(bool server) override;              // 0x0043eb50
+    void RestartMission(bool server) override;              // 0x0043eb50 (DS 0x004638d0)
     bool SaveGame(C_chunk &chunk) override;                 // 0x0043eba0
     bool LoadGame(C_chunk &chunk) override;                 // 0x0043ee10
     void WriteState(C_BitStream *msg) override;             // 0x0043f090

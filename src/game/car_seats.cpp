@@ -202,8 +202,10 @@ bool C_Car::ExitSeat(int seat)                          // 0x004d9be0
     if (!occupant || !PutOutside(occupant))
         return false;
     C_Human *human = static_cast<C_Human *>(occupant);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsNetClient() && human->GetNetId() == g_localPlayerSlot && seat == 0)
         SendFuel();
+#endif
     m_vehicle.SetSeatLoad(seat, 0.0f);
     m_vehicle.m_seats[seat].occupant = nullptr;
     if (C_SeatWeapon *weapon = GetSeatWeapon(seat))

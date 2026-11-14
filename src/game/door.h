@@ -114,7 +114,7 @@ public:
     void WriteState(C_BitStream *msg) override;         // 0x50 0x006021e0
     void ReadState(C_BitStream *msg) override;          // 0x54 0x00602290
     // The part's material, else the frame's (another part), else 11.
-    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x006023b0
+    int GetMaterialId(I3D_frame *part) override;        // 0xD8 0x006023b0 (DS 0x006286d0)
 
 private:
     // Sounds (+0x240, property chunk 0x65); -1 none.

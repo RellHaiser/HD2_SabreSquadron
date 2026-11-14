@@ -246,7 +246,7 @@ public:
     bool Load(C_chunk &chunk) override;                 // 0x006be6f0
     bool Save(C_chunk &chunk) override;                 // 0x006be590
     bool LoadProgress(C_chunk &chunk) override;         // 0x006bfc90
-    bool SaveProgress(C_chunk &chunk) override;         // 0x006bfb30
+    bool SaveProgress(C_chunk &chunk) override;         // 0x006bfb30 (DS 0x00705150)
 };
 
 // An operation (vtable 0x00815b94, type 2; 0x28 bytes): its missions, videos and screens.
@@ -258,7 +258,7 @@ public:
     bool Load(C_chunk &chunk) override;                 // 0x006be280
     bool Save(C_chunk &chunk) override;                 // 0x006be090
     bool LoadProgress(C_chunk &chunk) override;         // 0x006bf890
-    bool SaveProgress(C_chunk &chunk) override;         // 0x006bf730
+    bool SaveProgress(C_chunk &chunk) override;         // 0x006bf730 (DS 0x00704c40)
 
     const C_str &GetName() const { return m_name; }
 

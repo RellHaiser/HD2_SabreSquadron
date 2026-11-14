@@ -723,8 +723,10 @@ bool C_Vehicle::ApplyParams(S_VehicleParams &p, uint8_t flags)                //
     }
 
     m_params = p;
+#ifndef HD2_DEDICATED   // no sounds on the server
     if (flags & VEHICLE_PARAMS_LOAD_SOUNDS)
         LoadSounds(m_params);
+#endif
     return true;
 }
 

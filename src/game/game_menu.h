@@ -46,7 +46,7 @@ public:
     // decided; a network game: the team changed first, else the squad's edited soldier dropped).
     // The squad's soldier applied (and the spawn asked for) or dropped, then escape; the quit and
     // restart questions and their answers (the app's commands, the mission ended).
-    void OnMessage(S_ControlMessage *message) override; // 0x34 0x0067f850
+    void OnMessage(S_ControlMessage *message) override; // 0x34 0x0067f850 (DS 0x006bcce0)
     // The screens described (the main and options screens; a network game's player screen), their
     // models loaded (none: no screen), the builders' controls added, the screens made; then the
     // first opened (the warmup's menu: the player screen). True.
@@ -61,7 +61,7 @@ public:
     bool OnInput(float *held, float *pressed) override; // 0x44 0x00680960
     // The network games: the panel's soldier, the load's button, the game's status; a client: the
     // game's update.
-    void OnUpdate(int timeDelta) override;              // 0x48 0x006808d0
+    void OnUpdate(int timeDelta) override;              // 0x48 0x006808d0 (DS 0x006be180)
     // The menu time; the server: the game's tick.
     void OnTick(int timeDelta) override;                // 0x4C 0x00680920
     // By the top screen: the equipment screen's (index 3, or the message box over it) or the game's
@@ -86,9 +86,9 @@ public:
     // the weapons' information label (posted; none: nothing): left: hidden; entered: cleared, its
     // name, weight, a weapon's ammo, muzzle speed and a rifle scope's zoom (C_ItemInfo's lines), shown.
     bool OnItemNotify13(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x5C 0x00681ee0
-    bool OnItemNotify60(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x60 0x00686e10
+    bool OnItemNotify60(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x60 0x00686e10 (DS 0x006c5d80)
     bool OnItemNotify0A(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x64 0x00682020
-    bool OnItemNotify08(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x68 0x00682210
+    bool OnItemNotify08(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x68 0x00682210 (DS 0x006c0030)
     bool OnItemNotify09(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x6C 0x006822b0
     bool OnItemHover(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;      // 0x70 0x00680ea0
 

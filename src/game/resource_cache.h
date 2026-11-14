@@ -50,22 +50,22 @@ public:
     HRESULT Get(const char *fileName, T **out, T_CacheErrorProc onError = nullptr,
                 void *context = nullptr);                               // vtable +0x08
     // Releases every cached object.
-    void Clear();                                                       // vtable +0x10
+    void Clear();                                                       // vtable +0x10; models 0x006d77e0 (DS 0x0071f050), sounds 0x006d87a0 (DS 0x00720450), animations 0x006d9890 (DS 0x007219d0), shadows 0x006d6dd0 (DS 0x0071e370)
     // Forgets what it has without releasing it, the spare released (what the game's shutdown does: the driver's Close comes next; 0x006dc770).
     void Forget();
 
-    void SetMaxEntries(uint32_t count) { m_maxEntries = count; }        // vtable +0x00
-    int NumEntries() const { return static_cast<int>(m_entries.size()); }   // vtable +0x34
+    void SetMaxEntries(uint32_t count) { m_maxEntries = count; }        // vtable +0x00; models 0x006d77d0 (DS 0x0071f030), sounds 0x006d81e0 (DS 0x0071fd10), animations 0x006d91a0 (DS 0x00721110), shadows 0x006d6130 (DS 0x0071d390)
+    int NumEntries() const { return static_cast<int>(m_entries.size()); }   // vtable +0x34; models 0x006d81a0 (DS 0x0071fca0), sounds 0x006d9160 (DS 0x007210a0), animations 0x006da250 (DS 0x00722620), shadows 0x006d7790 (DS 0x0071efc0)
 
     // Search directories (stored with a trailing backslash).
     void AddDir(const char *dir);                                       // vtable +0x18
-    void RemoveDir(const char *dir);                                    // vtable +0x1C
-    void ClearDirs() { m_dirs.clear(); }                                // vtable +0x20
-    int NumDirs() const { return static_cast<int>(m_dirs.size()); }     // vtable +0x24
-    const char *GetDir(int index) const { return m_dirs[index]; }       // vtable +0x28
+    void RemoveDir(const char *dir);                                    // vtable +0x1C; models 0x006d7ac0 (DS 0x0071f3f0), animations 0x006d9b70 (DS 0x00721d70), shadows 0x006d70b0 (DS 0x0071e710)
+    void ClearDirs() { m_dirs.clear(); }                                // vtable +0x20; models 0x006d7d00 (DS 0x0071f6c0), sounds 0x006d8cc0 (DS 0x00720ac0), animations 0x006d9db0 (DS 0x00722040), shadows 0x006d72f0 (DS 0x0071e9e0)
+    int NumDirs() const { return static_cast<int>(m_dirs.size()); }     // vtable +0x24; models 0x006d7d70 (DS 0x0071f750), sounds 0x006d8d30 (DS 0x00720b50), animations 0x006d9e20 (DS 0x007220d0), shadows 0x006d7360 (DS 0x0071ea70)
+    const char *GetDir(int index) const { return m_dirs[index]; }       // vtable +0x28; models 0x006d7d90 (DS 0x0071f780), sounds 0x006d8d50 (DS 0x00720b80), animations 0x006d9e40 (DS 0x00722100), shadows 0x006d7380 (DS 0x0071eaa0)
     // Strips the working directory and then a search directory from the full
     // path in `path` (in place); false if it lies in none of the directories.
-    bool MakeRelative(char *path) const;                                // vtable +0x2C
+    bool MakeRelative(char *path) const;                                // vtable +0x2C; models 0x006d7db0 (DS 0x0071f7b0), animations 0x006d9e60 (DS 0x00722130), shadows 0x006d73a0 (DS 0x0071ead0)
 
 protected:
     // New empty object of the cached type.

@@ -168,7 +168,7 @@ class C_MeleeComp : public C_WeaponComp {               // vtable 0x008173b0
 public:
     C_MeleeComp() : C_WeaponComp(ICK_MELEE) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df330
-    void Load(int size, const void *data) override;     // 0x007df370
+    void Load(int size, const void *data) override;     // 0x007df370 (DS 0x0081ac70)
 
 private:
     float m_idealRange = 0.0f;                          // +0x24 (MeleeAttack uses a fixed 1.2 m reach)
@@ -179,7 +179,7 @@ public:
     C_MineComp() : C_WeaponComp(ICK_MINE) {}
     int GetUnknownVf00() override { return m_unknown24; }   // 0x007e0760 (DS 0x0081c570)
     void Save(int *ioSize, void *buffer) override;      // 0x007df3a0
-    void Load(int size, const void *data) override;     // 0x007df3e0
+    void Load(int size, const void *data) override;     // 0x007df3e0 (DS 0x0081ad00)
 
     float GetExplosionRadius() const { return m_explosionRadius; }
 
@@ -268,7 +268,7 @@ class C_ScopeComp : public C_ItemComponent {            // vtable 0x00817304
 public:
     C_ScopeComp() : C_ItemComponent(ICK_SCOPE) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df560 (DS 0x0081af00)
-    void Load(int size, const void *data) override;     // 0x007df5a0
+    void Load(int size, const void *data) override;     // 0x007df5a0 (DS 0x0081af50)
 
     int GetAimMode() const { return m_aimMode; }
     float GetAimedFovFactor() const { return m_aimedFovFactor; }
@@ -282,7 +282,7 @@ class C_UniformComp : public C_ItemComponent {          // vtable 0x008172f4
 public:
     C_UniformComp() : C_ItemComponent(ICK_UNIFORM) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df5d0 (DS 0x0081af90)
-    void Load(int size, const void *data) override;     // 0x007df610
+    void Load(int size, const void *data) override;     // 0x007df610 (DS 0x0081afe0)
 
     int GetDisguiseSide() const { return m_disguiseSide; }
 
@@ -294,7 +294,7 @@ class C_MedkitComp : public C_ItemComponent {           // vtable 0x008172e4
 public:
     C_MedkitComp() : C_ItemComponent(ICK_MEDKIT) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df640 (DS 0x0081b020)
-    void Load(int size, const void *data) override;     // 0x007df680
+    void Load(int size, const void *data) override;     // 0x007df680 (DS 0x0081b070)
 
     float GetHealingCapacity() const { return m_healingCapacity; }
 
@@ -307,7 +307,7 @@ class C_BackpackComp : public C_ItemComponent {         // vtable 0x008172d4
 public:
     C_BackpackComp() : C_ItemComponent(ICK_BACKPACK) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df6b0
-    void Load(int size, const void *data) override;     // 0x007df6f0
+    void Load(int size, const void *data) override;     // 0x007df6f0 (DS 0x0081b100)
 
     // 0: a real backpack, whose contents are worn as ITEM_CONTAINER_BACKPACK_CONTENTS.
     int GetSubtype() const { return m_subtype; }
@@ -327,7 +327,7 @@ class C_HeadgearComp : public C_ItemComponent {         // vtable 0x008172c4
 public:
     C_HeadgearComp() : C_ItemComponent(ICK_HEADGEAR) {}
     void Save(int *ioSize, void *buffer) override;      // 0x007df720 (DS 0x0081b140)
-    void Load(int size, const void *data) override;     // 0x007df760
+    void Load(int size, const void *data) override;     // 0x007df760 (DS 0x0081b190)
 
     int GetHeadgearType() const { return m_headgearType; }
     float GetProtection() const { return m_protection; }

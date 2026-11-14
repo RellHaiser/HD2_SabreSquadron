@@ -39,7 +39,7 @@ struct S_LightmapChange {
 
 class C_LightMapGroupsModule : public C_Module {       // vtable 0x00810398
 public:
-    C_LightMapGroupsModule(int id, const char *name);   // 0x0048cb10
+    C_LightMapGroupsModule(int id, const char *name);   // 0x0048cb10 (DS 0x004a2680)
     ~C_LightMapGroupsModule() override;                 // 0x0048cd30
 
     // The client's groups and switches dropped (no lightmap set back).
@@ -47,10 +47,10 @@ public:
     // RestartMission(false).
     void StopMission(bool server) override;             // 0x0048cb60
     // Every switched lightmap set back.
-    void RestartMission(bool server) override;          // 0x0048c790
+    void RestartMission(bool server) override;          // 0x0048c790 (DS 0x004a2200)
     // The switches, last first: the lightmap now and the frame's name.
     bool SaveGame(C_chunk &chunk) override;             // 0x0048c820
-    bool LoadGame(C_chunk &chunk) override;             // 0x0048c920
+    bool LoadGame(C_chunk &chunk) override;             // 0x0048c920 (DS 0x004a2400)
 
     // The groups of the chunk the scene loader is in (false without one); the old groups and
     // switches dropped first.

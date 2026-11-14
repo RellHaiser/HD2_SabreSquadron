@@ -78,7 +78,7 @@ private:
     // The body's callback (`context`: the actor): it passes through humans, sounds on other
     // contacts and sends where it came to rest.
     static int __fastcall OnContact(int event, int unused, void *context,
-                                    const S_RigidBodyContact *contact);   // 0x005b7630
+                                    const S_RigidBodyContact *contact);   // 0x005b7630 (DS 0x005ca040)
 
     C_Item *m_item = nullptr;                           // +0x90
     C_RigidBody m_body;                                 // +0xA0

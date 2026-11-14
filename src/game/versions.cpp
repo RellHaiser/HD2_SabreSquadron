@@ -701,12 +701,16 @@ void C_VersionsModule::RestartMission(bool /*server*/)
 {
     if (g_gameRole & GAME_ROLE_SERVER)
         StopMission(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (g_gameRole & GAME_ROLE_CLIENT)
         StopMission(false);
+#endif
     if (g_gameRole & GAME_ROLE_SERVER)
         StartMission(true);
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (g_gameRole & GAME_ROLE_CLIENT)
         StartMission(false);
+#endif
 }
 
 void C_VersionsModule::Clear()

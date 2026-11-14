@@ -247,7 +247,9 @@ void C_ItemsModule::Update(int timeDelta)
         return;
     g_clientMarksTime += timeDelta;
     if (g_clientMarksTime >= CLIENT_MARKS_STEP) {
+#ifndef HD2_DEDICATED   // no surface marks on the server
         SurfaceMarks_Tick(CLIENT_MARKS_STEP);
+#endif
         g_clientMarksTime -= CLIENT_MARKS_STEP;
     }
 }
@@ -327,7 +329,9 @@ bool C_ItemsModule::LoadGame(C_chunk &chunk)
         id == CHUNK_ITEMS_LAST_UID) {
         m_lastUid = ReadInt(chunk);
         chunk.Ascend();
+#ifndef HD2_DEDICATED   // no surface marks on the server
         SurfaceMarks_Load(chunk);
+#endif
         chunk.Ascend();
         return true;
     }
@@ -411,7 +415,7 @@ C_Item *C_ItemsModule::NewItem(int typeId) const
     if (def->GetRecordType() == ITEM_ANIMATED)
         item = new C_WeaponItem;                        // 0x007dd9c0
     else if (def->GetRecordType() == ITEM_AMMO)
-        item = new C_AmmoItem;                          // 0x007dd860
+        item = new C_AmmoItem;                          // 0x007dd860 (DS 0x00818a10)
     else if (def->GetComponentKind() != ICK_BACKPACK)
         item = new C_MedkitItem;                        // 0x007dd950 (DS 0x00818b50) (every other static item)
     else

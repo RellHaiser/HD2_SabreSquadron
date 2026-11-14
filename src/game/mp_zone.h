@@ -50,9 +50,9 @@ public:
     void CopyFrom(const C_Actor *source) override;      // 0x38 0x005ebff0
     // Once until StopMission: the flags and the spawn frame found, the flag's animation player;
     // a client shows the team again.
-    void StartMission(bool server) override;            // 0x3C 0x005ed110
+    void StartMission(bool server) override;            // 0x3C 0x005ed110 (DS 0x0060dcb0)
     // (Not deactivated.) The frames let go.
-    void StopMission(bool server) override;             // 0x40 0x005ed260
+    void StopMission(bool server) override;             // 0x40 0x005ed260 (DS 0x0060ddf0)
     // Its starting team again, the spawn points from the first.
     void RestartMission(bool server) override;          // 0x44 0x005ed8b0
     // (Nothing saved: false.)

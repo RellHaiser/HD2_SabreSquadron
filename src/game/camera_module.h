@@ -197,7 +197,7 @@ public:
     float GetNearSectorFov();                           // +0x60 0x00465e30
     // Position and view direction of camera `index` (0: the scene's camera, 1: the game camera;
     // false without one; 2 and 3: the module's, CAMERA_POS_*). They write a whole S_vector4.
-    bool GetCameraPos(int index, S_vector4 *pos);       // +0x64 0x00465a10
+    bool GetCameraPos(int index, S_vector4 *pos);       // +0x64 0x00465a10 (DS 0x00482d20)
     bool GetCameraDir(int index, S_vector4 *dir);       // +0x68 0x00465b40
     // The camera frame in use (a human's "camera3RD" / "cameraFPV" dummy when it follows one).
     I3D_frame *GetCamera();                             // +0x6C 0x004650b0

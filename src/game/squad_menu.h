@@ -146,7 +146,7 @@ protected:
     // half: shown again) or detached (a slot's soldier, unless he stays: shown again, false); the cursor's
     // notification 05. (None selected: false.)
     static bool OnDrop(void *menu, void *argument, C_Control *control, uint32_t notification,
-                       uint32_t value);                 // 0x00693f00
+                       uint32_t value);                 // 0x00693f00 (DS 0x006d37e0)
     // CONTROL_NOTIFY_13 (as the equipment screen's items' 13): assigned or detached by OnAssign, the
     // notification 05; a staying slot's soldier on the slots' half: shown again, false. (None selected:
     // false.)

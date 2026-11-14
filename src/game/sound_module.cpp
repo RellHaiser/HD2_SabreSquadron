@@ -236,7 +236,9 @@ void C_SoundModule::StartMission(bool server)
     InitSectorAcoustics();
     m_listenerSector = nullptr;
     m_fadeInTime = FADE_IN_TIME;
+#ifndef HD2_DEDICATED   // no sounds on the server
     ISndGetDriver()->SetVolume(0.0f);
+#endif
 }
 
 void C_SoundModule::StopMission(bool server)
@@ -252,15 +254,19 @@ void C_SoundModule::RestartMission(bool)
     StopAll(false, false);
     m_listenerSector = nullptr;
     m_fadeInTime = FADE_IN_TIME;
+#ifndef HD2_DEDICATED   // no sounds on the server
     ISndGetDriver()->SetVolume(0.0f);
+#endif
 }
 
 bool C_SoundModule::SaveGame(C_chunk &chunk)
 {
     chunk.Begin(CHUNK_SOUND_MODULE);
     int position = 0;
+#ifndef HD2_DEDICATED   // no sounds on the server
     if (IsMusicPlaying())
         m_music->GetPosition(&position);
+#endif
     chunk.WriteChunk(CHUNK_MUSIC_TRACK, m_musicTrack);
     chunk.WriteChunk(CHUNK_MUSIC_POSITION, position);
     chunk.Ascend();
@@ -907,7 +913,11 @@ void C_SoundModule::Stop(int *slotIndex)
         return;
     if (index >= 0 && index < static_cast<int>(m_slots.size()) && m_slots[index] && m_slots[index]->active) {
         S_SoundSlot *slot = m_slots[index];
+#ifdef HD2_DEDICATED   // the server does not ask for a sound device
+        if (slot->sound) {
+#else
         if (ISndGetDriver()->IsInitialized() && slot->sound) {
+#endif
             slot->sound->SetOn(false);
             slot->sound->SetVolume(0.0f);
             if (slot->sample) {

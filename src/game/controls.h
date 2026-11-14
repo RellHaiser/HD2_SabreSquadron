@@ -379,7 +379,7 @@ public:
     C_PagesControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_PagedTextControl(scene, id, parent) {}
     ~C_PagesControl() override = default;               // 0x0065fd80 (0x0065fda0)
     // The shown control's box drawn (no children).
-    void Refresh() override;                            // 0x0065c7d0
+    void Refresh() override;                            // 0x0065c7d0 (DS 0x00692d00)
     // (0x0065c7f0: C_PagedTextControl's.)
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0065c800
 };
@@ -407,7 +407,7 @@ protected:
     void SetLimits();                                   // 0x00664890
     // The frame at the cursor's place along the base (when the cursor moved that way): its value
     // changed (true).
-    bool Drag();                                        // 0x00664b30
+    bool Drag();                                        // 0x00664b30 (DS 0x0069d4d0)
     void MoveTo(const S_vector &position);              // 0x00664b10
     // The value from the place along the base (changed: true).
     bool SetValueFrom(float place);                     // 0x00664ca0
@@ -439,7 +439,7 @@ public:
     ~C_ScrollBar() override = default;                  // 0x00658070 (0x00658090)
 
     // The index of the child whose id's last 4 bits are `id`'s.
-    int FindChild(uint32_t id) const override;          // 0x00664e70
+    int FindChild(uint32_t id) const override;          // 0x00664e70 (DS 0x0069d8b0)
     // While held: a step toward the cursor.
     void Tick(int time) override;                       // 0x00665ce0 (DS 0x0069ead0)
     // The children made (each optional; posted to be ticked, the bar too); inactive.
@@ -487,7 +487,7 @@ public:
     ~C_SpinControl() override = default;                // 0x006605c0 (0x006605e0)
 
     // The index of the child whose id's last 4 bits are `id`'s.
-    int FindChild(uint32_t id) const override;          // 0x0064f4a0
+    int FindChild(uint32_t id) const override;          // 0x0064f4a0 (DS 0x00682b40)
     // The arrows made (each optional), the box placed; inactive (false: no box).
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064f4e0
     // The box's hover; the input to the arrow with the id.
@@ -498,7 +498,7 @@ public:
     int OnPress(int id) override;                       // 0x0064fd30
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0064f870
     // The box dimmed, the arrows inactive.
-    void SetInactive(bool inactive) override;           // 0x0064fd70
+    void SetInactive(bool inactive) override;           // 0x0064fd70 (DS 0x00683670)
 
 protected:
     C_Control *Focus() const { return IsChild(m_focus) ? m_children[m_focus] : nullptr; }
@@ -695,8 +695,8 @@ public:
     int OnEnter(int) override { return m_inactive ? 0 : CONTROL_HANDLED; }   // 0x00652490
     int OnLeave(int) override { return CONTROL_HANDLED; }   // 0x006524a0 (DS 0x006863f0)
     // CONTROL_NOTIFY_0E (its value).
-    int OnClick(int id) override;                       // 0x006524e0
-    int OnKeyClick(int id) override;                    // 0x006524b0
+    int OnClick(int id) override;                       // 0x006524e0 (DS 0x00686450)
+    int OnKeyClick(int id) override;                    // 0x006524b0 (DS 0x00686410)
     // GET_CHECKED, SET_CHECKED (marked), SET_NUMBER.
     bool HandleMessage(S_ControlMessage *message) override;   // 0x006528a0
 
@@ -1013,7 +1013,7 @@ public:
     ~C_SkillControl() override = default;               // 0x0065f760 (0x0065f780)
 
     // The child whose id's last 4 bits are `id`'s (the titles share theirs: the name's).
-    int FindChild(uint32_t id) const override;          // 0x00650180
+    int FindChild(uint32_t id) const override;          // 0x00650180 (DS 0x00683ba0)
     // The shown control's titles drawn (not the buttons).
     void Refresh() override;                            // 0x00650a30
     // The minus keys (0xc, 0x4a: a point down) and the plus keys (0xd, 0x4e: up): true.
@@ -1065,7 +1065,7 @@ public:
     ~C_ItemInfo() override = default;                   // 0x00660c30 (0x00660c50)
 
     // By the id's last 4 bits: 1 the picture, 2 the second.
-    int FindChild(uint32_t id) const override;          // 0x00653b30
+    int FindChild(uint32_t id) const override;          // 0x00653b30 (DS 0x00688070)
     // The shown control's parts drawn.
     void Refresh() override;                            // 0x00653b00
     // The parts (each optional; the pictures hidden, their "X_SQUARE.BMP" face group); false only
@@ -1109,8 +1109,8 @@ public:
     // The base's; the selector frame at (0, 0, 0); true.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00655b40
     // The group's; handled: the focus selected.
-    int OnClick(int id) override;                       // 0x00655de0
-    int OnPress(int id) override;                       // 0x00655db0
+    int OnClick(int id) override;                       // 0x00655de0 (DS 0x0068a780)
+    int OnPress(int id) override;                       // 0x00655db0 (DS 0x0068a740)
     // A page up or down of the scroll bar the value names per 120 (none: not handled).
     int OnWheel(int id, int amount) override;           // 0x00655fe0
     bool HandleMessage(S_ControlMessage *message) override;   // 0x00656230
@@ -1412,7 +1412,7 @@ public:
     int OnKeyClick(int id) override { return OnClick(id); }   // 0x0064eeb0 (DS 0x00682360)
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0064eac0
     // Both parts' too.
-    void SetInactive(bool inactive) override;            // 0x0064efd0
+    void SetInactive(bool inactive) override;            // 0x0064efd0 (DS 0x006824e0)
     // The binding (CONTROL_MSG_SET_BINDING's, without the text).
     virtual void SetBinding(int binding) { m_binding = binding; }   // +0x84 0x00660770
 
@@ -1459,7 +1459,7 @@ public:
     ~C_ItemPictures() override = default;               // (0x00660a60)
 
     // By the id's last 4 bits: 1 the picture, 2 the second.
-    int FindChild(uint32_t id) const override;          // 0x006521c0
+    int FindChild(uint32_t id) const override;          // 0x006521c0 (DS 0x00686020)
     // The shown control's pictures drawn.
     void Refresh() override;                            // 0x00652190
     // The group's (false: not made); the pictures hidden, their "X_SQUARE.BMP" face group; true.

@@ -99,7 +99,7 @@ public:
     // screens), its camera, the cursor's model, the message box, the menu's screens, the cursor,
     // the light, the click sound, the music (not after a mission, an operation or in the game:
     // none playing, track 0; track 37 crossfaded to 0 in 2 s); running, true.
-    bool Start(void *arg) override;                     // 0x04 0x0066b010
+    bool Start(void *arg) override;                     // 0x04 0x0066b010 (DS 0x006a3db0)
     // OnStop, the screens' stack emptied, the screens deleted (the last first), the models and
     // frames released, the cursor, the camera and the scene released, the queue emptied; true.
     bool Stop() override;                               // 0x08 0x0066b440
@@ -132,12 +132,12 @@ public:
     virtual bool OnRender() { return false; }           // 0x50 0x0067edb0 (DS 0x006bbd70)
     virtual bool OnDrawScreens() { return false; }      // 0x54 0x0067edc0 (DS 0x006bbd90)
     // The top screen and the one under its popup drawn, the menu's, the popup, the hint (9d-ii-b).
-    virtual void DrawScreens();                         // 0x58 0x0066e300
+    virtual void DrawScreens();                         // 0x58 0x0066e300 (DS 0x006a6df0)
 
     // A message: kept back or the kept ones posted / dropped (MENU_MSG_DEFER, MENU_MSG_DEFERRED);
     // to a screen by the target's top 6 bits; else the menu's (MENU_MSG_*, the message box's,
     // CONTROL_MSG_NOTIFY's cursor input to the top, the editing), the rest to OnMessage.
-    void HandleMessage(S_ControlMessage *message);      // 0x0066cc50
+    void HandleMessage(S_ControlMessage *message);      // 0x0066cc50 (DS 0x006a53d0)
     // The queued messages handled, the first first (those posted meanwhile too).
     void HandleMessages();                              // 0x0066ca70
     // The control with the id in its screen (by its top 6 bits; none, id 0: null).

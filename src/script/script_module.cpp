@@ -475,16 +475,20 @@ void C_ScriptModule::StopMission(bool server)
 void C_ScriptModule::RestartMission(bool /*server*/)
 {
     g_scriptModuleRestarting = true;
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (g_gameRole & GAME_ROLE_CLIENT)
         StopMission(false);
+#endif
     if (g_gameRole & GAME_ROLE_SERVER) {
         StopMission(true);
         RestoreSaveGameValues();
         if (g_gameRole & GAME_ROLE_SERVER)
             StartMission(true);
     }
+#ifndef HD2_DEDICATED   // the server has only the server's side
     if (g_gameRole & GAME_ROLE_CLIENT)
         StartMission(false);
+#endif
     g_scriptModuleRestarting = false;
 }
 
