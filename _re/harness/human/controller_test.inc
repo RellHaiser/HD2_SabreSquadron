@@ -251,9 +251,23 @@ bool C_WireCut::Cut(const S_vector &dir, bool hide)
     Log(this, "WireCut", {dir.x, dir.y, dir.z, double(hide)});
     return g_cs.answer;
 }
+// (The owner loses the item in the hands, as the game's does: the worn hands container of part 21.)
+int g_minesCreated = 0;
+void TakeHandsItem() { g_wornContainers[ITEM_CONTAINER_HANDS].item = nullptr; }
+// (The hands container is shared: what the port's CreateMine took is put back before the original runs, by ToOriginal.)
+void *g_handsItemBefore = nullptr;
+void (*g_toOriginalBeforeHands)() = nullptr;
+void HandsToOriginal()
+{
+    if (g_toOriginalBeforeHands)
+        g_toOriginalBeforeHands();
+    g_wornContainers[ITEM_CONTAINER_HANDS].item = g_handsItemBefore;
+}
 void C_TemporaryActorsList::CreateMine(C_Human *owner, int itemId, const S_vector &pos, const S_vector &dir, bool send)
 {
     Log(owner, "CreateMine", {double(itemId), pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, double(send)});
+    ++g_minesCreated;
+    TakeHandsItem();
 }
 // The first-person view, the interface, the visual, the items, the network, the game, the sound, the speech.
 S_vector4 C_FirstPersonView::GetAimDir() const
@@ -400,6 +414,29 @@ int CT_ DF_GetBehaviour(void *self)
 void *g_defVt[64];
 
 // ---- each side's controller
+// (UseMedkit logged while g_fakeMedkit: part 23c's interactions; the real one in part 23d. The original's: its
+// vtable's slot 0x14 switched alike.)
+bool g_fakeMedkit = false;
+struct S_TestController : C_HumanController {
+    using C_HumanController::C_HumanController;
+    bool UseMedkit(int humanId, int itemUid) override
+    {
+        if (!g_fakeMedkit)
+            return C_HumanController::UseMedkit(humanId, itemUid);
+        Log(this, "UseMedkit", {double(humanId), double(itemUid)});
+        return true;
+    }
+};
+uint32_t CT_ OC_UseMedkit(void *self, int humanId, int itemUid)
+{
+    Log(self, "UseMedkit", {double(humanId), double(itemUid)});
+    return true;
+}
+void FakeMedkit(bool on)
+{
+    g_fakeMedkit = on;
+    OriginalAt<void **>(0x00810fb8)[0x14 / 4] = on ? reinterpret_cast<void *>(OC_UseMedkit) : OriginalAt<void *>(0x00588aa0);
+}
 C_HumanController *g_pc;                                // the port's (its class)
 uint8_t *g_oc;                                          // the original's (0xC0 bytes)
 C_HumanController *g_pc2;                               // another one (Attach's previous)
@@ -419,6 +456,9 @@ void *ToOrig(const void *p)
         return g_oc;
     if (p == g_pc2)
         return g_oc2;
+    for (const auto &pq : g_extraPointers)
+        if (pq.first == p)
+            return pq.second;
     return const_cast<void *>(p);
 }
 // The port's controller copied into the original's layout (the message vectors emptied on both sides).
@@ -606,7 +646,7 @@ void SetUpController()
     for (auto &def : g_wornDefs)
         *reinterpret_cast<void ***>(def) = g_defVt;
     // The controllers.
-    g_pc = new C_HumanController(HUMAN_CONTROLLER_PLAYER);
+    g_pc = new S_TestController(HUMAN_CONTROLLER_PLAYER);
     g_pc2 = new C_HumanController(HUMAN_CONTROLLER_SQUAD);
     typedef void(CT_ *T_Ctor)(void *, int);
     g_oc = static_cast<uint8_t *>(OC_AlignedNew(0xC0, 16));
@@ -1062,6 +1102,446 @@ void TestControllerControls()
     }
 }
 
+// ---- part 23c: the interactions and commands
+
+
+// The actors the commands find by id (100 + the kind; the human: the other one): each side its own object, the
+// original's type, id, frame and temporary flag at its offsets, one vtable each side (the seats' blocking logged).
+struct S_ActorKind {
+    const char *name;
+    int type;
+    bool temporary;
+};
+const S_ActorKind ACTOR_KINDS[] = {
+    {"door", ACTOR_DOOR, false},           {"mine", ACTOR_MINE, true},
+    {"explosive", ACTOR_EXPLOSIVE_PLACE, false}, {"carActor", ACTOR_CAR, false},
+    {"submarine", ACTOR_SUBMARINE, false}, {"staticWeapon", ACTOR_STATIC_WEAPON, false},
+    {"ju88", ACTOR_JUNKERS88, false},      {"radio", ACTOR_RADIO, false},
+    {"switch", ACTOR_SWITCH, false},       {"photoPlace", ACTOR_PHOTO_PLACE, false},
+    {"documents", ACTOR_DOCUMENT_PLACE, false}, {"wireCut", ACTOR_WIRE_CUT, true},
+};
+constexpr int ACTOR_KIND_COUNT = 12;
+constexpr int KIND_HUMAN = 12;                          // (the other human)
+alignas(16) uint8_t g_actPort[ACTOR_KIND_COUNT][0x400], g_actOrig[ACTOR_KIND_COUNT][0x400];
+void *g_actPortVt[200], *g_actOrigVt[200];
+bool g_seatBlocked = false;
+uint32_t CT_ AC_IsSeatBlocked(void *self, int seat)
+{
+    Log(self, "IsSeatBlocked", {double(seat)});
+    return g_seatBlocked;
+}
+uint32_t CT_ AC_SetSeatBlocked(void *self, int seat, int blocked)
+{
+    Log(self, "SetSeatBlocked", {double(seat), double(B(blocked))});
+    return true;
+}
+void *PortActor(int kind) { return kind == KIND_HUMAN ? static_cast<void *>(g_portOther) : g_actPort[kind]; }
+void *OrigActor(int kind) { return kind == KIND_HUMAN ? static_cast<void *>(g_origOther) : g_actOrig[kind]; }
+// By id: 100 + the kind; others none.
+C_Actor *PortActorById(int id, bool original)
+{
+    const int kind = id - 100;
+    if (kind < 0 || kind > KIND_HUMAN)
+        return nullptr;
+    return static_cast<C_Actor *>(original ? OrigActor(kind) : PortActor(kind));
+}
+void *CT_ OC_GetActorById(void *self, int id)
+{
+    Log(self, "GetActorById", {double(id)});
+    return PortActorById(id, true);
+}
+C_Actor *PortTemporaryById(int id) { return PortActorById(id, false); }
+void *CT_ OC_FindActor(void *self, int id)
+{
+    Log(self, "FindTemporaryActor", {double(id)});
+    return PortActorById(id, true);
+}
+// Each side's offsets of the fields the commands read (the port's found through the inline getters).
+size_t g_doorKeyAt, g_explosiveStateAt, g_photoAt;
+template <class F> size_t ProbeOffset(uint8_t *bytes, size_t size, F read)
+{
+    for (size_t off = 4; off + 4 <= size; off += 4) {
+        std::memset(bytes, 0, size);
+        const int marker = 0x5A;
+        std::memcpy(bytes + off, &marker, 4);
+        if (read() == marker)
+            return off;
+    }
+    return 0;
+}
+// The other actors' fakes on the original's side.
+uint32_t CT_ OA_DoorLockB(void *self, int key)
+{
+    Log(self, "DoorLock", {double(key)});
+    return g_cs.answer;
+}
+uint32_t CT_ OA_DoorUnlock(void *self, int key)
+{
+    Log(self, "DoorUnlock", {double(key)});
+    return g_cs.answer;
+}
+void CT_ OA_DoorPickLock(void *self) { Log(self, "DoorPickLock"); }
+void CT_ OA_DoorSetState(void *self, int action, int autoClose, int linked, int force)
+{
+    Log(self, "DoorSetState", {double(action), double(B(autoClose)), double(B(linked)), double(force)});
+}
+uint32_t CT_ OA_ExplosivePlace(void *self, void *human)
+{
+    Log(self, ("ExplosivePlace " + NameOf(human)).c_str());
+    return g_cs.answer;
+}
+uint32_t CT_ OA_ExplosiveDisarm(void *self, void *human)
+{
+    Log(self, ("ExplosiveDisarm " + NameOf(human)).c_str());
+    return g_cs.answer;
+}
+void CT_ OA_MineDefuse(void *self) { Log(self, "MineDefuse"); }
+uint32_t CT_ OA_RadioUse(void *self, void *human)
+{
+    Log(self, ("RadioUse " + NameOf(human)).c_str());
+    return g_cs.answer;
+}
+void CT_ OA_SwitchToggle(void *self) { Log(self, "SwitchToggle"); }
+uint32_t CT_ OA_DocumentsDeliver(void *self, void *human)
+{
+    Log(self, ("DocumentsDeliver " + NameOf(human)).c_str());
+    return g_cs.answer;
+}
+uint32_t CT_ OA_WireCut(void *self, const S_vector *dir, int hide)
+{
+    Log(self, "WireCut", {dir->x, dir->y, dir->z, double(B(hide))});
+    return g_cs.answer;
+}
+uint32_t CT_ OA_CarHasEnemyAboard(void *self, void *human)
+{
+    Log(self, ("CarHasEnemyAboard " + NameOf(human)).c_str());
+    return g_cs.answer;
+}
+uint32_t CT_ OA_CarIsDestroyed(void *self)
+{
+    Log(self, "CarIsDestroyed");
+    return !g_cs.answer;
+}
+uint32_t CT_ OA_CarPlaceCharge(void *self, void *item, void *human, const S_vector4 *pos, const S_vector4 *normal)
+{
+    Log(self, ("CarPlaceCharge " + NameOf(item) + " " + NameOf(human)).c_str(), {pos->x, pos->y, pos->z, normal->x, normal->y, normal->z});
+    return g_cs.answer;
+}
+uint32_t CT_ OA_CarAttachCharge(void *self, void *item, void *human, const S_vector4 *pos, const S_vector4 *normal)
+{
+    Log(self, ("CarAttachCharge " + NameOf(item) + " " + NameOf(human)).c_str(), {pos->x, pos->y, pos->z, normal->x, normal->y, normal->z});
+    return g_cs.answer;
+}
+uint32_t CT_ OA_CarRayTest(void *self, const S_vector4 *from, const S_vector *dir, S_vector4 *pos, S_vector4 *normal)
+{
+    Log(self, "CarRayTest", {from->x, from->y, from->z, dir->x, dir->y, dir->z});
+    *pos = {from->x + dir->x * 0.5f, from->y + dir->y * 0.5f, from->z + dir->z * 0.5f, 1.0f};
+    *normal = {0.0f, 1.0f, 0.0f, 0.0f};
+    return g_cs.rayHit;
+}
+void CT_ OA_CreateMineT(void *, void *owner, int itemId, const S_vector *pos, const S_vector *dir, int send)
+{
+    Log(owner, "CreateMine", {double(itemId), pos->x, pos->y, pos->z, dir->x, dir->y, dir->z, double(B(send))});
+    TakeHandsItem();
+}
+void *CT_ OA_ItemGetFrame(void *self, int index)
+{
+    Log(self, "ItemGetFrame", {double(index)});
+    return g_cs.itemFrame;
+}
+void CT_ OA_ShowPhotoFlash(void *) { Log(nullptr, "ShowPhotoFlash"); }
+void CT_ OA_VisualSetPosition(void *self, const S_vector4 *pos) { LogV(self, "VisualSetPosition", &pos->x, 4); }
+void *CT_ OA_FindItem(void *self, int typeId, int *container)
+{
+    Log(self, "FindItem", {double(typeId), double(container != nullptr)});
+    if (container)
+        *container = 4;
+    return g_cs.found;
+}
+void *CT_ OA_FindWireCutter(void *self)
+{
+    Log(self, "FindWireCutter");
+    return g_cs.found;
+}
+alignas(16) uint8_t g_interfaceBytes[0x40];
+// The temporary actors' list (the mine and the wire cut in it, or not): the port's vector in its raw storage, the
+// original's (an allocator word, first, last, end) at +0x0C.
+void *g_tempPort[4], *g_tempOrig[4];
+void SetTemporaryActors(bool mine, bool wire)
+{
+    int n = 0;
+    if (mine) {
+        g_tempPort[n] = g_actPort[1];
+        g_tempOrig[n++] = g_actOrig[1];
+    }
+    if (wire) {
+        g_tempPort[n] = g_actPort[11];
+        g_tempOrig[n++] = g_actOrig[11];
+    }
+    auto *portVector = const_cast<std::vector<C_Actor *> *>(&g_temporaryActors.GetActors());
+    void **words = reinterpret_cast<void **>(portVector);
+    words[0] = g_tempPort;
+    words[1] = words[2] = g_tempPort + n;
+    // (UpdateInteraction reads its first and last at 0x0089b5f0 / 0x0089b5f4.)
+    void **orig = OriginalAt<void **>(0x0089b5f0);
+    orig[0] = g_tempOrig;
+    orig[1] = orig[2] = g_tempOrig + n;
+}
+
+// The network track's target (CLIMB: a client's copy of another player starts there): the port's slot, the
+// original's 0x2C.
+S_vector4 g_trackTarget = {1.0f, 2.0f, 3.0f, 1.0f};
+I3D_frame *g_mineBodyFrame;
+const S_vector4 *CT_ TR_GetTarget(void *self)
+{
+    Log(self, "TrackGetTarget");
+    return &g_trackTarget;
+}
+
+void SetUpInteractions()
+{
+    {
+        S_quat none;
+        none.Identity();
+        g_mineBodyFrame = NewFrame(FRAME_DUMMY, "body", S_vector(10, 1, 10), none, Box(S_vector(0.05f, 0.05f, 0.05f)), "",
+                                   g_sector);
+    }
+    g_portTrackVt[VSlot(&C_NetTrack::GetTarget)] = reinterpret_cast<void *>(TR_GetTarget);
+    g_origTrackVt[0x2C / 4] = reinterpret_cast<void *>(TR_GetTarget);
+    // (The port's C_Human::GetViewDir is part 21's fake: the original's answers the same.)
+    RedirectOriginal(0x005a80e0, FAKE(OH_GetViewDir));
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x00475d50, FAKE(OC_GetActorById)},
+        {0x004772f0, FAKE(OC_FindActor)},
+        {0x005ff650, FAKE(OA_DoorLockB)},
+        {0x005ff5f0, FAKE(OA_DoorUnlock)},
+        {0x005ff6c0, FAKE(OA_DoorPickLock)},
+        {0x005ff4b0, FAKE(OA_DoorSetState)},
+        {0x0060d6f0, FAKE(OA_ExplosivePlace)},
+        {0x0060d9f0, FAKE(OA_ExplosiveDisarm)},
+        {0x005feee0, FAKE(OA_MineDefuse)},
+        {0x0060b4c0, FAKE(OA_RadioUse)},
+        {0x00613640, FAKE(OA_SwitchToggle)},
+        {0x0060e9b0, FAKE(OA_DocumentsDeliver)},
+        {0x005e2510, FAKE(OA_WireCut)},
+        {0x004dde20, FAKE(OA_CarHasEnemyAboard)},
+        {0x004ddcf0, FAKE(OA_CarIsDestroyed)},
+        {0x004dead0, FAKE(OA_CarPlaceCharge)},
+        {0x004deb50, FAKE(OA_CarAttachCharge)},
+        {0x004dec60, FAKE(OA_CarRayTest)},
+        {0x00478b90, FAKE(OA_CreateMineT)},
+        {0x007d3f00, FAKE(OA_ItemGetFrame)},
+        {0x0049f5d0, FAKE(OA_ShowPhotoFlash)},
+        {0x0075a280, FAKE(OA_VisualSetPosition)},
+        {0x005a78f0, FAKE(OA_FindItem)},
+        {0x005a7ed0, FAKE(OA_FindWireCutter)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    g_actorById = PortActorById;
+    g_temporaryById = PortTemporaryById;
+    g_names[&g_temporaryActors] = g_names[OriginalAt<void *>(0x0089b5d0)] = "temporaryActors";
+    g_names[&g_actorsModule] = g_names[OriginalAt<void *>(0x0089b4b0)] = "actorsModule";
+    g_names[g_interfaceBytes] = "interface";
+    for (int i = 0; i < 200; ++i)
+        g_actPortVt[i] = g_actOrigVt[i] = reinterpret_cast<void *>(CT_Unexpected);
+    g_actPortVt[VSlot(&C_Actor::IsSeatBlocked)] = reinterpret_cast<void *>(AC_IsSeatBlocked);
+    g_actPortVt[VSlot(&C_Actor::SetSeatBlocked)] = reinterpret_cast<void *>(AC_SetSeatBlocked);
+    g_actOrigVt[0x6C / 4] = reinterpret_cast<void *>(AC_IsSeatBlocked);
+    g_actOrigVt[0x70 / 4] = reinterpret_cast<void *>(AC_SetSeatBlocked);
+    // The port's offsets of the door's key, the explosive place's state, the photo place's flag.
+    g_doorKeyAt = ProbeOffset(g_actPort[0], 0x400, [] { return reinterpret_cast<C_Door *>(g_actPort[0])->GetLockKey(); });
+    g_explosiveStateAt =
+        ProbeOffset(g_actPort[2], 0x400, [] { return reinterpret_cast<C_ExplosivePlace *>(g_actPort[2])->GetState(); });
+    // (A byte: probed byte by byte.)
+    for (size_t off = 4; off < 0x400 && !g_photoAt; ++off) {
+        std::memset(g_actPort[9], 0, 0x400);
+        g_actPort[9][off] = 1;
+        if (reinterpret_cast<C_PhotoPlace *>(g_actPort[9])->GetState())
+            g_photoAt = off;
+    }
+    CHECK(g_doorKeyAt && g_explosiveStateAt && g_photoAt);
+    for (int k = 0; k < ACTOR_KIND_COUNT; ++k) {
+        std::memset(g_actPort[k], 0, 0x400);
+        std::memset(g_actOrig[k], 0, 0x400);
+        auto *a = reinterpret_cast<C_Actor *>(g_actPort[k]);
+        *reinterpret_cast<void ***>(g_actPort[k]) = g_actPortVt;
+        *reinterpret_cast<void ***>(g_actOrig[k]) = g_actOrigVt;
+        a->m_type = static_cast<E_ActorType>(ACTOR_KINDS[k].type);
+        a->m_netId = 100 + k;
+        a->m_frame = g_targetFrame;
+        a->m_temporary = ACTOR_KINDS[k].temporary;
+        std::memcpy(g_actOrig[k] + 0x18, &ACTOR_KINDS[k].type, 4);
+        const int id = 100 + k;
+        std::memcpy(g_actOrig[k] + 0x10, &id, 4);
+        std::memcpy(g_actOrig[k] + 0x20, &g_targetFrame, 4);
+        g_actOrig[k][0x1C] = ACTOR_KINDS[k].temporary;
+        g_names[g_actPort[k]] = g_names[g_actOrig[k]] = ACTOR_KINDS[k].name;
+        g_extraPointers.push_back({g_actPort[k], g_actOrig[k]});
+    }
+}
+
+// The interactions' state: the human and the other one (health, a medkit's stats), the actors' fields (each side's
+// offsets), the temporary actors, the controller's interaction and its target, the game's interface.
+const int COMMAND_TYPES[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x0E, 0x0F, 0x10, 0x11, 0x13,
+                             0x14, 0x1B, 0x1C, 0x1E, 0x1F, 0x22, 0x23, 0x24, 0x26, 0x07, 0x30};
+void RandomInteractions()
+{
+    RandomController();
+    C_Human *h = g_h.human;
+    PortOther()->m_netId = 112;
+    const int otherId = 112;
+    std::memcpy(g_origOther + 0x10, &otherId, 4);
+    PortOther()->m_frame = g_targetFrame;
+    std::memcpy(g_origOther + 0x20, &g_targetFrame, 4);
+    // (Its controller part 20's logged one on each side: KnockOut calls it.)
+    PortOther()->m_controller = reinterpret_cast<C_HumanController *>(g_portController);
+    void *origController = g_origController;
+    std::memcpy(g_origOther + 0xB0, &origController, 4);
+    g_targetFrame->SetPos(S_vector(U(-3, 3), U(-1, 3), U(-3, 3)));
+    for (int k = 0; k < 2; ++k) {
+        // (Health 0 or less ends some interactions; the tested human's too.)
+        const int health = P(0.2f) ? I(-5, 1) : I(1, 100);
+        if (k == 0)
+            h->m_stats[STAT_HEALTH] = health;
+        else
+            PortOther()->m_stats[STAT_HEALTH] = health, std::memcpy(g_origOther + 0xEC, &health, 4);
+    }
+    const int key = P(0.3f) ? -1 : I(0, 300);
+    std::memcpy(g_actPort[0] + g_doorKeyAt, &key, 4);
+    std::memcpy(g_actOrig[0] + 0x230, &key, 4);
+    const int state = I(0, 2);
+    std::memcpy(g_actPort[2] + g_explosiveStateAt, &state, 4);
+    std::memcpy(g_actOrig[2] + 0x94, &state, 4);
+    g_actPort[9][g_photoAt] = 0;
+    g_actOrig[9][0x91] = 0;
+    SetTemporaryActors(P(0.7f), P(0.7f));
+    g_seatBlocked = P(0.3f);
+    g_cs.answer = P(0.6f);
+    g_cs.rayHit = P(0.7f);
+    g_cs.found = P(0.3f) ? nullptr : reinterpret_cast<C_Item *>(g_wornItems[I(0, 15)]);
+    g_cs.itemFrame = P(0.5f) ? g_targetFrame : nullptr;
+    g_cs.climbState = P(0.7f) ? 0 : 1;
+    g_cs.workState5 = P(0.2f);
+    g_behaviour = P(0.4f) ? (P(0.5f) ? ITEM_BEHAVIOUR_MINE : ITEM_BEHAVIOUR_STICKY_CHARGE) : I(0, 12);
+    g_firstPerson = P(0.5f);
+    void *ui = g_interfaceBytes;
+    GetGame()->m_interface = static_cast<C_Interface *>(ui);
+    std::memcpy(g_origGame + 0x58, &ui, 4);
+    // (Turned and scaled: the mine goes along its forward axis, normalized.)
+    const float scale = P(0.5f) ? 1.0f : U(0.7f, 1.4f);
+    g_mineBodyFrame->m_scale = S_vector(scale, scale, scale);
+    S_quat turn;
+    turn.Make(S_vector(0, 1, 0), U(-3.1f, 3.1f));
+    g_mineBodyFrame->SetRot(turn);
+    g_mineBodyFrame->SetPos(S_vector(U(5, 60), U(0.6f, 1.8f), U(5, 60)));
+    h->m_bodyFrame = g_mineBodyFrame;
+    h->m_carried = P(0.3f) ? reinterpret_cast<C_Actor *>(g_portOther) : nullptr;
+    // The vehicle: none or one of the actors (a car, a submarine, a static weapon, a Ju 88, a door).
+    static const int vehicles[] = {3, 4, 5, 6, 0};
+    h->m_vehicle = P(0.5f) ? nullptr : static_cast<C_Actor *>(PortActor(vehicles[I(0, 4)]));
+    h->m_seat = I(0, 3);
+    // The interaction going on and its target (kinds the original survives: see the tests).
+    g_pc->m_interactionTime = P(0.3f) ? I(-5, 0) : I(1, 5000);
+    g_pc->m_interactionArg = I(-1, 40);
+}
+void SetInteraction(int interaction, int kind)
+{
+    g_pc->m_interaction = interaction;
+    g_pc->m_interactionTarget = kind < 0 ? nullptr : kind == 99 ? g_h.human : static_cast<C_Actor *>(PortActor(kind));
+}
+
+void TestControllerInteractions()
+{
+    C_Human *h = g_h.human;
+    std::printf("controller interactions\n");
+    FakeMedkit(true);
+    g_toOriginalBeforeHands = g_toOriginalExtra;
+    g_toOriginalExtra = HandsToOriginal;
+    // The interactions and the kinds of their targets (-1 none, 99 the human itself).
+    struct S_Interaction {
+        int type;
+        int kind;
+        bool nullTarget;                                // EndInteraction survives it in the original
+        bool nullUpdate;                                // UpdateInteraction likewise
+    };
+    static const S_Interaction interactions[] = {
+        {0x02, 1, true, true},  {0x03, 9, true, true},  {0x04, 2, true, false}, {0x0E, 0, true, true},
+        {0x0F, KIND_HUMAN, true, false}, {0x10, 11, true, true}, {0x11, -1, true, true}, {0x13, KIND_HUMAN, false, false},
+        {0x23, 99, true, false}, {0x24, KIND_HUMAN, true, true}, {0x26, 2, true, false}, {0x1B, 0, true, true},
+        {-1, -1, true, true},   {0x00, 0, true, true},  {0x01, 0, true, true},
+    };
+    for (int i = 0; i < 60000 / QUICK; ++i) {
+        RandomInteractions();
+        const S_Interaction &in = interactions[I(0, 14)];
+        const int which = i % 6;
+        const bool update = which == 1;
+        const bool allowNull = update ? in.nullUpdate : in.nullTarget;
+        SetInteraction(in.type, allowNull && P(0.2f) ? -1 : in.kind);
+        g_handsItemBefore = g_wornContainers[ITEM_CONTAINER_HANDS].item;
+        switch (which) {
+        case 0: {
+            const bool completed = P(0.6f);
+            ControllerCall("EndInteraction", [&] { g_pc->EndInteraction(completed); return 0; },
+                           [&](void *) { OCtl<void>(0x00584e30, int(completed)); return 0; });
+            break;
+        }
+        case 1: {
+            const int time = P(0.3f) ? g_pc->m_interactionTime + I(-1, 1) : I(0, 3000);
+            ControllerCall("UpdateInteraction", [&] { g_pc->UpdateInteraction(time); return 0; },
+                           [&](void *) { OCtl<void>(0x00588010, time); return 0; });
+            break;
+        }
+        case 2:
+            ControllerCall("LeaveVehicle", [&] { g_pc->LeaveVehicle(); return 0; }, [&](void *) { OCtl<void>(0x00585a60); return 0; });
+            break;
+        case 3:
+            ControllerCall("RequestLeaveVehicle", [&] { g_pc->RequestLeaveVehicle(); return 0; },
+                           [&](void *) { OCtl<void>(0x00588c20); return 0; });
+            break;
+        default: {
+            S_HumanCommand command;
+            command.category = I(0, 3);
+            command.type = COMMAND_TYPES[I(0, 22)];
+            command.param1 = P(0.15f) ? I(0, 99) : 100 + I(0, KIND_HUMAN);
+            command.param2 = I(0, 3);
+            // (What the original does not survive, the port checks: a missing door on the server, a missing hands
+            // item laying a mine on the server, a missing document place on the server.)
+            const bool server = (g_gameRole & 1) != 0;   // (the original's test)
+            if ((command.type <= 1 || command.type == 0x22) && server && (command.param1 < 100))
+                command.param1 = 100 + (command.type == 0x22 ? 10 : 0);
+            if (command.type == 0x11 && server) {
+                h->m_containers = g_wornTable;
+                g_wornContainers[ITEM_CONTAINER_HANDS].item = g_wornItems[ITEM_CONTAINER_HANDS];
+            }
+            g_handsItemBefore = g_wornContainers[ITEM_CONTAINER_HANDS].item;
+            // (The original's command is polymorphic: its vtable 0x0080f720 first.)
+            uint32_t origCommand[5] = {static_cast<uint32_t>(reinterpret_cast<uintptr_t>(OriginalAt<void *>(0x0080f720))),
+                                       uint32_t(command.category), uint32_t(command.type), uint32_t(command.param1),
+                                       uint32_t(command.param2)};
+            if (which == 5)
+                ControllerCall("IssueCommand", [&] { g_pc->IssueCommand(command); return 0; },
+                               [&](void *) { OCtl<void>(0x00587540, origCommand); return 0; });
+            else if (command.type == 0x03 && P(0.5f))
+                ControllerCall("UseActor", [&] { return int(g_pc->UseActor(command)); },
+                               [&](void *) { return int(OCtl<uint32_t>(0x00585d10, origCommand) & 0xFF); });
+            else
+                ControllerCall("ExecuteCommand", [&] { return int(g_pc->ExecuteCommand(command)); },
+                               [&](void *) { return int(OCtl<uint32_t>(0x00586200, origCommand) & 0xFF); });
+            break;
+        }
+        }
+        // The photo place's flag (TakePhoto) alike, the other human's action bar.
+        CHECK(g_actPort[9][g_photoAt] == g_actOrig[9][0x91]);
+        CHECK(PortOther()->m_actionTime == *reinterpret_cast<const int *>(g_origOther + 0x17C));
+        CHECK(PortOther()->m_actionTotal == *reinterpret_cast<const int *>(g_origOther + 0x180));
+        CHECK(PortOther()->m_actionText == *reinterpret_cast<const int *>(g_origOther + 0x184));
+    }
+    FakeMedkit(false);
+    g_toOriginalExtra = g_toOriginalBeforeHands;
+    std::printf("  mines laid: %d\n", g_minesCreated);
+}
+
 void TestController()
 {
     SetUpCombat();
@@ -1077,6 +1557,10 @@ void TestController()
         RedirectOriginal(0x004d9050, FAKE(OV_CarApplyControls));
         RedirectOriginal(0x005e0dd0, FAKE(OV_SubmarineSetControls));
         TestControllerControls();
+    }
+    if (run("23c")) {
+        SetUpInteractions();
+        TestControllerInteractions();
     }
 }
 

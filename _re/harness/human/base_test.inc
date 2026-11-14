@@ -500,7 +500,12 @@ C_Actor *C_ActorsModule::GetActorById(int id) const
     Log(this, "GetActorById", {double(id)});
     return g_actorById ? g_actorById(id, false) : nullptr;
 }
-C_Actor *C_TemporaryActorsList::FindActor(int id) const { Log(this, "FindTemporaryActor", {double(id)}); return nullptr; }
+C_Actor *(*g_temporaryById)(int id) = nullptr;   // what FindActor answers (null: nothing; part 23c's)
+C_Actor *C_TemporaryActorsList::FindActor(int id) const
+{
+    Log(this, "FindTemporaryActor", {double(id)});
+    return g_temporaryById ? g_temporaryById(id) : nullptr;
+}
 bool C_game::IsFirstPersonView() const { return g_firstPerson; }
 void SendExplosionMessage(const S_vector &pos, int material) { Log(nullptr, "SendExplosionMessage", {pos.x, pos.y, pos.z, double(material)}); }
 void SurfaceMarks_Clear() { Log(nullptr, "SurfaceMarks_Clear"); }

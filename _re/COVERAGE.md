@@ -2257,3 +2257,39 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** I called the original's EncodeControlBits as the port's (returning the bits); it
   writes them through a second argument and pops two, so the call unbalanced the stack and overwrote the test's own
   locals: the crash looked like a null vehicle until the locals were printed.
+
+## Human part 23c (the controller's interactions and commands, `human_controller.cpp`, 2026-11-14)
+
+- **The build:** part 23b's. Added:
+  - the actors the commands find by id (100 + the kind: a door, a mine, an explosive place, a car, a submarine, a
+    static weapon, a Ju 88, a radio, a switch, a photo place, a document place, a wire cut, and the other human):
+    each side its own object, the type, id, frame and temporary flag at its offsets, one vtable each side (the seats'
+    blocking logged), mapped by ToOriginal; the door's key, the explosive place's state and the photo place's flag at
+    each side's offsets (the port's found through the inline getters);
+  - GetActorById and the temporary list's FindActor answering them on both sides; the temporary actors' vector in
+    both layouts (the original's at 0x0089b5f0);
+  - their members logged on both sides (doors, mines, explosive and document places, radios, switches, wire cuts, the
+    car's charges and ray), CreateMine (taking the item from the hands, as the game's does: put back by ToOriginal
+    before the original runs, the container being shared), the item's GetFrame, the photo flash, the visual's
+    position, FindItem, FindWireCutter, the network track's GetTarget;
+  - UseMedkit logged on both sides (a test class on the port's, the original's vtable slot 0x14): part 23d tests it;
+  - the original's commands in its own layout (its S_HumanCommand is polymorphic: a vtable first);
+  - a body frame over the ground, turned and scaled (the mine's ray down).
+- **The tests (60,000, all exact):** EndInteraction (each interaction, completed or not, a server or a client, no
+  target where the original survives it), UpdateInteraction (the actor gone, the place's state changed, a human's
+  health gone, the time running out at its edge), LeaveVehicle (each vehicle kind, a carried body, a network game),
+  RequestLeaveVehicle, IssueCommand, UseActor, ExecuteCommand (every command type and some unknown, actors of every
+  kind or none, seats blocked or not, a server or a client, lying or not, a medkit's uid); after each, the photo
+  place's flag and the other human's action bar.
+- **Kept out:** what the original does not survive and the port checks: a missing door locked on the server, a mine laid
+  without a hands item on the server, a missing document place, an interaction's missing target where the original
+  reads it.
+- **Port fixes:** none.
+- **Results:** lines: 100 % of these functions' 326.
+- **Mutations** (`human/mutations/mutate_controller3.py`): 227 mutants (166 generated, 61 for repeated lines); 208
+  killed, 14 not building, 5 survived (equivalent: listed there).
+- **Harness lessons (my mistakes):** I passed the original commands in the port's layout (it read the type from the
+  wrong word); I took the original's actors module and temporary list addresses from guesses and a header comment,
+  both wrong; the other humans held different controllers on the two sides; my CreateMine fake emptied the shared
+  hands container before the original ran, which looked like the original's ray missing; another heredoc collapsed a
+  backslash (caught by the script's assert).
