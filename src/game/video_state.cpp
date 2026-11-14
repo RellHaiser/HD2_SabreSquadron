@@ -78,6 +78,10 @@ const char *NodeFile(const C_CampaignVideo *video) { return video->GetFileName()
 
 bool C_VideoState::Start(void *arg)
 {
+#ifdef HD2_DEDICATED   // no videos on the server: the server's copy only returns true
+    (void)arg;
+    return true;
+#else
     // (The original's copy protection is left out.)
     m_video = static_cast<C_CampaignVideo *>(arg);
     m_textStyle = g_gameProfile.UsesUnicodeFont() ? SUBTITLE_UNICODE_STYLE : SUBTITLE_STYLE;
@@ -137,10 +141,14 @@ bool C_VideoState::Start(void *arg)
     }
     m_state = GAME_STATE_RUNNING;
     return true;
+#endif
 }
 
 bool C_VideoState::Stop()
 {
+#ifdef HD2_DEDICATED   // no videos on the server
+    return true;
+#else
     IGraph *graph = GetIGraph();
 #ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
     for (int i = 0; i < 3; ++i) {
@@ -176,10 +184,14 @@ bool C_VideoState::Stop()
     delete m_box;
     m_box = nullptr;
     return true;
+#endif
 }
 
 bool C_VideoState::HandleInput(float *, float *)
 {
+#ifdef HD2_DEDICATED   // no videos on the server
+    return true;
+#else
 #ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
     const int key = GetIGraph()->GetAsciiKey();
 #else
@@ -195,6 +207,7 @@ bool C_VideoState::HandleInput(float *, float *)
         m_state = GAME_STATE_ENDED;
     }
     return true;
+#endif
 }
 
 void C_VideoState::Update(int timeDelta)
@@ -502,9 +515,11 @@ bool C_MovieState::Play(const char *fileName, int sequence)
 
 bool C_MovieState::Stop()
 {
+#ifndef HD2_DEDICATED   // no videos on the server (its copy keeps the node)
     C_VideoState::Stop();
     delete m_video;
     m_video = nullptr;
+#endif
     return true;
 }
 

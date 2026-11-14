@@ -681,6 +681,12 @@ void C_SoundModule::ReleaseSlotSound(S_SoundSlot *slot)
 
 int C_SoundModule::Play(const S_SoundRequest &request)
 {
+#ifdef HD2_DEDICATED   // the server plays nothing; its AI listeners hear the request itself
+    // (The original also returns -1 at once for a null request.)
+    if (IsServer() && !(request.flags & SOUND_SILENT_TO_AI))
+        NotifyListenersForRequest(request);
+    return -1;
+#else
     I3D_scene *scene = GetGame()->GetScene();
     S_vector soundPos = request.pos;
     if (request.attachTo)
@@ -839,6 +845,7 @@ int C_SoundModule::Play(const S_SoundRequest &request)
         return -1;
     }
     return index;
+#endif
 }
 
 int C_SoundModule::PlayTableSound(void *owner, const S_SoundRequest &request)
@@ -1081,6 +1088,15 @@ bool C_SoundModule::NotifyListenersForRequest(const S_SoundRequest &request)    
 bool C_SoundModule::PlayDubbing(C_Human *owner, I3D_frame *frame, int dubbing, float nearRange, float farRange,
                                 bool showSubtitle)
 {
+#ifdef HD2_DEDICATED   // no speech on the server
+    (void)owner;
+    (void)frame;
+    (void)dubbing;
+    (void)nearRange;
+    (void)farRange;
+    (void)showSubtitle;
+    return false;
+#else
     if (!IsClient())
         return false;
     if (!dubbing) {
@@ -1095,11 +1111,22 @@ bool C_SoundModule::PlayDubbing(C_Human *owner, I3D_frame *frame, int dubbing, f
     const bool isActivePlayer = owner == g_teamManager.GetPlayerTeam()->GetActivePlayer();
     PlaySpeechSlot(slot, dubbing, nearRange, farRange, showSubtitle, isActivePlayer);
     return true;
+#endif
 }
 
 bool C_SoundModule::PlayDubbingWithNoise(C_Human *owner, I3D_frame *frame, int dubbing, float nearRange,
                                          float farRange, bool showSubtitle, uint32_t flags)
 {
+#ifdef HD2_DEDICATED   // no speech on the server (nor its noise: the client's copy returns first too)
+    (void)owner;
+    (void)frame;
+    (void)dubbing;
+    (void)nearRange;
+    (void)farRange;
+    (void)showSubtitle;
+    (void)flags;
+    return false;
+#else
     if (!IsClient())
         return false;
     if (!dubbing) {
@@ -1144,6 +1171,7 @@ bool C_SoundModule::PlayDubbingWithNoise(C_Human *owner, I3D_frame *frame, int d
         }
     }
     return true;
+#endif
 }
 
 void C_SoundModule::SetDopplerWobble(bool on)
@@ -1276,27 +1304,39 @@ void C_SoundModule::CrossfadeMusic(int track, int fadeTime, int position)
 
 int C_SoundModule::GetBackgroundMusicPosition() const
 {
+#ifdef HD2_DEDICATED   // no music on the server
+    return 0;
+#else
     int position = 0;
     if (m_music)
         m_music->GetPosition(&position);
     return position;
+#endif
 }
 
 float C_SoundModule::SetMusicVolume(float volume)
 {
+#ifdef HD2_DEDICATED   // no music on the server
+    (void)volume;
+#else
     if (IsClient()) {
         m_musicVolume = volume;
         if (IsMusicPlaying())
             m_music->SetVolume(m_musicFade * m_musicVolume);
     }
+#endif
     return m_musicVolume;
 }
 
 float C_SoundModule::SetMasterVolume(float volume)
 {
+#ifdef HD2_DEDICATED   // no sound device on the server
+    (void)volume;
+#else
     if (IsClient()) {
         m_masterVolume = volume;
         ISndGetDriver()->SetVolume(volume);
     }
+#endif
     return m_masterVolume;
 }

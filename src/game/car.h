@@ -681,7 +681,7 @@ private:
 class C_CarCreator : public C_ActorCreator {
 public:
     C_Actor *Create() override;                         // 0x004d04f0
-    const char *GetName() override { return "Car"; }    // 0x004d0560 (0x0083bdc8)
+    const char *GetName() override { return "Car"; }    // 0x004d0560 (DS 0x004bcd70) (0x0083bdc8)
     void Destroy(C_Actor *actor) override;              // 0x004d0570 (DS 0x004bcd90)
 };
 

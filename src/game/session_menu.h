@@ -46,7 +46,7 @@ public:
     // The console's text style made; its first step. True.
     bool OnStart(void *arg) override;                   // 0x40 0x0068a680
     void OnUpdate(int) override {}                      // 0x48 0x0068a730
-    bool OnRender() override { return false; }          // 0x50 0x0068a740
+    bool OnRender() override { return false; }          // 0x50 0x0068a740 (DS 0x006c7a10)
 
     // The console's screen tick (its own screen shown only, else false): a wait counted down by the
     // tick's time, else the step (the texts added to the console's; true).

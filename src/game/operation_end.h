@@ -33,7 +33,7 @@ public:
     // opened. True.
     bool BuildScreens() override;                       // 0x38 0x0068c0d0
     void OnStop() override {}                           // 0x3C 0x0068c050
-    bool OnStart(void *) override { return true; }      // 0x40 0x0068c040
+    bool OnStart(void *) override { return true; }      // 0x40 0x0068c040 (DS 0x006c9a00)
     // Escape or Space: the screen cleared, flipped, the state ended (the campaign's next step). True.
     bool OnInput(float *held, float *pressed) override; // 0x44 0x0068c070
 

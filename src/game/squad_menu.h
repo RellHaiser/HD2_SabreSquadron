@@ -50,7 +50,7 @@ public:
     // (Inline in C_GameApp::StartStep; the destructor is the base's: 0x006c1bb0.)
     C_SquadMenu() = default;
 
-    int GetTypeId() const override { return GAME_STATE_TYPE_SQUAD_MENU; }   // 0x1C 0x006c1ba0
+    int GetTypeId() const override { return GAME_STATE_TYPE_SQUAD_MENU; }   // 0x1C 0x006c1ba0 (DS 0x00707600)
 
     // Escape: on the selection screen closed, else asked whether to go back to the campaign's previous
     // screen. SQUAD_MSG_CONTINUE: the selected slot's soldier swapped into the first (the player's),

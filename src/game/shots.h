@@ -179,10 +179,10 @@ public:
     // Moves a client bullet towards its end (every frame); true when it arrived.
     bool TickClient(int timeDelta);                         // 0x0044ccb0
 
-    void Release() override;                                // 0x0044b380
+    void Release() override;                                // 0x0044b380 (DS 0x00467340)
     bool Tick(int timeDelta) override;                      // 0x0044b910 (DS 0x00467a20)
     void Update(int timeDelta) override;                    // 0x0044b400 (DS 0x004673e0)
-    void Recycle() override;                                // 0x0044b350
+    void Recycle() override;                                // 0x0044b350 (DS 0x00467310)
     void SaveGame(C_chunk &) override {}                    // 0x0044db60
     void LoadGame(C_chunk &) override {}                    // 0x0044db70
 

@@ -297,11 +297,13 @@ bool C_CameraModule::GetCameraPos(int index, S_vector4 *pos)
 
 void C_CameraModule::SetBlendTime(int time)
 {
+#ifndef HD2_DEDICATED   // the server has no player's view
     if (g_gameRole & GAME_ROLE_CLIENT) {
         C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer();
         if (player && player->GetVehicle())
             return;
     }
+#endif
     m_blendTime = time;
 }
 

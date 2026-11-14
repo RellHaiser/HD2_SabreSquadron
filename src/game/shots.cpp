@@ -348,16 +348,20 @@ void C_BulletShot::Init(C_Actor *shooter, const S_vector &pos, const S_vector &d
 void C_BulletShot::Recycle()
 {
     C_Shot::Recycle();
+#ifndef HD2_DEDICATED   // no particles on the server
     if (m_flareSparks != -1)
         g_particlesModule.Destroy(m_flareSparks);
+#endif
     m_flareSparks = -1;
 }
 
 void C_BulletShot::Release()
 {
     C_Shot::Release();
+#ifndef HD2_DEDICATED   // no particles on the server
     if (m_flareSparks != -1)
         g_particlesModule.Destroy(m_flareSparks);
+#endif
     m_flareSparks = -1;
 }
 

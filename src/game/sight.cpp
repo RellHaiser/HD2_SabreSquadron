@@ -186,7 +186,7 @@ C_HumanSightObserver::C_HumanSightObserver(C_Human *human_, uint32_t mask_, int 
 {
 }
 
-bool C_HumanSightObserver::WantsTest(int target)        // 0x0046d840
+bool C_HumanSightObserver::WantsTest(int target)        // 0x0046d840 (DS 0x00488d80)
 {
     const C_SightTarget *t = ValidTarget(target);
     if (!t)
@@ -393,7 +393,7 @@ C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver(C_MeleeTracker *meleeTr
 {
 }
 
-bool C_MeleeTrackerSightObserver::WantsTest(int target) // 0x0046dc70
+bool C_MeleeTrackerSightObserver::WantsTest(int target) // 0x0046dc70 (DS 0x004892d0)
 {
     const C_SightTarget *t = ValidTarget(target);
     if (!t)
