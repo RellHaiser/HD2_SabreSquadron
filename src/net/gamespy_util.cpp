@@ -774,6 +774,9 @@ void PersistSetReply(const char *reply)                 // 0x00736890 (DS 0x0079
 struct S_StatsGame {
     int reserved[3];
     S_BucketSet *buckets;                               // +0x0C
+    uint8_t unknown10[0x0C];                            // +0x10
+    S_DArray *players;                                  // +0x1C the players' numbers, by index
+    S_DArray *teams;                                    // +0x20 the teams' numbers, by index
 };
 
 S_StatsGame *g_statsGame;                               // 0x00982b98 the game given by default
@@ -807,4 +810,62 @@ char *StatsBucketString(S_StatsGame *game, const char *name, BucketOpFn op, char
     if (!result)
         result = BucketNew(game->buckets, name, 2, value);
     return static_cast<char *>(result);
+}
+
+// A team's and a player's number in the game (the index itself with no game).
+int StatsTeamNumber(S_StatsGame *game, int index)       // 0x00736a90 (DS 0x00792e10)
+{
+    if (!game && !(game = g_statsGame))
+        return index;
+    return *static_cast<int *>(ArrayNth(game->teams, index));
+}
+
+int StatsPlayerNumber(S_StatsGame *game, int index)     // 0x00736ab0 (DS 0x00792e40)
+{
+    if (!game && !(game = g_statsGame))
+        return index;
+    return *static_cast<int *>(ArrayNth(game->players, index));
+}
+
+// A team's buckets are "<name>_t<team number>", a player's "<name>_<player number>".
+int StatsTeamBucketInt(S_StatsGame *game, const char *name, BucketOpFn op, int value, int index)   // 0x00736bc0 (DS 0x00792fc0)
+{
+    char full[64];
+    std::sprintf(full, "%s_t%d", name, StatsTeamNumber(game, index));
+    return StatsBucketInt(game, full, op, value);
+}
+
+double StatsTeamBucketDouble(S_StatsGame *game, const char *name, BucketOpFn op, double value, int index)   // 0x00736c10 (DS 0x00793030)
+{
+    char full[64];
+    std::sprintf(full, "%s_t%d", name, StatsTeamNumber(game, index));
+    return StatsBucketDouble(game, full, op, value);
+}
+
+char *StatsTeamBucketString(S_StatsGame *game, const char *name, BucketOpFn op, char *value, int index)   // 0x00736c60 (DS 0x007930a0)
+{
+    char full[64];
+    std::sprintf(full, "%s_t%d", name, StatsTeamNumber(game, index));
+    return StatsBucketString(game, full, op, value);
+}
+
+int StatsPlayerBucketInt(S_StatsGame *game, const char *name, BucketOpFn op, int value, int index)   // 0x00736cb0 (DS 0x00793110)
+{
+    char full[64];
+    std::sprintf(full, "%s_%d", name, StatsPlayerNumber(game, index));
+    return StatsBucketInt(game, full, op, value);
+}
+
+double StatsPlayerBucketDouble(S_StatsGame *game, const char *name, BucketOpFn op, double value, int index)   // 0x00736d00 (DS 0x00793180)
+{
+    char full[64];
+    std::sprintf(full, "%s_%d", name, StatsPlayerNumber(game, index));
+    return StatsBucketDouble(game, full, op, value);
+}
+
+char *StatsPlayerBucketString(S_StatsGame *game, const char *name, BucketOpFn op, char *value, int index)   // 0x00736d50 (DS 0x007931f0)
+{
+    char full[64];
+    std::sprintf(full, "%s_%d", name, StatsPlayerNumber(game, index));
+    return StatsBucketString(game, full, op, value);
 }
