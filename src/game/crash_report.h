@@ -15,7 +15,7 @@
 #include <windows.h>
 
 extern void (*g_fatalErrorHandler)(const char *report);  // 0x008bf0e4: set by WinMain
-void OnFatalError(const char *report);                   // 0x006e1ad0
+void OnFatalError(const char *report);                   // 0x006e1ad0 (DS 0x0072b7e0)
 
 // The filter itself (0x006e3400; public for the test).
 LONG WINAPI ReportUnhandledException(EXCEPTION_POINTERS *exception);

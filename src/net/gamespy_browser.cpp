@@ -139,7 +139,7 @@ int CompareFirstField(const void *a, const void *b)
 {
     return _stricmp(*static_cast<char *const *>(a), *static_cast<char *const *>(b));
 }
-void FreeSharedString(void *element)                    // 0x0073a2c0
+void FreeSharedString(void *element)                    // 0x0073a2c0 (DS 0x00797750)
 {
     std::free(static_cast<S_SharedString *>(element)->text);
 }
