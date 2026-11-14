@@ -177,7 +177,7 @@ public:
     // Special camera mode `mode` (CAMERA_MODE_*): `on` sets it to whether the third argument is
     // non-zero, else toggles it (CAMERA_MODE_DEBUG, _SPECTATOR, _MOUSE_LOOK); CAMERA_MODE_AIM,
     // _UNDERWATER and _PROJECTILE take `on` itself (the projectile's frame, the water's surface).
-    void SetSpecialMode(int mode, bool on, I3D_frame *target);   // +0x44 0x0046cb20
+    void SetSpecialMode(int mode, bool on, I3D_frame *target);   // +0x44 0x0046cb20 (DS 0x00487e00)
     void SetSpecialMode(int mode, bool on, int value);
     void SetSpecialMode(int mode, bool on, float height);
     // The same slot with a vector: CAMERA_MODE_EXPLOSION's place (`value` metres: the shake

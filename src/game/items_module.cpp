@@ -561,8 +561,10 @@ void C_ItemsModule::NotifyMove(C_Item *item, C_Actor *fromHuman, C_ItemContainer
         else
             EquipmentOf(target)->OnItemAdded(item, toContainer, fromHuman, fromContainer, false);
     }
+#ifndef HD2_DEDICATED   // no inventory screen or HUD on the server
     if (IsClient() && target == ActivePlayer())
         GetGame()->GetInterface()->RefreshInventory();
+#endif
     if (target)
         AsHuman(target)->SetInventoryChanged(true);
     if (fromHuman) {
@@ -573,16 +575,20 @@ void C_ItemsModule::NotifyMove(C_Item *item, C_Actor *fromHuman, C_ItemContainer
             if (toContainer == ITEM_CONTAINER_LONG_GUN)
                 dest->SetLockTime(Now() + ITEM_BUSY_TIME);
             AsHuman(fromHuman)->OnHandsChanged();
+#ifndef HD2_DEDICATED   // no HUD on the server
             if (IsClient() && ActivePlayer() == fromHuman && notify)
                 Hud()->OnInventoryEvent(FPV_EVENT_CLEARED, 0);
+#endif
         }
     }
     if (target && toContainer == ITEM_CONTAINER_HANDS) {
         dest->SetLockTime(Now() + ITEM_BUSY_TIME);
         AsHuman(target)->OnHandsChanged();
+#ifndef HD2_DEDICATED   // no HUD on the server
         C_HumanEquipment *equipment = EquipmentOf(target);
         if (IsClient() && ActivePlayer() == target && equipment && !(equipment->GetFlags() & EQUIPMENT_HANDS_PUT_AWAY) && notify)
             Hud()->OnInventoryEvent(FPV_EVENT_DRAW, 0);
+#endif
     }
 }
 
@@ -825,8 +831,10 @@ int C_ItemsModule::MoveItem(C_Item *item, C_Item **replaced, C_Actor *from, int 
         from->SetContainer(ITEM_CONTAINER_BACKPACK_CONTENTS, nullptr);
     if (m_missionActive)
         NotifyMove(item, fromHuman, source, fromContainer, receiver, dest, toContainer, fromNew, notify);
+#ifndef HD2_DEDICATED   // no HUD on the server
     if (dropped && IsClient() && carrier == ActivePlayer() && fromContainer == ITEM_CONTAINER_HANDS)
         Hud()->OnInventoryEvent(FPV_EVENT_CLEARED, 0);
+#endif
     item->SetTime(Now() + ITEM_BUSY_TIME);
     return result;
 }

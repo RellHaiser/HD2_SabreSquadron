@@ -59,7 +59,7 @@ struct S_MenuDesc {                                     // 0x14 bytes, vtable 0x
 class C_Screen : public C_ControlGroup {                // 0x84 bytes, vtable 0x00815540
 public:
     // No parent, no id (the description's, Build); the shared cursor acquired.
-    C_Screen(I3D_scene *scene, I3D_frame *frame);       // 0x00668420
+    C_Screen(I3D_scene *scene, I3D_frame *frame);       // 0x00668420 (DS 0x006a1800)
     // The cursor released.
     ~C_Screen() override;                               // 0x00668550 (DS 0x006a1980) (0x00668530 (DS 0x006a1950))
 

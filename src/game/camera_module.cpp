@@ -1935,6 +1935,7 @@ void C_CameraModule::SpecialMode(int mode, bool on, bool value, I3D_frame *frame
         break;
     }
     case CAMERA_MODE_EXPLOSION: {
+#ifndef HD2_DEDICATED   // no camera shake on the server
         // A client: the shake (2 s) when the game camera is within `value` metres (2.5 times
         // that in the scripted view).
         if (!(g_gameRole & GAME_ROLE_CLIENT))
@@ -1946,6 +1947,7 @@ void C_CameraModule::SpecialMode(int mode, bool on, bool value, I3D_frame *frame
         const S_vector way(vector->x - at.x, vector->y - at.y, vector->z - at.z);
         if (SummedLength((way.y * way.y + way.x * way.x) + way.z * way.z) < radius)
             m_shakeTime = 2000;
+#endif
         break;
     }
     case CAMERA_MODE_SPECTATOR: {

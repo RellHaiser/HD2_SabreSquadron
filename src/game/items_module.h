@@ -100,7 +100,7 @@ public:
     // Returns ITEM_RESULT_OK or an error (ITEM_RESULT_*).
     int MoveItem(C_Item *item, C_Item **replaced, C_Actor *from, int fromContainer, C_Actor *to,
                  int toContainer, int index, C_Actor *carrier, bool notify, bool ignoreLocks,
-                 bool keepWeights, bool testOnly);      // 0x007d8fa0
+                 bool keepWeights, bool testOnly);      // 0x007d8fa0 (DS 0x008132f0)
     // Puts a free item into the container of `actor` its kind suggests (*container
     // receives it, ITEM_CONTAINER_DROPPED if none).
     int PutItem(C_Item *item, C_Actor *actor, int *container, bool notify);   // 0x007d9fa0
