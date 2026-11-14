@@ -43,15 +43,19 @@ const char *C_Human::GetPlayerName() const { return "playerName"; }
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 const S_vector &C_Human::GetViewDir() const { return g_combat.viewDir; }
 #endif
+#ifndef HUMAN_SENSES   // (the senses build links game/human_senses.cpp's)
 bool C_Human::HasSeenEnemy(const C_Human *human) const
 {
     Log(human, "HasSeenEnemy");
     return g_combat.seenEnemy;
 }
+#endif
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 bool C_Human::IsSurrendered() const { return g_combat.surrendered; }
 #endif
+#ifndef HUMAN_SENSES   // (the senses build links game/human_senses.cpp's)
 void C_Human::OnSightEvent(int lost, int targetId) { Log(this, "OnSightEvent", {double(lost), double(targetId)}); }
+#endif
 #ifndef HUMAN_CONTROLLER   // (the controller build links game/human_controller.cpp's)
 int C_HumanController::Say(int sentence, int delay, uint32_t flags, bool force)
 {

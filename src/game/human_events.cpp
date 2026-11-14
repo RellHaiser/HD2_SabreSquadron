@@ -88,6 +88,8 @@ bool S_HumanEvent::LoadGame(C_chunk &chunk)
     sourceId = -1;
     pos.x = pos.y = pos.z = 0.0f;
     unknown30 = 0;
+    // True when one of the event chunks was read (the actor and source chunks alone do not count).
+    bool loaded = false;
     uint16_t id;
     while (!chunk.AtEnd() && chunk.Descend(id)) {
         switch (id) {
@@ -99,6 +101,7 @@ bool S_HumanEvent::LoadGame(C_chunk &chunk)
             // (The age is read and then dropped.)
             age = 0;
             unknown30 = 0;
+            loaded = true;
             break;
         case CHUNK_EVENT_ACTOR:
             actorId = -1;
@@ -114,6 +117,7 @@ bool S_HumanEvent::LoadGame(C_chunk &chunk)
             chunk.Read(type);
             chunk.Read(age);
             unknown30 = 0;
+            loaded = true;
             break;
         case CHUNK_EVENT:
             chunk.Read(type);
@@ -121,13 +125,14 @@ bool S_HumanEvent::LoadGame(C_chunk &chunk)
             chunk.Read(timeLeft);
             chunk.Read(&pos, SAVED_POS_SIZE);
             chunk.Read(unknown30);
+            loaded = true;
             break;
         default:
             break;
         }
         chunk.Ascend();
     }
-    return true;
+    return loaded;
 }
 
 // ------------------------------------------------------------------------ C_HumanEvents
@@ -195,6 +200,8 @@ bool C_HumanEvents::SaveGame(C_chunk &chunk)
 bool C_HumanEvents::LoadGame(C_chunk &chunk)
 {
     Reset();
+    // True when the sniper chunk was read (the one chunk SaveGame always writes; the others do not count).
+    bool loaded = false;
     uint16_t id;
     while (!chunk.AtEnd() && chunk.Descend(id)) {
         switch (id) {
@@ -202,6 +209,7 @@ bool C_HumanEvents::LoadGame(C_chunk &chunk)
             chunk.Read(&m_sniperPos, SAVED_POS_SIZE);
             chunk.Read(m_sniperRadius);
             chunk.Read(m_sniper);
+            loaded = true;
             break;
         case CHUNK_EVENTS_PENDING: {
             S_HumanEvent *event = AllocHumanEvent();
@@ -232,7 +240,7 @@ bool C_HumanEvents::LoadGame(C_chunk &chunk)
         }
         chunk.Ascend();
     }
-    return true;
+    return loaded;
 }
 
 void C_HumanEvents::Tick(int timeDelta)

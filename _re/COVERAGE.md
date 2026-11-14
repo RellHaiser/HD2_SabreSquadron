@@ -2353,3 +2353,60 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** my first hands item was a plain worn item with a firearm's behaviour (no vtable:
   a crash); I kept the non-weapon kinds and null items that only the port survives; the shot-dummy fake did not do
   what the original inlines; I hashed float outputs bit for bit.
+
+## Human part 24 (the human's senses and events, `human_senses.cpp`, `human_events.cpp`, 2026-11-14)
+
+- **The build:** `human/build_senses.bat` (HUMAN_SENSES, `senses_test.inc`): part 22's harness with both files linked.
+  - The original keeps the human's seen lists and remembered sounds, and the events object's two deques and two
+    vectors, in MSVC6 form: each is rebuilt before the original's call and read back after it. The deques are
+    blocks of 1024 pointers through a map; the first element anywhere in its block, sometimes near its end, so
+    pushes and pops cross blocks.
+  - The events are shared (the same layout on both sides): their bytes are put back before the original's call and
+    compared after it.
+  - Each side's event pool is its own: what a call released is read back in order (the port's drained down to a
+    sentinel it was given first, the original's list emptied first). The original's pool was never constructed
+    (no static initialisers run): its block size of 50 is set by the test.
+  - Fakes, logged on both sides: the sight module's targets (each side's objects; the original's target vector
+    pointed at them), CanSee, the observer and target states; the sound module's listeners (now with the callback:
+    each side's own OnSoundHeard); the controller's virtuals; the body; the actors module; the team; the scripted
+    controller's Suspend; the remembered-sound pool (the original's free list read back after ForgetOldSounds);
+    timeGetTime (the port's import slot and the original's IAT entry). IsFriendOf, IsDisguisedEnemy and
+    UpdateDisguise (part 21's, tested there) are scripted per actor, the port's through the linker's --wrap.
+  - Actors: three other humans, a car, a meleeTracker (standing for a vehicle that is not a car too), the human.
+- **The tests (all exact):**
+  - 24a: the seen lists (add, remove, HasSeenEnemy: the human or the others, once or twice in a list), OnSightEvent
+    (lost or seen or neither, each kind of target, the human itself, deaf, no controller, the meleeTrackers for the
+    player's soldiers), UpdateSeenHumans (dead enemies, traitors hostile now, watched or not), OnSoundHeard (each
+    chapter and unknown ones, each source or none, at the edges of the hearing range, at the human, 1 m away, a
+    remembered sound refreshed, deaf, just made noise, a car or another vehicle, no listener, a frame without data
+    or without an actor), ForgetOldSounds (about 3 s old), Stop/StartListening, OnProximity, ProcessEvents (the
+    controller hands back the event, none or another), RaiseEvent, Freeze (hidden seats, the active player), Suspend.
+  - 24b: Reset, Tick, the nearby actors, AddUnknownActor, Raise, PopFront, AddStimulus (the same actor or source
+    tracked already, keeping the priority or not, a shorter time), GetStrongestStimulus (at an event's place),
+    GetAttacker, SetSniper, ActorToId, IdToActor, SaveGame (files byte for byte), LoadGame (saved files and random
+    ones: every chunk kind, unknown and short ones; the loaded events compared by what LoadGame sets, as each side's
+    pool hands out its own objects).
+- **Kept out:** what the original does not survive and the port checks: a sight event of a target that is not
+  registered (OnSightEvent, and UpdateSeenHumans through a seen human's target), a footstep with no source (the
+  original reads its type), a speech whose source is not a human (it reads its health).
+- **Not compared:** the debug strings of a sound without a listener; the original's GetMoveSpeedClass of a footstep's
+  source (a call the port leaves out: the original drops its answer; the sources' controllers have no move flags,
+  so it asks nothing more).
+- **Port fixes:** S_HumanEvent::LoadGame and C_HumanEvents::LoadGame returned true always; the original returns
+  whether an event chunk / the sniper chunk was read (no caller uses it).
+- **Results:** 174,901 checks; lines: human_senses.cpp 100 % of 194, human_events.cpp 100 % of 204.
+- **Mutations** (`human/mutations/mutate_senses1.py`, `mutate_senses2.py`; mutrun.py with MUT_BAT build_senses.bat,
+  MUT_DEFS as the bat's -D options, the bat's --wrap options in MUT_LDFLAGS, MUT_TIMEOUT 120, SENSES_ONLY=24a / 24b):
+  - 24a: 154 mutants (149 generated, 5 for repeated lines); 136 killed, 14 not building, 4 survived (equivalent:
+    EraseAll's unread count, the debug strings).
+  - 24b: 157 mutants (115 generated, 42 for repeated lines); 146 killed, 7 not building, 4 survived (equivalent: an
+    equal time, a dropped read, the scores scaled alike).
+- **Harness lessons (my mistakes):**
+  - My fakes were named like part 20's (a redefinition): this part's are SN_*.
+  - A seen human whose sight target was not registered made the original read through null (UpdateSeenHumans):
+    my check read past the target table; such humans now get a registered target.
+  - The original's event pool had no block size (its constructor never ran): the first load that emptied it crashed.
+  - The port's loading left events it released in its pool, and later loads handed one out twice: the pool is now
+    drained down to a sentinel after each load.
+  - First mutation passes: the CanSee fake always answered, Freeze's frame Update was not seen, short id chunks and
+    source id 0 were rare, and S_HumanEvent::LoadGame's result was never looked at.

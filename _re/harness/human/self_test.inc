@@ -109,9 +109,9 @@ bool C_SightModule::RemoveTarget(int id)
 }
 void C_SightModule::SetObserverState(int id, int state) { Log(nullptr, "SetObserverState", {double(id), double(state)}); }
 void C_SightModule::SetTargetState(int id, int state) { Log(nullptr, "SetTargetState", {double(id), double(state)}); }
-int C_SoundModule::AddListener(I3D_frame *frame, T_SoundHeardProc)
+int C_SoundModule::AddListener(I3D_frame *frame, T_SoundHeardProc proc)
 {
-    Log(this, ("AddListener " + NameOf(frame)).c_str());
+    Log(this, ("AddListener " + NameOf(frame)).c_str(), {double(proc == &C_Human::OnSoundHeard)});
     return g_self.listener;
 }
 bool C_SoundModule::RemoveListener(int index)
@@ -194,6 +194,7 @@ void ReleaseHumanOrder(S_HumanOrder *) { Log(nullptr, "ReleaseHumanOrder"); }
 void FreeRememberedSound(S_RememberedSound *) { Log(nullptr, "FreeRememberedSound"); }
 
 // The human's parts in other files: the events, the AI memory, the body.
+#ifndef HUMAN_SENSES   // (the senses build links game/human_events.cpp's)
 void C_HumanEvents::Reset() { Log(this, "EventsReset"); }
 void C_HumanEvents::Tick(int timeDelta) { Log(this, "EventsTick", {double(timeDelta)}); }
 bool C_HumanEvents::SaveGame(C_chunk &)
@@ -206,6 +207,7 @@ bool C_HumanEvents::LoadGame(C_chunk &)
     Log(this, "EventsLoad");
     return true;
 }
+#endif
 bool C_HumanAIMemory::SaveGame(C_chunk &)
 {
     Log(this, "AIMemorySave");
@@ -266,7 +268,9 @@ const char *C_Human::GetShortName() const { return "shortName"; }
 const char *C_Human::GetFullName() const { return "fullName"; }
 #endif
 void C_Human::OnHandsChanged() { Log(this, "OnHandsChanged"); }
+#ifndef HUMAN_SENSES   // (the senses build links game/human_senses.cpp's)
 void __stdcall C_Human::OnSoundHeard(const S_HeardSound *) {}
+#endif
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::AssignPlayerController(bool active)
 {
@@ -305,7 +309,9 @@ void C_Human::Unknown20(C_BitStream *) { Log(this, "Unknown20"); }
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::OnMessage(C_BitStream *) { Log(this, "OnMessage"); }
 #endif
+#ifndef HUMAN_SENSES   // (the senses build links game/human_senses.cpp's)
 void C_Human::UpdateSeenHumans() { Log(this, "UpdateSeenHumans"); }
+#endif
 #ifndef HUMAN_COMBAT
 void C_Human::UpdateBleeding(int frameTime) { Log(this, "UpdateBleeding", {double(frameTime)}); }
 void C_Human::TickBleeding(int timeDelta) { Log(this, "TickBleeding", {double(timeDelta)}); }
@@ -316,7 +322,9 @@ void C_Human::GetBoxCorners(S_vector4 *) {}
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 bool C_Human::IsUnconscious() const { return g_self.unconscious; }
 #endif
+#ifndef HUMAN_SENSES   // (the senses build links game/human_senses.cpp's)
 void C_Human::ForgetOldSounds() { Log(this, "ForgetOldSounds"); }
+#endif
 void C_Human::ClearContainers() { Log(this, "ClearContainers"); }
 #ifndef HUMAN_COMBAT
 void C_Human::ApplyRemoteHit(int type, int zone, int health, int killerId, const S_vector &, const S_vector &)
@@ -905,9 +913,10 @@ void ST OM_ApplyRemoteHit(void *self, int type, int zone, int health, int killer
 {
     Log(self, "ApplyRemoteHit", {double(type), double(zone), double(health), double(killer)});
 }
-int ST OM_AddListener(void *self, I3D_frame *frame, void *)
+int ST OM_AddListener(void *self, I3D_frame *frame, void *proc)
 {
-    Log(self, ("AddListener " + NameOf(frame)).c_str());
+    // (The callback: the original's OnSoundHeard, as the port's is its own.)
+    Log(self, ("AddListener " + NameOf(frame)).c_str(), {double(proc == OriginalAt<void *>(0x005a5430))});
     return g_self.listener;
 }
 int ST OM_RemoveListener(void *self, int index)

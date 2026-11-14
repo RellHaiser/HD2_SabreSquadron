@@ -214,10 +214,12 @@ void S_HumanBody::PlayAnimation(const char *name, int a, int b, int c)
 }
 void S_HumanBody::SetCarryMode(int mode) { Log(nullptr, "BodySetCarryMode", {double(mode)}); }
 void S_HumanBody::SetPlayerControlled(bool on) { Log(nullptr, "BodySetPlayerControlled", {double(on)}); }
+#ifndef HUMAN_SENSES   // (the senses build links game/human_events.cpp's)
 void C_HumanEvents::SetSniper(bool on, float radius, const S_vector &pos)
 {
     Log(this, "EventsSetSniper", {double(on), radius, pos.x, pos.y, pos.z});
 }
+#endif
 void C_HumanMovement::SetUnknown94(float value) { Log(this, "MovementSetUnknown94", {value}); }
 uint32_t C_Car::GetEnvironmentFlags() const
 {
