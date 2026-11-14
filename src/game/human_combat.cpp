@@ -232,9 +232,11 @@ void C_Human::ShowHitMessage(int type, int zone, int killerId)
                       GetName()->c_str());
         return;
     }
+    // (The teams compared before the names are taken, as the original does.)
+    const bool teamKill = killerTeam == GetTeam(false) && teamGame;
     const char *victimName = GetName()->c_str();
     const char *killerName = killer->GetName()->c_str();
-    if (killerTeam == GetTeam(false) && teamGame)
+    if (teamKill)
         PrintText(this, COLOR_YELLOW, TEXT_TEAMKILL, killerName, victimName);
     else if (zone == HIT_ZONE_HEAD)
         PrintText(this, TeamColor(killerTeam, false), TEXT_KILL_HEADSHOT, killerName, victimName);

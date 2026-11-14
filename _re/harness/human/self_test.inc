@@ -42,6 +42,7 @@ struct S_SelfScript {
     bool items = false;                                 // CreateItem makes one
     bool actorSetFrame = true;                          // C_Actor::SetFrame
     bool (*memberOf)(const void *human) = nullptr;      // the player team's IsMember by object (part 21; else `member`)
+    const char *(*textSuffix)(int id) = nullptr;        // after a text (part 21c: as many "%s" as its arguments)
 } g_self;
 // The debug console's lines (the original's Print is empty: both sides log the text).
 void LogPrint(const char *format, va_list args)
@@ -65,7 +66,7 @@ bool C_GameProfile::IsCooperativeGame() const
 C_str C_GameTexts::Get(int id) const
 {
     Log(nullptr, "Text", {double(id)});
-    return C_str(("text" + std::to_string(id)).c_str());
+    return C_str(("text" + std::to_string(id) + (g_self.textSuffix ? g_self.textSuffix(id) : "")).c_str());
 }
 void C_game::Print(const char *format, ...)
 {
@@ -385,7 +386,7 @@ void *ST O_Text(void *, void *out, int id)
 {
     Log(nullptr, "Text", {double(id)});
     *static_cast<void **>(out) = nullptr;
-    OriginalAt<T_StrAssign>(0x00405180)(out, ("text" + std::to_string(id)).c_str());
+    OriginalAt<T_StrAssign>(0x00405180)(out, ("text" + std::to_string(id) + (g_self.textSuffix ? g_self.textSuffix(id) : "")).c_str());
     return out;
 }
 // The graphic effects' face texture (slot 0xAC; the port's fake object on both sides).
@@ -491,6 +492,9 @@ void RandomSelf()
     h->m_stealthTime = P(0.3f) ? I(19900, 20100) : I(0, 25000);
     h->m_role = static_cast<E_HumanRole>(I(0, 6));
     h->m_nameTextId = P(0.4f) ? -1 : I(0, 9000);
+    // (Not a multiplayer message: those show "%s" in part 21c, and a name is formatted twice.)
+    if (h->m_nameTextId >= 0x2292 && h->m_nameTextId <= 0x22A3)
+        h->m_nameTextId -= 0x100;
     h->m_profileIndex = I(-1, 9);
     h->m_profile = P(0.3f) ? nullptr : Profile(I(0, 1));
     for (int i = 0; i < 2; ++i)

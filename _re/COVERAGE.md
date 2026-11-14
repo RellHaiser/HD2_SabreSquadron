@@ -2052,3 +2052,45 @@ particles and the surface marks. Files are served from memory.
   - the other human shared the tested one's model, so the aim points' distances were all 0;
   - another edit script through a heredoc collapsed its backslashes, and one converted line ends twice (CR CR LF):
     fixed with Edit and normalised.
+
+## Human part 21c (the human's messages and deaths, `human_combat.cpp`, 2026-11-14)
+
+- **The build:** part 21b's. Added:
+  - logged or scripted on both sides: the actors' GetHuman by id (the tested human and the other), the local team,
+    the game's PrintMessage (cdecl, varargs: the text formatted, then logged), the quick messages' texts, the player
+    names, the body's PlayDeath and ApplyHit, the periodic links' SetRate, the teams' and the coop team's
+    OnMemberDied, OnLeaderDied, the car's throttle, steering, brake and handbrake, StopFrameSpeech, IsSurrendered,
+    HasSeenEnemy, OnSightEvent, the net game's OnPlayerKilled, the damage flash, OnDamaged, the hit sounds, effects
+    and blood, the music (the sound module's slot 0x68);
+  - the controller's OnDeath, OnKilled, OnKnockedOut and OnKilledEnemy slots on both sides;
+  - the original's GetName and GetMaterialId in its human vtable (slots 0x04, 0xD8), the port's through thunks;
+  - the local player's slot written for the original by a hook chained after ToOriginal's (the tested human, the
+    other one or nobody);
+  - the texts show their arguments: each multiplayer message's text ends in as many "%s" as it takes, so a swapped
+    or missing argument shows in the printed line;
+  - each human its own name and face strings (kept reps): a copied human shared the C_str reps without a reference.
+- **The tests (24,000, all exact):** ShowHitMessage, PrintText and PrintNamedText (texts with two arguments, one or
+  none), SayQuickMessage, SetChatText (empty, none, up to 80 characters), OnDeath, ShowDeath, OnKilledHuman, KnockOut,
+  ApplyRemoteHit:
+  - every hit type and zone (and zones past the table), the killer the human itself, the other or an unknown id;
+  - local, client and server games, team games or deathmatch, the local team;
+  - every role and controller type, the quiet time at 60 s, the victim surrendered, unconscious or seen;
+  - OnKilledHuman's seen lists (enemies, friends, traitors) with the victim in none, one or several places; the
+    original's as MSVC6 vectors (an allocator word, then first, last, end);
+  - a car or a static weapon as the vehicle, a formation or none, a remote kill's health at -1..1.
+- **Port fixes:** ShowHitMessage took both names before comparing the teams; the original compares them first (the
+  calls' order differed in the log).
+- **Results:** lines: 100 % of these functions' 207; human_combat.cpp 81.5 % of 623 so far.
+- **Mutations** (`human/mutations/mutate_combat3.py`): 172 mutants; 153 killed, 13 not building, 6 survived, all
+  equivalent (buffer sizes, the named line PrintNamedText builds and never prints, a terminator written over, -2 for
+  no target).
+- **Harness lessons (my mistakes):**
+  - the original crashed silently in one ShowHitMessage: the victim's random name text id was one of the multiplayer
+    messages, whose test texts end in "%s", and the formatted line is formatted again by PrintMessage. Names are kept
+    out of that range now (self_test.inc's RandomSide; part 20's tests are unchanged otherwise). In the game a name
+    with "%s" would do the same in both;
+  - the first text suffix gave every text two "%s", more than some texts' arguments: undefined in both; now per text;
+  - the other human's name was empty in the original's copy, and both copies shared string reps;
+  - the seen lists were empty on both sides, so OnKilledHuman's search never ran: 13 survivors until they were
+    filled;
+  - two more edit scripts through heredocs collapsed their backslashes; fixed with files written by Write.

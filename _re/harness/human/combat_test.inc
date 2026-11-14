@@ -287,6 +287,7 @@ void RandomSide()
     h->m_stamina = P(0.2f) ? 0.0f : U(0, 150);
     g_memberSelf[0] = h;
     g_memberSelf[1] = o_human;
+    KeepStr(h->m_name, "name");
 }
 
 // The other human: a state like the tested one's, copied in both layouts (ToOriginal), then the tested one made again.
@@ -298,6 +299,14 @@ void RandomOther()
     std::memcpy(g_origOther, o_human, sizeof g_origOther);
     g_memberOther[0] = g_portOther;
     g_memberOther[1] = g_origOther;
+    // (Each human its own strings, kept: a copied human shares the C_str reps without a reference, and each side's
+    // GetName / SetTexture releases the one it replaces.)
+    KeepStr(PortOther()->m_name, "otherName");
+    KeepStr(PortOther()->m_faceTexture, "otherFace");
+    std::memset(g_origOther + 0x80, 0, 4);
+    std::memset(g_origOther + 0xBC, 0, 4);
+    OriginalAt<T_StrAssign>(0x00405180)(g_origOther + 0x80, "otherName");
+    OriginalAt<T_StrAssign>(0x00405180)(g_origOther + 0xBC, "otherFace");
     const bool memberOther = g_isMemberOther;
     RandomSide();
     g_isMemberOther = memberOther;
@@ -618,10 +627,356 @@ void TestCombatMotion()
     }
 }
 
+// ---- part 21c: the messages and the deaths
+
+// The human's own virtual GetName and GetMaterialId on both sides (the port's slots call the real members).
+C_str *CT_ PH_GetName(C_Human *self) { return self->C_Human::GetName(); }
+int CT_ PH_GetMaterialId(C_Human *self, I3D_frame *part) { return self->C_Human::GetMaterialId(part); }
+// The humans by id (the tested one and the other: each side its own).
+void *CT_ OD_GetHuman(void *, int id)
+{
+    Log(nullptr, "GetHuman", {double(id)});
+    C_Actor *port = id >= 0 && id < 64 ? g_combat.human[id] : nullptr;
+    if (port == reinterpret_cast<C_Actor *>(g_h.human))
+        return o_human;
+    if (port == reinterpret_cast<C_Actor *>(g_portOther))
+        return g_origOther;
+    return port;
+}
+int CT_ OD_GetLocalTeam(void *) { return g_combat.localTeam; }
+void OD_PrintMessage(void *, const S_vector *color, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    char text[256];
+    std::vsnprintf(text, sizeof text, format, args);
+    va_end(args);
+    Log(nullptr, (std::string("PrintMessage ") + text).c_str(), {color->x, color->y, color->z});
+}
+const char *CT_ OD_QuickText(void *, int id) { return id == 0 ? "quick0" : "quick"; }
+const char *CT_ OD_GetPlayerName(void *) { return "playerName"; }
+void CT_ OD_BodyPlayDeath(void *) { Log(nullptr, "BodyPlayDeath"); }
+void CT_ OD_BodyApplyHit(void *, uint32_t flags, const S_vector *pos, const S_vector *force)
+{
+    Log(nullptr, "BodyApplyHit", {double(flags), pos->x, pos->y, pos->z, force->x, force->y, force->z});
+}
+void __stdcall OD_SetRate(int id, int rate) { Log(nullptr, "PeriodicLinks_SetRate", {double(id), double(rate)}); }
+void CT_ OD_TeamOnMemberDied(void *, void *human) { Log(human, "TeamOnMemberDied"); }
+void CT_ OD_CoopOnMemberDied(void *, void *human) { Log(human, "CoopTeamOnMemberDied"); }
+void CT_ OD_PlayMusic(void *self, int track) { Log(self, "PlayMusic", {double(track)}); }
+void CT_ OD_OnLeaderDied(void *self) { Log(self, "FormationOnLeaderDied"); }
+int CT_ OD_SetThrottle(void *self, float v, int first)
+{
+    Log(self, "SetThrottle", {v, double(B(first))});
+    return 1;
+}
+int CT_ OD_SetSteering(void *self, float v)
+{
+    Log(self, "SetSteering", {v});
+    return 1;
+}
+int CT_ OD_SetBrake(void *self, float v)
+{
+    Log(self, "SetBrake", {v});
+    return 1;
+}
+int CT_ OD_SetHandbrake(void *self, int on, int unknown)
+{
+    Log(self, "SetHandbrake", {double(B(on)), double(B(unknown))});
+    return 1;
+}
+int CT_ OD_SetUnknown4f23b0(void *self, float v)
+{
+    Log(self, "SetUnknown4f23b0", {v});
+    return 1;
+}
+void CT_ OD_StopFrameSpeech(I3D_frame *owner) { Log(nullptr, ("StopFrameSpeech " + NameOf(owner)).c_str()); }
+int CT_ OD_IsSurrendered(void *) { return g_combat.surrendered; }
+int CT_ OD_HasSeenEnemy(void *, const void *human)
+{
+    Log(human, "HasSeenEnemy");
+    return g_combat.seenEnemy;
+}
+void CT_ OD_OnSightEvent(void *self, int lost, int target) { Log(self, "OnSightEvent", {double(lost), double(target)}); }
+void CT_ OD_OnPlayerKilled(void *, int victim, int killer) { Log(nullptr, "OnPlayerKilled", {double(victim), double(killer)}); }
+void CT_ OD_FlashDamage(void *) { Log(nullptr, "FlashDamage"); }
+void CT_ OD_OnDamaged(void *self, int type, int zone, const S_vector *dir)
+{
+    Log(self, "PlayerOnDamaged", {double(type), double(zone), dir->x, dir->y, dir->z});
+}
+void CT_ OD_PlayHitSound(void *, void *source, int material, const S_vector *pos, int alternate, int silent)
+{
+    Log(source, "PlayHitSound", {double(material), pos->x, pos->y, pos->z, double(B(alternate)), double(B(silent))});
+}
+void CT_ OD_SprayBlood(void *, const S_vector *pos, const S_vector *dir)
+{
+    Log(nullptr, "SprayBlood", {pos->x, pos->y, pos->z, dir->x, dir->y, dir->z});
+}
+void CT_ OD_PlayHitEffect(void *, int material, const S_vector *pos, const S_vector *normal)
+{
+    Log(nullptr, "PlayHitEffect", {double(material), pos->x, pos->y, pos->z, normal->x, normal->y, normal->z});
+}
+// The controller's death calls (the port's slots by member pointers, the original's 0x84 / 0x88 / 0x8C / 0x94).
+void CT_ CT_OnDeath(void *self) { Log(self, "ControllerOnDeath"); }
+void CT_ CT_OnKilled(void *self) { Log(self, "ControllerOnKilled"); }
+void CT_ CT_OnKnockedOut(void *self) { Log(self, "ControllerOnKnockedOut"); }
+void CT_ CT_OnKilledEnemy(void *self, void *victim) { Log(victim, "ControllerOnKilledEnemy"); }
+
+// The multiplayer messages' texts show their arguments: as many "%s" as each takes.
+const char *MessageArguments(int id)
+{
+    switch (id) {
+    case 0x2292: case 0x2293: case 0x229B: case 0x229C: case 0x229D:
+        return " [%s|%s]";
+    case 0x2297: case 0x2298: case 0x2299: case 0x229A: case 0x229E: case 0x22A3:
+        return " [%s]";
+    default:
+        return "";
+    }
+}
+
+void (*g_previousToOriginal)();
+void SlotToOriginal()
+{
+    if (g_previousToOriginal)
+        g_previousToOriginal();
+    *OriginalAt<int *>(0x00982104) = g_localPlayerSlot;
+}
+
+void SetUpDeaths()
+{
+    g_previousToOriginal = g_toOriginalExtra;
+    g_toOriginalExtra = SlotToOriginal;
+    g_self.textSuffix = MessageArguments;
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x00475e00, reinterpret_cast<const void *>(OD_GetHuman)},
+        {0x00730880, reinterpret_cast<const void *>(OD_GetLocalTeam)},
+        {0x0069c240, reinterpret_cast<const void *>(OD_PrintMessage)},
+        {0x004900e0, reinterpret_cast<const void *>(OD_QuickText)},
+        {0x005a81b0, reinterpret_cast<const void *>(OD_GetPlayerName)},
+        {0x005abbf0, reinterpret_cast<const void *>(OD_BodyPlayDeath)},
+        {0x005abbd0, reinterpret_cast<const void *>(OD_BodyApplyHit)},
+        {0x006e03a0, reinterpret_cast<const void *>(OD_SetRate)},
+        {0x0045e790, reinterpret_cast<const void *>(OD_TeamOnMemberDied)},
+        {0x0045fe10, reinterpret_cast<const void *>(OD_CoopOnMemberDied)},
+        {0x00595710, reinterpret_cast<const void *>(OD_OnLeaderDied)},
+        {0x004f2100, reinterpret_cast<const void *>(OD_SetThrottle)},
+        {0x004f2420, reinterpret_cast<const void *>(OD_SetSteering)},
+        {0x004f2270, reinterpret_cast<const void *>(OD_SetBrake)},
+        {0x004f26a0, reinterpret_cast<const void *>(OD_SetHandbrake)},
+        {0x004f23b0, reinterpret_cast<const void *>(OD_SetUnknown4f23b0)},
+        {0x0071e830, reinterpret_cast<const void *>(OD_StopFrameSpeech)},
+        {0x005a6450, reinterpret_cast<const void *>(OD_IsSurrendered)},
+        {0x005a5e50, reinterpret_cast<const void *>(OD_HasSeenEnemy)},
+        {0x005a5250, reinterpret_cast<const void *>(OD_OnSightEvent)},
+        {0x0072f230, reinterpret_cast<const void *>(OD_OnPlayerKilled)},
+        {0x0049f0b0, reinterpret_cast<const void *>(OD_FlashDamage)},
+        {0x00545dd0, reinterpret_cast<const void *>(OD_OnDamaged)},
+        {0x00451b00, reinterpret_cast<const void *>(OD_PlayHitSound)},
+        {0x0044f4d0, reinterpret_cast<const void *>(OD_SprayBlood)},
+        {0x00451c00, reinterpret_cast<const void *>(OD_PlayHitEffect)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    p_humanVt[VSlot(&C_Actor::GetName)] = reinterpret_cast<void *>(PH_GetName);
+    p_humanVt[VSlot(&C_Actor::GetMaterialId)] = reinterpret_cast<void *>(PH_GetMaterialId);
+    o_humanVt[0x04 / 4] = OriginalAt<void *>(0x005a9980);
+    o_humanVt[0xD8 / 4] = OriginalAt<void *>(0x0059c2a0);
+    g_origSoundVt[0x68 / 4] = reinterpret_cast<void *>(OD_PlayMusic);
+    g_portControllerVt[VSlot(&C_HumanController::OnDeath)] = reinterpret_cast<void *>(CT_OnDeath);
+    g_portControllerVt[VSlot(&C_HumanController::OnKilled)] = reinterpret_cast<void *>(CT_OnKilled);
+    g_portControllerVt[VSlot(&C_HumanController::OnKnockedOut)] = reinterpret_cast<void *>(CT_OnKnockedOut);
+    g_portControllerVt[VSlot(&C_HumanController::OnKilledEnemy)] = reinterpret_cast<void *>(CT_OnKilledEnemy);
+    g_origControllerVt[0x84 / 4] = reinterpret_cast<void *>(CT_OnDeath);
+    g_origControllerVt[0x88 / 4] = reinterpret_cast<void *>(CT_OnKilled);
+    g_origControllerVt[0x8C / 4] = reinterpret_cast<void *>(CT_OnKnockedOut);
+    g_origControllerVt[0x94 / 4] = reinterpret_cast<void *>(CT_OnKilledEnemy);
+    // The car's vehicle: the port's member at its own offset, the original's at +0x90.
+    g_names[reinterpret_cast<C_Car *>(g_vehicleBytes)->GetVehicle()] = g_names[g_vehicleBytes + 0x90] = "carVehicle";
+}
+
+// A death's state: the other human (a killer or a victim; its controller the original's on its side), the human's
+// vehicle a car or not, its ids, a formation, the network game's local team, the scripted answers.
+void RandomDeath()
+{
+    RandomOther();
+    RandomMotion();
+    C_Human *h = g_h.human;
+    void *origController = g_origController;
+    std::memcpy(g_origOther + 0xB0, &origController, 4);
+    PortOther()->m_controller = reinterpret_cast<C_HumanController *>(g_portController);
+    h->m_controller = reinterpret_cast<C_HumanController *>(g_portController);
+    const bool car = P(0.6f);
+    reinterpret_cast<C_Actor *>(g_vehicleBytes)->m_type = car ? ACTOR_CAR : ACTOR_STATIC_WEAPON;
+    const int type = car ? ACTOR_CAR : ACTOR_STATIC_WEAPON;
+    std::memcpy(g_vehicleBytes + 0x18, &type, 4);
+    h->m_formation = P(0.3f) ? reinterpret_cast<C_FormationShape *>(g_formationBytes) : nullptr;
+    h->m_bodyFrame = g_zFrame;
+    h->m_sightId = P(0.3f) ? -1 : I(0, 20);
+    h->m_sightTargetId = P(0.2f) ? -1 : I(0, 20);
+    h->m_soundListener = P(0.3f) ? -1 : I(0, 20);
+    h->m_periodicLink = I(-1, 20);
+    g_combat.localTeam = I(0, 2);
+    g_combat.surrendered = P(0.2f);
+    g_combat.seenEnemy = P(0.5f);
+    g_combat.speaking = P(0.5f);
+    g_self.unconscious = P(0.15f);
+    // The ids GetHuman knows: the tested human, the other one.
+    for (C_Actor *&a : g_combat.human)
+        a = nullptr;
+    h->m_netId = I(0, 30);
+    PortOther()->m_netId = (h->m_netId + I(1, 30)) % 32;
+    std::memcpy(g_origOther + 0x10, &PortOther()->m_netId, 4);
+    g_combat.human[h->m_netId] = reinterpret_cast<C_Actor *>(h);
+    g_combat.human[PortOther()->m_netId] = reinterpret_cast<C_Actor *>(g_portOther);
+    // The local player: the tested human, the other one or nobody.
+    g_localPlayerSlot = P(0.4f) ? h->m_netId : P(0.6f) ? PortOther()->m_netId : 99;
+    g_script.localPlayer = g_localPlayerSlot == h->m_netId;
+    // A health of 1 sometimes; the victim's controller AI or another, its quiet time short or long.
+    if (P(0.1f))
+        h->m_stats[STAT_HEALTH] = 1;
+    static const E_HumanController types[] = {HUMAN_CONTROLLER_PLAYER, HUMAN_CONTROLLER_REMOTE, HUMAN_CONTROLLER_ENEMY,
+                                              HUMAN_CONTROLLER_AI};
+    C_HumanController *c = reinterpret_cast<C_HumanController *>(g_portController);
+    c->m_type = types[I(0, 3)];
+    std::memcpy(g_origController + 0x48, &c->m_type, 4);
+    c->m_quietTime = P(0.3f) ? 60000 + I(0, 1) : P(0.5f) ? I(0, 70000) : I(60000, 200000);
+    std::memcpy(g_origController + 0xB0, &c->m_quietTime, 4);
+}
+
+typedef void(CT_ *T_DMessage)(void *, int, int, int);
+typedef void (*T_DPrint)(const void *, const S_vector *, int, ...);
+typedef void(CT_ *T_DText)(void *, const char *);
+typedef void(CT_ *T_DKilled)(void *, void *, int);
+typedef void(CT_ *T_DRemote)(void *, int, int, int, int, const S_vector *, const S_vector *);
+
+void TestCombatDeaths()
+{
+    C_Human *h = g_h.human;
+    // (The name's rep each side's own: its text is compared in the messages printed.)
+    g_skipFields.insert("m_name");
+    std::printf("combat deaths\n");
+    for (int i = 0; i < 24000 / QUICK; ++i) {
+        RandomDeath();
+        static const int types[] = {HIT_FALL, HIT_BULLET, HIT_EXPLOSION, HIT_MELEE, HIT_SCRIPT_KILL, HIT_THROWN_OBJECT,
+                                    HIT_BACKSTAB, HIT_SUICIDE, HIT_RUN_OVER, HIT_SCRIPT_KILL_EX, HIT_DROWNING, 9};
+        const int type = types[I(0, 11)];
+        const int zone = P(0.1f) ? I(10, 13) : I(0, 11);
+        // The killer: the tested human itself, the other, an unknown id.
+        const int killerId = P(0.2f) ? h->m_netId : P(0.8f) ? PortOther()->m_netId : 50;
+        switch (i % 9) {
+        case 0:
+            DiffCall("ShowHitMessage", [&] { h->ShowHitMessage(type, zone, killerId); return 0; },
+                     [&](void *) { OriginalAt<T_DMessage>(0x005a0da0)(o_human, type, zone, killerId); return 0; });
+            break;
+        case 1: {
+            // (A text with two arguments, one with one, or another.)
+            const int textId = P(0.4f) ? 0x229D : P(0.5f) ? 0x229E : I(0, 9000);
+            const S_vector color(U(0, 255), U(0, 255), U(0, 255));
+            const bool named = P(0.5f);
+            DiffCall(named ? "PrintNamedText" : "PrintText",
+                     [&] {
+                         if (named)
+                             C_Human::PrintNamedText(h, color, textId, "arg1", "arg2");
+                         else
+                             C_Human::PrintText(h, color, textId, "arg1", "arg2");
+                         return 0;
+                     },
+                     [&](void *) {
+                         OriginalAt<T_DPrint>(named ? 0x005a4770 : 0x005a4600)(o_human, &color, textId, "arg1", "arg2");
+                         return 0;
+                     });
+            break;
+        }
+        case 2: {
+            const int index = I(0, 3);
+            DiffCall("SayQuickMessage", [&] { h->SayQuickMessage(index); return 0; },
+                     [&](void *) { OriginalAt<T_KInt>(0x005a46a0)(o_human, index); return 0; });
+            break;
+        }
+        case 3: {
+            const std::string text = P(0.1f) ? std::string() : std::string(size_t(I(1, 80)), char('a' + I(0, 25)));
+            const char *arg = P(0.1f) ? nullptr : text.c_str();
+            DiffCall("SetChatText", [&] { h->SetChatText(arg); return 0; },
+                     [&](void *) { OriginalAt<T_DText>(0x005a9b30)(o_human, arg); return 0; });
+            break;
+        }
+        case 4:
+            DiffCall("OnDeath", [&] { h->OnDeath(); return 0; },
+                     [&](void *) { OriginalAt<T_SVoid>(0x005a0220)(o_human); return 0; });
+            break;
+        case 5:
+            DiffCall("ShowDeath", [&] { h->ShowDeath(); return 0; },
+                     [&](void *) { OriginalAt<T_SVoid>(0x005a03e0)(o_human); return 0; });
+            break;
+        case 6: {
+            // The killer a player often; the victim's sight target id at its edges.
+            if (P(0.5f))
+                h->m_role = HUMAN_ROLE_PLAYER;
+            PortOther()->m_sightTargetId = P(0.3f) ? I(-1, 1) : I(-1, 20);
+            std::memcpy(g_origOther + 0x25C, &PortOther()->m_sightTargetId, 4);
+            // The seen lists (enemies, friends, traitors): the victim in none, one or several places, among
+            // others (addresses only compared). The original's are MSVC6 vectors: an allocator word, then first,
+            // last, end.
+            static const uint32_t kListOffsets[3] = {0x264, 0x274, 0x294};
+            std::vector<C_Human *> *portLists[3] = {&h->m_seenEnemies, &h->m_seenFriends, &h->m_seenTraitors};
+            static void *origLists[3][6];
+            size_t counts[3];
+            for (int l = 0; l < 3; ++l) {
+                portLists[l]->clear();
+                counts[l] = size_t(P(0.15f) ? 0 : I(1, 6));
+                for (size_t k = 0; k < counts[l]; ++k) {
+                    const int pick = I(0, 3);
+                    C_Human *port = pick == 0 ? PortOther()
+                                  : pick == 1 ? h
+                                              : reinterpret_cast<C_Human *>(uintptr_t(0x1000 * pick));
+                    portLists[l]->push_back(port);
+                    origLists[l][k] = pick == 0 ? static_cast<void *>(g_origOther)
+                                    : pick == 1 ? static_cast<void *>(o_human)
+                                                : static_cast<void *>(port);
+                }
+            }
+            DiffCall("OnKilledHuman", [&] { h->OnKilledHuman(PortOther(), type); return 0; },
+                     [&](void *) {
+                         for (int l = 0; l < 3; ++l) {
+                             void **words = reinterpret_cast<void **>(o_human + kListOffsets[l]);
+                             words[0] = nullptr;
+                             words[1] = origLists[l];
+                             words[2] = origLists[l] + counts[l];
+                             words[3] = origLists[l] + counts[l];
+                         }
+                         OriginalAt<T_DKilled>(0x005a0be0)(o_human, g_origOther, type);
+                         for (int l = 0; l < 3; ++l)
+                             std::memset(o_human + kListOffsets[l], 0, 16);
+                         return 0;
+                     });
+            for (std::vector<C_Human *> *list : portLists)
+                std::vector<C_Human *>().swap(*list);
+            break;
+        }
+        case 7:
+            DiffCall("KnockOut", [&] { h->KnockOut(PortOther()); return 0; },
+                     [&](void *) { OriginalAt<T_KPtr>(0x005a62e0)(o_human, g_origOther); return 0; });
+            break;
+        default: {
+            const int health = P(0.2f) ? I(-1, 1) : P(0.4f) ? I(-20, 0) : I(1, 900);
+            const S_vector pos(U(-1, 1), U(0, 2), U(-1, 1)), dir(U(-1, 1), U(-1, 1), U(-1, 1));
+            DiffCall("ApplyRemoteHit", [&] { h->ApplyRemoteHit(type, zone, health, killerId, pos, dir); return 0; },
+                     [&](void *) {
+                         OriginalAt<T_DRemote>(0x005a15d0)(o_human, type, zone, health, killerId, &pos, &dir);
+                         return 0;
+                     });
+            break;
+        }
+        }
+    }
+}
+
 void TestCombat()
 {
     SetUpCombat();
     SetUpMotion();
+    SetUpDeaths();
     // COMBAT_ONLY: one part's tests alone (21a, 21b ...), for its mutation list.
     const char *only = std::getenv("COMBAT_ONLY");
     const auto run = [&](const char *part) { return !only || std::strcmp(only, part) == 0; };
@@ -631,6 +986,8 @@ void TestCombat()
     }
     if (run("21b"))
         TestCombatMotion();
+    if (run("21c"))
+        TestCombatDeaths();
 }
 
 }  // namespace
