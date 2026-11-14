@@ -183,13 +183,13 @@ private:
     static bool OnPlayerScreenShown(void *menu, void *argument, C_Control *control, uint32_t notification,
                                     uint32_t value);    // 0x00684fd0 (__thiscall)
     static bool OnPlayerScreenHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
-                                     uint32_t value);   // 0x00684fc0
+                                     uint32_t value);   // 0x00684fc0 (DS 0x006c36d0)
     static bool OnSoldierType(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);          // 0x00687dd0 (__thiscall)
     static bool OnSavePreset(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x00687f50 (__thiscall)
     static bool OnGameInfo(void *menu, void *argument, C_Control *control, uint32_t notification,
-                           uint32_t value);             // 0x006861b0 (__thiscall)
+                           uint32_t value);             // 0x006861b0 (__thiscall) (DS 0x006c4d70)
     static bool OnChat(void *menu, void *argument, C_Control *control, uint32_t notification,
                        uint32_t value);                 // 0x00682a20 (__thiscall)
     // A soldier's picture clicked: its profile (the control's index) kept for its list, its stats

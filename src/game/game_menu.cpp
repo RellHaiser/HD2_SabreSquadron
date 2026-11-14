@@ -638,7 +638,11 @@ bool C_GameMenu::OnPlayerScreenHidden(void *, void *, C_Control *, uint32_t, uin
 
 bool C_GameMenu::OnGameInfo(void *menu, void *, C_Control *, uint32_t, uint32_t)
 {
+#ifndef HD2_DEDICATED   // the server shows no info screen
     static_cast<C_GameMenu *>(menu)->m_infoScreen->Show(true);
+#else
+    (void)menu;
+#endif
     return true;
 }
 

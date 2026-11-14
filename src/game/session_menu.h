@@ -54,7 +54,7 @@ public:
                               uint32_t value);          // 0x0068b1c0
     // The console hidden: true.
     static bool OnConsoleHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
-                                uint32_t value);        // 0x0068b1b0
+                                uint32_t value);        // 0x0068b1b0 (DS 0x006c8740)
     // The password screen's controls: the input's Return or the OK button: a password entered kept
     // (the console's first step again, the screen closed; none: nothing); the input's Escape, the
     // Cancel button: the screen closed. Another control, none: false.

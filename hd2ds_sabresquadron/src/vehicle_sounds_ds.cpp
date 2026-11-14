@@ -8,6 +8,12 @@
 #include "game/resource_cache.h"                        // g_soundCache
 #include "ls3d/i3d.h"
 
+// The server's copy only returns 0 (DS 0x004bd8b0): no sound opened.
+long C_Vehicle::OpenSound(I3D_sound *sound, const char *fileName, uint32_t flags)   // 0x0051bd50
+{
+    return 0;
+}
+
 // Not in the server.
 void C_Vehicle::AddSoundsToSectors()                                            // 0x00517cf0
 {
