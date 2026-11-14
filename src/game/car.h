@@ -142,7 +142,7 @@ public:
     explicit C_CarMessage(int kind) : m_kind(kind) {}
     virtual ~C_CarMessage() = default;                  // (not in the original's vtables)
     virtual void Read(C_BitStream * /*stream*/) {}      // 0x00 (0x004e0760, 0x004e07b0)
-    virtual void Write(C_BitStream *stream);            // 0x04 (0x004e0770, 0x004e07c0)
+    virtual void Write(C_BitStream *stream);            // 0x04 (0x004e0770, 0x004e07c0, 0x004e0720)
     int GetKind() const { return m_kind; }
 
 protected:

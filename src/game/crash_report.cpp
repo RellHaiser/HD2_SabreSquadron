@@ -100,8 +100,8 @@ void LoadSymbolFiles(HANDLE process, DWORD processId)
     CloseHandle(snapshot);
 }
 
-// A frame's local variable (0x006e3cf0). The context is the fault's ESP.
-BOOL CALLBACK ReportLocalVariable(PSYMBOL_INFO symbol, ULONG, PVOID context)
+// A frame's local variable. The context is the fault's ESP.
+BOOL CALLBACK ReportLocalVariable(PSYMBOL_INFO symbol, ULONG, PVOID context)   // 0x006e3cf0 (DS 0x0072e3a0)
 {
     const DWORD address = static_cast<DWORD>(reinterpret_cast<DWORD_PTR>(context)) + static_cast<DWORD>(symbol->Address) - 8;
     // Fix: the original reads it directly, and a bad address faults inside the filter.
