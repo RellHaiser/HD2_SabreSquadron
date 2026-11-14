@@ -37,14 +37,20 @@ C_Actor *C_ActorsModule::GetHuman(int id) const
 void C_Team::OnMemberDied(C_Human *human) { Log(human, "TeamOnMemberDied"); }
 void C_CoopTeam::OnMemberDied(C_Human *human) { Log(human, "CoopTeamOnMemberDied"); }
 void C_FormationShape::OnLeaderDied() { Log(this, "FormationOnLeaderDied"); }
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 const char *C_Human::GetPlayerName() const { return "playerName"; }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 const S_vector &C_Human::GetViewDir() const { return g_combat.viewDir; }
+#endif
 bool C_Human::HasSeenEnemy(const C_Human *human) const
 {
     Log(human, "HasSeenEnemy");
     return g_combat.seenEnemy;
 }
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 bool C_Human::IsSurrendered() const { return g_combat.surrendered; }
+#endif
 void C_Human::OnSightEvent(int lost, int targetId) { Log(this, "OnSightEvent", {double(lost), double(targetId)}); }
 int C_HumanController::Say(int sentence, int delay, uint32_t flags, bool force)
 {

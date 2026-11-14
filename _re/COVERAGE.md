@@ -2129,3 +2129,36 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** I wrote the port car's speed at the original's offset; the port's vehicle is laid
   out differently, so GetSpeed read 0 every time. A check against GetSpeed showed it, and the offset is now found by
   probing.
+
+## Human part 22a (the human's controller made and its wrappers, `human_control.cpp`, 2026-11-14)
+
+- **The build:** a new one, `human/build_control.bat` (HUMAN_CONTROL; suite `human.control`): part 21's harness with
+  `human_control.cpp` linked (part 20's and 21's fakes of its functions left out). Added:
+  - the controllers CreateController makes: the port's derived vtables in raw storage under their symbols' names (their
+    code is not linked), the constructors logging the type; the original's inline constructions run with its
+    constructors (0x582ff0, 0x56ee90), the squad's Create and the aligned allocation redirected, and its six real
+    vtables' Attach, Detach and deleting destructor slots logged;
+  - each side's controller object for the wrappers, its fields in its own layout (the port's by member, the player's
+    and the scripted controller's by the type), its virtuals and the squad controller's logged (slots by member pointer
+    and by offset);
+  - the player's, AI's and scripted controllers' members the human calls, the body's, the events', the movement's, the
+    car's, the network game's player names, the squad commander, the hands weapon with its definition and component:
+    logged on both sides, their answers scripted;
+  - the human's OnMessage / Unknown20 real in both vtables (HandleMessage calls them through it).
+- **The tests (76,000, all exact):** CreateController, AssignPlayerController, SetScripted, StartScriptedController
+  (every type the original knows, the same type again, no controller); the wrappers: the controller's type, commands,
+  directions, accuracy (no weapon, equipment, a weapon), the move, state, AI and stance flags, the speed class, MakeNoise
+  at the 1 s quiet time, unconscious, in play, DetachFromWorld, spectating, remote, the move speed, water, surrendered,
+  suspended, the messages (the tested human, the other, none; player, remote or other controllers), the sight tests
+  (the local player or not), the path height, the light, the vehicle's leaving, the remote requests, the weapon stance,
+  the AI's path points, the player controller's input, equipment, commands, view mode, damage and breath, the squad's
+  orders and icons, LookAround, RaiseWeapon, LowerWeapon; no controller where the original tests for one.
+- **Kept out:** CreateController's unknown types (0, 2, 9): the original attaches a null controller and crashes; the
+  port checks.
+- **Port fixes:** none.
+- **Results:** lines: 261 of these functions' 264 (the three not run: the unknown type's case).
+- **Mutations** (`human/mutations/mutate_control1.py`): 127 mutants; 122 killed, 4 not building, 1 survived
+  (equivalent: the unknown type's case).
+- **Harness lessons (my mistakes):** the new controllers were named after their constructors logged (the names differed
+  in the first run); the original's deleting destructor's flag was logged where the port has none; the other human was
+  never made, so HandleMessage reached a zeroed object.

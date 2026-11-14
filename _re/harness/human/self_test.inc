@@ -249,29 +249,45 @@ void S_HumanBody::SetModelVisible(bool on) { Log(nullptr, "BodySetModelVisible",
 // The human's members in other files.
 // The port's controller object (parts 20b..: the fakes that make a controller install it).
 alignas(16) uint8_t g_portController[0x400];
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::CreateController(E_HumanController type)
 {
     Log(this, "CreateController", {double(type)});
     m_controller = reinterpret_cast<C_HumanController *>(g_portController);
 }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 const char *C_Human::GetShortName() const { return "shortName"; }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 const char *C_Human::GetFullName() const { return "fullName"; }
+#endif
 void C_Human::OnHandsChanged() { Log(this, "OnHandsChanged"); }
 void __stdcall C_Human::OnSoundHeard(const S_HeardSound *) {}
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::AssignPlayerController(bool active)
 {
     Log(this, "AssignPlayerController", {double(active)});
     m_controller = reinterpret_cast<C_HumanController *>(g_portController);
 }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::SetLeader(C_Human *leader) { Log(this, "SetLeader", {double(leader != nullptr)}); }
+#endif
 bool C_Human::PutOnUniform(int uid)
 {
     Log(this, "PutOnUniform", {double(uid)});
     return true;
 }
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 uint32_t C_Human::GetStateFlags() const { return g_self.stateFlags; }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 uint32_t C_Human::GetMoveMode() const { return g_self.moveMode; }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::DisbandFormation() { Log(this, "DisbandFormation"); }
+#endif
 #ifndef HUMAN_COMBAT   // (the combat build links game/human_combat.cpp's)
 void C_Human::UpdateVelocity(int timeDelta) { Log(this, "UpdateVelocity", {double(timeDelta)}); }
 void C_Human::UpdateDisguise(float amount) { Log(this, "UpdateDisguise", {amount}); }
@@ -280,8 +296,12 @@ void C_Human::Done() { Log(this, "Done"); }
 void C_Human::Init() { Log(this, "Init"); }
 void C_Human::WriteState(C_BitStream *) { Log(this, "WriteState"); }
 void C_Human::ReadState(C_BitStream *) { Log(this, "ReadState"); }
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::Unknown20(C_BitStream *) { Log(this, "Unknown20"); }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::OnMessage(C_BitStream *) { Log(this, "OnMessage"); }
+#endif
 void C_Human::UpdateSeenHumans() { Log(this, "UpdateSeenHumans"); }
 #ifndef HUMAN_COMBAT
 void C_Human::UpdateBleeding(int frameTime) { Log(this, "UpdateBleeding", {double(frameTime)}); }
@@ -290,7 +310,9 @@ bool C_Human::OnCollisionEx(C_Actor *, const S_vector *, int, int, int, int, int
 void C_Human::Hit(E_HitType, float, const S_vector &, const S_vector &, C_Actor *, int) {}
 void C_Human::GetBoxCorners(S_vector4 *) {}
 #endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 bool C_Human::IsUnconscious() const { return g_self.unconscious; }
+#endif
 void C_Human::ForgetOldSounds() { Log(this, "ForgetOldSounds"); }
 void C_Human::ClearContainers() { Log(this, "ClearContainers"); }
 #ifndef HUMAN_COMBAT
@@ -334,7 +356,9 @@ void C_CameraModule::SetSpecialMode(int mode, bool on, I3D_frame *target)
 }
 void C_CameraHumanEffects::Remove(C_Human *human) { Log(human, "CameraEffectsRemove"); }
 void C_EnemyRecords::Add(C_Human *enemy) { Log(enemy, "EnemyRecordsAdd"); }
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 C_FormationShape::C_FormationShape() {}
+#endif
 void C_FormationShape::Tick(int timeDelta) { Log(this, "FormationTick", {double(timeDelta)}); }
 bool C_FormationShape::SaveGame(C_chunk &chunk)
 {

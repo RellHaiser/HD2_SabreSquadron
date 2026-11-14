@@ -191,6 +191,7 @@ C_HumanMorph::C_HumanMorph() {}
 C_HumanWork::C_HumanWork() {}
 #endif
 
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 bool C_Human::AdjustToPathHeight(S_vector *pos) const
 {
     LogV(this, "AdjustToPathHeight", &pos->x, 3);
@@ -198,7 +199,10 @@ bool C_Human::AdjustToPathHeight(S_vector *pos) const
         pos->y = g_script.pathY;
     return g_script.pathHeight;
 }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 uint32_t C_Human::GetStanceFlags() const { Log(this, "GetStanceFlags"); return 0; }
+#endif
 #ifndef HUMAN_COMBAT
 int C_Human::GetStat(int stat) const { Log(this, "GetStat", {double(stat)}); return g_script.stat; }
 #endif
@@ -209,11 +213,15 @@ bool C_Human::IsLocalPlayer() const { return g_script.localPlayer; }
 bool C_Human::IsServerSimulated() const { return g_script.serverSimulated; }
 #endif
 bool C_Human::IsWearingDivingGear() const { Log(this, "IsWearingDivingGear"); return g_script.divingGear; }
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::PlayerRequestDamage(int type, int damage, int attackerId, int zone)
 {
     Log(this, "PlayerRequestDamage", {double(type), double(damage), double(attackerId), double(zone)});
 }
+#endif
+#ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
 void C_Human::SendRemoteRequest(int request) { Log(this, "SendRemoteRequest", {double(request)}); }
+#endif
 
 #ifndef HUMAN_MIXER   // (the HUMAN_MIXER build links game/human_anim_mixer.cpp)
 void C_HumanAnimMixer::AddMove(const S_vector4 &move, int duration) { LogV(this, "AddMove", &move.x, 4, {double(duration)}); }
@@ -753,6 +761,9 @@ namespace {
 #ifdef HUMAN_COMBAT
 #include "combat_test.inc"
 #endif
+#ifdef HUMAN_CONTROL
+#include "control_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -834,7 +845,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_COMBAT)
+#if defined(HUMAN_CONTROL)
+    TestControl();
+#elif defined(HUMAN_COMBAT)
     TestCombat();
 #elif defined(HUMAN_SELF)
     TestSelf();
