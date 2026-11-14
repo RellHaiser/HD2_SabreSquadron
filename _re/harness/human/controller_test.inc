@@ -323,9 +323,11 @@ int C_SpeechSet::SayNow(int sentence)
     return g_cs.speech;
 }
 void C_SpeechSet::SetDelay(int sentence, int delay) { Log(this, "SpeechSetSetDelay", {double(sentence), double(delay)}); }
-uint32_t SpeechCode_Base(uint32_t code) { return code & 0xFFFF00FFu; }
-int SpeechCode_GetSet(uint32_t code) { return int(code >> 8 & 0xFF); }
-int SpeechCode_GetVariant(uint32_t code) { return int(code & 0xFF); }
+// (The original's own: pure functions, __fastcall.)
+typedef uint32_t(__attribute__((fastcall)) * T_SpeechCode)(uint32_t);
+uint32_t SpeechCode_Base(uint32_t code) { return OriginalAt<T_SpeechCode>(0x005b0440)(code); }
+int SpeechCode_GetSet(uint32_t code) { return int(OriginalAt<T_SpeechCode>(0x005b0460)(code)); }
+int SpeechCode_GetVariant(uint32_t code) { return int(OriginalAt<T_SpeechCode>(0x005b0490)(code)); }
 
 // The queued messages (game/controller_messages.cpp is not linked: their vtables in raw storage under their symbols'
 // names, their deleting destructor logged as the original's aligned free is).
@@ -1542,6 +1544,331 @@ void TestControllerInteractions()
     std::printf("  mines laid: %d\n", g_minesCreated);
 }
 
+// ---- part 23d: saved games, speech, stamina, healing
+
+// The speech set (the human's own: logged on both sides, its answers scripted).
+alignas(16) uint8_t g_speechSetBytes2[0x40];
+int CT_ OS_SpeechSay(void *self, int sentence, int delay)
+{
+    Log(self, "SpeechSetSay", {double(sentence), double(delay)});
+    return g_cs.speech;
+}
+int CT_ OS_SpeechSayNow(void *self, int sentence)
+{
+    Log(self, "SpeechSetSayNow", {double(sentence)});
+    return g_cs.speech;
+}
+void CT_ OS_SpeechSetDelay(void *self, int sentence, int delay) { Log(self, "SpeechSetSetDelay", {double(sentence), double(delay)}); }
+// The sound module's (the original's slots 0x50, 0x4C, 0x94).
+uint32_t CT_ OS_PlayDubbing(void *, void *owner, void *frame, int dubbing, float nearRange, float farRange, int subtitle)
+{
+    Log(owner, ("PlayDubbing " + NameOf(frame)).c_str(), {double(dubbing), nearRange, farRange, double(B(subtitle))});
+    return g_cs.answer;
+}
+uint32_t CT_ OS_PlayDubbingWithNoise(void *, void *owner, void *frame, int dubbing, float nearRange, float farRange,
+                                     int subtitle, uint32_t flags)
+{
+    Log(owner, ("PlayDubbingWithNoise " + NameOf(frame)).c_str(),
+        {double(dubbing), nearRange, farRange, double(B(subtitle)), double(flags)});
+    return g_cs.answer;
+}
+int CT_ OS_GetDubbingSampleSize(void *, int id)
+{
+    Log(nullptr, "GetDubbingSampleSize", {double(id)});
+    return g_cs.sampleSize;
+}
+// The players (the actors' first 32: the tested human, the other one, none).
+int g_players[32];                                      // 0 none, 1 the tested human, 2 the other
+C_Actor *PlayerAt(int index, bool original)
+{
+    const int who = index >= 0 && index < 32 ? g_players[index] : 0;
+    if (who == 1)
+        return reinterpret_cast<C_Actor *>(original ? static_cast<void *>(o_human) : static_cast<void *>(g_h.human));
+    if (who == 2)
+        return reinterpret_cast<C_Actor *>(original ? static_cast<void *>(g_origOther) : static_cast<void *>(g_portOther));
+    return nullptr;
+}
+void *CT_ OC_GetActor(void *self, int index)
+{
+    Log(self, "GetActor", {double(index)});
+    return PlayerAt(index, true);
+}
+uint32_t CT_ OC_IsSpectating(void *self)
+{
+    Log(self, "IsSpectating");
+    return g_cs.spectating;
+}
+uint32_t CT_ OC_IsInPlay(void *self)
+{
+    Log(self, "IsInPlay");
+    return g_cs.inPlay;
+}
+int CT_ OC_GetMoveSpeedClass(void *self)
+{
+    Log(self, "GetMoveSpeedClass");
+    return g_cs.moveSpeedClass;
+}
+int CT_ OC_GetStance(void *self)
+{
+    Log(self, "GetStance");
+    return g_cs.stance;
+}
+// The medkit: each side its own object (the slots of Consume and GetCharges are not the same), its charges each side's.
+alignas(16) uint8_t g_medkitPort[0x80], g_medkitOrig[0x80];
+void *g_medkitPortVt[64], *g_medkitOrigVt[64];
+float g_charges[2];
+void CT_ MK_Consume(void *self, float amount)
+{
+    Log(self, "MedkitConsume", {amount});
+    float &c = g_charges[self == g_medkitOrig];
+    c -= amount;
+    if (c < 0.0f)
+        c = 0.0f;
+}
+float CT_ MK_GetCharges(void *self)
+{
+    Log(self, "MedkitGetCharges");
+    return g_charges[self == g_medkitOrig];
+}
+void *OrigItem(const void *p) { return p == g_medkitPort ? static_cast<void *>(g_medkitOrig) : const_cast<void *>(p); }
+void *CT_ OC_FindItemByUid(void *self, int uid)
+{
+    Log(self, "FindItemByUid", {double(uid)});
+    return OrigItem(g_cs.found);
+}
+void *CT_ OC_FindContainerOfBehaviour(void *self, int behaviour, int *container)
+{
+    Log(self, "FindContainerOfBehaviour", {double(behaviour)});
+    if (container)
+        *container = 3;
+    return OrigItem(g_cs.found);
+}
+void CT_ OC_RemoveItem(void *self, int uid, int destroy) { Log(self, "RemoveItem", {double(uid), double(B(destroy))}); }
+// The human's hit points (UpdateStamina: the strength) through its vtable: the real ones.
+int CT_ PH_GetHitPoints(C_Human *self) { return self->C_Human::GetHitPoints(); }
+I3D_frame *g_cameraFrame;
+
+void SetUpSpeech()
+{
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x005af8e0, FAKE(OS_SpeechSay)},
+        {0x005afa60, FAKE(OS_SpeechSayNow)},
+        {0x005afd10, FAKE(OS_SpeechSetDelay)},
+        {0x00475dd0, FAKE(OC_GetActor)},
+        {0x005a63f0, FAKE(OC_IsSpectating)},
+        {0x005a63b0, FAKE(OC_IsInPlay)},
+        {0x005a5cc0, FAKE(OC_GetMoveSpeedClass)},
+        {0x005a5d20, FAKE(OC_GetStance)},
+        {0x005a6ff0, FAKE(OC_FindItemByUid)},
+        {0x005a7810, FAKE(OC_FindContainerOfBehaviour)},
+        {0x005a7b70, FAKE(OC_RemoveItem)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    g_origSoundVt[0x50 / 4] = reinterpret_cast<void *>(OS_PlayDubbing);
+    g_origSoundVt[0x4C / 4] = reinterpret_cast<void *>(OS_PlayDubbingWithNoise);
+    g_origSoundVt[0x94 / 4] = reinterpret_cast<void *>(OS_GetDubbingSampleSize);
+    g_actorByIndex = PlayerAt;
+    g_names[g_speechSetBytes2] = "speech";
+    p_humanVt[VSlot(&C_Actor::GetHitPoints)] = reinterpret_cast<void *>(PH_GetHitPoints);
+    o_humanVt[0x10 / 4] = OriginalAt<void *>(0x0059c2b0);
+    // The medkits.
+    for (int i = 0; i < 64; ++i)
+        g_medkitPortVt[i] = g_medkitOrigVt[i] = reinterpret_cast<void *>(CT_Unexpected);
+    g_medkitPortVt[VSlot(&C_Item::Consume)] = reinterpret_cast<void *>(MK_Consume);
+    g_medkitPortVt[VSlot(&C_Item::GetCharges)] = reinterpret_cast<void *>(MK_GetCharges);
+    g_medkitOrigVt[0x1C / 4] = reinterpret_cast<void *>(MK_Consume);
+    g_medkitOrigVt[0x20 / 4] = reinterpret_cast<void *>(MK_GetCharges);
+    *reinterpret_cast<void ***>(g_medkitPort) = g_medkitPortVt;
+    *reinterpret_cast<void ***>(g_medkitOrig) = g_medkitOrigVt;
+    S_ItemAccess::SetDef(g_medkitPort, g_wornDefs[0]);
+    void *def = g_wornDefs[0];
+    std::memcpy(g_medkitOrig + 0x04, &def, 4);
+    g_names[g_medkitPort] = g_names[g_medkitOrig] = "medkit";
+    // The camera (the scene's active one, +0x13C).
+    S_quat none;
+    none.Identity();
+    g_cameraFrame = NewFrame(FRAME_DUMMY, "camera", S_vector(0, 2, 0), none, Box(S_vector(0.05f, 0.05f, 0.05f)), "", g_sector);
+    std::memcpy(g_sceneBytes + 0x13C, &g_cameraFrame, 4);
+}
+
+// The state: the speech set or none, the delay, the human's role and stats, the players, the medkit.
+void RandomSpeech()
+{
+    RandomInteractions();
+    C_Human *h = g_h.human;
+    h->m_speechSet = P(0.1f) ? nullptr : reinterpret_cast<C_SpeechSet *>(g_speechSetBytes2);
+    g_pc->m_speechDelay = P(0.5f) ? 0 : I(-5, 2000);
+    g_pc->m_moveFlags = P(0.2f) ? uint32_t(MOVE_SWIMMING) : uint32_t(I(0, 0xFFFF));
+    // A speech code: its base, set and variant (the original's helpers decode it).
+    g_cs.speech = P(0.1f) ? I(-3, 0) : P(0.5f) ? I(0, 40000) : int(uint32_t(I(0, 0x7FFFFFFF)));
+    g_cs.sampleSize = I(0, 3000);
+    g_cs.spectating = P(0.2f);
+    g_cs.inPlay = P(0.8f);
+    if (P(0.3f))
+        h->m_role = HUMAN_ROLE_PLAYER;
+    for (int &who : g_players)
+        who = P(0.85f) ? 0 : I(1, 2);
+    g_cameraFrame->SetPos(S_vector(U(-30, 90), U(0, 10), U(-30, 90)));
+    g_mineBodyFrame->SetPos(S_vector(U(-30, 90), U(0, 10), U(-30, 90)));
+    g_targetFrame->SetPos(S_vector(U(-30, 90), U(0, 10), U(-30, 90)));
+    // Stamina: the load, the endurance against its initial value, the speed class, the stance.
+    h->m_carriedWeight = P(0.2f) ? 0.0f : U(0, 60);
+    h->m_stats[STAT_ENDURANCE] = I(0, 120);
+    // (An initial endurance of 0 divides by zero in both.)
+    h->m_initialStats[STAT_ENDURANCE] = P(0.3f) ? std::max(1, h->m_stats[STAT_ENDURANCE]) : I(1, 120);
+    h->m_stats[STAT_STRENGTH] = I(1, 120);
+    h->m_stamina = P(0.2f) ? 0.0f : U(0, 130);
+    g_cs.moveSpeedClass = I(-1, 6);
+    g_cs.stance = I(0, 3);
+    // Healing: the patients (by id: 1 the tested human, 2 the other), their health against their initial health,
+    // the first aid skill, the medkit (found or not, its charges, its behaviour).
+    g_combat.human[1] = reinterpret_cast<C_Actor *>(h);
+    g_combat.human[2] = reinterpret_cast<C_Actor *>(g_portOther);
+    for (int k = 0; k < 2; ++k) {
+        const int initial = I(50, 120);
+        const int health = P(0.3f) ? initial : P(0.1f) ? 0 : I(1, initial);
+        if (k == 0) {
+            h->m_stats[STAT_HEALTH] = health;
+            h->m_initialStats[STAT_HEALTH] = initial;
+        } else {
+            PortOther()->m_stats[STAT_HEALTH] = health;
+            PortOther()->m_initialStats[STAT_HEALTH] = initial;
+            std::memcpy(g_origOther + 0xEC, &health, 4);
+            std::memcpy(g_origOther + 0x11C, &initial, 4);
+        }
+    }
+    h->m_stats[STAT_FIRST_AID] = I(0, 100);
+    g_charges[0] = g_charges[1] = P(0.2f) ? 0.0f : float(I(0, 150));
+    g_cs.found = P(0.2f) ? nullptr : reinterpret_cast<C_Item *>(g_medkitPort);
+    g_behaviour = P(0.8f) ? ITEM_BEHAVIOUR_MEDKIT : I(0, 12);
+    reinterpret_cast<C_Item *>(g_medkitPort)->SetUid(I(0, 50));
+    std::memcpy(g_medkitOrig + 0x10, g_medkitPort + 0x10, 4);
+}
+
+typedef int(CT_ *T_SaveChunk)(void *, C_chunk *);
+// Another chunk after the controller's (LoadGame: an unknown one, read alike).
+void WriteAfter(C_chunk &c)
+{
+    c.Begin(0x0123);
+    const int word = 0x55AA;
+    c.Write(&word, 4);
+    c.Ascend();
+}
+
+void TestControllerSpeech()
+{
+    C_Human *h = g_h.human;
+    std::printf("controller speech, stamina, healing\n");
+    for (int i = 0; i < 24000 / QUICK; ++i) {
+        RandomSpeech();
+        const int a = I(-2, 300), b = I(-2, 3000);
+        const bool flag = P(0.5f);
+        switch (i % 5) {
+        case 0:
+            // (The original calls a missing speech set; the port checks.)
+            if (!h->m_speechSet)
+                h->m_speechSet = reinterpret_cast<C_SpeechSet *>(g_speechSetBytes2);
+            ControllerCall("SayNow", [&] { g_pc->SayNow(a, flag); return 0; },
+                           [&](void *) { OCtl<void>(0x00588170, a, int(flag)); return 0; });
+            break;
+        case 1: {
+            const uint32_t flags = uint32_t(I(0, 3));
+            ControllerCall("Say", [&] { return g_pc->Say(a, b, flags, flag); },
+                           [&](void *) { return OCtl<int>(0x005882f0, a, b, flags, int(flag)); });
+            break;
+        }
+        case 2: {
+            const uint32_t time = uint32_t(I(0, 3000));
+            ControllerCall("UpdateStamina", [&] { g_pc->UpdateStamina(time); return 0; },
+                           [&](void *) { OCtl<void>(0x00588710, time); return 0; });
+            break;
+        }
+        case 3: {
+            const int who = I(0, 3);
+            const int uid = P(0.5f) ? -1 : I(0, 50);
+            ControllerCall("UseMedkit", [&] { return int(g_pc->C_HumanController::UseMedkit(who, uid)); },
+                           [&](void *) { return int(OCtl<uint32_t>(0x00588aa0, who, uid) & 0xFF); });
+            break;
+        }
+        default: {
+            const int who = I(0, 3);
+            const int health = I(-5, 80);
+            ControllerCall("Heal", [&] { g_pc->C_HumanController::Heal(who, a, health, flag); return 0; },
+                           [&](void *) { OCtl<void>(0x00588870, who, a, health, int(flag)); return 0; });
+            break;
+        }
+        }
+        // The patients' health, the medkit's charges alike.
+        CHECK(PortOther()->m_stats[STAT_HEALTH] == *reinterpret_cast<const int *>(g_origOther + 0xEC));
+        CHECK(g_charges[0] == g_charges[1]);
+    }
+}
+
+void TestControllerSaves()
+{
+    std::printf("controller saves\n");
+    const std::string portFile = TempFile("controller_port.sav"), origFile = TempFile("controller_orig.sav");
+    for (int i = 0; i < 2000 / QUICK; ++i) {
+        RandomInteractions();
+        // An interaction or none (its target an actor, a temporary one, or the human itself while healing it).
+        static const int kinds[] = {0, 1, 2, 9, 11, KIND_HUMAN};
+        if (P(0.6f)) {
+            g_pc->m_interaction = P(0.2f) ? HUMAN_COMMAND_HEAL_SELF : I(0, 0x26);
+            g_pc->m_interactionTarget = static_cast<C_Actor *>(PortActor(kinds[I(0, 5)]));
+        } else {
+            g_pc->m_interaction = -1;
+        }
+        std::remove(portFile.c_str());
+        std::remove(origFile.c_str());
+        ControllerCall("SaveGame",
+                       [&] {
+                           C_chunk c;
+                           c.Open(portFile.c_str(), true);
+                           c.Begin(0x7777);
+                           g_pc->SaveGame(c);
+                           WriteAfter(c);
+                           c.Ascend();
+                           return 0;
+                       },
+                       [&](void *) {
+                           C_chunk c;
+                           c.Open(origFile.c_str(), true);
+                           c.Begin(0x7777);
+                           OCtl<void>(0x00587550, &c);
+                           WriteAfter(c);
+                           c.Ascend();
+                           return 0;
+                       });
+        CHECK(FileBytes(portFile) == FileBytes(origFile));
+        // Loaded into another state from the port's file (or from an empty chunk).
+        RandomInteractions();
+        if (P(0.15f)) {
+            std::remove(portFile.c_str());
+            C_chunk c;
+            c.Open(portFile.c_str(), true);
+            c.Begin(0x7777);
+            c.Ascend();
+        }
+        uint16_t outer = 0;
+        ControllerCall("LoadGame",
+                       [&] {
+                           C_chunk c;
+                           c.Open(portFile.c_str(), false);
+                           c.Descend(outer);
+                           g_pc->LoadGame(c);
+                           return 0;
+                       },
+                       [&](void *) {
+                           C_chunk c;
+                           c.Open(portFile.c_str(), false);
+                           c.Descend(outer);
+                           OCtl<void>(0x00587830, &c);
+                           return 0;
+                       });
+    }
+}
+
 void TestController()
 {
     SetUpCombat();
@@ -1561,6 +1888,13 @@ void TestController()
     if (run("23c")) {
         SetUpInteractions();
         TestControllerInteractions();
+    }
+    if (run("23d")) {
+        if (!run("23c"))
+            SetUpInteractions();
+        SetUpSpeech();
+        TestControllerSpeech();
+        TestControllerSaves();
     }
 }
 

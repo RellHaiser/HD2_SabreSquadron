@@ -493,7 +493,14 @@ void C_SoundModule::SetChannelLimit(int channel, int limit) { Log(this, "SetChan
 C_SoundModule *GetSoundModule() { return reinterpret_cast<C_SoundModule *>(g_fakeSoundModule); }
 C_GEffectsModule *GetGEffects() { return reinterpret_cast<C_GEffectsModule *>(g_fakeGEffects); }
 C_Actor *g_actorAtIndex0 = nullptr;                      // what GetActor(0) answers (move_test.inc's saves: the vehicle)
-C_Actor *C_ActorsModule::GetActor(int index) const { Log(this, "GetActor", {double(index)}); return index == 0 ? g_actorAtIndex0 : nullptr; }
+C_Actor *(*g_actorByIndex)(int index, bool original) = nullptr;   // (part 23d: the players)
+C_Actor *C_ActorsModule::GetActor(int index) const
+{
+    Log(this, "GetActor", {double(index)});
+    if (g_actorByIndex)
+        return g_actorByIndex(index, false);
+    return index == 0 ? g_actorAtIndex0 : nullptr;
+}
 C_Actor *(*g_actorById)(int id, bool original) = nullptr; // what GetActorById answers (null: nothing; save_test.inc's loads)
 C_Actor *C_ActorsModule::GetActorById(int id) const
 {

@@ -2293,3 +2293,31 @@ particles and the surface marks. Files are served from memory.
   both wrong; the other humans held different controllers on the two sides; my CreateMine fake emptied the shared
   hands container before the original ran, which looked like the original's ray missing; another heredoc collapsed a
   backslash (caught by the script's assert).
+
+## Human part 23d (the controller's saved games, speech, stamina and healing, `human_controller.cpp`, 2026-11-14)
+
+- **The build:** part 23c's. Added:
+  - the speech set's Say, SayNow and SetDelay logged on both sides; the sound module's PlayDubbing,
+    PlayDubbingWithNoise and GetDubbingSampleSize (the original's slots 0x50, 0x4C, 0x94); the speech code helpers on
+    the port's side are the original's own (pure functions);
+  - the players the server's Say looks at (the actors' first 32: the tested human, the other one, none), their
+    IsSpectating and IsInPlay; the camera as the scene's active one;
+  - the medkit: each side its own object (Consume and GetCharges are at other slots on each side), its charges each
+    side's; FindItemByUid, FindContainerOfBehaviour, RemoveItem logged; the humans by id for the patients;
+  - the human's GetHitPoints real in both vtables (UpdateStamina reads the strength).
+- **The tests (26,000, all exact):** SayNow (the player's soldiers' quick messages, within the range or not, silent),
+  Say (no speech set, no sample, the delay running, swimming, the AI's hearing on a server or not, the clients told
+  when a player in play is in range), UpdateStamina (each speed class and stance, the load, the endurance against its
+  initial value, the maximum and 0, marching ended), UseMedkit and Heal (each patient or none, the human's own medkit
+  found or by uid, its charges, the first aid skill, a full health, a local, server or client game); SaveGame and
+  LoadGame (an interaction or none, its target an actor, a temporary one or the human healing itself; the files
+  compared byte for byte, the port's file loaded on both sides; a chunk after the controller's; an empty chunk).
+- **Kept out:** SayNow without a speech set (the original calls it; the port checks); an initial endurance of 0
+  (divides by zero in both); saving an interaction without a target (the original reads it; the port checks).
+- **Not run:** LoadGame's state chunk shorter than its fields (the size checks' false branches).
+- **Port fixes:** none.
+- **Results:** lines: 100 % of these functions' 180.
+- **Mutations** (`human/mutations/mutate_controller4.py`): 180 mutants (167 generated, 13 for repeated lines); 159
+  killed, 12 not building, 9 survived (equivalent or not comparable: listed there).
+- **Harness lessons (my mistakes):** the test first took 57 s alone (over a third of the mutation timeout): fewer
+  iterations; SayNow first ran without a speech set and the endurance with an initial value of 0.
