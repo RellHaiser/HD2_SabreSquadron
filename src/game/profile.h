@@ -467,7 +467,7 @@ enum E_PlayMode : int {
 
 struct S_PlayMode {
     S_PlayMode() = default;                             // 0x006b4990
-    virtual ~S_PlayMode() = default;                    // 0x006b49b0
+    virtual ~S_PlayMode() = default;                    // 0x006b49b0 (DS 0x006f7130)
     // Chunk 0x225C with the four ints.
     bool SaveGame(C_chunk &chunk);                      // 0x006b49d0
     bool LoadGame(C_chunk &chunk);                      // 0x006b4ad0

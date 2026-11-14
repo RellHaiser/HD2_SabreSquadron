@@ -39,7 +39,7 @@ class C_VideoState : public C_GameState {
 public:
     C_VideoState() = default;                           // 0x006c3330 (also inline)
     // (Its tables freed; the subtitles and voices are Stop's.)
-    ~C_VideoState() override = default;                 // 0x006c11a0 (0x006c1180)
+    ~C_VideoState() override = default;                 // 0x006c11a0 (0x006c1180 (DS 0x00708010))
     C_VideoState(const C_VideoState &) = delete;
     C_VideoState &operator=(const C_VideoState &) = delete;
 
@@ -49,12 +49,12 @@ public:
     // for a briefing, 1.1 %), opened: fitted to the screen, "D_Outro*" scrolled like the credits, else
     // the subtitles (their box when there are some), its volume the options' sound volume (110 %),
     // played. Running, true.
-    bool Start(void *arg) override;                     // 0x04 0x00688330
+    bool Start(void *arg) override;                     // 0x04 0x00688330 (DS 0x00707f50)
     // The screen cleared three times; not a briefing: the movie seen; the music back (or faded in);
     // the stream, the voices' player, the subtitles, the voices, the credits' styles, the box gone.
-    bool Stop() override;                               // 0x08 0x00688750
+    bool Stop() override;                               // 0x08 0x00688750 (DS 0x00707f70)
     // Escape (Space once the end is reached): the stream stopped, the screen cleared, ended. True.
-    bool HandleInput(float *held, float *pressed) override;   // 0x0C 0x00688ea0
+    bool HandleInput(float *held, float *pressed) override;   // 0x0C 0x00688ea0 (DS 0x00707f90)
     // The sound module's update; the stream's end (a briefing: "Press space to continue ...",
     // waited for; "D_Outro": its fade; else ended), its position; the credits scrolled (their last
     // line gone: 3 s more; "D_Outro" faded out over 1 s, ended after 1.2 s) or the subtitle shown;
@@ -111,17 +111,17 @@ protected:
 class C_MovieState : public C_VideoState {
 public:
     C_MovieState() = default;                           // (inline)
-    ~C_MovieState() override = default;                 // 0x006c1100 (0x006c10e0)
+    ~C_MovieState() override = default;                 // 0x006c1100 (0x006c10e0 (DS 0x00709280))
 
     // Plays `fileName` (a video node of its own); `sequence` says what follows it (C_GameApp: 0 back to
     // the state it was opened over, 1 .. 3 the next logo / the intro, 4 the main menu, 5 the first logo,
     // 6 the application ends). Running; returns false.
     bool Play(const char *fileName, int sequence);      // 0x0066ede0
     // The base's, the node deleted.
-    bool Stop() override;                               // 0x08 0x0066f030
+    bool Stop() override;                               // 0x08 0x0066f030 (DS 0x006a7f90)
     // The base's; ended: GAME_STATE_MOVIE_FINISHED.
-    bool HandleInput(float *held, float *pressed) override;   // 0x0C 0x0066f050
-    void Update(int timeDelta) override;                // 0x14 0x0066f080
+    bool HandleInput(float *held, float *pressed) override;   // 0x0C 0x0066f050 (DS 0x006a7fb0)
+    void Update(int timeDelta) override;                // 0x14 0x0066f080 (DS 0x006a7fe0)
     void Render() override { C_VideoState::Render(); }  // 0x18 0x0066f0a0
     int GetTypeId() const override { return GAME_STATE_TYPE_VIDEO; }   // 0x1C 0x006c10d0
 

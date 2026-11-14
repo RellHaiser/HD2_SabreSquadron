@@ -366,12 +366,16 @@ bool C_Team::AddMember(C_Human *human)                  // 0x0045e5d0
     return added;
 }
 
-bool C_Team::RemoveMember(C_Human *human)               // 0x0045e670
+bool C_Team::RemoveMember(C_Human *human)               // 0x0045e670 (DS 0x004798e0)
 {
     int index = -1;
     if (!C_TeamBase::RemoveMember(human, &index))
         return false;
+#ifdef HD2_DEDICATED   // no squad panel on the server (its copy still asks for the game)
+    (void)GetGame();
+#else
     GetGame()->GetInterface()->RemoveSquadMember(human, index);
+#endif
     if (m_active == index) {
         // The camera's soldier may have been hidden (first person view).
         // Fix: the original showed the member now in slot `index` (the last one moves there),
@@ -1000,11 +1004,13 @@ void C_TeamManager::StartMission(bool server)           // 0x00460aa0
         GetSquadCommander()->Reset();
 }
 
-void C_TeamManager::StopMission(bool server)            // 0x00460b30
+void C_TeamManager::StopMission(bool server)            // 0x00460b30 (DS 0x0047c840)
 {
     if (!server) {
+#ifndef HD2_DEDICATED   // the server has only the server's side
         if (IsClient())
             m_playerTeam.RestartMission(false);
+#endif
         m_clientRunning = false;
         return;
     }

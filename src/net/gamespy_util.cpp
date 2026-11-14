@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 // ---- darray.c ----------------------------------------------------------------------------------------------------------
 
@@ -547,6 +548,54 @@ void FreeBucketSet(S_BucketSet *set)                    // 0x00733400 (DS 0x0078
     free(set);
 }
 
+namespace {
+
+struct S_BucketText {
+    char *text;
+    int size;                                           // +0x04 allocated
+    int length;                                         // +0x08 used
+};
+
+// A bucket appended as "\name\value" (a double as %f).
+void AppendBucket(void *element, void *data)           // 0x00733870 (DS 0x0078ed80)
+{
+    const S_Bucket *bucket = static_cast<const S_Bucket *>(element);
+    S_BucketText *out = static_cast<S_BucketText *>(data);
+    int needed = static_cast<int>(std::strlen(bucket->name)) + 3;
+    if (bucket->type == BUCKET_INT || bucket->type == BUCKET_DOUBLE)
+        needed += out->length + 16;
+    else if (bucket->type == BUCKET_STRING)
+        needed += static_cast<int>(std::strlen(bucket->value.asString)) + out->length;
+    // Quirk kept: the text grows once, to twice its size, however much more the bucket needs.
+    if (out->size <= needed) {
+        out->size = out->size ? out->size * 2 : needed * 2;
+        out->text = static_cast<char *>(realloc(out->text, out->size));
+    }
+    char *end = out->text + out->length;
+    if (bucket->type == BUCKET_INT)
+        out->length += std::sprintf(end, "\\%s\\%d", bucket->name, bucket->value.asInt);
+    else if (bucket->type == BUCKET_DOUBLE)
+        out->length += std::sprintf(end, "\\%s\\%f", bucket->name, bucket->value.asDouble);
+    else if (bucket->type == BUCKET_STRING)
+        out->length += std::sprintf(end, "\\%s\\%s", bucket->name, bucket->value.asString);
+}
+
+}  // namespace
+
+// Every bucket of the set (null: the default set) as "\name\value" pairs, in a block the caller frees.
+char *BucketSetToString(S_BucketSet *set)              // 0x00733420 (DS 0x0078e7c0)
+{
+    if (!set)
+        set = g_bucketSet;
+    S_BucketText out;
+    out.text = static_cast<char *>(malloc(0x80));
+    out.text[0] = 0;
+    out.size = 0x80;
+    out.length = 0;
+    TableMap(set->buckets, AppendBucket, &out);
+    return out.text;
+}
+
 void *BucketNew(S_BucketSet *set, const char *name, int type, const void *value)    // 0x00733470 (DS 0x0078e830)
 {
     if (!set)
@@ -774,6 +823,9 @@ void PersistSetReply(const char *reply)                 // 0x00736890 (DS 0x0079
 struct S_StatsGame {
     int reserved[3];
     S_BucketSet *buckets;                               // +0x0C
+    uint8_t unknown10[0x0C];                            // +0x10
+    S_DArray *players;                                  // +0x1C the players' numbers, by index
+    S_DArray *teams;                                    // +0x20 the teams' numbers, by index
 };
 
 S_StatsGame *g_statsGame;                               // 0x00982b98 the game given by default
@@ -807,4 +859,148 @@ char *StatsBucketString(S_StatsGame *game, const char *name, BucketOpFn op, char
     if (!result)
         result = BucketNew(game->buckets, name, 2, value);
     return static_cast<char *>(result);
+}
+
+// A team's and a player's number in the game (the index itself with no game).
+int StatsTeamNumber(S_StatsGame *game, int index)       // 0x00736a90 (DS 0x00792e10)
+{
+    if (!game && !(game = g_statsGame))
+        return index;
+    return *static_cast<int *>(ArrayNth(game->teams, index));
+}
+
+int StatsPlayerNumber(S_StatsGame *game, int index)     // 0x00736ab0 (DS 0x00792e40)
+{
+    if (!game && !(game = g_statsGame))
+        return index;
+    return *static_cast<int *>(ArrayNth(game->players, index));
+}
+
+// A team's buckets are "<name>_t<team number>", a player's "<name>_<player number>".
+int StatsTeamBucketInt(S_StatsGame *game, const char *name, BucketOpFn op, int value, int index)   // 0x00736bc0 (DS 0x00792fc0)
+{
+    char full[64];
+    std::sprintf(full, "%s_t%d", name, StatsTeamNumber(game, index));
+    return StatsBucketInt(game, full, op, value);
+}
+
+double StatsTeamBucketDouble(S_StatsGame *game, const char *name, BucketOpFn op, double value, int index)   // 0x00736c10 (DS 0x00793030)
+{
+    char full[64];
+    std::sprintf(full, "%s_t%d", name, StatsTeamNumber(game, index));
+    return StatsBucketDouble(game, full, op, value);
+}
+
+char *StatsTeamBucketString(S_StatsGame *game, const char *name, BucketOpFn op, char *value, int index)   // 0x00736c60 (DS 0x007930a0)
+{
+    char full[64];
+    std::sprintf(full, "%s_t%d", name, StatsTeamNumber(game, index));
+    return StatsBucketString(game, full, op, value);
+}
+
+int StatsPlayerBucketInt(S_StatsGame *game, const char *name, BucketOpFn op, int value, int index)   // 0x00736cb0 (DS 0x00793110)
+{
+    char full[64];
+    std::sprintf(full, "%s_%d", name, StatsPlayerNumber(game, index));
+    return StatsBucketInt(game, full, op, value);
+}
+
+double StatsPlayerBucketDouble(S_StatsGame *game, const char *name, BucketOpFn op, double value, int index)   // 0x00736d00 (DS 0x00793180)
+{
+    char full[64];
+    std::sprintf(full, "%s_%d", name, StatsPlayerNumber(game, index));
+    return StatsBucketDouble(game, full, op, value);
+}
+
+char *StatsPlayerBucketString(S_StatsGame *game, const char *name, BucketOpFn op, char *value, int index)   // 0x00736d50 (DS 0x007931f0)
+{
+    char full[64];
+    std::sprintf(full, "%s_%d", name, StatsPlayerNumber(game, index));
+    return StatsBucketString(game, full, op, value);
+}
+
+// ---- gutil.c: the SDK's random numbers (Park and Miller's minimal standard) and the machine's unique id ------------------------
+
+namespace {
+
+int32_t s_randomNumber = 1;                             // 0x008455f0
+
+int32_t NextLongRand(int32_t seed)                      // 0x007381f0 (DS 0x00794cb0)
+{
+    uint32_t lo = 16807 * (static_cast<uint32_t>(seed) & 0xFFFF);
+    const uint32_t hi = 16807 * (static_cast<uint32_t>(seed) >> 16);
+    lo += (hi & 0x7FFF) << 16;
+    if (lo > 0x7FFFFFFF) {
+        lo &= 0x7FFFFFFF;
+        ++lo;
+    }
+    lo += hi >> 15;
+    if (lo > 0x7FFFFFFF) {
+        lo &= 0x7FFFFFFF;
+        ++lo;
+    }
+    return static_cast<int32_t>(lo);
+}
+
+int32_t LongRand()                                      // 0x007381d0 (DS 0x00794c80)
+{
+    s_randomNumber = NextLongRand(s_randomNumber);
+    return s_randomNumber;
+}
+
+}  // namespace
+
+void RandomSeed(uint32_t seed)                       // 0x00738190 (DS 0x00794c20)
+{
+    s_randomNumber = seed ? static_cast<int32_t>(seed & 0x7FFFFFFF) : 1;
+}
+
+// low .. high - 1 (the SDK's check for an empty range is not in this build).
+int RandomInt(int low, int high)                     // 0x007381b0 (DS 0x00794c50)
+{
+    return LongRand() % (high - low) + low;
+}
+
+namespace {
+
+// A new id: 19 letters and digits at random, '-' at 4, 9 and 14.
+void GenerateUniqueId(char *id)                         // 0x007380f0 (DS 0x00794b50)
+{
+    const char chars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    LARGE_INTEGER counter;
+    const uint32_t counterSeed = QueryPerformanceCounter(&counter) ? counter.HighPart ^ counter.LowPart : 0;
+    RandomSeed(static_cast<uint32_t>(std::time(nullptr)) ^ static_cast<uint32_t>(std::clock()) ^ GetTickCount() ^ counterSeed);
+    for (int i = 0; i < 19; ++i)
+        id[i] = (i == 4 || i == 9 || i == 14) ? '-' : chars[RandomInt(0, 62)];
+    id[19] = 0;
+}
+
+char s_uniqueId[0x104];                                 // 0x00982bb8
+
+}  // namespace
+
+// The id kept in HKCU\Software\GameSpy\GameSpy 3D\Registration "Crypt" (a new one written when it is missing or not 19 long),
+// without its dashes: 16 characters.
+const char *GetUniqueId()                               // 0x00737fd0 (DS 0x007949e0)
+{
+    static const char KEY[] = "Software\\GameSpy\\GameSpy 3D\\Registration";
+    HKEY key;
+    DWORD type = REG_SZ;
+    DWORD size = sizeof(s_uniqueId);
+    DWORD disposition;
+    const bool create = RegOpenKeyExA(HKEY_CURRENT_USER, KEY, 0, KEY_ALL_ACCESS, &key) != ERROR_SUCCESS;
+    if (RegQueryValueExA(key, "Crypt", nullptr, &type, reinterpret_cast<BYTE *>(s_uniqueId), &size) != ERROR_SUCCESS ||
+        std::strlen(s_uniqueId) != 19) {
+        GenerateUniqueId(s_uniqueId);
+        if (create)
+            RegCreateKeyExA(HKEY_CURRENT_USER, KEY, 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &key, &disposition);
+        RegSetValueExA(key, "Crypt", 0, REG_SZ, reinterpret_cast<const BYTE *>(s_uniqueId),
+                       static_cast<DWORD>(std::strlen(s_uniqueId) + 1));
+    }
+    RegCloseKey(key);
+    std::memmove(s_uniqueId + 4, s_uniqueId + 5, 4);
+    std::memmove(s_uniqueId + 8, s_uniqueId + 10, 4);
+    std::memmove(s_uniqueId + 12, s_uniqueId + 15, 4);
+    s_uniqueId[16] = 0;
+    return s_uniqueId;
 }

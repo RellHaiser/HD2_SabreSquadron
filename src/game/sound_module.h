@@ -111,7 +111,7 @@ uint32_t __stdcall AddSectorHopEntry(I3D_frame *frame, void *table);   // 0x0043
 // A sound frame of the scene whose volume follows the listener's sector.
 struct S_SoundFrame {                                   // 0x14 bytes
     S_SoundFrame(I3D_sound *sound, bool trackSector);   // 0x00432420
-    ~S_SoundFrame();                                    // 0x00432480
+    ~S_SoundFrame();                                    // 0x00432480 (DS 0x00457d80)
     S_SoundFrame(const S_SoundFrame &) = delete;
     S_SoundFrame &operator=(const S_SoundFrame &) = delete;
     // Sets the sector damping and applies it to the sound's volume.
@@ -146,20 +146,20 @@ public:
 
     // --- effects ----------------------------------------------------------------
     // Starts a sound; returns its slot or -1.
-    int Play(const S_SoundRequest &request);                        // vtable +0x54 0x00433fa0
+    int Play(const S_SoundRequest &request);                        // vtable +0x54 0x00433fa0 (DS 0x00459fd0)
     // Replays a table sample into the sound object of a recycled slot (see the
     // definition: free slots never keep a sound, so in practice this fails).
-    int PlayTableSound(void *owner, const S_SoundRequest &request);   // vtable +0x58 0x00435240
+    int PlayTableSound(void *owner, const S_SoundRequest &request);   // vtable +0x58 0x00435240 (DS 0x0045a010)
     // Stops the sound in `*slot` and sets `*slot` to -1.
     void Stop(int *slot);                                           // vtable +0x5C 0x00437340 (DS 0x0045b2c0)
     I3D_sound *GetSound(int slot) const;                            // vtable +0x78 0x004374a0
     // Stops every sound; `releaseTableSounds` also frees the samples' loaded
     // copies, `keepMusic` leaves the background music running.
-    void StopAll(bool releaseTableSounds, bool keepMusic);          // vtable +0x48 0x004361f0
+    void StopAll(bool releaseTableSounds, bool keepMusic);          // vtable +0x48 0x004361f0 (DS 0x0045ade0)
     // At most `limit` sounds of `channel` play at once.
     void SetChannelLimit(int channel, int limit);                   // vtable +0x90 0x004324c0
     S_SoundGroup *GetGroup(int chapter, int group) const;           // vtable +0x8C 0x004326d0
-    int GetDubbingSampleSize(int id);                               // vtable +0x94 0x004326c0 (ms)
+    int GetDubbingSampleSize(int id);                               // vtable +0x94 0x004326c0 (DS 0x00458060) (ms)
 
     // Plays dubbing number `dubbing` (a speech code's base, an animation note's "!a b")
     // at `owner` or `frame` in a free speech slot (PlaySpeechSlot: the sample and the lip
@@ -167,9 +167,9 @@ public:
     // second form also lets AI listeners near the owner hear it
     // (SOUND_SILENT_TO_AI / SOUND_AI_ONLY / SOUND_AI_OCCLUSION in `flags`).
     bool PlayDubbing(C_Human *owner, I3D_frame *frame, int dubbing, float nearRange, float farRange,
-                     bool showSubtitle);                            // vtable +0x50 0x00436470
+                     bool showSubtitle);                            // vtable +0x50 0x00436470 (DS 0x0045b090)
     bool PlayDubbingWithNoise(C_Human *owner, I3D_frame *frame, int dubbing, float nearRange,
-                              float farRange, bool showSubtitle, uint32_t flags);   // vtable +0x4C 0x00436520
+                              float farRange, bool showSubtitle, uint32_t flags);   // vtable +0x4C 0x00436520 (DS 0x0045b0b0)
 
     // Registers a sound frame of the scene (damped by the listener's sector).
     S_SoundFrame *RegisterSoundFrame(I3D_sound *sound, bool trackSector);   // vtable +0x88 0x00432710
@@ -183,12 +183,12 @@ public:
     // Plays track `track` once over the (turned down) background music; -1 stops it.
     void PlayMusic(int track);                                      // vtable +0x68 0x00436f60
     // Fades the music out in fadeTime/2 ms, then starts `track` and fades it in.
-    void CrossfadeMusic(int track, int fadeTime, int position);     // vtable +0x6C 0x00436f10
-    int GetBackgroundMusic() const { return m_musicTrack; }         // vtable +0x70 0x00433800
-    int GetBackgroundMusicPosition() const;                         // vtable +0x74 0x00433810 (ms)
-    float SetMusicVolume(float volume);                             // vtable +0x7C 0x00433510
-    float GetMusicVolume() const { return m_musicVolume; }          // vtable +0x80 0x00433830
-    float SetMasterVolume(float volume);                            // vtable +0x84 0x00433550
+    void CrossfadeMusic(int track, int fadeTime, int position);     // vtable +0x6C 0x00436f10 (DS 0x0045b1f0)
+    int GetBackgroundMusic() const { return m_musicTrack; }         // vtable +0x70 0x00433800 (DS 0x00459620)
+    int GetBackgroundMusicPosition() const;                         // vtable +0x74 0x00433810 (DS 0x00459640) (ms)
+    float SetMusicVolume(float volume);                             // vtable +0x7C 0x00433510 (DS 0x00459270)
+    float GetMusicVolume() const { return m_musicVolume; }          // vtable +0x80 0x00433830 (DS 0x00459660)
+    float SetMasterVolume(float volume);                            // vtable +0x84 0x00433550 (DS 0x00459290)
 
 private:
     struct S_SoundSlot {                                // 0x40 bytes

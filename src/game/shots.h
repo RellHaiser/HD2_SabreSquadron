@@ -179,10 +179,10 @@ public:
     // Moves a client bullet towards its end (every frame); true when it arrived.
     bool TickClient(int timeDelta);                         // 0x0044ccb0
 
-    void Release() override;                                // 0x0044b380
+    void Release() override;                                // 0x0044b380 (DS 0x00467340)
     bool Tick(int timeDelta) override;                      // 0x0044b910 (DS 0x00467a20)
     void Update(int timeDelta) override;                    // 0x0044b400 (DS 0x004673e0)
-    void Recycle() override;                                // 0x0044b350
+    void Recycle() override;                                // 0x0044b350 (DS 0x00467310)
     void SaveGame(C_chunk &) override {}                    // 0x0044db60
     void LoadGame(C_chunk &) override {}                    // 0x0044db70
 
@@ -331,18 +331,19 @@ struct S_ShotDecal;
 
 class C_ShotManager : public C_Module {                     // "ShotMgr", vtable 0x0080fa18, 0x154 bytes
 public:
-    C_ShotManager(int id, const char *name);               // 0x0044d920
-    ~C_ShotManager() override;                              // 0x0044dc30
+    C_ShotManager(int id, const char *name);               // 0x0044d920 (DS 0x0046a040)
+    ~C_ShotManager() override;                              // 0x0044dc30 (DS 0x0046a360) (scalar deleting 0x0044dc10 (DS 0x0046a330))
 
     // Runs the shots (server, and clients through Update).
     void Tick(int timeDelta) override;                      // 0x00451ec0 (DS 0x0046c950)
     // Clients: 100 ms ticks of their own, client bullets, interpolation and the effects.
-    void Update(int timeDelta) override;                    // 0x00451fb0
-    void StartMission(bool server) override;                // 0x0044dde0
-    void StopMission(bool server) override;                 // 0x0044e110
+    void Update(int timeDelta) override;                    // 0x00451fb0 (DS 0x0046ca70)
+    void StartMission(bool server) override;                // 0x0044dde0 (DS 0x0046a500)
+    void StopMission(bool server) override;                 // 0x0044e110 (DS 0x0046a5a0)
     bool OnMessage(C_BitStream *msg) override;              // 0x00452bd0
-    void RestartMission(bool server) override;              // 0x00452280
-    bool SaveGame(C_chunk &chunk) override;                 // 0x004524c0
+    bool Unknown28(C_BitStream *) override { return false; }   // 0x0044dc00 (DS 0x0046a310)
+    void RestartMission(bool server) override;              // 0x00452280 (DS 0x0046cbe0)
+    bool SaveGame(C_chunk &chunk) override;                 // 0x004524c0 (DS 0x0046cca0)
     bool LoadGame(C_chunk &chunk) override;                 // 0x004527e0
 
     // --- firing ------------------------------------------------------------------------

@@ -32,7 +32,7 @@ public:
     // The highlights of the places `item` may go (`ignoreWeight`: even over the free weight; the
     // belt and the backpack only with room for it).
     virtual void ShowAllowed(const S_SoldierItem &item, bool ignoreWeight);   // 0x04 0x006728a0
-    virtual ~C_EquipmentPanel() = default;              // 0x08 0x0067f3d0; the body 0x0067f3c0 (DS 0x006bc740)
+    virtual ~C_EquipmentPanel() = default;              // 0x08 0x0067f3d0 (DS 0x006bc760); the body 0x0067f3c0 (DS 0x006bc740)
 
     // The panel's description in `screen` (its controls' ids kept; the item controls' callbacks the
     // menu's slots, the scroll arrows OnScroll), then the highlights; `model` the screen's model (its

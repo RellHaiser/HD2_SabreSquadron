@@ -4970,11 +4970,15 @@ void C_HotKeyControl::Tick(int time)
 
 bool C_HotKeyControl::Unknown20(int key)
 {
+#ifdef HD2_DEDICATED   // no keys on the server: the server's copy only returns true
+    (void)key;
+#else
     if (!m_edit->IsEditing())
         return false;
     // (Its low byte: the original's.)
     if (static_cast<uint8_t>(key) == SCAN_ESCAPE)
         m_edit->OnInput02(0);
+#endif
     return true;
 }
 

@@ -844,6 +844,10 @@ void C_VersionsModule::ReadState(C_BitStream *msg)
 
 bool C_VersionsModule::OnMessage(C_BitStream *msg)
 {
+#ifdef HD2_DEDICATED   // the server takes no version messages
+    (void)msg;
+    return false;
+#else
     if (!(g_gameRole & GAME_ROLE_CLIENT) || !msg)
         return false;
     const auto masterIndex = static_cast<uint32_t>(static_cast<int16_t>(msg->ReadBits(16)));
@@ -861,4 +865,5 @@ bool C_VersionsModule::OnMessage(C_BitStream *msg)
         master->OnKeeperDamaged(master->m_keepers[keeperIndex]);
     }
     return true;
+#endif
 }

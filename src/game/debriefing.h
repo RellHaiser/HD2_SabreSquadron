@@ -23,7 +23,7 @@ public:
     // (Inline in C_GameApp::StartStep; the destructor is the base's: 0x006c2030.)
     C_DebriefingMenu() = default;
 
-    int GetTypeId() const override { return GAME_STATE_TYPE_DEBRIEFING_MENU; }   // 0x1C 0x006c2020
+    int GetTypeId() const override { return GAME_STATE_TYPE_DEBRIEFING_MENU; }   // 0x1C 0x006c2020 (DS 0x00707bf0)
 
     // Escape (no screen, or not the diary on top: the campaign's question "save and quit" (0x2533; the
     // mission played before: 0x2534), a single mission's "ARE YOU SURE?"; the diary: closed).

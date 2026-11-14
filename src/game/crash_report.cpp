@@ -6,6 +6,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #include "game/game_texts.h"
@@ -99,8 +100,8 @@ void LoadSymbolFiles(HANDLE process, DWORD processId)
     CloseHandle(snapshot);
 }
 
-// A frame's local variable (0x006e3cf0). The context is the fault's ESP.
-BOOL CALLBACK ReportLocalVariable(PSYMBOL_INFO symbol, ULONG, PVOID context)
+// A frame's local variable. The context is the fault's ESP.
+BOOL CALLBACK ReportLocalVariable(PSYMBOL_INFO symbol, ULONG, PVOID context)   // 0x006e3cf0 (DS 0x0072e3a0)
 {
     const DWORD address = static_cast<DWORD>(reinterpret_cast<DWORD_PTR>(context)) + static_cast<DWORD>(symbol->Address) - 8;
     // Fix: the original reads it directly, and a bad address faults inside the filter.
@@ -345,7 +346,7 @@ bool GetLogicalAddress(const void *address, char *module, DWORD moduleSize, int 
     return false;
 }
 
-LONG WINAPI ReportUnhandledException(EXCEPTION_POINTERS *exception)
+LONG WINAPI ReportUnhandledException(EXCEPTION_POINTERS *exception)   // 0x006e3400 (DS 0x0072d880)
 {
     ClearCrashReport();
     ReportLine("\n%s", LINE_OF_HASHES);
@@ -355,9 +356,13 @@ LONG WINAPI ReportUnhandledException(EXCEPTION_POINTERS *exception)
     ReportLine("%s", LINE_OF_HASHES);
     if (g_fatalErrorHandler)
         g_fatalErrorHandler(s_report);
+#ifdef HD2_DEDICATED   // the server ends there, without the previous filter
+    _exit(1);
+#else
     if (s_previousFilter)
         return s_previousFilter(exception);
     return EXCEPTION_CONTINUE_SEARCH;
+#endif
 }
 
 void OnFatalError(const char *report)

@@ -30,20 +30,23 @@ float Limit(float value, float limit)
     return value > 0.0f ? limit : -limit;
 }
 
+#ifndef HD2_DEDICATED   // no lamps on the server
 // The half of a shared lamp's projector that stays lit when the lamp breaks: the other side's
 // (a lamp left of the model's centre, x < 0, leaves the right one).
 uint16_t OtherSide(const S_VehicleLamp &lamp)
 {
     return lamp.frame->GetPos().x < 0.0f ? VEHICLE_PROJECTOR_RIGHT : VEHICLE_PROJECTOR_LEFT;
 }
+#endif
 
 }  // namespace
 
 void C_Vehicle::Deform(const S_vector4 &point, const S_vector4 &direction, float radius, float strength,
-                       uint8_t flags, const S_vector *push)                    // 0x004ff8b0
+                       uint8_t flags, const S_vector *push)                    // 0x004ff8b0 (DS 0x004f2be0)
 {
     const bool wear = (m_unknownF6C & VEHICLE_SIM_IMPACT_DAMAGE) && !(flags & DEFORM_NO_WEAR);
 
+#ifndef HD2_DEDICATED   // no lamps on the server
     // The lamps within `radius` (but those of a light part, which go with the part) lose health;
     // below m_lampBreakHealth they break.
     if (wear && ((flags & DEFORM_ANY_STRENGTH) || m_lampMinImpulse < strength)) {
@@ -68,6 +71,7 @@ void C_Vehicle::Deform(const S_vector4 &point, const S_vector4 &direction, float
                 BreakProjectorSide(lamp.projector, OtherSide(lamp));
         }
     }
+#endif
 
     // The parts: each one the impulse passes (minImpulse; DEFORM_ANY_STRENGTH: every one) has its
     // vertices within `radius` of the point moved along the direction (both in the part's space)
@@ -224,6 +228,7 @@ void C_Vehicle::Deform(const S_vector4 &point, const S_vector4 &direction, float
             // Fix: no callback, no call (the original calls through a null one).
             if (auto callback = reinterpret_cast<T_VehiclePartOffCallback>(m_callbacks[VEHICLE_CALLBACK_PART_OFF]))
                 callback(m_callbackContext, static_cast<int>(index), &velocity, push);
+#ifndef HD2_DEDICATED   // no lamps on the server
             for (size_t i = m_lamps.size(); i-- > 0;) {
                 S_VehicleLamp &lamp = m_lamps[i];
                 if (lamp.part != index)
@@ -246,6 +251,7 @@ void C_Vehicle::Deform(const S_vector4 &point, const S_vector4 &direction, float
                         BreakProjectorSide(lamp.projector, OtherSide(lamp));
                 }
             }
+#endif
         }
     }
 
@@ -278,7 +284,7 @@ void C_Vehicle::Deform(const S_vector4 &point, const S_vector4 &direction, float
     }
 }
 
-void C_Vehicle::ShowPartDamage(uint32_t index, const S_vector *push, bool detach)   // 0x004fefd0
+void C_Vehicle::ShowPartDamage(uint32_t index, const S_vector *push, bool detach)   // 0x004fefd0 (DS 0x004f2140)
 {
     // A door gone breaks its windows (the glass parts on its frame).
     if (index < m_parts.size() && m_parts[index].type == VEHICLE_PART_DOOR && m_parts[index].health <= 0.0f) {
@@ -334,6 +340,7 @@ void C_Vehicle::ShowPartDamage(uint32_t index, const S_vector *push, bool detach
     }
     part.frame->SetOn(false);
 
+#ifndef HD2_DEDICATED   // no lamps on the server
     // Its lamps (and those on its frame) break.
     for (size_t i = m_lamps.size(); i-- > 0;) {
         S_VehicleLamp &lamp = m_lamps[i];
@@ -344,6 +351,7 @@ void C_Vehicle::ShowPartDamage(uint32_t index, const S_vector *push, bool detach
         if (lamp.flags & VEHICLE_LAMP_SHARED)
             BreakProjectorSide(lamp.projector, OtherSide(lamp));
     }
+#endif
 
     // The parts on its frame are gone: a group shows its last visual (a body's or one with health
     // left on), glass cracks, the others come off (`detach`).
@@ -381,8 +389,11 @@ void C_Vehicle::ShowPartDamage(uint32_t index, const S_vector *push, bool detach
     }
 }
 
-void C_Vehicle::CrackGlass(uint32_t index, const S_vector &velocity)          // 0x00500da0
+void C_Vehicle::CrackGlass(uint32_t index, const S_vector &velocity)          // 0x00500da0 (DS 0x004f4170)
 {
+#ifdef HD2_DEDICATED   // the server's is empty
+    return;
+#endif
     S_VehiclePart &part = m_parts[index];
     // Below its crack health the glass shows the cracked texture (kept in glassTexture, which then
     // keeps the intact one).
@@ -410,6 +421,7 @@ void C_Vehicle::CrackGlass(uint32_t index, const S_vector &velocity)          //
     }
 }
 
+#ifndef HD2_DEDICATED   // no lamps on the server
 bool C_Vehicle::BreakProjectorSide(const I3D_projector_visual *projector, uint16_t keep)   // 0x00500cb0
 {
     int i = static_cast<int>(m_projectors.size());
@@ -430,3 +442,4 @@ bool C_Vehicle::BreakProjectorSide(const I3D_projector_visual *projector, uint16
     }
     return false;
 }
+#endif

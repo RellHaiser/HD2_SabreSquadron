@@ -59,7 +59,7 @@ C_Car::~C_Car()                                         // 0x004d0f20
     }
 }
 
-int C_Car::GetSeatCount()                               // 0x004d0e30
+int C_Car::GetSeatCount()                               // 0x004d0e30 (DS 0x004bd8f0)
 {
     return static_cast<int>(m_vehicle.m_seats.size());
 }

@@ -100,7 +100,7 @@ public:
     void Tick(int timeDelta) override;              // 0x0069b1e0
     void Update(int timeDelta) override;            // 0x0069b500
     void Render() override;                         // 0x0069bb40
-    int GetTypeId() const override { return GAME_STATE_TYPE_GAME; }   // 0x00698ab0
+    int GetTypeId() const override { return GAME_STATE_TYPE_GAME; }   // 0x00698ab0 (DS 0x006d97a0)
 
     // States in which a mission is loaded and running.
     bool IsMissionRunning() const

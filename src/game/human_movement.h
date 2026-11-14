@@ -1100,7 +1100,7 @@ public:
     void UpdateModelNames();                            // 0x00786b30
     // The camera is under water (set by the camera code at 0x0046c340; the swimming sounds of
     // the humans are heard by it).
-    static void SetCameraUnderWater(bool on);           // 0x00786b20 __fastcall
+    static void SetCameraUnderWater(bool on);           // 0x00786b20 (DS 0x007f5910) __fastcall
     static bool IsCameraUnderWater();
     // Plays dubbing number `dubbing` at `frame`, lip-synced and with its subtitle
     // (GetSoundModule()->PlayDubbing; 0 ends the frame's speech).

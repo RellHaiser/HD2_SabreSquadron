@@ -87,7 +87,7 @@ void WideName(wchar_t *out, const char *name)
 
 // The replication's factories by the object's id: a car's (the seat weapons' messages, the car's state); a human's
 // or a player's (the controllers'); none for the other actors.
-NetMessageFactory MakeObjectFactory(int id)
+NetMessageFactory MakeObjectFactory(int id)             // 0x0072d590 (DS 0x00786eb0)
 {
     if (id >= 32) {
         C_Actor *actor = g_actorsModule.GetActor(id);
@@ -99,7 +99,7 @@ NetMessageFactory MakeObjectFactory(int id)
     }
     return NetCreateMessage;
 }
-NetStateHandler MakeObjectStateReader(int id)
+NetStateHandler MakeObjectStateReader(int id)           // 0x0072d5c0 (DS 0x00786ef0)
 {
     if (id >= 32) {
         C_Actor *actor = g_actorsModule.GetActor(id);

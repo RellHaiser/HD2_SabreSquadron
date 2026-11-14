@@ -1395,7 +1395,7 @@ public:
     // binding's, CHANGED; Escape: none), the edit ended, HOT_KEY_DONE posted.
     void Tick(int time) override;                        // 0x0064e850
     // While editing: true (its low byte 1, Escape: the edit ended); else false.
-    bool Unknown20(int key) override;                    // 0x0064ea90
+    bool Unknown20(int key) override;                    // 0x0064ea90 (DS 0x00681df0)
     // The base's (false: not made); the edit box made on the frame (when there is one), the title on
     // "hktext*" taking input.
     bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064db20

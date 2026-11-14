@@ -177,7 +177,7 @@ public:
     // Special camera mode `mode` (CAMERA_MODE_*): `on` sets it to whether the third argument is
     // non-zero, else toggles it (CAMERA_MODE_DEBUG, _SPECTATOR, _MOUSE_LOOK); CAMERA_MODE_AIM,
     // _UNDERWATER and _PROJECTILE take `on` itself (the projectile's frame, the water's surface).
-    void SetSpecialMode(int mode, bool on, I3D_frame *target);   // +0x44 0x0046cb20
+    void SetSpecialMode(int mode, bool on, I3D_frame *target);   // +0x44 0x0046cb20 (DS 0x00487e00)
     void SetSpecialMode(int mode, bool on, int value);
     void SetSpecialMode(int mode, bool on, float height);
     // The same slot with a vector: CAMERA_MODE_EXPLOSION's place (`value` metres: the shake
@@ -192,7 +192,7 @@ public:
     bool SetFov(float fov);                             // +0x50 0x00465e50
     float GetFov();                                     // +0x54 0x00465e80
     // The view distance of the scene's active camera (its far range; the AI's sight range limit).
-    float GetViewDistance();                            // +0x58 0x00465de0
+    float GetViewDistance();                            // +0x58 0x00465de0 (DS 0x004831b0)
     bool SetNearSectorFov(float fov);                   // +0x5C 0x00465e00
     float GetNearSectorFov();                           // +0x60 0x00465e30
     // Position and view direction of camera `index` (0: the scene's camera, 1: the game camera;
@@ -203,7 +203,7 @@ public:
     I3D_frame *GetCamera();                             // +0x6C 0x004650b0
     // The game camera eases into its next position over `time` ms (ignored on a client whose
     // active soldier is in a vehicle).
-    void SetBlendTime(int time);                        // +0x70 0x00465ad0
+    void SetBlendTime(int time);                        // +0x70 0x00465ad0 (DS 0x00482e10)
     // Makes the game camera watch `frame`; speed -1 = cut, else degrees per second.
     void SetTarget(I3D_frame *frame, int speed);        // +0x74 0x00465b20
     // The debug camera is on (+0x26D; the player-driven meleeTracker ignores the mouse
@@ -216,7 +216,7 @@ public:
     bool HasScriptedView();                             // +0x80 0x00465080
     // A spectator's camera is on (+0x26E).
     bool GetUnknown84();                                // +0x84 0x00465090
-    C_CameraHumanEffects *GetHumanEffects();            // +0x88 0x004650a0
+    C_CameraHumanEffects *GetHumanEffects();            // +0x88 0x004650a0 (DS 0x00482110)
     // Sector the camera (the sound listener) is in.
     I3D_sector *GetListenerSector();                    // +0x8C 0x004650c0
 

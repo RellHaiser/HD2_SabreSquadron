@@ -15,7 +15,7 @@ class C_BitStream;
 // A reference-counted object (vtable 0x00816678): deleted when released below one.
 class C_NetRefCounted {
 public:
-    virtual ~C_NetRefCounted() = default;                         // 0x00745e90 (DS 0x007a6d60) (scalar deleting 0x00745ea0)
+    virtual ~C_NetRefCounted() = default;                         // 0x00745e90 (DS 0x007a6d60) (scalar deleting 0x00745ea0 (DS 0x007a6d80))
     virtual void AddRef() { ++m_refs; }                           // 0x00745e10 (DS 0x007a6ca0)
     virtual void Release();                                       // 0x00745e20
 

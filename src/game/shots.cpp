@@ -348,16 +348,20 @@ void C_BulletShot::Init(C_Actor *shooter, const S_vector &pos, const S_vector &d
 void C_BulletShot::Recycle()
 {
     C_Shot::Recycle();
+#ifndef HD2_DEDICATED   // no particles on the server
     if (m_flareSparks != -1)
         g_particlesModule.Destroy(m_flareSparks);
+#endif
     m_flareSparks = -1;
 }
 
 void C_BulletShot::Release()
 {
     C_Shot::Release();
+#ifndef HD2_DEDICATED   // no particles on the server
     if (m_flareSparks != -1)
         g_particlesModule.Destroy(m_flareSparks);
+#endif
     m_flareSparks = -1;
 }
 
@@ -1732,7 +1736,9 @@ C_ShotManager::C_ShotManager(int id, const char *name)
     : C_Module(id, name), m_bulletPool(16), m_shellPool(16)
 {
     m_bulletPool.Grow();
+#ifndef HD2_DEDICATED   // no shells on the server
     m_shellPool.Grow();
+#endif
 }
 
 C_ShotManager::~C_ShotManager()
@@ -1750,6 +1756,7 @@ void C_ShotManager::StartMission(bool server)
     m_maxBloodDrops = 100;
     m_maxBloodPools = IsLocalGame() ? 50 : 20;
     m_maxDecals = 100;
+#ifndef HD2_DEDICATED   // no models, decals or textures on the server
     m_weaponOdds = nullptr;
     m_traceModel = nullptr;
     m_shell3rd = nullptr;
@@ -1764,6 +1771,7 @@ void C_ShotManager::StartMission(bool server)
     m_bloodDrops.reserve(m_maxBloodDrops);
     m_bloodPools.reserve(m_maxBloodPools);
     LoadTextures();
+#endif
     m_clientTickTime = 0;
 }
 
@@ -1771,7 +1779,9 @@ void C_ShotManager::StopMission(bool server)
 {
     if (server) {
         g_hitZones.Free();
-    } else {
+    }
+#ifndef HD2_DEDICATED   // no client effects on the server
+    else {
         RemoveEffects(false);
         m_shellPool.Clear();
         for (IImage *&texture : m_decalTextures) {
@@ -1789,13 +1799,16 @@ void C_ShotManager::StopMission(bool server)
         m_weaponOdds = nullptr;
         m_traceModel = nullptr;                             // (the shell models are not reset)
     }
+#endif
     RemoveShots();
     m_bulletPool.Clear();
 }
 
 void C_ShotManager::RestartMission(bool)
 {
+#ifndef HD2_DEDICATED   // no client effects on the server
     RemoveEffects(true);
+#endif
     RemoveShots();
 }
 
@@ -1916,6 +1929,7 @@ void C_ShotManager::Update(int timeDelta)
     }
     for (size_t i = 0; i < m_shots.size(); ++i)
         m_shots[i]->Update(timeDelta);
+#ifndef HD2_DEDICATED   // no shells, muzzle lights or blood on the server
     for (int i = 0; i < static_cast<int>(m_shells.size()); ++i) {
         C_Shell *shell = m_shells[i];
         if (!shell->Tick(timeDelta))
@@ -1937,11 +1951,13 @@ void C_ShotManager::Update(int timeDelta)
         pool->Tick(timeDelta);
     for (C_BloodDrop *drop : m_bloodDrops)
         drop->Tick(timeDelta);
+#endif
 }
 
 bool C_ShotManager::SaveGame(C_chunk &chunk)
 {
     // Only placeholders: an empty chunk per decal, blood drop, blood pool and shot.
+#ifndef HD2_DEDICATED   // no decals or blood on the server
     for (size_t i = 0; i < m_decals.size(); ++i) {
         chunk.Begin(CHUNK_DECAL);
         chunk.Ascend();
@@ -1954,6 +1970,7 @@ bool C_ShotManager::SaveGame(C_chunk &chunk)
         chunk.Begin(CHUNK_BLOOD_POOL);
         chunk.Ascend();
     }
+#endif
     for (size_t i = m_shots.size(); i-- > 0;) {
         chunk.Begin(CHUNK_SHOT);
         m_shots[i]->SaveGame(chunk);

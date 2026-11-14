@@ -26,9 +26,10 @@ from build_game import COMMON, RELEASE, LINK, LAA, dll_lib, run_bat           # 
 # The game's .cpp files with no counterpart in HD2DS_SabreSquadron.exe: none of their client functions match a server function,
 # and none pairs with a changed server function between the same matched neighbours (MEDIUM: only 6334 of the client's 11400
 # functions are mapped to a src/ file, so a file is listed only when several of its functions are mapped). Human poses, stains,
-# vehicle sounds / lamps / effects / damage visuals and the in-game interface.
+# vehicle sounds / lamps / effects and the in-game interface.
 # Built although listed by that measure: files whose other functions the server's code calls (human_pose_ik.cpp's pose math,
-# input_controls.cpp's g_controls / WideToAnsi / render callback, speech_slots.cpp's LoadMaterialTables).
+# input_controls.cpp's g_controls / WideToAnsi / render callback, speech_slots.cpp's LoadMaterialTables, vehicle_damage.cpp's
+# Deform / ShowPartDamage: the server has them, without the lamps).
 CLIENT_ONLY = [
     "game/car_effects.cpp",
     "game/human_pose_body.cpp", "game/human_pose_dead.cpp", "game/human_pose_hold.cpp",
@@ -36,7 +37,7 @@ CLIENT_ONLY = [
     "game/human_stains.cpp", "game/human_weapon_pose.cpp",
     "game/interface.cpp", "game/interface_inventory.cpp", "game/interface_map.cpp", "game/interface_overlays.cpp",
     "game/interface_selectors.cpp", "game/interface_signals.cpp",
-    "game/vehicle_damage.cpp", "game/vehicle_effects.cpp", "game/vehicle_lamps.cpp", "game/vehicle_sounds.cpp",
+    "game/vehicle_effects.cpp", "game/vehicle_lamps.cpp", "game/vehicle_sounds.cpp",
 ]
 
 LIBS = [os.path.join(ROOT, "ls3drf", "build", "msvc", "LS3DRF.lib"), dll_lib("rw_data", "RW_DATA", "rw_data.lib"),

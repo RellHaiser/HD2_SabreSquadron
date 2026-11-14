@@ -492,6 +492,11 @@ bool C_MenuState::Stop()
 
 bool C_MenuState::HandleInput(float *held, float *pressed)
 {
+#ifdef HD2_DEDICATED   // no menus' input on the server
+    (void)held;
+    (void)pressed;
+    return true;
+#else
     if (m_keyboardOff)
         return true;
     OnInput(held, pressed);
@@ -566,6 +571,7 @@ bool C_MenuState::HandleInput(float *held, float *pressed)
     message.value = g_menuScreens.back()->GetId();
     PostControlMessage(message);
     return true;
+#endif
 }
 
 void C_MenuState::Update(int timeDelta)

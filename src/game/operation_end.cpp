@@ -99,17 +99,13 @@ bool C_OperationEndMenu::DescribeScreen(S_ScreenDesc *desc, I3D_frame *model)
 
 bool C_OperationEndMenu::OnInput(float *, float *)
 {
-#ifndef HD2_DEDICATED   // no keyboard in LS3DRF.dll
+#ifndef HD2_DEDICATED   // no keyboard on the server: the server's copy only returns true
     const int key = GetIGraph()->GetAsciiKey();
-#else
-    const int key = 0;
-#endif
     if (key == KEY_ESCAPE || key == KEY_SPACE) {
-#ifndef HD2_DEDICATED   // no rendering in LS3DRF.dll
         GetIGraph()->Clear(0, 1.0f, 3);
         GetIGraph()->Flip();
-#endif
         m_state = GAME_STATE_ENDED;
     }
+#endif
     return true;
 }

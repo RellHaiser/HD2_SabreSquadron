@@ -61,17 +61,14 @@ bool C_TSExplosion::SetFrame(I3D_frame *frame)          // 0x0060eea0
     return C_Actor::SetFrame(frame);
 }
 
-void C_TSExplosion::StartMission(bool server)           // 0x0060eef0
+void C_TSExplosion::StartMission(bool server)           // 0x0060eef0 (DS 0x00638720)
 {
     m_clientTime = 0;
     m_serverTime = 0;
     m_flags = 0;
     m_texture = nullptr;
-#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll
+#ifndef HD2_DEDICATED   // no textures in LS3DRF.dll (the server's copy activates either side)
     if (!server && GetIGraph()->LoadTexture("x_expl00.tga", nullptr, TEXTURE_MODE, &m_texture) != 0)
-        return;
-#else
-    if (!server)
         return;
 #endif
     Activate(server);

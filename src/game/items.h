@@ -288,16 +288,16 @@ protected:
     int m_container = 0;                                // +0x24
 };
 
-class C_AmmoItem : public C_Item {                      // vtable 0x00816ed8, 0x30 bytes
+class C_AmmoItem : public C_Item {                      // vtable 0x00816ed8, 0x30 bytes; deleting dtor 0x007d37a0 (DS 0x0080c730), dtor 0x007d37c0 (DS 0x0080c760)
 public:
-    C_AmmoItem() : C_Item(ITEM_KIND_AMMO) {}            // 0x007d3680
+    C_AmmoItem() : C_Item(ITEM_KIND_AMMO) {}            // 0x007d3680 (DS 0x0080c510)
 
     void Init(int typeId) override;                     // 0x007d37d0
-    float GetAmount() override { return m_rounds; }     // 0x007d3780
-    float GetMaxAmount() override { return m_maxRounds; }   // 0x007d3790
+    float GetAmount() override { return m_rounds; }     // 0x007d3780 (DS 0x0080c6f0)
+    float GetMaxAmount() override { return m_maxRounds; }   // 0x007d3790 (DS 0x0080c710)
     void SetAmount(float rounds) { m_rounds = rounds; }
-    int Fire(C_Actor *, const S_vector &, const S_vector &, uint32_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d3760
-    int FireSecondary(C_Actor *, const S_vector &, const S_vector &, uint8_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d3770
+    int Fire(C_Actor *, const S_vector &, const S_vector &, uint32_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d3760 (DS 0x0080c6b0)
+    int FireSecondary(C_Actor *, const S_vector &, const S_vector &, uint8_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d3770 (DS 0x0080c6d0)
     bool SaveGame(C_chunk &chunk) override;             // 0x007d3820
     bool LoadGame(C_chunk &chunk) override;             // 0x007d3a20
 
@@ -328,9 +328,9 @@ public:
 
     void Init(int typeId) override;                     // 0x007d4640
     void Consume(float amount) override;                // 0x007d45d0
-    float GetCharges() override { return m_charges; }   // 0x007d4600
-    int Fire(C_Actor *, const S_vector &, const S_vector &, uint32_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d4680
-    int FireSecondary(C_Actor *, const S_vector &, const S_vector &, uint8_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d4690
+    float GetCharges() override { return m_charges; }   // 0x007d4600 (DS 0x0080da20)
+    int Fire(C_Actor *, const S_vector &, const S_vector &, uint32_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d4680 (DS 0x0080dae0)
+    int FireSecondary(C_Actor *, const S_vector &, const S_vector &, uint8_t) override { return FIRE_NOT_A_WEAPON; }   // 0x007d4690 (DS 0x0080db00)
     bool SaveGame(C_chunk &chunk) override;             // 0x007d46a0
     bool LoadGame(C_chunk &chunk) override;             // 0x007d47b0
 
@@ -355,7 +355,7 @@ public:
     // Rounds in the weapon; 0 until a reload / the last shot is finished.
     float GetAmount() override;                         // 0x007d4ae0
     float GetMaxAmount() override { return m_capacity; }   // 0x007d4b00 (DS 0x0080e0f0)
-    void SetRounds(C_Actor *owner, int ammoUid, int rounds) override;   // 0x007d51d0
+    void SetRounds(C_Actor *owner, int ammoUid, int rounds) override;   // 0x007d51d0 (DS 0x0080e7e0)
     // Takes the fullest magazine of the right type from container `container` of
     // `owner` (ITEM_BEHAVIOUR_LAUNCHER weapons use the backpack contents instead of the
     // belt). Rounds that do not fit go back into the emptiest magazine if they fit
@@ -363,7 +363,7 @@ public:
     // refills the weapon without being used up (as does the infinite ammo cheat).
     // The weapon is busy for the component's reload time; `*ammoUid` receives the uid
     // of the magazine used up (-1 none).
-    bool Reload(C_Actor *owner, int container, int *ammoUid, bool keepLastMagazine) override;   // 0x007d4cb0
+    bool Reload(C_Actor *owner, int container, int *ammoUid, bool keepLastMagazine) override;   // 0x007d4cb0 (DS 0x0080e340)
     int Fire(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint32_t flags) override;   // 0x007d5430 (DS 0x0080e8e0)
     int FireSecondary(C_Actor *shooter, const S_vector &pos, const S_vector &dir, uint8_t flags) override;   // 0x007d5670
     I3D_frame *GetProjectileFrame() override;           // 0x007d4b10

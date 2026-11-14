@@ -7,6 +7,7 @@
 
 #include "common/chunk.h"
 #include "common/color.h"
+#include "common/radix_sort.h"
 #include "game/game.h"
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
@@ -96,6 +97,7 @@ struct S_SortKey {
     int depth;
     int index;
 };
+static_assert(sizeof(S_SortKey) == sizeof(S_RadixPair), "S_SortKey is sorted as S_RadixPair");
 std::vector<S_SortKey> g_particleSortKeys;                  // 0x008999ec (count 0x008999f4)
 
 // Rotation by `angle` around z.
@@ -788,11 +790,8 @@ void C_ParticleEmitter::Sort(bool collect)
         bound.bbox.max.z = std::max(bound.bbox.max.z, pos.z + extent);
     }
     if (collect) {
-        // Nearest first (a radix sort on the keys as unsigned numbers in the original).
-        std::stable_sort(g_particleSortKeys.begin(), g_particleSortKeys.end(),
-                         [](const S_SortKey &a, const S_SortKey &b) {
-                             return static_cast<uint32_t>(a.depth) < static_cast<uint32_t>(b.depth);
-                         });
+        // Nearest first (the keys as unsigned numbers).
+        RadixSortPairs(reinterpret_cast<S_RadixPair *>(g_particleSortKeys.data()), static_cast<int>(g_particleSortKeys.size()));
     }
     m_depth /= static_cast<float>(count);
 
