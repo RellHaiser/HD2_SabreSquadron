@@ -767,6 +767,9 @@ namespace {
 #ifdef HUMAN_SENSES
 #include "senses_test.inc"
 #endif
+#ifdef HUMAN_CROWD
+#include "crowd_test.inc"
+#endif
 #ifdef HUMAN_CONTROLLER
 #include "controller_test.inc"
 #endif
@@ -851,7 +854,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_SENSES)
+#if defined(HUMAN_CROWD)
+    TestCrowd();
+#elif defined(HUMAN_SENSES)
     TestSenses();
 #elif defined(HUMAN_CONTROLLER)
     TestController();

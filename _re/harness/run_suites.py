@@ -173,6 +173,8 @@ SUITES = [
     T("human.controller", "human/build_controller.bat", TMP + r"\human_controller_test.exe", needs=("mingw", "original_exe")),
     # (The human's senses and events, game/human_senses.cpp, human_events.cpp: human/build_senses.bat, HUMAN_SENSES.)
     T("human.senses", "human/build_senses.bat", TMP + r"\human_senses_test.exe", needs=("mingw", "original_exe")),
+    # (The humans keeping out of each other's way, game/human_crowd.cpp: human/build_crowd.bat, HUMAN_CROWD.)
+    T("human.crowd", "human/build_crowd.bat", TMP + r"\human_crowd_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

@@ -2410,3 +2410,36 @@ particles and the surface marks. Files are served from memory.
     drained down to a sentinel after each load.
   - First mutation passes: the CanSee fake always answered, Freeze's frame Update was not seen, short id chunks and
     source id 0 were rare, and S_HumanEvent::LoadGame's result was never looked at.
+
+## Human part 25a (the crowd's geometry and a memory's steps, `human_crowd.cpp`, 2026-11-14)
+
+- **The build:** `human/build_crowd.bat` (HUMAN_CROWD, `crowd_test.inc`): part 24's harness with human_crowd.cpp linked.
+  - The AI memories (C_HumanAIMemory, the same layout on both sides) are each side's own: their owner (the human or
+    one of part 24's other humans) and route (the port's std::vector, the original's MSVC6 vector of the same
+    waypoints) differ. After each call both memories are compared word by word (floats within the usual tolerance:
+    the file's own note says its sums are not always in the original's order), pointers by what they name.
+  - The checkpoint network is the test's: 40 points about the humans (every fourth on whole metres with a radius of
+    whole halves, for exact ties), linked to their nearest few. Both games point at it (the original's +0x54); its
+    count and points are at the original's offsets. Get and FindNearestPoint (checkpoints.cpp is not linked) are
+    fakes on both sides; the original's Get takes a 16-bit index (KeepOnNetwork passes a link's target in AX).
+  - The original's crowd methods get a zeroed crowd object as `this`.
+- **The tests (all within the float tolerance):** AddPush (no total, along, against, across), KeepInsideStrip (in
+  either circle, beside, before, after; exact ties on the edges), KeepOnNetwork (in, out, along a link, no point, on
+  the edge), SortCorners (in and about the unit square, no direction), AdvanceWaypoint (a move ending about 5 cm short),
+  MoveOneStep (a route or none, walking or not), PushFromHuman and PushTargetFromHuman (standing or lying, overlapping,
+  on a collision course, the same target, a tiny offset), PushOntoNetwork, HoldOnNetwork, TurnPushAside (pushed straight
+  back), UpdateStuckTimer, the memory's SaveGame (files byte for byte) and LoadGame (saved and random chunks, the
+  chunk after it read next).
+- **Not compared:** the w of the memory's position, velocity, push and target (+0x2C, +0x3C, +0x4C, +0x6C): the
+  original's HoldOnNetwork, MoveOneStep, MoveTarget store a stack temporary's undefined one, and its AddPush copies a
+  whole 16-byte push in.
+- **Port fixes:** UpdateStuckTimer summed the squares in another order than the original's ((z^2 + x^2) + y^2): an
+  exact tie with the best distance went the other way. PushFromHuman asked for the other's stance only after the floor
+  test; the original asks first (no effect: the calls now agree).
+- **Results:** 60,653 checks; lines: 95.9 % of these functions' 386 (the rest: the car helpers, PointRate and
+  IsInvalid, part 25b's, and FirstRootAhead's both-roots-behind case, unreachable).
+- **Mutations** (`human/mutations/mutate_crowd1.py`): 412 mutants (393 generated, 19 for repeated lines); 332 killed,
+  19 not building, 61 survived: 20 in part 25b's helpers, 19 equivalent, 22 float ties at exact equality.
+- **Harness lessons (my mistakes):** my network Get fake took the whole index word (the original passes 16 bits);
+  `near` is a windows.h macro (again); I aimed a human exactly at another for a mutant and made the side it gives way
+  to rounding noise; the original's undefined w words.

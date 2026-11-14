@@ -466,11 +466,13 @@ void PushFromHuman(C_HumanAIMemory &self, const C_HumanAIMemory &other)
 {
     if (!self.solved)
         return;
+    // (The other's stance is asked before the floors are compared, as the original does.)
+    const bool prone = other.owner->GetStance() == 2;
     S_vector offset = Sub4(self.pos, other.pos);
     if (!(std::fabs(offset.y) <= SAME_FLOOR))
         return;
     offset.y = 0.0f;
-    if (other.owner->GetStance() == 2) {
+    if (prone) {
         const S_Ellipsoid shape = ProneEllipsoid(other);
         S_vector l = shape.Local(offset);
         const float c = Sq(l) - 1.0f;
@@ -642,7 +644,8 @@ void UpdateStuckTimer(C_HumanAIMemory &memory, int16_t timeDelta)
 {
     const S_vector point = Xyz((*memory.route)[memory.waypoint]->pos);
     const S_vector off(memory.pos.x - point.x, memory.pos.y - point.y, memory.pos.z - point.z);
-    const float sq = Sq(off);
+    // (In the original's order: the comparison with the best is exact.)
+    const float sq = (off.z * off.z + off.x * off.x) + off.y * off.y;
     if (sq < memory.bestDistance) {
         memory.bestDistance = sq;
         memory.stuckTimer = 2000;

@@ -208,6 +208,7 @@ bool C_HumanEvents::LoadGame(C_chunk &)
     return true;
 }
 #endif
+#ifndef HUMAN_CROWD   // (the crowd build links game/human_crowd.cpp's)
 bool C_HumanAIMemory::SaveGame(C_chunk &)
 {
     Log(this, "AIMemorySave");
@@ -218,6 +219,7 @@ bool C_HumanAIMemory::LoadGame(C_chunk &)
     Log(nullptr, "AIMemoryLoad");
     return true;
 }
+#endif
 bool S_HumanBody::Create(C_Human *owner, int group)
 {
     Log(owner, "BodyCreate", {double(group)});
