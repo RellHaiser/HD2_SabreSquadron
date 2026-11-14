@@ -110,7 +110,7 @@ public:
     // goes back to the source (its old container, any free one, or dropped:
     // *replacedContainer). Updates the equipment models and the HUD itself.
     int TransferItem(C_Item *item, C_Actor *from, int fromContainer, C_Actor *to, int toContainer,
-                     C_Item **replaced, int *toContainerOut, int *replacedContainer);   // 0x007da240
+                     C_Item **replaced, int *toContainerOut, int *replacedContainer);   // 0x007da240 (DS 0x008148e0)
     // TransferItem into the container of `to` the item's kind suggests.
     int TransferItemAuto(C_Item *item, C_Actor *from, int fromContainer, C_Actor *to,
                          int *toContainer);             // 0x007da850
