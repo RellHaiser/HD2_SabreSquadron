@@ -29,8 +29,8 @@ enum : int {
 
 class C_SessionMenu : public C_MenuState {
 public:
-    // (Inline in C_GameApp::UpdateClient; the destructor is the base's: 0x006c3200.)
-    C_SessionMenu() = default;
+    C_SessionMenu() = default;                          // (inline in C_GameApp::UpdateClient)
+    ~C_SessionMenu() override = default;                // 0x006c3200 (DS 0x007090d0), 0x006c3220 (DS 0x00709100): the base's body only
 
     int GetTypeId() const override { return GAME_STATE_TYPE_SESSION_MENU; }   // 0x1C 0x006c31f0
 

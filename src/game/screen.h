@@ -185,7 +185,7 @@ enum : uint32_t {
 class C_MessageBox : public C_Screen {                  // 0x90 bytes, vtable 0x008155d8
 public:
     C_MessageBox(I3D_scene *scene, I3D_frame *frame) : C_Screen(scene, frame) {}   // (inline)
-    // (0x0066c6d0 (0x0066c6b0): the screen's.)
+    ~C_MessageBox() override = default;                 // 0x0066c6b0, 0x0066c6d0 (DS 0x006a4d00): the screen's body only
 
     // Shown (none shown before): the buttons of the kind shown, the others hidden (kinds above 3:
     // left), the text set (kind 3: the second style), the answers' messages kept, shown posted.

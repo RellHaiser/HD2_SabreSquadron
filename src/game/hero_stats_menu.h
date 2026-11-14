@@ -16,8 +16,8 @@ struct S_ScreenDesc;
 
 class C_HeroStatsMenu : public C_MenuState {
 public:
-    // (Inline in C_GameApp::StartStep; the destructor is the base's: 0x006c22d0, deleting 0x006c22b0.)
-    C_HeroStatsMenu() = default;
+    C_HeroStatsMenu() = default;                        // (inline in C_GameApp::StartStep)
+    ~C_HeroStatsMenu() override = default;              // 0x006c22b0 (DS 0x00708080), 0x006c22d0 (DS 0x007080b0): the base's body only
 
     int GetTypeId() const override { return GAME_STATE_TYPE_HERO_STATS_MENU; }   // 0x1C 0x006c22a0
 
