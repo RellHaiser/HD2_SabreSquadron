@@ -1983,3 +1983,38 @@ particles and the surface marks. Files are served from memory.
     crashed);
   - self_test.inc had mixed line endings (CR CR LF in 315 lines) from an edit script that turned LF into CRLF in text
     that already had CR: normalised to LF.
+
+## Human part 21a (the human's sides, teams, disguise and stats, `human_combat.cpp`, 2026-11-14)
+
+- **The build:** `human/build_combat.bat` (HUMAN_COMBAT): build_human.bat's harness with game/human_combat.cpp linked
+  too, `human/combat_test.inc`'s tests alone.
+  - Part 20's fakes of the combat functions are left out (`#ifndef HUMAN_COMBAT`), and the original's GetStat,
+    IsLocalPlayer, IsServerSimulated and UpdateDisguise run real again.
+  - About 40 more port fakes (the shot manager, the network game's teams, the vehicle's controls, the body's hit and
+    death calls, the scripts' OnDeath, ...).
+  - The player team's IsMember answers by object. A second human ("other") is copied in both layouts through
+    ToOriginal, as part 20f's CopyFrom.
+  - The worn items' containers (one each, GetItem: slot 0x40 on both sides), items and their definitions: the
+    original's item +0x04 -> definition +0x44, the port's at its own offsets.
+  - The game's uniform-disguise flag (the original's game +0x34). A MeleeTracker (its type at +0x18 on both sides).
+- **The tests (36,000, all exact):** IsFriendOfInNetGame, IsFriendOf (another human or a MeleeTracker in local games),
+  IsDisguisedEnemy, GetSide, GetTeam, SetPlayerTeam, IsLocalPlayer, IsServerSimulated, UpdateDisguise, SetDisguise,
+  GetDisguisePercent, NotifyShotAt, GetStat, GetStatFactor, SetSkills, ChangeMorale, Get / SetHealthPercent,
+  GetStaminaPercent:
+  - every role, local, client and server games, co-op or not, deathmatch or team games, the uniforms disguising or
+    not;
+  - members of the player's team or not, allied, axis or neutral items worn or none, carrying a body;
+  - stats of 0, negative and large.
+- **Port fixes (on main):** GetStaminaPercent and GetHealthPercent converted an infinity (an endurance or an initial
+  health of 0) to INT_MIN; the original's __ftol truncates through 64 bits, whose "indefinite" value has a low word of
+  0, so it returns 0. Both truncate through int64_t now.
+- **Not observable, not compared:** the worn containers' GetItem (a getter): the original's GetSide asks for the
+  uniform twice and its UpdateDisguise asks the containers in another order, with the same results.
+- **Results:** lines: 100 % of the 122 lines of these functions; human_combat.cpp 19.6 % of 622 so far.
+- **Mutations** (`human/mutations/mutate_combat1.py`): 90 mutants; 74 killed, 5 not building, 11 survived (clamps,
+  equivalent at their boundaries).
+- **Harness lessons (my mistakes):**
+  - the test passed a MeleeTracker to IsFriendOf in network games, which treat every actor as a human (both sides
+    crash on it); only local games pass one now;
+  - a rerun of the survivors ran against a failing baseline (GetHealthPercent's infinity, found by the new random
+    values) and reported every mutant killed: the baseline line must be read first.

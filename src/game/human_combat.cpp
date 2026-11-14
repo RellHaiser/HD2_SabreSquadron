@@ -917,7 +917,8 @@ int C_Human::GetHealthPercent() const
         return 1;
     if (percent > 100.0f)
         return 100;
-    return static_cast<int>(percent);
+    // (Truncated through 64 bits as __ftol does: an initial health of 0 gives an infinity, whose low word is 0.)
+    return static_cast<int>(static_cast<int64_t>(percent));
 }
 
 void C_Human::SetHealthPercent(int percent)
@@ -935,7 +936,9 @@ int C_Human::GetStaminaPercent() const
 {
     if (m_stats[STAT_HEALTH] == 0 || m_stamina == 0.0f)
         return 0;
-    return static_cast<int>(m_stamina / (static_cast<float>(m_stats[STAT_ENDURANCE]) * 0.01f));
+    // (__ftol truncates through 64 bits: an endurance of 0 gives infinity, whose 64-bit "indefinite" value has a low
+    // word of 0, as the original returns; a 32-bit conversion would give INT_MIN.)
+    return static_cast<int>(static_cast<int64_t>(m_stamina / (static_cast<float>(m_stats[STAT_ENDURANCE]) * 0.01f)));
 }
 
 // -------------------------------------------------------------------------- visibility

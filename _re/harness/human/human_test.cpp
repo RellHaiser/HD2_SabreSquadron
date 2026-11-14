@@ -199,9 +199,15 @@ bool C_Human::AdjustToPathHeight(S_vector *pos) const
     return g_script.pathHeight;
 }
 uint32_t C_Human::GetStanceFlags() const { Log(this, "GetStanceFlags"); return 0; }
+#ifndef HUMAN_COMBAT
 int C_Human::GetStat(int stat) const { Log(this, "GetStat", {double(stat)}); return g_script.stat; }
+#endif
+#ifndef HUMAN_COMBAT   // (the combat build links the real one)
 bool C_Human::IsLocalPlayer() const { return g_script.localPlayer; }
+#endif
+#ifndef HUMAN_COMBAT
 bool C_Human::IsServerSimulated() const { return g_script.serverSimulated; }
+#endif
 bool C_Human::IsWearingDivingGear() const { Log(this, "IsWearingDivingGear"); return g_script.divingGear; }
 void C_Human::PlayerRequestDamage(int type, int damage, int attackerId, int zone)
 {
@@ -744,6 +750,9 @@ namespace {
 #ifdef HUMAN_SELF
 #include "self_test.inc"
 #endif
+#ifdef HUMAN_COMBAT
+#include "combat_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -825,7 +834,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_SELF)
+#if defined(HUMAN_COMBAT)
+    TestCombat();
+#elif defined(HUMAN_SELF)
     TestSelf();
 #elif defined(HUMAN_SAVE)
     TestSave();

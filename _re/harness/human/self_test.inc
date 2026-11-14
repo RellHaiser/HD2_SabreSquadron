@@ -41,6 +41,7 @@ struct S_SelfScript {
     bool uniform = false;                               // the uniform container's GetItem
     bool items = false;                                 // CreateItem makes one
     bool actorSetFrame = true;                          // C_Actor::SetFrame
+    bool (*memberOf)(const void *human) = nullptr;      // the player team's IsMember by object (part 21; else `member`)
 } g_self;
 // The debug console's lines (the original's Print is empty: both sides log the text).
 void LogPrint(const char *format, va_list args)
@@ -177,7 +178,7 @@ void C_Interface::SetScreen(int screen) { Log(nullptr, "SetScreen", {double(scre
 bool C_TeamBase::IsMember(const C_Human *human) const
 {
     Log(human, "IsTeamMember");
-    return g_self.member;
+    return g_self.memberOf ? g_self.memberOf(human) : g_self.member;
 }
 void C_Team::UpdateCameraTarget() { Log(nullptr, "UpdateCameraTarget"); }
 void C_Team::SetWatchedHuman(C_Human *human) { Log(human, "SetWatchedHuman"); }
@@ -270,8 +271,10 @@ bool C_Human::PutOnUniform(int uid)
 uint32_t C_Human::GetStateFlags() const { return g_self.stateFlags; }
 uint32_t C_Human::GetMoveMode() const { return g_self.moveMode; }
 void C_Human::DisbandFormation() { Log(this, "DisbandFormation"); }
+#ifndef HUMAN_COMBAT   // (the combat build links game/human_combat.cpp's)
 void C_Human::UpdateVelocity(int timeDelta) { Log(this, "UpdateVelocity", {double(timeDelta)}); }
 void C_Human::UpdateDisguise(float amount) { Log(this, "UpdateDisguise", {amount}); }
+#endif
 void C_Human::Done() { Log(this, "Done"); }
 void C_Human::Init() { Log(this, "Init"); }
 void C_Human::WriteState(C_BitStream *) { Log(this, "WriteState"); }
@@ -279,18 +282,22 @@ void C_Human::ReadState(C_BitStream *) { Log(this, "ReadState"); }
 void C_Human::Unknown20(C_BitStream *) { Log(this, "Unknown20"); }
 void C_Human::OnMessage(C_BitStream *) { Log(this, "OnMessage"); }
 void C_Human::UpdateSeenHumans() { Log(this, "UpdateSeenHumans"); }
+#ifndef HUMAN_COMBAT
 void C_Human::UpdateBleeding(int frameTime) { Log(this, "UpdateBleeding", {double(frameTime)}); }
 void C_Human::TickBleeding(int timeDelta) { Log(this, "TickBleeding", {double(timeDelta)}); }
 bool C_Human::OnCollisionEx(C_Actor *, const S_vector *, int, int, int, int, int) { return false; }
-bool C_Human::IsUnconscious() const { return g_self.unconscious; }
 void C_Human::Hit(E_HitType, float, const S_vector &, const S_vector &, C_Actor *, int) {}
 void C_Human::GetBoxCorners(S_vector4 *) {}
+#endif
+bool C_Human::IsUnconscious() const { return g_self.unconscious; }
 void C_Human::ForgetOldSounds() { Log(this, "ForgetOldSounds"); }
 void C_Human::ClearContainers() { Log(this, "ClearContainers"); }
+#ifndef HUMAN_COMBAT
 void C_Human::ApplyRemoteHit(int type, int zone, int health, int killerId, const S_vector &, const S_vector &)
 {
     Log(this, "ApplyRemoteHit", {double(type), double(zone), double(health), double(killerId)});
 }
+#endif
 // The actor's base (game/actor.cpp is not linked; the human's calls of its base members logged).
 C_Actor::C_Actor(E_ActorType type) : m_type(type) {}
 C_Actor::~C_Actor() {}
