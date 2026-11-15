@@ -1,0 +1,2 @@
+-Wl,--wrap=_Z11ShowMessagePKcS0_j
+-Wl,--wrap=_ZN15C_ResourceCacheI17I3D_animation_setE3GetEPKcPPS0_PU8fastcallFvS3_PvES6_

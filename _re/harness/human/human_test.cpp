@@ -749,6 +749,9 @@ namespace {
 #ifdef HUMAN_SPEECHSETS
 #include "speechsets_test.inc"
 #endif
+#ifdef HUMAN_ANIMTABLES
+#include "animtables_test.inc"
+#endif
 #ifdef HUMAN_BASE
 #include "base_test.inc"
 #include "base2_test.inc"
@@ -922,6 +925,8 @@ int main(int argc, char **argv)
     TestNetState();
 #elif defined(HUMAN_SPEECHSETS)
     TestSpeechSets();
+#elif defined(HUMAN_ANIMTABLES)
+    TestAnimTables();
 #elif defined(HUMAN_PART3_ONLY)
     // (Part 3's mutation runs: its world, then its tests alone.)
     LoadGround();
@@ -930,7 +935,7 @@ int main(int argc, char **argv)
     TestLocomotion();
     TestLocomotion2();
 #endif
-#if !defined(HUMAN_BASE) && !defined(HUMAN_BODYWRAP) && !defined(HUMAN_NETSTATE) && !defined(HUMAN_SPEECHSETS)
+#if !defined(HUMAN_BASE) && !defined(HUMAN_BODYWRAP) && !defined(HUMAN_NETSTATE) && !defined(HUMAN_SPEECHSETS) && !defined(HUMAN_ANIMTABLES)
     TestLocomotion3();
 #endif
     PrintStats();

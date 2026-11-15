@@ -9,8 +9,10 @@ int g_nextHandle = 1;
 }  // namespace
 
 // ---- files (the test's own collision files, on disk)
-int RW_DATA_CALL dtaOpen(const char *name, bool)
+int g_lastDtaOpenFlag = -1;                             // (the last dtaOpen's second argument, for the tests to compare)
+int RW_DATA_CALL dtaOpen(const char *name, bool flag)
 {
+    g_lastDtaOpenFlag = flag;
     FILE *f = std::fopen(name, "rb");
     if (!f)
         return DTA_INVALID_HANDLE;
@@ -31,7 +33,13 @@ int RW_DATA_CALL dtaSeek(int handle, int offset, int origin)
     std::fseek(f, offset, origin == 0 ? SEEK_SET : origin == 1 ? SEEK_CUR : SEEK_END);
     return static_cast<int>(std::ftell(f));
 }
-int RW_DATA_CALL dtaRead(int handle, void *data, int size) { return static_cast<int>(std::fread(data, 1, size, g_open[handle])); }
+bool g_dtaReadFails = false;                           // (a test's read error: dtaRead answers -1)
+int RW_DATA_CALL dtaRead(int handle, void *data, int size)
+{
+    if (g_dtaReadFails)
+        return -1;
+    return static_cast<int>(std::fread(data, 1, size, g_open[handle]));
+}
 // (Saved games of the test, on disk: C_chunk writes them.)
 int RW_DATA_CALL dtaOpenWrite(const char *name, int)
 {

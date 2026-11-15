@@ -2627,3 +2627,39 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the port's Acquire ran first on the shared file, so a mutant opening it for
   writing emptied it for the original too and both agreed on nothing loaded; short sample chunks first gave the
   original's undefined start value (now only after a full one in the same set, counting only sentences it reads).
+
+## Human part 29 (the humans' animation tables, `human_anim_tables.cpp`, 2026-11-14)
+
+- **The build:** `human/build_animtables.bat` (HUMAN_ANIMTABLES, `animtables_test.inc`): the base harness with
+  human_anim_tables.cpp linked; `animtables_globals.cpp` stands in for g_animationCache (only its address is used).
+  - Each side makes, loads and frees its own tables (the original's in its globals 0x0098a474..0x0098a4a4). The
+    port's tables keep the original's layout: compared word by word (animation sets by name, the records pointer as
+    null or not).
+  - The animation cache is a fake on both sides (the port's C_ResourceCache::Get wrapped, the original's
+    AnimationCacheBase_Get redirected): one fake set per name (COM-style vtable: Release logged, GetEndTime from the
+    name), a name that cannot be a file's failing as the real cache would. ShowMessage logged on both sides.
+  - The original's new and delete use the test's heap and this build's operator new[] is the test's: new blocks
+    filled with 0xCD on both sides. The fake engine's dtaRead can now fail (-1) and its dtaOpen records its flag.
+- **The tests:** 160 loads: the game's Tables\anim.sav, the M1919 front sights mod's (a copy; the full size), the
+  test's (flags, times, weights, names of 0..19 characters, control characters, a leading space; longer and shorter
+  files), no file, a failing read; Init, Done, EnsureHumanAnimTablesLoaded (once, its flag set for good), SaveRecords
+  before a load (the size, then the records); after each load the length queries (the carry tables' and the activity
+  table's, stdcall in the original, and the movement tables' through the original's 0x0075d000 on a fake movement
+  whose human's work names the group): 3,000 each, ids in and out of range.
+- **Findings (no port fixes):**
+  - The game's anim.sav is 111,624 bytes; the tables take 111,708 (seven carry tables). The last 84 bytes, the seat
+    weapon table's last records, are what the heap block held, in the original as in the port: with 0xCD they make
+    names neither side can load.
+  - The original's carry tables leave their slots' weights, its activity table its slots' times, unset until loaded;
+    the port's start at 0 (zeroed in the original's copy for the comparison).
+  - The original's DoneHumanAnimTables leaves its globals pointing at the freed tables; the port's clears them.
+  - The port's ReadName stops a name at its 20 bytes (the original reads on); no name in the game's or the mod's
+    file fills them.
+- **Results:** 2,329,289 checks, 2 s; lines: 198 of 198.
+- **Mutations** (`human/mutations/mutate_animtables.py`): 156 mutants (106 generated, 50 for repeated lines); 102
+  killed, 29 not building, 25 survived, all equivalent (14 frees and closes, 4 stores into objects being freed, the
+  2 globals the original leaves too, the carry tables' unused index, a min of equals, the 20-byte names' terminator).
+- **Harness lessons (my mistakes):** I first compared the tables after DoneHumanAnimTables (the original's globals
+  dangle: a crash); my fake cache made a set for every name, so the 0xCD names of the short file (read 20 bytes by
+  the port, on into the heap by the original) differed where the real cache fails on both; the uninitialised fields
+  of the original's constructors needed zeroing after every Init, not only the first.
