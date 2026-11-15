@@ -417,7 +417,7 @@ bool __fastcall CarOnWheelOff(void *context, int index, const S_vector *velocity
     return true;
 }
 
-void __fastcall CarOnGlassBroken(void *context, int part, const S_vector * /*velocity*/, const char * /*sound*/)   // 0x004d4a10
+void __fastcall CarOnGlassBroken(void *context, int part, const S_vector * /*velocity*/, const char * /*sound*/)   // 0x004d4a10 (DS 0x004c23a0)
 {
     C_Car *car = static_cast<C_Car *>(context);
     const S_VehiclePart &glass = car->m_vehicle.m_parts[part];

@@ -72,21 +72,21 @@ bool C_Car::SetFrame(I3D_frame *frame)                  // 0x004d10a0
     std::fill(std::begin(m_seatWeapons), std::end(m_seatWeapons), nullptr);
     if (!C_Actor::SetFrame(frame) || !m_vehicle.Setup(frame))
         return false;
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_ACTOR_RESPONSE, reinterpret_cast<void *>(&CarOnBodyActorResponse));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_ACTOR_IMPULSE, reinterpret_cast<void *>(&CarOnBodyActorImpulse));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_ACTOR_TOUCH, reinterpret_cast<void *>(&CarOnBodyActorTouch));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_ACTOR_FIRM, reinterpret_cast<void *>(&CarIsActorFirm));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_IMPACT, reinterpret_cast<void *>(&CarOnVehicleImpact));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_PART_OFF, reinterpret_cast<void *>(&CarOnPartOff));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_WHEEL_OFF, reinterpret_cast<void *>(&CarOnWheelOff));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_GLASS_BROKEN, reinterpret_cast<void *>(&CarOnGlassBroken));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_IMPULSE, nullptr);
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_BODY_GROUND, reinterpret_cast<void *>(&CarOnBodyGround));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_WHEEL_GROUND, reinterpret_cast<void *>(&CarOnWheelGround));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_PART_HIT, reinterpret_cast<void *>(&CarOnPartHit));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_REPAIRED, reinterpret_cast<void *>(&CarOnRepaired));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_SETUP_EMITTER, reinterpret_cast<void *>(&SetupCarEmitter));
-    m_vehicle.SetCallback(VEHICLE_CALLBACK_REUSE_EMITTER, reinterpret_cast<void *>(&ReuseCarEmitter));
+    m_vehicle.SetActorResponseCallback(reinterpret_cast<void *>(&CarOnBodyActorResponse));
+    m_vehicle.SetActorImpulseCallback(reinterpret_cast<void *>(&CarOnBodyActorImpulse));
+    m_vehicle.SetActorTouchCallback(reinterpret_cast<void *>(&CarOnBodyActorTouch));
+    m_vehicle.SetActorFirmCallback(reinterpret_cast<void *>(&CarIsActorFirm));
+    m_vehicle.SetImpactCallback(reinterpret_cast<void *>(&CarOnVehicleImpact));
+    m_vehicle.SetPartOffCallback(reinterpret_cast<void *>(&CarOnPartOff));
+    m_vehicle.SetWheelOffCallback(reinterpret_cast<void *>(&CarOnWheelOff));
+    m_vehicle.SetGlassBrokenCallback(reinterpret_cast<void *>(&CarOnGlassBroken));
+    m_vehicle.SetImpulseCallback(nullptr);
+    m_vehicle.SetBodyGroundCallback(reinterpret_cast<void *>(&CarOnBodyGround));
+    m_vehicle.SetWheelGroundCallback(reinterpret_cast<void *>(&CarOnWheelGround));
+    m_vehicle.SetPartHitCallback(reinterpret_cast<void *>(&CarOnPartHit));
+    m_vehicle.SetRepairedCallback(reinterpret_cast<void *>(&CarOnRepaired));
+    m_vehicle.SetSetupEmitterCallback(reinterpret_cast<void *>(&SetupCarEmitter));
+    m_vehicle.SetReuseEmitterCallback(reinterpret_cast<void *>(&ReuseCarEmitter));
     m_parts.Setup(this);
     return true;
 }

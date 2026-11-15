@@ -733,7 +733,7 @@ public:
     // True.
     bool SetEngine(bool on, bool instant);              // 0x004f2530 (DS 0x004e3a40)
     bool SetFuel(float litres);                         // 0x004f2670 (at most the tank size; true)
-    bool IsEngineOn() const { return m_engineOn; }      // byte +0x22BF
+    bool IsEngineOn() const { return m_engineOn; }      // byte +0x22BF; 0x0041d650 (DS 0x0043e1a0)
     // The engine's revolutions per minute (+0x864 per second × 60; 0 with the engine off).
     float GetEngineRpm() const;                         // 0x004f4c50
     // The camera's offset over the seat: (0, +0x67C, 0) (inferred: C_CameraModule 0x0046c370 takes
@@ -753,9 +753,25 @@ public:
     // position and centre of mass as ReadModelPlace (not the parent, nor the sector), the
     // velocity's direction and the speed; +0x229F cleared.
     void ReadModelState();                              // 0x004f5d10
-    // A callback slot (VEHICLE_CALLBACK_*; the original has one 13-byte setter per slot, 0x004fb080
-    // .. 0x004fb180; C_Car::SetFrame 0x004d10a0 sets them).
-    void SetCallback(int slot, void *callback) { m_callbacks[slot] = callback; }
+    // The callback slots' setters (VEHICLE_CALLBACK_*; C_Car::SetFrame 0x004d10a0 sets them). The
+    // server's table sits 0x20 lower (+0x660): its setters are the same functions.
+    void SetActorResponseCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_ACTOR_RESPONSE] = callback; }   // 0x004fb080 (DS 0x004edab0)
+    void SetActorImpulseCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_ACTOR_IMPULSE] = callback; }     // 0x004fb090 (DS 0x004edad0)
+    void SetActorTouchCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_ACTOR_TOUCH] = callback; }         // 0x004fb0a0 (DS 0x004edaf0)
+    void SetActorFirmCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_ACTOR_FIRM] = callback; }           // 0x004fb0b0 (DS 0x004edb10)
+    void SetImpactCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_IMPACT] = callback; }                  // 0x004fb0c0 (DS 0x004edb30)
+    void SetPartOffCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_PART_OFF] = callback; }               // 0x004fb0d0 (DS 0x004edb50)
+    void SetWheelOffCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_WHEEL_OFF] = callback; }             // 0x004fb0e0 (DS 0x004edb70)
+    void SetGlassBrokenCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_GLASS_BROKEN] = callback; }       // 0x004fb0f0 (DS 0x004edb90)
+    void SetSeatCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_SEAT] = callback; }                      // 0x004fb100 (DS 0x004edbb0)
+    void SetImpulseCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_IMPULSE] = callback; }                // 0x004fb110 (DS 0x004edbd0)
+    void SetBodyGroundCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_BODY_GROUND] = callback; }         // 0x004fb120 (DS 0x004edbf0)
+    void SetWheelGroundCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_WHEEL_GROUND] = callback; }       // 0x004fb130 (DS 0x004edc10)
+    void SetPartHitCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_PART_HIT] = callback; }               // 0x004fb140 (DS 0x004edc30)
+    void SetRepairedCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_REPAIRED] = callback; }              // 0x004fb150 (DS 0x004edc50)
+    void SetCollisionCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_COLLISION] = callback; }            // 0x004fb160 (DS 0x004edc70)
+    void SetSetupEmitterCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_SETUP_EMITTER] = callback; }     // 0x004fb170 (DS 0x004edc90)
+    void SetReuseEmitterCallback(void *callback) { m_callbacks[VEHICLE_CALLBACK_REUSE_EMITTER] = callback; }     // 0x004fb180 (DS 0x004edcb0)
     float GetFuel() const { return m_fuel; }            // +0xF5C litres
     float GetTankSize() const { return m_tankSize; }    // +0x2220
     // The velocity in m/s (+0x410; C_Car +0x4A0).
