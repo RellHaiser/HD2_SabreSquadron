@@ -18,7 +18,7 @@ template <class T, int GROW>
 class C_NodePool {
 public:
     C_NodePool() = default;                             // (made full at start-up in the original, 0x0051ea70 (DS 0x0050ab50))
-    ~C_NodePool()                                       // (0x005204b0 / 0x00520fc0 at exit)
+    ~C_NodePool()                                       // (0x005204b0 / 0x00520fc0 at exit; the pool base's deleting dtor 0x00523200 (DS 0x005105e0): the free list's nodes and cells, then the spare cells)
     {
         for (T *node : m_free)
             delete node;
