@@ -9,6 +9,7 @@
 #pragma once
 
 #include <cstdint>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "ls3d/math.h"
 
@@ -354,6 +355,14 @@ enum {
 
 class C_HumanWeaponPose {
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x00785c00
+    {
+        _aligned_free(p);
+    }
+
     C_HumanWeaponPose();                                // 0x0079bd70
     ~C_HumanWeaponPose();                               // 0x0079bf20
     C_HumanWeaponPose(const C_HumanWeaponPose &) = delete;

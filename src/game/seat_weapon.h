@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "game/pending.h"                               // C_NetObjectMessage
 #include "ls3d/math.h"
@@ -41,6 +42,14 @@ struct S_SeatWeaponBarrel {                             // 0x10 bytes
 
 class alignas(16) C_SeatWeapon {
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x004d25b0 (DS 0x004bf6a0)
+    {
+        _aligned_free(p);
+    }
+
     C_SeatWeapon();                                     // 0x004c19d0
     ~C_SeatWeapon();                                    // 0x004c1aa0
     C_SeatWeapon(const C_SeatWeapon &) = delete;
@@ -227,6 +236,14 @@ enum : int {
 // direction (the floats' bits) and the position (quantised with the sender's settings).
 class C_SeatWeaponShotMessage : public C_NetObjectMessage {   // deleting dtor and dtor: 0x004c1420 (DS 0x004a8330), 0x004c1440 (DS 0x004a8360)
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x004c1410 (DS 0x004a8310)
+    {
+        _aligned_free(p);
+    }
+
     C_SeatWeaponShotMessage() : C_NetObjectMessage(SEAT_WEAPON_MSG_SHOT) {}
     void Write(C_BitStream *stream) override;           // 0x004c1760
     void Read(C_BitStream *stream) override;            // 0x004c1810
@@ -241,6 +258,14 @@ public:
 // seat (3).
 class C_SeatWeaponReloadMessage : public C_NetObjectMessage {   // deleting dtor and dtor: 0x004c1480 (DS 0x004a83d0), 0x004c14a0 (DS 0x004a8400)
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x004c1470 (DS 0x004a83b0)
+    {
+        _aligned_free(p);
+    }
+
     C_SeatWeaponReloadMessage() : C_NetObjectMessage(SEAT_WEAPON_MSG_RELOAD) {}
     void Write(C_BitStream *stream) override;           // 0x004c1920
     void Read(C_BitStream *stream) override;            // 0x004c1970
@@ -252,6 +277,14 @@ public:
 // bytes; queued on the car's net object by C_Car::SetSeatOccupant).
 class C_SeatWeaponRoundsMessage : public C_NetObjectMessage {   // deleting dtor and dtor: 0x004c16a0 (DS 0x004a86c0), 0x004c16c0 (DS 0x004a86f0)
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x004c1690 (DS 0x004a86a0)
+    {
+        _aligned_free(p);
+    }
+
     C_SeatWeaponRoundsMessage() : C_NetObjectMessage(SEAT_WEAPON_MSG_ROUNDS) {}
     // The type (3 bits), the seat (3), the rounds (10).
     void Write(C_BitStream *stream) override;           // 0x004c1890
@@ -265,6 +298,14 @@ public:
 // 0x38 bytes; queued on the car's net object by C_Car::Tick).
 class C_SeatWeaponAmmoMessage : public C_NetObjectMessage {   // deleting dtor and dtor: 0x004c1660 (DS 0x004a8650), 0x004c1680 (DS 0x004a8680)
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x004c1650 (DS 0x004a8630)
+    {
+        _aligned_free(p);
+    }
+
     C_SeatWeaponAmmoMessage() : C_NetObjectMessage(SEAT_WEAPON_MSG_AMMO) {}
     // The type (3 bits), the uid (16, read back sign-extended), the item's type (8).
     void Write(C_BitStream *stream) override;           // 0x004c16d0

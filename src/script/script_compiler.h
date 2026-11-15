@@ -47,7 +47,7 @@ struct S_ScriptLabel {                                      // 8 bytes
 
 class C_ScriptCompiler {                                    // 0x444 bytes
 public:
-    C_ScriptCompiler() = default;                           // 0x0042cb80
+    C_ScriptCompiler() = default;                           // 0x0042cb80 (DS 0x00450b60)
     ~C_ScriptCompiler();                                    // 0x0042bfa0
     C_ScriptCompiler(const C_ScriptCompiler &) = delete;
     C_ScriptCompiler &operator=(const C_ScriptCompiler &) = delete;

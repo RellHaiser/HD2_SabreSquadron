@@ -114,7 +114,9 @@ HRESULT ReadHeader(int file, const char *magic, int version, const FILETIME *tim
 // 0x1005d210: a progress message every 2 %.
 void LoadProgress(float progress)
 {
-    if (!(s_progressSent + 0.02f > progress) && (s_loadFlags & 2)) {
+    // (The original adds on the x87 stack and compares the unrounded sum; a double holds it
+    // exactly, so the same messages are sent.)
+    if (!(static_cast<double>(s_progressSent) + static_cast<double>(0.02f) > progress) && (s_loadFlags & 2)) {
         s_progressSent = progress;
         s_progress = progress;
         s_callback(8, progress, 1, s_callbackContext);

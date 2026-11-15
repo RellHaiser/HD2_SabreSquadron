@@ -303,13 +303,50 @@ bool C_FontManager::AddMapFont(const char *texture, const char *table, int id)
     return true;
 }
 
+namespace {
+
+// The 1.0 / 1.1 set's files: in the language's text directory, or the central European ones.
+C_str OldSetTable(const char *name, int set)
+{
+    return C_fstr("%sFonts\\Set%d\\%s.tbl", static_cast<const char *>(g_gameProfile.GetTextDirectory()), set, name);
+}
+C_str OldSetTexture(const char *name, int set)
+{
+    return C_fstr("%sFonts\\Set%d\\%s.tga", static_cast<const char *>(g_gameProfile.GetTextDirectory()), set, name);
+}
+C_str CzechTable(const char *name, int set) { return C_fstr("Text\\Czech\\Fonts\\Set%d\\%s.tbl", set, name); }
+C_str CzechTexture(const char *name, int set) { return C_fstr("Text\\Czech\\Fonts\\Set%d\\%s.tga", set, name); }
+
+}  // namespace
+
+void C_FontManager::LoadOldSet()
+{
+    m_set = FontSet();
+    auto add = [this](const C_str &table, const C_str &texture, int id) { return AddTextureFont(texture, table, id); };
+    add(OldSetTable("BIG", m_set), OldSetTexture("BIG", m_set), FONT_BIG);
+    add(OldSetTable("SMALL", m_set), OldSetTexture("SMALL", m_set), FONT_SMALL);
+    // The original loads SMALL under the symbols' id when SYMBOLS is missing.
+    if (!add(OldSetTable("SYMBOLS", m_set), OldSetTexture("SYMBOLS", m_set), FONT_SYMBOLS))
+        add(OldSetTable("SMALL", m_set), OldSetTexture("SMALL", m_set), FONT_SYMBOLS);
+    if (!add(CzechTable("BIG", m_set), CzechTexture("BIG", m_set), FONT_CE_BIG))
+        add(OldSetTable("BIG", m_set), OldSetTexture("BIG", m_set), FONT_CE_BIG);
+    if (!add(CzechTable("SMALL", m_set), CzechTexture("SMALL", m_set), FONT_CE_SMALL))
+        add(OldSetTable("SMALL", m_set), OldSetTexture("SMALL", m_set), FONT_CE_SMALL);
+    if (add(OldSetTable("SUBTITLES3", m_set), OldSetTexture("SUBTITLES3", m_set), FONT_SUBTITLES))
+        return;
+    if (add(OldSetTable("SUBTITLES", m_set), OldSetTexture("SUBTITLES", m_set), FONT_SUBTITLES))
+        return;
+    add(OldSetTable("SMALL", m_set), OldSetTexture("SMALL", m_set), FONT_SUBTITLES);
+}
+
 void C_FontManager::Load()
 {
     int major = 0, minor = 0;
     GetGameVersion(&major, &minor);
-    // (Dropped: the 1.0 and 1.1 versions' own font set, 0x0063f870; the version is 1.12.)
-    if (major == 1 && minor < 2)
+    if (major == 1 && minor < 2) {
+        LoadOldSet();
         return;
+    }
     const int set = FontSet();
     const char *const kind = g_gameProfile.IsLanguage("Czech") || g_gameProfile.IsLanguage("Polish") ? "Ce"
                              : g_gameProfile.IsLanguage("Japan")                                   ? "Japan"

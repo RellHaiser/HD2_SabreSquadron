@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <cstring>
-#include <new>
 
 #include "common/chunk.h"
 #include "game/actor.h"
@@ -110,7 +109,7 @@ void C_ScriptModule::RememberFrame(I3D_frame *frame, uint32_t what)
             return;
         }
     }
-    auto *r = new (_aligned_malloc(sizeof(S_RememberedFrame), 16)) S_RememberedFrame;
+    auto *r = new S_RememberedFrame;
     r->frame = frame;
     frame->AddRef();
     r->parent = frame->GetParent();
@@ -136,8 +135,7 @@ void C_ScriptModule::RestoreFrame(I3D_frame *frame)
         if (r->frame != frame)
             continue;
         r->Restore();
-        r->~S_RememberedFrame();
-        _aligned_free(r);
+        delete r;
         m_rememberedFrames[i] = m_rememberedFrames.back();
         m_rememberedFrames.pop_back();
         return;
@@ -255,7 +253,7 @@ void C_ScriptModule::RotateFrame(I3D_frame *frame, int axis, int angle, int spee
             return;
         }
     }
-    auto *r = new (_aligned_malloc(sizeof(S_FrameRotation), 16)) S_FrameRotation(frame, axis, angle, speed);
+    auto *r = new S_FrameRotation(frame, axis, angle, speed);
     RememberFrame(frame, SCRIPT_FRAME_ROTATION);
     m_rotations.push_back(r);
 }
@@ -434,14 +432,12 @@ void C_ScriptModule::StopMission(bool server)
             RestoreAnimatedModel(static_cast<I3D_model *>(r->frame));
     }
     for (S_FrameRotation *r : m_rotations) {
-        r->~S_FrameRotation();
-        _aligned_free(r);
+        delete r;
     }
     m_rotations.clear();
     for (S_RememberedFrame *r : m_rememberedFrames) {
         r->Restore();
-        r->~S_RememberedFrame();
-        _aligned_free(r);
+        delete r;
     }
     m_rememberedFrames.clear();
 
@@ -534,8 +530,7 @@ void C_ScriptModule::Update(int timeDelta)
     for (size_t i = m_rotations.size(); i-- > 0;) {
         if (m_rotations[i]->Update(timeDelta))
             continue;
-        m_rotations[i]->~S_FrameRotation();
-        _aligned_free(m_rotations[i]);
+        delete m_rotations[i];
         m_rotations[i] = m_rotations.back();
         m_rotations.pop_back();
     }

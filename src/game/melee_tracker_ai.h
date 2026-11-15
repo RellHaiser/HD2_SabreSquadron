@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "ls3d/math.h"
 
@@ -138,9 +139,13 @@ public:
 
 // The full AI (vtable 0x00811fd0, 0xC0 bytes; abstract in the original -- only its two variants
 // are made): sensing, the target and the attack, heel, the checkpoint paths. Its own vtable's
-// save / load (0x005d25b0 / 0x005d28b0) are unreachable and not ported.
+// save / load are unreachable: both variants override them and neither calls them.
 class C_MeleeTrackerAI : public C_MeleeTrackerController {   // deleting dtor and dtor: 0x005cb3c0 (DS 0x005e2e60), 0x005cb3e0 (DS 0x005e2e90)
 public:
+    // --- save / load: chunk 0x2249 (the targets, the positions, the path's checkpoints) -------------
+    bool SaveGame(C_chunk &chunk) override;             // +0x64 0x005d25b0 (DS 0x005ec0c0)
+    bool LoadGame(C_chunk &chunk) override;             // +0x68 0x005d28b0 (DS 0x005ec480)
+
     // --- script commands (C_MeleeTrackerScript::ExecuteCommand calls them directly) ----------
     void MoveTo(uint16_t checkpoint);                   // 0x005cf700
     void Attack(I3D_frame *target);                     // 0x005cf7c0
@@ -277,6 +282,14 @@ public:
 // alarm calls the script back, and it barks now and then when the script asks.
 class C_MeleeTrackerScriptedAI : public C_MeleeTrackerAI {
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x005d5ba0 (DS 0x005f05e0)
+    {
+        _aligned_free(p);
+    }
+
     C_MeleeTrackerScriptedAI();                         // (SetController case 5)
     ~C_MeleeTrackerScriptedAI() override;               // 0x005d5bd0
     // Binds the tracker and picks up the script of its frame; true when it has one.
@@ -315,6 +328,14 @@ public:
 // deaf to the hearing / sight hooks (it attacks what it has seen or heard on its own).
 class C_MeleeTrackerAutoAI : public C_MeleeTrackerAI {
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x005d5b10 (DS 0x005f0500)
+    {
+        _aligned_free(p);
+    }
+
     C_MeleeTrackerAutoAI();                             // (SetController case 4)
     ~C_MeleeTrackerAutoAI() override;                   // 0x005d5b30
     bool Attach(C_MeleeTracker *meleeTracker) override; // +0x00 0x005cf0a0
@@ -356,6 +377,14 @@ public:
 // (MouseLook, from the body's UpdateAnimation), and a client sends its state to the server.
 class C_MeleeTrackerPlayerControl : public C_MeleeTrackerController {
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x005d5ab0 (DS 0x005f0450)
+    {
+        _aligned_free(p);
+    }
+
     C_MeleeTrackerPlayerControl();                      // (SetController case 1)
     ~C_MeleeTrackerPlayerControl() override;            // 0x005d5ad0
     // Binds the tracker and clears the four buffers.

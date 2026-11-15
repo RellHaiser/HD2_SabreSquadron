@@ -23,7 +23,7 @@ char g_cdKey[0x40];
 }  // namespace
 
 // The game's role (GAME_ROLE_*): local until a session starts (the static initialiser 0x00732da0).
-uint32_t g_gameRole = GAME_ROLE_LOCAL;                  // 0x00982100
+uint32_t g_gameRole = GAME_ROLE_LOCAL;                  // 0x00982100, its constructor 0x00732de0 (DS 0x0078df00)
 
 void C_NetGame::PrintLoadProgress(int percent)
 {

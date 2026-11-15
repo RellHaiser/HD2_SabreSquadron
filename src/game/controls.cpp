@@ -4560,7 +4560,7 @@ enum : uint32_t { SORT_NAME = 1, SORT_MAP = 2, SORT_TYPE = 3, SORT_PING = 4, SOR
 // The comparisons (0x006675a0 .. 0x006676f0, fastcall); ties by the ping.
 bool ServerPingLess(const S_ServerEntry *a, const S_ServerEntry *b) { return a->ping < b->ping; }
 bool ServerPingGreater(const S_ServerEntry *a, const S_ServerEntry *b) { return b->ping < a->ping; }
-bool ServerNameLess(const S_ServerEntry *a, const S_ServerEntry *b) { return _stricmp(a->name, b->name) < 0; }
+bool ServerNameLess(const S_ServerEntry *a, const S_ServerEntry *b) { return _stricmp(a->name, b->name) < 0; }   // 0x006675c0 (DS 0x006a0a30)
 bool ServerNameGreater(const S_ServerEntry *a, const S_ServerEntry *b) { return _stricmp(a->name, b->name) > 0; }
 // (Descending maps tied ascending by ping: the original's.)
 bool ServerMapLess(const S_ServerEntry *a, const S_ServerEntry *b)

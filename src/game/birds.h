@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "ls3d/math.h"
 
@@ -20,6 +21,14 @@ enum : int {
 
 class C_Bird {                                          // 0x70 bytes (_aligned_malloc 16)
 public:
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete(void *p)                // 0x0047a9f0 (DS 0x004983f0)
+    {
+        _aligned_free(p);
+    }
+
     // On `model`, whose frame data then points at the bird (a bird on the model before leaves
     // its start place to this one); `ownModel`: the model is the bird's (removed from the scene
     // with it), else it goes back to g_spareBirdModels (hidden, at its start) when the bird is

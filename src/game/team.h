@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "game/module.h"
 #include "ls3d/math.h"
@@ -55,6 +56,14 @@ struct alignas(16) S_FormationSlot {
     bool dirty = false;                                 // +0x88 the place has changed
     std::vector<uint16_t> path;                         // +0x8C to the first slot's checkpoint
     uint16_t pathFrom = 0xFFFF;                         // +0x9C its checkpoint when found
+
+    // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+    // constructor frees with this delete).
+    static void *operator new[](size_t size) { return _aligned_malloc(size, 16); }
+    static void operator delete[](void *p)              // 0x005976d0 (DS 0x005a15c0)
+    {
+        _aligned_free(p);
+    }
 };
 
 // Shape of a formation and its member slots (0xA0 bytes, 16-byte aligned; humans that lead

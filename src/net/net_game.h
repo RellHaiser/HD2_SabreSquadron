@@ -608,7 +608,7 @@ bool CanPlayerRespawn(int slot);                    // 0x00730970
 long __stdcall ClientMessageHandler(void *context, unsigned long type, void *message);   // 0x00722520
 long __stdcall ServerMessageHandler(void *context, unsigned long type, void *message);   // 0x00726440
 long __stdcall VoiceClientHandler(void *context, unsigned long type, void *message);     // 0x00722510
-long __stdcall VoiceServerHandler(void *context, unsigned long type, void *message);     // 0x00726430
+long __stdcall VoiceServerHandler(void *context, unsigned long type, void *message);     // 0x00726430 (DS 0x0077e0c0)
 // Text between the ANSI / UTF-8 code pages and wide characters (`length` -1: the whole text; the last character
 // of the room the terminator).
 void NetAnsiToWide(wchar_t *out, const char *text, unsigned length);    // 0x00724ad0

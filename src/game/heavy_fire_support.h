@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <malloc.h>                                     // _aligned_malloc, _aligned_free
 
 #include "common/c_str.h"
 #include "game/module.h"
@@ -74,6 +75,14 @@ private:
         I3D_frame *model = nullptr;                     // +0x10
         int sound = -1;                                 // +0x14 the engine's sound slot
         ~S_Plane();                                     // 0x00471750 (__fastcall; constructor 0x00471730)
+
+        // Its own 16-byte aligned blocks (the original's new inlines _aligned_malloc; an exception in the
+        // constructor frees with this delete).
+        static void *operator new(size_t size) { return _aligned_malloc(size, 16); }
+        static void operator delete(void *p)            // 0x00471080 (DS 0x0048cb80)
+        {
+            _aligned_free(p);
+        }
     };
 
     S_vector4 m_pos = {};                               // +0x00 the lead plane
