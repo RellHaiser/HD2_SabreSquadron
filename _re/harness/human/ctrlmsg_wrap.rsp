@@ -1,0 +1,16 @@
+-Wl,--wrap=_Z10GetItemDefi
+-Wl,--wrap=_Z19NetReadSoldierStateP12C_NetMessageR14S_SoldierStateb
+-Wl,--wrap=_Z20NetWriteSoldierStateP12C_NetMessageR14S_SoldierStateb
+-Wl,--wrap=_Z7GetGamev
+-Wl,--wrap=_ZN12C_NetMessage13ReadQuantizedEPfPK17S_NetQuantizationj
+-Wl,--wrap=_ZN12C_NetMessage14WriteQuantizedEPKfPK17S_NetQuantizationh
+-Wl,--wrap=_ZN12C_NetMessage15ReadDirection3DER8S_vectori
+-Wl,--wrap=_ZN12C_NetMessage16WriteDirection3DERK8S_vectori
+-Wl,--wrap=_ZN6C_game5PrintEPKcz
+-Wl,--wrap=_ZN7C_Human15CreateEquipmentEP14S_SoldierState
+-Wl,--wrap=_ZNK12C_NetMessage9GetSenderEi
+-Wl,--wrap=_ZNK14C_ActorsModule12GetActorByIdEi
+-Wl,--wrap=_ZNK7C_Human11GetFullNameEv
+-Wl,--wrap=_ZNK7C_Human13FindItemByUidEi
+-Wl,--wrap=_ZNK7C_Human17GetControllerTypeEv
+-Wl,--wrap=_ZNK7C_Human17GetEquipmentStateER14S_SoldierState

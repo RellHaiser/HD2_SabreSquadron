@@ -2739,3 +2739,53 @@ particles and the surface marks. Files are served from memory.
   manager's AcquireTextures directly left borrowers that did not know it, freed later; a 130-byte pitch, then
   loading over a borrowing body, made crashes that came and went (heap contents): the mutation runs with them were
   rerun.
+
+## Human part 31 (the controllers' network messages, `controller_messages.cpp`, 2026-11-15)
+
+- **The build:** `human/build_ctrlmsg.bat` (HUMAN_CTRLMSG, `ctrlmsg_test.inc`): the base harness with
+  controller_messages.cpp and net/bitstream.cpp linked, part 27's way.
+  - The bits go through each side's own bit stream code (WriteBits, ReadBits, WriteString, ReadString) on port
+    C_NetMessage objects over the test's buffers; the written words and bit positions are compared, and both sides'
+    Read get the same input.
+  - The quantised floats and the 3D directions stand in on both sides with raw floats (the call logged with its
+    sender or player index; C_NetMessage's own code is the net harnesses'). What the messages call besides (16
+    functions: GetSender, the soldier state's serialisers, GetActorById, the human's FindItemByUid, GetFullName,
+    GetControllerType, CreateEquipment and GetEquipmentState, GetGame and C_game::Print, GetItemDef) is wrapped
+    (`ctrlmsg_wrap.rsp`) on the port's side and redirected on the original's, to the same loggers.
+  - The item definitions: ten fakes, in the original's table at 0x0098b030 and behind the port's GetItemDef (the
+    name at +0x10 on both). The inventory check's containers: each side's vtable (GetItem, GetUsedSlotCount,
+    GetSlots) over the same items, the original's slots as pointers to MSVC6 vectors.
+  - The message objects are the port's classes; the original runs on a copy of their bytes. The port's layout is the
+    original's but where vectors are: the port's S_vector4 is 4-aligned, so Hit, ControlState, DropItem and Action
+    have their fields elsewhere (moved by a table per message; the action command's fields one word on, the original's
+    command having a vtable). Compared word by word after each call, but for the vectors' w the original fills from
+    stack temps.
+- **The tests:** every message's Write (60,000: fields at random, edge floats, NaNs, names of every length up to past
+  the buffer, bullets' speeds near whole numbers, containers full and empty, the backpack's contents missing) and Read
+  (60,000: random words, or input in Write's format with edge values); WriteControlState and ReadControlState on their
+  own, their results too (6,000).
+- **Results:** 264,010 checks, 0 failures; lines: 368 of 370 (the two left: DropItem's clamps, which 4 bits cannot
+  reach).
+- **Port fixes:**
+  - ReadControlState dropped a velocity under 0.01f; the original compares with the double 0.01, so 0.01f itself (a
+    little under 0.01) is dropped too.
+  - The action message read and wrote its raw float words through float values: an unoptimised x86 build passes them
+    through the x87 stack, which quiets a signalling NaN (seen in the coverage build only). Now copied as words, as the
+    original does.
+  - The inventory check's print asked GetGame before the human's GetFullName; the original asks the human first (both
+    getters: no effect, the order now the original's).
+- **Not tested:** speeds of 2^31 and more in a hit (the original's __ftol keeps the low word of its 64-bit result, the
+  port's conversion gives 0x80000000: no bullet flies so fast); an item type outside the definitions in the inventory
+  check (the original reads its name through a null definition and crashes; the port prints none); the equipment
+  message for a missing human (the original asks null for its equipment; the port sends the empty state); a belt
+  container missing (the original calls through null). The soldier state's progress block: the original zeroes it,
+  the port's S_SoldierProgress starts with its defaults (0.5, 1.0), but the items-only state neither sends nor reads it
+  and CreateEquipment reads the items alone.
+- **Mutations** (`human/mutations/mutate_ctrlmsg.py`, in the quick build): 368 mutants (293 generated, 75 for
+  repeated lines); 339 killed, 13 not building, 16 survived, all equivalent or unreachable (DropItem's clamps, the
+  (void) casts, a fifth byte copied past a float, a fourth float not read, MAX_OF_BITS[0] not read, a <= at the double
+  0.01, 1023 clamped to 1023).
+- **Harness lessons (my mistakes):** I first assumed the messages had the original's layout (the header's offset
+  comments are the original's): the vector messages failed until the field tables; I copied the containers array's
+  first element instead of its address (a jump into the original's data); my Hit velocities went up to 1e12 (the
+  __ftol difference above); the full build made the mutation run take hours, so it was redone in the quick build.

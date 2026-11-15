@@ -35,18 +35,19 @@ int ReadShort(C_NetMessage &msg)
     return static_cast<int16_t>(msg.ReadBits(16));
 }
 
-uint32_t FloatBits(float value)
+// A float's bits, sent and read as a word (by address: a float value can pass through the x87 stack, which quiets a
+// signalling NaN; the original copies the words).
+uint32_t FloatBits(const float &value)
 {
     uint32_t bits;
     std::memcpy(&bits, &value, 4);
     return bits;
 }
 
-float BitsFloat(uint32_t bits)
+void ReadFloatBits(C_NetMessage &msg, float &value)
 {
-    float value;
+    const uint32_t bits = msg.ReadBits(32);
     std::memcpy(&value, &bits, 4);
-    return value;
 }
 
 void WriteType(C_NetMessage &msg, int type)
@@ -102,7 +103,8 @@ bool __fastcall ReadControlState(C_NetMessage *msg, float *pos, float *velocity,
     std::memcpy(pos, value, sizeof(value));
     msg->ReadQuantized(value, msg->GetSender(-1), 7);
     std::memcpy(velocity, value, sizeof(value));
-    if (std::fabs(velocity[0]) < 0.01f && std::fabs(velocity[1]) < 0.01f && std::fabs(velocity[2]) < 0.01f) {
+    // (Against the double 0.01, as the original: 0.01f itself, a little under it, is dropped too.)
+    if (std::fabs(velocity[0]) < 0.01 && std::fabs(velocity[1]) < 0.01 && std::fabs(velocity[2]) < 0.01) {
         velocity[0] = 0.0f;
         velocity[1] = 0.0f;
         velocity[2] = 0.0f;
@@ -333,13 +335,13 @@ void S_MsgTakeFromBox::Write(C_NetMessage &msg)         // 0x005b1d80
 
 void S_MsgAction::Read(C_NetMessage &msg)               // 0x005b1290
 {
-    pos.x = BitsFloat(msg.ReadBits(32));
-    pos.y = BitsFloat(msg.ReadBits(32));
-    pos.z = BitsFloat(msg.ReadBits(32));
+    ReadFloatBits(msg, pos.x);
+    ReadFloatBits(msg, pos.y);
+    ReadFloatBits(msg, pos.z);
     command.action = static_cast<int>(msg.ReadBits(BITS_0_43));
-    command.dir.x = BitsFloat(msg.ReadBits(32));
-    command.dir.y = BitsFloat(msg.ReadBits(32));
-    command.dir.z = BitsFloat(msg.ReadBits(32));
+    ReadFloatBits(msg, command.dir.x);
+    ReadFloatBits(msg, command.dir.y);
+    ReadFloatBits(msg, command.dir.z);
     // Single player sends four more words (two of them pointers).
     command.command = -1;
     command.actor = nullptr;
@@ -393,7 +395,9 @@ void S_MsgInventoryCheck::Read(C_NetMessage &msg)       // 0x005b2340
             continue;
         // Fix: the original read the name of a type out of range through a null definition.
         const C_ItemDef *def = GetItemDef(typeId);
-        GetGame()->Print(MISSING[code], human->GetFullName(), def ? def->GetDisplayName() : nullptr, uid);
+        const char *typeName = def ? def->GetDisplayName() : nullptr;
+        const char *name = human->GetFullName();        // (before GetGame, as the original)
+        GetGame()->Print(MISSING[code], name, typeName, uid);
     }
 }
 

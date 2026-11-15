@@ -186,6 +186,8 @@ SUITES = [
     T("human.animtables", "human/build_animtables.bat", TMP + r"\human_animtables_test.exe", needs=("mingw", "original_exe")),
     # (The blood stains, game/human_stains.cpp: human/build_stains.bat, HUMAN_STAINS.)
     T("human.stains", "human/build_stains.bat", TMP + r"\human_stains_test.exe", needs=("mingw", "original_exe")),
+    # (The controllers' network messages, game/controller_messages.cpp: human/build_ctrlmsg.bat, HUMAN_CTRLMSG.)
+    T("human.ctrlmsg", "human/build_ctrlmsg.bat", TMP + r"\human_ctrlmsg_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
