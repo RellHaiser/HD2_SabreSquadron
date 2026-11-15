@@ -218,10 +218,23 @@ enum E_SquadCommand {
     SQUAD_COMMAND_ON_ACTOR_QUIET = 0x38,
 };
 
-// The body action of CTRL_MSG_ACTION: a command of category 3 (vtable 0x00810528, the no-op
-// methods of S_HumanCommand). The last four fields only travel in local games (single
-// player): the pointers as this process's 32-bit values.
-struct S_ActionCommand {
+// The base of the orders a human or a squad is given (S_HumanCommand, S_ActionCommand): six
+// methods that do nothing, none overridden. The original has five copies of its table, each
+// order kind its own (0x0080f720, 0x00810528, 0x008105a0, 0x008105b8, 0x00810b48); nothing
+// calls them. Names and argument types unknown.
+struct S_CommandBase {
+    virtual int Unknown00() { return 0; }               // 0x00 0x00423560 (DS 0x00445b10)
+    virtual int Unknown04() { return 0; }               // 0x04 0x00423570 (DS 0x00445b30)
+    virtual void Unknown08(int, int) {}                 // 0x08 0x00423590 (DS 0x00445b70)
+    virtual void Unknown0C(int) {}                      // 0x0C 0x00423580 (DS 0x00445b50)
+    virtual int Unknown10() { return 0; }               // 0x10 0x004235a0 (DS 0x00445b90)
+    virtual void Unknown14(int) {}                      // 0x14 0x004235b0 (DS 0x00445bb0)
+};
+
+// The body action of CTRL_MSG_ACTION: a command of category 3 (vtable 0x00810528). The last
+// four fields only travel in local games (single player): the pointers as this process's
+// 32-bit values.
+struct S_ActionCommand : S_CommandBase {
     int category = 3;                                   // +0x04 (of the message: +0x24)
     int unknown08 = 0;
     int unknown0C = 0;

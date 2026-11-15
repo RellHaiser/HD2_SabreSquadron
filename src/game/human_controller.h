@@ -98,8 +98,8 @@ enum : uint32_t {
     STATE_TREADING = 0x00016000,          // any of these sets off a mine stepped on
 };
 
-// Order given to a human (C_HumanController::IssueCommand; HUMAN_BoardVehicle). Polymorphic
-// in the original (vtable 0x0080f720, six no-op methods). The commands of category 2, which
+// Order given to a human (C_HumanController::IssueCommand; HUMAN_BoardVehicle), an
+// S_CommandBase (vtable 0x0080f720). The commands of category 2, which
 // C_HumanController::ExecuteCommand carries out (names partly inferred):
 enum E_HumanCommandType {
     HUMAN_COMMAND_VEHICLE = 2,                          // the category of all of them
@@ -125,7 +125,7 @@ enum E_HumanCommandType {
     HUMAN_COMMAND_BACKSTAB = 0x24,                      // 1 s
     HUMAN_COMMAND_DISARM_EXPLOSIVE = 0x26,              // an explosive place; 4 s
 };
-struct S_HumanCommand {
+struct S_HumanCommand : S_CommandBase {                 // vtable 0x0080f720
     int category = 0;
     int type = 0;
     int param1 = 0;                                     // the actor's network id (or the medkit's uid)

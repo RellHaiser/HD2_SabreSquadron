@@ -400,7 +400,7 @@ static_assert(offsetof(S_MsgMoveItem, slot) == 0x18 && offsetof(S_MsgTransferIte
 static_assert(offsetof(S_MsgDropItem, dir) == 0x0C && offsetof(S_MsgDropItem, actor) == 0x20, "S_MsgDropItem");
 static_assert(offsetof(S_MsgTakeFromBox, container) == 0x14, "S_MsgTakeFromBox");
 static_assert(offsetof(S_MsgAction, pos) == 0x08 && offsetof(S_MsgAction, command) == 0x18 &&
-                      offsetof(S_ActionCommand, dir) == 0x0C && offsetof(S_ActionCommand, member) == 0x2C,
+                      offsetof(S_ActionCommand, dir) == 0x10 && offsetof(S_ActionCommand, member) == 0x30,
               "S_MsgAction");
 static_assert(offsetof(S_MsgHeal, removeItem) == 0x14 && offsetof(S_Msg17, value14) == 0x14, "S_MsgHeal, S_Msg17");
 static_assert(offsetof(S_MsgAnimation, blendTime) == 0x88 && offsetof(S_MsgAnimation, loop) == 0x90, "S_MsgAnimation");
@@ -441,7 +441,7 @@ void MakeMessages()
     AddMessage<S_MsgDropItem>("DropItem", 0x005b1f10, 0x005b2020, {0x1C}, {{4, 4, 8}, {0x0C, 0x10, 0x18}});
     AddMessage<S_MsgTakeFromBox>("TakeFromBox", 0x005b1d10, 0x005b1d80);
     // (The original's command: its vtable at +0x20, category +0x24, ..., dir +0x30.)
-    AddMessage<S_MsgAction>("Action", 0x005b1290, 0x005b13f0, {0x1C, 0x3C}, {{4, 4, 4}, {0x08, 0x10, 0x10}, {0x18, 0x24, 0x30}});
+    AddMessage<S_MsgAction>("Action", 0x005b1290, 0x005b13f0, {0x1C, 0x3C}, {{4, 4, 4}, {0x08, 0x10, 0x10}, {0x1C, 0x24, 0x30}});
     AddMessage<S_MsgInventoryCheck>("InventoryCheck", 0x005b2340, 0x005b2700);
     AddMessage<S_MsgHeal>("Heal", 0x005b2100, 0x005b2150);
     AddMessage<S_MsgRemoteRequest>("RemoteRequest", 0x005b0ee0, 0x005b0f00);
