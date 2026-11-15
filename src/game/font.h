@@ -184,7 +184,7 @@ private:
 // loads the fonts, the last Release frees them.
 class C_FontManager {
 public:
-    C_FontManager() = default;
+    C_FontManager() = default;                          // 0x0063de80 (DS 0x006710d0)
     C_FontManager(const C_FontManager &) = delete;
     C_FontManager &operator=(const C_FontManager &) = delete;
 

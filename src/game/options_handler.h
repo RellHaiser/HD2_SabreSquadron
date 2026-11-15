@@ -76,7 +76,7 @@ private:
                          uint32_t value);               // 0x0061fd00 (__thiscall)
     // The check boxes: the mouse's inversion, the subtitles, the crosshair.
     static bool OnCheck(void *handler, void *argument, C_Control *control, uint32_t notification,
-                        uint32_t value);                // 0x006204a0 (__thiscall)
+                        uint32_t value);                // 0x006204a0 (DS 0x0064df60) (__thiscall)
     // The voice chat (its volume active with it).
     static bool OnVoiceChat(void *handler, void *argument, C_Control *control, uint32_t notification,
                             uint32_t value);            // 0x00620780 (__thiscall)
@@ -85,7 +85,7 @@ private:
                            uint32_t value);             // 0x006209c0 (__thiscall)
     // A binding changed: the groups refreshed.
     static bool OnKeyChanged(void *handler, void *argument, C_Control *control, uint32_t notification,
-                             uint32_t value);           // 0x006209b0 (__thiscall)
+                             uint32_t value);           // 0x006209b0 (DS 0x0064e5e0) (__thiscall)
     // The layouts' buttons: the player's key layout (0 the defaults', 1 the other's), the groups refreshed.
     static bool OnKeyLayout(void *handler, void *argument, C_Control *control, uint32_t notification,
                             uint32_t value);            // 0x0061fcb0 (__thiscall)

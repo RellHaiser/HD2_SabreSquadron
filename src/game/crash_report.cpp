@@ -236,7 +236,7 @@ void ReportWithDbgHelp(EXCEPTION_POINTERS *exception)
 // Installed before WinMain, removed after it (0x006e33d0, 0x006e33f0).
 struct S_FilterInstaller {
     S_FilterInstaller() { s_previousFilter = SetUnhandledExceptionFilter(ReportUnhandledException); }
-    ~S_FilterInstaller() { SetUnhandledExceptionFilter(s_previousFilter); }
+    ~S_FilterInstaller() { SetUnhandledExceptionFilter(s_previousFilter); }   // 0x006e33f0 (DS 0x0072d860)
 };
 S_FilterInstaller s_filterInstaller;                    // 0x008bf0e0
 
