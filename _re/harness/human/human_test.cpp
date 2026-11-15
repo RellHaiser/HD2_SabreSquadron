@@ -758,6 +758,9 @@ namespace {
 #ifdef HUMAN_CTRLMSG
 #include "ctrlmsg_test.inc"
 #endif
+#ifdef HUMAN_AIPARTS
+#include "aiparts_test.inc"
+#endif
 #ifdef HUMAN_BASE
 #include "base_test.inc"
 #include "base2_test.inc"
@@ -937,6 +940,8 @@ int main(int argc, char **argv)
     TestStains();
 #elif defined(HUMAN_CTRLMSG)
     TestCtrlMsg();
+#elif defined(HUMAN_AIPARTS)
+    TestAiParts();
 #elif defined(HUMAN_PART3_ONLY)
     // (Part 3's mutation runs: its world, then its tests alone.)
     LoadGround();
@@ -945,7 +950,7 @@ int main(int argc, char **argv)
     TestLocomotion();
     TestLocomotion2();
 #endif
-#if !defined(HUMAN_BASE) && !defined(HUMAN_BODYWRAP) && !defined(HUMAN_NETSTATE) && !defined(HUMAN_SPEECHSETS) && !defined(HUMAN_ANIMTABLES) && !defined(HUMAN_STAINS) && !defined(HUMAN_CTRLMSG)
+#if !defined(HUMAN_BASE) && !defined(HUMAN_BODYWRAP) && !defined(HUMAN_NETSTATE) && !defined(HUMAN_SPEECHSETS) && !defined(HUMAN_ANIMTABLES) && !defined(HUMAN_STAINS) && !defined(HUMAN_CTRLMSG) && !defined(HUMAN_AIPARTS)
     TestLocomotion3();
 #endif
     PrintStats();

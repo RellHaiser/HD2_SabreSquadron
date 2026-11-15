@@ -1,0 +1,6 @@
+-Wl,--wrap=_Z7GetGamev
+-Wl,--wrap=_ZN19C_CheckpointNetwork3GetEi
+-Wl,--wrap=_ZN19C_CheckpointNetwork8FindPathEiiPSt6vectorItSaItEEj
+-Wl,--wrap=_ZN9C_Vehicle16SetUnknown4f2630Ef
+-Wl,--wrap=_ZNK14C_ActorsModule12GetActorByIdEi
+-Wl,--wrap=_ZNK19C_CheckpointNetwork11FindNearestE8S_vectorff

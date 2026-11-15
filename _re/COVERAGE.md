@@ -2789,3 +2789,51 @@ particles and the surface marks. Files are served from memory.
   comments are the original's): the vector messages failed until the field tables; I copied the containers array's
   first element instead of its address (a jump into the original's data); my Hit velocities went up to 1e12 (the
   __ftol difference above); the full build made the mutation run take hours, so it was redone in the quick build.
+
+## Human part 32 (the AI controllers' parts, `ai_parts.cpp`, 2026-11-15)
+
+- **The build:** `human/build_aiparts.bat` (HUMAN_AIPARTS, `aiparts_test.inc`): the base harness with ai_parts.cpp
+  linked. What it calls outside (the game, the road network's FindNearest, FindPath and Get, the car's
+  SetUnknown4f2630, the actors module's GetActorById) is wrapped (`aiparts_wrap.rsp`) on the port's side and redirected
+  on the original's, to the same fakes; the scene's FindFrame is a COM fake shared by both; rand, operator new and
+  delete, _aligned_malloc and _aligned_free are the test's on both sides.
+  - Each part is the port's struct and the original's copy of its bytes: the same layout for the facing, the orders,
+    the alert state, the waypoints and the remembered sounds; S_AIFire's throwPos (+0x1C / +0x20), the tasks' own
+    fields (+0x14 / +0x20: g++ puts them in the base's tail padding) and the driver's fields (by a table from
+    `layout_offsets.py`, its path as an MSVC6 vector of 16-byte aligned storage) moved. Actor pointers go to each
+    actor's original copy (net id +0x10, type +0x18); frames and road points are shared.
+  - The original's 16 pools (0x008ab158) had no growth: their static initialiser never ran; the test sets each one's
+    16. Its FindPath fills an MSVC6 vector<uint16_t> allocated with the test's heap. Its road Get takes the index's
+    low word (the callers load only that).
+  - Saved games go to files through each side's own C_chunk code (named by the process: the mutation runs run several
+    at once), compared byte for byte; loads read the same file, then the objects and the next chunk are compared.
+- **The tests:** S_AIFacing (40,000: SetView, SetFacing, LookToward, SetLookAround, TickLookTimer, the locks, the
+  constructor, on facings of every kind, cones of 0.7, 0.94 and others, the locks set or not); S_AIFireOrder and
+  S_AIMoveOrder (20,000 each: every setter and getter, the constructor, Wait's random time, positions past 100,000
+  in y); S_AIAlertState::Set; C_AIDriver (30,000: SetVehicle, both DriveTo, Stop, ResetPath, PlanPath on random road
+  networks: no path, the start or end not found, repeated points, points in line, a path already ending at the start,
+  `beyond` NaN or a point); the saved games of the facing, both orders, the alert state, S_AIFire and the driver
+  (1,200: saved by both, then loaded from the saved file or one made by hand: missing, unknown, repeated and long
+  chunks, look-at frames found or not, no chunk at all); the twelve task types made by each side's pool, saved and
+  loaded (1,200); the pools (30,000 allocations and releases of waypoints, raw waypoints, sounds and every task type:
+  what each fills in, and which released object comes back).
+- **Results:** 254,850 checks, 0 failures, 28 s; lines: 761 of 764 (not run: the driver's destructor, LoadGame's
+  return without a chunk). No port fixes needed. The loads go into objects given other values first, and a chunk
+  follows each part's in the files, so what a load does not set and where it leaves the file show. The driver's
+  constructor is compared too (the original's leaves m_target, m_targetDir and m_label as they were).
+- **Left out (the original's own undefined values, not read):** the vectors' w and padding its constructors leave;
+  S_AIFireOrder's throwPos (its constructor does not set it); a new pool object's fields its allocation does not set
+  (a raw waypoint's all, a waypoint's padding byte, task 2's unknown40); the tangent of a path of one point (the
+  original reads past the path: the port's known fix); chunks shorter than their fields (the original reads stack
+  garbage for what they lack); look-at names without a terminator (the original copies them as they are: the port's
+  known fix). The hand-made chunks are therefore never short, so ReadIfFits' false branches are not taken.
+- **Mutations** (`human/mutations/mutate_aiparts.py`, in the quick build): 695 mutants (507 generated, 188 for
+  repeated lines); 62 not building; 586 of 633 killed; the 47 survivors unobservable, the port's lone-point fix, ties,
+  initial values only a short chunk would show, and an Ascend the chunk reader makes up for.
+- **Harness lessons (my mistakes):** my search for the car's top speed field zeroed every word before it (the cars'
+  type and net id: their saved ids differed); the original's pools had no growth (its static initialiser never ran) and
+  crashed the first allocation; the original's road Get takes the low word of its index (my fake read the stale high
+  word as well); the saved games first took 7 minutes (Windows file I/O); fixed file names would have mixed the
+  parallel mutation runs; the first mutation run's baseline failed on the fire order constructor's padding, so its
+  "killed" meant nothing and it was redone; it then showed the loads ran into the objects just saved (nothing a load
+  leaves out could show) and no chunk followed the parts.
