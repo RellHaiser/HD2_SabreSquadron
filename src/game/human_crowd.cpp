@@ -73,9 +73,10 @@ S_vector Flat(const S_vector &a) { return S_vector(a.x, 0.0f, a.z); }
 S_vector Sub4(const S_vector4 &a, const S_vector4 &b) { return S_vector(a.x - b.x, a.y - b.y, a.z - b.z); }
 
 // As the game's inline copies do it (y² + x² + z² here, to the last bits).
-S_vector NormalizedZero(S_vector v)
+S_vector NormalizedZero(S_vector v) { return NormalizedZero(v, Sq(v)); }
+// (With its square worked out by the caller, in the caller's order.)
+S_vector NormalizedZero(S_vector v, float sq)
 {
-    const float sq = Sq(v);
     if (std::fabs(sq - 1.0f) >= 1e-8f) {
         if (sq >= 1e-8f) {
             const float k = 1.0f / std::sqrt(sq);
@@ -190,20 +191,21 @@ bool FirstRootAhead(float doubled, float discriminant, float a, float *t)
 }
 
 // Coming through a unit sphere: `l` where we are in it, `r` the relative velocity; aside, in the sphere's coordinates, for how far off it passes (the common
-// ends of 0x00566130, 0x00568580).
-bool SideStepEllipsoid(const S_vector &l, const S_vector &r, float c, float scale, S_vector *out)
+// ends of 0x00566130, 0x00568580). Their sums go from z down; the car's (`offFromX`) squares the miss distance from x.
+bool SideStepEllipsoid(const S_vector &l, const S_vector &r, float c, float scale, S_vector *out, bool offFromX)
 {
-    const float a = Sq(r);
+    const float a = (r.z * r.z + r.y * r.y) + r.x * r.x;
     if (a < 1e-8f)
         return false;
-    const float half = Dot(r, l);
+    const float half = (r.z * l.z + r.y * l.y) + r.x * l.x;
     const float doubled = half + half;
     if (!IsNegative(doubled))
         return false;
     const float inverse = 1.0f / a;
     const float k = half * inverse;
     const S_vector off(l.x - r.x * k, l.y - r.y * k, l.z - r.z * k);
-    if (!(Sq(off) <= 1.0f))
+    const float offSq = offFromX ? Sq(off) : (off.z * off.z + off.y * off.y) + off.x * off.x;
+    if (!(offSq <= 1.0f))
         return false;
     const float discriminant = doubled * doubled - a * c * 4.0f;
     if (IsNegative(discriminant))
@@ -212,7 +214,7 @@ bool SideStepEllipsoid(const S_vector &l, const S_vector &r, float c, float scal
     if (!FirstRootAhead(doubled, discriminant, a, &t))
         return false;
     const float tangentX = r.z, tangentZ = -r.x;
-    const float v = ((l.y + t * r.y) * 0.0f + tangentX * (l.x + t * r.x) + tangentZ * (l.z + t * r.z)) * inverse;
+    const float v = ((tangentZ * (t * r.z + l.z) + tangentX * (t * r.x + l.x)) + (t * r.y + l.y) * 0.0f) * inverse;
     const float px = tangentX * v, pz = tangentZ * v;
     float force = 1.0f - (pz * pz + px * px);
     if (IsNegative(v))
@@ -480,7 +482,7 @@ void PushFromHuman(C_HumanAIMemory &self, const C_HumanAIMemory &other)
     if (prone) {
         const S_Ellipsoid shape = ProneEllipsoid(other);
         S_vector l = shape.Local(offset);
-        const float c = Sq(l) - 1.0f;
+        const float c = ((l.z * l.z + l.y * l.y) + l.x * l.x) - 1.0f;
         if (c <= 1e-8f) {
             if (1e-8f < c + 1.0f) {
                 const float length = std::sqrt(c + 1.0f);
@@ -491,7 +493,7 @@ void PushFromHuman(C_HumanAIMemory &self, const C_HumanAIMemory &other)
             S_vector relative = Sub4(self.velocity, other.velocity);
             relative.y = 0.0f;
             S_vector aside;
-            if (SideStepEllipsoid(l, shape.Local(relative), c, 0.125f, &aside))
+            if (SideStepEllipsoid(l, shape.Local(relative), c, 0.125f, &aside, false))
                 AddPush(self.push, shape.World(aside));
         }
         return;
@@ -503,7 +505,7 @@ void PushFromHuman(C_HumanAIMemory &self, const C_HumanAIMemory &other)
         if (1e-8f < sq && 1e-8f < speedSq) {
             const float t = Dot(offset, Xyz(self.velocity)) / speedSq;
             const S_vector across(offset.x - t * self.velocity.x, offset.y - t * self.velocity.y, offset.z - t * self.velocity.z);
-            const float acrossSq = Sq(across);
+            const float acrossSq = (across.y * across.y + across.z * across.z) + across.x * across.x;
             if (acrossSq <= 1e-8f) {
                 const float length = std::sqrt(sq);
                 AddPush(self.push, offset * ((0.55f / length) * (HUMAN_RADIUS - length)));
@@ -562,8 +564,13 @@ void PushTargetFromHuman(C_HumanAIMemory &self, C_HumanAIMemory &other)
     S_vector by;
     if (other.owner->GetStance() == 2) {
         const S_Ellipsoid shape = ProneEllipsoid(other);
-        S_vector l = shape.Local(offset);
-        const float sq = Sq(l);
+        // (Its own sphere coordinates: divided by the half sizes; z y x, y z x, y z x.)
+        const S_vector *const a = shape.axis;
+        const S_vector &o = offset;
+        const S_vector l(((o.z * a[0].z + o.y * a[0].y) + o.x * a[0].x) / shape.half.x,
+                         ((o.y * a[1].y + o.z * a[1].z) + o.x * a[1].x) / shape.half.y,
+                         ((o.y * a[2].y + o.z * a[2].z) + o.x * a[2].x) / shape.half.z);
+        const float sq = (l.z * l.z + l.x * l.x) + l.y * l.y;
         if (1e-06f <= sq - 1.0f)
             return;
         if (1e-8f < sq) {
@@ -572,8 +579,10 @@ void PushTargetFromHuman(C_HumanAIMemory &self, C_HumanAIMemory &other)
             by = shape.World(S_vector(l.x * k, l.y * k, l.z * k));
         } else {
             // On top of each other: along where they themselves are.
-            const S_vector apart = Sub4(self.pos, other.pos);
-            by = shape.World(NormalizedZero(S_vector(Dot(apart, shape.axis[0]), Dot(apart, shape.axis[1]), Dot(apart, shape.axis[2]))));
+            const S_vector p = Sub4(self.pos, other.pos);
+            const S_vector d(((p.z * a[0].z + p.y * a[0].y) + p.x * a[0].x), ((p.z * a[1].z + p.y * a[1].y) + p.x * a[1].x),
+                             ((p.z * a[2].z + p.y * a[2].y) + p.x * a[2].x));
+            by = shape.World(NormalizedZero(d, (d.z * d.z + d.x * d.x) + d.y * d.y));
         }
     } else {
         const float sq = Sq(offset);
@@ -583,7 +592,8 @@ void PushTargetFromHuman(C_HumanAIMemory &self, C_HumanAIMemory &other)
             const float length = std::sqrt(sq);
             by = offset * ((0.75f / length) * (HUMAN_RADIUS - length));
         } else {
-            by = NormalizedZero(Sub4(self.pos, other.pos)) * HUMAN_RADIUS;
+            const S_vector p = Sub4(self.pos, other.pos);
+            by = NormalizedZero(p, (p.x * p.x + p.z * p.z) + p.y * p.y) * HUMAN_RADIUS;
         }
     }
     MoveTarget(self, by);
@@ -800,7 +810,11 @@ void C_HumanCrowd::Prepare(C_HumanAIMemory &memory, float time)
     memory.currentPoint = nullptr;
     if (owner->GetStance() == 2) {
         // Lying, the box around the body along where it faces.
-        S_vector dir = owner->GetFrame()->GetLocalDir();
+        // (GetLocalDir's normalisation inline, its square summed y z x.)
+        bool normalize;
+        S_vector dir = owner->GetFrame()->GetLocalDirUnnormalized(&normalize);
+        if (normalize)
+            dir = NormalizedZero(dir, (dir.y * dir.y + dir.z * dir.z) + dir.x * dir.x);
         dir.y = 0.0f;
         const float sq = dir.x * dir.x + dir.z * dir.z;
         if (std::fabs(sq - 1.0f) >= 1e-8f) {
@@ -824,7 +838,9 @@ void C_HumanCrowd::Prepare(C_HumanAIMemory &memory, float time)
     }
     memory.notPlayer = type != 1;
     memory.walking = type != 5 && owner->GetStance() != 2 && memory.notPlayer;
-    memory.walking = memory.walking && owner->ControllerUnknown104();
+    // (Asked whether walking or not, as the original's & does.)
+    const bool unknown104 = owner->ControllerUnknown104();
+    memory.walking = memory.walking && unknown104;
     memory.solved = memory.notPlayer && (memory.walking || RouteHasPoints(memory.route));
     memory.givesWay = (g_gameRole & 7) == 7 || !g_gameProfile.IsCooperativeGame() || type != 1;
     if (!memory.walking) {
@@ -1050,13 +1066,16 @@ void C_HumanCrowd::CollectBest(C_HumanAIMemory &memory, const S_PlanNode *node, 
         S_PlanNode *const child = reinterpret_cast<S_PlanNode *>(value);
         if ((value & 1) == 0 && child->point) {
             path[depth] = child;
-            CollectBest(memory, child, Sq(Sub4(child->pos, node->pos)) + cost, true, path, depth + 1);
+            // (The squares in the original's orders: z x y here, z y x for the distance.)
+            const S_vector d = Sub4(child->pos, node->pos);
+            CollectBest(memory, child, ((d.z * d.z + d.x * d.x) + d.y * d.y) + cost, true, path, depth + 1);
             leaf = false;
         }
     }
     if (!leaf || !notRoot)
         return;
-    const float distance = Sq(Sub4(node->pos, (*memory.route)[memory.waypoint]->pos));
+    const S_vector d = Sub4(node->pos, (*memory.route)[memory.waypoint]->pos);
+    const float distance = (d.z * d.z + d.y * d.y) + d.x * d.x;
     const float difference = distance - m_bestDistance;
     if (IsNegative(difference) || (difference < 0.0001f && cost < m_bestCost)) {
         for (int i = 0; i < depth; ++i)
@@ -1390,6 +1409,34 @@ int C_HumanCrowd::FindBlocker(C_HumanAIMemory &memory, const S_PlanNode *from, S
     return result;
 }
 
+// The two car pushes work out their own sphere coordinates, each summing in its own order (the last bits decide a tie):
+namespace {
+// PushFromCar's (0x00568580): by the reciprocals of the half sizes; x y z, x y z, y z x.
+S_vector CarLocalPos(const S_Ellipsoid &shape, const S_vector &v)
+{
+    const S_vector *const a = shape.axis;
+    return S_vector(((a[0].x * v.x + a[0].y * v.y) + v.z * a[0].z) * (1.0f / shape.half.x),
+                    ((a[1].x * v.x + a[1].y * v.y) + a[1].z * v.z) * (1.0f / shape.half.y),
+                    ((a[2].y * v.y + a[2].z * v.z) + a[2].x * v.x) * (1.0f / shape.half.z));
+}
+// ... its relative velocity's (whose y it multiplies by 0, not reading it): x z, x z, z x, then the y term.
+S_vector CarLocalVelocity(const S_Ellipsoid &shape, const S_vector &v)
+{
+    const S_vector *const a = shape.axis;
+    return S_vector(((a[0].x * v.x + v.z * a[0].z) + a[0].y * 0.0f) * (1.0f / shape.half.x),
+                    ((a[1].x * v.x + v.z * a[1].z) + a[1].y * 0.0f) * (1.0f / shape.half.y),
+                    ((v.z * a[2].z + a[2].x * v.x) + a[2].y * 0.0f) * (1.0f / shape.half.z));
+}
+// PushTargetFromCar's (0x00568dc0): divided by the half sizes; z x y, z y x, x z y.
+S_vector CarLocalTarget(const S_Ellipsoid &shape, const S_vector &v)
+{
+    const S_vector *const a = shape.axis;
+    return S_vector(((a[0].z * v.z + a[0].x * v.x) + a[0].y * v.y) / shape.half.x,
+                    ((a[1].z * v.z + a[1].y * v.y) + a[1].x * v.x) / shape.half.y,
+                    ((a[2].x * v.x + a[2].z * v.z) + a[2].y * v.y) / shape.half.z);
+}
+}  // namespace
+
 void C_HumanCrowd::PushFromCar(C_HumanAIMemory &memory, int index, float step)
 {
     if (!memory.solved)
@@ -1397,8 +1444,8 @@ void C_HumanCrowd::PushFromCar(C_HumanAIMemory &memory, int index, float step)
     C_Car *const car = m_cars[index];
     const S_vector carPos = car->GetFrame()->GetWorldPos();
     const S_Ellipsoid shape = CarEllipsoid(car, m_carHalves[index]);
-    const S_vector l = shape.Local(Flat(S_vector(memory.pos.x - carPos.x, memory.pos.y - carPos.y, memory.pos.z - carPos.z)));
-    const float c = Sq(l) - 1.0f;
+    const S_vector l = CarLocalPos(shape, Flat(S_vector(memory.pos.x - carPos.x, memory.pos.y - carPos.y, memory.pos.z - carPos.z)));
+    const float c = ((l.z * l.z + l.y * l.y) + l.x * l.x) - 1.0f;
     if (c <= 1e-8f) {
         if (1e-8f < c + 1.0f) {
             const float length = std::sqrt(c + 1.0f);
@@ -1410,7 +1457,7 @@ void C_HumanCrowd::PushFromCar(C_HumanAIMemory &memory, int index, float step)
     const S_vector carVelocity = car->GetVelocity();
     const S_vector relative(memory.velocity.x - carVelocity.x, 0.0f, memory.velocity.z - carVelocity.z);
     S_vector aside;
-    if (SideStepEllipsoid(l, shape.Local(relative), c, step, &aside))
+    if (SideStepEllipsoid(l, CarLocalVelocity(shape, relative), c, step, &aside, true))
         AddPush(memory.push, shape.World(aside));
 }
 
@@ -1421,14 +1468,15 @@ void C_HumanCrowd::PushTargetFromCar(C_HumanAIMemory &memory, int index)
     C_Car *const car = m_cars[index];
     const S_vector carPos = car->GetFrame()->GetWorldPos();
     const S_Ellipsoid shape = CarEllipsoid(car, m_carHalves[index]);
-    const S_vector l = shape.Local(Flat(S_vector(memory.target.x - carPos.x, memory.target.y - carPos.y, memory.target.z - carPos.z)));
-    const float sq = Sq(l);
+    const S_vector l = CarLocalTarget(shape, Flat(S_vector(memory.target.x - carPos.x, memory.target.y - carPos.y, memory.target.z - carPos.z)));
+    const float sq = (l.z * l.z + l.x * l.x) + l.y * l.y;
     if (!(sq - 1.0f < 1e-06f))
         return;
     S_vector unit;
     if (sq <= 1e-8f) {
         const S_vector apart(memory.pos.x - carPos.x, memory.pos.y - carPos.y, memory.pos.z - carPos.z);
-        unit = NormalizedZero(S_vector(Dot(apart, shape.axis[0]), Dot(apart, shape.axis[1]), Dot(apart, shape.axis[2])));
+        const S_vector d(Dot(apart, shape.axis[0]), Dot(apart, shape.axis[1]), Dot(apart, shape.axis[2]));
+        unit = NormalizedZero(d, (d.z * d.z + d.x * d.x) + d.y * d.y);
     } else {
         const float length = std::sqrt(sq);
         const float k = (1.0f - length) / length;
@@ -1534,11 +1582,13 @@ void C_HumanCrowd::Tick(int timeDelta, const std::vector<C_Actor *> &active)
         C_HumanAIMemory &memory = *m_humans[i]->m_aiMemory;
         if (RouteHasPoints(memory.route)) {
             S_AIWaypoint *const waypoint = (*memory.route)[memory.waypoint];
-            if (1e-08f < Sq(Sub4(memory.target, waypoint->pos)))
+            // (Squares summed in the original's orders: x z y here, z y x for the move.)
+            const S_vector d = Sub4(memory.target, waypoint->pos);
+            if (1e-08f < (d.x * d.x + d.z * d.z) + d.y * d.y)
                 waypoint->pos = memory.target;
         }
         const S_vector moved = Sub4(memory.pos, memory.start);
-        if (Sq(moved) <= 1e-08f) {
+        if ((moved.z * moved.z + moved.y * moved.y) + moved.x * moved.x <= 1e-08f) {
             memory.step[0] = memory.step[1] = memory.step[2] = 0.0f;
             memory.stepping = false;
         } else {

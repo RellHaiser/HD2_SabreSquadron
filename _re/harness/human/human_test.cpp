@@ -707,6 +707,11 @@ bool CallsAgree(const std::vector<S_Call> &a, const std::vector<S_Call> &b, std:
     for (size_t i = 0; i < std::max(a.size(), b.size()); ++i) {
         if (i >= a.size() || i >= b.size() || a[i].what != b[i].what || a[i].nums.size() != b[i].nums.size()) {
             why = "call " + std::to_string(i) + ": port " + (i < a.size() ? a[i].what : "-") + ", original " + (i < b.size() ? b[i].what : "-");
+            // (HUMAN_CALLS: both sides' calls, the first few times.)
+            static int shown;
+            if (std::getenv("HUMAN_CALLS") && shown++ < 3)
+                for (size_t j = 0; j < std::max(a.size(), b.size()); ++j)
+                    std::printf("    %3u %-40s %s\n", unsigned(j), j < a.size() ? a[j].what.c_str() : "-", j < b.size() ? b[j].what.c_str() : "-");
             return false;
         }
         for (size_t k = 0; k < a[i].nums.size(); ++k) {

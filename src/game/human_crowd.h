@@ -81,8 +81,9 @@ bool KeepOnNetwork(const C_CheckpointNetwork *network, S_vector4 &pos, const S_C
 void SortCorners(const S_vector &pos, const S_vector &side, const S_vector &dir, S_vector corners[4], int *negative, int *positive, int *negativeCount, int *positiveCount);   // 0x0056de90
 float FastInvSqrt(float value);
 bool FirstRootAhead(float doubled, float discriminant, float a, float *t);
-bool SideStepEllipsoid(const S_vector &l, const S_vector &r, float c, float scale, S_vector *out);
+bool SideStepEllipsoid(const S_vector &l, const S_vector &r, float c, float scale, S_vector *out, bool offFromX);
 S_vector NormalizedZero(S_vector v);
+S_vector NormalizedZero(S_vector v, float sq);           // (`sq`: v's square, summed in the caller's order)
 void AdvanceWaypoint(C_HumanAIMemory &memory, float time);   // 0x005653c0
 void MoveOneStep(C_HumanAIMemory &memory, float step);   // 0x00565f30
 // (0x00566130; a third stack argument in the original, not used)

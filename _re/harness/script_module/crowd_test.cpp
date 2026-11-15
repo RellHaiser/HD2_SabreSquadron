@@ -882,22 +882,22 @@ void TestRoots()
     S_vector out(9, 9, 9);
     const S_vector r(0, 0, -2);
     S_vector l(0, 0, 2);
-    CHECK(crowd::SideStepEllipsoid(l, r, 3.0f, 0.125f, &out));
+    CHECK(crowd::SideStepEllipsoid(l, r, 3.0f, 0.125f, &out, false));
     const float f = crowd::FastInvSqrt(4.0f);
     CHECK(Near(out.x, -2.0f * f * 0.0625f) && out.y == 0.0f && Near(out.z, 0.0f));
     // Off to one side: the other way, a little weaker.
     l = S_vector(0.1f, 0, 2);
-    CHECK(crowd::SideStepEllipsoid(l, r, 0.01f + 4.0f - 1.0f, 0.125f, &out));
+    CHECK(crowd::SideStepEllipsoid(l, r, 0.01f + 4.0f - 1.0f, 0.125f, &out, false));
     CHECK(out.x > 0.0f);
     // Scaled by what it is given.
     S_vector twice;
-    CHECK(crowd::SideStepEllipsoid(l, r, 3.01f, 0.25f, &twice));
+    CHECK(crowd::SideStepEllipsoid(l, r, 3.01f, 0.25f, &twice, false));
     CHECK(Near(twice.x, out.x * 2.0f));
     // Going away; too slow; passing wide; not getting there in the step.
-    CHECK(!crowd::SideStepEllipsoid(S_vector(0, 0, 2), S_vector(0, 0, 2), 3.0f, 0.125f, &out));
-    CHECK(!crowd::SideStepEllipsoid(S_vector(0, 0, 2), S_vector(0, 0, 0), 3.0f, 0.125f, &out));
-    CHECK(!crowd::SideStepEllipsoid(S_vector(3, 0, 2), S_vector(0, 0, -2), 12.0f, 0.125f, &out));
-    CHECK(!crowd::SideStepEllipsoid(S_vector(0, 0, 5), S_vector(0, 0, -2), 24.0f, 0.125f, &out));
+    CHECK(!crowd::SideStepEllipsoid(S_vector(0, 0, 2), S_vector(0, 0, 2), 3.0f, 0.125f, &out, false));
+    CHECK(!crowd::SideStepEllipsoid(S_vector(0, 0, 2), S_vector(0, 0, 0), 3.0f, 0.125f, &out, false));
+    CHECK(!crowd::SideStepEllipsoid(S_vector(3, 0, 2), S_vector(0, 0, -2), 12.0f, 0.125f, &out, false));
+    CHECK(!crowd::SideStepEllipsoid(S_vector(0, 0, 5), S_vector(0, 0, -2), 24.0f, 0.125f, &out, false));
 }
 
 C_HumanAIMemory *Memory(S_Fake *fake, float x, float z)
@@ -2552,7 +2552,7 @@ void TestConeNumbers()
     crowd::PushFromHuman(self, other);
     S_vector aside;
     const S_vector l(-3.0f / 1.1f, 0, -0.1f / 1.7f), r(2.0f / 1.1f, 0, 0);
-    CHECK(crowd::SideStepEllipsoid(l, r, l.x * l.x + l.z * l.z - 1.0f, 0.125f, &aside));
+    CHECK(crowd::SideStepEllipsoid(l, r, l.x * l.x + l.z * l.z - 1.0f, 0.125f, &aside, false));
     CHECK(Near(self.push.x, aside.x * 1.1f, 1e-5f) && Near(self.push.z, aside.z * 1.7f, 1e-5f) && self.push.y == 0.0f);
     b->stance = 0;
 
@@ -2661,7 +2661,7 @@ void TestCarPushNumbers()
     crowd_.PushFromCar(m, 0, 0.25f);
     const S_vector l(-3.0f / 1.4f, 0, 0.1f / 2.4f), r(2.0f / 1.4f, 0, 0);
     S_vector aside;
-    CHECK(crowd::SideStepEllipsoid(l, r, l.x * l.x + l.z * l.z - 1.0f, 0.25f, &aside));
+    CHECK(crowd::SideStepEllipsoid(l, r, l.x * l.x + l.z * l.z - 1.0f, 0.25f, &aside, false));
     CHECK(Near(m.push.x, aside.x * 1.4f, 1e-5f) && Near(m.push.z, aside.z * 2.4f, 1e-5f));
     // Not taking part.
     m.push = {};

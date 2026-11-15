@@ -69,7 +69,8 @@ alignas(16) S_AIWaypoint g_newWaypoints[64];
 int g_newWaypointNext = 0;
 S_AIWaypoint *NewWaypoint(int checkpoint, const S_vector4 *pos, int flags, int type, float radius)
 {
-    Log(nullptr, "AllocWaypoint", {double(checkpoint), pos->x, pos->y, pos->z, pos->w, double(flags & 0xFFFF), double(type & 0xFF), radius});
+    // (Not the position's w: the original's is a stack temporary's.)
+    Log(nullptr, "AllocWaypoint", {double(checkpoint), pos->x, pos->y, pos->z, double(flags & 0xFFFF), double(type & 0xFF), radius});
     S_AIWaypoint *w = &g_newWaypoints[g_newWaypointNext++ % 64];
     w->pos = *pos;
     w->pos2 = *pos;
@@ -343,7 +344,13 @@ void MemToOrig(int k)
 {
     std::memcpy(g_memOrig[k], g_memBefore[k], 0x110);
     const auto *m = reinterpret_cast<const C_HumanAIMemory *>(g_memBefore[k]);
-    void *route = m->route ? static_cast<void *>(g_routeOrig[k]) : nullptr;
+    // (Any memory's route: the other humans share one, the first other's.)
+    void *route = nullptr;
+    for (int j = 0; j < MEMS; ++j)
+        if (m->route == &g_routePort[j])
+            route = g_routeOrig[j];
+    if (m->route && !route)
+        route = g_routeOrig[k];
     void *owner = MemOwnerOrig(k);
     std::memcpy(g_memOrig[k] + 0xE0, &route, 4);
     std::memcpy(g_memOrig[k] + 0xE8, &owner, 4);
@@ -362,7 +369,9 @@ std::string MemDiffers(int k, const uint8_t *port, const std::vector<S_AIWaypoin
         std::memcpy(&x, port + i, 4);
         std::memcpy(&y, orig + i, 4);
         if (i == 0xE0) {
-            const bool same = (x == Word(&g_routePort[k])) == (y == Word(g_routeOrig[k])) && (x == 0) == (y == 0);
+            bool same = (x == 0) == (y == 0);
+            for (int j = 0; j < MEMS; ++j)
+                same = same && (x == Word(&g_routePort[j])) == (y == Word(g_routeOrig[j]));
             if (!same)
                 return "route pointer";
             continue;
@@ -377,7 +386,12 @@ std::string MemDiffers(int k, const uint8_t *port, const std::vector<S_AIWaypoin
         // HoldOnNetwork, MoveOneStep and MoveTarget store a stack temporary's undefined one.)
         if (i == 0x4C || i == 0x2C || i == 0x3C || i == 0x6C)
             continue;
-        if (!WordsNear(x, y, 'm')) {
+        // (The word after the step and the w of the start, last goal and route start, +0x0C, +0x5C, +0x7C, +0x8C:
+        // the original's StepAlone and Prepare copy whole 16-byte velocities and positions, some stack temporaries.)
+        if (i == 0x0C || i == 0x5C || i == 0x7C || i == 0x8C || i == 0xCC)
+            continue;
+        static const bool exact = std::getenv("CROWD_EXACT") != nullptr;
+        if (exact ? x != y : !WordsNear(x, y, 'm')) {
             float a, b;
             std::memcpy(&a, &x, 4);
             std::memcpy(&b, &y, 4);
@@ -421,8 +435,17 @@ template <class P, class O> void CrowdCall(const char *what, P port, O original)
     std::string why;
     for (int k = 0; k < MEMS && why.empty(); ++k)
         why = MemDiffers(k, g_memAfter[k], g_routeAfter[k]);
-    if (why.empty() && std::memcmp(g_wpAfter, g_wp, sizeof g_wp) != 0)
-        why = "waypoints";
+    // (Not the w of pos and pos2, +0x0C and +0x1C: the tick copies a target's, the original's undefined, into them.)
+    for (size_t i = 0; why.empty() && i < sizeof g_wp; i += 4) {
+        if (i % sizeof(S_AIWaypoint) == 0x0C || i % sizeof(S_AIWaypoint) == 0x1C)
+            continue;
+        uint32_t a, b;
+        std::memcpy(&a, g_wpAfter + i, 4);
+        std::memcpy(&b, reinterpret_cast<const uint8_t *>(g_wp) + i, 4);
+        static const bool exact = std::getenv("CROWD_EXACT") != nullptr;
+        if (exact ? a != b : !WordsNear(a, b, 'm'))
+            why = "waypoint word " + std::to_string(i / 4);
+    }
     CHECK(why.empty());
     static int shown;
     if (!why.empty() && shown++ < 15) {
@@ -1046,6 +1069,7 @@ template <class P, class O> void PlannerCall(const char *what, P port, O origina
                                                 OrigReleasedWaypoints());
                   return r;
               });
+    static const bool exact = std::getenv("CROWD_EXACT") != nullptr;
     std::string why;
     if (g_portCrowd.text != g_origCrowdState.text)
         why = "crowd:\n--- port\n" + g_portCrowd.text + "\n--- original\n" + g_origCrowdState.text;
@@ -1053,7 +1077,7 @@ template <class P, class O> void PlannerCall(const char *what, P port, O origina
         uint32_t a, b;
         std::memcpy(&a, &g_portCrowd.floats[i], 4);
         std::memcpy(&b, &g_origCrowdState.floats[i], 4);
-        if (!WordsNear(a, b, 'f'))
+        if (exact ? a != b : !WordsNear(a, b, 'f'))
             why = "crowd float " + std::to_string(i) + ": port " + std::to_string(g_portCrowd.floats[i]) + " original " +
                   std::to_string(g_origCrowdState.floats[i]);
     }
@@ -1064,7 +1088,7 @@ template <class P, class O> void PlannerCall(const char *what, P port, O origina
         // (Not the w of pos and pos2, +0x0C and +0x1C: the original's come from stack temporaries.)
         if ((i % 0x30 == 0x0C || i % 0x30 == 0x1C))
             continue;
-        if (!WordsNear(a, b, 'm'))
+        if (exact ? a != b : !WordsNear(a, b, 'm'))
             why = "new waypoint word " + std::to_string(i / 4);
     }
     CHECK(why.empty());
@@ -1203,6 +1227,270 @@ void TestCrowdPlanner()
     }
 }
 
+}  // namespace
+void HumanPass_Tick(int timeDelta, const std::vector<C_Actor *> &active);   // (game/pending.h's)
+namespace {
+
+// ---- part 25c: the cars' pushes, a human's preparation and the whole tick
+struct S_TickScript {
+    bool mainRoute = true;                              // the human's controller's GetWaypoints: its route, or none
+    bool otherRoute = true;                             // the other humans' (one controller): the first other's
+} g_tk;
+void *CT_ CR_GetWaypoints(void *self)
+{
+    Log(self, "GetWaypoints");
+    if (self == g_cPort)
+        return g_tk.mainRoute ? static_cast<void *>(&g_routePort[0]) : nullptr;
+    if (self == g_cOrig)
+        return g_tk.mainRoute ? static_cast<void *>(g_routeOrig[0]) : nullptr;
+    if (self == g_cPort2)
+        return g_tk.otherRoute ? static_cast<void *>(&g_routePort[1]) : nullptr;
+    if (self == g_cOrig2)
+        return g_tk.otherRoute ? static_cast<void *>(g_routeOrig[1]) : nullptr;
+    return nullptr;
+}
+uint32_t CT_ CR_GetClimbState(void *)
+{
+    Log(nullptr, "BodyGetClimbState");
+    return uint32_t(g_crowd.climbState);
+}
+uint32_t CT_ CR_IsWorkState5(void *)
+{
+    Log(nullptr, "BodyIsWorkState5");
+    return g_crowd.workState5;
+}
+// The port car's private velocity (C_Car::GetVelocity's; the original's +0x4A0).
+size_t CarVelocityOffset()
+{
+    return size_t(reinterpret_cast<const uint8_t *>(&CarPort(0)->GetVelocity()) - g_carsPort[0]);
+}
+void SetUpTick()
+{
+    RedirectOriginal(0x005ac2b0, FAKE(CR_GetClimbState));
+    RedirectOriginal(0x005ac310, FAKE(CR_IsWorkState5));
+    RedirectOriginal(0x006b69d0, reinterpret_cast<const void *>(OM_IsCoop));
+    for (uint32_t at : {0x00568580u, 0x00568dc0u, 0x00564ef0u, 0x005656e0u, 0x005647c0u, 0x005a45c0u, 0x005a6380u,
+                        0x005a5c70u, 0x005a5cc0u, 0x005a5d20u, 0x005aa7b0u})
+        RestoreOriginal(at);
+    SetSlot(g_cPortVt, g_cOrigVt, &C_HumanController::GetWaypoints, 0xD4, FAKE(CR_GetWaypoints));
+    // The other humans: the human's events (the nearby ones theirs too).
+    for (int k = 0; k < OTHERS; ++k) {
+        OtherPort(k)->m_events = g_portEvents;
+        void *events = g_origEvents;
+        std::memcpy(g_otherOrig[k] + 0xB4, &events, 4);
+    }
+}
+// Both sides' controller fields the crowd reads (the human's and the other humans' one).
+void RandomTickController(uint8_t *port, uint8_t *orig)
+{
+    auto *pc = reinterpret_cast<C_HumanController *>(port);
+    pc->m_moveFlags = uint32_t(I(0, 0xFFFF)) | (P(0.1f) ? uint32_t(MOVE_UNCONSCIOUS) : 0u);
+    if (P(0.3f))
+        pc->m_moveFlags &= ~uint32_t(MOVE_MOVING_MASK);
+    std::memcpy(orig + 0x50, &pc->m_moveFlags, 4);
+    pc->m_interaction = P(0.85f) ? -1 : I(0, 0x26);
+    std::memcpy(orig + 0x60, &pc->m_interaction, 4);
+}
+S_vector4 RandomVelocity()
+{
+    return P(0.2f) ? S_vector4{0, 0, 0, 0} : S_vector4{U(-3, 3), P(0.7f) ? 0.0f : U(-0.5f, 0.5f), U(-3, 3), 0.0f};
+}
+void RandomTick()
+{
+    RandomPlanner();
+    C_Human *h = g_h.human;
+    SetControllerType(P(0.4f) ? HUMAN_CONTROLLER_AI : CONTROLLER_TYPES[I(0, 6)]);
+    RandomTickController(g_cPort, g_cOrig);
+    RandomTickController(g_cPort2, g_cOrig2);
+    const bool suspended = P(0.2f);
+    PortScripted(g_cPort)->m_suspended = suspended;
+    g_cOrig[0x1D2] = suspended;
+    h->m_stats[STAT_HEALTH] = P(0.08f) ? I(-5, 0) : I(1, 100);
+    h->m_velocity = RandomVelocity();
+    for (int k = 0; k < OTHERS; ++k) {
+        C_Human *o = OtherPort(k);
+        o->m_stats[STAT_HEALTH] = P(0.1f) ? I(-5, 0) : I(1, 100);
+        std::memcpy(g_otherOrig[k] + 0xEC, &o->m_stats[STAT_HEALTH], 4);
+        const bool rides = g_pl.cars && P(0.08f);
+        o->m_vehicle = rides ? CarPort(0) : nullptr;
+        void *car = rides ? static_cast<void *>(g_carsOrig[0]) : nullptr;
+        std::memcpy(g_otherOrig[k] + 0x160, &car, 4);
+        o->m_velocity = RandomVelocity();
+        std::memcpy(g_otherOrig[k] + 0x1B0, &o->m_velocity, 16);
+    }
+    g_crowd.workState5 = P(0.08f);
+    g_crowd.climbState = P(0.05f) ? I(1, 3) : 0;
+    g_gameRole = ROLES[I(0, 3)];
+    g_self.coop = P(0.5f);
+    g_ctl.answer = P(0.7f);                             // Unknown104
+    g_tk.mainRoute = P(0.85f);
+    g_tk.otherRoute = P(0.7f);
+    // (Now and then a route start or last goal not set yet: the quiet NaN marking it, either sign.)
+    for (int k = 0; k < MEMS; ++k) {
+        if (P(0.1f))
+            MemPort(k).routeStart.x = C_HumanAIMemory::INVALID_FLOAT();
+        if (P(0.1f))
+            MemPort(k).lastGoal.x = P(0.5f) ? C_HumanAIMemory::INVALID_FLOAT() : -C_HumanAIMemory::INVALID_FLOAT();
+    }
+    for (int k = 0; k < CARS; ++k) {
+        const S_vector v = P(0.4f) ? S_vector(0, 0, 0) : S_vector(U(-5, 5), U(-0.5f, 0.5f), U(-5, 5));
+        std::memcpy(g_carsPort[k] + CarVelocityOffset(), &v, 12);
+        std::memcpy(g_carsOrig[k] + 0x4A0, &v, 12);
+    }
+    // The frames where the memories are (each tick starts from them; now and then a little off), the human's turned
+    // (lying: its box along it), now and then tilted, facing straight up or down, or nearly.
+    for (int k = 0; k < MEMS; ++k) {
+        I3D_frame *f = k == 0 ? h->GetFrame() : g_actorFrame[k - 1];
+        S_quat q;
+        const float up = P(0.5f) ? 1.5707964f : -1.5707964f;
+        const float r = U(0, 1);
+        if (r < 0.05f)
+            q.Make(S_vector(1, 0, 0), up);
+        else if (r < 0.08f)
+            q.Make(S_vector(1, 0, 1e-5f), up);                 // (its flat direction tiny along x)
+        else if (r < 0.11f)
+            q.Make(S_vector(1, 0, 0), up > 0 ? up - 1e-5f : up + 1e-5f);   // (x exactly 0, z tiny)
+        else if (r < 0.3f) {
+            S_vector axis(U(-0.5f, 0.5f), 1.0f, U(-0.5f, 0.5f));
+            q.Make(axis * (1.0f / axis.Magnitude()), U(0, 6.2831853f));
+        } else
+            q.Make(S_vector(0, 1, 0), U(0, 6.2831853f));
+        f->SetRot(q);
+        S_vector at(MemPort(k).pos.x, MemPort(k).pos.y, MemPort(k).pos.z);
+        if (P(0.5f))
+            at = at + S_vector(U(-0.3f, 0.3f), U(-0.1f, 0.1f), U(-0.3f, 0.3f));
+        f->SetPos(at);
+        f->Update();
+    }
+}
+// The crowd's lists of humans and cars as names, the port's and the original's.
+std::string PortCrowdLists()
+{
+    std::vector<uint32_t> humans, cars;
+    for (C_Human *x : g_humanCrowd.m_humans)
+        humans.push_back(Word(x));
+    for (C_Car *x : g_humanCrowd.m_cars)
+        cars.push_back(Word(x));
+    return ListText(humans) + "/ " + ListText(cars);
+}
+std::string OrigCrowdLists() { return ListText(MsvcVectorGet(g_origCrowd)) + "/ " + ListText(MsvcVectorGet(g_origCrowd + 0x10)); }
+
+void TestCrowdTick()
+{
+    std::printf("crowd: the tick\n");
+    for (int i = 0; i < 24000 / QUICK; ++i) {
+        RandomTick();
+        const int k = P(0.5f) ? 0 : I(1, MEMS - 1);
+        switch (i % 5) {
+        case 0:
+        case 1: {
+            if (!g_pl.cars)
+                break;
+            const int c = I(0, g_pl.cars - 1);
+            // (Now and then the memory right at the car, or inside its box.)
+            if (P(0.4f)) {
+                const S_vector at = g_carFrame[c]->GetWorldPos();
+                MemPort(k).pos = {at.x + U(-2.5f, 2.5f), at.y + U(-0.3f, 0.3f), at.z + U(-3, 3), 0.0f};
+                if (P(0.1f))
+                    MemPort(k).pos = {at.x, at.y, at.z, 0.0f};
+                // (A hair off the centre along x or z, either way: NormalizedZero's signs.)
+                if (P(0.1f)) {
+                    const float hair = P(0.5f) ? 1e-6f : -1e-6f;
+                    MemPort(k).pos = P(0.5f) ? S_vector4{at.x + hair, at.y, at.z, 0.0f} : S_vector4{at.x, at.y, at.z + hair, 0.0f};
+                }
+            }
+            if (P(0.4f)) {
+                const S_vector at = g_carFrame[c]->GetWorldPos();
+                MemPort(k).target = {at.x + U(-2.5f, 2.5f), at.y, at.z + U(-3, 3), 0.0f};
+                if (P(0.1f))
+                    MemPort(k).target = {at.x, at.y, at.z, 0.0f};
+            }
+            if (i % 5 == 0) {
+                const float step = U(0.001f, 0.03f);
+                PlannerCall("PushFromCar", [&] { g_humanCrowd.PushFromCar(MemPort(k), c, step); return 0; },
+                            [&](void *) {
+                                OCall<void>(0x00568580, static_cast<void *>(g_origCrowd), static_cast<void *>(g_memOrig[k]), c, step);
+                                return 0;
+                            });
+            } else {
+                PlannerCall("PushTargetFromCar", [&] { g_humanCrowd.PushTargetFromCar(MemPort(k), c); return 0; },
+                            [&](void *) {
+                                OCall<void>(0x00568dc0, static_cast<void *>(g_origCrowd), static_cast<void *>(g_memOrig[k]), c, 0);
+                                return 0;
+                            });
+            }
+            break;
+        }
+        case 2: {
+            const float time = U(0.01f, 0.2f);
+            // (Now and then the human a hair from its route's last waypoint: a tiny velocity, zeroed.)
+            if (k == 0 && g_tk.mainRoute && !g_routePort[0].empty() && P(0.3f)) {
+                const S_vector4 &w = g_routePort[0].back()->pos;
+                I3D_frame *f = MemOwnerPort(0)->GetFrame();
+                f->SetPos(S_vector(w.x + (P(0.5f) ? 1e-5f : -1e-5f), w.y, w.z));
+                f->Update();
+            }
+            PlannerCall("StepAlone", [&] { return int(g_humanCrowd.StepAlone(MemOwnerPort(k), time)); },
+                        [&](void *) {
+                            return int(OCall<uint32_t>(0x00564ef0, static_cast<void *>(g_origCrowd), MemOwnerOrig(k), time) & 0xFF);
+                        });
+            break;
+        }
+        case 3: {
+            const float time = U(0.01f, 0.2f);
+            PlannerCall("Prepare", [&] { g_humanCrowd.Prepare(MemPort(k), time); return 0; },
+                        [&](void *) {
+                            OCall<void>(0x005656e0, static_cast<void *>(g_origCrowd), static_cast<void *>(g_memOrig[k]), time);
+                            return 0;
+                        });
+            break;
+        }
+        default: {
+            // The active actors: the humans (most), the crowd cars, now and then the meleeTracker, in any order.
+            std::vector<int> picks;
+            if (P(0.9f))
+                picks.push_back(ACTOR_SELF_INDEX);
+            for (int o = 0; o < OTHERS; ++o)
+                if (P(0.7f))
+                    picks.push_back(o);
+            for (int c = 0; c < CARS; ++c)
+                if (P(0.7f))
+                    picks.push_back(100 + c);
+            if (P(0.2f))
+                picks.push_back(ACTOR_MELEE_INDEX);
+            for (size_t a = picks.size(); a > 1; --a)
+                std::swap(picks[a - 1], picks[size_t(I(0, int(a) - 1))]);
+            std::vector<C_Actor *> active;
+            std::vector<uint32_t> origActive;
+            for (int p : picks) {
+                active.push_back(static_cast<C_Actor *>(p >= 100 ? static_cast<void *>(CarPort(p - 100)) : ActorPort(p)));
+                origActive.push_back(Word(p >= 100 ? static_cast<void *>(g_carsOrig[p - 100]) : ActorOrig(p)));
+            }
+            const int timeDelta = I(10, 150);
+            std::string portLists, origLists;
+            alignas(16) uint8_t vec[16];
+            PlannerCall("Tick",
+                        [&] {
+                            HumanPass_Tick(timeDelta, active);
+                            portLists = PortCrowdLists();
+                            return 0;
+                        },
+                        [&](void *) {
+                            MsvcVectorPut(vec, origActive, size_t(I(0, 2)));
+                            OCall<void>(0x005647c0, static_cast<void *>(g_origCrowd), timeDelta, static_cast<void *>(vec));
+                            origLists = OrigCrowdLists();
+                            return 0;
+                        });
+            CHECK(portLists == origLists);
+            static int shown;
+            if (portLists != origLists && shown++ < 4)
+                std::printf("  Tick lists: port %s original %s\n", portLists.c_str(), origLists.c_str());
+            break;
+        }
+        }
+    }
+}
+
 void TestCrowd()
 {
     SetUpCombat();
@@ -1219,6 +1507,10 @@ void TestCrowd()
     }
     if (run("25b"))
         TestCrowdPlanner();
+    if (run("25c")) {
+        SetUpTick();
+        TestCrowdTick();
+    }
 }
 
 }  // namespace

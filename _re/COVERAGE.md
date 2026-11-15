@@ -2417,15 +2417,16 @@ particles and the surface marks. Files are served from memory.
   - The AI memories (C_HumanAIMemory, the same layout on both sides) are each side's own: their owner (the human or
     one of part 24's other humans) and route (the port's std::vector, the original's MSVC6 vector of the same
     waypoints) differ. After each call both memories are compared word by word (floats within the usual tolerance;
-    bit for bit with CROWD_EXACT=1 since part 25b), pointers by what they name.
+    bit for bit with CROWD_EXACT=1 since part 25c, see there), pointers by what they name.
   - The checkpoint network is the test's: 40 points about the humans (every fourth on whole metres with a radius of
     whole halves, for exact ties), linked to their nearest few. Both games point at it (the original's +0x54); its
     count and points are at the original's offsets. Get and FindNearestPoint (checkpoints.cpp is not linked) are
     fakes on both sides; the original's Get takes a 16-bit index (KeepOnNetwork passes a link's target in AX).
   - The original's crowd methods get a zeroed crowd object as `this`.
-- **The tests (all within the float tolerance):** AddPush (no total, along, against, across), KeepInsideStrip (in
-  either circle, beside, before, after; exact ties on the edges), KeepOnNetwork (in, out, along a link, no point, on
-  the edge), SortCorners (in and about the unit square, no direction), AdvanceWaypoint (a move ending about 5 cm short),
+- **The tests (within the float tolerance when written; bit for bit since part 25c):** AddPush (no total, along,
+  against, across), KeepInsideStrip (in either circle, beside, before, after; exact ties on the edges), KeepOnNetwork
+  (in, out, along a link, no point, on the edge), SortCorners (in and about the unit square, no direction),
+  AdvanceWaypoint (a move ending about 5 cm short),
   MoveOneStep (a route or none, walking or not), PushFromHuman and PushTargetFromHuman (standing or lying, overlapping,
   on a collision course, the same target, a tiny offset), PushOntoNetwork, HoldOnNetwork, TurnPushAside (pushed straight
   back), UpdateStuckTimer, the memory's SaveGame (files byte for byte) and LoadGame (saved and random chunks, the
@@ -2440,7 +2441,7 @@ particles and the surface marks. Files are served from memory.
   IsInvalid, part 25b's, and FirstRootAhead's both-roots-behind case, unreachable).
 - **Mutations** (`human/mutations/mutate_crowd1.py`, regenerated after part 25b): 415 mutants (396 generated, 19 for
   repeated lines); 335 killed, 19 not building, 61 survived: 21 in helpers 25a does not call (9 killed by 25b's
-  tests, the rest part 25c's), 18 equivalent, 22 float ties at exact equality.
+  tests, the rest part 25c's), 18 equivalent, 22 float ties at exact equality. Rerun exact in part 25c (see there).
 - **Harness lessons (my mistakes):** my network Get fake took the whole index word (the original passes 16 bits);
   `near` is a windows.h macro (again); I aimed a human exactly at another for a mutant and made the side it gives way
   to rounding noise; the original's undefined w words.
@@ -2459,7 +2460,8 @@ particles and the surface marks. Files are served from memory.
     turned, some tilted, standing or moving; the port's private speed found by probing GetSpeed), the waypoint pool
     (AllocWaypoint logged; the released ones read from each side's list), the events rebuilt for the original before
     each call.
-- **The tests (bit for bit with CROWD_EXACT=1; within the float tolerance otherwise):** FindPointNear (no start, a
+- **The tests (within the float tolerance; CROWD_EXACT=1 made only the nodes' and results' float hash exact, not the
+  memories and the crowd's floats as first written here; all bit for bit since part 25c):** FindPointNear (no start, a
   hint: none, the start, another, a linked neighbour with the place between or beyond the two; ladders not gone
   through), IsPointBlocked (near the others, standing or lying, on other floors; near the cars, the human's own
   vehicle), FindBlocker directly (from the human to its waypoint: humans standing or lying, cars, nodes with no point),
@@ -2477,8 +2479,55 @@ particles and the surface marks. Files are served from memory.
 - **Mutations** (`human/mutations/mutate_crowd2.py`): 381 mutants (319 generated, 62 for repeated lines); 311 killed,
   21 not building, 49 survived: 14 equivalent, 7 not reached (rare plan shapes, narrow distance windows), 28 float
   ties at exact equality. Part 25a's list regenerated for the changed file (its helpers Local and CarEllipsoid: all 9
-  killed by these tests).
+  killed by these tests). Rerun exact in part 25c: the same 49 survive.
 - **Harness lessons (my mistakes):** the original crowd's vector offsets off by 4; its events never rebuilt for the
   crowd calls and its nodes never copied in at first; the car half sizes need a 16-byte stride; the original's node
   capacity (+0x44) left 0 (it returned early or crashed); my header copy overwrote its result pointer (a crash); the
   mutation baseline then failed under mutrun's SSE math.cpp (real last-bit ties, which led to the order fixes above).
+
+## Human part 25c (the crowd's tick, `human_crowd.cpp`, 2026-11-14)
+
+- **The build:** part 25b's (`human/build_crowd.bat`, `crowd_test.inc`, CROWD_ONLY=25c for these tests alone).
+  - CROWD_EXACT=1 now makes every comparison bit for bit: the memories (MemDiffers), the waypoints the crowd reads, the
+    crowd's floats and new waypoints, the planner's float hash. Until now it made only the hash exact (25a's and 25b's
+    sections said otherwise: corrected there).
+  - Not compared: the w words the original fills from stack temporaries (the memory's +0x0C, +0x2C .. +0x8C and +0xCC,
+    the waypoints' positions' w; AllocWaypoint's logged position without it).
+  - The controllers' GetWaypoints (slot 0xD4: route 0 for the human's, route 1 for the others'), the body's climb and
+    work state 5 answers, the game role (synced to 0x982100), the profile's co-operative game and Unknown104's answer
+    are fakes or fields set on both sides. A route pointer in a memory is compared by which route it names.
+  - Each tick test randomises the controller types, move flags and the scripted one's suspended flag, healths, riders,
+    velocities (the humans' and the cars'), routes (or none), the routes' start and last goal (now and then the quiet
+    NaN markers, either sign) and the frames: turned about y, tilted, straight up or down, nearly so with x tiny, or x
+    exactly 0 with z tiny; sometimes up to 0.3 m off the memory's position.
+- **The tests:** PushFromCar and PushTargetFromCar (the memory and its target at a car, its centre, a hair off it along
+  x or z, or about it; moving cars), StepAlone (alone, near others or cars, the work state 5 body, the player's type;
+  now and then a hair from the route's last waypoint), Prepare (all controller types, routes or none, lying), Tick
+  through HumanPass_Tick (random active lists: humans, the crowd's cars, the meleeTracker, in any order; the crowd's
+  lists of humans and cars compared too). 24,000 calls; all bit for bit with CROWD_EXACT=1.
+- **Port fixes** (all found by the exact comparisons; the last bits decide ties at the push edges and plan sides):
+  - SideStepEllipsoid (25a): the original sums from z (z + y + x) for the speed, the dot and the human's miss distance;
+    the car's squares the miss distance from x; the tangent term in the original's order. Now a flag tells them apart.
+  - PushFromHuman (25a): the lying overlap ((z^2 + y^2) + x^2) - 1; the standing across square (y^2 + z^2) + x^2.
+  - PushTargetFromHuman (25a): the lying case has its own sphere coordinates (divided by the half sizes, z y x, y z x,
+    y z x) and square (z^2 + x^2) + y^2; on top of each other the dots go z y x and NormalizedZero takes the caller's
+    square ((z^2 + x^2) + y^2); standing, the near-zero case's square is (x^2 + z^2) + y^2.
+  - The car pushes: each works out its own sphere coordinates (PushFromCar by reciprocals, x y z, x y z, y z x; its
+    relative velocity's x z, y times 0; PushTargetFromCar divided, z x y, z y x, x z y) and squares in its own order.
+  - CollectBest (25b): its cost ((z^2 + x^2) + y^2) + cost and distance (z^2 + y^2) + x^2.
+  - Tick's last loop: the target test's square (x^2 + z^2) + y^2, the move's (z^2 + y^2) + x^2.
+  - Prepare: Unknown104 is asked even when the human is not walking (the original's &; the port's && skipped the
+    call); the lying facing is normalised as GetLocalDir does (square y z x) before it is flattened.
+- **Results:** 67,189 checks (25c alone; 25a 60,519, 25b 103,471, all exact, 0 failures); lines: 291 of the 292 in
+  25c's ranges (not run: the one-argument NormalizedZero, used by the script module's crowd test only).
+- **Mutations** (`human/mutations/mutate_crowd3.py`, all three lists regenerated for the changed file and run exact):
+  319 mutants (275 generated, 44 for repeated lines); 281 killed, 8 not building, 30 survived: 2 killed by 25a's
+  tests, 19 equivalent, 1 not reached (a lying facing exactly vertical), 8 float ties. Part 25a: 436 mutants, 349
+  killed, 22 not building, 65 survived (19 killed by 25b's or 25c's tests, 23 equivalent, 23 ties); part 25b: 382, 312
+  killed, 21 not building, the same 49 survived.
+- **Harness lessons (my mistakes):** I reported 25a and 25b as bit for bit when CROWD_EXACT compared only the planner's
+  hash exactly; the memories and the crowd's floats were within the tolerance, which hid the order differences above.
+  I misread PushFromHuman as keeping the offset's y (my search missed `MOV [ESP+n],0x0` stores; the original zeroes it).
+  I had seen Tick's last-loop orders and not applied them until two mutants showed it. A split debug mode for Tick
+  crashed and mapped pointers wrongly (removed). I changed SideStepEllipsoid's signature without updating the script
+  module's crowd test (the suites caught it: it did not build).
