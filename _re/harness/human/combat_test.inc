@@ -41,7 +41,7 @@ void C_FormationShape::OnLeaderDied() { Log(this, "FormationOnLeaderDied"); }
 const char *C_Human::GetPlayerName() const { return "playerName"; }
 #endif
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
-const S_vector &C_Human::GetViewDir() const { return g_combat.viewDir; }
+const S_vector &C_Human::GetViewDir() const { return AnswersOf(this) ? AnswersOf(this)->viewDir : g_combat.viewDir; }
 #endif
 #ifndef HUMAN_SENSES   // (the senses build links game/human_senses.cpp's)
 bool C_Human::HasSeenEnemy(const C_Human *human) const
@@ -51,7 +51,7 @@ bool C_Human::HasSeenEnemy(const C_Human *human) const
 }
 #endif
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
-bool C_Human::IsSurrendered() const { return g_combat.surrendered; }
+bool C_Human::IsSurrendered() const { return AnswersOf(this) ? AnswersOf(this)->surrendered : g_combat.surrendered; }
 #endif
 #ifndef HUMAN_SENSES   // (the senses build links game/human_senses.cpp's)
 void C_Human::OnSightEvent(int lost, int targetId) { Log(this, "OnSightEvent", {double(lost), double(targetId)}); }
@@ -96,7 +96,7 @@ void C_ShotManager::SprayBloodRandom(const S_vector &pos, const S_vector &dir)
 void C_SightModule::GetVisibleParts(int observer, int target, uint32_t *parts)
 {
     Log(nullptr, "GetVisibleParts", {double(observer), double(target)});
-    *parts = g_combat.visibleParts;
+    *parts = g_visiblePartsOf ? g_visiblePartsOf(target) : g_combat.visibleParts;
 }
 void C_SoundModule::PlayMusic(int track) { Log(this, "PlayMusic", {double(track)}); }
 bool C_Vehicle::SetBrake(float value)
@@ -472,7 +472,7 @@ const uint32_t *CT_ OB_GetGround(void *) { return g_combat.groundOn ? g_combat.g
 void CT_ OB_GetVisibleParts(void *, int observer, int target, uint32_t *parts)
 {
     Log(nullptr, "GetVisibleParts", {double(observer), double(target)});
-    *parts = g_combat.visibleParts;
+    *parts = g_visiblePartsOf ? g_visiblePartsOf(target) : g_combat.visibleParts;
 }
 void CT_ OB_SprayBloodRandom(void *, const S_vector *pos, const S_vector *dir)
 {
@@ -703,7 +703,7 @@ int CT_ OD_SetUnknown4f23b0(void *self, float v)
     return 1;
 }
 void CT_ OD_StopFrameSpeech(I3D_frame *owner) { Log(nullptr, ("StopFrameSpeech " + NameOf(owner)).c_str()); }
-int CT_ OD_IsSurrendered(void *) { return g_combat.surrendered; }
+int CT_ OD_IsSurrendered(void *self) { return AnswersOf(self) ? AnswersOf(self)->surrendered : g_combat.surrendered; }
 int CT_ OD_HasSeenEnemy(void *, const void *human)
 {
     Log(human, "HasSeenEnemy");
@@ -1006,7 +1006,7 @@ void CT_ OH_BodyDie(void *, void *killer) { Log(killer, "BodyDie"); }
 void CT_ OH_BodyCripple(void *) { Log(nullptr, "BodyCripple"); }
 void CT_ OH_BodyRagdoll(void *) { Log(nullptr, "BodyRagdoll"); }
 void CT_ OH_BodyResetMovement(void *) { Log(nullptr, "BodyResetMovement"); }
-const S_vector *CT_ OH_GetViewDir(void *) { return &g_combat.viewDir; }
+const S_vector *CT_ OH_GetViewDir(void *self) { return AnswersOf(self) ? &AnswersOf(self)->viewDir : &g_combat.viewDir; }
 void CT_ OH_ScriptOnDeath(void *self) { Log(self, "ScriptOnDeath"); }
 // The controller's OnHit and OnCollisionEx (both sides: the port's references are pointers).
 void CT_ CT_OnHit(void *self, int type, int zone, int health, void *attacker, const S_vector *pos, const S_vector *dir)

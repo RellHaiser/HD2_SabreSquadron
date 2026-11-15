@@ -82,7 +82,8 @@ void SightDirection(const C_Human *human, float &x, float &z)
         z = aim.z;
         return;
     }
-    const S_vector axis = S_vector(human->GetBodyFrame()->GetMatrix()(2)).Normalized();
+    S_vector axis(human->GetBodyFrame()->GetMatrix()(2));
+    NormalizeBy(axis, (axis.y * axis.y + axis.z * axis.z) + axis.x * axis.x);   // (the original's order)
     x = axis.x;
     z = axis.z;
 }
@@ -141,7 +142,7 @@ float TargetAwarenessScore(const C_Human *enemy, const C_Human *self, float dirX
     const C_HumanController *controller = enemy->GetController();
     if (controller->GetType() == HUMAN_CONTROLLER_PLAYER) {
         const S_vector &view = enemy->GetViewDir();
-        score += (-dirX * view.x + -dirY * view.y + -dirZ * view.z > 0.9f) ? 50.0f : 30.0f;
+        score += ((-dirZ * view.z + -dirY * view.y) + -dirX * view.x > 0.9f) ? 50.0f : 30.0f;   // (the original's order)
     } else if (FireTargetOf(controller) == self) {
         score += 50.0f;
     }
@@ -181,7 +182,7 @@ void C_AIController::TestSightOfMeleeTracker(C_Actor *meleeTracker, int *status,
     const I3D_frame *meleeTrackerFrame = static_cast<C_MeleeTracker *>(meleeTracker)->GetBodyFrame();
     const I3D_frame *eye = m_human->GetBodyFrame();
     const S_vector offset = eye->GetWorldPos() - meleeTrackerFrame->GetWorldPos();
-    if (range * range < offset.Square()) {
+    if (range * range < (offset.z * offset.z + offset.y * offset.y) + offset.x * offset.x) {   // (the original's order)
         *visibility = 0.0f;
         return;
     }
@@ -293,7 +294,7 @@ C_Human *C_AIController::PickTargetFromSeat()
         }
         const S_vector &enemyPos = enemy->GetFrame()->GetWorldPos();
         S_vector offset = enemyPos - frame->GetWorldPos();
-        const float square = offset.Square();
+        const float square = (offset.z * offset.z + offset.y * offset.y) + offset.x * offset.x;   // (the original's order)
         float distance;
         if (square < 1e-8f) {
             distance = 0.0f;
@@ -308,9 +309,9 @@ C_Human *C_AIController::PickTargetFromSeat()
         const C_HumanController *controller = enemy->GetController();
         bool watched;
         if (controller->GetType() == HUMAN_CONTROLLER_PLAYER) {
-            offset.Normalize();
+            NormalizeBy(offset, square);
             const S_vector &view = enemy->GetViewDir();
-            watched = 0.99f < -offset.x * view.x + -offset.y * view.y + -offset.z * view.z;
+            watched = 0.99f < (-offset.z * view.z + -offset.y * view.y) + -offset.x * view.x;   // (the original's order)
         } else {
             watched = FireTargetOf(controller) == m_human;
         }
@@ -357,7 +358,7 @@ C_Human *C_AIController::PickTarget(const S_vector *dir)
         if (!IsTargetable(enemy))
             continue;
         S_vector offset = enemy->GetFrame()->GetWorldPos() - frame->GetWorldPos();
-        const float square = offset.Square();
+        const float square = (offset.z * offset.z + offset.y * offset.y) + offset.x * offset.x;   // (the original's order)
         float distance;
         if (square < 1e-8f) {
             distance = 0.0f;
@@ -368,10 +369,12 @@ C_Human *C_AIController::PickTarget(const S_vector *dir)
         } else {
             distance = 1.0f;
         }
-        offset.Normalize();
-        if (dir && !(0.9f <= offset.Dot(*dir)))
+        NormalizeBy(offset, square);
+        // (The dot products summed z, y, x: the original's order.)
+        if (dir && !(0.9f <= (offset.z * dir->z + offset.y * dir->y) + offset.x * dir->x))
             continue;
-        const float viewDot = offset.Dot(GetViewDir());
+        const S_vector &view = GetViewDir();
+        const float viewDot = (offset.z * view.z + offset.y * view.y) + offset.x * view.x;
         float score = 100.0f - distance;
         score += TargetAwarenessScore(enemy, m_human, offset.x, offset.y, offset.z);
         uint32_t parts = 0;

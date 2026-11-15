@@ -25,6 +25,16 @@ C_ActorCreator **g_actorCreators = g_creatorTable;
 
 namespace {
 // What the fakes answer.
+// Per-human answers of the shared fakes (part 35b's several humans; port or original pointers; null: the shared
+// values).
+struct S_HumanAnswers {
+    bool unconscious, surrendered;
+    S_vector viewDir;
+};
+const S_HumanAnswers *(*g_humanAnswers)(const void *human) = nullptr;
+uint32_t (*g_visiblePartsOf)(int target) = nullptr;
+const S_HumanAnswers *AnswersOf(const void *human) { return g_humanAnswers ? g_humanAnswers(human) : nullptr; }
+
 struct S_SelfScript {
     int difficulty = 2;                                 // C_GameProfile::GetDifficulty
     bool coop = false;                                  // IsCooperativeGame
@@ -324,7 +334,7 @@ void C_Human::Hit(E_HitType, float, const S_vector &, const S_vector &, C_Actor 
 void C_Human::GetBoxCorners(S_vector4 *) {}
 #endif
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
-bool C_Human::IsUnconscious() const { return g_self.unconscious; }
+bool C_Human::IsUnconscious() const { return AnswersOf(this) ? AnswersOf(this)->unconscious : g_self.unconscious; }
 #endif
 #ifndef HUMAN_SENSES   // (the senses build links game/human_senses.cpp's)
 void C_Human::ForgetOldSounds() { Log(this, "ForgetOldSounds"); }
@@ -1632,7 +1642,7 @@ void *ST OS_GetActorById(void *, int id)
     Log(&g_actorsModule, "GetActorById", {double(id)});
     return id == g_vehicleId ? g_vehicleBytes : id == g_carriedId ? g_carriedBytes : nullptr;
 }
-int ST OS_IsUnconscious(void *) { return g_self.unconscious; }
+int ST OS_IsUnconscious(void *self) { return AnswersOf(self) ? AnswersOf(self)->unconscious : g_self.unconscious; }
 void ST OS_EnemyRecordsAdd(void *, void *enemy) { Log(enemy, "EnemyRecordsAdd"); }
 void ST OS_SetObserverState(void *, int id, int state) { Log(nullptr, "SetObserverState", {double(id), double(state)}); }
 void ST VH_SetSeatOccupant(void *self, int seat, void *occupant)

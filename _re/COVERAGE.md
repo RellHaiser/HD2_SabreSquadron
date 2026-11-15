@@ -2971,3 +2971,35 @@ particles and the surface marks. Files are served from memory.
   hit message's fields went unnoticed; the first stale pattern (0xA5) reads as a float near 0, within the tolerance; the
   sounds mostly fell behind the human and the knock-away paths were reached a few times only. The first mutation pass
   left two mutants that a rerun with no change killed: I rerun every survivor.
+
+## Human part 35b (the AI controllers' senses: sight tests and targets, `ai_senses.cpp`, 2026-11-15)
+
+- **The build:** part 35a's (`human/build_aisenses.bat`, `aisenses_test.inc`).
+  - Three humans: the tested one, part 21's other and a third copy of it, each on its own frame around the tested one
+    (also its body frame, the original's +0x260), with its own health, controller (the AI's with an AI type, or the
+    second base controller as a player's), vehicle, seat and sight target id. The tested human's body frame is its own,
+    turned (sometimes tilted, sometimes not turned).
+  - The shared fakes answer per human when a test sets the new hooks (`g_humanAnswers`: unconscious, surrendered, view
+    direction; `g_visiblePartsOf`: the sight module's parts by target id); other builds keep the shared values.
+  - A car (the port's C_Car, its private +0x5E0 flag found through GetUnknown5E0) carries the seat weapons:
+    HasSeatWeapon, GetSeatWeaponAim, GetSeatWeaponDef (a definition with a component of every kind) and
+    CanSeatWeaponAim (answering by the enemy's position) logged on both sides. The camera module's view distance: the
+    port's member and the original's slot 0x58. A MeleeTracker with its body frame (+0x544).
+- **The tests:** 20,000 calls: TestSightOfHuman, TestSightOfMeleeTracker (the controlled actor now and then a
+  MeleeTracker or another kind), PickTarget (with directions at the enemies or anywhere), PickTargetFromSeat; the test
+  prints the outcomes (about 30 % of the sight tests see their target; PickTarget picks someone in 60 %).
+- **Results:** 80,003 checks for the file's tests, 0 failures, 14 s; lines: 418 of 420 (two branches for angles above
+  2 pi, which atan2 never gives).
+- **Port fixes:** the original's sums in SightDirection (y, z, x), the MeleeTracker's range test, PickTarget,
+  PickTargetFromSeat and the awareness score (z, y, x), its normalizations by the square already summed. Found by
+  reading the x87 code, not by a failure: the scenes agreed before.
+- **Not tested:** an AI controller of another type or a base controller other than a player's: the original reads
+  +0xD0 of any controller as its fire target (a remote's own member there); the port answers none for those types.
+- **Mutations** (`human/mutations/mutate_aisenses2.py`): 193 mutants (143 generated, 50 for repeated lines); 24 not
+  building; 146 of 169 killed; the survivors are equivalent (12) or ties at exact boundaries (11).
+- **Harness lessons (my mistakes):** the copied combat buffers were too small (the MeleeTracker's body frame at +0x544,
+  the car's flag at +0x5E0); I set the car's flag at the original's offset in the port's car, where its C_Car reads
+  another; the base controller first stood for remotes and the AI for any type, where the original reads +0xD0 (the
+  differences looked like port bugs); the body frame was not turned, so the body's direction was always +z and
+  SightDirection's x never mattered; my Python edit scripts' string literals turned the "\n" of two printf lines into
+  line breaks (the build failed or the trace broke: fixed by hand).
