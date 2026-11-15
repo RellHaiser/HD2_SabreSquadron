@@ -737,6 +737,9 @@ namespace {
 #include "locomotion_test.inc"
 #include "locomotion2_test.inc"
 #include "locomotion3_test.inc"
+#ifdef HUMAN_BODYWRAP
+#include "bodywrap_test.inc"
+#endif
 #ifdef HUMAN_BASE
 #include "base_test.inc"
 #include "base2_test.inc"
@@ -904,6 +907,8 @@ int main(int argc, char **argv)
 #else
     TestRagdoll();
 #endif
+#elif defined(HUMAN_BODYWRAP)
+    TestBodyWrap();
 #elif defined(HUMAN_PART3_ONLY)
     // (Part 3's mutation runs: its world, then its tests alone.)
     LoadGround();
@@ -912,7 +917,7 @@ int main(int argc, char **argv)
     TestLocomotion();
     TestLocomotion2();
 #endif
-#ifndef HUMAN_BASE
+#if !defined(HUMAN_BASE) && !defined(HUMAN_BODYWRAP)
     TestLocomotion3();
 #endif
     PrintStats();

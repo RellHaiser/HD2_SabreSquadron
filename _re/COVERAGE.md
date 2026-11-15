@@ -2531,3 +2531,35 @@ particles and the surface marks. Files are served from memory.
   I had seen Tick's last-loop orders and not applied them until two mutants showed it. A split debug mode for Tick
   crashed and mapped pointers wrongly (removed). I changed SideStepEllipsoid's signature without updating the script
   module's crowd test (the suites caught it: it did not build).
+
+## Human part 26 (the body forwarding to the work, movement and equipment, `human_body.cpp`, 2026-11-14)
+
+- **The build:** `human/build_bodywrap.bat` (HUMAN_BODYWRAP, `bodywrap_test.inc`): the base harness (build.bat's: the
+  human, its movement and work with the original's copies in the original's layout, DiffCall) with human_body.cpp
+  linked. The other human builds fake S_HumanBody, so this one is its own.
+  - Every out-of-line method human_body.o calls (the work's, the movement's and its morph, idle and animation player,
+    the equipment's, the table lengths, the camera module's: 56) is wrapped with ld --wrap (`bodywrap_wrap.rsp`) into
+    a logger; the original's same functions are redirected to the same loggers. The inline parts run on each side's
+    objects (the work's flags and Die, the movement's flags, ResetMovement's fields), which DiffCall compares after.
+  - The loggers that matter to the state act on it alike: ClearFlags clears the movement's flags, the work's Interact
+    sets its refused requests, Play logs the work's m_forced, the saves write and the loads read a tag.
+  - The original's SetModelVisible calls the model (movement +0xA9C, slot 0x30) itself: a fake model logs it under
+    the movement's name. Its camera module (slot 0x70) is the test's.
+  - Create and Destroy run on bodies of their own: the original's _aligned_malloc gives the test's blocks by size, the
+    port's new objects are named by its fake constructors (0xCD-filled movements on both sides).
+- **The tests:** every body function with random roles (local, client, server, both), the human local or
+  not, simulated or not, carried or not, the work's stance, gait, mode, refused requests and flags, the movement's
+  flags, state (the climbing ones), ladder, timers, light, ground, sector and velocity (zero, tiny, exactly 1, any);
+  the commands with every kind and out-of-range ones; DoAction's actions and out-of-range ones; poses -2..10;
+  interactions 0..16 with flags; SaveGame (files byte for byte) and LoadGame (saved files, the chunks reordered,
+  repeated, missing, without their data; inside a parent chunk with one after it, read next on both sides).
+- **Not tested:** LoadGame with an unknown chunk inside the body's. The original does not leave it, reads on at the
+  garbage headers past it and, once the file ends, loops for ever (it stops only at exactly 0 bytes left, and a
+  failed read keeps the last id); the port's loop stops at the end. The game never writes such a chunk.
+- **Results:** 63,750 checks; lines: 271 of 271.
+- **Mutations** (`human/mutations/mutate_body_wrap.py`): 185 mutants (164 generated, 21 for repeated lines); 166
+  killed, 18 not building, 1 survived (Destroy's `delete work`: a leak only).
+- **Harness lessons (my mistakes):** the fake constructors first returned nothing (the original's Create keeps what
+  they return); LoadGame's file had no parent chunk, so its loop never ran while all its comparisons agreed (coverage
+  showed it); the first crafted files with unknown chunks hung the original (above); Create's write to the new
+  movement and PlayDeath's m_forced were not compared until mutants showed it.
