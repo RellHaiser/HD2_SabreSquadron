@@ -180,6 +180,8 @@ SUITES = [
     T("human.bodywrap", "human/build_bodywrap.bat", TMP + r"\human_bodywrap_test.exe", needs=("mingw", "original_exe")),
     # (The human's state for a joining client, game/human_net.cpp: human/build_netstate.bat, HUMAN_NETSTATE.)
     T("human.netstate", "human/build_netstate.bat", TMP + r"\human_netstate_test.exe", needs=("mingw", "original_exe")),
+    # (The speech sets and sound codes, game/human_speech.cpp: human/build_speechsets.bat, HUMAN_SPEECHSETS.)
+    T("human.speechsets", "human/build_speechsets.bat", TMP + r"\human_speechsets_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

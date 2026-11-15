@@ -2593,3 +2593,37 @@ particles and the surface marks. Files are served from memory.
   controller through the port's members for both sides, but the port's layout is not the original's (the original saw
   type 0, so its AI branch never ran while the calls agreed); that branch then crashed in the original's CRT heap
   until its operator new and delete were redirected. P_Unexpected now prints its caller's link-time address.
+
+## Human part 28 (the speech sets and sound codes, `human_speech.cpp`, 2026-11-14)
+
+- **The build:** `human/build_speechsets.bat` (HUMAN_SPEECHSETS, `speechsets_test.inc`): the base harness with
+  human_speech.cpp linked (no wraps). The original's objects are built in its own layout from the port's (a sentence
+  0x1C bytes: its MSVC6 vector's first, last and end at +0x04..+0x0C, the cursor an iterator at +0x10, the next time
+  +0x14, enabled +0x18; a set 0xF24 bytes; the sets' list first and last at +0x04 / +0x08, its C_chunk at +0x10) and
+  both described as text after every call. Both sides draw from the same rand() (the original's _rand redirected, both
+  seeded alike); the original's new and delete use the test's heap, its file opens the fake engine's.
+- **The tests:**
+  - The sound codes (the original's fastcall functions) on every code 90000000..99999999 and 2,000,000 random ones;
+    SetSet and SetVariant on 400,000 codes, values in and out of range.
+  - AddSample (40,000 sentences: empty or not, any cursor, vectors with room or not); Say, SayNow and SetDelay on
+    sets (4,000 x 40 calls: any sentence, out of range too, delays below 1, 1 and more, the mission time at the
+    sentence's next time now and then).
+  - Acquire, Release (sets handed out, sets the list does not hold) and Clear on Tables\speech.set: the game's (H:\
+    HD2_Unpacked) and the test's (any number of sets, names, sets without sentences, sentence ids out of range,
+    sample chunks short of 4 bytes, the sentences before the name, a wrong top chunk, no file). The file is rewritten
+    between the two sides' calls. ResetDelays (inline in the original's C_game::RestartMission, no function to call)
+    against what it should do.
+- **Port fixes:**
+  - SpeechCode_GetSet and GetVariant computed in doubles; the original multiplies on the x87 in the game's 24-bit
+    precision (the product rounded to a float). 6,499 of the ten million speech codes had another variant (90010000's
+    is 1, the port said 0; 90030000's 2, the port 3) and 109 another set. Now rounded to a float as the x87 does: all
+    agree.
+  - Acquire's sample: the original keeps one variable for the whole load (a short sample chunk repeats the last
+    sample); the port started each at 0.
+- **Results:** 784,380 checks (25 s; mutation runs 7 codes in 1); lines: 130 of 130.
+- **Mutations** (`human/mutations/mutate_speechsets.py`): 114 mutants (97 generated, 17 for repeated lines); 92
+  killed, 6 not building, 16 survived, all equivalent (dead stores, leaks, start values never read, the unused name
+  size, Ascends and a Close after the set is made).
+- **Harness lessons (my mistakes):** the port's Acquire ran first on the shared file, so a mutant opening it for
+  writing emptied it for the original too and both agreed on nothing loaded; short sample chunks first gave the
+  original's undefined start value (now only after a full one in the same set, counting only sentences it reads).

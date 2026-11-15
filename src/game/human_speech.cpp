@@ -143,6 +143,9 @@ C_SpeechSet *C_SpeechSets::Acquire(int id)
 
     C_SpeechSet *set = nullptr;
     int index = -1;
+    // (One for the whole file, as the original's: a sample chunk short of its 4 bytes gives the last sample read
+    // again. The original's starts undefined.)
+    int sample = 0;
     do {
         // Skip to the id-th set.
         bool found = false;
@@ -176,7 +179,6 @@ C_SpeechSet *C_SpeechSets::Acquire(int id)
                             uint16_t sampleChunk;
                             file.Descend(sampleChunk);
                             entry.enabled = true;
-                            int sample = 0;
                             file.Read(sample);
                             file.Ascend();
                             entry.AddSample(sample);
@@ -237,7 +239,17 @@ void C_SpeechSets::ResetDelays()
 }
 
 // ------------------------------------------------------------------------- sound codes
-// (Computed through doubles in the original, scaling by 1e-6; truncation errors included.)
+// (The original scales by the double 1e-6 on the x87 in the game's 24-bit precision: the product rounded to a float,
+// the rest in floats; truncation errors included, 90010000's variant is 1 and 90030000's 2.)
+
+namespace {
+// The code times `scale` as the game's FPU gives it: rounded once to a float (the double product is exact enough
+// for the one rounding to agree with the x87's: checked against the original over 90000000..99999999).
+float ScaleCode(uint32_t code, double scale)
+{
+    return static_cast<float>(static_cast<double>(code) * scale);
+}
+}  // namespace
 
 uint32_t SpeechCode_Base(uint32_t code)
 {
@@ -246,13 +258,14 @@ uint32_t SpeechCode_Base(uint32_t code)
 
 int SpeechCode_GetSet(uint32_t code)
 {
-    return -SPEECH_CODE_SET_BASE - static_cast<int>(static_cast<double>(code) * -1e-6);
+    return -SPEECH_CODE_SET_BASE - static_cast<int>(ScaleCode(code, -1e-6));
 }
 
 int SpeechCode_GetVariant(uint32_t code)
 {
-    const double scaled = static_cast<double>(code) * 1e-6;
-    return static_cast<int>((scaled - static_cast<int>(scaled)) * 100.0f);
+    const float scaled = ScaleCode(code, 1e-6);
+    const float fraction = scaled - static_cast<float>(static_cast<int>(scaled));
+    return static_cast<int>(fraction * 100.0f);
 }
 
 void SpeechCode_SetSet(uint32_t *code, int set)
