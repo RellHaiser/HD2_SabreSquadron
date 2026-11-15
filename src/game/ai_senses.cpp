@@ -39,10 +39,12 @@ constexpr int SIGHT_SKIPPED = 500;
 // Move flags that skip the sight test: 0x800 (MOVE_DEAD) and MOVE_DEAF.
 constexpr uint32_t MOVE_NO_SIGHT = MOVE_DEAD | MOVE_DEAF;
 
-// Distance in the way the SDK computes a magnitude (exact 0 and 1).
+// Distance in the way the SDK computes a magnitude (exact 0 and 1), the squares summed as the original's inline code
+// does here: (z + y) + x.
 float Distance(const S_vector &a, const S_vector &b)
 {
-    return (a - b).Magnitude();
+    const S_vector d = a - b;
+    return MagnitudeBy((d.z * d.z + d.y * d.y) + d.x * d.x);
 }
 
 // A new event of the AI, its age 0 and 10 s to live.
@@ -437,14 +439,14 @@ S_vector4 C_AIController::GetAimDirTo(const C_Actor *target) const
         dir = static_cast<const C_Human *>(target)->GetAimPoint(m_human) - eye;
     else
         dir = target->GetFrame()->GetWorldPos() - eye;
-    dir.Normalize();
+    NormalizeBy(dir, (dir.y * dir.y + dir.z * dir.z) + dir.x * dir.x);   // (the original's order)
     return ToVector4(dir, 0.0f);                        // (w: a stale local in the original)
 }
 
 S_vector4 C_AIController::GetDirToFrame(const I3D_frame *frame) const
 {
     S_vector dir = frame->GetWorldPos() - m_human->GetBodyFrame()->GetWorldPos();
-    dir.Normalize();
+    NormalizeBy(dir, (dir.z * dir.z + dir.y * dir.y) + dir.x * dir.x);   // (the original's order)
     return ToVector4(dir, 0.0f);
 }
 
@@ -680,7 +682,7 @@ float C_AIController::GetTargetDistance2() const
 float C_AIController::GetViewDotTo(const C_Actor *target) const
 {
     const S_vector4 dir = GetAimDirTo(target);
-    return dir.x * m_facingDir.x + dir.y * m_facingDir.y + dir.z * m_facingDir.z;
+    return (dir.z * m_facingDir.z + dir.y * m_facingDir.y) + dir.x * m_facingDir.x;   // (the original's order)
 }
 
 void C_AIController::GetWeaponPos(S_vector4 *pos) const
@@ -745,9 +747,10 @@ void C_AIController::GetNearestEnemy(float *distance, float *dot) const
         return;
     const S_vector &enemy = enemies[nearest]->GetFrame()->GetWorldPos();
     S_vector toEnemy(enemy.x - own.x, enemy.y - own.y, enemy.z - own.z);
-    toEnemy.Normalize();
+    NormalizeBy(toEnemy, (toEnemy.z * toEnemy.z + toEnemy.y * toEnemy.y) + toEnemy.x * toEnemy.x);
     const S_vector4 &waypoint = m_waypoints[0]->pos;
     S_vector toWaypoint(waypoint.x - own.x, waypoint.y - own.y, waypoint.z - own.z);
-    toWaypoint.Normalize();
-    *dot = toWaypoint.x * toEnemy.x + toWaypoint.y * toEnemy.y + toWaypoint.z * toEnemy.z;
+    NormalizeBy(toWaypoint, (toWaypoint.z * toWaypoint.z + toWaypoint.y * toWaypoint.y) + toWaypoint.x * toWaypoint.x);
+    // (The sums in the original's order: z, y, x.)
+    *dot = (toWaypoint.z * toEnemy.z + toWaypoint.y * toEnemy.y) + toWaypoint.x * toEnemy.x;
 }

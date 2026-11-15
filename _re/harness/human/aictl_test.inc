@@ -30,6 +30,8 @@ int g_netPlayerCount = 0;
 bool C_AIController::AdjustAim(S_vector *) { Log(this, "AI.AdjustAim"); return false; }
 bool C_AIController::AdjustToPathHeight(S_vector *) { Log(this, "AI.AdjustToPathHeight"); return false; }
 int C_AIController::ApplyAlertState() { Log(this, "ApplyAlertState"); return 0; }
+bool C_AIController::Unknown5C(float *, float *) { Log(this, "AI.Unknown5C"); return false; }
+#ifndef HUMAN_AISENSES   // (the senses build links game/ai_senses.cpp's)
 void C_AIController::OnBodyHeard(C_Actor *) { Log(this, "AI.OnBodyHeard"); }
 void C_AIController::OnBodySeen(C_Human *) { Log(this, "AI.OnBodySeen"); }
 void C_AIController::OnEnemyLost(C_Human *) { Log(this, "AI.OnEnemyLost"); }
@@ -42,7 +44,7 @@ void C_AIController::OnShotAt(C_Actor *, const S_vector &) { Log(this, "AI.OnSho
 void C_AIController::OnSoundHeard(S_RememberedSound *) { Log(this, "AI.OnSoundHeard"); }
 void C_AIController::TestSightOfHuman(C_Human *, int *, float *) { Log(this, "AI.TestSightOfHuman"); }
 void C_AIController::TestSightOfMeleeTracker(C_Actor *, int *, float *) { Log(this, "AI.TestSightOfMeleeTracker"); }
-bool C_AIController::Unknown5C(float *, float *) { Log(this, "AI.Unknown5C"); return false; }
+#endif
 
 // ---- the controller's network callbacks (controller_net.cpp, not linked: only their addresses are compared)
 C_NetObjectMessage *__fastcall NetCreateMessage(void *, C_BitStream *, bool) { AiUnexpected(__PRETTY_FUNCTION__); }
@@ -403,6 +405,10 @@ void AiToOrig(S_TestAi *pa, uint8_t *oa)
 
 // The messages to the clients part 23's describer does not know: the equipment's human, the command's fields (the
 // port's class by its vtable, the original's by 0x00810ce4 / 0x00810c6c).
+// Another message: its type (+4 on both sides) and the fields the fakes' Write sends (part 33b's table), whole words.
+struct S_AiMsgField;
+std::vector<S_AiMsgField> AiMsgFields(int type);
+std::string AiMsgText(const uint8_t *m, bool orig);
 std::string AiMessages(const std::vector<S_ControllerMessage *> &port, const uint8_t *vec)
 {
     static const S_MsgEquipment equipment;
@@ -415,7 +421,7 @@ std::string AiMessages(const std::vector<S_ControllerMessage *> &port, const uin
             const auto *c = static_cast<const S_MsgCommand *>(m);
             p += "Command[" + std::to_string(c->command) + " " + std::to_string(c->actor) + " " + std::to_string(c->arg) + "]";
         } else
-            p += "-";
+            p += AiMsgText(reinterpret_cast<const uint8_t *>(m), false);
     }
     void *const *first = *reinterpret_cast<void *const *const *>(vec + 4);
     void *const *last = *reinterpret_cast<void *const *const *>(vec + 8);
@@ -429,7 +435,7 @@ std::string AiMessages(const std::vector<S_ControllerMessage *> &port, const uin
         else if (vt == 0x00810c6c)
             o += "Command[" + std::to_string(w[0]) + " " + std::to_string(w[1]) + " " + std::to_string(w[2]) + "]";
         else
-            o += "-";
+            o += AiMsgText(b, true);
     }
     return p == o ? "" : "to the clients: port " + p + ", original " + o;
 }
@@ -1224,6 +1230,18 @@ std::vector<S_AiMsgField> AiMsgFields(int type)
     case CTRL_MSG_INVENTORY_CHECK: return {};
     default: return {{8, 8, 'i'}};
     }
+}
+std::string AiMsgText(const uint8_t *m, bool orig)
+{
+    int type;
+    std::memcpy(&type, m + 4, 4);
+    std::string t = "Msg" + std::to_string(type) + "[";
+    for (const S_AiMsgField &f : AiMsgFields(type)) {
+        uint32_t w = 0;
+        std::memcpy(&w, m + (orig ? f.orig : f.port), f.kind == 'b' ? 1 : 4);
+        t += std::to_string(f.kind == 'b' ? (w & 1u) : w) + " ";
+    }
+    return t + "]";
 }
 void FakeMsgWrite(uint8_t *m, C_BitStream *s, bool orig)
 {

@@ -808,6 +808,9 @@ namespace {
 #ifdef HUMAN_REMOTE
 #include "remote_test.inc"
 #endif
+#ifdef HUMAN_AISENSES
+#include "aisenses_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -893,6 +896,8 @@ int main(int argc, char **argv)
     TestCrowd();
 #elif defined(HUMAN_SENSES)
     TestSenses();
+#elif defined(HUMAN_AISENSES)
+    TestAiSenses();
 #elif defined(HUMAN_REMOTE)
     TestRemoteController();
 #elif defined(HUMAN_AICTL)

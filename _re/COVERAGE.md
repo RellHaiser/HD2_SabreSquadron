@@ -2936,3 +2936,38 @@ particles and the surface marks. Files are served from memory.
   23; I set the binoculars' flag at the original's offset in the port's message; Update's axes pointers were not
   mapped between the sides; the port's real OnFrozen ran on a movement the harness had not set up for it (a crash in
   UpdateHitSpheres); the original's real UseObject and ExecuteCommand first ran unlogged.
+
+## Human part 35a (the AI controllers' senses: events, hits, sounds, distances, `ai_senses.cpp`, 2026-11-15)
+
+- **The build:** `human/build_aisenses.bat` (HUMAN_AISENSES on part 33's build, `aisenses_test.inc`), with
+  ai_senses.cpp linked; part 33's AI controllers, message and stream fakes, part 23's controllers, actors and weapons,
+  part 21's other human.
+  - The events the senses make are logged by their fields (type, time left, age, the ids, +0x30, the position) where
+    they are raised or kept: C_HumanEvents::Raise and AddStimulus faked on both sides (the original's 0x005adac0,
+    0x005adee0); the port's allocations hand out stale bytes, as a pool's; the original's event pool (0x008ac430) given
+    its growth.
+  - The human's seen enemies and friends are written into the original's human as MSVC6 vectors (+0x264, +0x274) on
+    every copy; the sounds heard are each side's copy of one remembered sound (the source mapped); the definitions'
+    carry mode and the actors' seat flags join part 23's fakes.
+  - Part 33's comparison of the queued messages now compares every type by the fields the fakes' Write sends (it knew
+    the equipment and command messages only).
+- **The tests:** 20,000 calls: OnKilledEnemy, OnEnemySeen, OnEnemyLost, OnBodySeen, OnBodyHeard, OnFriendHeard,
+  OnLoudSound, OnShotAt, OnSoundHeard (every chapter, around the human, the turns toward the sound), OnHit (local and
+  network games, in seats with flags or seat weapons, the headgear and the weapons knocked away, dead or alive),
+  GetDistanceTo, GetNearestEnemyDistance, GetAimDirTo, GetDirToFrame, GetTargetDistance2, GetViewDotTo, GetWeaponPos
+  (components of every kind, the gun's "shdum"), FaceTowards, CanSeeHeadOf, GetNearestEnemy. Network games give the
+  sounds human sources (IsFriendOf takes them as humans there, on both sides).
+- **Results:** 40,002 checks, 0 failures, 7 s; lines: 236 of 416 for the file, every line of 35a's functions (the
+  sight tests and the targets, 76-412, are 35b's).
+- **Port fixes:** the sums in the original's orders (its inline Magnitude, Normalize and dot products, per site):
+  Distance (z, y, x), GetAimDirTo's normalization (y, z, x), GetDirToFrame's, GetViewDotTo's and GetNearestEnemy's
+  (z, y, x). The port's plain Normalize and Magnitude summed x, y, z: results differed in the last bit.
+- **Mutations** (`human/mutations/mutate_aisenses1.py`): 236 mutants (213 generated, 23 for repeated lines); 34 not
+  building; 189 of 202 killed; the survivors are equivalent (6), ties at exact boundaries (3), the directions' stale w,
+  a read past the matrix and the ray's mask (the harness's volumes answer both).
+- **Harness lessons (my mistakes):** the aim tests first took the copied other human, whose bones GetAimPoint cannot
+  pick from, and CanSeeHeadOf its missing body frame (crashes); OnLoudSound met part 23's actors in network games;
+  the event fake handed out zeroed memory and the queued messages were compared by type only, so the clears and the
+  hit message's fields went unnoticed; the first stale pattern (0xA5) reads as a float near 0, within the tolerance; the
+  sounds mostly fell behind the human and the knock-away paths were reached a few times only. The first mutation pass
+  left two mutants that a rerun with no change killed: I rerun every survivor.
