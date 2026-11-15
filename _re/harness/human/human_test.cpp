@@ -476,7 +476,10 @@ bool __attribute__((thiscall)) P_OnCollisionEx(C_Human *self, C_Actor *other, co
 }
 void __attribute__((thiscall)) P_Unexpected(void *self)
 {
-    std::printf("unexpected virtual call on %s\n", NameOf(self).c_str());
+    // (The caller at its link-time address: the test runs relocated, 0x20000000 is its image base.)
+    const uintptr_t caller = reinterpret_cast<uintptr_t>(__builtin_return_address(0)) -
+                             reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr)) + 0x20000000u;
+    std::printf("unexpected virtual call on %s (from %08x)\n", NameOf(self).c_str(), static_cast<unsigned>(caller));
     std::abort();
 }
 template <class F> size_t VSlot(F f)
@@ -740,6 +743,9 @@ namespace {
 #ifdef HUMAN_BODYWRAP
 #include "bodywrap_test.inc"
 #endif
+#ifdef HUMAN_NETSTATE
+#include "netstate_test.inc"
+#endif
 #ifdef HUMAN_BASE
 #include "base_test.inc"
 #include "base2_test.inc"
@@ -909,6 +915,8 @@ int main(int argc, char **argv)
 #endif
 #elif defined(HUMAN_BODYWRAP)
     TestBodyWrap();
+#elif defined(HUMAN_NETSTATE)
+    TestNetState();
 #elif defined(HUMAN_PART3_ONLY)
     // (Part 3's mutation runs: its world, then its tests alone.)
     LoadGround();
@@ -917,7 +925,7 @@ int main(int argc, char **argv)
     TestLocomotion();
     TestLocomotion2();
 #endif
-#if !defined(HUMAN_BASE) && !defined(HUMAN_BODYWRAP)
+#if !defined(HUMAN_BASE) && !defined(HUMAN_BODYWRAP) && !defined(HUMAN_NETSTATE)
     TestLocomotion3();
 #endif
     PrintStats();

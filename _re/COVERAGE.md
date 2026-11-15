@@ -2563,3 +2563,33 @@ particles and the surface marks. Files are served from memory.
   they return); LoadGame's file had no parent chunk, so its loop never ran while all its comparisons agreed (coverage
   showed it); the first crafted files with unknown chunks hung the original (above); Create's write to the new
   movement and PlayDeath's m_forced were not compared until mutants showed it.
+
+## Human part 27 (the human's state for a joining network client, `human_net.cpp`, 2026-11-14)
+
+- **The build:** `human/build_netstate.bat` (HUMAN_NETSTATE, `netstate_test.inc`): the base harness with human_net.cpp
+  and net/bitstream.cpp linked, part 26's way.
+  - The bits go through each side's own bit stream code (WriteBits, ReadBits, WriteString, ReadString) on port
+    C_NetMessage objects over the test's buffers: the port's C_BitStream has the original's layout, and the original's
+    WriteBits reaches the port's Reserve through slot 0. Written words and bit positions are compared.
+  - What the two functions call besides (18 functions: the soldier state's getter, serialisers and Setup, the
+    position, the human's IsAISuspended, IsSurrendered, IsUnconscious, Freeze, SetTexture, PlayAnimation,
+    ApplyRemoteHit, ExecuteBodyCommand, the actors module's GetActorById and ClearActorContainers, the controller's
+    RaiseWeapon and LowerWeapon) is wrapped (`netstate_wrap.rsp`) on the port's side and redirected on the original's,
+    to the same loggers. The soldier state's serialisers stand in with a format of their own (its health in 8 bits, a
+    5-bit marker); the position goes as three raw floats (the original's GetSender, WriteQuantized and its inline
+    reader at 0x005aa740 faked).
+  - The vehicles are fakes of each side's layout and vtable (car, submarine, static weapon, Junkers 88, a door, a
+    human; FindSeat and SetSeatBlocked logged). The controller is two blocks: the port's class's layout and the
+    original's offsets (type +0x48, raised weapon +0xAD, animation +0x150, frame +0x188; the port's differ).
+  - The original's operator new and delete (its C_str copies) use the test's heap.
+- **The tests:** WriteState (20,000: in every kind of vehicle or none, players and others, dead or alive, faces and
+  animation names of every length, the controller's types, raised or not, suspended, surrendered, unconscious);
+  ReadState (20,000: random input in WriteState's format, vehicles found or not, the position read or not, faces,
+  animations, the flags; the human's fields, the frame's position bytes and the bits read compared).
+- **Results:** 80,000 checks, 0 failures; lines: 80 of 80. No port fixes needed.
+- **Mutations** (`human/mutations/mutate_netstate.py`): 96 mutants (89 generated, 7 for repeated lines); 86 killed, 6
+  not building, 4 survived (seatWritten, a variable set and never read).
+- **Harness lessons (my mistakes):** I called WriteState through the human's fake vtable (it is virtual); I set the
+  controller through the port's members for both sides, but the port's layout is not the original's (the original saw
+  type 0, so its AI branch never ran while the calls agreed); that branch then crashed in the original's CRT heap
+  until its operator new and delete were redirected. P_Unexpected now prints its caller's link-time address.
