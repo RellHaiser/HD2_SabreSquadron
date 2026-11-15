@@ -2757,8 +2757,8 @@ particles and the surface marks. Files are served from memory.
     GetSlots) over the same items, the original's slots as pointers to MSVC6 vectors.
   - The message objects are the port's classes; the original runs on a copy of their bytes. The port's layout is the
     original's but where vectors are: the port's S_vector4 is 4-aligned, so Hit, ControlState, DropItem and Action
-    have their fields elsewhere (moved by a table per message; the action command's fields one word on, the original's
-    command having a vtable). Compared word by word after each call, but for the vectors' w the original fills from
+    have their fields elsewhere (moved by a table per message; since PR 23 the action command has the original's vtable too,
+    its fields from +0x1C on going to +0x24 on). Compared word by word after each call, but for the vectors' w the original fills from
     stack temps.
 - **The tests:** every message's Write (60,000: fields at random, edge floats, NaNs, names of every length up to past
   the buffer, bullets' speeds near whole numbers, containers full and empty, the backpack's contents missing) and Read
