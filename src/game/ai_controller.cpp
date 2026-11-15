@@ -563,17 +563,19 @@ bool C_AIController::Unknown108()
 void C_AIController::GetPathPoints(uint16_t *current, uint16_t *next)
 {
     // The first waypoint's point, and the index of the walking point the human was at
-    // (unchanged without one).
+    // (0xFFFF: none).
     if (!m_waypoints.empty())
         *next = static_cast<uint16_t>(m_waypoints[0]->checkpoint);
     else
         *next = 0xFFFF;
-    if (m_currentCheckpoint) {
-        int index = m_checkpoints->GetIndex(m_currentCheckpoint);
-        if (index >= m_checkpoints->GetCount() || index < 0)
-            index = 0xFFFF;
-        *current = static_cast<uint16_t>(index);
+    if (!m_currentCheckpoint) {
+        *current = 0xFFFF;
+        return;
     }
+    int index = m_checkpoints->GetIndex(m_currentCheckpoint);
+    if (index >= m_checkpoints->GetCount() || index < 0)
+        index = 0xFFFF;
+    *current = static_cast<uint16_t>(index);
 }
 
 // ------------------------------------------------------------------------- driving

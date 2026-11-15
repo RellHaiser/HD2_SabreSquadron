@@ -2837,3 +2837,46 @@ particles and the surface marks. Files are served from memory.
   parallel mutation runs; the first mutation run's baseline failed on the fire order constructor's padding, so its
   "killed" meant nothing and it was redone; it then showed the loads ran into the objects just saved (nothing a load
   leaves out could show) and no chunk followed the parts.
+
+## Human part 33a (the AI controllers' base: life cycle, small virtuals, body flags, saved games, `ai_controller.cpp`, 2026-11-15)
+
+- **The build:** `human/build_aictl.bat` (HUMAN_AICTL on top of part 23's controller build, `aictl_test.inc`): the
+  controller build with ai_controller.cpp, ai_parts.cpp (part 32's parts, real on both sides) and net/bitstream.cpp
+  linked; part 23's controllers, human, actors, weapons and fakes and part 20's net property are set up as its own
+  tests do.
+  - Each side has its AI controller: the port's (a test class; its pure Unknown114 and ExecuteCommand, part 23's,
+    logged) and the original's made by its own constructor (0x0056ee90, its parts too), with a copy of its vtable whose
+    ExecuteCommand is logged alike. Before each call the port's is copied into the original's layout: the base by part
+    23's table, the AI's fields by `layout_offsets.py`'s (S_AIFire's throwPos moved), the waypoints into an MSVC6 vector
+    of the original pool's waypoints, the task into one of the original's pool (the derived fields +0x20), the parts'
+    contents into the original's own parts (the driver's path as 16-byte aligned storage); after it the two are
+    compared the same way, with the queued messages (part 23's describer, and the equipment's and command's).
+  - The net object is part 20's block (enlarged to 0x100 bytes), each side's writes kept apart: the port's out-of-line
+    setters write the original's offsets, as its inline ones do; the callbacks compared by address pairs, the contexts
+    mapped. The queued net messages (the action and the dive) are logged by their fields from either side.
+  - The AI's virtuals in other files (the senses, the combat, the movement), ApplyAlertState, the body's movement
+    flags and climb target, GetActorPoints, SetUnknown4f2630 are logged on both sides; the original's g_netReplication
+    is a block of the test's (its local id +0xDC); its pools get their growth (part 32). The message Reads are 33b's.
+- **The tests:** 12,000 calls (SetAlertState, Attach in local and network games with and without a previous
+  controller, on ladders, with and without a walking network; Detach, ReleaseTask, LookAround, LookAroundAt,
+  SetMoveFlags, Get/SetFacingDir, Get/SetViewDir, OnCollisionEx on ladders and others, PlanGrenade, Unknown108,
+  Freeze, OnBodyFlags with every throw in local and network games, IssueCommand, Drive in a car or not to a road point
+  or a stop, GetPathPoints, RequestAction with weapons of any shot interval or another item); the saved games (2,400:
+  saved by both, the files compared; loaded into controllers given other values from the saved file or one made by
+  hand: the AI's chunks in any order, some left out, unknown ones); the destructor (400).
+- **Results:** 36,402 checks, 0 failures, 34 s; lines: all 288 in 33a's ranges (300 of 394 in the file; the rest 33b's).
+- **Port fix:** GetPathPoints left the current walking point's index as it was without one; the original writes 0xFFFF.
+- **Left out, as the original's:** the ladder's points asked of a missing walking network (the original calls through
+  null: the port's fix); flag 0x20000 without a hands item (the original's UseItem crashes on none); an interaction
+  without a target in a save (the original reads its id through null); the tasks' vectors' w after a load, and a task
+  2's human after a load naming another kind of actor (both what the pool's object had: the two sides' pools differ).
+- **Mutations** (`human/mutations/mutate_aictl1.py`, in the quick build): 242 mutants (201 generated, 41 for repeated
+  lines); 14 not building; 209 of 228 killed; the 19 survivors are frees and pool releases nothing compares, Detach's
+  flush of an empty queue (33b's), an equivalent clear, a stale w and an initial value always read over.
+- **Harness lessons (my mistakes):** I left out part 23's setups (combat, motion, deaths, interactions, weapons) and
+  its second controller's copy, and first let the original's real ExecuteCommand run on random commands; the shared net
+  object block was 0x40 bytes where the setters write up to +0x67; I tested a network game with
+  `!(role & GAME_ROLE_LOCAL)`, which is true only for 0 (a null net object then crashed); my random actors did not
+  follow part 23's ids (100 + the kind), so the two sides' GetActorById answered differently; the original's GetActorById,
+  climb target and the hands' weapons needed their original copies; part 23's aligned-free logger counted the
+  original's own vector growth.

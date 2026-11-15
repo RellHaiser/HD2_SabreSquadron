@@ -16,7 +16,7 @@ asm(".globl _g_texts\n\t.bss\n\t.balign 16\n_g_texts:\n\t.space 256\n\t.text");
 asm(".globl _g_netGame\n\t.bss\n\t.balign 16\n_g_netGame:\n\t.space 8192\n\t.text");
 asm(".globl _g_gameProfile\n\t.bss\n\t.balign 16\n_g_gameProfile:\n\t.space 4096\n\t.text");
 int g_localPlayerSlot = 0;
-alignas(16) uint8_t g_netBytes[0x40], g_netObjectBytes[0x40], g_portTrack[0x100], g_origProperty[0x200];
+alignas(16) uint8_t g_netBytes[0x40], g_netObjectBytes[0x100], g_portTrack[0x100], g_origProperty[0x200];
 C_NetReplication *g_netReplication = reinterpret_cast<C_NetReplication *>(g_netBytes);
 namespace {
 C_ActorCreator *g_creatorTable[64];
@@ -191,7 +191,9 @@ void C_FirstPersonView::Refresh() { Log(nullptr, "FirstPersonRefresh"); }
 void SurfaceMarks_SetHumanVisible(C_Human *human, bool hide) { Log(human, "SurfaceMarks_SetHumanVisible", {double(hide)}); }
 void C_Mine::OnSteppedOn(C_Actor *actor, int unused) { Log(actor, "MineSteppedOn", {double(unused)}); }
 void ReleaseHumanOrder(S_HumanOrder *) { Log(nullptr, "ReleaseHumanOrder"); }
+#ifndef HUMAN_AICTL   // (the AI controllers' build links game/ai_parts.cpp's)
 void FreeRememberedSound(S_RememberedSound *) { Log(nullptr, "FreeRememberedSound"); }
+#endif
 
 // The human's parts in other files: the events, the AI memory, the body.
 #ifndef HUMAN_SENSES   // (the senses build links game/human_events.cpp's)

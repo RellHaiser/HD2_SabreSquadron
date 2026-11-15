@@ -802,6 +802,9 @@ namespace {
 #ifdef HUMAN_CONTROLLER
 #include "controller_test.inc"
 #endif
+#ifdef HUMAN_AICTL
+#include "aictl_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -887,6 +890,8 @@ int main(int argc, char **argv)
     TestCrowd();
 #elif defined(HUMAN_SENSES)
     TestSenses();
+#elif defined(HUMAN_AICTL)
+    TestAiController();
 #elif defined(HUMAN_CONTROLLER)
     TestController();
 #elif defined(HUMAN_CONTROL)
