@@ -1212,8 +1212,15 @@ std::vector<S_AiMsgField> AiMsgFields(int type)
     case CTRL_MSG_MOVE_ITEM:
     case CTRL_MSG_TRANSFER_ITEM: return {{8, 8, 'i'}, {0xC, 0xC, 'i'}, {0x10, 0x10, 'i'}, {0x14, 0x14, 'i'}, {0x18, 0x18, 'i'}};
     case CTRL_MSG_TAKE_FROM_BOX: return {{8, 8, 'i'}, {0xC, 0xC, 'i'}, {0x10, 0x10, 'i'}, {0x14, 0x14, 'i'}};
-    case CTRL_MSG_CONTROL_STATE: return {{0x48, 0x50, 'i'}};
-    case CTRL_MSG_ACTION: return {{0x34, 0x40, 'i'}};
+    case CTRL_MSG_CONTROL_STATE: return {{0x28, 0x30, 'f'}, {0x2C, 0x34, 'f'}, {0x30, 0x38, 'f'}, {0x34, 0x3C, 'f'}, {0x48, 0x50, 'i'}};
+    case CTRL_MSG_COMMAND: return {{8, 8, 'i'}, {0xC, 0xC, 'i'}, {0x10, 0x10, 'i'}};
+    case CTRL_MSG_PICK_UP_ITEM: return {{8, 8, 'i'}, {0xC, 0xC, 'i'}};
+    case CTRL_MSG_HEAL: return {{8, 8, 'i'}, {0xC, 0xC, 'i'}, {0x10, 0x10, 'i'}, {0x14, 0x14, 'b'}};
+    case CTRL_MSG_ANIMATION: return {{8, 8, 'i'}, {0x88, 0x88, 'i'}, {0x8C, 0x8C, 'i'}, {0x90, 0x90, 'b'}};
+    // (The action command's: its vtable since PR 23; the original's +0x40.)
+    case CTRL_MSG_ACTION: return {{offsetof(S_MsgAction, command) + offsetof(S_ActionCommand, action), 0x40, 'i'}};
+    case CTRL_MSG_SUSPEND:
+    case CTRL_MSG_23: return {{8, 8, 'b'}};
     case CTRL_MSG_INVENTORY_CHECK: return {};
     default: return {{8, 8, 'i'}};
     }
@@ -1236,6 +1243,11 @@ void FakeMsgWrite(uint8_t *m, C_BitStream *s, bool orig)
 void FakeMsgRead(uint8_t *m, int type, C_BitStream *s, bool orig)
 {
     std::vector<double> nums = {double(type)};
+    // (The controls' arrays and the animation's name are cleared first; the name then a short one of the tag.)
+    if (type == CTRL_MSG_CONTROLS)
+        std::memset(m + 8, 0, 0x200);
+    if (type == CTRL_MSG_ANIMATION)
+        std::memset(m + 8, 0, 0x80);
     if (type == CTRL_MSG_INVENTORY_CHECK) {
         void *h;
         std::memcpy(&h, m + 8, 4);
@@ -1249,6 +1261,10 @@ void FakeMsgRead(uint8_t *m, int type, C_BitStream *s, bool orig)
             w = uint32_t(int32_t(int16_t(w)));
         std::memcpy(m + (orig ? f.orig : f.port), &w, f.kind == 'b' ? 1 : 4);
         nums.push_back(double(int32_t(w)));
+    }
+    if (type == CTRL_MSG_ANIMATION) {
+        const char name[4] = {char('a' + (m[8] & 15)), char('a' + (m[9] & 15)), 0, 0};
+        std::memcpy(m + 8, name, 4);
     }
     S_Call c{"MessageRead", nums};
     g_calls.push_back(c);

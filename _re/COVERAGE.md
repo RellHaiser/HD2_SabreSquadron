@@ -2905,3 +2905,34 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** my stream pool's Attach kept the old bit position (Attach does not reset it); the
   Say messages first ran without a speech set; the first mutation run's baseline failed because the runner lacked the
   bat's ApplyRemoteHit wrap, so its "killed" meant nothing and it was redone.
+
+## Human part 34 (the remote controller, `remote_controller.cpp`, 2026-11-15)
+
+- **The build:** `human/build_remote.bat` (HUMAN_REMOTE on part 33's build, `remote_test.inc`), with
+  remote_controller.cpp linked; part 33's message and stream fakes, part 23's controllers, human and fakes.
+  - Each side has its remote controller: the port's (a test class whose ExecuteCommand, part 23's, is logged) and the
+    original's made by the base's constructor with a copy of its vtable (0x008112d8; ExecuteCommand logged alike), its
+    own fields cleared, as the original's C_Human::CreateController does inline. The port's control axes and buttons,
+    VIP and surrender flags (+0xAC.. in the port, +0xC0.. in the original) are copied over and compared, with the base
+    (part 23's table), the queued messages and the net object's block (part 33a's way).
+  - What the controller calls is logged on both sides: the client's item moves, Freeze, PlayAnimation (the original's
+    loop flag pushed as the word holding the message's bool: its low byte compared), the movement's UseObject,
+    OnRemoteAction and OnFrozen (wrapped: part 4's), the visual's SetDirection, the net game's player stats and rank, the
+    human store's GetStats, the weapons' SetRounds and PlayEmptySound. The net object's Update (slot 2), the tracks'
+    GetCurrent and GetRate (slots 10, 13) answer the test's vectors; PopMessage hands out each side's queue of net
+    messages (action, dive, binoculars: the port's binoculars flag sits after the base's bool, +0x30 in the original).
+  - GetSquadCommandGesture (player_controller.cpp, not linked) reads the original's table (0x0083c358): the remote's
+    flow is compared here, the lookup with the player controller.
+- **The tests:** Attach, Detach, OnBodyFlags, the three requests, FlushMessages and OnMessage (16,000: random queues,
+  every message type but the inventory check; the shared message fakes now carry the command's, control state's,
+  pickup's, heal's and animation's fields); Update (12,000: dead or not, a spectator, in play or not, in a seat, the
+  replicated values, queued messages, net messages of every kind with every action, weapons, belt grenades).
+- **Results:** 80,002 checks, 0 failures, 10 s; lines: 242 of 243 (the inventory check: the original reads its
+  message's human unset, a stale value). No port fixes needed.
+- **Mutations** (`human/mutations/mutate_remote.py`): 218 mutants (182 generated, 36 for repeated lines); 41 not
+  building; 161 of 177 killed; the survivors are equivalent (7), a tie, values not compared here (the w copied from
+  stack temps, the frame's on flag, the dive's controls Update clears, message releases) and the inventory check.
+- **Harness lessons (my mistakes):** the shared fake still took the action command's field at its offset before PR
+  23; I set the binoculars' flag at the original's offset in the port's message; Update's axes pointers were not
+  mapped between the sides; the port's real OnFrozen ran on a movement the harness had not set up for it (a crash in
+  UpdateHitSpheres); the original's real UseObject and ExecuteCommand first ran unlogged.
