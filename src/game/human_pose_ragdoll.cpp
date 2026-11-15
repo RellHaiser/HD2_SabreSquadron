@@ -92,7 +92,7 @@ S_RagdollBody *C_HumanWeaponPose::NewRagdollBody(S_RagdollBody *parent, int bone
         parent->children[slot] = body;
     }
     if (boneCount) {
-        body->bones = static_cast<int *>(operator new(boneCount * sizeof(int)));
+        body->bones = static_cast<int *>(::operator new(boneCount * sizeof(int)));
         body->boneOffsets = static_cast<S_matrix *>(_aligned_malloc(boneCount * sizeof(S_matrix), 16));
     }
     return body;
@@ -110,7 +110,7 @@ void C_HumanWeaponPose::FreeRagdollBody(S_RagdollBody *body)
         m_rootBody = nullptr;
     m_bodies[body->index] = nullptr;
     if (body->bones)
-        operator delete(body->bones);
+        ::operator delete(body->bones);
     if (body->boneOffsets)
         _aligned_free(body->boneOffsets);
     if (S_RagdollBody *parent = body->parent) {

@@ -107,16 +107,18 @@ C_HumanWeaponPose::C_HumanWeaponPose()
     m_owner = nullptr;
     m_movement = nullptr;
     m_weapon = nullptr;
-    m_proneHits = static_cast<uint8_t *>(operator new(PRONE_SPHERE_COUNT));
+    // (The global new and delete, as the original's: the class has its own aligned ones, which an unqualified
+    // operator new in a member would find.)
+    m_proneHits = static_cast<uint8_t *>(::operator new(PRONE_SPHERE_COUNT));
     m_proneGround = static_cast<S_vector4 *>(_aligned_malloc(PRONE_SPHERE_COUNT * sizeof(S_vector4), 16));
     m_proneNormals = static_cast<S_vector4 *>(_aligned_malloc(PRONE_SPHERE_COUNT * sizeof(S_vector4), 16));
     m_proneFrom = static_cast<S_vector4 *>(_aligned_malloc(PRONE_SPHERE_COUNT * sizeof(S_vector4), 16));
     m_proneTo = static_cast<S_vector4 *>(_aligned_malloc(PRONE_SPHERE_COUNT * sizeof(S_vector4), 16));
     m_proneNow = static_cast<S_vector4 *>(_aligned_malloc(PRONE_SPHERE_COUNT * sizeof(S_vector4), 16));
     m_proneSpheres = static_cast<S_vector4 *>(_aligned_malloc(PRONE_SPHERE_COUNT * sizeof(S_vector4), 16));
-    m_proneBlendTime = static_cast<int *>(operator new(PRONE_SPHERE_COUNT * sizeof(int)));
-    m_gunnerRot = static_cast<S_quat **>(operator new(GUNNER_POSE_COUNT * sizeof(S_quat *)));
-    m_gunnerPos = static_cast<S_vector4 **>(operator new(GUNNER_POSE_COUNT * sizeof(S_vector4 *)));
+    m_proneBlendTime = static_cast<int *>(::operator new(PRONE_SPHERE_COUNT * sizeof(int)));
+    m_gunnerRot = static_cast<S_quat **>(::operator new(GUNNER_POSE_COUNT * sizeof(S_quat *)));
+    m_gunnerPos = static_cast<S_vector4 **>(::operator new(GUNNER_POSE_COUNT * sizeof(S_vector4 *)));
     for (int i = 0; i < GUNNER_POSE_COUNT; ++i) {
         m_gunnerRot[i] = static_cast<S_quat *>(_aligned_malloc(POSE_BONE_COUNT * sizeof(S_quat), 16));
         m_gunnerPos[i] = static_cast<S_vector4 *>(_aligned_malloc(POSE_BONE_COUNT * sizeof(S_vector4), 16));
@@ -144,23 +146,23 @@ C_HumanWeaponPose::C_HumanWeaponPose()
 C_HumanWeaponPose::~C_HumanWeaponPose()
 {
     if (m_proneHits)
-        operator delete(m_proneHits);
+        ::operator delete(m_proneHits);
     for (S_vector4 *buffer : {m_proneGround, m_proneNormals, m_proneFrom, m_proneTo, m_proneNow, m_proneSpheres})
         if (buffer)
             _aligned_free(buffer);
     if (m_proneBlendTime)
-        operator delete(m_proneBlendTime);
+        ::operator delete(m_proneBlendTime);
     if (m_gunnerRot) {
         for (int i = 0; i < GUNNER_POSE_COUNT; ++i)
             if (m_gunnerRot[i])
                 _aligned_free(m_gunnerRot[i]);
-        operator delete(m_gunnerRot);
+        ::operator delete(m_gunnerRot);
     }
     if (m_gunnerPos) {
         for (int i = 0; i < GUNNER_POSE_COUNT; ++i)
             if (m_gunnerPos[i])
                 _aligned_free(m_gunnerPos[i]);
-        operator delete(m_gunnerPos);
+        ::operator delete(m_gunnerPos);
     }
     if (m_contactFrames)
         ReleaseRagdollContacts();
