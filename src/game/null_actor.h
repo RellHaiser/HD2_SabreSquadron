@@ -10,8 +10,9 @@ public:
     C_NullActor() : C_Actor(ACTOR_NULL) {}              // 0x005e2b10
     ~C_NullActor() override = default;                  // 0x005e2b50 (scalar deleting 0x005e2b30)
 
-    // (SetFrame 0x005e2b60 is the base's; WriteProperties 0x005e2bb0 and ReadProperties 0x005e2bc0
-    // return true, as the base's do.)
+    // (SetFrame 0x005e2b60 is the base's.) Its own copies of the base's two, both true:
+    bool WriteProperties(C_chunk & /*chunk*/) override { return true; }   // 0x30 0x005e2bb0 (DS 0x00600fb0)
+    bool ReadProperties(C_chunk & /*chunk*/) override { return true; }    // 0x34 0x005e2bc0 (DS 0x00600fd0)
     void CopyFrom(const C_Actor *source) override       // 0x38 0x005e2b70
     {
         if (source)

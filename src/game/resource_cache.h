@@ -69,7 +69,7 @@ public:
 
 protected:
     // New empty object of the cached type.
-    virtual T *Create() { return nullptr; }                             // vtable +0x0C
+    virtual T *Create() { return nullptr; }                             // vtable +0x0C; models 0x006d81c0 (DS 0x0071fcd0), sounds 0x006d9180 (DS 0x007210d0), animations 0x006da270 (DS 0x00722650), shadows 0x006d77b0 (DS 0x0071eff0)
     // Makes `dest` a copy of `source`.
     virtual void Duplicate(T *dest, T *source) = 0;                     // vtable +0x30
 

@@ -69,7 +69,7 @@ public:
 
     // Executes one command; returns false for opcodes this class does not implement.
     virtual bool ExecuteCommand(const S_ScriptCommand &cmd);   // 0x00416e10 (DS 0x00435e50) (vtable +0x00)
-    virtual int GetKind() const { return SCRIPT_KIND_GENERIC; } // 0x0041df10 (vtable +0x04)
+    virtual int GetKind() const { return SCRIPT_KIND_GENERIC; } // 0x0041df10 (DS 0x0043ecf0) (vtable +0x04)
 
     // Runs the script for one game tick.
     void Tick(int timeDelta);                          // 0x004167b0
