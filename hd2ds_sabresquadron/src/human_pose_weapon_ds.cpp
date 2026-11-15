@@ -8,9 +8,13 @@
 #include "game/world.h"
 #include "ls3d/i3d.h"
 
-// 0x007b91c0: not in the server.
-void C_HumanWeaponPose::LowerWeapon(int time)
+// The server's own small copy (DS 0x00805dc0): the raised state and the hold bit only, no blend.
+void C_HumanWeaponPose::LowerWeapon(int /*time*/)
 {
+    if (!m_raised || !m_weapon)
+        return;
+    m_raised = false;
+    m_flags &= ~static_cast<uint32_t>(POSE_FLAG_HOLD);
 }
 
 // 0x007b9220: not in the server.
@@ -28,9 +32,14 @@ void C_HumanWeaponPose::PlayActivity(I3D_animation_set *anim)
 {
 }
 
-// 0x007b9160: not in the server.
-void C_HumanWeaponPose::RaiseWeapon(int time)
+// The server's own small copy (DS 0x00805d90): no blend and no steer / static / seat test; the raise
+// bit is kept as it was, not set.
+void C_HumanWeaponPose::RaiseWeapon(int /*time*/)
 {
+    if (m_raised || !m_weapon)
+        return;
+    m_raised = true;
+    m_flags = (m_flags & 0x4FFFFFC2u) | POSE_FLAG_HOLD;
 }
 
 // The server's own small copy (DS 0x00805df0): the hand bits and the grip flag only, nothing linked
@@ -74,9 +83,18 @@ void C_HumanWeaponPose::SetModel(I3D_frame *model, int /*behaviour*/)
     SetMode(1);
 }
 
-// 0x007b9b20: not in the server.
+// The server's own small copy (DS 0x00805e80): the hand bit and the grip flag only, no grip test or
+// timing; off leaves the hand bit set.
 void C_HumanWeaponPose::SetSupportHand(bool on)
 {
+    if (on) {
+        if (IsSupportHandOn())
+            return;
+        m_hand |= 0x80000000u;
+    } else if (!IsSupportHandOn()) {
+        return;
+    }
+    m_flags |= POSE_FLAG_GRIP;
 }
 
 // 0x007b92e0: not in the server.
