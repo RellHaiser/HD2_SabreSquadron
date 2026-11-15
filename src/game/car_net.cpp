@@ -522,7 +522,7 @@ void C_Car::UpdateNetwork(int time)                     // 0x004d3380
 
 // --- the net object's state handlers ------------------------------------------------------------------
 
-void __fastcall CarNetReadState(void *context, C_BitStream *stream)   // 0x004d0610
+void __fastcall CarNetReadState(void *context, C_BitStream *stream)   // 0x004d0610 (DS 0x004bce80)
 {
     auto *car = static_cast<C_Car *>(context);
     C_Vehicle &vehicle = *car->GetVehicle();
@@ -559,7 +559,7 @@ void __fastcall CarNetReadState(void *context, C_BitStream *stream)   // 0x004d0
         vehicle.m_engineRevs = revs;
 }
 
-void __fastcall CarNetWriteState(void *context, C_BitStream *stream)  // 0x004d08c0
+void __fastcall CarNetWriteState(void *context, C_BitStream *stream)  // 0x004d08c0 (DS 0x004bd1e0)
 {
     auto *car = static_cast<C_Car *>(context);
     C_Vehicle &vehicle = *car->GetVehicle();

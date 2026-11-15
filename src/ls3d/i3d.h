@@ -1424,8 +1424,8 @@ public:
     // The dedicated server's LS3DRF.dll scene (0x420 bytes): no render fields before these, so
     // each is 0x20 lower than LS3DF's; no sound listener.
     const int *GetViewportRect() const { return &Field<int>(0x224); }
-    I3D_camera *GetActiveCamera() const { return Field<I3D_camera *>(0x13C); }
-    I3D_sector *GetPrimarySector() const { return Field<I3D_sector *>(0x1D8); }
+    I3D_camera *GetActiveCamera() const { return Field<I3D_camera *>(0x13C); }   // 0x0041d550 (DS 0x0043de70)
+    I3D_sector *GetPrimarySector() const { return Field<I3D_sector *>(0x1D8); }  // 0x0041d560 (DS 0x0043de90)
     I3D_sector *GetBackdropSector() const { return Field<I3D_sector *>(0x1DC); }
     I3D_sector *GetOmniSector() const { return Field<I3D_sector *>(0x1E0); }
     I3D_frame *GetDynamicRoot() const { return Field<I3D_frame *>(0x1E0); }
@@ -1434,9 +1434,9 @@ public:
 #else
     // The viewport set with SetViewport (left, top, right, bottom; +0x244).
     const int *GetViewportRect() const { return &Field<int>(0x244); }
-    I3D_camera *GetActiveCamera() const { return Field<I3D_camera *>(0x15C); }
+    I3D_camera *GetActiveCamera() const { return Field<I3D_camera *>(0x15C); }   // 0x0041d550
     // The outdoor sector everything else is inside of.
-    I3D_sector *GetPrimarySector() const { return Field<I3D_sector *>(0x1F8); }
+    I3D_sector *GetPrimarySector() const { return Field<I3D_sector *>(0x1F8); }  // 0x0041d560
     // The sector drawn behind everything with its own projection (the sky's).
     I3D_sector *GetBackdropSector() const { return Field<I3D_sector *>(0x1FC); }
     // The "Omni sector" (the frame GetDynamicRoot() returns).
