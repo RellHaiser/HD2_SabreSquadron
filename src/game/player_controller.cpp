@@ -49,6 +49,10 @@ enum : uint16_t {
 // The pending command as saved: the original's object with its vtable pointer (0x40 bytes).
 constexpr uint32_t ACTION_COMMAND_VTABLE = 0x00810528;
 constexpr int ACTION_COMMAND_SAVED_SIZE = 0x40;
+// Its fields, from category (+4) to member (+0x30); the vtable pointer is written as the
+// original's and never read back.
+constexpr size_t ACTION_COMMAND_FIELDS_SIZE = sizeof(S_ActionCommand) - sizeof(void *);
+static_assert(sizeof(S_ActionCommand) == 0x34, "S_ActionCommand: the original's offsets");
 
 // The controls HandleInput reads (E_ControlAxis / E_ControlButton indexes).
 enum : int {
@@ -1044,7 +1048,7 @@ void C_PlayerController::SaveGame(C_chunk &chunk)
         uint8_t image[ACTION_COMMAND_SAVED_SIZE] = {};
         const uint32_t vtable = ACTION_COMMAND_VTABLE;
         std::memcpy(image, &vtable, sizeof(vtable));
-        std::memcpy(image + sizeof(vtable), &m_pendingCommand, sizeof(S_ActionCommand));
+        std::memcpy(image + sizeof(vtable), &m_pendingCommand.category, ACTION_COMMAND_FIELDS_SIZE);
         chunk.Write(image, ACTION_COMMAND_SAVED_SIZE);
         chunk.Write(m_commandDelay);
         chunk.Ascend();
@@ -1074,7 +1078,7 @@ void C_PlayerController::LoadGame(C_chunk &chunk)
         case CHUNK_PLAYER_COMMAND: {
             uint8_t image[ACTION_COMMAND_SAVED_SIZE];
             chunk.Read(image, ACTION_COMMAND_SAVED_SIZE);
-            std::memcpy(&m_pendingCommand, image + sizeof(uint32_t), sizeof(S_ActionCommand));
+            std::memcpy(&m_pendingCommand.category, image + sizeof(uint32_t), ACTION_COMMAND_FIELDS_SIZE);
             chunk.Read(m_commandDelay);
             break;
         }
