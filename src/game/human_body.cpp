@@ -226,7 +226,7 @@ void S_HumanBody::Execute(const S_BodyCommand &command)
         work->SetGait(crippled ? WORK_STANCE_CRIPPLED : command.arg0, true);
         break;
     case BODY_COMMAND_3:
-        work->SetStance(command.arg0, true);
+        SetWorkStance(command.arg0);
         break;
     case BODY_COMMAND_ACTION:
         DoAction(command.arg0, reinterpret_cast<I3D_frame *>(static_cast<intptr_t>(command.arg1)), command.arg2);
@@ -240,6 +240,11 @@ void S_HumanBody::Execute(const S_BodyCommand &command)
     default:
         break;
     }
+}
+
+void S_HumanBody::SetWorkStance(int stance)
+{
+    work->SetStance(stance, true);
 }
 
 void S_HumanBody::Play(int animation)

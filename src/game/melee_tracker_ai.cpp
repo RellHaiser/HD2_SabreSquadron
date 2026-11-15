@@ -1552,6 +1552,90 @@ bool C_MeleeTrackerScriptedAI::LoadGame(C_chunk &chunk) // 0x005d2fc0
     return true;
 }
 
+// --- the full AI's own save / load (its vtable's; the variants override both) ----------------------
+
+bool C_MeleeTrackerAI::SaveGame(C_chunk &chunk)         // 0x005d25b0
+{
+    if (!chunk.IsOpen() || !chunk.Begin(0x2249))
+        return false;
+    chunk.WriteChunk(0, m_084);
+    const int targetId = m_target ? m_target->GetNetId() : -1;
+    chunk.WriteChunk(1, targetId);
+    const int orderedId = m_orderedTarget ? m_orderedTarget->GetNetId() : -1;
+    chunk.WriteChunk(2, orderedId);
+    chunk.WriteChunk(3, &m_090, 0xc);                   // xyz only
+    chunk.WriteChunk(4, &m_0a0, 0xc);
+    chunk.WriteChunk(5, m_0b0);
+    chunk.WriteChunk(6, m_0b4);
+    chunk.WriteChunk(7, static_cast<uint32_t>(m_changed));
+    chunk.WriteChunk(8, m_0bc);
+    // The path: one sub-chunk per waypoint (its index), holding the checkpoint.
+    chunk.Begin(9);
+    for (uint32_t i = 0; m_pathBegin != nullptr && i < static_cast<uint32_t>(m_pathEnd - m_pathBegin); ++i)
+        chunk.WriteChunk(static_cast<uint16_t>(i), m_pathBegin[i]->checkpoint);
+    chunk.Ascend();
+    chunk.Ascend();
+    return true;
+}
+
+bool C_MeleeTrackerAI::LoadGame(C_chunk &chunk)         // 0x005d28b0
+{
+    FreeAllWaypoints(this);
+    if (!chunk.IsOpen())
+        return false;
+    uint16_t id;
+    if (!chunk.Descend(id))
+        return false;
+    if (id != 0x2249) {
+        chunk.Ascend();
+        return false;
+    }
+    uint16_t sub;
+    while (chunk.RemainingSize() > 0 && chunk.Descend(sub)) {
+        switch (sub) {
+        case 0: chunk.Read(m_084); break;
+        case 1:
+        case 2: {
+            int actorId;
+            chunk.Read(actorId);
+            C_Actor *actor = actorId == -1 ? nullptr : g_actorsModule.GetActor(actorId);
+            (sub == 1 ? m_target : m_orderedTarget) = actor;
+            break;
+        }
+        // Fix: read xyz only (the original read 0xc but stored a 4th uninitialised word).
+        case 3: chunk.Read(&m_090, 0xc); break;
+        case 4: chunk.Read(&m_0a0, 0xc); break;
+        case 5: chunk.Read(m_0b0); break;
+        case 6: chunk.Read(m_0b4); break;
+        case 7: {
+            int changed;
+            chunk.Read(changed);
+            m_changed = changed != 0;
+            break;
+        }
+        case 8: chunk.Read(m_0bc); break;
+        case 9: {
+            uint16_t index;
+            while (chunk.RemainingSize() > 0 && chunk.Descend(index)) {
+                int cp;
+                chunk.Read(cp);
+                chunk.Ascend();
+                S_Checkpoint *point = m_checkpoints->Get(cp);
+                // Fix: w is 1 (the original left it uninitialised), as in the path builder.
+                const S_vector4 pos = {point->pos.x, point->pos.y, point->pos.z, 1.0f};
+                PathPushBack(this,
+                             AllocMeleeTrackerWaypoint(cp, pos, point->flags & 0xfb40, point->type, point->radius));
+            }
+            break;
+        }
+        default: break;
+        }
+        chunk.Ascend();
+    }
+    chunk.Ascend();
+    return true;
+}
+
 // ===========================================================================
 // Part 2d: the remote mirror (mode 7) and the player's control (mode 1).
 

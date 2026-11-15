@@ -379,6 +379,8 @@ struct S_HumanBody {                                    // 0x18 bytes
     // Body commands (S_BodyCommand, vtable 0x00810b48).
     void Execute(const struct S_BodyCommand &command);  // 0x005abd90
     void PlayWorkAnimation(int animation, I3D_frame *frame);   // 0x005abb50
+    // Command 3: the work object's stance, on.
+    void SetWorkStance(int stance);                     // 0x005abbb0 (DS 0x005bafc0)
     void DoAction(int action, I3D_frame *frame, void *arg);    // 0x005abe30
     void SetPose(int pose, const void *arg);            // 0x005abf60
     // An interaction with `target` (E_Interaction and flags; `arg`: the seat, the door's open).

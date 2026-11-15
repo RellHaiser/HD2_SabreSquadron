@@ -279,7 +279,7 @@ public:
     const char *GetName() const { return m_name ? m_name : ""; }
     // Name without the model prefix ("model.frame" -> "frame").
     const char *GetShortName() const { return m_name ? m_name + m_nameOffset : ""; }
-    I3D_frame *GetParent() const { return m_parent; }
+    I3D_frame *const &GetParent() const { return m_parent; }   // 0x0041d4b0 (DS 0x0043ddc0)
     I3D_CALLBACK *GetCallback() const { return m_callback; }
     // Children as a linked list (the engine's own iteration; NumChildren/GetChild are virtual).
     I3D_frame *GetFirstChild() const { return m_firstChild; }
