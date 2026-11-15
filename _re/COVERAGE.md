@@ -2695,3 +2695,47 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** an empty face group crashed the original inside its own exception frames, which
   hid it from the harness's handler (a first-chance handler now prints where); I kept mesh pointers across an Init that
   deleted them, and a new mesh got a freed address on the port's side only.
+
+## Human part 30b (the stained bodies, `human_stains.cpp`, 2026-11-15)
+
+- **The build:** part 30a's (`human/build_stains.bat`, `stains_test.inc`), with bodies.
+  - Each side's bodies: the port's C_HumanStains on a pose of a human (its classes' layouts), the original's (the same
+    layout, by the offset comments) on a pose (owner +0, model +8) of a human (role +0x19C, containers +0x74), the
+    container and item shared fakes (every vtable slot one function: the sides' slots differ). The bodies' fields
+    (pictures by hash, textures by name), the images (releases, locks, pixels) and the managers compared after each
+    call. Both sides draw from the same rand(); the game's time (the original's +0x2C) and g_missionVariant
+    (0x0098a6b0) synced.
+  - The worlds' meshes are surfaces now (bent grid patches: two triangles a cell, seams with UVs of their own, some
+    1e-6 apart, whole-number places, degenerate triangles), the visuals turned and tilted; models of one file share
+    their geometry. Images now and then of a 126-byte pitch.
+- **The tests:** 80 worlds, 12 bodies each (on meshes, on a non-mesh child, on none; roles; items of 0..3 kg, exactly
+  0.1 too; mission variants 0..2): every body bound and hit on the head in turn now and then (the 9th on takes the
+  oldest borrower's textures), then 60 calls: Bind (modes 0, 1, 2, out of range), SetVisible, SetPaint (0..8), AddHit
+  (at the mesh's places or anywhere, any direction, zone bits single, combined, with side bits), SaveGame (files byte
+  for byte), LoadGame (its own or another body's save, another chunk, an empty file; a chunk after, read next),
+  SkipSaved, ReturnTextures, Bind mode 2 on bound bodies; the destructors.
+- **Port fixes:**
+  - Bind mode 2 (another model) cleared the stains and made new pictures as mode 0 does; the original keeps them and,
+    owning textures, takes them again for the new materials.
+  - SetPaint with no paint put the head's overlay picture on a visible head; the original puts the null picture
+    (SetVisible the head's or null, SetPaint the paint's or null: each its own).
+  - AddHit summed the hit's local point x, y, z; the original (z + y) + x, and the front and side (y + z) + x.
+  - The distances: the walks and searches (z² + y²) + x², NearestByWalks (z² + x²) + y², BuildMesh's joining test
+    (z² + x²) + y² (the port: x, y, z or y, x, z). Part 30a's list rerun with them.
+- **Not tested (the original would crash or read garbage; the game never does it):** a human without containers
+  (Bind reads through null), ReturnTextures on a body without a level, the bodies before the manager's Init (the
+  original finds its overlay and splat tables empty and does nothing; the port paints), a save of another picture size
+  loaded into a body, a save loaded over a body borrowing textures, an image pitch above 128 bytes (the copies read
+  pitch x height bytes of a 64 x 64 picture: past it, on both sides).
+- **Results:** 78,233 checks, 18 s; lines: 574 of 586 in the file, 397 of 398 in 30b's ranges (not run: TakeTextures'
+  return for a group without a face group or picture).
+- **Mutations** (`human/mutations/mutate_stains2.py`): 457 mutants (418 generated, 39 for repeated lines); 397 killed,
+  19 not building, 41 survived: 29 equivalent, 4 ties, 1 boundary not reached, 4 frees, 2 overruns not seen, 1 gap
+  (the near seams only on one side along z). Part 30a's list rerun: 172 mutants, 127 killed, 7 not building, 38
+  survived (13 equivalent, 1 tie, 14 frees and sizes, 10 not reached).
+- **Harness lessons (my mistakes):** random triangles among any vertices made graphs whose searches take exponential
+  time; two models of one file had different meshes (the manager keeps meshes by name: out-of-range vertices); the
+  images piled up across worlds and hashing them took minutes; I read the bodies after their destructors; calling the
+  manager's AcquireTextures directly left borrowers that did not know it, freed later; a 130-byte pitch, then
+  loading over a borrowing body, made crashes that came and went (heap contents): the mutation runs with them were
+  rerun.

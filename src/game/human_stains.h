@@ -113,7 +113,9 @@ private:
     void SetPaint(unsigned paint);                      // 0x007999a0
     void PutBaseTextures();                             // (the common part of 0x007995d0, 0x007996d0)
     IImage *BaseTexture(int group) const;
-    void ShowBuffer0();                                 // (the common end of SetVisible, SetPaint)
+    // (The common end of SetVisible and SetPaint: the picture to the texture lent, or `base` to the material. Each
+    // gives its own: SetVisible the head's or null, SetPaint the paint's or null, whatever the other's state.)
+    void ShowBuffer0(IImage *base);
     // (0x0079a010; the original also passes the vertices it does not use)
     void PaintHit(const S_StainVertex &vertex, const S_vector &point, const float *positions, int group);
     void PaintSplat(uint16_t *buffer, uint16_t *texture, int16_t x, int16_t y, const uint16_t *image, uint16_t width, uint16_t height);   // 0x0079a880

@@ -88,10 +88,16 @@ void BlendOverlay(uint16_t *buffer, const uint16_t *overlay)
         buffer[i] = BlendTexels(overlay[i], buffer[i]);
 }
 
+// (Summed as the original's: (z² + y²) + x² in the walks and searches; NearestByWalks's own (z² + x²) + y².)
 float SquaredDistance(const float *position, const float *point)
 {
-    return (position[0] - point[0]) * (position[0] - point[0]) + (position[1] - point[1]) * (position[1] - point[1])
-        + (position[2] - point[2]) * (position[2] - point[2]);
+    const float dx = position[0] - point[0], dy = position[1] - point[1], dz = position[2] - point[2];
+    return (dz * dz + dy * dy) + dx * dx;
+}
+float SquaredDistanceZXY(const float *position, const float *point)
+{
+    const float dx = position[0] - point[0], dy = position[1] - point[1], dz = position[2] - point[2];
+    return (dz * dz + dx * dx) + dy * dy;
 }
 
 S_StainVertex *FindVertex(const S_StainGroup &group, uint16_t index)    // 0x00797eb0
@@ -195,7 +201,7 @@ void BuildMesh(S_StainMesh &mesh, I3D_mesh_level *level)
                 const uint16_t other = group.vertices[j]->index;
                 const float *const q = reinterpret_cast<const float *>(vertices + other * 0x20u);
                 const float dx = q[0] - p[0], dy = q[1] - p[1], dz = q[2] - p[2];
-                if (dy * dy + dx * dx + dz * dz <= 1e-8f)
+                if ((dz * dz + dx * dx) + dy * dy <= 1e-8f)   // (the original's order)
                     AddEdge(group, index, other, 0);
             }
         }
@@ -271,7 +277,7 @@ const S_StainVertex *NearestByWalks(const S_StainMesh &mesh, const float *point,
     for (int i = 0; i < 4; ++i) {
         const S_StainVertex *const found = WalkToNearest(point, positions, nullptr, visited.data(), group);
         if (found) {
-            const float distance = SquaredDistance(positions + found->index * 4u, point);
+            const float distance = SquaredDistanceZXY(positions + found->index * 4u, point);
             if (distance < bestDistance) {
                 bestDistance = distance;
                 best = found;
@@ -560,9 +566,15 @@ void C_HumanStains::Bind(char mode)
         }
     }
     LevelSetDetail(m_level);
-    std::memset(m_painted, 0, sizeof(m_painted));
-    m_lastHitTime = 0;
-    PrepareBuffers();
+    if (mode == 0) {
+        std::memset(m_painted, 0, sizeof(m_painted));
+        m_lastHitTime = 0;
+        PrepareBuffers();
+    } else if (m_ownTextures) {
+        // Mode 2 (another model): the stains kept, the textures taken again for the new materials.
+        m_ownTextures = false;
+        TakeTextures();
+    }
 
     // Soldiers of side 1, in some missions, are painted, one of four by turns.
     const int variant = m_pose->m_owner->GetRole() == 1 ? g_missionVariant : 0;
@@ -689,10 +701,10 @@ void C_HumanStains::ReturnTextures()
     PutBaseTextures();
 }
 
-void C_HumanStains::ShowBuffer0()
+void C_HumanStains::ShowBuffer0(IImage *base)
 {
     if (!m_ownTextures) {
-        SetMaterialImage(m_level->GetFaceGroup(0)->material, BaseTexture(0));
+        SetMaterialImage(m_level->GetFaceGroup(0)->material, base);
     } else if (m_textures[0]) {
         int pitch = 0;
         if (void *const pixels = m_textures[0]->Lock(0, &pitch, 0)) {
@@ -714,7 +726,7 @@ void C_HumanStains::SetVisible(bool on)
         std::memcpy(m_buffers[0], m_clean, static_cast<size_t>(m_width) * static_cast<size_t>(m_height) * 2);
     }
     m_visible = on;
-    ShowBuffer0();
+    ShowBuffer0(on ? g_stainManager.HeadTexture() : g_stainManager.NullTexture());
 }
 
 void C_HumanStains::SetPaint(unsigned paint)
@@ -734,7 +746,8 @@ void C_HumanStains::SetPaint(unsigned paint)
         BlendOverlay(m_buffers[0], STAIN_OVERLAYS[value]);
     }
     m_paint = value;
-    ShowBuffer0();
+    // (Without paint the null picture, even with the head's overlay shown: the original's.)
+    ShowBuffer0(value ? g_stainManager.PaintTexture(value - 1) : g_stainManager.NullTexture());
 }
 
 void C_HumanStains::SaveGame(C_chunk &chunk)
@@ -886,14 +899,15 @@ void C_HumanStains::AddHit(const S_vector &pos, const S_vector &dir, uint32_t fl
     const float *const positions = VisualPositions(m_visual);
     const S_matrix &world = m_visual->GetMatrix();
     const S_vector offset = pos - world(3);
+    // (The sums in the original's orders: (z + y) + x for the point, (y + z) + x for the front and side.)
     const float point[3] = {
-        offset.x * world.m[0][0] + offset.y * world.m[0][1] + offset.z * world.m[0][2],
-        offset.x * world.m[1][0] + offset.y * world.m[1][1] + offset.z * world.m[1][2],
-        offset.x * world.m[2][0] + offset.y * world.m[2][1] + offset.z * world.m[2][2],
+        (offset.z * world.m[0][2] + offset.y * world.m[0][1]) + offset.x * world.m[0][0],
+        (offset.z * world.m[1][2] + offset.y * world.m[1][1]) + offset.x * world.m[1][0],
+        (offset.z * world.m[2][2] + offset.y * world.m[2][1]) + offset.x * world.m[2][0],
     };
     const S_vector localPoint(point[0], point[1], point[2]);
-    const float front = world.m[2][0] * dir.x + world.m[2][2] * dir.z + world.m[2][1] * dir.y;
-    const float side = world.m[0][0] * dir.x + world.m[0][2] * dir.z + world.m[0][1] * dir.y;
+    const float front = (world.m[2][1] * dir.y + world.m[2][2] * dir.z) + world.m[2][0] * dir.x;
+    const float side = (world.m[0][1] * dir.y + world.m[0][2] * dir.z) + world.m[0][0] * dir.x;
 
     enum : uint32_t { FROM_NEG_FRONT = 0x40, FROM_POS_FRONT = 0x80, FROM_POS_SIDE = 0x100, FROM_NEG_SIDE = 0x200 };
     // (Sign tests of the floats as the original's.)
