@@ -31,6 +31,7 @@ struct S_FontVertex {                                   // 0x20 bytes
 // The fonts' ids (FindFont): the big and the small font of the language, the symbols, the big and the
 // small central European ones (the debriefing's names).
 enum : int {
+    FONT_SUBTITLES = 1,                                 // (the 1.0 / 1.1 versions' set only)
     FONT_BIG = 2,
     FONT_SMALL = 3,
     FONT_SYMBOLS = 4,
@@ -190,9 +191,10 @@ public:
     C_Font *FindFont(int id);                           // 0x0063df80
     void Release();                                     // 0x0063df60
 
-    // The fonts for the screen's width and the language (1.0 / 1.1 versions: their own set,
-    // dropped).
+    // The fonts for the screen's width and the language (1.0 / 1.1 versions: their own set).
     void Load();                                        // 0x0063e000
+    // The 1.0 / 1.1 versions' set: the screen's set, then each font with a fallback.
+    void LoadOldSet();                                  // 0x0063f870 (DS 0x00672810)
     void Free();                                        // 0x0063edd0
     // A texture font (a table: C_TextureFont; by code: C_MapFont) added when it loads.
     bool AddTextureFont(const char *texture, const char *table, int id);   // 0x0063f590 (DS 0x006724f0)
@@ -207,6 +209,7 @@ public:
 
 private:
     int m_refs = 0;                                     // +0x04
+    int m_set = 0;                                      // +0x08 the 1.0 / 1.1 set's number (LoadOldSet)
     std::vector<C_Font *> m_fonts;                      // +0x10
     bool m_batching = false;                            // +0x1C
 
