@@ -178,9 +178,9 @@ void BuildMesh(S_StainMesh &mesh, I3D_mesh_level *level)
     const int numVertices = level->NumVertices();
     for (int g = 0; g < STAIN_GROUPS; ++g) {
         S_StainGroup &group = mesh.groups[g];
-        I3D_face_group *const faceGroup = level->GetFaceGroup(g);
-        const uint16_t *const faces = faceGroup->Lock(0);
-        const int numFaces = faceGroup->numFaces;
+        // (The group asked for twice, as the original does: for its faces, then for their count.)
+        const uint16_t *const faces = level->GetFaceGroup(g)->Lock(0);
+        const int numFaces = level->GetFaceGroup(g)->numFaces;
         for (int face = 0; face < numFaces; ++face) {
             const uint16_t *const f = faces + face * 3;
             AddEdge(group, f[0], f[1], face);

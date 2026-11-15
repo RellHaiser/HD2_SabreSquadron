@@ -2663,3 +2663,35 @@ particles and the surface marks. Files are served from memory.
   dangle: a crash); my fake cache made a set for every name, so the 0xCD names of the short file (read 20 bytes by
   the port, on into the heap by the original) differed where the real cache fails on both; the uninitialised fields
   of the original's constructors needed zeroing after every Init, not only the first.
+
+## Human part 30a (the stain manager and its mesh graphs, `human_stains.cpp`, 2026-11-15)
+
+- **The build:** `human/build_stains.bat` (HUMAN_STAINS, `stains_test.inc`): the base harness with human_stains.cpp
+  linked (the port's I3DGetDriver wrapped; GetIGraph and g_missionVariant the test's).
+  - The engine's objects are fakes in its layout, every call logged: images (Release, Lock, Unlock; their size at
+    +0x20), the IGraph's LoadTexture (slot 0x3C), the driver's states (0x18, 0x1C), materials (0x2C, 0x30, 0x34), face
+    groups (Lock 0x0C, DuplicateMaterial 0x18; the material +0x04, the faces' count +0x08), mesh levels (vertices 0x04,
+    unlock 0x08, face groups 0x14, 0x38, 0x3C; the UVs +0x4C, the vertices' count +0x54, flags +100), meshes,
+    visuals (flags +0x1D0, mesh +0x1E0; 0xA0, 0xBC, 0xC4) and models (file name +0x134, FindChildFrame 0x48). The
+    original's I3DGetDriver and GetIGraph (import thunks 0x007e529c, 0x007e530e) answer the same fakes.
+  - Each side has its own world of them (built twice from one seed, the same names): the calls change them. After
+    each call: the logs, both worlds, and the managers as text (the original's singleton 0x0098adf0 in its layout;
+    its meshes with MSVC6 vectors: a vertex's edges at +0x08, a group's vertices at +0x10, edges at +0x20, the
+    extremes at +0x30, +0x34, +0x4C, +0x3C, +0x6C, +0xAC).
+  - Six models a world: four with meshes (two sharing a file name), one whose child is not a single mesh, one with
+    no child. A mesh's seven face groups: 1..40 vertices, some at another's place, some at whole numbers, 1..2n
+    triangles among them, some degenerate.
+- **The tests:** 400 worlds x 30 calls: Init, Reset, Done, AcquireMesh (any model, none), ReleaseMesh (of meshes held).
+- **Port fix:** BuildMesh asks the level for each face group twice, as the original does (for its faces, then their
+  count); the port asked once (the calls compared).
+- **Not tested:** a face group without vertices: the original reads the first vertex of none (a crash), the port's
+  fix gives zero extremes. Real body meshes (none has met the stains in a test: still the synthetic ones, 11g's quads
+  before).
+- **Results:** 39,196 checks, 4 s; lines: 158 of the 169 in these ranges (not run: 142, unreachable; the static
+  manager's destructor; Init's releases of images it cannot hold while not initialized; ReturnTextures, part 30b's).
+- **Mutations** (`human/mutations/mutate_stains1.py`): 172 mutants (147 generated, 25 for repeated lines); 125 killed,
+  7 not building, 40 survived: 13 equivalent (AddEdge's other-face handling repeats itself), 1 tie, 13 frees and
+  sizes, 8 not reached, 5 for part 30b.
+- **Harness lessons (my mistakes):** an empty face group crashed the original inside its own exception frames, which
+  hid it from the harness's handler (a first-chance handler now prints where); I kept mesh pointers across an Init that
+  deleted them, and a new mesh got a freed address on the port's side only.
