@@ -106,13 +106,8 @@ void C_NetObject::QueueMessage(C_NetObjectMessage *m, int sentTo, bool outgoing)
     LogNetMessage(this, reinterpret_cast<const uint8_t *>(m), sentTo, outgoing);
     _aligned_free(m);
 }
-void C_NetObject::Tick(float) { AiUnexpected(__PRETTY_FUNCTION__); }
-C_NetDirTrack &C_NetProperty::GetDirTrack() { AiUnexpected(__PRETTY_FUNCTION__); }
 int C_NetReplication::GetLocalId() const { return g_ai.localId; }
 C_NetObjectMessage::C_NetObjectMessage(int t) : type(t) {}
-C_BitStream *CreateActorMessage(int, bool) { AiUnexpected(__PRETTY_FUNCTION__); }
-C_BitStream *CreateActorMessageEx(int, bool) { AiUnexpected(__PRETTY_FUNCTION__); }
-void SendActorMessage(C_BitStream *) { AiUnexpected(__PRETTY_FUNCTION__); }
 // (Raw storage under the vtables' names: these classes' key functions are in net code not linked; part 33b.)
 asm(".globl __ZTV14C_NetQuantized\n\t.data\n\t.balign 4\n__ZTV14C_NetQuantized:\n\t.space 64\n"
     ".globl __ZTV18C_NetObjectMessage\n__ZTV18C_NetObjectMessage:\n\t.space 64\n"
@@ -139,37 +134,6 @@ int S_HumanBody::GetClimbTarget() const
 {
     Log(this, "BodyGetClimbTarget");
     return g_ai.climbTarget;
-}
-
-// The messages' Read and Write (game/controller_messages.cpp is not linked; part 23's raw vtables stand for six of
-// them): part 33b's fakes, not reached in 33a.
-#define AI_MSG_STUBS(T) \
-    void T::Read(C_NetMessage &) { AiUnexpected(__PRETTY_FUNCTION__); } \
-    void T::Write(C_NetMessage &) { AiUnexpected(__PRETTY_FUNCTION__); }
-AI_MSG_STUBS(S_MsgControls)
-AI_MSG_STUBS(S_MsgHit)
-AI_MSG_STUBS(S_MsgPutOnUniform)
-AI_MSG_STUBS(S_MsgCommand)
-AI_MSG_STUBS(S_MsgControlState)
-AI_MSG_STUBS(S_MsgUseObject)
-AI_MSG_STUBS(S_MsgPickUpItem)
-AI_MSG_STUBS(S_MsgTakeFromBox)
-AI_MSG_STUBS(S_MsgAction)
-AI_MSG_STUBS(S_MsgInventoryCheck)
-AI_MSG_STUBS(S_MsgHeal)
-AI_MSG_STUBS(S_MsgSoldierClass)
-AI_MSG_STUBS(S_Msg17)
-AI_MSG_STUBS(S_MsgAnimation)
-AI_MSG_STUBS(S_MsgEquipment)
-AI_MSG_STUBS(S_Msg21)
-AI_MSG_STUBS(S_MsgSuspend)
-extern "C" {
-void AC __wrap__ZN13S_MsgMoveItem4ReadER12C_NetMessage(void *, void *) { AiUnexpected(__PRETTY_FUNCTION__); }
-void AC __wrap__ZN17S_MsgTransferItem4ReadER12C_NetMessage(void *, void *) { AiUnexpected(__PRETTY_FUNCTION__); }
-void AC __wrap__ZN13S_MsgDropItem4ReadER12C_NetMessage(void *, void *) { AiUnexpected(__PRETTY_FUNCTION__); }
-void AC __wrap__ZN18S_MsgRemoteRequest4ReadER12C_NetMessage(void *, void *) { AiUnexpected(__PRETTY_FUNCTION__); }
-void AC __wrap__ZN7S_Msg234ReadER12C_NetMessage(void *, void *) { AiUnexpected(__PRETTY_FUNCTION__); }
-void AC __wrap__ZN8S_MsgSay4ReadER12C_NetMessage(void *, void *) { AiUnexpected(__PRETTY_FUNCTION__); }
 }
 
 namespace {
@@ -852,6 +816,7 @@ void SetUpAi()
     g_names[&g_h.human->m_body] = g_names[o_human + 0x98] = "body";
 }
 
+void RandomAiQueue(std::vector<S_ControllerMessage *> &port, uint8_t *vec);   // (part 33b's)
 void TestAiLife()
 {
     std::printf("ai controller: life cycle, small virtuals, body flags\n");
@@ -889,7 +854,8 @@ void TestAiLife()
             break;
         }
         case 2:
-            g_pa->m_toClients.clear();
+            // (Messages to the clients: Detach flushes them; part 33b's streams.)
+            RandomAiQueue(g_pa->m_toClients, g_oa + 0x90);
             AiCall("Detach", [&] { g_pa->Detach(); return 0; }, [&](void *) { OAi<void>(0x0056f630); return 0; });
             break;
         case 3:
@@ -1220,11 +1186,379 @@ void TestAiDestructor()
     }
 }
 
+// ---- part 33b: the network side (UpdateNetwork, FlushMessages, OnMessage, OnMessage2)
+//
+// The messages' Read and Write are fakes of the same format on both sides (part 31 tested the real ones): Write sends
+// the type in 5 bits and the fields the controller reads (each side's layout), Read reads those fields; the port's
+// through its message classes' stubs, part 23's raw vtables' Write slot and the Read wraps, the original's through
+// redirects of its 23 Reads and 23 Writes. The actor messages' streams are the test's: CreateActorMessage(Ex) hands out
+// a stream, SendActorMessage logs its bits.
+
+// A message's fields as the controller uses them: (port offset, original offset, kind: 'i' a 16-bit int, 'b' a bool
+// byte, 'f' a raw float).
+struct S_AiMsgField {
+    size_t port, orig;
+    char kind;
+};
+std::vector<S_AiMsgField> AiMsgFields(int type)
+{
+    switch (type) {
+    case CTRL_MSG_HIT:
+        return {{8, 8, 'i'}, {0xC, 0xC, 'i'}, {0x10, 0x10, 'i'}, {0x14, 0x14, 'i'}, {0x18, 0x20, 'f'}, {0x1C, 0x24, 'f'},
+                {0x20, 0x28, 'f'}, {0x28, 0x30, 'f'}, {0x2C, 0x34, 'f'}, {0x30, 0x38, 'f'}};
+    case CTRL_MSG_DROP_ITEM:
+        return {{8, 8, 'i'}, {0xC, 0x10, 'f'}, {0x10, 0x14, 'f'}, {0x14, 0x18, 'f'}, {0x1C, 0x20, 'f'}, {0x20, 0x24, 'i'}};
+    case CTRL_MSG_SAY: return {{8, 8, 'i'}, {0xC, 0xC, 'b'}};
+    case CTRL_MSG_MOVE_ITEM:
+    case CTRL_MSG_TRANSFER_ITEM: return {{8, 8, 'i'}, {0xC, 0xC, 'i'}, {0x10, 0x10, 'i'}, {0x14, 0x14, 'i'}, {0x18, 0x18, 'i'}};
+    case CTRL_MSG_TAKE_FROM_BOX: return {{8, 8, 'i'}, {0xC, 0xC, 'i'}, {0x10, 0x10, 'i'}, {0x14, 0x14, 'i'}};
+    case CTRL_MSG_CONTROL_STATE: return {{0x48, 0x50, 'i'}};
+    case CTRL_MSG_ACTION: return {{0x34, 0x40, 'i'}};
+    case CTRL_MSG_INVENTORY_CHECK: return {};
+    default: return {{8, 8, 'i'}};
+    }
+}
+void FakeMsgWrite(uint8_t *m, C_BitStream *s, bool orig)
+{
+    int type;
+    std::memcpy(&type, m + 4, 4);
+    s->WriteBits(uint32_t(type), 5);
+    std::vector<double> nums = {double(type)};
+    for (const S_AiMsgField &f : AiMsgFields(type)) {
+        uint32_t w = 0;
+        std::memcpy(&w, m + (orig ? f.orig : f.port), f.kind == 'b' ? 1 : 4);
+        s->WriteBits(f.kind == 'f' ? w : w & (f.kind == 'b' ? 1u : 0xFFFFu), f.kind == 'f' ? 32 : f.kind == 'b' ? 1 : 16);
+        nums.push_back(double(w));
+    }
+    S_Call c{"MessageWrite", nums};
+    g_calls.push_back(c);
+}
+void FakeMsgRead(uint8_t *m, int type, C_BitStream *s, bool orig)
+{
+    std::vector<double> nums = {double(type)};
+    if (type == CTRL_MSG_INVENTORY_CHECK) {
+        void *h;
+        std::memcpy(&h, m + 8, 4);
+        S_Call c{"MessageRead " + NameOf(h), nums};
+        g_calls.push_back(c);
+        return;
+    }
+    for (const S_AiMsgField &f : AiMsgFields(type)) {
+        uint32_t w = s->ReadBits(f.kind == 'f' ? 32 : f.kind == 'b' ? 1 : 16);
+        if (f.kind == 'i')
+            w = uint32_t(int32_t(int16_t(w)));
+        std::memcpy(m + (orig ? f.orig : f.port), &w, f.kind == 'b' ? 1 : 4);
+        nums.push_back(double(int32_t(w)));
+    }
+    S_Call c{"MessageRead", nums};
+    g_calls.push_back(c);
+}
+// The original's: its Reads and Writes by type (0x005b0e20..0x005b30d0).
+const uint32_t kOrigMsgRead[24] = {0x005b10c0, 0x005b1510, 0x005b1980, 0x005b1180, 0x005b1000, 0, 0x005b0f70, 0x005b1a10,
+                                   0x005b1bb0, 0x005b1e40, 0x005b1f10, 0x005b1d10, 0x005b1290, 0x005b2340, 0x005b2100,
+                                   0x005b0ee0, 0x005b0e50, 0x005b1800, 0x005b21d0, 0x005b22b0, 0x005b2a90, 0x005b2f80,
+                                   0x005b2ff0, 0x005b3060};
+const uint32_t kOrigMsgWrite[24] = {0x005b1100, 0x005b1540, 0x005b19a0, 0x005b11a0, 0x005b1030, 0, 0x005b0f90, 0x005b1ad0,
+                                    0x005b1c40, 0x005b1e90, 0x005b2020, 0x005b1d80, 0x005b13f0, 0x005b2700, 0x005b2150,
+                                    0x005b0f00, 0x005b0e70, 0x005b1820, 0x005b2230, 0x005b22e0, 0x005b2d20, 0x005b2fa0,
+                                    0x005b3010, 0x005b3080};
+const uint32_t kOrigMsgVt[24] = {0x00810cc4, 0x00810c84, 0x00810c8c, 0x00810c6c, 0x00810cbc, 0, 0x00810cfc, 0x00810ca4,
+                                 0x00810cac, 0x00810c9c, 0x00810cb4, 0x00810c94, 0x00810c74, 0x00810cf4, 0x00810d04,
+                                 0x00810d0c, 0x00810d14, 0x00810d1c, 0x00810d24, 0x00810cec, 0x00810ce4, 0x00810ccc,
+                                 0x00810cdc, 0x00810cd4};
+// (One fake per type for the original's Reads: the type is not in the message before Read.)
+template <int T> void AC OM_Read(uint8_t *m, C_BitStream *s) { FakeMsgRead(m, T, s, true); }
+void AC OM_Write(uint8_t *m, C_BitStream *s) { FakeMsgWrite(m, s, true); }
+void AC PM_Write(uint8_t *m, C_BitStream *s) { FakeMsgWrite(m, s, false); }
+template <int... T> void RedirectOrigReads(std::integer_sequence<int, T...>)
+{
+    (void)std::initializer_list<int>{(kOrigMsgRead[T] ? (RedirectOriginal(kOrigMsgRead[T], reinterpret_cast<const void *>(OM_Read<T>)), 0) : 0)...};
+}
+
+// The actor messages' streams: four per side, handed out in turn.
+struct S_AiStream {
+    uint32_t words[64] = {};
+    C_NetMessage msg;
+};
+S_AiStream g_aiStreams[4];
+int g_aiStreamNext = 0;
+C_BitStream *NewAiStream(int id, bool reliable, bool ex)
+{
+    S_AiStream &s = g_aiStreams[g_aiStreamNext++ & 3];
+    std::memset(s.words, 0, sizeof s.words);
+    s.msg.Attach(s.words, sizeof s.words * 8);
+    s.msg.ResetPosition();                              // (Attach keeps the position)
+    S_Call c{"CreateActorMessage", {double(id), double(reliable), double(ex)}};
+    g_calls.push_back(c);
+    return &s.msg;
+}
+void SendAiStream(C_BitStream *stream)
+{
+    auto *m = static_cast<C_NetMessage *>(stream);
+    std::vector<double> nums = {double(m->BitPosition())};
+    for (S_AiStream &s : g_aiStreams)
+        if (&s.msg == m)
+            for (uint32_t i = 0; i < (m->BitPosition() + 31) / 32; ++i)
+                nums.push_back(double(s.words[i]));
+    S_Call c{"SendActorMessage", nums};
+    g_calls.push_back(c);
+}
+void *AC OS_CreateActorMessage(void *, int id, int reliable) { return NewAiStream(id, (reliable & 0xFF) != 0, false); }
+void *AC OS_CreateActorMessageEx(void *, int id, int reliable) { return NewAiStream(id, (reliable & 0xFF) != 0, true); }
+void AC OS_SendActorMessage(void *, C_BitStream *stream) { SendAiStream(stream); }
+
+// The net object's Tick, the property's direction track (the original's at the property's +0xC0, SetDirection its
+// slot 0x50).
+void AC OS_Tick(void *self, float seconds) { Log(self, "NetObjectTick", {seconds}); }
+void AC TR_SetDirection(void *self, const S_vector4 *dir, float angle) { Log(self, "TrackSetDirection", {dir->x, dir->y, dir->z, angle}); }
+void *g_aiDirTrackVtPort[32], *g_aiDirTrackVtOrig[32];
+alignas(16) uint8_t g_aiDirTrackPort[0x100];
+void AC OS_ApplyRemoteHit(void *self, int a, int b, int c, int d, const float *v1, const float *v2)
+{
+    Log(self, "ApplyRemoteHit", {double(a), double(b), double(c), double(d), v1[0], v1[1], v1[2], v2[0], v2[1], v2[2]});
+}
+void AC OS_ClientDropItem(void *self, int actor, int uid, const float *v) { Log(self, "ClientDropItem", {double(actor), double(uid), v[0], v[1], v[2]}); }
+
+void SetUpAiNetwork()
+{
+    RedirectOrigReads(std::make_integer_sequence<int, 24>());
+    for (uint32_t w : kOrigMsgWrite)
+        if (w)
+            RedirectOriginal(w, reinterpret_cast<const void *>(OM_Write));
+    const std::pair<uint32_t, const void *> redirects[] = {
+        {0x00475530, FAKE(OS_CreateActorMessage)},
+        {0x00475570, FAKE(OS_CreateActorMessageEx)},
+        {0x004755b0, FAKE(OS_SendActorMessage)},
+        {0x0073eaf0, FAKE(OS_Tick)},
+        {0x005a15d0, FAKE(OS_ApplyRemoteHit)},
+        {0x005a3750, FAKE(OS_ClientDropItem)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.first, r.second);
+    // Part 23's raw message vtables: Write (slot 5) the port's fake.
+    for (void **vt : {g_vtMsgMoveItem, g_vtMsgTransferItem, g_vtMsgDropItem, g_vtMsgRemoteRequest, g_vtMsg23, g_vtMsgSay})
+        vt[5] = reinterpret_cast<void *>(PM_Write);
+    // The direction tracks.
+    for (int k = 0; k < 32; ++k)
+        g_aiDirTrackVtPort[k] = g_aiDirTrackVtOrig[k] = reinterpret_cast<void *>(CT_Unexpected);
+    g_aiDirTrackVtPort[VSlot(&C_NetDirTrack::SetDirection)] = reinterpret_cast<void *>(TR_SetDirection);
+    g_aiDirTrackVtOrig[0x50 / 4] = reinterpret_cast<void *>(TR_SetDirection);
+    *reinterpret_cast<void ***>(g_aiDirTrackPort) = g_aiDirTrackVtPort;
+    *reinterpret_cast<void ***>(g_origProperty + 0xC0) = g_aiDirTrackVtOrig;
+    g_names[g_aiDirTrackPort] = g_names[g_origProperty + 0xC0] = "dirTrack";
+}
+
+// A message of `type` on each side (the port's class, the original's block with its vtable), its fields random.
+S_ControllerMessage *NewPortMessage(int type)
+{
+    switch (type) {
+    case 0: return new S_MsgControls;
+    case 1: return new S_MsgHit;
+    case 2: return new S_MsgPutOnUniform;
+    case 3: return new S_MsgCommand;
+    case 4: return new S_MsgControlState;
+    case 6: return new S_MsgUseObject;
+    case 7: return new S_MsgMoveItem;
+    case 8: return new S_MsgTransferItem;
+    case 9: return new S_MsgPickUpItem;
+    case 10: return new S_MsgDropItem;
+    case 11: return new S_MsgTakeFromBox;
+    case 12: return new S_MsgAction;
+    case 13: return new S_MsgInventoryCheck;
+    case 14: return new S_MsgHeal;
+    case 15: return new S_MsgRemoteRequest;
+    case 16: return new S_MsgSoldierClass;
+    case 17: return new S_Msg17;
+    case 18: return new S_MsgAnimation;
+    case 19: return new S_MsgSay;
+    case 20: return new S_MsgEquipment;
+    case 21: return new S_Msg21;
+    case 22: return new S_MsgSuspend;
+    default: return new S_Msg23;
+    }
+}
+// Random queues on both sides (types 5 and above 23 too: a class's object with its type word changed; the original's
+// the same class's vtable).
+void RandomAiQueue(std::vector<S_ControllerMessage *> &port, uint8_t *vec)
+{
+    port.clear();
+    const int n = P(0.2f) ? 0 : I(1, 6);
+    auto **data = static_cast<uint8_t **>(std::malloc(size_t(n ? n : 1) * 4));
+    for (int k = 0; k < n; ++k) {
+        int type = P(0.15f) ? (P(0.5f) ? 5 : I(24, 31)) : I(0, 23);
+        const int cls = type == 5 || type > 23 ? (P(0.5f) ? 19 : 7) : type;
+        S_ControllerMessage *m = NewPortMessage(cls);
+        auto *pb = reinterpret_cast<uint8_t *>(m);
+        auto *ob = static_cast<uint8_t *>(_aligned_malloc(0x100, 16));
+        std::memset(ob, 0, 0x100);
+        const uint32_t vt = kOrigMsgVt[cls];
+        std::memcpy(ob, &vt, 4);
+        m->type = type;
+        std::memcpy(ob + 4, &type, 4);
+        for (const S_AiMsgField &f : AiMsgFields(cls)) {
+            uint32_t w = f.kind == 'b' ? uint32_t(P(0.5f)) : f.kind == 'f' ? (uint32_t(std::rand()) << 17) ^ uint32_t(std::rand()) : uint32_t(I(-3, 2000));
+            std::memcpy(pb + f.port, &w, f.kind == 'b' ? 1 : 4);
+            std::memcpy(ob + f.orig, &w, f.kind == 'b' ? 1 : 4);
+        }
+        port.push_back(m);
+        data[k] = ob;
+    }
+    uint32_t v[4] = {0, 0, 0, 0};
+    if (n) {
+        v[1] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(data));
+        v[2] = v[3] = v[1] + 4 * uint32_t(n);
+    } else
+        std::free(data);
+    std::memcpy(vec, v, 16);
+}
+// Input for OnMessage / OnMessage2: messages in the fakes' format, now and then types the switch skips, the end.
+void RandomAiInput(C_BitStream &w, bool server)
+{
+    static const int CLIENT_TYPES[] = {0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 5, 21, 25};
+    static const int SERVER_TYPES[] = {7, 8, 10, 11, 7, 8, 10, 11, 0, 5, 19};
+    for (int k = I(0, 5); k > 0; --k) {
+        const int type = server ? SERVER_TYPES[I(0, 10)] : CLIENT_TYPES[I(0, 24)];
+        w.WriteBits(uint32_t(type), 5);
+        const bool known = server ? (type == 7 || type == 8 || type == 10 || type == 11) : !(type == 5 || type == 21 || type > 23);
+        if (!known)
+            continue;
+        for (const S_AiMsgField &f : AiMsgFields(type)) {
+            if (f.kind == 'f') {
+                const float x = U(-50, 50);
+                uint32_t b;
+                std::memcpy(&b, &x, 4);
+                w.WriteBits(b, 32);
+            } else if (f.kind == 'b') {
+                w.WriteBits(P(0.5f), 1);
+            } else {
+                // (Ids of part 23's actors now and then: 100 + a kind.)
+                w.WriteBits(uint32_t(P(0.3f) ? 100 + I(0, KIND_HUMAN) : I(0, 0xFFFF)) & 0xFFFF, 16);
+            }
+        }
+    }
+    w.WriteBits(CTRL_MSG_END, 5);
+}
+
+void TestAiNetwork()
+{
+    std::printf("ai controller: network\n");
+    C_Human *h = g_h.human;
+    for (int i = 0; i < 12000 / QUICK; ++i) {
+        RandomAi();
+        static const uint32_t ROLES[] = {GAME_ROLE_LOCAL, GAME_ROLE_SERVER, GAME_ROLE_SERVER, GAME_ROLE_CLIENT, GAME_ROLE_CLIENT};
+        g_gameRole = ROLES[I(0, 4)];
+        g_pa->m_netObject = reinterpret_cast<C_NetObject *>(g_netObjectBytes);
+        // (A speech set, part 23d's: the original's SayNow calls through a missing one, the port's fix does not.)
+        h->m_speechSet = reinterpret_cast<C_SpeechSet *>(g_speechSetBytes2);
+        g_cs.speech = P(0.5f) ? I(0, 40000) : int(uint32_t(I(0, 0x7FFFFFFF)));
+        const int which = I(0, 4);
+        switch (which) {
+        case 0: {
+            // (Co-operative games, or another type; in a seat or not; the dive's conditions.)
+            const int gameType = P(0.7f) ? MP_GAME_COOPERATIVE : I(0, 5);
+            g_mpSettings->gameType = gameType;
+            std::memcpy(g_mpBlock + 0x224, &gameType, 4);
+            if (g_pa->m_buttons && P(0.5f))
+                g_pa->m_buttons[BUTTON_DIVE] = 1.0f;
+            h->m_stamina = P(0.5f) ? U(0, 9.9f) : P(0.2f) ? 10.0f : U(10.1f, 100);
+            const int frameTime = I(0, 200);
+            AiCall("UpdateNetwork", [&] { g_pa->UpdateNetwork(frameTime); return 0; },
+                   [&](void *) { OAi<void>(0x0056f710, frameTime); return 0; });
+            break;
+        }
+        case 1:
+        case 2: {
+            const bool toClients = which == 1;
+            RandomAiQueue(toClients ? g_pa->m_toClients : g_pa->m_toServer, g_oa + (toClients ? 0x90 : 0x80));
+            AiCall("FlushMessages", [&] { g_pa->FlushMessages(toClients); return 0; },
+                   [&](void *) { OAi<void>(0x00577b30, toClients); return 0; });
+            break;
+        }
+        default: {
+            const bool server = which == 4;
+            uint32_t input[128] = {};
+            {
+                C_BitStream w(input, sizeof input * 8);
+                RandomAiInput(w, server);
+            }
+            S_AiStream ps, os;
+            std::memcpy(ps.words, input, sizeof input < sizeof ps.words ? sizeof input : sizeof ps.words);
+            std::memcpy(os.words, ps.words, sizeof ps.words);
+            ps.msg.Attach(ps.words, sizeof ps.words * 8);
+            os.msg.Attach(os.words, sizeof os.words * 8);
+            AiCall(server ? "OnMessage2" : "OnMessage",
+                   [&] {
+                       if (server)
+                           g_pa->OnMessage2(&ps.msg);
+                       else
+                           g_pa->OnMessage(&ps.msg);
+                       return int(ps.msg.BitPosition());
+                   },
+                   [&](void *) {
+                       OAi<void>(server ? 0x00578190 : 0x00577ce0, &os.msg);
+                       return int(os.msg.BitPosition());
+                   });
+            break;
+        }
+        }
+    }
+}
+
 void TestAiController()
 {
     SetUpAi();
+    SetUpAiNetwork();
     TestAiLife();
     TestAiSaves();
     TestAiDestructor();
+    TestAiNetwork();
 }
 }  // namespace
+
+// ---- part 33b's port side: the messages' Read and Write (fakes of the test's format), the actor messages' streams,
+// the net object's Tick, the property's direction track, ApplyRemoteHit (wrapped)
+#define AI_MSG_FAKES(T) \
+    void T::Read(C_NetMessage &msg) { FakeMsgRead(reinterpret_cast<uint8_t *>(this), type, &msg, false); } \
+    void T::Write(C_NetMessage &msg) { FakeMsgWrite(reinterpret_cast<uint8_t *>(this), &msg, false); }
+AI_MSG_FAKES(S_MsgControls)
+AI_MSG_FAKES(S_MsgHit)
+AI_MSG_FAKES(S_MsgPutOnUniform)
+AI_MSG_FAKES(S_MsgCommand)
+AI_MSG_FAKES(S_MsgControlState)
+AI_MSG_FAKES(S_MsgUseObject)
+AI_MSG_FAKES(S_MsgPickUpItem)
+AI_MSG_FAKES(S_MsgTakeFromBox)
+AI_MSG_FAKES(S_MsgAction)
+AI_MSG_FAKES(S_MsgInventoryCheck)
+AI_MSG_FAKES(S_MsgHeal)
+AI_MSG_FAKES(S_MsgSoldierClass)
+AI_MSG_FAKES(S_Msg17)
+AI_MSG_FAKES(S_MsgAnimation)
+AI_MSG_FAKES(S_MsgEquipment)
+AI_MSG_FAKES(S_Msg21)
+AI_MSG_FAKES(S_MsgSuspend)
+extern "C" {
+// (Part 23's six raw vtables: their Read through these wraps; the type is the object's.)
+void AC AiWrappedRead(uint8_t *m, C_NetMessage *msg)
+{
+    int type;
+    std::memcpy(&type, m + 4, 4);
+    FakeMsgRead(m, type, msg, false);
+}
+void AC __wrap__ZN13S_MsgMoveItem4ReadER12C_NetMessage(uint8_t *m, C_NetMessage *msg) { AiWrappedRead(m, msg); }
+void AC __wrap__ZN17S_MsgTransferItem4ReadER12C_NetMessage(uint8_t *m, C_NetMessage *msg) { AiWrappedRead(m, msg); }
+void AC __wrap__ZN13S_MsgDropItem4ReadER12C_NetMessage(uint8_t *m, C_NetMessage *msg) { AiWrappedRead(m, msg); }
+void AC __wrap__ZN18S_MsgRemoteRequest4ReadER12C_NetMessage(uint8_t *m, C_NetMessage *msg) { AiWrappedRead(m, msg); }
+void AC __wrap__ZN7S_Msg234ReadER12C_NetMessage(uint8_t *m, C_NetMessage *msg) { AiWrappedRead(m, msg); }
+void AC __wrap__ZN8S_MsgSay4ReadER12C_NetMessage(uint8_t *m, C_NetMessage *msg) { AiWrappedRead(m, msg); }
+void AC __wrap__ZN7C_Human14ApplyRemoteHitEiiiiRK8S_vectorS2_(C_Human *h, int a, int b, int c, int d, const S_vector &v1, const S_vector &v2)
+{
+    OS_ApplyRemoteHit(h, a, b, c, d, &v1.x, &v2.x);
+}
+}
+C_BitStream *CreateActorMessage(int id, bool reliable) { return NewAiStream(id, reliable, false); }
+C_BitStream *CreateActorMessageEx(int id, bool reliable) { return NewAiStream(id, reliable, true); }
+void SendActorMessage(C_BitStream *stream) { SendAiStream(stream); }
+void C_NetObject::Tick(float seconds) { Log(this, "NetObjectTick", {seconds}); }
+C_NetDirTrack &C_NetProperty::GetDirTrack() { return *reinterpret_cast<C_NetDirTrack *>(g_aiDirTrackPort); }
+

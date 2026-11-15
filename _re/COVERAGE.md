@@ -2871,8 +2871,8 @@ particles and the surface marks. Files are served from memory.
   without a target in a save (the original reads its id through null); the tasks' vectors' w after a load, and a task
   2's human after a load naming another kind of actor (both what the pool's object had: the two sides' pools differ).
 - **Mutations** (`human/mutations/mutate_aictl1.py`, in the quick build): 242 mutants (201 generated, 41 for repeated
-  lines); 14 not building; 209 of 228 killed; the 19 survivors are frees and pool releases nothing compares, Detach's
-  flush of an empty queue (33b's), an equivalent clear, a stale w and an initial value always read over.
+  lines); 14 not building; 211 of 228 killed (with part 33b's queues for Detach); the 17 survivors are frees and pool
+  releases nothing compares, an equivalent clear, a stale w and an initial value always read over.
 - **Harness lessons (my mistakes):** I left out part 23's setups (combat, motion, deaths, interactions, weapons) and
   its second controller's copy, and first let the original's real ExecuteCommand run on random commands; the shared net
   object block was 0x40 bytes where the setters write up to +0x67; I tested a network game with
@@ -2880,3 +2880,28 @@ particles and the surface marks. Files are served from memory.
   follow part 23's ids (100 + the kind), so the two sides' GetActorById answered differently; the original's GetActorById,
   climb target and the hands' weapons needed their original copies; part 23's aligned-free logger counted the
   original's own vector growth.
+
+## Human part 33b (the AI controllers' network side, `ai_controller.cpp`, 2026-11-15)
+
+- **The build:** part 33a's (`human/build_aictl.bat`), the network tests appended to `aictl_test.inc`.
+  - The messages' Read and Write are fakes of one format on both sides (part 31 compared the real ones): Write sends
+    the type in 5 bits and the fields the controller reads, from each side's layout; Read reads them. The port's
+    through its message classes, part 23's raw vtables' Write slot and the six Read wraps; the original's through
+    redirects of its 23 Reads and 23 Writes. Queued messages are made on both sides (the original's with its classes'
+    vtables), so its own deleting destructors free them.
+  - CreateActorMessage(Ex) hand out the test's streams (C_NetMessage over buffers, each side's own WriteBits);
+    SendActorMessage logs their bits. The net object's Tick, the net property's direction track (the original's at the
+    property's +0xC0, SetDirection its slot 0x50), ApplyRemoteHit (wrapped) and ClientDropItem are logged alike; the
+    multiplayer settings' game type set on both sides (the original's +0x224); the human has part 23d's speech set
+    (the original's SayNow calls through a missing one: the port's fix).
+- **The tests:** 12,000 calls: UpdateNetwork (co-operative games and others, in a seat or not, the dive with its
+  stamina and moving conditions), FlushMessages to the server and to the clients (random queues of every type, the
+  control state's unreliable stream, types 5 and above 23 skipped), OnMessage and OnMessage2 (random inputs in the
+  fakes' format with types the switches skip); part 33a's Detach now flushes queued messages too.
+- **Results:** 60,402 checks for the whole file, 0 failures, 38 s; lines: 394 of 394. No port fixes needed.
+- **Mutations** (`human/mutations/mutate_aictl2.py`): 102 mutants (70 generated, 32 for repeated lines); 33 not
+  building; 66 of 69 killed; the 3 survivors are OnMessage2's deletes of the messages it does not send on (frees are not
+  compared). Part 33a's two Detach mutants are killed now (211 of 228 there).
+- **Harness lessons (my mistakes):** my stream pool's Attach kept the old bit position (Attach does not reset it); the
+  Say messages first ran without a speech set; the first mutation run's baseline failed because the runner lacked the
+  bat's ApplyRemoteHit wrap, so its "killed" meant nothing and it was redone.
