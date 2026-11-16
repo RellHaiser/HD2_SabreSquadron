@@ -74,6 +74,8 @@ struct S_ControllerScript {
 } g_cs;
 // The walking network's points (shared: both sides' controllers point at them).
 alignas(16) uint8_t g_checkpointBytes[8][0x40];
+// (Set: Get's answers on both sides instead, by the index's low word: part 38's points at the network's stride.)
+S_Checkpoint *(*g_checkpointAt)(int index) = nullptr;
 }  // namespace
 
 // The checkpoints.
@@ -84,6 +86,10 @@ int C_CheckpointNetwork::FindNearest(S_vector pos, float maxDist, float minDist)
 }
 S_Checkpoint *C_CheckpointNetwork::Get(int index)
 {
+    if (g_checkpointAt) {
+        Log(this, "CheckpointsGet", {double(uint16_t(index))});
+        return g_checkpointAt(uint16_t(index));
+    }
     Log(this, "CheckpointsGet", {double(index)});
     return index >= 0 && index < 8 ? reinterpret_cast<S_Checkpoint *>(g_checkpointBytes[index]) : nullptr;
 }
@@ -372,6 +378,10 @@ int CT_ OC_FindNearest(void *self, S_vector pos, float maxDist, float minDist)
 }
 void *CT_ OC_CheckpointGet(void *self, int index)
 {
+    if (g_checkpointAt) {
+        Log(self, "CheckpointsGet", {double(uint16_t(index))});
+        return g_checkpointAt(uint16_t(index));
+    }
     Log(self, "CheckpointsGet", {double(index)});
     return index >= 0 && index < 8 ? g_checkpointBytes[index] : nullptr;
 }

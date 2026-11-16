@@ -197,6 +197,7 @@ SUITES = [
     T("human.aisenses", "human/build_aisenses.bat", TMP + r"\human_aisenses_test.exe", needs=("mingw", "original_exe")),
     T("human.aicombat", "human/build_aicombat.bat", TMP + r"\human_aicombat_test.exe", needs=("mingw", "original_exe")),
     T("human.mtai", "human/build_mtai.bat", TMP + r"\human_mtai_test.exe", needs=("mingw", "original_exe")),
+    T("human.sniper", "human/build_sniper.bat", TMP + r"\human_sniper_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

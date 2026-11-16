@@ -3198,3 +3198,48 @@ particles and the surface marks. Files are served from memory.
   test compared the object after the port's destructor (its stores are dead to the compiler); 5,000 saves made the test
   73 s (file creation is slow here: fewer saves, 30 s); the load test compared only the next chunk's id, which a missed
   Ascend does not change (the depth and position now); a bash heredoc again turned "\n" into line breaks.
+
+## Human part 38 (the sniper AI, `sniper_controller.cpp`, 2026-11-16)
+
+- **The build:** `human/build_sniper.bat` (HUMAN_SNIPER with HUMAN_AICOMBAT and HUMAN_AISENSES: part 36's harness with
+  `sniper_controller.cpp` and `checkpoint.cpp` linked), `sniper_test.inc`, run_suites `human.sniper`.
+  - The pair: the port's sniper (a test class: ExecuteCommand logged) is part 33's AI pair (AiCall converts and
+    compares the C_AIController part); the original's is its AI constructor's object (0x0056ee90) with a copy of the
+    sniper vtable (0x00811618). The sniper's own fields (+0x140 .. +0x180: the post, its stance, flags, task time,
+    target; the two point vectors MSVC6 ones in the original) and the human's events (the sniper post, the stimuli: an
+    MSVC6 deque at +0x48) are converted and compared around each call; the AI's control arrays (the port's statics, the
+    original's 0x008ab058 / 0x008aaf58) too.
+  - The private members reached through explicit instantiation (member pointers; no `#define private public`).
+  - Faked on both sides: UpdateMove (step 4's), DrawLongGun / DrawSidearm, the sight module's TestNow, GetNeighbours,
+    ProcessEvents, StartScriptedController, RequestThrowItem, GetActor / GetActorById (the humans and part 23's actors
+    by net id); IdToActor (human_events.cpp's) and CoverAgainst (enemy_combat.cpp's, inline in the original) are copies
+    of the port's until their files are linked. ReleaseHumanEvent is silent (the original puts the stimulus into its
+    pool inline).
+  - Part 36's per-side vtables (the weapon component's; now the definitions' slot 0x10 too: the port's GetCarryMode is
+    the original's GetBehaviour) and its stale facing w words. The walking points are part 33's at the network's
+    stride (Get and GetIndex agree; part 23's Get by the index's low word through a new hook, `g_checkpointAt`: the
+    original pushes 16 bits). The next task of type 3 in both pools primed alike (a new task keeps its pool object's
+    +0x0C and +0x10). The MSVC6 container helpers moved from `senses_test.inc` to `msvc_containers.inc` (shared).
+- **The tests:** 20,000 calls: Attach (with a previous controller or none: the post's points and sniper points, the
+  hands, the script's OnAlarmDone, the morale flags), Detach, Update, Tick (network games' send mask, queued messages,
+  the task given back to the script), UpdateTimers (a target gone), DropHandsItem, UpdateFiring (an empty single-shot
+  launcher thrown away), HandleEvent (each event type), UpdateTask (morale at its edges), CheckDone, RunTask, StartTask,
+  UpdateZombie and UpdateSniper (every state), TestSightOfTarget, TakeCoverStance, HasSomethingToDo, SeesEnemies,
+  SeesTarget, TakeStimulusSource, ChooseStance, FindCoverPoint, FindFirePointHeard / Seen, SaveGame (files byte for
+  byte), LoadGame, Unknown114.
+- **Results:** 62,163 checks, 0 failures, 17 s; lines: 414 of 414.
+- **Port fixes:** none needed. Noted in the source: the turn's look direction's w is a stale stack word in the
+  original (the port 0).
+- **Not tested:** the original's crashes the harness avoids: a missing walking network (the original reads its ladder
+  points; the port checks: part 33's fix) and missing checkpoints in UpdateSniper (both sides crash); aiming at the
+  copied humans (their test models have no bones).
+- **Mutations** (`human/mutations/mutate_sniper1.py`): 351 mutants (251 generated, 100 for repeated lines); 19 not
+  building; 315 of 332 killed; the survivors are equivalent (12), ties at the turn's 0.76 (2), the silent stimulus
+  release (1) and weak (2: the point at index 0, the tick's fire flags).
+- **Harness lessons (my mistakes):** the original's container fakes had no IsLocked (an exit on "unexpected controller
+  call"); part 23's Get read the original's 16-bit index as an int (a null point: a crash in the original's Attach); I
+  mixed the two point tables (0x40 and the network's stride); the save needed an interaction's target (part 33's
+  lesson again); the fire order unset (a crash in the port's UpdateFireOrder) and aiming at a copied human (no bones);
+  the original's game object without the walking network (its +0x54); a load naming an actor I had made unknown (the
+  sides' stale pool objects); comparing the 16-bit fire points as ints; a typedef cannot spell a member-pointer type
+  (using), and `->*` binds looser than `->`.

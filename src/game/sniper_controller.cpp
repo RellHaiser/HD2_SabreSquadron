@@ -300,6 +300,7 @@ void C_SniperController::UpdateZombie(int /*timeDelta*/)
             // (The body's direction normalized a second time, as in the original.)
             NormalizeBy(body, body.y * body.y + body.z * body.z + body.x * body.x);
             if (body.z * to.z + body.y * to.y + body.x * to.x <= 0.76f) {
+                // (w: a stale stack word in the original; 0 here.)
                 if (m_facing->LookToward({to.x, to.y, to.z, 0.0f}))
                     task->unknown08 = SNIPER_DECIDE;
             } else {
@@ -410,6 +411,7 @@ void C_SniperController::UpdateSniper(int /*timeDelta*/)
             // (The body's direction normalized a second time, as in the original.)
             NormalizeBy(body, body.x * body.x + body.y * body.y + body.z * body.z);
             if (body.x * to.x + body.z * to.z + body.y * to.y <= 0.76f) {
+                // (w: a stale stack word in the original; 0 here.)
                 if (m_facing->LookToward({to.x, to.y, to.z, 0.0f}))
                     task->unknown08 = SNIPER_DECIDE;
             } else {
