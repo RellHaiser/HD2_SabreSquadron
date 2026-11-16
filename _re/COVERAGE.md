@@ -3157,3 +3157,44 @@ particles and the surface marks. Files are served from memory.
   the original's one global pair (overwriting the tested pair's copy); the waypoints' padding made the comparison
   differ from run to run; CheckHeel without an owner read the original's unset spot (the failures showed only in the
   coverage build's environment); a Python edit script again turned "\n" into line breaks several times.
+
+## Human part 37c (the meleeTrackers' controllers: the idle bark, saves, the remote and the player's control, `melee_tracker_ai.cpp`, 2026-11-16)
+
+- **The build:** part 37a's (`human/build_mtai.bat`, `mtai_test.inc`).
+  - The remote (vtable 0x008121e0, 0x270 bytes) and the player's control (0x00812340, 0x4B0 bytes): each side's copy
+    the same bytes, the tracker and the owner mapped, the weights' pointers into the copy's own buffers rebased (the
+    test arrays the original's copies). ReadControlState (0x005ac660) answers the same state on both sides;
+    WriteControlState (0x005ac5f0) logs the position, direction and bits (not the velocity: the original's player
+    sends stack words there, the port zeros); CreateActorMessageEx / SendActorMessage are part 33's fakes.
+  - The idle bark: the tracker frame has a "d" child (the mouth); _rand is the same rand() on both sides (part 33's),
+    seeded alike before each side's Tick; the sound request is logged whole (part 13's).
+  - The saved games: each side's into its own file through the port's C_chunk, the files compared byte for byte; the
+    loads from the saved file or a hand-made one (the sub-chunks a random subset in a random order, unknown ones,
+    another chunk id, now and then a closed chunk), the result, the chunk's depth and position after the load and the
+    next chunk compared; GetActor answers the humans, part 34's actors and the tracker by net id on each side.
+- **The tests:** 14,000 rounds: the scripted Tick with the bark due or not (the automatic one's Tick too); the saves
+  and loads of the variants' slots, the full AI's own (0x005d25b0 / 0x005d28b0: no variant uses them) and the root's
+  (0x005d2000 / 0x005d21d0); the full AI's Reset, Detach and Tick; the remote's and the player's Attach, Detach, Reset,
+  FrameUpdate (each game role), Tick, OnNetState (the remote moves the frame: compared), save and load; the root's
+  Attach; the player's OnNetControl, ResetState and MouseLook (zero and one-count moves, the pitch's limits); 400
+  destructors.
+- **Results:** 171,927 checks for the file (parts 37a-c), 0 failures, 30 s; lines: 1,087 of 1,090 (the rest:
+  TestSight's no-target fix, 2 lines, and mode 3's print, which no variant reaches).
+- **Port fixes:**
+  - The scripted tracker's load returns false without the bark timer's chunk (none next, or another one, which is
+    skipped), as the original; the port returned true (C_MeleeTracker::LoadGame passes the result on).
+  - MouseLook: the arctangents, sines and cosines wide and each stored result rounded once, as the original's x87 code
+    (the port rounded every step to float: the facing differed in its last bits).
+- **Not tested:** the destructors' effect on the object (the compiler drops the port destructor's stores into the
+  dying object: both sides' destructors run, nothing else is compared); a bark timer's sub-chunk shorter than 4 bytes
+  (the original then stores a stale stack word: the game never writes one).
+- **Mutations** (`human/mutations/mutate_mtai3.py`): 252 mutants (205 generated, 47 for repeated lines); 46 not
+  building; 179 of 206 killed; the survivors are equivalent (21: array sizes, the load loops' size tests, a unit row
+  normalised, the dedicated server's branch, MouseLook's moot second clamp), ties at the pitch limits (2), not compared
+  (2: the destructor's stores, the loaded waypoints' w) and the two variants' mode numbers, which only their callers
+  read (2).
+- **Harness lessons (my mistakes):** I compared the frame's position after the player's OnNetState, which does not move
+  it; my random paths' checkpoints (up to 300) crashed the load, which reads the checkpoint unchecked; the destructor
+  test compared the object after the port's destructor (its stores are dead to the compiler); 5,000 saves made the test
+  73 s (file creation is slow here: fewer saves, 30 s); the load test compared only the next chunk's id, which a missed
+  Ascend does not change (the depth and position now); a bash heredoc again turned "\n" into line breaks.

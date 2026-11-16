@@ -1543,18 +1543,21 @@ bool C_MeleeTrackerScriptedAI::LoadGame(C_chunk &chunk) // 0x005d2fc0
 {
     if (!C_MeleeTrackerController::LoadGame(chunk))
         return false;
+    // The bark timer's chunk next: false without it (another chunk is skipped), as the original.
     uint16_t id;
-    if (chunk.Descend(id)) {
-        if (id == 0x2054) {
-            uint16_t sub;
-            while (chunk.RemainingSize() > 0 && chunk.Descend(sub)) {
-                if (sub == 0)
-                    chunk.Read(m_barkTimer);
-                chunk.Ascend();
-            }
-        }
+    if (!chunk.Descend(id))
+        return false;
+    if (id != 0x2054) {
+        chunk.Ascend();
+        return false;
+    }
+    uint16_t sub;
+    while (chunk.RemainingSize() > 0 && chunk.Descend(sub)) {
+        if (sub == 0)
+            chunk.Read(m_barkTimer);
         chunk.Ascend();
     }
+    chunk.Ascend();
     return true;
 }
 
@@ -1820,12 +1823,15 @@ void C_MeleeTrackerPlayerControl::MouseLook(int dx, int dy)   // 0x005cf1b0
     if (dx == 0 && dy == 0)
         return;
     constexpr float RADIANS_PER_COUNT = 0.0062831854f;  // 2 pi per 1000 mouse counts
-    float length = std::sqrt(m_facing.x * m_facing.x + m_facing.z * m_facing.z);   // flat
-    float yaw = std::atan2(-m_facing.x, m_facing.z);
+    // (As the original's x87 code: the arctangents, sines and cosines wide, each stored result rounded once.)
+    const float flat = std::sqrt(m_facing.x * m_facing.x + m_facing.z * m_facing.z);
+    double length = flat;
+    float yaw = static_cast<float>(std::atan2(static_cast<double>(-m_facing.x), static_cast<double>(m_facing.z)));
     if (dx != 0)
         yaw -= static_cast<float>(dx) * RADIANS_PER_COUNT;
     if (dy != 0) {
-        float pitch = std::atan2(m_facing.y, length) - static_cast<float>(dy) * RADIANS_PER_COUNT;
+        float pitch = static_cast<float>(std::atan2(static_cast<double>(m_facing.y), static_cast<double>(flat)) -
+                                         static_cast<double>(static_cast<float>(dy) * RADIANS_PER_COUNT));
         if (pitch > 1.0471976f)
             pitch = 1.0471976f;
         else if (pitch < -1.0471976f)
@@ -1835,10 +1841,10 @@ void C_MeleeTrackerPlayerControl::MouseLook(int dx, int dy)   // 0x005cf1b0
             pitch = 1.5676548f;
         if (pitch < -1.5676548f)
             pitch = -1.5676548f;
-        m_facing.y = std::sin(pitch);
-        length = std::cos(pitch);
+        m_facing.y = static_cast<float>(std::sin(static_cast<double>(pitch)));
+        length = std::cos(static_cast<double>(pitch));
     }
-    m_facing.x = -(std::sin(yaw) * length);
-    m_facing.z = std::cos(yaw) * length;
+    m_facing.x = static_cast<float>(-(std::sin(static_cast<double>(yaw)) * length));
+    m_facing.z = static_cast<float>(std::cos(static_cast<double>(yaw)) * length);
     MeleeTrackerMovement(m_meleeTracker)->SetFacing(&m_facing.x);
 }

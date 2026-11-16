@@ -60,13 +60,36 @@ int MeleeTrackerAnimClass(int group)
 void MeleeTrackerBarkTurn(C_MeleeTracker *meleeTracker) { Log(meleeTracker, "MeleeTrackerBarkTurn"); }
 uint64_t MicrosecondsNow() { return g_mt.now; }
 void ReleaseMeleeTrackerSighting(S_MeleeTrackerSighting *) {}   // (silent: the original puts it in its pool inline)
-bool __fastcall WriteControlState(C_NetMessage *, const float *pos, const float *velocity, const float *dir, const void *,
-                                  uint32_t bits)
+// The control state a message carries (ReadControlState's answer on both sides; part 37c).
+struct S_MtNetState {
+    float pos[4], velocity[4], dir[4];
+    uint8_t unused[0x10];
+    uint32_t bits;
+} g_mtNet;
+void ReadMtNetState(float *pos, float *velocity, float *dir, void *unused, uint32_t *bits)
 {
-    Log(nullptr, "WriteControlState", {pos[0], pos[1], pos[2], velocity[0], velocity[1], velocity[2], dir[0], dir[1], dir[2], double(bits)});
+    Log(nullptr, "ReadControlState");
+    std::memcpy(pos, g_mtNet.pos, 16);
+    std::memcpy(velocity, g_mtNet.velocity, 16);
+    std::memcpy(dir, g_mtNet.dir, 16);
+    std::memcpy(unused, g_mtNet.unused, 0x10);
+    *bits = g_mtNet.bits;
+}
+// (The velocity and the unused bytes not logged: the original's player sends stack words there, the port zeros, its fix.)
+void LogMtControlState(const float *pos, const float *dir, uint32_t bits)
+{
+    Log(nullptr, "WriteControlState", {pos[0], pos[1], pos[2], pos[3], dir[0], dir[1], dir[2], dir[3], double(bits)});
+}
+bool __fastcall WriteControlState(C_NetMessage *, const float *pos, const float *, const float *dir, const void *, uint32_t bits)
+{
+    LogMtControlState(pos, dir, bits);
     return true;
 }
-bool __fastcall ReadControlState(C_NetMessage *, float *, float *, float *, void *, uint32_t *) { AiUnexpected(__PRETTY_FUNCTION__); }
+bool __fastcall ReadControlState(C_NetMessage *, float *pos, float *velocity, float *dir, void *unused, uint32_t *bits)
+{
+    ReadMtNetState(pos, velocity, dir, unused, bits);
+    return true;
+}
 bool C_MeleeTrackerAI::RouteAroundCars()
 {
     Log(this, "RouteAroundCars");
@@ -113,6 +136,16 @@ int MT OM_RouteAroundCars(void *self)
 {
     Log(self, "RouteAroundCars");
     return g_mt.route;
+}
+int __fastcall OM_WriteControlState(void *, const float *pos, const float *, const float *dir, const void *, uint32_t bits)
+{
+    LogMtControlState(pos, dir, bits);
+    return 1;
+}
+int __fastcall OM_ReadControlState(void *, float *pos, float *velocity, float *dir, void *unused, uint32_t *bits)
+{
+    ReadMtNetState(pos, velocity, dir, unused, bits);
+    return 1;
 }
 void *__cdecl OM_New(size_t size) { return std::malloc(size); }
 void __cdecl OM_Delete(void *p) { std::free(p); }
@@ -1223,6 +1256,569 @@ void TestMtB()
     }
 }
 
+// ---- part 37c: the scripted tracker's idle bark, the saved games, the remote and the player's controllers, the
+// destructors and the full AI's own slots.
+//
+// The remote (vtable 0x008121e0, 0x270 bytes) and the player's control (0x00812340, 0x4B0 bytes): each side's copy the
+// same bytes (the tracker and the owner mapped; the weights' pointers into the copy's own buffers rebased, the test
+// arrays the original's copies). The idle bark's sound comes from the tracker frame's "d" child (the mouth); _rand is
+// the same rand() on both sides (part 33's), seeded alike. The saved games: each side's into a file (the port's C_chunk
+// on both sides), the files compared; the loads from those and from hand-made files; the actors by id the humans and
+// part 34's actors (GetActor: each side's own).
+C_MeleeTrackerRemote *g_pMtR;
+C_MeleeTrackerPlayerControl *g_pMtP;
+uint8_t *g_oMtR, *g_oMtP;
+C_MeleeTrackerController *g_pCtl;                       // the pair under test
+uint8_t *g_oCtl;
+size_t g_ctlSize;
+I3D_frame *g_mtMouth;
+
+void CtlToOrig(const C_MeleeTrackerController *pc, uint8_t *oc, size_t size)
+{
+    const auto *pb = reinterpret_cast<const uint8_t *>(pc);
+    std::memcpy(oc + 4, pb + 4, size - 4);
+    for (size_t at : {size_t(0x10), size_t(0x18)}) {
+        void *p;
+        std::memcpy(&p, pb + at, 4);
+        p = p ? ToOrig(p) : nullptr;
+        std::memcpy(oc + at, &p, 4);
+    }
+    for (int k = 0; k < 2; ++k) {
+        float *p = k ? pc->m_actionB : pc->m_actionA;
+        const auto *pp = reinterpret_cast<const uint8_t *>(p);
+        uint8_t *o = nullptr;
+        if (pp >= pb && pp < pb + size) {
+            o = oc + (pp - pb);
+        } else if (p) {
+            float *copy = p == g_mtTestActionA ? g_mtOrigTestActionA : g_mtOrigTestActionB;
+            std::memcpy(copy, p, 0x40 * 4);
+            o = reinterpret_cast<uint8_t *>(copy);
+        }
+        std::memcpy(oc + (k ? 0x64 : 0x60), &o, 4);
+    }
+}
+std::string CtlDiffers(const C_MeleeTrackerController *pc, const uint8_t *oc, size_t size)
+{
+    const auto *pb = reinterpret_cast<const uint8_t *>(pc);
+    for (size_t at = 4; at < size; at += 4) {
+        uint32_t a, b;
+        std::memcpy(&a, pb + at, 4);
+        std::memcpy(&b, oc + at, 4);
+        if (at == 0x10 || at == 0x18) {
+            void *p = reinterpret_cast<void *>(static_cast<uintptr_t>(a));
+            a = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(p ? ToOrig(p) : nullptr));
+        } else if (at == 0x60 || at == 0x64) {
+            const auto *p = reinterpret_cast<const uint8_t *>(static_cast<uintptr_t>(a));
+            const auto *o = reinterpret_cast<const uint8_t *>(static_cast<uintptr_t>(b));
+            const bool pOwn = p >= pb && p < pb + size, oOwn = o >= oc && o < oc + size;
+            if (pOwn || oOwn) {
+                if (!pOwn || !oOwn || p - pb != o - oc)
+                    return "weights " + std::to_string(at) + " (where)";
+                continue;
+            }
+            if ((p != nullptr) != (o != nullptr))
+                return "weights " + std::to_string(at) + " (null on one side)";
+            if (p && std::memcmp(p, o, 0x40 * 4) != 0)
+                return "weights " + std::to_string(at);
+            continue;
+        }
+        if (a != b)
+            return "controller+" + std::to_string(at);
+    }
+    return "";
+}
+// A call on the remote / player pair (the source controller converted too). `staleW`: the w words the original fills
+// from stack words (Apply's accumulator; a load's three vectors): the port's.
+template <class P, class O> void CtlCall(const char *what, bool staleW, P port, O original)
+{
+    MtTrackerToOrig();
+    MtToOrig(g_pMtSrc, g_oMtSrc, 0xC0);
+    CtlToOrig(g_pCtl, g_oCtl, g_ctlSize);
+    DiffCall(what, port,
+             [&](void *o) {
+                 const int r = original(o);
+                 const auto *pc = reinterpret_cast<const uint8_t *>(g_pCtl);
+                 std::memcpy(g_oCtl + 0x3C, pc + 0x3C, 4);
+                 if (staleW) {
+                     std::memcpy(g_oCtl + 0x4C, pc + 0x4C, 4);
+                     std::memcpy(g_oCtl + 0x5C, pc + 0x5C, 4);
+                 }
+                 return r;
+             });
+    std::string why = CtlDiffers(g_pCtl, g_oCtl, g_ctlSize);
+    if (why.empty())
+        why = MtDiffers(g_pMtSrc, g_oMtSrc, 0xC0);
+    if (why.empty())
+        why = MtTrackerDiffers();
+    CHECK(why.empty());
+    static std::map<std::string, int> shown;
+    if (!why.empty() && shown[what]++ < 3)
+        std::printf("  %s: %s\n", what, why.c_str());
+}
+template <class R, class... A> R OMtCtl(uint32_t at, A... a)
+{
+    using F = R(MT *)(void *, A...);
+    return OriginalAt<F>(at)(static_cast<void *>(g_oCtl), a...);
+}
+template <class R, class... A> R OMtCtlV(size_t slot, A... a)
+{
+    using F = R(MT *)(void *, A...);
+    void **vt = *reinterpret_cast<void ***>(g_oCtl);
+    return reinterpret_cast<F>(vt[slot / 4])(static_cast<void *>(g_oCtl), a...);
+}
+
+// The actors by id (GetActor's answers: the humans, part 34's actors, the tracker).
+C_Actor *MtActorById(int id, bool original)
+{
+    std::vector<C_Actor *> all = {g_h.human, PortOther(), PortThird(), PortMtActor()};
+    for (int k = 0; k < ACTOR_KIND_COUNT; ++k)
+        all.push_back(static_cast<C_Actor *>(PortActor(k)));
+    for (C_Actor *a : all)
+        if (a && a->m_netId == id)
+            return original ? static_cast<C_Actor *>(ToOrig(a)) : a;
+    return nullptr;
+}
+int MtActorId()
+{
+    if (P(0.2f))
+        return P(0.5f) ? -1 : I(0, 1000);
+    const C_Actor *a = P(0.5f) ? static_cast<C_Actor *>(P(0.5f) ? g_h.human : PortOther()) : static_cast<C_Actor *>(PortActor(I(0, ACTOR_KIND_COUNT - 1)));
+    return a->m_netId;
+}
+void *MT OM_GetActorMt(void *self, int index)
+{
+    Log(self, "GetActor", {double(index)});
+    return MtActorById(index, true);
+}
+
+void SetUpMeleeTrackerC()
+{
+    RedirectOriginal(0x005ac5f0, FAKE(OM_WriteControlState));
+    RedirectOriginal(0x005ac660, FAKE(OM_ReadControlState));
+    RedirectOriginal(0x00475570, FAKE(OS_CreateActorMessageEx));
+    RedirectOriginal(0x004755b0, FAKE(OS_SendActorMessage));
+    RedirectOriginal(0x00475dd0, FAKE(OM_GetActorMt));
+    g_actorByIndex = MtActorById;
+    S_quat none;
+    none.Identity();
+    g_mtMouth = NewFrame(FRAME_DUMMY, "d", S_vector(0, 0.1f, 0.35f), none, Box(S_vector(0.05f, 0.05f, 0.05f)), "", g_asMeleeBody);
+    g_pMtR = new C_MeleeTrackerRemote;
+    g_pMtP = new C_MeleeTrackerPlayerControl;
+    g_oMtR = static_cast<uint8_t *>(OC_AlignedNew(0x270, 16));
+    g_oMtP = static_cast<uint8_t *>(OC_AlignedNew(0x4B0, 16));
+    const uint32_t vtR = 0x008121e0, vtP = 0x00812340;
+    std::memcpy(g_oMtR, &vtR, 4);
+    std::memcpy(g_oMtP, &vtP, 4);
+    g_names[g_pMtR] = g_names[g_oMtR] = "mtRemote";
+    g_names[g_pMtP] = g_names[g_oMtP] = "mtPlayer";
+    g_extraPointers.push_back({g_pMtR, g_oMtR});
+    g_extraPointers.push_back({g_pMtP, g_oMtP});
+}
+
+// A remote's / player's state at random: the root's fields, the buffers, the weights' pointers (none, the copy's own
+// buffers, the test arrays).
+void RandomMtCtl(bool player)
+{
+    g_pCtl = player ? static_cast<C_MeleeTrackerController *>(g_pMtP) : static_cast<C_MeleeTrackerController *>(g_pMtR);
+    g_oCtl = player ? g_oMtP : g_oMtR;
+    g_ctlSize = player ? 0x4B0 : 0x270;
+    C_MeleeTrackerController *c = g_pCtl;
+    C_Human *const humans[3] = {g_h.human, PortOther(), PortThird()};
+    c->m_meleeTracker = PortMt();
+    c->m_owner = P(0.4f) ? nullptr : P(0.7f) ? static_cast<C_Actor *>(humans[I(0, 2)]) : static_cast<C_Actor *>(PortActor(I(0, ACTOR_KIND_COUNT - 1)));
+    c->m_alarm = P(0.5f) ? 0 : I(1, 0x40);
+    c->m_flags = (uint32_t(std::rand()) << 17) ^ uint32_t(std::rand());
+    c->m_savedPos = MtPos();
+    c->m_facing = {MtValue(), MtValue(), MtValue(), MtValue()};
+    c->m_050 = MtPos();
+    c->m_068 = I(0, 50);
+    auto *b = reinterpret_cast<uint8_t *>(c);
+    for (size_t at = 0x70; at < g_ctlSize; at += 4) {
+        const float v = MtValue();
+        std::memcpy(b + at, &v, 4);
+    }
+    auto pick = [&](size_t own, float *test) {
+        const float r = U(0, 1);
+        return r < 0.25f ? nullptr : r < 0.65f ? reinterpret_cast<float *>(b + own) : test;
+    };
+    c->m_actionA = pick(0x70, g_mtTestActionA);
+    c->m_actionB = pick(0x170, g_mtTestActionB);
+    static const uint32_t roles[] = {GAME_ROLE_LOCAL, GAME_ROLE_SERVER, GAME_ROLE_CLIENT};
+    g_gameRole = roles[I(0, 2)];
+    for (float &v : g_mtNet.pos)
+        v = U(-30, 30);
+    for (float &v : g_mtNet.velocity)
+        v = MtValue();
+    for (float &v : g_mtNet.dir)
+        v = MtValue();
+    for (uint8_t &v : g_mtNet.unused)
+        v = uint8_t(I(0, 255));
+    g_mtNet.bits = (uint32_t(std::rand()) << 17) ^ uint32_t(std::rand());
+    g_mt.camera78 = P(0.15f);
+}
+
+// The hand-made chunks: the root's (0x22b8), the full AI's (0x2249), the scripted's bark timer (0x2054); their
+// sub-chunks a random subset in a random order, now and then an unknown one; now and then another chunk id.
+template <class T> void MtShuffled(std::vector<T> &v)
+{
+    for (size_t k = v.size(); k > 1; --k)
+        std::swap(v[k - 1], v[size_t(I(0, int(k) - 1))]);
+    v.resize(size_t(I(0, int(v.size()))));
+}
+void MtVector3(C_chunk &c, uint16_t id)
+{
+    const float v[3] = {U(-30, 30), U(-30, 30), U(-30, 30)};
+    c.WriteChunk(id, v, 0xc);
+}
+void HandMadeRootChunk(C_chunk &c)
+{
+    c.Begin(P(0.1f) ? uint16_t(I(1, 0x2000)) : uint16_t(0x22b8));
+    std::vector<int> subs = {0, 1, 2, 3, 4, 5, 6};
+    MtShuffled(subs);
+    for (int sub : subs) {
+        switch (sub) {
+        case 0: c.WriteChunk(0, MtActorId()); break;
+        case 1: c.WriteChunk(1, I(0, 0x40)); break;
+        case 2: c.WriteChunk(2, (uint32_t(std::rand()) << 17) ^ uint32_t(std::rand())); break;
+        case 3: case 4: case 5: MtVector3(c, uint16_t(sub)); break;
+        default: c.WriteChunk(uint16_t(I(6, 40)), I(0, 1000)); break;
+        }
+    }
+    c.Ascend();
+}
+void HandMadeAiChunk(C_chunk &c)
+{
+    c.Begin(P(0.1f) ? uint16_t(I(1, 0x2000)) : uint16_t(0x2249));
+    std::vector<int> subs = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    MtShuffled(subs);
+    for (int sub : subs) {
+        switch (sub) {
+        case 0: case 5: case 6: case 8: c.WriteChunk(uint16_t(sub), I(-500, 2000)); break;
+        case 1: case 2: c.WriteChunk(uint16_t(sub), MtActorId()); break;
+        case 3: case 4: MtVector3(c, uint16_t(sub)); break;
+        case 7: c.WriteChunk(7, P(0.5f) ? 0 : I(1, 3)); break;
+        case 9: {
+            // (Known checkpoints: both sides read the checkpoint unchecked.)
+            c.Begin(9);
+            for (int k = 0, n = I(0, 6); k < n; ++k)
+                c.WriteChunk(uint16_t(k), I(0, 7));
+            c.Ascend();
+            break;
+        }
+        default: c.WriteChunk(uint16_t(I(10, 40)), I(0, 1000)); break;
+        }
+    }
+    c.Ascend();
+}
+void HandMadeBarkChunk(C_chunk &c)
+{
+    c.Begin(P(0.1f) ? uint16_t(I(1, 0x2000)) : uint16_t(0x2054));
+    if (P(0.8f))
+        c.WriteChunk(0, I(-1, 30000));
+    if (P(0.2f))
+        c.WriteChunk(uint16_t(I(1, 9)), I(0, 1000));
+    c.Ascend();
+}
+
+// One save and load of the pair under test (`ai`: the AI pair, else the remote / player). `kind`: the variant's slots,
+// the full AI's own (0x005d25b0 / 0x005d28b0), the root's (0x005d2000 / 0x005d21d0).
+void MtSaveLoad(bool ai, int kind)
+{
+    const std::string portFile = AiTempFile("_mtport.sav"), origFile = AiTempFile("_mtorig.sav");
+    std::remove(portFile.c_str());
+    std::remove(origFile.c_str());
+    C_MeleeTrackerAI *a = g_pMt;
+    C_MeleeTrackerController *c = ai ? static_cast<C_MeleeTrackerController *>(g_pMt) : g_pCtl;
+    auto portSave = [&](C_chunk &ch) -> bool {
+        if (kind == 0)
+            return c->SaveGame(ch);
+        if (kind == 1)
+            return a->C_MeleeTrackerAI::SaveGame(ch);
+        return c->C_MeleeTrackerController::SaveGame(ch);
+    };
+    auto origSave = [&](C_chunk &ch) -> uint32_t {
+        if (!ai)
+            return OMtCtlV<uint32_t>(0x64, &ch);
+        if (kind == 0)
+            return OMtV<uint32_t>(0x64, &ch);
+        return OMt<uint32_t>(kind == 1 ? 0x005d25b0 : 0x005d2000, &ch);
+    };
+    // (Now and then into a closed chunk: nothing written.)
+    const bool closedSave = P(0.03f);
+    auto save = [&](const std::string &file, bool orig) {
+        C_chunk ch;
+        if (closedSave)
+            return orig ? int(origSave(ch) & 0xFF) : int(portSave(ch));
+        ch.Open(file.c_str(), true);
+        ch.Begin(0x7777);
+        const int r = orig ? int(origSave(ch) & 0xFF) : int(portSave(ch));
+        ch.Ascend();
+        ch.Begin(0x0BD1);
+        ch.Ascend();
+        return r;
+    };
+    if (ai)
+        MtCallB("SaveGame", [&] { return save(portFile, false); }, [&](void *) { return save(origFile, true); });
+    else
+        CtlCall("SaveGame", false, [&] { return save(portFile, false); }, [&](void *) { return save(origFile, true); });
+    const bool same = AiFileBytes(portFile) == AiFileBytes(origFile);
+    CHECK(same);
+    static int shown;
+    if (!same && shown++ < 3)
+        std::printf("  SaveGame (kind %d): the files differ\n", kind);
+    // The load: the saved file, or a hand-made one (now and then a closed chunk).
+    if (P(0.5f)) {
+        C_chunk ch;
+        ch.Open(portFile.c_str(), true);
+        ch.Begin(0x7777);
+        if (kind == 1)
+            HandMadeAiChunk(ch);
+        else
+            HandMadeRootChunk(ch);
+        if (kind == 0 && ai && g_mtSize == 0xD0 && P(0.8f))
+            HandMadeBarkChunk(ch);
+        ch.Ascend();
+        ch.Begin(0x0BD1);
+        ch.Ascend();
+    }
+    const bool closed = P(0.03f);
+    // A new state to load over.
+    if (ai) {
+        RandomMtController(g_pMt, true);
+        if (g_mtSize == 0xD0)
+            g_pMtS->m_barkTimer = P(0.3f) ? -1 : I(0, 25000);
+    } else {
+        RandomMtCtl(g_pCtl == g_pMtP);
+    }
+    int nextPort = 0, nextOrig = 0;
+    auto load = [&](bool orig) {
+        C_chunk ch;
+        if (!closed) {
+            ch.Open(portFile.c_str(), false);
+            uint16_t id;
+            ch.Descend(id);
+        }
+        int r;
+        if (orig) {
+            if (!ai)
+                r = int(OMtCtlV<uint32_t>(0x68, &ch) & 0xFF);
+            else if (kind == 0)
+                r = int(OMtV<uint32_t>(0x68, &ch) & 0xFF);
+            else
+                r = int(OMt<uint32_t>(kind == 1 ? 0x005d28b0 : 0x005d21d0, &ch) & 0xFF);
+        } else {
+            r = int(kind == 0 ? c->LoadGame(ch) : kind == 1 ? a->C_MeleeTrackerAI::LoadGame(ch) : c->C_MeleeTrackerController::LoadGame(ch));
+        }
+        if (closed)
+            return r;
+        // (Where the load left the chunk: its depth (+0x410) and position, then the next chunk after its own.)
+        int depth;
+        std::memcpy(&depth, reinterpret_cast<const uint8_t *>(&ch) + 0x410, 4);
+        const int at = ch.GetPosition();
+        ch.Ascend();
+        (orig ? nextOrig : nextPort) = AiNextChunk(ch);
+        return r * 0x400000 + depth * 0x10000 + (at & 0xFFFF);
+    };
+    static const char *const loads[] = {"LoadGame (auto)", "LoadGame (scripted)", "LoadGame (AI's own)", "LoadGame (root's)"};
+    const char *what = loads[kind == 0 ? (ai && g_mtSize == 0xD0 ? 1 : 0) : kind + 1];
+    if (ai)
+        MtCallB(what, [&] { return load(false); }, [&](void *) { return load(true); });
+    else
+        CtlCall("LoadGame (remote, player)", true, [&] { return load(false); }, [&](void *) { return load(true); });
+    CHECK(nextPort == nextOrig);
+    static int shownNext;
+    if (nextPort != nextOrig && shownNext++ < 3)
+        std::printf("  %s: the next chunk %d / %d\n", what, nextPort, nextOrig);
+    std::remove(portFile.c_str());
+    std::remove(origFile.c_str());
+}
+
+void TestMtC()
+{
+    std::printf("melee tracker ai: the idle bark, saves, the remote and the player's control\n");
+    for (int i = 0; i < 14000 / QUICK; ++i) {
+        RandomMtB();
+        C_MeleeTrackerAI *c = g_pMt;
+        const bool scripted = g_mtSize == 0xD0;
+        PortMtActor()->m_frame = g_asMeleeFrame;
+        const int which = I(0, 21);
+        if (which <= 1) {
+            // The scripted tracker's Tick with its idle bark due now and then (the AI pair otherwise: its own Tick).
+            const int dt = I(0, 200);
+            if (scripted)
+                g_pMtS->m_barkTimer = P(0.2f) ? -1 : I(0, 2 * dt + 5);
+            const unsigned seed = unsigned(I(1, 1 << 30));
+            MtCallB(scripted ? "Tick (bark)" : "Tick (auto)",
+                    [&] {
+                        std::srand(seed);
+                        c->Tick(dt);
+                        if (c->m_actionA != g_mtTestActionA && c->m_actionA) {
+                            g_mtPortActionA = c->m_actionA;
+                            g_mtPortActionB = c->m_actionB;
+                        }
+                        return 0;
+                    },
+                    [&](void *) {
+                        std::srand(seed);
+                        OMtV<void>(0x18, dt);
+                        return 0;
+                    });
+            std::srand(seed + 1);
+        } else if (which <= 2) {
+            // (The path's checkpoints known ones: a load reads them unchecked.)
+            for (S_AIWaypoint **w = c->m_pathBegin; w && w != c->m_pathEnd; ++w)
+                (*w)->checkpoint = I(0, 7);
+            MtSaveLoad(true, I(0, 2));
+        } else if (which <= 5) {
+            // The full AI's own slots (its variants override them): Reset, Detach, Tick.
+            const int k = I(0, 2), dt = I(0, 200);
+            if (k == 0)
+                MtCallB("AI Reset", [&] { c->C_MeleeTrackerAI::Reset(); return 0; }, [&](void *) { OMt<void>(0x005cb0d0); return 0; });
+            else if (k == 1)
+                MtCallB("AI Detach", [&] { return int(c->C_MeleeTrackerAI::Detach()); },
+                        [&](void *) { return int(OMt<uint32_t>(0x005cb410) & 0xFF); });
+            else
+                MtCallB("AI Tick",
+                        [&] {
+                            c->C_MeleeTrackerAI::Tick(dt);
+                            if (c->m_actionA != g_mtTestActionA && c->m_actionA) {
+                                g_mtPortActionA = c->m_actionA;
+                                g_mtPortActionB = c->m_actionB;
+                            }
+                            return 0;
+                        },
+                        [&](void *) { OMt<void>(0x005ce190, dt); return 0; });
+        } else {
+            const bool player = which >= 13;
+            RandomMtCtl(player);
+            C_MeleeTrackerController *p = g_pCtl;
+            switch (I(0, player ? 10 : 7)) {
+            case 0:
+                p->m_meleeTracker = nullptr;
+                CtlCall("Ctl Attach", false, [&] { return int(p->Attach(PortMt())); },
+                        [&](void *) { return int(OMtCtlV<uint32_t>(0x00, static_cast<void *>(g_mtOrigBytes)) & 0xFF); });
+                break;
+            case 1:
+                CtlCall("Ctl Detach", false, [&] { return int(p->Detach()); }, [&](void *) { return int(OMtCtlV<uint32_t>(0x0C) & 0xFF); });
+                break;
+            case 2:
+                CtlCall("Ctl Reset", false, [&] { p->Reset(); return 0; }, [&](void *) { OMtCtlV<void>(0x04); return 0; });
+                break;
+            case 3: {
+                const int ms = I(0, 100);
+                CtlCall("Ctl FrameUpdate", false, [&] { p->FrameUpdate(ms); return 0; }, [&](void *) { OMtCtlV<void>(0x14, ms); return 0; });
+                break;
+            }
+            case 4: {
+                const int dt = I(0, 200);
+                CtlCall("Ctl Tick", false, [&] { p->Tick(dt); return 0; }, [&](void *) { OMtCtlV<void>(0x18, dt); return 0; });
+                break;
+            }
+            case 5: {
+                // (The remote moves the tracker's frame: where it is after each side's call, compared.)
+                I3D_frame *frame = PortMt()->GetFrame();
+                S_vector portAt, origAt;
+                CtlCall("Ctl OnNetState", false,
+                        [&] {
+                            p->OnNetState(nullptr);
+                            portAt = frame->GetPos();
+                            return 0;
+                        },
+                        [&](void *) {
+                            frame->SetPosInline(S_vector(-77, -77, -77));
+                            OMtCtlV<void>(0x58, static_cast<void *>(nullptr));
+                            origAt = frame->GetPos();
+                            return 0;
+                        });
+                if (player)
+                    break;   // (the player's keeps the state: the frame does not move)
+                const bool same = std::memcmp(&portAt, &origAt, 12) == 0;
+                CHECK(same);
+                static int shownAt;
+                if (!same && shownAt++ < 3)
+                    std::printf("  OnNetState: the frame's position\n");
+                break;
+            }
+            case 6:
+                // (Now and then: the files are slow to make.)
+                if (P(0.3f))
+                    MtSaveLoad(false, 0);
+                break;
+            case 7:
+                // The root's Attach (no variant keeps it): the remote's copy.
+                p->m_meleeTracker = nullptr;
+                CtlCall("Root Attach", false, [&] { return int(p->C_MeleeTrackerController::Attach(PortMt())); },
+                        [&](void *) { return int(OMtCtl<uint32_t>(0x005ce630, static_cast<void *>(g_mtOrigBytes)) & 0xFF); });
+                break;
+            case 8:
+                CtlCall("Player OnNetControl", false, [&] { p->OnNetControl(nullptr); return 0; },
+                        [&](void *) { OMtCtlV<void>(0x5C, static_cast<void *>(nullptr)); return 0; });
+                break;
+            case 9:
+                CtlCall("Player ResetState", false, [&] { p->ResetState(g_pMtSrc); return 0; },
+                        [&](void *) { OMtCtlV<void>(0x10, static_cast<void *>(g_oMtSrc)); return 0; });
+                break;
+            default: {
+                // (Now and then far: the pitch's limits.)
+                auto small = [] { return P(0.5f) ? 0 : P(0.5f) ? 1 : -1; };
+                const int dx = P(0.35f) ? small() : I(-300, 300), dy = P(0.35f) ? small() : P(0.3f) ? I(-600, 600) : I(-100, 100);
+                CtlCall("Player MouseLook", false, [&] { g_pMtP->MouseLook(dx, dy); return 0; },
+                        [&](void *) { OMtCtl<void>(0x005cf1b0, dx, dy); return 0; });
+                break;
+            }
+            }
+        }
+    }
+}
+
+// The destructors: each variant's on a copy (the port's in place, the original's deleting destructor without its delete
+// flag); the AI's path array freed (its waypoints first released, as Detach does). Nothing is logged: both run, the
+// logs (none) compared.
+void TestMtDestructors()
+{
+    std::printf("melee tracker ai: destructors\n");
+    for (int i = 0; i < 400 / QUICK; ++i) {
+        RandomMtB();
+        const int kind = I(0, 3);
+        alignas(16) static uint8_t portBytes[0x4B0], origBytes[0x4B0];
+        std::memset(portBytes, 0, sizeof portBytes);
+        std::memset(origBytes, 0, sizeof origBytes);
+        static const uint32_t vtables[] = {0x00812250, 0x008122c8, 0x008121e0, 0x00812340};
+        static const size_t sizes[] = {0xD0, 0xC0, 0x270, 0x4B0};
+        C_MeleeTrackerController *p;
+        if (kind == 0)
+            p = ::new (portBytes) S_MtScripted;
+        else if (kind == 1)
+            p = ::new (portBytes) S_MtAuto;
+        else if (kind == 2)
+            p = ::new (portBytes) C_MeleeTrackerRemote;
+        else
+            p = ::new (portBytes) C_MeleeTrackerPlayerControl;
+        if (kind < 2) {
+            auto *ai = static_cast<C_MeleeTrackerAI *>(p);
+            RandomMtController(ai, true);
+            for (S_AIWaypoint **w = ai->m_pathBegin; w && w != ai->m_pathEnd; ++w)
+                ReleaseMeleeTrackerWaypoint(*w);
+            ai->m_pathEnd = ai->m_pathBegin;
+            MtToOrig(ai, origBytes, sizes[kind]);
+        }
+        std::memcpy(origBytes, &vtables[kind], 4);
+        DiffCall("Destructor",
+                 [&] {
+                     p->~C_MeleeTrackerController();
+                     return 0;
+                 },
+                 [&](void *) {
+                     typedef void *(MT * T_Dtor)(void *, int);
+                     void **vt = *reinterpret_cast<void ***>(origBytes);
+                     reinterpret_cast<T_Dtor>(vt[0x08 / 4])(origBytes, 0);
+                     return 0;
+                 });
+        // (The object's bytes are not compared afterwards: the compiler drops the port destructor's stores into the dying
+        // object.)
+    }
+}
+
 void TestMeleeTrackerAi()
 {
     SetUpSenses();
@@ -1235,6 +1831,9 @@ void TestMeleeTrackerAi()
     g_visiblePartsOf = AsPartsOf;
     TestMtA();
     TestMtB();
+    SetUpMeleeTrackerC();
+    TestMtC();
+    TestMtDestructors();
     g_humanAnswers = nullptr;
     g_visiblePartsOf = nullptr;
 }
