@@ -27,9 +27,13 @@ S_NetPlayer *g_netPlayerTable = nullptr;                // (net/net_game.cpp's, 
 int g_netPlayerCount = 0;
 
 // ---- the AI's virtuals in other files (ai_senses.cpp, ai_combat.cpp, ai_movement.cpp): logged
+#ifndef HUMAN_AICOMBAT   // (the combat build links game/ai_combat.cpp's)
 bool C_AIController::AdjustAim(S_vector *) { Log(this, "AI.AdjustAim"); return false; }
+#endif
 bool C_AIController::AdjustToPathHeight(S_vector *) { Log(this, "AI.AdjustToPathHeight"); return false; }
+#ifndef HUMAN_AICOMBAT
 int C_AIController::ApplyAlertState() { Log(this, "ApplyAlertState"); return 0; }
+#endif
 bool C_AIController::Unknown5C(float *, float *) { Log(this, "AI.Unknown5C"); return false; }
 #ifndef HUMAN_AISENSES   // (the senses build links game/ai_senses.cpp's)
 void C_AIController::OnBodyHeard(C_Actor *) { Log(this, "AI.OnBodyHeard"); }
@@ -781,7 +785,9 @@ void SetUpAi()
         {0x005ac390, FAKE(OA_SetMovementFlags)},
         {0x005ac2e0, FAKE(OA_GetClimbTarget)},
         {0x0051e6d0, FAKE(OA_GetActorPoints)},
+#ifndef HUMAN_AICOMBAT   // (the combat build tests the real one)
         {0x00575850, FAKE(OA_ApplyAlertState)},
+#endif
         {0x004f2630, FAKE(OA_SetUnknown4f2630)},
         {0x0073e970, FAKE(OA_QueueMessage)},
         {0x007e559c, FAKE(AO_AlignedFree)},

@@ -3003,3 +3003,33 @@ particles and the surface marks. Files are served from memory.
   differences looked like port bugs); the body frame was not turned, so the body's direction was always +z and
   SightDirection's x never mattered; my Python edit scripts' string literals turned the "\n" of two printf lines into
   line breaks (the build failed or the trace broke: fixed by hand).
+
+## Human part 36a (the AI controllers' fighting: timers, aim spread, hit chance, looking, firing, stance, `ai_combat.cpp`, 2026-11-15)
+
+- **The build:** `human/build_aicombat.bat` (HUMAN_AICOMBAT with HUMAN_AISENSES: part 35's build with ai_combat.cpp,
+  `aicombat_test.inc`; part 35's humans, fakes and helpers, its tests not run).
+  - Faked on both sides and logged: IsHumanWithin (ai_movement.cpp's, step 4), the human's CountAmmo, the sight
+    module's CanSee, the body's GetCarryAnimLength. Part 33's fake of the original's ApplyAlertState is left out here.
+  - The AI's controls (part 23's axes and buttons) are kept apart per side and compared (ShareBlock): before, both
+    sides wrote one array that no test compared. The stance and speed class answer per human through part 35's hook.
+  - UpdateLook: the original takes the w of the look direction it clears, and of the direction to a frame it looks at,
+    from stack words no path sets; the facing's, view's and look direction's w (and the controller's copies) are the
+    port's after the call.
+- **The tests:** 24,000 calls: UpdateTimers, ExtendBurst, GetAimSpread, GetHitChance (each human its stance and speed),
+  TurnTowards (on a ladder or not), ApplyAlertState, UpdateLook (frames, directions, the view locked, the look timer),
+  StartFiring, StopFiring (weapons busy, the order's pause), PressReload, SetStance (every stance, carrying, special
+  moves, animation 0x5F, the squad's print), UpdateCheckpointStance (points of every type, near and far).
+- **Results:** 48,003 checks, 0 failures, 13 s; lines: every line of these functions (250 of the file's 452; the
+  firing, aim and grenade are 36b's).
+- **Port fixes:** the sums in the original's orders: TurnTowards on a ladder (z, x, y), GetHitChance's range, UpdateLook's
+  dot with the facing and UpdateCheckpointStance's distance (z, y, x), UpdateLook's look direction (x, y, z); the fire
+  direction's two tests in UpdateFireOrder (x, y, z firing, z, y, x not: one helper had served both). GetAimSpread and
+  GetHitChance ask the stance again for their second test, as the original does (a getter: the calls only).
+- **Mutations** (`human/mutations/mutate_aicombat1.py`): 278 mutants (246 generated, 32 for repeated lines); 10 not
+  building; 243 of 268 killed; the survivors are equivalent (14), ties at exact boundaries (8), a stale w and a chance
+  above 0.95 that five random bonuses would all have to reach.
+- **Harness lessons (my mistakes):** part 23's weapon tests take the AI's controls away (a crash in PressReload); the
+  shared controls were not compared at all; part 33's redirect of ApplyAlertState still stood (the original's side
+  logged a fake); my item time was set on the port's weapon only; the move order's random flags were nearly always
+  busy, so ApplyAlertState rarely got past them; a heredoc script with a Windows path failed (written with Write
+  instead).

@@ -195,6 +195,7 @@ SUITES = [
     # (The network clients' controller of other players' humans, game/remote_controller.cpp: human/build_remote.bat.)
     T("human.remote", "human/build_remote.bat", TMP + r"\human_remote_test.exe", needs=("mingw", "original_exe")),
     T("human.aisenses", "human/build_aisenses.bat", TMP + r"\human_aisenses_test.exe", needs=("mingw", "original_exe")),
+    T("human.aicombat", "human/build_aicombat.bat", TMP + r"\human_aicombat_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

@@ -30,6 +30,8 @@ namespace {
 struct S_HumanAnswers {
     bool unconscious, surrendered;
     S_vector viewDir;
+    bool body = false;                                  // (part 36: stance and speed class too)
+    int stance = 0, speedClass = 0;
 };
 const S_HumanAnswers *(*g_humanAnswers)(const void *human) = nullptr;
 uint32_t (*g_visiblePartsOf)(int target) = nullptr;

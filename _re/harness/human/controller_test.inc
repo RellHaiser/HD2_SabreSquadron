@@ -129,11 +129,15 @@ C_Item *C_Human::FindWireCutter() const
 int C_Human::GetMoveSpeedClass() const
 {
     Log(this, "GetMoveSpeedClass");
+    if (AnswersOf(this) && AnswersOf(this)->body)
+        return AnswersOf(this)->speedClass;
     return g_cs.moveSpeedClass;
 }
 int C_Human::GetStance() const
 {
     Log(this, "GetStance");
+    if (AnswersOf(this) && AnswersOf(this)->body)
+        return AnswersOf(this)->stance;
     return g_cs.stance;
 }
 bool C_Human::IsInPlay() const
@@ -1646,11 +1650,15 @@ uint32_t CT_ OC_IsInPlay(void *self)
 int CT_ OC_GetMoveSpeedClass(void *self)
 {
     Log(self, "GetMoveSpeedClass");
+    if (AnswersOf(self) && AnswersOf(self)->body)
+        return AnswersOf(self)->speedClass;
     return g_cs.moveSpeedClass;
 }
 int CT_ OC_GetStance(void *self)
 {
     Log(self, "GetStance");
+    if (AnswersOf(self) && AnswersOf(self)->body)
+        return AnswersOf(self)->stance;
     return g_cs.stance;
 }
 // The medkit: each side its own object (the slots of Consume and GetCharges are not the same), its charges each side's.

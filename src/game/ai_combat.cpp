@@ -36,9 +36,14 @@ constexpr float THROW_HEIGHT_CROUCHING = 1.1f;
 constexpr float HALF_G = 4.905f;
 
 
-float Xyz4Square(const S_vector4 &v)
+// A vector's squared length summed x, y, z or z, y, x: the original's sites differ.
+float SquareXyz(const S_vector4 &v)
 {
-    return v.z * v.z + v.y * v.y + v.x * v.x;
+    return (v.x * v.x + v.y * v.y) + v.z * v.z;
+}
+float SquareZyx(const S_vector4 &v)
+{
+    return (v.z * v.z + v.y * v.y) + v.x * v.x;
 }
 
 // The weapon's attack time (C_WeaponItem +0x58). (Fix: the original reads it of any item in
@@ -87,17 +92,13 @@ float C_AIController::GetAimSpread()
     // its own, and with some weapons.
     float spread = 1.0f - static_cast<float>(m_human->m_stats[STAT_SHOOTING]) * 0.01f;
     spread = spread + spread;
-    switch (m_human->GetStance()) {
-    case 0:
+    // (The stance asked again for the second test, as the original does.)
+    if (m_human->GetStance() == 0)
         spread = RandFloat() * 0.3f + spread + 0.7f;
-        break;
-    case 1:
+    else if (m_human->GetStance() == 1)
         spread = RandFloat() * 0.6f + spread + 0.3f;
-        break;
-    default:
+    else
         spread = RandFloat() * 0.4f + spread;
-        break;
-    }
     switch (m_human->GetMoveSpeedClass()) {
     case 0:
         spread = RandFloat() * 0.3f + spread + 0.2f;
@@ -248,7 +249,9 @@ int C_AIController::TurnTowards(const S_vector4 &from, const S_vector4 &to)
         reinterpret_cast<S_vector &>(dir) = S_vector(to.x - from.x, 0.0f, to.z - from.z).Normalized();
         return m_facing->SetFacing(dir);
     }
-    reinterpret_cast<S_vector &>(dir) = (XYZ(to) - XYZ(from)).Normalized();
+    S_vector offset = XYZ(to) - XYZ(from);
+    NormalizeBy(offset, (offset.z * offset.z + offset.x * offset.x) + offset.y * offset.y);   // (the original's order)
+    reinterpret_cast<S_vector &>(dir) = offset;
     const int result = m_facing->SetFacing(dir);
     m_facing->SetView(dir);
     return result;
@@ -281,7 +284,7 @@ int C_AIController::UpdateLook(int timeDelta)
 {
     S_AIFacing *facing = m_facing;
     if (!facing->lookAt) {
-        if (Xyz4Square(facing->lookDir) <= 0.1f) {
+        if (SquareXyz(facing->lookDir) <= 0.1f) {
             // Nothing to look at: now and then a look around.
             if (facing->TickLookTimer(timeDelta))
                 LookAround(1);
@@ -312,7 +315,8 @@ int C_AIController::UpdateLook(int timeDelta)
         const S_vector &target = facing->lookAt->GetWorldPos();
         S_vector dir = target - m_human->GetBodyFrame()->GetWorldPos();
         dir.Normalize();
-        if (-0.1f < dir.Dot(XYZ(facing->facing)) || facing->IsViewLocked()) {
+        const S_vector4 &front = facing->facing;
+        if (-0.1f < (dir.z * front.z + dir.y * front.y) + dir.x * front.x || facing->IsViewLocked()) {   // (the original's order)
             LookAroundAt(8, reinterpret_cast<const S_vector4 &>(facing->lookAt->GetMatrix().m[3]));
             facing->SetLookAt(nullptr);
         } else {
@@ -540,7 +544,7 @@ uint32_t C_AIController::UpdateFireOrder(int timeDelta)
     C_Actor *target = order->target;
     uint32_t result;
     if (m_moveFlags & MOVE_FIRING) {
-        if (!target && Xyz4Square(order->fireDir) < 1e-16f) {
+        if (!target && SquareXyz(order->fireDir) < 1e-16f) {
             StopFiring(100);
             m_fireOrder->result = AI_FIRE_NOTHING;
             return AI_FIRE_NOTHING;
@@ -568,7 +572,7 @@ uint32_t C_AIController::UpdateFireOrder(int timeDelta)
         return result;
     }
     if (!target) {
-        if (Xyz4Square(order->fireDir) < 1e-16f) {
+        if (SquareZyx(order->fireDir) < 1e-16f) {
             m_fireOrder->result = AI_FIRE_NOTHING;
             return AI_FIRE_NOTHING;
         }
@@ -601,7 +605,7 @@ void C_AIController::UpdateCheckpointStance()
         ((point->type == CHECKPOINT_TYPE_4 && m_waypoints[0]->type == 4) ||
          (point->type == CHECKPOINT_TYPE_6 && m_waypoints[0]->type == 5))) {
         const S_vector offset = point->pos - m_human->GetFrame()->GetWorldPos();
-        const float square = offset.Square();
+        const float square = (offset.z * offset.z + offset.y * offset.y) + offset.x * offset.x;   // (the original's order)
         if (square < 1e-8f || std::fabs(square - 1.0f) < 1e-8f || std::sqrt(square) < 1.5f) {
             if (m_moveFlags & MOVE_STANDING)
                 return;
@@ -717,25 +721,25 @@ float SpeedPenalty(int speedClass, float fast)
 float C_AIController::GetHitChance(const C_Human *target) const
 {
     float chance = static_cast<float>(m_human->m_stats[STAT_SHOOTING]) * 0.005f;
-    const int targetStance = target->GetStance();
-    if (targetStance == 2)
+    // (The stances asked again for the second test, as the original does.)
+    if (target->GetStance() == 2)
         chance -= RandFloat() * 0.1f;
-    else if (targetStance == 1)
+    else if (target->GetStance() == 1)
         chance -= RandFloat() * 0.05f;
     else
         chance = RandFloat() * 0.1f + chance;
     chance += SpeedPenalty(target->GetMoveSpeedClass(), 0.25f);
 
-    const float range = (target->GetFrame()->GetWorldPos() - m_human->GetFrame()->GetWorldPos()).Magnitude();
+    const S_vector offset = target->GetFrame()->GetWorldPos() - m_human->GetFrame()->GetWorldPos();
+    const float range = MagnitudeBy((offset.z * offset.z + offset.y * offset.y) + offset.x * offset.x);   // (the original's order)
     if (range > 100.0f)
         chance -= 0.1f;
     else if (range != 0.0f)
         chance -= range * 0.001f;
 
-    const int ownStance = m_human->GetStance();
-    if (ownStance == 2)
+    if (m_human->GetStance() == 2)
         chance = RandFloat() * 0.1f + chance;
-    else if (ownStance == 1)
+    else if (m_human->GetStance() == 1)
         chance = RandFloat() * 0.05f + chance;
     chance += SpeedPenalty(m_human->GetMoveSpeedClass(), 0.2f);
 
