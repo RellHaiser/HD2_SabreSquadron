@@ -3033,3 +3033,43 @@ particles and the surface marks. Files are served from memory.
   logged a fake); my item time was set on the port's weapon only; the move order's random flags were nearly always
   busy, so ApplyAlertState rarely got past them; a heredoc script with a Windows path failed (written with Write
   instead).
+
+## Human part 36b (the AI controllers' fighting: the fire order, AdjustAim, ThrowGrenade, `ai_combat.cpp`, 2026-11-15)
+
+- **The build:** part 36a's (`human/build_aicombat.bat`, `aicombat_test.inc`).
+  - Part 23's weapons (each side its copy: time +0x14, attack time +0x58, ready time +0x5C (the port's found through
+    GetReadyTime), flags +0x60) share part 23's definition and component; the component's virtuals sit at other slots
+    on the two sides, so its vtable is each side's own during the call (GetReloadTimeMs: the port's slot, the
+    original's 0x20). The definition's GetAmmoItemId and the AI's line-of-fire test (Unknown114: part 33's test class,
+    the original's slot 0x114) answer the script on both sides and are logged.
+  - After the original's call the facing's and the controller's w words are the port's: the directions the original
+    hands SetView (ThrowGrenade's, GetAimDirTo's, GetDirToFrame's) take their w from stack words it does not set.
+- **The tests:** 24,000 calls: UpdateFiring (rounds or none, reloading, targets the sight module counts or not, zombie
+  and defensive AIs), CheckFireOrder (weapons busy or not ready, pauses, bursts ending, directions or targets, empty
+  weapons without ammo, a client waiting for its weapon's aim, friends, the line of fire, dead targets), CheckReload,
+  UpdateFireOrder (grenades, reload orders, firing or not, no target), AdjustAim (projectile weapons lobbing with the
+  aim's error, others scattered by the spread and the difficulty), ThrowGrenade (standing, crouching, lying).
+- **Results:** 96,005 checks for the file, 0 failures, 26 s; lines: 452 of 452.
+- **Port fixes:**
+  - AdjustAim and ThrowGrenade read the muzzle velocity from the component's field as the original's inline code does
+    (the port called the virtual: another component kind would have answered 0).
+  - AdjustAim's sums and roundings in the original's orders: the side vector's square (z, y, x), the side scaled by the
+    spread before the random offsets, the direction's square (z, y, x), the aim error's z added doubled
+    (tz + (e + e)).
+  - LobDirection: the distance's square (z, y, x), the result's (y, z, x); its angle and cosine wider than a float
+    (the x87's, in double here), the sine of the angle stored as a float, the square's y term the wide sine times the
+    stored one.
+  - NormalizeBy (controller_internal.h) sends a NaN square to the division, as the original's x87 test does (the port's
+    zero-vector rule turned a NaN direction into -1).
+- **Not tested:** a reload ordered with empty hands (the original reads the missing weapon's reload time, a crash the
+  port fixes); fire-order targets other than the tested human and part 23's actors (the copied humans' models have no
+  bones for GetAimPoint).
+- **Mutations** (`human/mutations/mutate_aicombat2.py`): 205 mutants (177 generated, 28 for repeated lines); 10 not
+  building; 181 of 195 killed; the survivors are equivalent (8), ties at exact boundaries (4), a stale w and the
+  client's aim test, weak.
+- **Harness lessons (my mistakes):** part 35b points the weapons' definition at its seat component on every call (the
+  port called through a component without a vtable); the copied humans have no bones (GetAimPoint crashed); part 35b's
+  visible parts could be only the extra bits, where the original's GetAimPoint divides by zero; AdjustAim was asked
+  with empty hands (both sides read them); my reading of a test run cut AdjustAim's single differences off with
+  `head`, so I first took them for fixed; a `sed -i` turned ai_combat.cpp's line ends to LF, which hid the repeated
+  lines from the mutant generator (put back).

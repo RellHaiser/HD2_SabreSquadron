@@ -61,6 +61,7 @@ struct S_AiScript {
     std::vector<uint16_t> ladderPoints;                 // GetActorPoints' answer
     int climbTarget = 0;                                // GetClimbTarget's
     int localId = 3;                                    // the replication's local id
+    bool lineOfFire = false;                            // Unknown114's (part 36b: the original's slot too)
 } g_ai;
 // The net object's contents after each side's call (the original's offsets: send mask +0x38, live +0x3C, forwarding
 // +0x40, the state handlers +0x54 / +0x58 and their context +0x5C, the factory's context +0x60 and the factory +0x64).
@@ -208,10 +209,10 @@ struct S_TestAi : C_AIController {
         LogCommand(this, c);
         return true;
     }
-    bool Unknown114(const S_vector *) override
+    bool Unknown114(const S_vector *dir) override
     {
-        Log(this, "Unknown114");
-        return false;
+        Log(this, "Unknown114", {dir->x, dir->y, dir->z});
+        return g_ai.lineOfFire;
     }
 };
 S_TestAi *g_pa;

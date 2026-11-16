@@ -248,7 +248,8 @@ inline void NormalizeBy(S_vector &v, float square)
 {
     if (std::fabs(square - 1.0f) < 1e-8f)
         return;
-    if (square >= 1e-8f) {
+    // (Not below 1e-8: a NaN square divides too, as the original's x87 test sends it.)
+    if (!(square < 1e-8f)) {
         const float k = 1.0f / std::sqrt(square);
         v.x *= k;
         v.y *= k;

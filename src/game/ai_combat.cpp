@@ -71,14 +71,20 @@ int ReloadTimeOf(const C_Item *item)
 // `from` at `speed` (half of g times the time of flight squared lifts the aim).
 S_vector LobDirection(const S_vector &from, const S_vector &target, float speed)
 {
-    const float distance = (target - from).Magnitude();
+    // (The original's orders: the distance's square z, y, x; the result's y, z, x. Its angle and cosine are the
+    // x87's, wider than a float (computed in double here); the sine is of the angle stored as a float, and the
+    // square's y term multiplies the wide sine by the stored one.)
+    const S_vector d = target - from;
+    const float distance = MagnitudeBy((d.z * d.z + d.y * d.y) + d.x * d.x);
     const float flightTime = distance * 1.1f / speed;
-    S_vector flat(target.x - from.x, 0.0f, target.z - from.z);
+    S_vector flat(d.x, 0.0f, d.z);
     const float flatDistance = flat.Magnitude();
     flat.Normalize();
-    const float angle = std::atan((flightTime * flightTime * HALF_G + (target.y - from.y)) * (1.0f / flatDistance));
-    S_vector dir(flat.x * std::cos(angle), std::sin(angle), flat.z * std::cos(angle));
-    dir.Normalize();
+    const double angle = std::atan(static_cast<double>((flightTime * flightTime * HALF_G + d.y) * (1.0f / flatDistance)));
+    const double cosine = std::cos(angle);
+    const double sine = std::sin(static_cast<double>(static_cast<float>(angle)));
+    S_vector dir(static_cast<float>(flat.x * cosine), static_cast<float>(sine), static_cast<float>(flat.z * cosine));
+    NormalizeBy(dir, (static_cast<float>(sine * dir.y) + dir.z * dir.z) + dir.x * dir.x);
     return dir;
 }
 
@@ -148,19 +154,22 @@ bool C_AIController::AdjustAim(S_vector *dir)
             *dir *= 100.0f;
         }
         S_vector side(dir->y * 0.0f - dir->z, dir->z * 0.0f - dir->x * 0.0f, dir->x - dir->y * 0.0f);
-        side.Normalize();
-        float offset = (RandFloat() - 0.5f) * side.x * spread;
+        // (The original's orders: the side's square z, y, x; the side scaled by the spread before the random
+        // offsets; the direction's square z, y, x.)
+        NormalizeBy(side, (side.z * side.z + side.y * side.y) + side.x * side.x);
+        side *= spread;
+        float offset = (RandFloat() - 0.5f) * side.x;
         dir->x = offset + offset + dir->x;
-        offset = (RandFloat() - 0.5f) * side.y * spread;
+        offset = (RandFloat() - 0.5f) * side.y;
         dir->y = offset + offset + dir->y;
-        offset = (RandFloat() - 0.5f) * side.z * spread;
+        offset = (RandFloat() - 0.5f) * side.z;
         dir->z = offset + offset + dir->z;
-        dir->Normalize();
+        NormalizeBy(*dir, (dir->z * dir->z + dir->y * dir->y) + dir->x * dir->x);
         return true;
     }
     // A projectile weapon lobs at the target, missing by up to 10 m with no shooting skill
     // (the squad aims true).
-    const float speed = static_cast<C_ProjectileWeaponComp *>(component)->GetMuzzleVelocity();
+    const float speed = static_cast<C_ProjectileWeaponComp *>(component)->C_ProjectileWeaponComp::GetMuzzleVelocity();   // (the original reads the field: no virtual call)
     S_vector eye = m_human->GetFrame()->GetWorldPos();
     S_vector target = m_fire.target->GetFrame()->GetWorldPos();
     if (m_type != HUMAN_CONTROLLER_SQUAD) {
@@ -171,7 +180,7 @@ bool C_AIController::AdjustAim(S_vector *dir)
         const float z = (r3 - 0.5f) * error;
         target.x = ((r2 - 0.5f) + (r2 - 0.5f)) * error + target.x;
         target.y = ((r1 - 0.5f) + (r1 - 0.5f)) * error + target.y;
-        target.z = target.z + z + z;
+        target.z = target.z + (z + z);   // (the original doubles the error first)
     }
     if (m_moveFlags & MOVE_STANDING)
         eye.y += THROW_HEIGHT_STANDING;
@@ -190,7 +199,7 @@ void C_AIController::ThrowGrenade()
     C_Item *grenade = m_human->FindBeltItem(ITEM_BEHAVIOUR_THROWN);
     if (!grenade)
         return;
-    const float speed = static_cast<C_ProjectileWeaponComp *>(grenade->GetDef()->GetComponent())->GetMuzzleVelocity();
+    const float speed = static_cast<C_ProjectileWeaponComp *>(grenade->GetDef()->GetComponent())->C_ProjectileWeaponComp::GetMuzzleVelocity();   // (the field, as the original)
     S_vector eye = m_human->GetFrame()->GetWorldPos();
     if (m_moveFlags & MOVE_STANDING)
         eye.y += THROW_HEIGHT_STANDING;

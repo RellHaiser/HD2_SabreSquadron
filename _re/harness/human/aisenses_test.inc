@@ -653,7 +653,7 @@ void RandomSensesB()
             g_asAnswers[k].viewDir = (to.Normalized() + (P(0.5f) ? S_vector(U(-0.1f, 0.1f), U(-0.1f, 0.1f), U(-0.1f, 0.1f)) : S_vector(0, 0, 0))).Normalized();
         }
     for (uint32_t &parts : g_asParts)
-        parts = P(0.2f) ? 0u : uint32_t(I(0, 0x3F));
+        parts = P(0.2f) ? 0u : uint32_t(I(1, 0x1F)) | (P(0.3f) ? 0x20u : 0u);   // (never only other bits: the original's GetAimPoint divides by 0)
     // The car and the seat weapon.
     auto *car = reinterpret_cast<C_Actor *>(g_asCarPort);
     const int type = P(0.7f) ? ACTOR_CAR : ACTOR_STATIC_WEAPON;
