@@ -482,6 +482,9 @@ void C_ScriptedController::SetFormation(C_FormationShape *formation)
 
 bool C_ScriptedController::FollowFormation()
 {
+    // (Known difference: when the human leads the formation, the original returns the low byte of the human's
+    // address (AL left over), mostly true, so a leader's finished route does not tell the script; false here.
+    // Without a formation it returns 0, as here.)
     if (!m_formation || m_human == m_formation->GetLeader())
         return false;
     S_vector4 pos;

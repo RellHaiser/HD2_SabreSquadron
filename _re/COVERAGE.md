@@ -3243,3 +3243,47 @@ particles and the surface marks. Files are served from memory.
   the original's game object without the walking network (its +0x54); a load naming an actor I had made unknown (the
   sides' stale pool objects); comparing the 16-bit fire points as ints; a typedef cannot spell a member-pointer type
   (using), and `->*` binds looser than `->`.
+
+## Human part 39a (the scripted controller: life cycle, alarm, moves, modes, objects, saves, `scripted_controller.cpp`, 2026-11-16)
+
+- **The build:** `human/build_scripted.bat` (HUMAN_SCRIPTED with HUMAN_AICOMBAT and HUMAN_AISENSES; part 36's harness with
+  `scripted_controller.cpp` and `checkpoint.cpp` linked), `scripted_test.inc`, run_suites `human.scripted`.
+  - The derived AI controllers' common harness moved out of part 38's test into `derived_ai.inc` (the private members
+    through explicit instantiation, the fakes, the events pair now with the pending events and the nearby actors, the
+    control arrays, the walking points, the per-side vtables, the call wrapper, the pool priming, the original's
+    controller made from a vtable); `sniper_test.inc` is built on it (the same checks).
+  - The pair: the original's AI constructor's object with a copy of the scripted vtable (0x00811500, 0x1F0 bytes); its
+    26 fields by `_re/tools/layout_offsets.py`'s table (at other port offsets), converted and compared around each call
+    (the looped animation's name as a string: the port pads it with zeros).
+  - Faked on both sides: the script's OnAlarm, OnAlarmDone, OnActionDone (three copies) and Advance, the formation's
+    GetSlotTarget (a formation block per side, the leader at +0x74), UpdateDriving, the checkpoints' Find, the human's
+    Freeze, PlayAnimation, SetCarryMode, SetScripted, Start / StopListening, GetHandsWeapon, RequestMoveItem, the body's
+    GetActivityAnimLength, GetLeadPoint, timeGetTime (the port's import slot, the original's 0x0080f3f8), the scene's
+    FindFrame (slot 0x7C, both sides' frames by name); the events' GetNearbyActor is a copy of the port's (the
+    original runs its own).
+- **The tests:** 24,000 calls: Attach, Detach; the handlers OnEnemySeen, OnBodySeen, OnBodyHeard, OnFriendHeard,
+  OnLoudSound, OnShotAt, OnHit, OnSoundHeard (each chapter); the alarm's raise, SetAlarmType, GetAlarmType, SetAlarm,
+  MoveToAlarm, StartScript, ResetAI (each role); MoveTo and AttackMoveTo (to the point the human stands at, or
+  another), SetWaitForPlayer, FindCheckpoint, SetFormation, FollowFormation (each distance band); the eight move
+  modes (seated or not), Sit, ActivityTurk, Disable / EnableEvents, SetMode, HasAIMode, StopAction, Suspend,
+  SetOptimized; PickObject, DropObject, TakeWeapon, HolsterWeapon, Reload, PlayActivity (at a frame or not),
+  SeesEnemy, SeesFriend, SetAnimation (network games' messages), AdvanceScript, PlaySpeech, LookAround1; the attack's
+  Start, Stop and Clear; SaveGame (files byte for byte), LoadGame; Unknown104, Unknown114.
+- **Results:** 76,517 checks, 0 failures, 22 s; lines: 478 of 478 in part 39a's ranges (the update, the firing, the
+  attack's decisions, the meleeTrackers' alerts: part 39b).
+- **Port fixes:** none. Found and noted in the source: when the human leads its formation, the original's
+  FollowFormation returns the low byte of the human's address (AL left over: mostly true), so a leader's finished route
+  does not tell the script; the port returns false and tells it (its result is not compared then). The original's
+  HolsterWeapon asks the item's behaviour and drops the answer (the port does not: the getter is silent here).
+- **Not tested:** the original's crashes the port fixes: OnLoudSound with a source that is not a human or none (the
+  original asks it, as a human, whether the human is its friend); sounds without a source (the AI base turns toward it,
+  both sides); a looped animation name of 56 characters or more (the original copies it unbounded).
+- **Mutations** (`human/mutations/mutate_scripted1.py`): 366 mutants (280 generated, 86 for repeated lines); 17 not
+  building; 324 of 349 killed; the survivors are equivalent (10), ties at FollowFormation's distances (5), the clients'
+  animation message name (5, not compared) and weak (5: a narrow distance band, saved files that always hold every
+  chunk).
+- **Harness lessons (my mistakes):** a function and a member tag of the same name; `->*` and a subscript again; the
+  scene had no FindFrame (a call through null); the formation block shared by both sides (the original's leader word
+  overwrote the port's); the original's SetFormation given the port's formation; sounds without a source; the friend's
+  enemies from a human whose lists are not converted; the tested human at the origin (a difference and a sum look
+  alike: the mutants of FollowFormation's distance lived).

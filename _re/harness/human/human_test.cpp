@@ -820,6 +820,9 @@ namespace {
 #ifdef HUMAN_SNIPER
 #include "sniper_test.inc"
 #endif
+#ifdef HUMAN_SCRIPTED
+#include "scripted_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -907,6 +910,8 @@ int main(int argc, char **argv)
     TestSenses();
 #elif defined(HUMAN_SNIPER)
     TestSniper();
+#elif defined(HUMAN_SCRIPTED)
+    TestScripted();
 #elif defined(HUMAN_MTAI)
     TestMeleeTrackerAi();
 #elif defined(HUMAN_AICOMBAT)
