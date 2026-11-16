@@ -668,6 +668,7 @@ void C_MeleeTrackerAI::OnSeenHuman(int /*type*/, C_Actor *actor)   // 0x005cdf30
         m_flags &= ~0x80000u;
         m_0b4 = 200 - std::rand() % 0x5DC;
     }
+    // (Fix: the original reads a missing actor's type here; the scripted variant's checks.)
     if ((m_flags & 0x200) != 0 && actor && actor->GetType() == ACTOR_HUMAN) {
         m_orderedTarget = actor;
         m_flags |= 0x400;
@@ -901,7 +902,7 @@ float C_MeleeTrackerAI::DistanceToTarget()
     const float dx = targetPos.x - meleeTrackerPos.x;
     const float dy = targetPos.y - meleeTrackerPos.y;
     const float dz = targetPos.z - meleeTrackerPos.z;
-    return SafeLength(dx * dx + dy * dy + dz * dz);   // 0 on top of it, else the distance
+    return SafeLength((dz * dz + dy * dy) + dx * dx);   // 0 on top of it, else the distance (the original's order)
 }
 
 void C_MeleeTrackerAI::CullSightings(int /*timeDelta*/)          // 0x005cdff0 (the frame time is pushed but unread)

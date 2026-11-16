@@ -3073,3 +3073,40 @@ particles and the surface marks. Files are served from memory.
   with empty hands (both sides read them); my reading of a test run cut AdjustAim's single differences off with
   `head`, so I first took them for fixed; a `sed -i` turned ai_combat.cpp's line ends to LF, which hid the repeated
   lines from the mutant generator (put back).
+
+## Human part 37a (the meleeTrackers' controllers: life cycle, commands, alarm, Apply, timers, events, `melee_tracker_ai.cpp`, 2026-11-15)
+
+- **The build:** `human/build_mtai.bat` (HUMAN_MTAI with HUMAN_AICOMBAT and HUMAN_AISENSES: part 36's build with
+  melee_tracker_ai.cpp, `mtai_test.inc`; parts 33-36's humans, actors and fakes, their tests not run).
+  - The controllers' layouts are the original's (the header's static_asserts, offsets checked): each side's controller
+    holds the same bytes (the scripted and the automatic variants: the port's test classes; the original's made by its
+    constructor 0x005cb190 with the variant's vtable, 0x00812250 / 0x008122c8), the tracker, the owner and the targets
+    mapped, the behaviour weights' arrays each side's (the original's 0x008ac820 / 0x008ac720), the path an MSVC6
+    vector of the original pool's waypoints (its AllocMeleeTrackerWaypoint, 0x005ce4c0; the pool's growth set: its
+    static initialiser did not run). The original's operator new and delete are the test's (malloc and free).
+  - The meleeTracker is a block per side: the port's C_Actor packs its vectors 4-aligned, so its fields sit elsewhere
+    than the original's (the header names the original's offsets): the fields the controllers read are set alike (id,
+    type, frame, position, direction, stats, the movement's speed target and air steps), those they write compared.
+  - Faked on both sides and logged: the movement's SetMode, SetSubModeA / B, SetFacing, SetOptimizedController,
+    CheckAttackSequence, GetSeqAnimA / C; the tracker's SetOptimized and SetController; the script's Advance and OnAlarm;
+    the camera module's GetUnknown78 and SetViewDir (slots 0x78, 0x48); FindMeleeTrackerPath; the human's RaiseEvent;
+    MeleeTrackerAnimClass; MeleeTrackerBarkTurn (the tracker in ECX); RouteAroundCars (vehicle part 4's).
+  - The w words the original fills from stack words (the move accumulator's in Apply, the facing's in SetMoveToward,
+    the two target positions' in ClearAttack and SetOwnerActor) are the port's after its call.
+- **The tests:** 24,000 calls: Attach, Reset, Detach, ResetState, SetAlarm (both variants), SetOwner (no human),
+  TakeChanged, Disable, Apply, the six mode commands, Suspend, SetOptimized, SetSightRange, SetHearRange, UpdateTimers,
+  SubUpdate, DistanceToTarget, DistanceToOwnerSpot, OwnerPosition, ClearAttack, SetMoveToward (with the normalisation's
+  snaps), OnHeardSound, OnSpottedEnemy, OnSeenHuman (both variants), ReleaseScript, SetScript, SetBarking; the base's
+  and the AI's own members the variants override (Detach, SetOwnerActor, OnHeardSound, OnSpottedEnemy, Reset), called
+  directly.
+- **Results:** 46,255 checks, 0 failures, 16 s; lines: every line these reach but SetOwnerActor's and HumanOfFrame's
+  with a human owner (FindPath: part 37c); 334 of the file's 1,084.
+- **Port fixes:** DistanceToTarget's square in the original's order (z, y, x); the AI's OnSeenHuman documents its null
+  check as a fix (the original reads a missing actor's type when ordered to; the scripted variant's checks).
+- **Mutations** (`human/mutations/mutate_mtai1.py`): 274 mutants (217 generated, 57 for repeated lines); 9 not
+  building; 249 of 265 killed; the survivors are equivalent (9), ties at exact boundaries (6) and SetBarking's result
+  switched off (the original's is stale).
+- **Harness lessons (my mistakes):** I took the tracker's layout for the original's because the header comments give the
+  original's offsets: the port's actor packs its vectors (the first runs compared the wrong fields); I called the
+  original pool's Grow for its Get (a crash); I faked MeleeTrackerBarkTurn as cdecl (it is thiscall); the variants'
+  vtables never reach the base's overridden members, and the owners had no positions: the first mutation pass left 60.

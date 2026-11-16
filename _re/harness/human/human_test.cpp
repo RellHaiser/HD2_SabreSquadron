@@ -814,6 +814,9 @@ namespace {
 #ifdef HUMAN_AICOMBAT
 #include "aicombat_test.inc"
 #endif
+#ifdef HUMAN_MTAI
+#include "mtai_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -899,6 +902,8 @@ int main(int argc, char **argv)
     TestCrowd();
 #elif defined(HUMAN_SENSES)
     TestSenses();
+#elif defined(HUMAN_MTAI)
+    TestMeleeTrackerAi();
 #elif defined(HUMAN_AICOMBAT)
     TestAiCombat();
 #elif defined(HUMAN_AISENSES)
