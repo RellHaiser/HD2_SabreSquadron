@@ -7,6 +7,7 @@
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 
 #include "common/chunk.h"
 #include "common/object_pool.h"
@@ -615,10 +616,10 @@ namespace {
 // alone (the AI's inlined normalise pattern).
 void NormalizeXYZ(float &x, float &y, float &z)
 {
-    const float sq = x * x + y * y + z * z;
+    const float sq = (y * y + z * z) + x * x;           // (the original's order)
     if (std::fabs(sq - 1.0f) < 1e-08f)
         return;
-    if (sq >= 1e-08f) {
+    if (!(sq < 1e-08f)) {                               // (a NaN square divides too, as the original's x87 test sends it)
         const float inv = 1.0f / std::sqrt(sq);
         x *= inv;
         y *= inv;
@@ -683,12 +684,16 @@ void C_MeleeTrackerAI::OnSeenHuman(int /*type*/, C_Actor *actor)   // 0x005cdf30
 namespace {
 
 // Length of a vector from its squared magnitude, clamped the way the AI's inlined helper does:
-// 0 below ~1e-8, exactly 1 for a near-unit square, the square root otherwise.
+// 0 below ~1e-8, exactly 1 for a near-unit square, the square root otherwise. (The original tests
+// the float's bits as an int against 1e-8's: a NaN with its sign set, as 0 / 0 makes, counts as 0;
+// another NaN takes the root.)
 float SafeLength(float sq)
 {
-    if (sq < 1e-08f)
+    int32_t bits;
+    std::memcpy(&bits, &sq, sizeof bits);
+    if (bits < 0x322bcc77)
         return 0.0f;
-    if (std::fabs(sq - 1.0f) >= 1e-08f)
+    if (!(std::fabs(sq - 1.0f) < 1e-08f))
         return std::sqrt(sq);
     return 1.0f;
 }
@@ -766,8 +771,9 @@ void C_MeleeTrackerAI::SmoothPath(const float *from, const float *to)
         const float npX = next[0] - prevX;
         const float npY = next[1] - prevY;
         const float npZ = next[2] - prevZ;
-        const float t = ((nodeZ - prevZ) * npZ + (nodeY - prevY) * npY + (nodeX - prevX) * npX) /
-                        (npX * npX + npY * npY + npZ * npZ);
+        // (The original's orders: the numerator x, y, z; the denominator z, y, x.)
+        const float t = (((nodeX - prevX) * npX + (nodeY - prevY) * npY) + (nodeZ - prevZ) * npZ) /
+                        ((npZ * npZ + npY * npY) + npX * npX);
         const float projX = npX * t + prevX;
         const float projY = npY * t + prevY;
         const float projZ = npZ * t + prevZ;
@@ -775,7 +781,7 @@ void C_MeleeTrackerAI::SmoothPath(const float *from, const float *to)
         float dx = projX - nodeX;
         float dy = projY - nodeY;
         float dz = projZ - nodeZ;
-        if (SafeLength(dx * dx + dy * dy + dz * dz) <= node->radius) {
+        if (SafeLength((dz * dz + dy * dy) + dx * dx) <= node->radius) {   // (the original's order)
             // Within the point's radius: move the walk point straight onto the line.
             node->pos.x = projX;
             node->pos.y = projY;
@@ -795,7 +801,7 @@ void C_MeleeTrackerAI::SmoothPath(const float *from, const float *to)
     }
 }
 
-bool C_MeleeTrackerAI::RunPathSearch(uint16_t startCheckpoint, uint16_t goalCheckpoint,
+bool C_MeleeTrackerAI::RunPathSearch(int startCheckpoint, int goalCheckpoint,
                             const float *from, const float *to)
 {
     if (!m_checkpoints)
@@ -845,7 +851,7 @@ bool C_MeleeTrackerAI::RunPathSearch(uint16_t startCheckpoint, uint16_t goalChec
         const float dx = first->pos.x - worldPos.x;
         const float dz = first->pos.z - worldPos.z;
         if (dx * dx + dz * dz <= first->radius * first->radius ||
-            bX * aX + bY * aY + bZ * aZ < 0.0f) {
+            (bZ * aZ + bY * aY) + bX * aX < 0.0f) {   // (the original's order)
             if (first)
                 ReleaseMeleeTrackerWaypoint(first);
             for (S_AIWaypoint **p = m_pathBegin; p + 1 != m_pathEnd; ++p)
@@ -872,8 +878,7 @@ bool C_MeleeTrackerAI::FindPath(const float *from, const float *to)
         m_checkpoints->FindNearest(S_vector(start[0], start[1], start[2]), 5.0f, -1.0f);
     const int goalCheckpoint =
         m_checkpoints->FindNearest(S_vector(to[0], to[1], to[2]), 5.0f, -1.0f);
-    return RunPathSearch(static_cast<uint16_t>(startCheckpoint),
-                         static_cast<uint16_t>(goalCheckpoint), start, to);
+    return RunPathSearch(startCheckpoint, goalCheckpoint, start, to);
 }
 
 // ===========================================================================
@@ -1102,7 +1107,7 @@ void C_MeleeTrackerAI::FacePoint(int /*unused*/, const float *point)   // 0x005c
 {
     if ((m_flags & 0xC) != 0 || (m_flags & MELEE_TRACKER_ORDER_ACTIVE) != 0)
         return;
-    if (point[2] * point[2] + point[1] * point[1] + point[0] * point[0] < 1e-16f)
+    if ((point[0] * point[0] + point[1] * point[1]) + point[2] * point[2] < 1e-16f)   // (the original's order)
         return;
     const S_vector4 &own = m_meleeTracker->GetPosition4();
     const float from[4] = {own.x, own.y, own.z, own.w};
@@ -1124,7 +1129,7 @@ bool C_MeleeTrackerAI::CheckHeel(int /*unused*/)        // 0x005ccec0
             const float ex = m_0a0.x - spot[0];
             const float ey = m_0a0.y - spot[1];
             const float ez = m_0a0.z - spot[2];
-            if (SafeLength(ex * ex + ey * ey + ez * ez) > 0.5f) {
+            if (SafeLength((ez * ez + ey * ey) + ex * ex) > 0.5f) {   // (the original's order)
                 m_0a0 = {spot[0], spot[1], spot[2], spot[3]};
                 const S_vector4 &own = m_meleeTracker->GetPosition4();
                 const float from[4] = {own.x, own.y, own.z, own.w};
@@ -1343,7 +1348,7 @@ void C_MeleeTrackerAI::ScoreTarget(C_Actor *candidate, float *bestScore, C_Actor
     const float dx = theirs.x - own.x;
     const float dy = theirs.y - own.y;
     const float dz = theirs.z - own.z;
-    float distance = SafeLength(dx * dx + dy * dy + dz * dz);
+    float distance = SafeLength((dz * dz + dy * dy) + dx * dx);   // (the original's order)
     if (distance > 1e+06f)
         distance = 1e+06f;
     // Quirk kept: meant to fall with the distance, the score (1e6 - d) + d is ~1e6 for everyone

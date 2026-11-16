@@ -247,7 +247,8 @@ public:
     // Finds a checkpoint path from `from` to `to`; true when one is built. (0x005cb500)
     bool FindPath(const float *from, const float *to);
     // Searches a path between the checkpoints nearest `from`/`to` and builds the waypoint list.
-    bool RunPathSearch(uint16_t startCheckpoint, uint16_t goalCheckpoint,
+    // (The checkpoints as FindNearest gives them, -1 for none: the original passes the int on.)
+    bool RunPathSearch(int startCheckpoint, int goalCheckpoint,
                        const float *from, const float *to);                  // 0x005cb610
     // Smooths the built path, cutting corners within each point's radius. (0x005cb9b0)
     void SmoothPath(const float *from, const float *to);

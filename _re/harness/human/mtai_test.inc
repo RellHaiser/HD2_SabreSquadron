@@ -59,7 +59,7 @@ int MeleeTrackerAnimClass(int group)
 }
 void MeleeTrackerBarkTurn(C_MeleeTracker *meleeTracker) { Log(meleeTracker, "MeleeTrackerBarkTurn"); }
 uint64_t MicrosecondsNow() { return g_mt.now; }
-void ReleaseMeleeTrackerSighting(S_MeleeTrackerSighting *sighting) { Log(sighting, "ReleaseSighting"); }
+void ReleaseMeleeTrackerSighting(S_MeleeTrackerSighting *) {}   // (silent: the original puts it in its pool inline)
 bool __fastcall WriteControlState(C_NetMessage *, const float *pos, const float *velocity, const float *dir, const void *,
                                   uint32_t bits)
 {
@@ -103,7 +103,7 @@ int MT OM_CameraGetUnknown78(void *)
 }
 void MT OM_CameraSetViewDir(void *, const S_vector4 *dir) { Log(nullptr, "CameraSetViewDir", {dir->x, dir->y, dir->z}); }
 void MT OM_HumanRaiseEvent(void *self, uint8_t *event) { LogEvent(self, "HumanRaiseEvent", event); }
-int __cdecl OM_AnimClass(int group)
+int __fastcall OM_AnimClass(int group)   // (the group in ECX)
 {
     Log(nullptr, "MeleeTrackerAnimClass", {double(group)});
     return g_mt.animClass;
@@ -166,6 +166,9 @@ float *g_mtPortActionA, *g_mtPortActionB;
 float *OrigActionA() { return OriginalAt<float *>(0x008ac820); }
 float *OrigActionB() { return OriginalAt<float *>(0x008ac720); }
 alignas(16) float g_mtTestActionA[0x40], g_mtTestActionB[0x40];
+// (The test's arrays have their own copies on the original's side: two controllers may hold them; the port's statics
+// are the original's globals.)
+alignas(16) float g_mtOrigTestActionA[0x40], g_mtOrigTestActionB[0x40];
 
 // A waypoint of the original's pool (its AllocMeleeTrackerWaypoint, 0x005ce4c0: the pool's Get inline; the caller copies
 // the port's waypoint over it).
@@ -194,7 +197,10 @@ void MtToOrig(const C_MeleeTrackerAI *pc, uint8_t *oc, size_t size)
         float *p = k ? pc->m_actionB : pc->m_actionA;
         float *o = nullptr;
         if (p) {
-            o = k ? OrigActionB() : OrigActionA();
+            if (p == g_mtTestActionA || p == g_mtTestActionB)
+                o = p == g_mtTestActionA ? g_mtOrigTestActionA : g_mtOrigTestActionB;
+            else
+                o = k ? OrigActionB() : OrigActionA();
             std::memcpy(o, p, 0x40 * 4);
         }
         std::memcpy(oc + (k ? 0x64 : 0x60), &o, 4);
@@ -244,9 +250,19 @@ std::string MtDiffers(const C_MeleeTrackerAI *pc, const uint8_t *oc, size_t size
     const size_t portCount = pc->m_pathBegin ? size_t(pc->m_pathEnd - pc->m_pathBegin) : 0;
     if (count != portCount)
         return "path: " + std::to_string(portCount) + " / " + std::to_string(count);
-    for (size_t k = 0; k < count; ++k)
-        if (std::memcmp(reinterpret_cast<uint8_t *const *>(static_cast<uintptr_t>(v[0]))[k], pc->m_pathBegin[k], sizeof(S_AIWaypoint)) != 0)
-            return "path waypoint " + std::to_string(k);
+    const size_t cap = v[0] ? (v[2] - v[0]) / 4 : 0;
+    const size_t portCap = pc->m_pathBegin ? size_t(pc->m_pathCap - pc->m_pathBegin) : 0;
+    if (cap != portCap)
+        return "path capacity: " + std::to_string(portCap) + " / " + std::to_string(cap);
+    // (Each waypoint but the two w words: the original makes them from the checkpoint's three floats, the w a stale
+    // stack word; the port's 1, its documented fix.)
+    for (size_t k = 0; k < count; ++k) {
+        const auto *o = reinterpret_cast<const uint32_t *>(reinterpret_cast<uint8_t *const *>(static_cast<uintptr_t>(v[0]))[k]);
+        const auto *q = reinterpret_cast<const uint32_t *>(pc->m_pathBegin[k]);
+        for (size_t w = 0; w < sizeof(S_AIWaypoint) / 4; ++w)
+            if (w != 3 && w != 7 && w != 11 && (o[w] ^ q[w]) & (w == 9 ? 0x00FFFFFFu : 0xFFFFFFFFu))   // (+0x27, +0x2C: padding)
+                return "path waypoint " + std::to_string(k) + " word " + std::to_string(w);
+    }
     return "";
 }
 
@@ -399,12 +415,12 @@ void RandomMtController(C_MeleeTrackerAI *c, bool withPath)
     c->m_084 = timer();
     ClearPortPath(c);
     if (withPath && P(0.6f)) {
-        const int n = I(1, 5);
-        c->m_pathBegin = static_cast<S_AIWaypoint **>(::operator new(sizeof(void *) * (n + I(0, 2))));
+        const int n = I(1, 5), spare = I(0, 2);
+        c->m_pathBegin = static_cast<S_AIWaypoint **>(::operator new(sizeof(void *) * (n + spare)));
         c->m_pathEnd = c->m_pathBegin;
         for (int k = 0; k < n; ++k)
             *c->m_pathEnd++ = AllocMeleeTrackerWaypoint(I(0, 300), MtPos(), uint16_t(I(0, 0xFFFF)), uint8_t(I(0, 20)), uint8_t(I(0, 64)));
-        c->m_pathCap = c->m_pathEnd + I(0, 2);
+        c->m_pathCap = c->m_pathEnd + spare;
     }
 }
 
@@ -677,6 +693,536 @@ void TestMtA()
     }
 }
 
+// ---- part 37b: the update and its stages (the sightings culled, the target decided and found, the move decided, the
+// path found, smoothed and followed, the heel and reach checks), the attack and move orders, the sight test
+//
+// The tracker's lists are each side's: the humans seen (the original's copies mapped) and the sightings (a copy per
+// side, the source mapped; the original puts the ones it culls into its pool, the port's release is silent: the lists
+// are compared). The original's clock is QueryPerformanceCounter / Frequency through its import slots (0x0080f1c8 /
+// 0x0080f1c4): the counter is the test's microseconds at a frequency of 1e6, the port's MicrosecondsNow the same.
+// FindMeleeTrackerPath hands each side the test's checkpoints (the original's an MSVC6 vector: its new).
+int MT OM_FindMeleeTrackerPath(void *self, int from, int to, uint32_t *vec)
+{
+    Log(self, "FindMeleeTrackerPath", {double(from), double(to)});
+    if (!g_mt.path.empty()) {
+        auto *data = static_cast<uint16_t *>(std::malloc(g_mt.path.size() * 2));
+        std::memcpy(data, g_mt.path.data(), g_mt.path.size() * 2);
+        vec[1] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(data));
+        vec[2] = vec[3] = vec[1] + 2 * static_cast<uint32_t>(g_mt.path.size());
+    }
+    return g_mt.pathFound;
+}
+int __stdcall OM_QueryFrequency(int64_t *frequency)
+{
+    *frequency = 1000000;
+    return 1;
+}
+int __stdcall OM_QueryCounter(int64_t *counter)
+{
+    *counter = static_cast<int64_t>(g_mt.now);
+    return 1;
+}
+
+// The lists of each side.
+constexpr int MT_LIST = 6;
+C_Actor *g_mtSeenPort[MT_LIST];
+void *g_mtSeenOrig[MT_LIST];
+S_MeleeTrackerSighting g_mtSightingsPort[MT_LIST], g_mtSightingsOrig[MT_LIST];
+S_MeleeTrackerSighting *g_mtSightPort[MT_LIST];
+void *g_mtSightOrig[MT_LIST];
+int g_mtSeenCount = 0, g_mtSightCount = 0;
+
+void MtListsToOrig()
+{
+    C_MeleeTracker *t = PortMt();
+    const size_t seen = t->m_seenBegin ? size_t(t->m_seenEnd - t->m_seenBegin) : 0;
+    for (size_t k = 0; k < seen; ++k)
+        g_mtSeenOrig[k] = t->m_seenBegin[k] ? ToOrig(t->m_seenBegin[k]) : nullptr;
+    const size_t sight = t->m_sightingsBegin ? size_t(t->m_sightingsEnd - t->m_sightingsBegin) : 0;
+    for (size_t k = 0; k < sight; ++k) {
+        const size_t index = size_t(t->m_sightingsBegin[k] - g_mtSightingsPort);
+        g_mtSightingsOrig[index] = *t->m_sightingsBegin[k];
+        void *source = g_mtSightingsOrig[index].source ? ToOrig(g_mtSightingsOrig[index].source) : nullptr;
+        std::memcpy(&g_mtSightingsOrig[index].source, &source, 4);
+        g_mtSightOrig[k] = &g_mtSightingsOrig[index];
+    }
+    uint32_t v[3] = {0, 0, 0};
+    if (t->m_seenBegin) {
+        v[0] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(g_mtSeenOrig));
+        v[1] = v[0] + 4 * static_cast<uint32_t>(seen);
+        v[2] = v[0] + 4 * MT_LIST;
+    }
+    std::memcpy(g_mtOrigBytes + 0x574, v, 12);
+    v[0] = v[1] = v[2] = 0;
+    if (t->m_sightingsBegin) {
+        v[0] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(g_mtSightOrig));
+        v[1] = v[0] + 4 * static_cast<uint32_t>(sight);
+        v[2] = v[0] + 4 * MT_LIST;
+    }
+    std::memcpy(g_mtOrigBytes + 0x564, v, 12);
+    std::memcpy(g_mtOrigBytes + 0x580, &t->m_velocity, 16);
+    std::memcpy(g_mtOrigBytes + 0x590, &t->m_lastPos, 16);
+    std::memcpy(g_mtOrigBytes + 0x5A0, &t->m_lastFrameTime, 4);
+    std::memcpy(g_mtOrigBytes + 0x544, &t->m_bodyFrame, 4);
+    std::memcpy(g_mtOrigBytes + 0x90 + 0x364, PortMtMovement() + 0x364, 4);
+    void *ai = t->m_ai ? ToOrig(t->m_ai) : nullptr;
+    std::memcpy(g_mtOrigBytes + 0x534, &ai, 4);
+}
+// After a call: the lists alike (the sightings by which one, in order).
+std::string MtListsDiffer()
+{
+    C_MeleeTracker *t = PortMt();
+    uint32_t v[3];
+    std::memcpy(v, g_mtOrigBytes + 0x564, 12);
+    const size_t sight = t->m_sightingsBegin ? size_t(t->m_sightingsEnd - t->m_sightingsBegin) : 0;
+    const size_t origSight = v[0] ? (v[1] - v[0]) / 4 : 0;
+    if (sight != origSight)
+        return "sightings: " + std::to_string(sight) + " / " + std::to_string(origSight);
+    for (size_t k = 0; k < sight; ++k) {
+        const auto *o = reinterpret_cast<const S_MeleeTrackerSighting *const *>(static_cast<uintptr_t>(v[0]))[k];
+        const S_MeleeTrackerSighting *p = t->m_sightingsBegin[k];
+        if (int(p - g_mtSightingsPort) != int(o - g_mtSightingsOrig))
+            return "sighting " + std::to_string(k);
+    }
+    return "";
+}
+
+void SetUpMeleeTrackerB()
+{
+    RedirectOriginal(0x00522470, FAKE(OM_FindMeleeTrackerPath));
+    *OriginalAt<void **>(0x0080f1c4) = reinterpret_cast<void *>(OM_QueryFrequency);
+    *OriginalAt<void **>(0x0080f1c8) = reinterpret_cast<void *>(OM_QueryCounter);
+    PortMt()->m_bodyFrame = g_asMeleeBody;
+    for (int k = 0; k < MT_LIST; ++k)
+        g_names[&g_mtSightingsPort[k]] = g_names[&g_mtSightingsOrig[k]] = "sighting" + std::to_string(k);
+}
+
+// A frame carrying a human (Attack's and SetOwner's): the frames are shared, so its data names each side's human during
+// that side's call.
+S_FrameData g_mtHumanFrameData;
+C_Human *g_mtFrameHuman = nullptr;
+I3D_frame *MtHumanFrame(C_Human *human)
+{
+    g_mtFrameHuman = human;
+    g_mtHumanFrameData = S_FrameData();
+    g_mtHumanFrameData.actor = human;
+    g_asThirdFrame->SetData(&g_mtHumanFrameData);
+    return g_asThirdFrame;
+}
+void MtFrameDataFor(bool orig)
+{
+    if (g_mtFrameHuman)
+        g_mtHumanFrameData.actor = orig ? static_cast<C_Actor *>(ToOrig(g_mtFrameHuman)) : g_mtFrameHuman;
+}
+
+// The fight's state: the humans' velocities and health, the tracker's motion, its lists, the checkpoints and the answers.
+void RandomMtB()
+{
+    RandomMtAll();
+    for (S_HumanAnswers &a : g_asAnswers) {
+        a.body = true;
+        a.stance = I(0, 3);
+        static const int classes[] = {-1, 0, 1, 2, 3, 5};
+        a.speedClass = classes[I(0, 5)];
+    }
+    C_Human *const humans[3] = {g_h.human, PortOther(), PortThird()};
+    uint8_t *const origs[3] = {nullptr, g_origOther, g_origThird};
+    for (int k = 0; k < 3; ++k) {
+        humans[k]->m_velocity = P(0.4f) ? S_vector4{0, 0, 0, 0} : S_vector4{U(-5, 5), U(-1, 1), U(-5, 5), 0};
+        humans[k]->m_stats[STAT_HEALTH] = P(0.15f) ? I(-5, 0) : I(1, 800);
+        if (origs[k]) {
+            std::memcpy(origs[k] + 0x1B0, &humans[k]->m_velocity, 16);
+            std::memcpy(origs[k] + 0xEC, &humans[k]->m_stats[STAT_HEALTH], 4);
+        }
+    }
+    // The targets now and then close to the tracker (bites, lunges).
+    const S_vector4 &own = PortMtActor()->m_position;
+    for (int k = 0; k < 3; ++k)
+        if (P(0.4f)) {
+            humans[k]->m_position = {own.x + U(-5, 5), own.y + U(-0.5f, 0.5f), own.z + U(-5, 5), 1.0f};
+            if (origs[k])
+                std::memcpy(origs[k] + 0x30, &humans[k]->m_position, 16);
+        }
+    C_MeleeTracker *t = PortMt();
+    t->m_velocity = P(0.3f) ? S_vector4{0, 0, 0, 0} : S_vector4{U(-4, 4), U(-0.5f, 0.5f), U(-4, 4), 0};
+    t->m_lastPos = {own.x + U(-1, 1), own.y, own.z + U(-1, 1), 1.0f};
+    t->m_lastFrameTime = I(0, 200);
+    const int animGroup = I(0, 0x40);
+    std::memcpy(PortMtMovement() + 0x364, &animGroup, 4);
+    t->m_ai = P(0.2f) ? nullptr : static_cast<C_MeleeTrackerController *>(g_pMtSrc);
+    // The tracker turned (its body frame too: the sight test's eye), now and then tilted; its direction with a height
+    // now and then.
+    S_quat turn;
+    turn.Make(P(0.2f) ? S_vector(U(-1, 1), U(-1, 1), U(-1, 1)).Normalized() : S_vector(0, 1, 0), U(0, 6.2831f));
+    g_asMeleeFrame->SetRot(turn);
+    UpdateTree(g_asMeleeFrame);
+    {
+        const float yaw = U(0, 6.2831f);
+        PortMtActor()->m_direction = {std::sin(yaw), P(0.2f) ? U(-0.3f, 0.3f) : 0.0f, std::cos(yaw), 0};
+    }
+    // The humans near: the owner's spot about the tracker; targets in front of the eye within its sight range.
+    const S_matrix &eye = g_asMeleeBody->GetMatrix();
+    S_vector look(eye.m[2][0], 0, eye.m[2][2]);
+    look.Normalize();
+    const S_vector side(look.z, 0, -look.x);
+    const float range = float(t->GetStats().sightRange);
+    for (int k = 0; k < 3; ++k) {
+        const float r = U(0, 1);
+        S_vector4 pos = humans[k]->m_position;
+        if (r < 0.3f) {
+            pos = {own.x + U(-4, 4), own.y + U(-0.3f, 0.3f), own.z + U(-4, 4), 1.0f};
+        } else if (r < 0.6f) {
+            const float ahead = U(0, 1.3f) * range;
+            const S_vector at = S_vector(eye.m[3][0], eye.m[3][1], eye.m[3][2]) + look * ahead + side * (U(-0.9f, 0.9f) * ahead * 0.84f);
+            pos = {at.x, own.y, at.z, 1.0f};
+        }
+        humans[k]->m_position = pos;
+        if (origs[k])
+            std::memcpy(origs[k] + 0x30, &humans[k]->m_position, 16);
+    }
+    // (The copied humans' frames where they are: the sight test reads them.)
+    for (int k = 1; k < 3; ++k) {
+        I3D_frame *f = humans[k]->GetFrame();
+        f->SetPosInline(S_vector(humans[k]->m_position.x, humans[k]->m_position.y, humans[k]->m_position.z));
+        UpdateTree(f);
+    }
+    // The lists.
+    g_mt.now = uint64_t(I(0, 1000000)) * 100 + 10000000;
+    g_mtSeenCount = P(0.3f) ? 0 : I(1, 3);
+    // (Humans only, and loud sightings from humans: the original scores them as humans unchecked, the port skips the
+    // others, its fix.)
+    for (int k = 0; k < g_mtSeenCount; ++k)
+        g_mtSeenPort[k] = humans[I(0, 2)];
+    g_mtSightCount = P(0.3f) ? 0 : I(1, 4);
+    for (int k = 0; k < g_mtSightCount; ++k) {
+        S_MeleeTrackerSighting &s = g_mtSightingsPort[k];
+        s.pos = MtPos();
+        s.type = I(0, 3);
+        s.loudness = I(0, 30);
+        s.source = s.loudness <= 19 && P(0.3f) ? (P(0.5f) ? nullptr : static_cast<C_Actor *>(PortActor(I(0, ACTOR_KIND_COUNT - 1))))
+                                               : static_cast<C_Actor *>(humans[I(0, 2)]);
+        const uint32_t nowLow = uint32_t(g_mt.now);
+        s.time = P(0.1f) ? nowLow + 2500000u : P(0.4f) ? nowLow + 2500000u + uint32_t(I(1, 2000000)) : nowLow + uint32_t(I(-2000000, 2500000));
+        g_mtSightPort[k] = &s;
+    }
+    t->m_seenBegin = P(0.1f) ? nullptr : g_mtSeenPort;
+    t->m_seenEnd = t->m_seenBegin ? g_mtSeenPort + g_mtSeenCount : nullptr;
+    t->m_seenCap = t->m_seenBegin ? g_mtSeenPort + MT_LIST : nullptr;
+    t->m_sightingsBegin = P(0.1f) ? nullptr : g_mtSightPort;
+    t->m_sightingsEnd = t->m_sightingsBegin ? g_mtSightPort + g_mtSightCount : nullptr;
+    t->m_sightingsCap = t->m_sightingsBegin ? g_mtSightPort + MT_LIST : nullptr;
+    // The checkpoints near the tracker, the path search's answer, the nearest point's.
+    for (auto &bytes : g_checkpointBytes) {
+        auto *point = reinterpret_cast<S_Checkpoint *>(bytes);
+        point->pos = S_vector(own.x + U(-15, 15), own.y + U(-0.5f, 0.5f), own.z + U(-15, 15));
+        point->radius = uint8_t(I(0, 64));
+        point->flags = uint16_t(I(0, 0xFFFF));
+        point->type = uint8_t(I(0, 12));
+    }
+    // (A checkpoint right by the tracker now and then: the path's first point dropped.)
+    int nearPoint = -1;
+    if (P(0.3f)) {
+        nearPoint = I(0, 7);
+        auto *point = reinterpret_cast<S_Checkpoint *>(g_checkpointBytes[nearPoint]);
+        point->pos = S_vector(own.x + U(-0.8f, 0.8f), own.y, own.z + U(-0.8f, 0.8f));
+        point->radius = uint8_t(I(8, 40));
+    }
+    g_mt.path.clear();
+    if (nearPoint >= 0 && P(0.7f))
+        g_mt.path.push_back(uint16_t(nearPoint));
+    // (Never the same checkpoint twice in a row, as a search's path: a repeated point makes the smoothing divide 0 by 0.)
+    for (int k = P(0.15f) ? 0 : I(1, 5); k > 0; --k) {
+        uint16_t cp = uint16_t(I(0, 7));
+        if (!g_mt.path.empty() && cp == g_mt.path.back())
+            cp = uint16_t((cp + 1) % 8);
+        g_mt.path.push_back(cp);
+    }
+    g_mt.pathFound = P(0.85f);
+    // (A search that succeeds gives at least the start: from == to is one point.)
+    if (g_mt.pathFound && g_mt.path.empty())
+        g_mt.path.push_back(uint16_t(I(0, 7)));
+    g_mt.route = P(0.85f);
+    g_cs.nearest = P(0.1f) ? -1 : I(0, 7);
+    g_mt.animClass = I(0, 2);
+    // The controllers' waypoints about the tracker.
+    for (S_AIWaypoint **w = g_pMt->m_pathBegin; w && w != g_pMt->m_pathEnd; ++w)
+        (*w)->pos = (*w)->pos2 = {own.x + U(-3, 3), own.y, own.z + U(-3, 3), 1.0f};
+    // The orders that steer the stages; following (0x10) exactly when there is an owner, as SetOwnerActor keeps them.
+    if (P(0.5f))
+        g_pMt->m_flags = (g_pMt->m_flags & ~uint32_t(0x800 | MELEE_TRACKER_ORDER_SUSPEND)) | (P(0.5f) ? 0x20000u : 0u) |
+                         (P(0.5f) ? 0x4u : 0u);
+    g_pMt->m_flags = g_pMt->m_owner && P(0.9f) ? g_pMt->m_flags | 0x10u : g_pMt->m_flags & ~0x10u;
+}
+
+// A call with the lists each side's (converted before, compared after).
+template <class P, class O> void MtCallB(const char *what, P port, O original)
+{
+    MtListsToOrig();
+    MtCall(what, port, original);
+    const std::string why = MtListsDiffer();
+    CHECK(why.empty());
+    static std::map<std::string, int> shown;
+    if (!why.empty() && shown[what]++ < 3)
+        std::printf("  %s: %s\n", what, why.c_str());
+}
+
+void TestMtB()
+{
+    std::printf("melee tracker ai: the update, targets, paths\n");
+    C_Human *const humans[3] = {g_h.human, PortOther(), PortThird()};
+    for (int i = 0; i < 30000 / QUICK; ++i) {
+        RandomMtB();
+        C_MeleeTrackerAI *c = g_pMt;
+        const bool scripted = g_mtSize == 0xD0;
+        const S_vector4 own = PortMtActor()->m_position;
+        auto randomPoint = [&](float *p) {
+            const S_vector4 v = P(0.5f) ? S_vector4{own.x + U(-4, 4), own.y, own.z + U(-4, 4), 1.0f} : MtPos();
+            p[0] = v.x, p[1] = v.y, p[2] = v.z, p[3] = v.w;
+        };
+        int which = I(0, 23);   // (17 .. 20: the sight test; 21 .. 23: FollowPath again)
+        if (which > 20)
+            which = 4;
+        switch (which) {
+        case 0: {
+            if (scripted)
+                g_pMtS->m_barkTimer = -1;   // (the idle bark: part 37d)
+            const int dt = I(0, 200);
+            if (g_mtPortActionA && P(0.5f))
+                for (int k = 0; k < 0x40; ++k) {
+                    g_mtPortActionA[k] = P(0.5f) ? 1.0f : 0.0f;
+                    g_mtPortActionB[k] = P(0.5f) ? 1.0f : 0.0f;
+                }
+            MtCallB("Tick",
+                    [&] {
+                        c->Tick(dt);
+                        if (c->m_actionA != g_mtTestActionA && c->m_actionA) {
+                            g_mtPortActionA = c->m_actionA;
+                            g_mtPortActionB = c->m_actionB;
+                        }
+                        return 0;
+                    },
+                    [&](void *) { OMtV<void>(0x18, dt); return 0; });
+            break;
+        }
+        case 1:
+            MtCallB("CullSightings", [&] { c->CullSightings(0); return 0; }, [&](void *) { OMt<void>(0x005cdff0, 0); return 0; });
+            break;
+        case 2: {
+            if (!c->m_actionB)
+                c->m_actionB = g_mtTestActionB;
+            const int dt = I(0, 2000);
+            if (P(0.3f))
+                c->m_0b4 = P(0.5f) ? (P(0.5f) ? 1200 : 1201) - dt : P(0.5f) ? 100000 : 99999 - I(0, 5);
+            if (P(0.5f)) {
+                C_Human *target = humans[I(0, 2)];
+                c->m_target = target;
+                c->m_flags |= 0x20000u;
+                target->m_stats[STAT_HEALTH] = I(1, 800);
+                target->m_vehicle = nullptr;
+                const float yaw = U(0, 6.2831f), d = U(0, 4.5f);
+                target->m_position = {own.x + std::sin(yaw) * d, own.y, own.z + std::cos(yaw) * d, 1.0f};
+                if (P(0.5f))
+                    target->m_velocity = {0, 0, 0, 0};
+                uint8_t *const origs[3] = {nullptr, g_origOther, g_origThird};
+                const int k = target == humans[0] ? 0 : target == humans[1] ? 1 : 2;
+                if (origs[k]) {
+                    std::memcpy(origs[k] + 0x30, &target->m_position, 16);
+                    std::memcpy(origs[k] + 0x1B0, &target->m_velocity, 16);
+                    std::memcpy(origs[k] + 0xEC, &target->m_stats[STAT_HEALTH], 4);
+                    std::memset(origs[k] + 0x160, 0, 4);
+                }
+            }
+            MtCallB("DecideTarget", [&] { c->DecideTarget(dt); return 0; }, [&](void *) { OMt<void>(0x005cd1f0, dt); return 0; });
+            break;
+        }
+        case 3:
+            if (P(0.6f)) {
+                C_Human *owner = humans[I(0, 2)];
+                c->m_owner = owner;
+                c->m_flags = (c->m_flags & ~0x20000u) | (P(0.9f) ? 0x10u : 0u);
+                float spot[4] = {};
+                c->OwnerPosition(spot);
+                const S_vector want(own.x + U(-2.5f, 2.5f), own.y, own.z + U(-2.5f, 2.5f));
+                owner->m_position.x += want.x - spot[0];
+                owner->m_position.z += want.z - spot[2];
+                const int k = owner == humans[0] ? 0 : owner == humans[1] ? 1 : 2;
+                uint8_t *const origs[3] = {nullptr, g_origOther, g_origThird};
+                if (origs[k])
+                    std::memcpy(origs[k] + 0x30, &owner->m_position, 16);
+                if (P(0.6f))
+                    ClearPortPath(c);
+            }
+            MtCallB("DecideMove", [&] { c->DecideMove(0); return 0; }, [&](void *) { OMt<void>(0x005cd890, 0); return 0; });
+            break;
+        case 4:
+            if (c->m_pathBegin && c->m_pathEnd != c->m_pathBegin && P(0.8f)) {
+                const S_vector &at = g_asMeleeFrame->GetWorldPos();
+                S_AIWaypoint *next = c->m_pathBegin[0];
+                next->pos = {at.x + U(-1.2f, 1.2f), at.y, at.z + U(-1.2f, 1.2f), 1.0f};
+                C_MeleeTracker *t = PortMt();
+                t->m_lastPos = {at.x + U(-0.5f, 0.5f), at.y, at.z + U(-0.5f, 0.5f), 1.0f};
+                t->m_velocity = {(next->pos.x - t->m_lastPos.x) * U(0, 4), 0, (next->pos.z - t->m_lastPos.z) * U(0, 4), 0};
+                if (P(0.8f)) {
+                    // (The next waypoint 0.3 .. 1 m ahead; the motion passing it 0 .. 0.6 m to the side.)
+                    const float yaw = U(0, 6.2831f);
+                    const S_vector dir(std::sin(yaw), 0, std::cos(yaw)), perp(dir.z, 0, -dir.x);
+                    next->pos = {at.x + dir.x * U(0.3f, 1.0f), at.y, at.z + dir.z * U(0.3f, 1.0f), 1.0f};
+                    t->m_lastFrameTime = I(1, 200);
+                    const float speed = U(1, 6), seconds = float(t->m_lastFrameTime) * 0.001f;
+                    t->m_velocity = {dir.x * speed, 0, dir.z * speed, 0};
+                    const S_vector back = dir * (speed * seconds * U(0, 1.5f));
+                    const S_vector offset = perp * U(-0.6f, 0.6f);
+                    t->m_lastPos = {next->pos.x - back.x + offset.x, at.y, next->pos.z - back.z + offset.z, 1.0f};
+                }
+                c->m_flags = (c->m_flags & ~0x10000u) | 0x4u;
+                if (P(0.6f))
+                    c->m_flags &= ~0x20010u;
+            }
+            MtCallB("FollowPath", [&] { c->FollowPath(0); return 0; }, [&](void *) { OMt<void>(0x005cbf00, 0); return 0; });
+            break;
+        case 5:
+            if (P(0.4f)) {
+                // (The last leg of a scripted MoveTo: one waypoint near, moving, the script's order.)
+                PickMtPair(true);
+                c = g_pMt;
+                RandomMtController(c, false);
+                g_pMtS->m_script = reinterpret_cast<C_Script *>(g_mtScriptBytes);
+                c->m_pathBegin = static_cast<S_AIWaypoint **>(::operator new(sizeof(void *)));
+                c->m_pathEnd = c->m_pathCap = c->m_pathBegin + 1;
+                const S_vector &at = g_asMeleeFrame->GetWorldPos();
+                const S_vector4 wp = {at.x + U(-3, 3), at.y, at.z + U(-3, 3), 1.0f};
+                c->m_pathBegin[0] = AllocMeleeTrackerWaypoint(I(0, 7), wp, 0, 0, uint8_t(I(0, 40)));
+                c->m_pathBegin[0]->pos2 = {at.x + U(-2, 2), at.y, at.z + U(-2, 2), 1.0f};
+                c->m_flags = (c->m_flags & ~0x20010u) | (P(0.7f) ? MELEE_TRACKER_ORDER_MOVETO : 0u) | MELEE_TRACKER_ORDER_ACTIVE |
+                             (P(0.5f) ? 0x4u : 0x8u);
+                c->m_owner = nullptr;
+            }
+            MtCallB("AdvanceWaypoint", [&] { return int(c->AdvanceWaypoint()); }, [&](void *) { return int(OMt<uint32_t>(0x005cc420) & 0xFF); });
+            break;
+        case 6:
+            // (Always with an owner and following, as AdvanceWaypoint calls it: without one the original reads its spot
+            // unset.)
+            if (!c->m_owner)
+                c->m_owner = humans[I(0, 2)];
+            c->m_flags |= 0x10u;
+            if (P(0.5f)) {
+                float spot[4] = {};
+                c->OwnerPosition(spot);
+                c->m_0a0 = {spot[0] + U(-0.4f, 0.4f), spot[1] + U(-0.3f, 0.3f), spot[2] + U(-0.4f, 0.4f), spot[3]};
+            }
+            MtCallB("CheckHeel", [&] { return int(c->CheckHeel(1)); }, [&](void *) { return int(OMt<uint32_t>(0x005ccec0, 1) & 0xFF); });
+            break;
+        case 7: {
+            float point[4];
+            randomPoint(point);
+            if (P(0.1f))
+                point[0] = point[1] = point[2] = 0.0f;
+            MtCallB("FacePoint", [&] { c->FacePoint(1, point); return 0; }, [&](void *) { OMt<void>(0x005cb480, 1, point); return 0; });
+            break;
+        }
+        case 8: {
+            const bool force = P(0.5f);
+            MtCallB("FindTarget", [&] { c->FindTarget(force); return 0; }, [&](void *) { OMt<void>(0x005cc8d0, int(force)); return 0; });
+            break;
+        }
+        case 9: {
+            // (The original reads any candidate as a human, a missing one too: the port skips them. Humans here.)
+            C_Actor *candidate = humans[I(0, 2)];
+            void *oCandidate = ToOrig(candidate);
+            const float start = P(0.3f) ? -10000.0f : U(999000, 1000001);
+            float pScore = start, oScore = start;
+            C_Actor *pBest = nullptr;
+            void *oBest = nullptr;
+            MtCallB("ScoreTarget",
+                    [&] {
+                        c->ScoreTarget(candidate, &pScore, &pBest);
+                        return FloatBitsOf(pScore) ^ int(pBest ? reinterpret_cast<uintptr_t>(ToOrig(pBest)) : 0);
+                    },
+                    [&](void *) {
+                        OMt<void>(0x005cc7a0, oCandidate, &oScore, &oBest);
+                        return FloatBitsOf(oScore) ^ int(reinterpret_cast<uintptr_t>(oBest));
+                    });
+            break;
+        }
+        case 10:
+            if (c->m_target && P(0.5f)) {
+                const S_vector4 &theirs = c->m_target->GetPosition4();
+                c->m_090 = {theirs.x + U(-1, 1), theirs.y + U(-0.3f, 0.3f), theirs.z + U(-1, 1), theirs.w};
+            }
+            MtCallB("CheckReached", [&] { return int(c->CheckReached(1)); }, [&](void *) { return int(OMt<uint32_t>(0x005cccc0, 1) & 0xFF); });
+            break;
+        case 11:
+            MtCallB("BeginAttack", [&] { c->BeginAttack(); return 0; }, [&](void *) { OMt<void>(0x005cd0a0); return 0; });
+            break;
+        case 12: {
+            I3D_frame *const frames[4] = {nullptr, g_h.frame, g_targetFrame, g_otherFrame};
+            I3D_frame *frame = P(0.4f) ? MtHumanFrame(humans[I(0, 2)]) : frames[I(0, 3)];
+            MtCallB("Attack", [&] { MtFrameDataFor(false); c->Attack(frame); return 0; },
+                    [&](void *) { MtFrameDataFor(true); OMt<void>(0x005cf7c0, frame); MtFrameDataFor(false); return 0; });
+            g_mtFrameHuman = nullptr;
+            break;
+        }
+        case 13: {
+            // (The scripted controller with its script: the original advances whatever +0xC0 holds, a missing script
+            // or past the automatic variant; the port's fix checks.)
+            PickMtPair(true);
+            c = g_pMt;
+            RandomMtController(c, true);
+            g_pMtS->m_script = reinterpret_cast<C_Script *>(g_mtScriptBytes);
+            const uint16_t checkpoint = uint16_t(P(0.1f) ? 0xFFFF : I(0, 7));
+            MtCallB("MoveTo", [&] { c->MoveTo(checkpoint); return 0; }, [&](void *) { OMt<void>(0x005cf700, int(checkpoint)); return 0; });
+            break;
+        }
+        case 14: {
+            C_Actor *owner = P(0.2f) ? nullptr : static_cast<C_Actor *>(humans[I(0, 2)]);
+            void *oOwner = owner ? ToOrig(owner) : nullptr;
+            if (P(0.3f)) {
+                // (Through SetOwner, the script command: the owner's frame.)
+                I3D_frame *frame = MtHumanFrame(humans[I(0, 2)]);
+                MtCallB("SetOwner", [&] { MtFrameDataFor(false); c->SetOwner(frame); return 0; },
+                        [&](void *) { MtFrameDataFor(true); OMt<void>(0x005cf9b0, frame); MtFrameDataFor(false); return 0; });
+                g_mtFrameHuman = nullptr;
+            } else {
+                MtCallB("SetOwnerActor", [&] { c->SetOwnerActor(owner); return 0; }, [&](void *) { OMtV<void>(0x30, oOwner); return 0; });
+            }
+            break;
+        }
+        case 15: {
+            float from[4], to[4];
+            randomPoint(from);
+            randomPoint(to);
+            MtCallB("FindPath", [&] { return int(c->FindPath(from, to)); }, [&](void *) { return int(OMt<uint32_t>(0x005cb500, from, to) & 0xFF); });
+            break;
+        }
+        case 16:
+            if (P(0.5f))
+                MtCallB("ClearPath", [&] { c->ClearPath(); return 0; }, [&](void *) { OMt<void>(0x005cbe60); return 0; });
+            else
+                MtCallB("ResetPath", [&] { return int(c->ResetPath()); }, [&](void *) { return int(OMt<uint32_t>(0x005cb410) & 0xFF); });
+            break;
+        default: {
+            // The sight test: a human, a part 23 actor, the tracker itself (with its controller: the original assumes one).
+            C_Actor *target = P(0.6f) ? static_cast<C_Actor *>(humans[I(0, 2)]) : P(0.5f) ? static_cast<C_Actor *>(PortActor(I(0, ACTOR_KIND_COUNT - 1))) : PortMtActor();
+            if (target == PortMtActor() && !PortMt()->m_ai)
+                PortMt()->m_ai = g_pMtSrc;
+            void *oTarget = ToOrig(target);
+            int ps = 7, os = 7;
+            float pv = 9, ov = 9;
+            MtCallB("TestSight",
+                    [&] {
+                        c->TestSight(target, &ps, &pv);
+                        return ps * 31 ^ FloatBitsOf(pv);
+                    },
+                    [&](void *) {
+                        OMtV<void>(0x1C, oTarget, &os, &ov);
+                        return os * 31 ^ FloatBitsOf(ov);
+                    });
+            break;
+        }
+        }
+    }
+}
+
 void TestMeleeTrackerAi()
 {
     SetUpSenses();
@@ -684,6 +1230,12 @@ void TestMeleeTrackerAi()
     SetUpCombatAi();
     SetUpFireOrder();
     SetUpMeleeTrackerAi();
+    SetUpMeleeTrackerB();
+    g_humanAnswers = AsAnswers;
+    g_visiblePartsOf = AsPartsOf;
     TestMtA();
+    TestMtB();
+    g_humanAnswers = nullptr;
+    g_visiblePartsOf = nullptr;
 }
 }  // namespace

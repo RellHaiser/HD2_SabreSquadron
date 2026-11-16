@@ -3110,3 +3110,50 @@ particles and the surface marks. Files are served from memory.
   original's offsets: the port's actor packs its vectors (the first runs compared the wrong fields); I called the
   original pool's Grow for its Get (a crash); I faked MeleeTrackerBarkTurn as cdecl (it is thiscall); the variants'
   vtables never reach the base's overridden members, and the owners had no positions: the first mutation pass left 60.
+
+## Human part 37b (the meleeTrackers' controllers: the update, targets, paths, sight, `melee_tracker_ai.cpp`, 2026-11-16)
+
+- **The build:** part 37a's (`human/build_mtai.bat`, `mtai_test.inc`).
+  - The tracker's lists are each side's: the humans seen (the original's copies mapped) and the sightings (a copy per
+    side, the source mapped; the port's release is silent: the original puts the culled ones in its pool inline; the
+    lists are compared). The original's clock is QueryPerformanceCounter / Frequency through its import slots
+    (0x0080f1c8 / 0x0080f1c4): the counter is the test's microseconds at a frequency of 1e6, the port's MicrosecondsNow
+    the same. FindMeleeTrackerPath hands each side the test's checkpoints (the original's an MSVC6 vector, malloc'd: its
+    delete is the test's free). The tracker's velocity, last position and frame time, body frame, movement +0x364 and
+    controller (+0x534) are set on both sides; a frame carrying a human (Attack, SetOwner) names each side's human
+    during that side's call.
+  - The path's waypoints are compared but for the two w words (the original's are stale stack words: the port's 1, its
+    documented fix) and the padding (+0x27, +0x2C: the original's pool memory), its capacity too.
+- **The tests:** 30,000 calls: Tick (the whole update; the port's static weights first filled with junk), CullSightings,
+  DecideTarget (attacking a target near or far, held back or not, the timer's edges), DecideMove (an owner's spot about
+  the tracker), FollowPath (the next waypoint within a metre, the line of motion passing it), AdvanceWaypoint (the last
+  leg of a scripted MoveTo), CheckHeel, FacePoint, FindTarget, ScoreTarget, CheckReached, BeginAttack, Attack, MoveTo,
+  SetOwnerActor and SetOwner, FindPath (with SmoothPath and the first point's drop), ClearPath, ResetPath, TestSight
+  (humans by stance and pace, part 23's actors, the tracker itself); the tracker turned and tilted, targets in front
+  within its sight range, a checkpoint by it.
+- **Results:** 136,263 checks for the file, 0 failures, 19 s; lines: 852 of 1,085 (the rest: the scripted Tick's idle
+  bark, the saved games, the remote and player controllers: part 37c; TestSight's no-target fix; mode 3's print).
+- **Port fixes:**
+  - RunPathSearch takes the checkpoints as int: the port cast FindNearest's -1 to 65535 for the search (the original
+    passes the int on).
+  - The original's sum orders: SmoothPath's projection (numerator x, y, z; denominator z, y, x) and distance (z, y, x),
+    NormalizeXYZ (y, z, x), RunPathSearch's drop test (z, y, x), CheckHeel's spot test, ScoreTarget's distance (z, y,
+    x), FacePoint's zero test (x, y, z), DistanceToTarget (37a).
+  - SafeLength tests the float's bits as an int, as the original's inline code does (a NaN with its sign set counts as
+    0); NormalizeXYZ divides a NaN square as the original does (the port turned NaN directions into -1).
+- **Not tested:** the original's unchecked cases the port fixes: non-human or missing candidates for ScoreTarget (seen
+  lists and loud sightings are humans here), a MoveTo without a script (the original advances whatever +0xC0 holds),
+  CheckHeel without an owner (the original reads its spot unset), the sight test without a target or with a tracker
+  without a controller; FindTarget's print (mode 3, no SetController variant).
+- **Mutations** (`human/mutations/mutate_mtai2.py`): 679 mutants (631 generated, 48 for repeated lines); 72 not
+  building; 516 of 607 killed; the survivors are equivalent (44: arrays' sizes, unread arguments, the scores' kept
+  quirk, zero y terms, pool releases), ties at exact boundaries (34), mode 3's print and 12 weak ones (the pass test's
+  line of motion, the predicted height, TestSight's range factors).
+- **Harness lessons (my mistakes):** my random path array's capacity exceeded its allocation (the push overran the heap:
+  crashes the harness could not report); a search that succeeded with no checkpoints (the real one gives at least the
+  start); MeleeTrackerAnimClass takes its argument in ECX (I faked it cdecl); the follow flag set without an owner and
+  the scored lists with non-humans (states the original does not survive); repeated checkpoints in a row (the smoothing
+  divides 0 by 0: NaN paths, where the sides' NaN handling then differed); the source controller's weights mapped to
+  the original's one global pair (overwriting the tested pair's copy); the waypoints' padding made the comparison
+  differ from run to run; CheckHeel without an owner read the original's unset spot (the failures showed only in the
+  coverage build's environment); a Python edit script again turned "\n" into line breaks several times.
