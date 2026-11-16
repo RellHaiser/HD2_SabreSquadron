@@ -1940,7 +1940,9 @@ struct S_WeaponScript {
 } g_ws;
 int CT_ WP_Fire(void *self, void *shooter, const S_vector *pos, const S_vector *dir, uint32_t flags)
 {
-    Log(self, ("WeaponFire " + NameOf(shooter)).c_str(), {pos->x, pos->y, pos->z, dir->x, dir->y, dir->z, double(flags)});
+    // (The flags' low byte: the weapons read only that; the scripted controller's original passes a byte in a register
+    // whose other bytes are left over.)
+    Log(self, ("WeaponFire " + NameOf(shooter)).c_str(), {pos->x, pos->y, pos->z, dir->x, dir->y, dir->z, double(flags & 0xFF)});
     return g_ws.fire;
 }
 int CT_ WP_FireSecondary(void *self, void *shooter, const S_vector *pos, const S_vector *dir, uint32_t flags)

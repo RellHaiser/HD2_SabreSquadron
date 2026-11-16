@@ -3287,3 +3287,35 @@ particles and the surface marks. Files are served from memory.
   overwrote the port's); the original's SetFormation given the port's formation; sounds without a source; the friend's
   enemies from a human whose lists are not converted; the tested human at the origin (a difference and a sum look
   alike: the mutants of FollowFormation's distance lived).
+
+## Human part 39b (the scripted controller: update, tick, seat weapon, firing, attack, alerts, neutral, `scripted_controller.cpp`, 2026-11-16)
+
+- **The build:** part 39a's (`human/build_scripted.bat`, `scripted_test.inc`).
+  - The vehicle: part 35's car (a car, a static weapon or a submarine) with its seat weapon's rounds and origin added
+    (the port's slots, the original's 0x9C and 0xA8 with its hidden return pointer); the submarine's SetControls is
+    part 23's fake. The neutral controller: its own pair (vtable 0x008113e8, 0x140 bytes), the AI pair for its calls.
+  - GetLeadPoint is a copy of the port's (enemy_gunner.cpp's; inline in the original). The heard sounds (the original's
+    +0x2A8) emptied before the alerts and compared after, by their contents (each side's pool objects). UpdateMove's
+    fake ends the route now and then (the move order's FLAG_ROUTE, +0x50, on both sides). Part 23's weapon Fire fake
+    logs the flags' low byte (the weapons read only that).
+- **The tests:** 12,000 calls: Update, Tick (in a vehicle or not, the formation, waiting for the player, the route's
+  end, the attack, the firing time, network games' send mask), ControlVehicle, TurnAt, TurnSeatWeapon, AttackActor,
+  AttackFrame, UpdateFireTime (from a seat or not), GetSeatAimDir (scattered or not), AimAndFireSeatWeapon (a gun or a
+  cannon, no rounds), DecideAttack (each weapon behaviour, targets up to 330 m), UpdateAttack, ProcessMeleeTrackerAlerts
+  (the nearby humans and others), the neutral controller's Attach, Detach and Unknown114.
+- **Results:** 113,787 checks for the file (parts 39a-b), 0 failures, 29 s; lines: 791 of 791.
+- **Port fixes:** ProcessMeleeTrackerAlerts looks a nearby actor up a second time for its controller, as the original
+  (it looked it up once: the same answer, one call fewer).
+- **Not tested:** the original's crashes: a meleeTracker alert whose source is gone and sounds without a source (the AI
+  base turns toward the source unchecked, both sides), a nearby actor that is gone (the original reads it: the port
+  checks), firing from a seat outside a vehicle and a firing with no target and no frame (both read them unchecked), a
+  weapon without its model (both); the same event twice in the pending queue (impossible in play: the original
+  releases it twice and leaves one).
+- **Mutations** (`human/mutations/mutate_scripted2.py`): 310 mutants (248 generated, 62 for repeated lines); 21 not
+  building; 256 of 289 killed; the survivors are not compared (5: stale w words, the silent release), equivalent (8),
+  ties (9) and weak (11: waiting for the player, whose fake is the human itself; DecideAttack's range bands).
+- **Harness lessons (my mistakes):** a second fake of the submarine's SetControls; sounds and alerts without a source;
+  the same event twice in the pending queue (the original then leaves one: I took it for a port difference until a
+  run without duplicates agreed); firing from a seat outside a vehicle, a firing with neither target nor frame, a
+  weapon without its model (crashes of both sides); a nearby actor that is gone; the neutral's random state without
+  the walking network; 20,000 calls made the test 41 s (12,000: 29 s).

@@ -50,10 +50,22 @@ int S_HumanBody::GetActivityAnimLength(int id, int variant)
     Log(nullptr, "GetActivityAnimLength", {double(id), double(variant)});
     return g_scs.animLength;
 }
+// (enemy_gunner.cpp's, copied: inline in the original; that file is linked by the enemy's part.)
 S_vector4 GetLeadPoint(const C_Human *human)
 {
-    Log(human, "GetLeadPoint");
-    return g_scs.lead;
+    S_vector4 point;
+    const uint32_t flags = human->GetController()->GetMoveFlags();
+    if (flags & (MOVE_STANDING | MOVE_CROUCHING)) {
+        const S_vector &body = human->GetBodyFrame()->GetWorldPos();
+        point = {body.x, body.y - 0.3f, body.z, 0.0f};
+    } else {
+        point = WorldPos4Of(human->GetFrame());
+    }
+    const S_vector &velocity = human->GetVelocity();
+    point.x += velocity.x * 0.125f;
+    point.y += velocity.y * 0.125f;
+    point.z += velocity.z * 0.125f;
+    return point;
 }
 // (human_events.cpp's, copied: GetActorById is the test's on both sides; the original runs its own.)
 C_Actor *C_HumanEvents::GetNearbyActor(int index) const
@@ -272,9 +284,16 @@ std::string ScriptedDiffers()
     }
     return "";
 }
+// (The look direction's w, the facing's +0x2C: the turns pass a stack word they do not set, the port 0.)
 template <class P, class O> void ScCall(const char *what, P port, O original)
 {
-    DaCall(what, ScriptedToOrig, ScriptedDiffers, [] {}, port, original);
+    DaCall(what, ScriptedToOrig, ScriptedDiffers,
+           [] {
+               uint8_t *facing;
+               std::memcpy(&facing, g_osc + 0x124, 4);
+               std::memcpy(facing + 0x2C, reinterpret_cast<const uint8_t *>(g_psc->m_facing) + 0x2C, 4);
+           },
+           port, original);
 }
 
 // The formation (the leader at the port's member and the original's +0x74), frames to fire at and turn to.
@@ -393,7 +412,8 @@ void RandomScripted(bool aiming)
     e.*DaGet(EvNearby()) = {};
     for (S_HumanEvent &ev : g_daEv) {
         ev.type = P(0.5f) ? 0x10000017u : uint32_t(I(1, 9));
-        ev.sourceId = P(0.2f) ? -1 : humans[I(0, 1)]->GetNetId();
+        // (An alert's source someone there, as the meleeTracker barks at: the AI turns toward a sound's source unchecked.)
+        ev.sourceId = P(0.2f) && ev.type != 0x10000017u ? -1 : humans[I(0, 1)]->GetNetId();
         ev.timeLeft = I(0, 30000);
         ev.pos = AiDir();
     }
@@ -791,6 +811,343 @@ void TestScriptedA()
     }
 }
 
+// ---- part 39b: the update and the tick, the seat weapon's turning and firing, the firing for a time, AttackMoveTo's
+// attack, the meleeTrackers' alerts, the neutral controller.
+DA_ROB(ScTurnSeatWeapon, void (S_Sc::*)(), &S_Sc::TurnSeatWeapon)
+DA_ROB(ScUpdateFireTime, void (S_Sc::*)(int), &S_Sc::UpdateFireTime)
+DA_ROB(ScGetSeatAimDir, S_vector (S_Sc::*)(bool), &S_Sc::GetSeatAimDir)
+DA_ROB(ScAimAndFireSeatWeapon, void (S_Sc::*)(), &S_Sc::AimAndFireSeatWeapon)
+DA_ROB(ScProcessMeleeTrackerAlerts, void (S_Sc::*)(), &S_Sc::ProcessMeleeTrackerAlerts)
+DA_ROB(ScDecideAttack, void (S_Sc::*)(), &S_Sc::DecideAttack)
+DA_ROB(ScUpdateAttack, void (S_Sc::*)(int), &S_Sc::UpdateAttack)
+
+// The car's seat weapon's rounds and origin (part 35's car: the port's slots and the original's 0x9C, 0xA8 with its
+// hidden return pointer).
+struct S_ScSeat {
+    int rounds = 5;
+    S_vector origin;
+} g_scSeat;
+struct S_ScSeatFake {
+    virtual int Rounds(int seat);
+    virtual S_vector Origin(int seat);
+};
+int S_ScSeatFake::Rounds(int seat)
+{
+    Log(this, "GetSeatWeaponRounds", {double(seat)});
+    return g_scSeat.rounds;
+}
+S_vector S_ScSeatFake::Origin(int seat)
+{
+    Log(this, "GetSeatWeaponOrigin", {double(seat)});
+    return g_scSeat.origin;
+}
+int AC SC_SeatRounds(void *self, int seat)
+{
+    Log(self, "GetSeatWeaponRounds", {double(seat)});
+    return g_scSeat.rounds;
+}
+float *AC SC_SeatOrigin(void *self, float *out, int seat)
+{
+    Log(self, "GetSeatWeaponOrigin", {double(seat)});
+    out[0] = g_scSeat.origin.x;
+    out[1] = g_scSeat.origin.y;
+    out[2] = g_scSeat.origin.z;
+    return out;
+}
+void AC SC_SubmarineSetControls(void *self, float forward, float side, float up)
+{
+    Log(self, "SubmarineSetControls", {forward, side, up});
+}
+
+// The neutral controller's pair (vtable 0x008113e8, 0x140 bytes).
+struct S_TestNeutral : C_NeutralController {
+    bool ExecuteCommand(const S_HumanCommand &c) override
+    {
+        LogCommand(this, c);
+        return true;
+    }
+};
+S_TestNeutral *g_pne;
+uint8_t *g_one;
+void *g_oneVt[0x48];
+
+void SetUpScriptedB()
+{
+    S_ScSeatFake fake;
+    void **fakeVt = *reinterpret_cast<void ***>(&fake);
+    g_asCarPortVt[VSlot(&C_Actor::GetSeatWeaponRounds)] = fakeVt[0];
+    g_asCarPortVt[VSlot(&C_Actor::GetSeatWeaponOrigin)] = fakeVt[1];
+    g_asCarOrigVt[0x9C / 4] = reinterpret_cast<void *>(SC_SeatRounds);
+    g_asCarOrigVt[0xA8 / 4] = reinterpret_cast<void *>(SC_SeatOrigin);
+    RedirectOriginal(0x005e0dd0, FAKE(SC_SubmarineSetControls));
+    g_pne = new S_TestNeutral;
+    g_one = DaOrigController(g_pne, 0x140, HUMAN_CONTROLLER_NEUTRAL, 0x008113e8, g_oneVt, "neutral");
+    // (The AI pair the scripted controller again.)
+    g_pa = reinterpret_cast<S_TestAi *>(static_cast<C_AIController *>(g_psc));
+    g_oa = g_osc;
+}
+
+// Part 39a's state, then: the human in the car now and then (a car, a static weapon or a submarine), the seat weapon,
+// the hands item's behaviour, targets near, the pending meleeTracker alerts and the nearby actors.
+void RandomScriptedB(bool aiming)
+{
+    RandomScripted(aiming);
+    S_Sc *s = Sc();
+    C_Human *h = g_h.human;
+    auto *car = reinterpret_cast<C_Actor *>(g_asCarPort);
+    static const int types[] = {ACTOR_CAR, ACTOR_STATIC_WEAPON, ACTOR_SUBMARINE, ACTOR_CAR};
+    const int type = types[I(0, 3)];
+    car->m_type = static_cast<E_ActorType>(type);
+    std::memcpy(g_asCarOrig + 0x18, &type, 4);
+    // (Firing from a seat in the vehicle, as AttackActor / AttackFrame set it: both read it unchecked.)
+    h->m_vehicle = P(0.4f) || s->*DaGet(ScFireFromSeat()) ? car : nullptr;
+    // (A firing has its target or frame: the aim reads the frame unchecked, both sides.)
+    if (!(s->*DaGet(ScFireTarget())) && !(s->*DaGet(ScFireFrame())))
+        s->*DaGet(ScFireFrame()) = g_asThirdFrame;
+    h->m_seat = I(0, 3);
+    void *ov = h->m_vehicle ? static_cast<void *>(g_asCarOrig) : nullptr;
+    std::memcpy(o_human + 0x160, &ov, 4);
+    std::memcpy(o_human + 0x164, &h->m_seat, 4);
+    // The seat weapon: its aim now and then toward the target (the turn's and the firing's tests).
+    g_scSeat.rounds = P(0.2f) ? 0 : I(1, 30);
+    g_scSeat.origin = h->GetFrame()->GetWorldPos() + S_vector(U(-1, 1), U(0, 2), U(-1, 1));
+    if (P(0.4f)) {
+        I3D_frame *to = P(0.5f) ? g_asThirdFrame : PortOther()->GetFrame();
+        S_vector dir = to->GetWorldPos() - h->GetFrame()->GetWorldPos();
+        dir.Normalize();
+        g_asSeat.aim = (dir + (P(0.5f) ? S_vector(0, 0, 0) : S_vector(U(-0.1f, 0.1f), U(-0.1f, 0.1f), U(-0.1f, 0.1f)))).Normalized();
+    }
+    static const int behaviours[] = {ITEM_BEHAVIOUR_SIDEARM, ITEM_BEHAVIOUR_SMG, ITEM_BEHAVIOUR_RIFLE, ITEM_BEHAVIOUR_ASSAULT,
+                                     ITEM_BEHAVIOUR_LMG, 0, 7};
+    g_behaviour = behaviours[I(0, 6)];
+    // The pending events (meleeTracker alerts and others) and the nearby actors (the humans' ids, gone ones, -1).
+    C_HumanEvents &e = g_daEvents;
+    // (Each a different event, as raised: the same one twice does not happen, and the original releases it twice.)
+    {
+        int order[DA_EVENTS];
+        for (int k = 0; k < DA_EVENTS; ++k)
+            order[k] = k;
+        for (int k = DA_EVENTS; k > 1; --k)
+            std::swap(order[k - 1], order[I(0, k - 1)]);
+        for (int k = P(0.3f) ? 0 : I(1, 4); k > 0; --k)
+            (e.*DaGet(EvPending())).push_back(&g_daEv[order[k]]);
+    }
+    for (int k = I(0, 3); k > 0; --k)
+        (e.*DaGet(EvNearby())).push_back(P(0.2f) ? static_cast<C_Actor *>(PortActor(I(0, ACTOR_KIND_COUNT - 1)))->GetNetId()
+                                                 : (P(0.5f) ? h : PortOther())->GetNetId());   // (known: the original reads one gone)
+    g_scs.time = uint32_t(I(0, 1000000));
+    // (The formation not led by the human: the original's FollowFormation returns a stale byte then.)
+    if (s->*DaGet(ScFormation()) && ScFormationObj()->*DaGet(FmLeader()) == h) {
+        ScFormationObj()->*DaGet(FmLeader()) = PortOther();
+        void *oleader = ToOrig(PortOther());
+        std::memcpy(g_scOrigFormation + 0x74, &oleader, 4);
+    }
+    g_script.activeIsOwner = P(0.6f);
+    // (The movement idle or not: the network games' send mask.)
+    g_h.movement->m_unknown1AC = P(0.5f) ? 0 : I(1, 3);
+    g_h.movement->m_unknown9C0 = P(0.5f) ? 0 : I(1, 900);
+    // (A tick that may fire: the weapon has its model (the shot dummy's frame), as part 36's firing tests.)
+    if (aiming)
+        g_cs.itemFrame = g_shdumParent;
+    // (The active player is the human itself here, 0 m away: a stop distance below 0 now and then.)
+    if (P(0.3f))
+        s->*DaGet(ScStopDist2()) = U(-1, -0.1f);
+    // A route that ends in the move now and then.
+    g_da.routeEnds = P(0.3f);
+    if (P(0.6f))
+        s->m_move->flags |= S_AIMoveOrder::FLAG_ROUTE;
+}
+
+// The heard sounds (the port's vector, the original's at +0x2A8): emptied before, their contents compared after.
+std::string HeardSoundsDiffer()
+{
+    const std::vector<S_RememberedSound *> &port = g_h.human->m_heardSounds;
+    uint32_t v[4];
+    std::memcpy(v, o_human + 0x2A8, 16);
+    const size_t n = v[1] ? (v[2] - v[1]) / 4 : 0;
+    if (n != port.size())
+        return "heard sounds: " + std::to_string(port.size()) + " / " + std::to_string(n);
+    for (size_t k = 0; k < n; ++k) {
+        const auto *o = reinterpret_cast<const uint8_t *const *>(static_cast<uintptr_t>(v[1]))[k];
+        const auto *p = reinterpret_cast<const uint8_t *>(port[k]);
+        if (std::memcmp(o, p, 0x14) != 0 || std::memcmp(o + 0x18, p + 0x18, 4) != 0)
+            return "heard sound " + std::to_string(k);
+        void *source;
+        std::memcpy(&source, p + 0x14, 4);
+        if ((source ? ToOrig(source) : nullptr) != *reinterpret_cast<void *const *>(o + 0x14))
+            return "heard sound " + std::to_string(k) + " source";
+    }
+    return "";
+}
+
+void TestScriptedB()
+{
+    std::printf("scripted: update, tick, seat weapon, firing, attack, alerts, neutral\n");
+    SetUpScriptedB();
+    C_Human *const humans[2] = {g_h.human, PortOther()};
+    for (int i = 0; i < 12000 / QUICK; ++i) {
+        const int which = I(0, 15);
+        RandomScriptedB(which == 1 || which == 6 || which == 8);
+        S_Sc *s = Sc();
+        const int dt = I(0, 200);
+        switch (which) {
+        case 0:
+            ScCall("Update", [&] { s->Update(dt); return 0; }, [&](void *) { OAi<void>(0x0058e1c0, dt); return 0; });
+            break;
+        case 1:
+            ScCall("Tick", [&] { s->Tick(dt); return 0; }, [&](void *) { OAi<void>(0x0058e210, dt); return 0; });
+            break;
+        case 2:
+            g_h.human->m_vehicle = reinterpret_cast<C_Actor *>(g_asCarPort);   // (the original reads the vehicle unchecked)
+            {
+                void *ov = g_asCarOrig;
+                std::memcpy(o_human + 0x160, &ov, 4);
+            }
+            ScCall("ControlVehicle", [&] { s->ControlVehicle(); return 0; }, [&](void *) { OAi<void>(0x005911f0); return 0; });
+            break;
+        case 3: {
+            I3D_frame *target = P(0.2f) ? nullptr : P(0.5f) ? g_asThirdFrame : PortOther()->GetFrame();
+            ScCall("TurnAt", [&] { s->TurnAt(target); return 0; }, [&](void *) { OAi<void>(0x005904c0, static_cast<void *>(target)); return 0; });
+            break;
+        }
+        case 4:
+            ScCall("TurnSeatWeapon", [&] { (s->*DaGet(ScTurnSeatWeapon()))(); return 0; }, [&](void *) { OAi<void>(0x0058db20); return 0; });
+            break;
+        case 5: {
+            const int time = I(-10, 3000), label = I(-1, 30);
+            const bool fake = P(0.5f);
+            if (P(0.5f)) {
+                C_Actor *target = P(0.2f) ? nullptr : static_cast<C_Actor *>(humans[I(0, 1)]);
+                ScCall("AttackActor", [&] { s->AttackActor(target, time, fake, label); return 0; },
+                       [&](void *) { OAi<void>(0x0058f1f0, target ? ToOrig(target) : nullptr, time, int(fake), label); return 0; });
+            } else {
+                I3D_frame *target = P(0.5f) ? g_asThirdFrame : g_h.frame;
+                ScCall("AttackFrame", [&] { s->AttackFrame(target, time, fake, label); return 0; },
+                       [&](void *) { OAi<void>(0x0058f260, static_cast<void *>(target), time, int(fake), label); return 0; });
+            }
+            break;
+        }
+        case 6:
+            // (The fire target the tested human: its model has the bones the aim picks from.)
+            s->*DaGet(ScFireTarget()) = P(0.3f) ? nullptr : g_h.human;
+            if (!(s->*DaGet(ScFireTarget())) && !(s->*DaGet(ScFireFrame())))
+                s->*DaGet(ScFireFrame()) = g_asThirdFrame;
+            if (s->*DaGet(ScFireFromSeat())) {
+                // (Firing from a seat: in the vehicle, as AttackActor / AttackFrame set it; both read it unchecked.)
+                g_h.human->m_vehicle = reinterpret_cast<C_Actor *>(g_asCarPort);
+                void *ov = g_asCarOrig;
+                std::memcpy(o_human + 0x160, &ov, 4);
+            }
+            ScCall("UpdateFireTime", [&] { (s->*DaGet(ScUpdateFireTime()))(dt); return 0; }, [&](void *) { OAi<void>(0x0058e500, dt); return 0; });
+            break;
+        case 7: {
+            // (In a seat: the original reads the vehicle unchecked; a fire target or frame.)
+            g_h.human->m_vehicle = reinterpret_cast<C_Actor *>(g_asCarPort);
+            void *ov = g_asCarOrig;
+            std::memcpy(o_human + 0x160, &ov, 4);
+            if (!(s->*DaGet(ScFireTarget())) && !(s->*DaGet(ScFireFrame())))
+                s->*DaGet(ScFireFrame()) = g_asThirdFrame;
+            if (P(0.5f)) {
+                const bool scatter = P(0.5f);
+                S_vector pd, od;
+                ScCall("GetSeatAimDir",
+                       [&] {
+                           pd = (s->*DaGet(ScGetSeatAimDir()))(scatter);
+                           return 0;
+                       },
+                       [&](void *) {
+                           typedef float *(AC * T_Fn)(void *, float *, int);
+                           float out[3];
+                           OriginalAt<T_Fn>(0x0058e8b0)(g_osc, out, int(scatter));
+                           od = S_vector(out[0], out[1], out[2]);
+                           return 0;
+                       });
+                const bool same = std::memcmp(&pd, &od, 12) == 0;
+                CHECK(same);
+                static int shown;
+                if (!same && shown++ < 3)
+                    std::printf("  GetSeatAimDir: %g %g %g / %g %g %g\n", pd.x, pd.y, pd.z, od.x, od.y, od.z);
+            } else {
+                ScCall("AimAndFireSeatWeapon", [&] { (s->*DaGet(ScAimAndFireSeatWeapon()))(); return 0; },
+                       [&](void *) { OAi<void>(0x0058ebd0); return 0; });
+            }
+            break;
+        }
+        case 8:
+            // (The other human far now and then: the weapons' ranges, 30 to 300 m.)
+            if (P(0.5f)) {
+                const S_vector4 &own = g_h.human->m_position;
+                const float yaw = U(0, 6.2831f), d = U(20, 330);
+                PortOther()->m_position = {own.x + std::sin(yaw) * d, own.y, own.z + std::cos(yaw) * d, 1.0f};
+                std::memcpy(g_origOther + 0x30, &PortOther()->m_position, 16);
+            }
+            ScCall("DecideAttack", [&] { (s->*DaGet(ScDecideAttack()))(); return 0; }, [&](void *) { OAi<void>(0x00591550); return 0; });
+            break;
+        case 9:
+        case 10:
+            ScCall("UpdateAttack", [&] { (s->*DaGet(ScUpdateAttack()))(dt); return 0; }, [&](void *) { OAi<void>(0x00591930, dt); return 0; });
+            break;
+        case 11: {
+            g_h.human->m_heardSounds.clear();
+            std::memset(o_human + 0x2A8, 0, 16);
+            ScCall("ProcessMeleeTrackerAlerts", [&] { (s->*DaGet(ScProcessMeleeTrackerAlerts()))(); return 0; },
+                   [&](void *) {
+                       std::memset(o_human + 0x2A8, 0, 16);
+                       OAi<void>(0x0058fd30);
+                       return 0;
+                   });
+            const std::string why = HeardSoundsDiffer();
+            CHECK(why.empty());
+            static int shown;
+            if (!why.empty() && shown++ < 3)
+                std::printf("  ProcessMeleeTrackerAlerts: %s\n", why.c_str());
+            g_h.human->m_heardSounds.clear();
+            break;
+        }
+        default: {
+            // The neutral controller (its own pair, the AI pair for the call).
+            g_pa = reinterpret_cast<S_TestAi *>(static_cast<C_AIController *>(g_pne));
+            g_oa = g_one;
+            RandomAi();
+            g_pa->m_human = g_h.human;
+            // (The game's walking network: the original reads a missing one's ladder points.)
+            GetGame()->m_checkpoints = reinterpret_cast<C_Checkpoints *>(g_checkpointNet);
+            {
+                void *net = g_checkpointNet;
+                std::memcpy(g_origGame + 0x54, &net, 4);
+            }
+            C_HumanController *previous = P(0.5f) ? nullptr : static_cast<C_HumanController *>(g_pc2);
+            const int k = I(0, 2);
+            const char *const names[] = {"NeutralAttach", "NeutralDetach", "NeutralUnknown114"};
+            const S_vector dir(U(-1, 1), U(-1, 1), U(-1, 1));
+            DaCall(
+                names[k], [] {}, [] { return std::string(); }, [] {},
+                [&] {
+                    if (k == 0)
+                        g_pne->Attach(g_h.human, previous);
+                    else if (k == 1)
+                        g_pne->Detach();
+                    else
+                        return int(g_pne->Unknown114(&dir));
+                    return 0;
+                },
+                [&](void *) {
+                    if (k == 0)
+                        OAi<void>(0x005a42f0, ToOrig(g_h.human), previous ? ToOrig(previous) : nullptr);
+                    else if (k == 1)
+                        OAi<void>(0x005a4310);
+                    else
+                        return int(OAi<uint32_t>(0x005a42e0, &dir) & 0xFF);
+                    return 0;
+                });
+            g_pa = reinterpret_cast<S_TestAi *>(static_cast<C_AIController *>(g_psc));
+            g_oa = g_osc;
+            break;
+        }
+        }
+    }
+}
+
 void TestScripted()
 {
     SetUpSenses();
@@ -801,6 +1158,7 @@ void TestScripted()
     SetUpFireOrder();
     SetUpScripted();
     TestScriptedA();
+    TestScriptedB();
     g_humanAnswers = nullptr;
     g_visiblePartsOf = nullptr;
 }

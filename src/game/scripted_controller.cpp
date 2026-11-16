@@ -1134,6 +1134,8 @@ void C_ScriptedController::ProcessMeleeTrackerAlerts()
             // Fix: the original read a nearby actor that is gone.
             if (!actor || actor->GetType() != ACTOR_HUMAN)
                 continue;
+            // (The actor looked up again for its controller, as the original.)
+            actor = m_events->GetNearbyActor(j);
             if (C_HumanController *controller = static_cast<C_Human *>(actor)->GetController())
                 controller->OnSoundHeard(sound);
         }

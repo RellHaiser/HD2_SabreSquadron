@@ -40,6 +40,7 @@ struct S_DaScript {
     int move = 0;                                       // UpdateMove
     bool longGun = false;                               // DrawLongGun
     std::vector<uint16_t> neighbours;                   // GetNeighbours
+    bool routeEnds = false;                             // UpdateMove ends the route (the move order's FLAG_ROUTE, +0x50)
 } g_da;
 }  // namespace
 
@@ -47,6 +48,8 @@ struct S_DaScript {
 int C_AIController::UpdateMove(int timeDelta)
 {
     Log(this, "UpdateMove", {double(timeDelta)});
+    if (g_da.routeEnds)
+        m_move->flags &= ~S_AIMoveOrder::FLAG_ROUTE;
     return g_da.move;
 }
 bool C_Human::DrawLongGun()
@@ -118,6 +121,14 @@ namespace {
 int AC DA_UpdateMove(void *self, int timeDelta)
 {
     Log(self, "UpdateMove", {double(timeDelta)});
+    if (g_da.routeEnds) {
+        uint8_t *move;
+        std::memcpy(&move, static_cast<uint8_t *>(self) + 0x12C, 4);
+        uint32_t flags;
+        std::memcpy(&flags, move + 0x50, 4);
+        flags &= ~uint32_t(S_AIMoveOrder::FLAG_ROUTE);
+        std::memcpy(move + 0x50, &flags, 4);
+    }
     return g_da.move;
 }
 int AC DA_DrawLongGun(void *self)
