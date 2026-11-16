@@ -111,7 +111,11 @@ void LogNetMessage(const void *object, const uint8_t *m, int sentTo, bool outgoi
 void C_NetObject::QueueMessage(C_NetObjectMessage *m, int sentTo, bool outgoing)
 {
     LogNetMessage(this, reinterpret_cast<const uint8_t *>(m), sentTo, outgoing);
-    _aligned_free(m);
+    // (The binoculars' message has no 16-aligned member: the plain new's; the action's and the dive's the aligned one.)
+    if (m->GetType() == 2)
+        ::operator delete(m);
+    else
+        _aligned_free(m);
 }
 int C_NetReplication::GetLocalId() const { return g_ai.localId; }
 C_NetObjectMessage::C_NetObjectMessage(int t) : type(t) {}

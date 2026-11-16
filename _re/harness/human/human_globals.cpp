@@ -5,6 +5,10 @@
 alignas(16) unsigned char g_teamManager[0x400];
 void *g_mpSettingsStorage;
 void *&g_mpSettings = g_mpSettingsStorage;
+// The profile's HUD option (part 40: the player controller; one byte, the original's through 0x008aea18).
+unsigned char g_hudOptionByte;
+void *g_hudOptionStorage = &g_hudOptionByte;
+void *&g_hudOption = g_hudOptionStorage;
 uint32_t g_gameRole = 7;                                // GAME_ROLE_LOCAL
 // g_noPhysicsObject: &g_noPhysicsHandle {-1, false} (physics.cpp is not linked).
 struct S_Handle {

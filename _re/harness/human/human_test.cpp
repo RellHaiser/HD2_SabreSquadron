@@ -125,6 +125,7 @@ struct S_Script {
     bool ladderCanUse = false;
     float viewDirY = 0.0f;
     bool activeIsOwner = false;                         // the player team's active player is the test human
+    uint32_t stanceFlags = 0;                           // C_Human::GetStanceFlags (part 40)
     bool headInWater = false;                           // GetHeadWater's answer (headUnderWater: below the surface)
     bool soundPlays = true;                             // C_MovementSounds::Play gives the fake sound
     bool soundPlaying = true;                           // I3D_sound::IsPlaying's answer
@@ -201,7 +202,7 @@ bool C_Human::AdjustToPathHeight(S_vector *pos) const
 }
 #endif
 #ifndef HUMAN_CONTROL   // (the control build links game/human_control.cpp's)
-uint32_t C_Human::GetStanceFlags() const { Log(this, "GetStanceFlags"); return 0; }
+uint32_t C_Human::GetStanceFlags() const { Log(this, "GetStanceFlags"); return g_script.stanceFlags; }
 #endif
 #ifndef HUMAN_COMBAT
 int C_Human::GetStat(int stat) const { Log(this, "GetStat", {double(stat)}); return g_script.stat; }
@@ -808,6 +809,9 @@ namespace {
 #ifdef HUMAN_REMOTE
 #include "remote_test.inc"
 #endif
+#ifdef HUMAN_PLAYERCTL
+#include "playerctl_test.inc"
+#endif
 #ifdef HUMAN_AISENSES
 #include "aisenses_test.inc"
 #endif
@@ -920,6 +924,8 @@ int main(int argc, char **argv)
     TestAiSenses();
 #elif defined(HUMAN_REMOTE)
     TestRemoteController();
+#elif defined(HUMAN_PLAYERCTL)
+    TestPlayerController();
 #elif defined(HUMAN_AICTL)
     TestAiController();
 #elif defined(HUMAN_CONTROLLER)

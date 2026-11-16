@@ -13,7 +13,7 @@ bool OT O_AdjustToPathHeight(void *self, float *pos)
         pos[1] = g_script.pathY;
     return g_script.pathHeight;
 }
-uint32_t OT O_GetStanceFlags(void *self) { Log(self, "GetStanceFlags"); return 0; }
+uint32_t OT O_GetStanceFlags(void *self) { Log(self, "GetStanceFlags"); return g_script.stanceFlags; }
 int OT O_GetStat(void *self, int stat) { Log(self, "GetStat", {double(stat)}); return g_script.stat; }
 bool OT O_IsLocalPlayer(void *) { return g_script.localPlayer; }
 bool OT O_IsServerSimulated(void *) { return g_script.serverSimulated; }

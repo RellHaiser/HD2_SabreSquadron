@@ -281,6 +281,7 @@ void C_PlayerController::Attach(C_Human *human, C_HumanController *previous)
     m_latchFire2 = 0;
     m_latchFire = 0;
     m_latchThrow = 0;
+    m_whispering = false;                               // (a squad member's taken over below)
     m_throwDelay = 0;
     m_squadCombatOrder = SQUAD_ORDER_MODE0;
     C_CameraModule *camera = GetGame()->GetCameraModule();
@@ -542,11 +543,12 @@ void C_PlayerController::HandleInput(float *held, float *pressed)
             m_viewDir = FrameAxisZ(m_human->GetFrame());
         }
         if (flags & SEAT_FLAG_WEAPON) {
-            // The seat's weapon takes the mouse (inverted as the player wants).
-            if (invertMouse)
+            // The seat's weapon takes the mouse (inverted as the player wants; the setting asked again before and
+            // after, as the original).
+            if (g_gameProfile.GetDetailSettings()->invertMouse)
                 held[AXIS_MOUSE_Y] = -held[AXIS_MOUSE_Y];
             vehicle->ApplySeatControls(seat, held, pressed);
-            if (invertMouse)
+            if (g_gameProfile.GetDetailSettings()->invertMouse)
                 held[AXIS_MOUSE_Y] = -held[AXIS_MOUSE_Y];
             mouseLook = false;
         } else if (flags & SEAT_FLAG_HIDDEN) {
@@ -572,7 +574,9 @@ void C_PlayerController::HandleInput(float *held, float *pressed)
                 yaw += TWO_PI;
             else if (yaw > TWO_PI)
                 yaw -= TWO_PI;
-            if (InArmedCarSeat(m_human) || m_human->m_body.GetClimbState() != 0)
+            // (Both asked, the seat first, as the original.)
+            const bool armed = InArmedCarSeat(m_human);
+            if (m_human->m_body.GetClimbState() != 0 || armed)
                 yaw = ClampYawToFrame(m_human, yaw);
         }
         if (tilt != 0.0f) {

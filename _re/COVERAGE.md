@@ -3319,3 +3319,50 @@ particles and the surface marks. Files are served from memory.
   run without duplicates agreed); firing from a seat outside a vehicle, a firing with neither target nor frame, a
   weapon without its model (crashes of both sides); a nearby actor that is gone; the neutral's random state without
   the walking network; 20,000 calls made the test 41 s (12,000: 29 s).
+
+## Human part 40a (the player controller: the life cycle, the update and the tick, the keys and the mouse, the breath, `player_controller.cpp`, 2026-11-16)
+
+- **The build:** `human/build_playerctl.bat` (`playerctl_test.inc`; part 33a's AI controller build with
+  HUMAN_PLAYERCTL, the movement's OnFrozen wrapped and logged).
+  - The pair: the port's C_PlayerController (ExecuteCommand logged); the original's made by the base constructor
+    (0x00582ff0) with a copy of its vtable (0x00811848), 0x560 bytes, its own fields cleared from 0xC0. Its fields
+    from layout_offsets.py; the pending command without its vtable word; the human's net object kept per side as part
+    33a's AiCall.
+  - Fakes logged alike on both sides: the camera's slots, the car's SetInput, the enemy records' Remove, the
+    first-person view's CanUseWeapon / SetAimView / SetWeaponView, the profile's detail settings (invertMouse at
+    +0x39, a block per side), the sound direction, AddScore, the replication's epochs, the game's VIP slot, objective
+    status and binoculars view, the heavy fire support and the squad commander (fake objects, per-side vtables),
+    RequestThrowItem, the team's IsEnemyKnown and ReleaseHoldingMembers, the player's members in other files
+    (FlushMessages, TickLocal, UpdateRemote, WeaponControls with the four latched buttons), the seats' flags, camera
+    and occupant (part 23's actor vtables).
+  - Compared besides the fields: the shared controls (axes and buttons: Tick latches into them), the human's frame's
+    on flag and SetOn count (only bit 0: reading the matrix sets others on the port's side), the players unlocked.
+  - The state: part 23's controller and part 33a's AI state; a network role, the local player's lives (the team's and
+    the player's, co-op or not), the pace and stamina, the stance, part 23's car (armed seat or not) and climbing now
+    and then, the spectator's camera, the frame turned (now and then tilted), the weapons' ready times, the mission's
+    objectives (a VIP's), the squad member taken over (part 23's second controller as a squad member).
+- **The tests:** 12,000 calls: Attach (no previous, a base controller, a squad member), Detach, OnDeath, OnKilled,
+  Update (spectating, detached, the timers at their edges), Tick (the latches), HandleInput (each control random;
+  the pace keys one at a time; the mouse far, or exactly one step; a scripted view or an interaction; the vehicle
+  seats; marching against the endurance; dropping the hands weapon), HoldBreath.
+- **Results:** 27,023 checks, 0 failures, 7 s; lines: 330 of 332 (the two `> 2 pi` wraps after atan2, which cannot
+  exceed pi).
+- **Port fixes:** Attach clears the whispering flag (the original's +0xC0; a squad member's taken over sets it
+  again); HandleInput asks the profile for invertMouse again around the seat weapon's controls, as the original;
+  the turn's limit asks the seat before the climbing state, both always, as the original.
+- **Not tested:** the original's crashes the port checks: holding the breath through the scope with no hands item,
+  the ready time of a hands item that is not a weapon, dropping through a missing hands container; a squad-type
+  previous controller that is not a squad controller (the original reads past it; impossible in play); a VIP game
+  without a mission (both read it unchecked).
+- **Mutations** (`human/mutations/mutate_playerctl1.py`): 379 mutants (327 generated, 52 for repeated lines); 19 not
+  building; 323 of 360 killed; the survivors are equivalent (24: unit axes normalised again, periodic angle wraps,
+  the second pitch clamp, stores made anyway), ties (10) and not reached here (3: the spectated slot 0, the index -1
+  before the controls' arrays).
+- **Harness lessons (my mistakes):** the build script at first still linked remote_controller.cpp (a sed pattern's
+  backslash); a second OnDamaged; SetUpPlayerFakes not called; the action command's actor and member are pointers; a
+  squad-type previous that was a base controller; no mission in the VIP path; a binoculars message freed with
+  _aligned_free; the control arrays unmapped; holding the breath without a hands item (the original's crash); a
+  null LockPlayers; a heredoc collapsed a macro's backslash; the mutation runner without the OnFrozen wrap (failing
+  baseline); the pace and mouse keys written inside the controls' loop; the shared buttons, the frame's on flag and
+  the unlocks not compared at first (72 survivors, 37 after); I first read the original's frame flag after DiffCall
+  had put the port's state back, and once took an already-killed mutant for a flaky one.

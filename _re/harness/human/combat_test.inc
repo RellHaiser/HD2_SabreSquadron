@@ -71,10 +71,12 @@ int C_NetGame::GetPlayerTeam(int slot, bool pending)
     return slot >= 0 && slot < 64 ? g_combat.playerTeam[slot] : 0;
 }
 void C_NetGame::OnPlayerKilled(int victim, int killer) { Log(nullptr, "OnPlayerKilled", {double(victim), double(killer)}); }
+#ifndef HUMAN_PLAYERCTL   // (the player controller's build links game/player_controller.cpp's)
 void C_PlayerController::OnDamaged(int type, int zone, const S_vector &dir)
 {
     Log(this, "PlayerOnDamaged", {double(type), double(zone), dir.x, dir.y, dir.z});
 }
+#endif
 const char *C_QuickMessages::GetText(int id) const { return id == 0 ? "quick0" : "quick"; }
 void C_Script::OnDeath() { Log(this, "ScriptOnDeath"); }
 void C_ShotManager::PlayHitEffect(int material, const S_vector &pos, const S_vector &normal)
