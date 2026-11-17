@@ -10,6 +10,19 @@
 - Last checkpoint: none
 - Checkpoint location: none
 - Review/integration: none
+- Pull request: none
+
+## Branch authority and completion PR
+
+The assigned agent has full control of this task's branch: editing, committing, rebasing,
+resolving conflicts, pushing to the project remote, and creating/updating its PR without
+repeated user approval. Preserve other workers' work and shared checkpoints. When the
+implementation and required validation are complete, push and create/update a PR targeting
+`main`. Include reproducible **How to test** steps, prerequisites, and expected results;
+separate checks actually run from proposed reviewer checks. State **Source-only** explicitly
+when no runnable artifact is supplied, or **Documentation-only** for documentation tasks.
+Record the PR URL in this handoff. Follow the [completion PR requirements](../agent_workflow.md#review-and-integration);
+source-only delivery does not waive required runtime acceptance evidence.
 
 ## Result and scope
 

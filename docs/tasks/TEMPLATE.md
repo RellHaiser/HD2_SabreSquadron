@@ -11,6 +11,18 @@
   literal self-referential commit ID cannot be recorded
 - Checkpoint location: local only / actual remote branch or PR
 - Review/integration: none; record the final integrated commit after merging
+- Pull request: none; record its URL when created
+
+## Branch authority and completion PR
+
+The assigned agent has full control of this task's branch, including editing, committing,
+rebasing, resolving conflicts, pushing to the project remote, and creating/updating its
+PR without repeated user approval. Preserve other workers' work and shared checkpoints.
+When implementation and required validation are complete, push and create/update a PR
+targeting `main`. Follow the [completion PR requirements](../agent_workflow.md#review-and-integration).
+The description must give reproducible **How to test** steps and expected results, report
+checks actually run, and explicitly state **Source-only** or **Documentation-only** when
+applicable. Source-only delivery does not waive required runtime acceptance evidence.
 
 ## Result and scope
 
@@ -34,6 +46,14 @@ section before expanding scope.
 Record exact commands, environment/toolchain, tested commit, outcome, and concise evidence
 or artifact location. Distinguish passed, failed, and unavailable checks. Keep game assets
 and secrets out of committed logs. Documentation changes do not require a game build.
+
+## PR test instructions and delivery
+
+- Delivery: integrated gameplay / component; runnable artifact / Source-only / Documentation-only
+- Prerequisites: toolchain, dependencies, game version/data, and relevant settings
+- How to test: exact setup/build/launch steps or document/harness checks, with expected results
+- Validation actually run: commands, environment, and outcomes
+- Not run: missing checks and reasons; keep suggested reviewer steps distinct from passed checks
 
 ## Handoff
 

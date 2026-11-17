@@ -40,6 +40,11 @@ no required team size and no permanent UI, networking, or integration agent.
 
 ## Claiming and resuming work
 
+Once assigned, the agent has full control of its task branch, including editing,
+committing, rebasing, resolving conflicts, pushing to the project remote, and creating
+or updating its PR without repeated user approval. This authority covers the task branch;
+`main` still accepts only finished, reviewed work.
+
 1. Check the current coordinator's claim map, local worktrees, and existing local/remote
    task branches or PRs. Do not infer availability from the planning copy on `main`.
 2. Get a claim or reassignment acknowledged. Use the canonical branch above; if it already
@@ -47,6 +52,12 @@ no required team size and no permanent UI, networking, or integration agent.
 3. Update that branch's task record with owner, status, base SHA, scope, and next action.
 4. Before stopping, commit a handoff and preserve the code checkpoint. Record check results
    and where the checkpoint is accessible, including whether it is local only.
+5. When the task implementation and required validation are complete, push the branch and
+   create/update a PR targeting `main`. Include reproducible **How to test** steps with
+   prerequisites, commands/actions, and expected results. State **Source-only** explicitly
+   when no runnable artifact is supplied, or **Documentation-only** for documentation tasks.
+   Separate checks actually run from suggested reviewer checks and record the PR URL in
+   the task handoff. Task status remains `review` until integration, then becomes `done`.
 
 The coordinator transfers the active claim map and merge queue in a durable handoff when
 that role changes. A branch file is a progress record; branch discovery and coordinator

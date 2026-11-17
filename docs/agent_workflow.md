@@ -10,6 +10,13 @@ time; tasks have dependencies and acceptance criteria rather than permanent agen
 
 ## Branches and worktrees
 
+Once assigned, an agent has full control of its task branch, including editing, committing,
+checkpointing, rebasing, resolving conflicts, pushing to the configured project remote,
+and creating or updating its pull request. These task-branch actions are authorized by
+the project owner and do not require repeated user approval. Coordinate changes that
+affect another worker's shared history or contracts. Integration into `main` remains
+subject to the review and acceptance gates below.
+
 Use one branch per bounded task and one separate worktree per active worker. Name branches
 `feature/coop-001-build-baseline`, `fix/coop-012-controller-handoff`, or
 `docs/coop-003-preparation-ui` using the task's ID and a short description. Avoid branch
@@ -179,9 +186,10 @@ asking for review. Include:
 - Uncommitted changes and where they live, if an interruption prevented committing them.
 
 Checkpoint commits may contain WIP on a task branch. Give them a clear message and keep
-them out of `main`. When an authorized remote is available, publish checkpoint commits
+them out of `main`. When the project remote is available, push checkpoint commits
 and use a draft PR so another machine can find the work. The PR must identify its task,
-dependencies, scope, and handoff file. A local-only branch can be resumed only where its
+dependencies, scope, and handoff file. Branch publication and task PR creation are already
+authorized; do not ask the user to approve them again. A local-only branch can be resumed only where its
 Git objects and working files are available; a chat summary alone does not transfer them.
 
 Do not require a remote service to work locally. Without one, the coordinator tracks
@@ -220,6 +228,31 @@ pushes during handoff, and do not rewrite commits another active task depends on
 
 ## Review and integration
 
+When the task implementation and required validation are complete, push the final branch
+and create a pull request targeting `main`, or update its existing draft and mark it ready
+for review. Record the PR URL in the task record. A local commit or final chat reply alone
+does not complete the review handoff. If remote access is unavailable, preserve the local
+checkpoint, record the publication blocker and prepared PR description, and report that
+the PR still needs to be created.
+
+Every completion PR description must include:
+
+- The completed result, task/dependencies, and whether it is integrated gameplay, a
+  component, source-only delivery, or documentation-only delivery. State **Source-only**
+  explicitly when no runnable artifact is supplied; describe whether the code is wired
+  into the game and whether a build or runtime test was performed.
+- Reproducible **How to test** steps: required toolchain, game data/version, setup/build
+  and launch commands, relevant mission/settings, player count and host/guest actions
+  where applicable, and the expected result after each meaningful step.
+- Checks actually run, their environment and outcomes, and any checks not run. Separate
+  suggested reviewer steps from validation already performed. For source-only components,
+  explain how to build/run the relevant harness or tests; for documentation-only tasks,
+  give document review and link/diff checks instead of invented gameplay steps.
+
+Use [the PR template](../.github/pull_request_template.md). Source-only delivery describes
+what is supplied; it does not waive runtime evidence required by the task's acceptance
+criteria. Keep a PR in draft if those criteria remain unmet.
+
 The unit of integration is a finished, reviewable task with a clear result. A reusable
 ownership module with meaningful tests can be finished before the entire co-op mode is
 playable. Its task must describe that limited outcome and it must not expose unfinished
@@ -255,8 +288,8 @@ commit list so no draft dependency or unrelated change lands accidentally.
 
 Merge the reviewed feature through the repository's authorized integration mechanism.
 Keep feature history identifiable with its task ID, whether using a PR squash or a merge
-commit. Do not push, merge, or change branch protection merely because this document
-describes the procedure; follow the authorization for the current assignment.
+commit. Task-branch pushes and PR creation are authorized as above. Merging into `main`
+requires the integration gates; changing repository branch protection is a separate action.
 
 After a successful merge, record `done` and the actual merged commit in the task record
 through a finished documentation follow-up if the integration mechanism could not include
