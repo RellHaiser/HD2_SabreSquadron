@@ -214,8 +214,8 @@ void C_SquadController::MakeRoomForLeader()
     S_vector4 dir = selected->m_velocity;
     if (dir.x * dir.x + dir.z * dir.z + dir.y * dir.y == 0.0f)
         dir = selected->GetDirection4();
-    S_vector d(dir.x, dir.y, dir.z);
-    d.Normalize();
+    // (The square summed (y² + z²) + x², as the original's inline.)
+    const S_vector d = S_vector(dir.x, dir.y, dir.z).NormalizedGame();
     StepAside(other, {d.x, d.y, d.z, dir.w}, true, false);
 }
 

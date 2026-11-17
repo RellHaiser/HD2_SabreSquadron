@@ -1033,10 +1033,10 @@ void C_SquadController::FinishAction(int type)
             leader = g_teamManager.GetPlayerTeam()->GetSelectedMember();
         bool cover = false;
         if (leader) {
-            const uint32_t stance = leader->GetStanceFlags();
-            if ((stance & MOVE_LYING) && m_quietTime > 5000)
+            // (The stance asked again for each test, as the original does.)
+            if ((leader->GetStanceFlags() & MOVE_LYING) && m_quietTime > 5000)
                 m_coverStance = MOVE_LYING;
-            else if (stance & MOVE_CROUCHING)
+            else if (leader->GetStanceFlags() & MOVE_CROUCHING)
                 m_coverStance = MOVE_CROUCHING;
             else if (m_currentCheckpoint)
                 cover = true;

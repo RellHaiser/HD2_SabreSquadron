@@ -39,10 +39,14 @@ void WORLD_CALL __real__ZN16C_CollisionWorld16SetIgnoredVolumeEP17S_CollisionVol
 void WORLD_CALL __real__ZN16C_CollisionWorld17SetIgnoredVolumesEPP17S_CollisionVolumeji(C_CollisionWorld *, S_CollisionVolume **, uint32_t,
                                                                                         int);
 
+// (g_volumeLogger: a suite's volumes logged instead of added (part 44's orders), true when it took the call.)
+bool (*g_volumeLogger)(const char *what, const S_CollisionVolume *v) = nullptr;
 void WORLD_CALL __wrap__ZN16C_CollisionWorld9AddVolumeEP17S_CollisionVolume(C_CollisionWorld *self, S_CollisionVolume *v)
 {
     if (IsHumanVolume(v))
         LogVolume("AddVolume", v);
+    else if (g_volumeLogger && g_volumeLogger("AddVolume", v))
+        ;
     else
         __real__ZN16C_CollisionWorld9AddVolumeEP17S_CollisionVolume(self, v);
 }
@@ -50,6 +54,8 @@ void WORLD_CALL __wrap__ZN16C_CollisionWorld12RemoveVolumeEP17S_CollisionVolume(
 {
     if (IsHumanVolume(v))
         LogVolume("RemoveVolume", v);
+    else if (g_volumeLogger && g_volumeLogger("RemoveVolume", v))
+        ;
     else
         __real__ZN16C_CollisionWorld12RemoveVolumeEP17S_CollisionVolume(self, v);
 }
@@ -57,6 +63,8 @@ void WORLD_CALL __wrap__ZN16C_CollisionWorld10MoveVolumeEP17S_CollisionVolume(C_
 {
     if (IsHumanVolume(v))
         LogVolume("MoveVolume", v);
+    else if (g_volumeLogger && g_volumeLogger("MoveVolume", v))
+        ;
     else
         __real__ZN16C_CollisionWorld10MoveVolumeEP17S_CollisionVolume(self, v);
 }

@@ -139,8 +139,8 @@ bool CanSeeVehicle(C_Actor *actor, const C_Human *human)
 
 S_vector4 FindCoverPoint(const S_vector4 &pos, const S_vector4 &dir, float radius, uint32_t seed)
 {
-    S_vector d = XYZ(dir);
-    d.Normalize();
+    // (Both normalizes here: the square summed (y² + z²) + x², as the original's inline.)
+    const S_vector d = XYZ(dir).NormalizedGame();
     // The cover points within `radius` that cover a stance (of 1 or 2) against `dir`.
     C_Checkpoints *network = GetGame()->GetCheckpoints();
     std::vector<uint16_t> points;
@@ -156,8 +156,7 @@ S_vector4 FindCoverPoint(const S_vector4 &pos, const S_vector4 &dir, float radiu
         return pos;
     // One of them (by the seed), the offset turned by the seed within its radius.
     const S_Checkpoint *cover = covers[seed % covers.size()];
-    S_vector offset = d.RotateByMatrix(RotateYMatrix(static_cast<float>(static_cast<int>(seed))));
-    offset.Normalize();
+    S_vector offset = d.RotateByMatrix(RotateYMatrix(static_cast<float>(static_cast<int>(seed)))).NormalizedGame();
     offset *= static_cast<float>(cover->radius) * 0.0625f;
     // (w: a stale local in the original.)
     return {cover->pos.x + offset.x, offset.y + cover->pos.y, offset.z + cover->pos.z, pos.w};
@@ -588,7 +587,7 @@ void C_SquadController::UpdateCombat(int timeDelta, bool ordersDone)
         // Engaged: at what is around the engage point (1 m lower), else at the point.
         const S_vector4 &own = m_human->GetPosition4();
         S_vector d(m_engagePos.x - own.x, (m_engagePos.y - own.y) - 1.0f, m_engagePos.z - own.z);
-        d.Normalize();
+        d = d.NormalizedGame();                         // (the square summed (z² + y²) + x², as the original's inline)
         if (C_Human *target = PickCombatTarget(&d))
             m_fireOrder->SetTarget(target);
         else
@@ -1454,8 +1453,8 @@ bool C_SquadController::VehicleCombat(int timeDelta)
         dir = m_fireOrder->fireDir;
     else
         GetVehicleAimDir(&dir, m_fireOrder->target);
-    S_vector d = XYZ(dir);
-    d.Normalize();
+    // (The square summed (y² + z²) + x², as the original's inline.)
+    const S_vector d = XYZ(dir).NormalizedGame();
     dir = {d.x, d.y, d.z, dir.w};
     m_facing->SetView(dir);
     m_facing->SetFacing(dir);
@@ -1474,7 +1473,7 @@ bool C_SquadController::VehicleCombat(int timeDelta)
     }
     // The gun pointing at it: fire.
     const S_vector aim = vehicle->GetSeatWeaponAim(seat);
-    const float dot = d.x * aim.x + d.z * aim.z + d.y * aim.y;
+    const float dot = (d.y * aim.y + d.z * aim.z) + d.x * aim.x;   // (the original's grouping)
     if (!(dot <= cone)) {
         m_axes[AXIS_FIRE] = 1.0f;
         m_buttons[BUTTON_FIRE] = 1.0f;
@@ -1662,7 +1661,7 @@ void C_SquadController::UpdateGunner(int timeDelta)
         }
         const S_vector4 &own = m_human->GetPosition4();
         S_vector d(m_engagePos.x - own.x, (m_engagePos.y - own.y) - 1.0f, m_engagePos.z - own.z);
-        d.Normalize();
+        d = d.NormalizedGame();                         // (the square summed (z² + y²) + x², as the original's inline)
         if (C_Human *target = PickCombatTarget(&d))
             m_fireOrder->SetTarget(target);
         else

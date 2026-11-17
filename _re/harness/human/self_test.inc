@@ -60,6 +60,9 @@ struct S_SelfScript {
 void LogPrint(const char *format, va_list args)
 {
     char text[256];
+    // (The squad's weapon switch: the original passes nothing for the second %s, a stack word; the first alone.)
+    if (std::strcmp(format, "%s: Switching to %s") == 0)
+        format = "%s: Switching to";
     std::vsnprintf(text, sizeof text, format, args);
     Log(nullptr, (std::string("Print ") + text).c_str());
 }
@@ -202,7 +205,9 @@ void C_Team::SelectMember(C_Human *human) { Log(human, "SelectMember"); }
 void C_FirstPersonView::Refresh() { Log(nullptr, "FirstPersonRefresh"); }
 void SurfaceMarks_SetHumanVisible(C_Human *human, bool hide) { Log(human, "SurfaceMarks_SetHumanVisible", {double(hide)}); }
 void C_Mine::OnSteppedOn(C_Actor *actor, int unused) { Log(actor, "MineSteppedOn", {double(unused)}); }
+#ifndef HUMAN_SQUAD   // (part 44 links squad_order.cpp)
 void ReleaseHumanOrder(S_HumanOrder *) { Log(nullptr, "ReleaseHumanOrder"); }
+#endif
 #ifndef HUMAN_AICTL   // (the AI controllers' build links game/ai_parts.cpp's)
 void FreeRememberedSound(S_RememberedSound *) { Log(nullptr, "FreeRememberedSound"); }
 #endif
@@ -713,7 +718,10 @@ const S_vector *ST CT_GetViewDir(void *self)
 void ST CT_OnBodyFlags(void *self, uint32_t flags) { Log(self, "ControllerOnBodyFlags", {double(flags)}); }
 void ST CT_Unexpected(void *self)
 {
-    std::printf("unexpected controller call on %s\n", NameOf(self).c_str());
+    // (from: the return address as linked, image base 0x20000000; the original's code: its own address, raw.)
+    std::printf("unexpected controller call on %s from %08x (raw %p)\n", NameOf(self).c_str(),
+                unsigned(static_cast<char *>(__builtin_return_address(0)) - reinterpret_cast<char *>(GetModuleHandleA(nullptr)) + 0x20000000),
+                __builtin_return_address(0));
     std::exit(3);
 }
 

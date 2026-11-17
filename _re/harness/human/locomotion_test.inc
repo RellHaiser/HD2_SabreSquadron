@@ -386,6 +386,7 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
     for (size_t i = 0; i < g_sharedWords.size(); ++i)
         sharedPort.push_back(*g_sharedWords[i].first);
     const std::vector<S_Call> portCalls = g_calls;
+    g_lastPortCalls = portCalls;
     const int portSetPos = fake->setPos - setPos0, portLinks = fake->links - links0;
     fake->setPos = setPos0;
     fake->links = links0;
@@ -412,6 +413,7 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
     const int origResult = WithOriginalWorldMapped(true, [](S_CollisionVolume *v) { return v; },
                                                    [&] { return original(static_cast<void *>(o_movement + 0xAC0)); });
     const std::vector<S_Call> origCalls = g_calls;
+    g_lastOrigCalls = origCalls;
     ContactsFor(false);
     const int origSetPos = fake->setPos - setPos0, origLinks = fake->links - links0;
     // Compared.

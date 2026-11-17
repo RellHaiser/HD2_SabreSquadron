@@ -83,6 +83,7 @@ struct S_Call {
     std::vector<double> nums;
 };
 std::vector<S_Call> g_calls;
+std::vector<S_Call> g_lastPortCalls, g_lastOrigCalls;   // (the last DiffCall's calls: debugging dumps)
 // The objects by name: the port's and the original's copies of them under the same name.
 std::map<const void *, std::string> g_names;
 std::string NameOf(const void *p)
@@ -664,6 +665,10 @@ bool WordsNear(uint32_t a, uint32_t b, char kind)
         return false;
     if (kind == 'm' && !(FloatLike(a) && FloatLike(b)))
         return false;
+    // (A NaN and the same NaN signed the other way: g++ folds x * -1.0f into a sign flip, which flips a NaN's sign;
+    // x87's fmul keeps it. The squad's stamina of a human without hit points.)
+    if ((a ^ b) == 0x80000000u && (a & 0x7F800000u) == 0x7F800000u && (a & 0x007FFFFFu) != 0)
+        return true;
     float x, y;
     std::memcpy(&x, &a, 4);
     std::memcpy(&y, &b, 4);
@@ -848,6 +853,9 @@ namespace {
 #ifdef HUMAN_ENEMY
 #include "enemy_test.inc"
 #endif
+#ifdef HUMAN_SQUAD
+#include "squad_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -961,6 +969,8 @@ int main(int argc, char **argv)
     TestSniper();
 #elif defined(HUMAN_ENEMY)
     TestEnemy();
+#elif defined(HUMAN_SQUAD)
+    TestSquad();
 #elif defined(HUMAN_SCRIPTED)
     TestScripted();
 #elif defined(HUMAN_MTAI)

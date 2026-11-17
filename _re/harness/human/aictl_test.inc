@@ -144,7 +144,14 @@ asm(".globl __ZTV18C_NetActionMessage\n\t.data\n\t.balign 4\n__ZTV18C_NetActionM
 #endif
 
 // The road network's paths (the driver's planner: part 32's) and the actors' walking points.
-bool C_CheckpointNetwork::FindPath(int, int, std::vector<uint16_t> *, uint32_t) { AiUnexpected(__PRETTY_FUNCTION__); }
+// (g_findPathFake: a suite's answer, part 44's walking network; none: not expected.)
+bool (*g_findPathFake)(const void *network, int from, int to, std::vector<uint16_t> *path, uint32_t excludeFlags) = nullptr;
+bool C_CheckpointNetwork::FindPath(int from, int to, std::vector<uint16_t> *path, uint32_t excludeFlags)
+{
+    if (!g_findPathFake)
+        AiUnexpected(__PRETTY_FUNCTION__);
+    return g_findPathFake(this, from, to, path, excludeFlags);
+}
 void C_CheckpointNetwork::GetActorPoints(const C_Actor *actor, std::vector<uint16_t> &out) const
 {
     Log(actor, "GetActorPoints");
@@ -469,6 +476,7 @@ std::string AiMessages(const std::vector<S_ControllerMessage *> &port, const uin
     return p == o ? "" : "to the clients: port " + p + ", original " + o;
 }
 
+bool g_fireDirW = true;
 std::string AiDiffers(S_TestAi *pa, const uint8_t *oa)
 {
     std::string why = ControllerDiffers(pa, oa);
@@ -549,11 +557,28 @@ std::string AiDiffers(S_TestAi *pa, const uint8_t *oa)
         std::memcpy(&p, oa + at, 4);
         return p;
     };
-    if ((at = FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_facing), part(0x124), 0x60, {0x54, 0x58, 0x5C})) >= 0)
-        return "facing+" + std::to_string(at);
-    if ((at = FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_fireOrder), part(0x128), 0x50, {0x4C})) >= 0)
-        return "fireOrder+" + std::to_string(at);
-    if ((at = FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x5C})) >= 0) {
+    if ((at = FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_facing), part(0x124), 0x60, {0x54, 0x58, 0x5C})) >= 0) {
+        uint32_t a, b;
+        std::memcpy(&a, reinterpret_cast<const uint8_t *>(pa->m_facing) + at, 4);
+        std::memcpy(&b, part(0x124) + at, 4);
+        char words[64];
+        std::snprintf(words, sizeof words, " (port %08x original %08x)", a, b);
+        return "facing+" + std::to_string(at) + words;
+    }
+    // (g_fireDirW false: fireDir's w left out too; nothing reads it, and the squad's launcher leaves the original's a
+    // stack word.)
+    if ((at = g_fireDirW ? FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_fireOrder), part(0x128), 0x50, {0x4C})
+                         : FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_fireOrder), part(0x128), 0x50, {0x1C, 0x4C})) >= 0) {
+        uint32_t a, b;
+        std::memcpy(&a, reinterpret_cast<const uint8_t *>(pa->m_fireOrder) + at, 4);
+        std::memcpy(&b, part(0x128) + at, 4);
+        char words[64];
+        std::snprintf(words, sizeof words, " (port %08x original %08x)", a, b);
+        return "fireOrder+" + std::to_string(at) + words;
+    }
+    // (g_fireDirW false: the move's pos.w left out too, the squad's grenade flight leaves the original's a stack word.)
+    if ((at = g_fireDirW ? FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x5C})
+                         : FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x1C, 0x5C})) >= 0) {
         uint32_t a = 0, b = 0;
         std::memcpy(&a, reinterpret_cast<const uint8_t *>(pa->m_move) + at, 4);
         std::memcpy(&b, part(0x12C) + at, 4);
@@ -613,8 +638,25 @@ template <class P, class O> void AiCall(const char *what, P port, O original)
     }
     CHECK(why.empty());
     static std::map<std::string, int> shown;
-    if (!why.empty() && shown[what]++ < 3)
+    if (!why.empty() && shown[what]++ < 3) {
         std::printf("  %s: %s\n", what, why.c_str());
+        // (HUMAN_DUMP_CALLS: both sides' calls of the call; 2: with their numbers.)
+        if (const char *dump = std::getenv("HUMAN_DUMP_CALLS")) {
+            for (int side = 0; side < 2; ++side) {
+                std::printf("  [%s] %s:", what, side ? "original" : "port");
+                for (const S_Call &c : side ? g_lastOrigCalls : g_lastPortCalls) {
+                    std::printf(" %s", c.what.c_str());
+                    if (dump[0] == '2' && !c.nums.empty()) {
+                        std::printf("(");
+                        for (size_t k = 0; k < c.nums.size() && k < 8; ++k)
+                            std::printf(k ? ",%.9g" : "%.9g", c.nums[k]);
+                        std::printf(")");
+                    }
+                }
+                std::printf("\n");
+            }
+        }
+    }
 }
 template <class R, class... A> R OAi(uint32_t at, A... a)
 {

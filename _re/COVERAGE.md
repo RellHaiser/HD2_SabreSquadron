@@ -3585,3 +3585,70 @@ particles and the surface marks. Files are served from memory.
   fakes replacing the lists their callers cleared; a height offset that accumulated; the mutation runs' first copy taken
   from an older harness (its baseline failed in quick mode: a part must pass in quick mode too); a background chain
   run from a script the edit tool had not rewritten (stopped); heredocs collapsing "\n" again.
+
+## Human part 44 (the squad AI, `squad_controller.cpp`, `squad_order.cpp`, `squad_actions.cpp`, `squad_combat.cpp`, `squad_movement.cpp`, 2026-11-17)
+
+- **The build:** `human/build_squad.bat` (`squad_test.inc`, HUMAN_SQUAD): part 36's fighting build with the squad's five
+  files and checkpoint.cpp linked; HUMAN_SQUAD_PART picks the parts (a, b, c, d) to run, HUMAN_SQUAD_CASE one case of
+  a part alone (2,000 rounds). The original's controller: the AI constructor's object with a copy of the squad's vtable
+  (0x008109f8, 83 slots, 0x260 bytes); its fields +0x140 .. +0x260 converted and compared around each call (the order
+  queue an MSVC6 vector; engagePos, holdDir and the action's pos copied whole and compared without their w, which
+  LoadGame and several writes leave a stack word in the original). The orders: each side's own (the port's pool, the
+  original's AllocHumanOrder 0x005825c0), made alike, paired and compared by their fields (the path's ends, points and
+  capacity, the marker's place, data and parent, the direction by x, y, z).
+  - Faked on both sides and logged: the squad commander (the port's object with a fake vtable, the original's global
+    0x0089ad40); the player team's selected member, members, the enemies it knows and sees (the records' Add and Remove);
+    the formation's slots; the car's seat entry, input, crew side and entry; the seat car's seats (count, occupant,
+    camera, the gun's rounds and origin) and part 23's actors' seat count and occupant; the human's last name, medkit,
+    controller type, item counts and collection, FindItem (each side's own weapon), requests and commands; the walking
+    network's path length, FindPath (each side's vector), cover, names, actors and points (16-bit points compared as 16
+    bits); the wire's cut; the items module's room; the air attacks, the Junkers and the submarines; the temporary
+    actors' mines and items (an item actor with a weapon); the command panel's order markers (a pool of 16 frames per
+    side, the first free one); the map path's points (a point per walking point and the end); the body's sector and
+    spheres; the collision world's ray tests; the orders' boxes in the collision world (logged instead of added: their
+    fields at AddVolume, flags and owners at MoveVolume and RemoveVolume); the original's C_fstr constructor (a real
+    C_str buffer); the leader's controller (ctl2 with a faked last target).
+  - Shared harness changes: WordsNear takes a NaN and the same NaN signed the other way as equal (g++ folds x * -1.0f
+    into a sign flip, x87's fmul keeps the sign); g_fireDirW (off in this build: the fire order's direction w and the
+    move's pos.w left out); g_findPathFake and g_volumeLogger hooks; LogPrint drops the squad's weapon switch's second
+    %s (the original passes none); CT_Unexpected prints the caller's address; HUMAN_DUMP_CALLS also dumps AiCall's
+    failing calls (both sides, =2 with numbers); the fire order's comparison prints the words.
+- **The tests:** 44a 30,000 calls on the life cycle, updates, the idle member, the order queue, icons, senses, vehicles,
+  saved games, plus 12,000 on the orders' own functions (markers, actor points, paths, changes, Init again); 44b 30,000
+  on the commander's commands, the orders started, the action executed (to its command, a bound's hop, the walk's
+  start), follow and hold, the combat orders, looting and equipping; 44c 30,000 on events, stimuli, hits, targets,
+  bursts, the line of fire, weapons, the gunner, cover; 44d 20,000 on the pace, stepping aside, room for the leader,
+  attack points, special points, a grenade thrown.
+- **Results:** 382,038 checks, 0 failures, 68 s (quick mode: a 10 s, b 5 s, c 5 s, d 4 s); lines: controller 826 of 827,
+  orders 172 of 185, actions 1,066 of 1,093, combat 972 of 1,032, movement 172 of 179 (3,208 of 3,316).
+- **Port fixes:** five inline normalizes summed in the original's order ((y² + z²) + x², NormalizedGame): UpdateCombat's
+  and UpdateGunner's engage direction, VehicleCombat's aim, MakeRoomForLeader's step, both of FindCoverPoint's; the
+  gun's cone test summed (y·y' + z·z') + x·x'; FinishAction asks for the leader's stance again for each test (as the
+  original; no change in behaviour).
+- **Not covered:** the melee trackers (no tracker actor in the harness: FindNearMeleeTracker's list, the trackers as
+  targets), the air attack actors (GetVehicleAimDir's lead), supply boxes; the path's growth past its first 8 points (the
+  order's paths hold two), the order's destructor (the pool's), Init with a marker already on, QueueWatchOrder's null
+  model (every caller passes one), DropAction's type 0x200 (no action has it); SetCombatOrder's MODE0_ALT with empty
+  hands (the original's crash); a few rare answer combinations (the swap's helmet refused, the line blocked, the far
+  leader's pace).
+- **Original flaws, steered clear of (the port shares them):** FindEnemyTargeting takes an enemy's last target for a
+  human (a vehicle would be read as one); ReactToStimuli takes a stimulus's source for a human; CanFireAt and
+  HasClearLine read the fire target's body frame (the squad only sets humans there). The port's fixes, avoided by the
+  tests: SetCombatOrder's MODE0_ALT with no hands item, ProcessOrders removing from the empty queue, UpdatePath's and
+  GetActorPoint's empty paths, QueueWatchOrder with an empty queue.
+- **Mutations:** `mutate_squad1.py` (controller, 44a): 857 mutants; 43 not building; 719 of 814 killed (88 %).
+  `mutate_squad2.py` (orders, 44a): 212; 15; 156 of 197 (79 %). `mutate_squad3.py` (actions, 44b): 1,166; 87; 923 of
+  1,079 (86 %). `mutate_squad4.py` (combat, 44c): 1,146; 120; 784 of 1,026 (76 %). `mutate_squad5.py` (movement,
+  44d): 196; 18; 140 of 178 (79 %). The survivors (rerun with all four parts on the final harness): equivalent,
+  ties, code this harness cannot reach (melee trackers, air attacks, the order path's growth), values not compared
+  (the order box's centre, stale in the original), and weakly tested combinations (each file's docstring). The
+  combat file's 76 % is the weakest of the human parts so far: its distance thresholds and the vehicle attack's walk
+  are rarely met by the random state.
+- **Harness lessons (my mistakes):** the records' Remove redirected at the camera's address; the team's g++ layout
+  differing from the original's (the records' pointer logged); a vehicle's unfaked seat slots; the original's GetSlots
+  answering an array of vector pointers; the containers' vtable-less worn items in the belt and the long gun; the hands
+  item and container out of step (WeaponsToOriginal); the human's network role random (the squad is single player's);
+  the other humans sharing the AI pair's controller (its fire target became an enemy's last target); attack and follow
+  actions without their targets; a car actor without its "body" frame; the original's cover compass never initialised
+  (its static initialiser); pooled tasks' stale words; the markers' pool handing one frame to every order; Git Bash's
+  sed -i turning CRLF files LF-only (a mutation list made from one had to be redone); heredocs collapsing "\n" again.
