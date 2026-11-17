@@ -2,14 +2,14 @@
 
 ## Coordination
 
-- Status: review
+- Status: done
 - Owner/session: Codex COOP-003 / 2026-11-18 user assignment
 - Canonical branch: `docs/coop-003-preparation-ui`
 - Base commit: `7e033adde95881baad06c6877cbbd6eef8197d96`
 - Dependencies: none
 - Last checkpoint: implementation/design `1e998bd2`; this handoff commit is the latest metadata checkpoint (`HEAD`)
 - Checkpoint location: `origin/docs/coop-003-preparation-ui`; worktree `.worktrees/COOP-003`
-- Review/integration: claim acknowledged by COOP-001 coordinator (`c5a2f841`); COOP-002 consumer and independent full review passed; coordinator integration pending, not merged
+- Review/integration: coordinator review passed; integrated through PR #3; actual merge `dd2aa98e2571eef5bd8d542d51d43113bd223745`
 - Pull request: https://github.com/xcntroller/HD2_BaseCoop/pull/3 (ready for coordinator review)
 
 ## Branch authority and completion PR
@@ -146,3 +146,9 @@ git log --oneline main..HEAD
 4. Review source-symbol/resource claims against the unchanged hand port, check confirmed
    versus proposed policies, and run the diff commands above. Expected: documentation-only
    changes and a reusable UI consumer boundary without global squad/stock writes.
+
+## Integration outcome
+
+Actual merge: `dd2aa98e2571eef5bd8d542d51d43113bd223745`. The coordinator reviewed the final diff and evidence against `main`; the finished documentation deliverable is integrated. No task work remains. Earlier review/pending language above records the pre-merge handoff, not the current status.
+
+Coordinator reproduced the browser smoke (all scenarios, three widths, zero page errors), inspected the host preview, checked source/resource claims and reviewed both final prose corrections at `b4030c11`. COOP-002 independently reviewed the full deliverable. Native component/runtime checks remain COOP-007 and later integration gates.

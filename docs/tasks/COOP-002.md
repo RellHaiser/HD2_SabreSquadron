@@ -2,14 +2,14 @@
 
 ## Coordination
 
-- Status: review
+- Status: done
 - Owner/session: Codex COOP-002 / `01a1ebd2-902d-7e32-9876-9818a845d361` (2026-11-18)
 - Canonical branch: `feature/coop-002-contracts`
 - Base commit: `7e033adde95881baad06c6877cbbd6eef8197d96`
 - Dependencies: none
 - Last checkpoint: final contract/review commit; this branch `HEAD` (claim checkpoint `4e28d883`)
 - Checkpoint location: `.worktrees/COOP-002`; `origin/feature/coop-002-contracts`; contract checkpoint `6d3b5443`
-- Review/integration: document self-review and COOP-003 consumer review passed; coordinator integration review requested; not merged
+- Review/integration: coordinator review passed; integrated through PR #4; actual merge `9f59ff4790f02ef73e3e02c850f79cfa9ba95130`
 - Pull request: https://github.com/xcntroller/HD2_BaseCoop/pull/4
 
 ## Branch authority and completion PR
@@ -179,3 +179,9 @@ After integration use the PR base/merge parents for comparison instead of update
   are untouched. No new public headers or game artifacts.
 - Review notes: COOP-003 consumer review has no blocking findings. Keep COOP-011 as a
   separate future implementation claim; no duplicate DTO headers in downstream branches.
+
+## Integration outcome
+
+Actual merge: `9f59ff4790f02ef73e3e02c850f79cfa9ba95130`. The coordinator reviewed the final diff and evidence against `main`; the finished documentation deliverable is integrated. No task work remains. Earlier review/pending language above records the pre-merge handoff, not the current status.
+
+Coordinator reproduced both documented checks (11 changed Markdown files, 68 local links/anchors; 11 canonical task/dependency records, acyclic) and whitespace validation at reviewed head `2ee1dca6`. COOP-003 consumer review passed. COOP-011 becomes ready; COOP-004 through COOP-007 remain planned behind its merged declaration gate. No runtime evidence is claimed by this documentation task.

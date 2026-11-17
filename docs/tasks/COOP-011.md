@@ -2,11 +2,11 @@
 
 ## Coordination
 
-- Status: planned
+- Status: ready
 - Owner/session: unassigned
 - Canonical branch: `feature/coop-011-shared-declarations`
 - Base commit: not started
-- Dependencies: COOP-002 (merged document-level contracts)
+- Dependencies: COOP-002 (document-level contracts merged as `9f59ff4790f02ef73e3e02c850f79cfa9ba95130`)
 - Last checkpoint: none
 - Checkpoint location: none
 - Review/integration: none
@@ -85,8 +85,8 @@ baseline result or treating unavailable tools as a passing compile.
 
 - Completed: bounded declaration scope and canonical branch reserved by coordinator during COOP-002.
 - Remaining: shared declarations, target compile fixture and consumer review.
-- Next action: after COOP-002 merges, claim this task and implement the header/fixture in its own worktree.
-- Blockers: COOP-002 has not merged; intended target compiler must be available before review.
+- Next action: request a coordinator claim, then create the canonical branch/worktree from integrated main and implement the header/fixture.
+- Blockers: none for claim; COOP-002 is integrated. Intended MSVC x86 compiler must be available before review; COOP-001 has established a local portable MSVC/Wine toolchain.
 - Decisions: follow confirmed campaign behavior and COOP-002 engineering contracts; leave product policies explicit.
 - Local state: no implementation branch/worktree exists for this planned task.
 - Review notes: COOP-004/005/006/007 become implementation-ready only after this result merges (and COOP-003 for UI).
