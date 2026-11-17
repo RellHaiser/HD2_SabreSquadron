@@ -2,13 +2,13 @@
 
 ## Coordination
 
-- Status: ready
-- Owner/session: unassigned
+- Status: active
+- Owner/session: Codex COOP-002 / `01a1ebd2-902d-7e32-9876-9818a845d361` (2026-11-18)
 - Canonical branch: `feature/coop-002-contracts`
-- Base commit: not started
+- Base commit: `7e033adde95881baad06c6877cbbd6eef8197d96`
 - Dependencies: none
-- Last checkpoint: none
-- Checkpoint location: none
+- Last checkpoint: initial claim commit; this branch `HEAD`
+- Checkpoint location: `.worktrees/COOP-002`; `origin/feature/coop-002-contracts` after push
 - Review/integration: none
 - Pull request: none
 
@@ -52,9 +52,9 @@ types with COOP-003; refine COOP-004 through COOP-010 file scopes before marking
 
 ## Handoff
 
-- Completed: source investigation in the campaign design; no shared contracts implemented.
+- Completed: required design/workflow/task reads; fetched origin and inspected branches, worktrees and open PRs. Canonical branch/worktree created from integrated `main`. Claim acknowledged by coordinator ledger commit `c5a2f841`.
 - Remaining: concrete interfaces, coupling audit, consumer review, downstream scope refinement.
-- Next action: derive the identity and preparation request/result contracts from the design.
+- Next action: write document-level identity/preparation/protocol contracts, source coupling audit and exact downstream file scopes. COOP-003 consumer coordination is active through its task thread; no new headers or gameplay changes are planned.
 - Blockers: none for initial contract work; unresolved product choices are in the design.
 - Decisions: see confirmed behavior in `docs/base_game_coop.md`; proposed defaults stay proposals.
 - Validation: none for this task.
