@@ -1,5 +1,15 @@
 # Hidden & Dangerous 2: Sabre Squadron — C++ source port
 
+This fork is intended to add a base game cooperative campaign, accessible from the
+singleplayer mode picker, with up to four players and AI controlling unclaimed squadmates.
+See the [cooperative campaign design and implementation milestones](docs/base_game_coop.md).
+The mode is not implemented yet; the port status below describes the upstream foundation.
+
+Development uses small task branches and resumable handoffs, with finished work integrated
+into `main`. Start with the [agent workflow](docs/agent_workflow.md) and
+[task queue](docs/tasks/README.md). Players choose their own loadouts through a new
+campaign-style preparation UI; the host also equips unclaimed AI soldiers.
+
 A reconstruction of the game client of *Hidden & Dangerous 2: Sabre Squadron* (Illusion Softworks)
 as readable, compilable C++, written from the decompiled 32-bit executable. The engine is LS3D; the
 port keeps its structure, names and data formats so that it can stand in for the original code.
