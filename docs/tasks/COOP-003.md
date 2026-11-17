@@ -10,7 +10,7 @@
 - Last checkpoint: implementation/design `1e998bd2`; this handoff commit is the latest metadata checkpoint (`HEAD`)
 - Checkpoint location: `origin/docs/coop-003-preparation-ui`; worktree `.worktrees/COOP-003`
 - Review/integration: claim acknowledged by COOP-001 coordinator (`c5a2f841`); COOP-002 consumer review passed; separate coordinator review requested, not merged
-- Pull request: creation follows this handoff checkpoint; URL will be recorded before stopping
+- Pull request: https://github.com/xcntroller/HD2_BaseCoop/pull/3 (ready for coordinator review)
 
 ## Branch authority and completion PR
 
@@ -74,6 +74,8 @@ Do not change shipping menu behavior or commit extracted game assets.
   read-only inventory; no loose Models or Tables directory. Model geometry/materials,
   font fit/glyphs, decoded archive members and native input/rendering remain unverified.
   This does not imply absent game data or require multiplayer UI fallback.
+- Publication: branch and PR published; connector PR creation returned HTTP 403, so the
+  authenticated repository GitHub CLI created PR #3 successfully.
 - Remaining task work: separate review/integration, then record actual merge SHA through
   coordinator's finished follow-up. Native implementation/runtime evidence belongs to
   COOP-007 and subsequent integration tasks; this deliverable does not waive their gates.
