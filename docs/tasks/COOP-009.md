@@ -36,6 +36,19 @@ Expected hotspots: `game_app.cpp`, `game.cpp`, `spawn_point.cpp`, `game_rounds.c
 settings, and script player-team queries. Coordinate `game_rounds.cpp` and actor/controller
 integration with COOP-008. Narrow/split scope from the COOP-002 audit before claiming.
 
+### COOP-002 scope refinement
+
+Contract implementation scope from COOP-002: own `src/game/campaign_mission_adapter.{h,cpp}`
+and lifecycle changes in `game.cpp`, `game_app.cpp`, `game_rounds.cpp`, `spawn_point.cpp`,
+narrow profile-rule adapters, script player-team queries and host AI replication.
+Follow [the audit and sequencing](../coop_contracts.md#legacy-coupling-audit-and-adapter-allocation).
+You are the sole writer of these overlapping lifecycle files. Call COOP-008's agreed
+disconnect/handoff helper before native actor/mine destruction; coordinate its signature
+before implementation. Iterate roster bindings, not a contiguous actor-ID/player-slot
+assumption. Supply frozen manifest, reconstruction/binding and barrier hooks; COOP-010
+owns live dispatch attachment. Final combined adapter integration follows COOP-008 merge
+and repeats affected checks; do not merge an unfinished dependency branch.
+
 ## Acceptance criteria
 
 - Spawn the selected squad at original campaign points with committed equipment and stats;

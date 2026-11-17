@@ -6,7 +6,7 @@
 - Owner/session: unassigned
 - Canonical branch: `feature/coop-004-ownership`
 - Base commit: not started
-- Dependencies: COOP-002
+- Dependencies: COOP-002, COOP-011 (merged shared declarations)
 - Last checkpoint: none
 - Checkpoint location: none
 - Review/integration: none
@@ -36,6 +36,16 @@ Own new ownership/session implementation files and focused tests at paths agreed
 Consume shared identity and transition contracts. Legacy controller and mission adapters
 belong to COOP-008/009; avoid concurrent edits to those files.
 
+### COOP-002 scope refinement
+
+Contract implementation scope from COOP-002: own `src/game/campaign_session.{h,cpp}`,
+`src/game/campaign_ownership.{h,cpp}`, and `_re/harness/campaign_ownership/`. Follow [the identity, lifecycle and ownership
+contracts](../coop_contracts.md#identity-and-session-context), including connection
+incarnations, per-soldier control revisions, script suspension and actor-binding invalidation.
+Consume COOP-011 shared declarations; coordinate changes with all consumers before
+editing that common header. Do not create independent incompatible copies.
+No legacy controller/profile layout edits.
+
 ## Acceptance criteria
 
 - Enforce one human owner per soldier, at most one soldier per player, and campaign squad limits.
@@ -52,6 +62,6 @@ belong to COOP-008/009; avoid concurrent edits to those files.
 - Completed: task scope only.
 - Remaining: implementation and tests after contract merge.
 - Next action: inspect the merged COOP-002 contract and agree on the exact implementation files.
-- Blockers: COOP-002 has not merged.
+- Blockers: COOP-002 and COOP-011 have not merged.
 - Decisions: model follows confirmed campaign behavior and the reviewed contracts.
 - Validation: none for this task.

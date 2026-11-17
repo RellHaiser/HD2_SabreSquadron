@@ -6,7 +6,7 @@
 - Owner/session: unassigned
 - Canonical branch: `feature/coop-006-protocol`
 - Base commit: not started
-- Dependencies: COOP-002
+- Dependencies: COOP-002, COOP-011 (merged shared declarations)
 - Last checkpoint: none
 - Checkpoint location: none
 - Review/integration: none
@@ -36,6 +36,17 @@ Own new protocol/codec files and network harness additions at paths agreed in CO
 Inspect `src/net/bitstream.*`, `net_game.*`, `net_commands.cpp`, and message dispatch before
 choosing an extension point. Serialize edits to existing dispatch files with COOP-008/009.
 
+### COOP-002 scope refinement
+
+Contract implementation scope from COOP-002: own `src/net/campaign_protocol.{h,cpp}`
+and `_re/harness/campaign_protocol/`. Follow [the negotiation and snapshot contract](../coop_contracts.md#protocol-compatibility-and-snapshot-boundaries).
+Specify version, command reservation after dispatch audit, framing, byte/bit order,
+limits, content descriptors and deterministic fixtures. Keep `S_JoinRequest` and native
+message layouts unchanged. Public codec binding uses merged COOP-011 DTOs.
+Deliver the concrete admission/quarantine and actor-input envelope attachment plan;
+COOP-010 installs live `net_game.cpp`/`net_commands.cpp`/`net_messages.cpp` hooks after
+adapters merge. Tests must reject pre-admission mutation without claiming a live handshake.
+
 ## Acceptance criteria
 
 - Encode/decode the agreed identities, revisions, requests, acknowledgments, and snapshots
@@ -53,6 +64,6 @@ choosing an extension point. Serialize edits to existing dispatch files with COO
 - Completed: task scope only; native transport available for investigation.
 - Remaining: extension audit, codecs, compatibility component, fixtures, adapter documentation.
 - Next action: read the merged COOP-002 protocol contract and trace dispatch/bitstream bounds.
-- Blockers: COOP-002 has not merged.
+- Blockers: COOP-002 and COOP-011 have not merged.
 - Decisions: reuse networking infrastructure; keep campaign semantics explicit.
 - Validation: none for this task.

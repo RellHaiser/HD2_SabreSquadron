@@ -6,7 +6,7 @@
 - Owner/session: unassigned
 - Canonical branch: `feature/coop-005-preparation-model`
 - Base commit: not started
-- Dependencies: COOP-002
+- Dependencies: COOP-002, COOP-011 (merged shared declarations)
 - Last checkpoint: none
 - Checkpoint location: none
 - Review/integration: none
@@ -37,6 +37,18 @@ stock contracts. Audit existing item/soldier/equipment validation for reuse; coo
 changes to `equipment_screen.*` or `equipment_panel.*` with COOP-007. Prefer adapters over
 an unrelated rewrite of the original singleplayer screen.
 
+### COOP-002 scope refinement
+
+Contract implementation scope from COOP-002: own `src/game/campaign_preparation.{h,cpp}`
+and `_re/harness/campaign_preparation/`. Implement [the preparation boundary](../coop_contracts.md#preparation-model-and-ui-boundary)
+with one aggregate preparation commit revision, a separate view revision for readiness,
+atomic stock/loadout candidate commits, explicit bulk targets, and commit-time ownership
+checks. Use the common RequestId deduplication rules. Consume the merged COOP-011
+identity/DTO/interface declarations and inject an ownership catalog view; no dependency on the COOP-004 model implementation is required.
+Reuse campaign edit/deploy validation semantics; direct panel/profile mutation is not the
+new model API. Any legacy validator extraction requires coordinator scope acknowledgment
+and COOP-007 notification before editing shared equipment files.
+
 ## Acceptance criteria
 
 - Each human edits their own soldier; host edits their own and unclaimed AI soldiers only.
@@ -54,6 +66,6 @@ an unrelated rewrite of the original singleplayer screen.
 - Completed: proposed transaction rules in the campaign design.
 - Remaining: reviewed transaction contract, implementation, and behavioral tests.
 - Next action: read the merged COOP-002 contract and inventory reusable equipment validators.
-- Blockers: COOP-002 has not merged; deploy/stock UX policies may need user input later.
+- Blockers: COOP-002 and COOP-011 have not merged; deploy/stock UX policies may need user input later.
 - Decisions: editing permissions are confirmed; shared-state implementation follows the contract.
 - Validation: none for this task.

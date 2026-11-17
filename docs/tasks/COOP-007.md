@@ -6,7 +6,7 @@
 - Owner/session: unassigned
 - Canonical branch: `feature/coop-007-preparation-screen`
 - Base commit: not started
-- Dependencies: COOP-002, COOP-003
+- Dependencies: COOP-002, COOP-003, COOP-011 (merged shared declarations)
 - Last checkpoint: none
 - Checkpoint location: none
 - Review/integration: none
@@ -37,6 +37,17 @@ equipment components where appropriate; coordinate shared component edits with C
 Do not wire a fake or incomplete screen into the normal mode picker. Keep assets original
 or generated at install/build time; do not commit extracted game data.
 
+### COOP-002 scope refinement
+
+Contract implementation scope from COOP-002: own `src/game/campaign_preparation_screen.{h,cpp}`,
+`_re/harness/campaign_preparation_ui/`, and original resources agreed by COOP-003.
+The fake and live bindings share [I_CampaignPreparation](../coop_contracts.md#preparation-model-and-ui-boundary):
+immutable snapshots, queued proposals/results, explicit synchronization/phase status,
+revision-bound readiness and capabilities with denial reasons. Local editor selection
+is not an ownership or squad mutation. Consume the merged COOP-011 interface for the
+fake; no COOP-005 model implementation dependency is needed. Coordinate any `equipment_panel.*`/
+`equipment_frames.*` extraction with COOP-005; keep `equipment_screen.*` on its solo route.
+
 ## Acceptance criteria
 
 - Render and navigate the campaign-style layout approved in COOP-003 through the model API.
@@ -52,6 +63,6 @@ or generated at install/build time; do not commit extracted game data.
 - Completed: task scope only.
 - Remaining: component implementation and UI verification after contract/layout merges.
 - Next action: review the merged layout and preparation interface, then build the fake model.
-- Blockers: COOP-002 and COOP-003 have not merged.
+- Blockers: COOP-002, COOP-003 and COOP-011 have not merged.
 - Decisions: new campaign-style UI, with existing singleplayer components reused when suitable.
 - Validation: none for this task.
