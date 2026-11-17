@@ -3395,3 +3395,48 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the first run's 27 survivors: the human had no speech set in this build, so Say
   returned before logging any sentence (the comments' and the commands' sentences unchecked), and the body frame was
   never tilted; a helper's name (FloatBits, not part 33's FloatBitsOf).
+
+## Human part 40c (the player controller: hits, the view's kicks, saved games, the view modes, the medkit, `player_controller.cpp`, 2026-11-16)
+
+- **The build:** part 40b's (`human/build_playerctl.bat`, `playerctl_test.inc`).
+  - Part 23's logging fake of the original's OnDamaged taken back (RestoreOriginal): tested here. RequestAction
+    (player_weapons.cpp's: the base's LoadGame raises or lowers the weapon) logged on both sides.
+  - The worn definitions get a vtable per side while a call runs (the port's GetCarryMode slot is the original's
+    GetBehaviour slot in part 23's shared one); the carry mode a fake on both. The hands weapon's scope: the
+    definition's secondary component (the port's member, the original's +0x4C), its aimed field of view at the
+    port's offset (found by GetAimedFovFactor) and the original's +0x10.
+  - The copy protection tables the original checks in UseMedkit and SetViewMode (0x008ca840 / 0x008caf40 by the
+    words at 0x008cac66 / 0x008cb366 and 0x008cac92 / 0x008cb392) made equal, as in a game that passes; the port
+    dropped the checks.
+  - The binoculars message's on and fromClient flags logged with the queued net messages (part 33a's logger): on at
+    +0x30 in the original and an MSVC build, at +0x2D in the g++ build (the base's tail padding).
+  - The original's pending command keeps its vtable word (0x00810528, as its constructor leaves it): saves write it.
+  - The state: part 40b's; the helmet or none; the hands weapon's carry mode; the local player and the first-person
+    view; the difficulty 1..4; the binoculars on the belt or none, their frame; the scope's field of view; part
+    23's healing state (the patients by id, their health against the initial, the first aid skill, the medkit's
+    charges, behaviour and uid).
+- **The tests:** 12,000 calls: OnHit (the helmet's and the weapon's zones more often; an attacker none, the other,
+  the human itself, another kind of actor in network games), OnDamaged, SaveGame and LoadGame (about 1,200 rounds:
+  each save byte for byte, the port's file loaded on both sides, now and then a hand-written state chunk of 0..22
+  bytes, a command chunk, an unknown chunk), SetViewMode (-1..4 from any mode), UseMedkit (a patient or none, a uid
+  or -1).
+- **Results:** 78,671 checks for the build (parts 40a-c), 0 failures, 20 s; lines: 172 of 172 for part 40c's ranges,
+  701 of 703 for the file (the two wraps past two pi after atan2).
+- **Port fixes:** none needed in this part.
+- **Not tested:** the port's fixes: ScopeFovOf without a hands item or scope (the original reads them unchecked), a
+  missing head container, another kind of attacker in a local game (the original takes it for a human: a crash in
+  the harness); the pending command's actor and member in a save (both write the raw pointers: each side's own
+  address; only null tested), the original's command padding (+0x34..+0x3F: it saves its object's stale bytes, the
+  port zeros; cleared before each save); a failed copy protection check (dropped by the port).
+- **A weakness the original shares:** a save made while a squad command waits (about a second after it is given)
+  stores the command's actor and member as raw pointers, which a load restores as they were: stale pointers in the
+  new session. Not changed on main.
+- **Mutations** (`human/mutations/mutate_playerctl3.py`): 195 mutants (185 generated, 10 for repeated lines); 13 not
+  building; 176 of 182 killed; the survivors are not compared (2: the hit message's w words), the port's fix not
+  reached (1) and equivalent (3).
+- **Harness lessons (my mistakes):** the original's OnDamaged was still part 23's logging fake; a non-human
+  attacker crashed the original's IsHostileTo in local games; RequestAction was an unexpected call; part 40b's found
+  item (the gun) stood in for the medkit; my carry mode fake in the shared definitions' vtable replaced the
+  original's GetBehaviour; the original's command vtable word was never set, and my hand-written command chunks
+  loaded random words and padding into it; 2,400 save rounds made the test 29 s; the binoculars flags were not
+  logged, and at first I read the port's at the MSVC offset.

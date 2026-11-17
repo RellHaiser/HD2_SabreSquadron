@@ -87,7 +87,9 @@ void C_NetObject::SetForwarding(bool value) { reinterpret_cast<uint8_t *>(this)[
 // The net object's queued messages (the same layout on both sides: the type +0x1C, from a client +0x2C; the action's
 // direction +0x30, position +0x40, shot interval +0x50, strength +0x54, ammunition +0x58, rounds +0x5C, action +0x60),
 // logged and freed (each side's _aligned_malloc'd block).
-void LogNetMessage(const void *object, const uint8_t *m, int sentTo, bool outgoing)
+// (`onAt`: the binoculars message's on flag: +0x30 in the original and an MSVC build, the base's tail padding +0x2D in
+// this g++ build.)
+void LogNetMessage(const void *object, const uint8_t *m, int sentTo, bool outgoing, size_t onAt)
 {
     int type;
     std::memcpy(&type, m + 0x1C, 4);
@@ -104,13 +106,16 @@ void LogNetMessage(const void *object, const uint8_t *m, int sentTo, bool outgoi
         for (int k = 0; k < 7; ++k)
             nums.push_back(f[k]);
         nums.insert(nums.end(), {double(ints[0]), double(ints[1]), double(ints[2]), double(m[0x5C]), double(m[0x2C])});
+    } else if (type == NET_MSG_BINOCULARS) {
+        // (Part 40c: on, fromClient +0x2C.)
+        nums.insert(nums.end(), {double(m[onAt]), double(m[0x2C])});
     }
     S_Call c{NameOf(object) + ".QueueMessage", nums};
     g_calls.push_back(c);
 }
 void C_NetObject::QueueMessage(C_NetObjectMessage *m, int sentTo, bool outgoing)
 {
-    LogNetMessage(this, reinterpret_cast<const uint8_t *>(m), sentTo, outgoing);
+    LogNetMessage(this, reinterpret_cast<const uint8_t *>(m), sentTo, outgoing, offsetof(C_NetBinocularsMessage, on));
     // (The binoculars' message has no 16-aligned member: the plain new's; the action's and the dive's the aligned one.)
     if (m->GetType() == 2)
         ::operator delete(m);
@@ -175,7 +180,7 @@ int AC OA_ApplyAlertState(void *self, int)
 }
 void AC OA_QueueMessage(void *self, uint8_t *m, int sentTo, int outgoing)
 {
-    LogNetMessage(self, m, sentTo, (outgoing & 0xFF) != 0);
+    LogNetMessage(self, m, sentTo, (outgoing & 0xFF) != 0, 0x30);
     _aligned_free(m);
 }
 alignas(16) uint8_t g_aiReplication[0x100];

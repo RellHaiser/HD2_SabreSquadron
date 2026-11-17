@@ -130,7 +130,11 @@ bool C_PlayerController::OnCollisionEx(C_Actor *, const S_vector *, int, int, in
 void C_PlayerController::OnMessage(C_BitStream *) { AiUnexpected(__PRETTY_FUNCTION__); }
 void C_PlayerController::OnMessage2(C_BitStream *) { AiUnexpected(__PRETTY_FUNCTION__); }
 void C_PlayerController::OnUniformChanged(int) { AiUnexpected(__PRETTY_FUNCTION__); }
-void C_PlayerController::RequestAction(int, const S_vector4 *, const S_vector4 *, float, int, int) { AiUnexpected(__PRETTY_FUNCTION__); }
+// (The base's LoadGame raises or lowers the weapon through it.)
+void C_PlayerController::RequestAction(int action, const S_vector4 *pos, const S_vector4 *dir, float strength, int ammoUid, int rounds)
+{
+    Log(this, "PlayerRequestAction", {double(action), pos->x, pos->y, pos->z, dir->x, dir->y, dir->z, strength, double(ammoUid), double(rounds)});
+}
 bool C_PlayerController::RequestMoveItem(int, int, int, int, int) { AiUnexpected(__PRETTY_FUNCTION__); }
 void C_PlayerController::RequestPickUpItem(int, int) { AiUnexpected(__PRETTY_FUNCTION__); }
 void C_PlayerController::RequestTakeFromBox(int, int) { AiUnexpected(__PRETTY_FUNCTION__); }
@@ -207,6 +211,10 @@ void AC PO_WeaponControls(void *self, int timeDelta)
     std::memcpy(&b, static_cast<uint8_t *>(self) + 0x78, 4);
     Log(self, "PlayerWeaponControls", {double(timeDelta), b ? b[BUTTON_THROW] : -1.0, b ? b[BUTTON_FIRE] : -1.0, b ? b[BUTTON_7] : -1.0,
                                        b ? b[BUTTON_RELOAD] : -1.0});
+}
+void AC PO_RequestAction(void *self, int action, const S_vector4 *pos, const S_vector4 *dir, float strength, int ammoUid, int rounds)
+{
+    Log(self, "PlayerRequestAction", {double(action), pos->x, pos->y, pos->z, dir->x, dir->y, dir->z, strength, double(ammoUid), double(rounds)});
 }
 void AC PO_MovementOnFrozen(void *m, int on) { Log(m, "MovementOnFrozen", {double(on & 0xFF)}); }
 
@@ -332,6 +340,7 @@ void SetUpPlayerFakes()
         {0x0053f520, FAKE(PO_UpdateRemote)},
         {0x005433b0, FAKE(PO_WeaponControls)},
         {0x0075c730, FAKE(PO_MovementOnFrozen)},
+        {0x00542920, FAKE(PO_RequestAction)},
     };
     for (const auto &r : redirects)
         RedirectOriginal(r.first, r.second);
@@ -501,6 +510,16 @@ std::string PlayerDiffers(const C_PlayerController *p, const uint8_t *o)
         return "m_pendingCommand+" + std::to_string(at + 4);
     return "";
 }
+// The worn definitions' vtable per side while set (part 40c: the port's GetCarryMode slot is the original's
+// GetBehaviour slot in part 23's shared one).
+void **g_plDefVt[2] = {nullptr, nullptr};
+void PlDefVtables(int side)
+{
+    if (!g_plDefVt[0])
+        return;
+    for (auto &def : g_wornDefs)
+        *reinterpret_cast<void ***>(def) = side < 0 ? g_defVt : g_plDefVt[side];
+}
 // (The human's net object, part 20's block: each side's writes kept apart, as part 33a's AiCall.)
 template <class P, class O> void PlCall(const char *what, P port, O original)
 {
@@ -517,7 +536,9 @@ template <class P, class O> void PlCall(const char *what, P port, O original)
     g_unlockedPlayers = 0;
     DiffCall(what,
              [&] {
+                 PlDefVtables(0);
                  const int r = port();
+                 PlDefVtables(-1);
                  std::memcpy(g_aiNetOrig, g_netObjectBytes, sizeof g_aiNetOrig);
                  std::memcpy(g_netObjectBytes, g_aiNetPort, sizeof g_aiNetPort);
                  std::memcpy(g_aiNetPort, g_aiNetOrig, sizeof g_aiNetPort);
@@ -530,7 +551,9 @@ template <class P, class O> void PlCall(const char *what, P port, O original)
                  return r;
              },
              [&](void *o) {
+                 PlDefVtables(1);
                  const int r = original(o);
+                 PlDefVtables(-1);
                  std::memcpy(g_aiNetOrig, g_netObjectBytes, sizeof g_aiNetOrig);
                  origFlags = g_h.frame->m_frameFlags;
                  origSetOn = Fake(g_h.frame)->setOn - setOn0;
@@ -1167,6 +1190,258 @@ void TestPlayerB()
     }
 }
 
+// ---- part 40c: hits, the view's kicks, saved games, the view modes, the medkit
+// The definitions' carry mode (OnHit's weapon falling: the port's slot and the original's 0x0C), the hands weapon's
+// scope (the definition's secondary component: the port's member, the original's +0x4C; its aimed field of view the
+// port's member and the original's +0x10, found by GetAimedFovFactor).
+int g_plCarry = 0;
+int CT_ PL_GetCarryMode(void *self)
+{
+    Log(self, "DefGetCarryMode");
+    return g_plCarry;
+}
+struct S_ScopeAccess : C_ItemDef {
+    static void SetSecondary(void *def, void *comp)
+    {
+        static_cast<S_ScopeAccess *>(static_cast<C_ItemDef *>(def))->m_secondaryComponent = static_cast<C_ItemComponent *>(comp);
+    }
+};
+alignas(16) uint8_t g_plScope[0x40];
+size_t g_plFovAt = 0;
+
+void SetUpPlayerC()
+{
+    // (Part 23's logging fake of the original's OnDamaged taken back: tested here.)
+    CHECK(RestoreOriginal(0x00545dd0));
+    // (The original's pending command's vtable word, as its constructor leaves it: saved games write it.)
+    const uint32_t commandVt = 0x00810528;
+    std::memcpy(g_op + 0x4E0, &commandVt, 4);
+    static void *vt[2][64];
+    for (int side = 0; side < 2; ++side) {
+        std::memcpy(vt[side], g_defVt, sizeof vt[side]);
+        g_plDefVt[side] = vt[side];
+    }
+    vt[0][VSlot(&C_ItemDef::GetCarryMode)] = reinterpret_cast<void *>(PL_GetCarryMode);
+    vt[0][VSlot(&C_ItemDef::GetBehaviour)] = reinterpret_cast<void *>(DF_GetBehaviour);
+    vt[1][0x0C / 4] = reinterpret_cast<void *>(PL_GetCarryMode);
+    vt[1][0x10 / 4] = reinterpret_cast<void *>(DF_GetBehaviour);
+    for (size_t at = 4; at + 4 <= sizeof g_plScope && !g_plFovAt; at += 4) {
+        std::memset(g_plScope, 0, sizeof g_plScope);
+        const float marker = 1234.5f;
+        std::memcpy(g_plScope + at, &marker, 4);
+        if (reinterpret_cast<C_ScopeComp *>(g_plScope)->GetAimedFovFactor() == marker)
+            g_plFovAt = at;
+    }
+    CHECK(g_plFovAt != 0);
+    std::memset(g_plScope, 0, sizeof g_plScope);
+    S_ScopeAccess::SetSecondary(g_wornDefs[0], g_plScope);
+    void *scope = g_plScope;
+    std::memcpy(g_wornDefs[0] + 0x4C, &scope, 4);
+    g_names[g_plScope] = "scope";
+    // The copy protection's tables (the medkit's and the scopes' checks, dropped by the port): equal, as in a game
+    // that passes them.
+    for (const auto &pair : {std::pair<uint32_t, uint32_t>{0x008cac66, 0x008cb366}, {0x008cac92, 0x008cb392}}) {
+        const uint16_t a = *OriginalAt<uint16_t *>(pair.first), b = *OriginalAt<uint16_t *>(pair.second);
+        OriginalAt<uint32_t *>(0x008ca840)[a] = OriginalAt<uint32_t *>(0x008caf40)[b];
+    }
+}
+
+// The state for part 40c: part 40b's; the helmet and the hands weapon's carry mode; the local player and the
+// first-person view; the difficulty; the binoculars; the scope's field of view; the patients and the medkit (part
+// 23's healing state).
+void RandomPlayerC()
+{
+    RandomPlayerB();
+    C_Human *h = g_h.human;
+    g_wornContainers[ITEM_CONTAINER_HEAD].item = P(0.5f) ? reinterpret_cast<C_Item *>(g_weaponPort[1]) : nullptr;
+    static const int carries[] = {ITEM_CARRY_SMG, ITEM_CARRY_RIFLE, ITEM_CARRY_LMG};
+    g_plCarry = P(0.6f) ? carries[I(0, 2)] : I(0, 6);
+    g_firstPerson = P(0.6f);
+    g_script.localPlayer = P(0.6f);
+    g_localPlayerSlot = g_script.localPlayer ? h->m_netId : 99;
+    g_self.difficulty = I(1, 4);
+    g_cs.beltItem = P(0.3f) ? nullptr : reinterpret_cast<C_Item *>(g_weaponPort[I(0, 1)]);
+    g_cs.itemFrame = P(0.5f) ? g_h.frame : nullptr;
+    const float fov = P(0.2f) ? 0.0f : U(0.1f, 1.0f);
+    std::memcpy(g_plScope + g_plFovAt, &fov, 4);
+    std::memcpy(g_plScope + 0x10, &fov, 4);
+    // The patients (ids 1 the tested human, 2 the other), their health against their initial health, the first aid
+    // skill, the medkit (found or not, its charges, its behaviour, its uid).
+    g_combat.human[1] = reinterpret_cast<C_Actor *>(h);
+    g_combat.human[2] = reinterpret_cast<C_Actor *>(g_portOther);
+    for (int k = 0; k < 2; ++k) {
+        const int initial = I(50, 120);
+        const int health = P(0.3f) ? initial : P(0.1f) ? 0 : I(1, initial);
+        if (k == 0) {
+            h->m_stats[STAT_HEALTH] = health;
+            h->m_initialStats[STAT_HEALTH] = initial;
+        } else {
+            PortOther()->m_stats[STAT_HEALTH] = health;
+            PortOther()->m_initialStats[STAT_HEALTH] = initial;
+            std::memcpy(g_origOther + 0xEC, &health, 4);
+            std::memcpy(g_origOther + 0x11C, &initial, 4);
+        }
+    }
+    h->m_stats[STAT_FIRST_AID] = P(0.1f) ? 0 : I(1, 100);
+    g_charges[0] = g_charges[1] = P(0.2f) ? 0.0f : float(I(0, 150));
+    g_cs.found = P(0.2f) ? nullptr : reinterpret_cast<C_Item *>(g_medkitPort);
+    g_behaviour = P(0.8f) ? ITEM_BEHAVIOUR_MEDKIT : I(0, 12);
+    reinterpret_cast<C_Item *>(g_medkitPort)->SetUid(I(0, 50));
+    std::memcpy(g_medkitOrig + 0x10, g_medkitPort + 0x10, 4);
+    g_h.human->m_stats[STAT_ENDURANCE] = I(0, 120);
+    g_h.human->m_initialStats[STAT_ENDURANCE] = I(1, 120);
+}
+
+void TestPlayerC()
+{
+    std::printf("player controller: hits, kicks, saved games, view modes, medkit\n");
+    for (int i = 0; i < 12000; ++i) {
+        RandomPlayerC();
+        C_PlayerController *p = g_pp;
+        switch (I(0, 9)) {
+        case 0:
+        case 1:
+        case 4: {
+            // (The helmet's zone and the weapon's more often; the weapon falls one time in 20.)
+            const int type = I(0, 7), zone = P(0.3f) ? 0xB : P(0.4f) ? 3 : I(0, 12), health = I(-10, 100);
+            // (Another kind of actor only in network games: in a local one the original takes it for a human.)
+            C_Actor *attacker = P(0.2f) ? nullptr : P(0.5f) ? static_cast<C_Actor *>(PortOther()) : P(0.5f) || (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL
+                                                                ? static_cast<C_Actor *>(g_h.human)
+                                                                : static_cast<C_Actor *>(PortActor(I(0, ACTOR_KIND_COUNT - 1)));
+            if (P(0.4f))
+                p->m_handsItem = reinterpret_cast<C_Item *>(g_weaponPort[I(0, 1)]);
+            const S_vector pos(U(-50, 50), U(-2, 3), U(-50, 50)), dir(U(-1, 1), U(-1, 1), U(-1, 1));
+            PlCall("OnHit", [&] { p->OnHit(type, zone, health, attacker, pos, dir); return 0; },
+                   [&](void *) { OPl<void>(0x0053db90, type, zone, health, ToOrig(attacker), &pos, &dir); return 0; });
+            break;
+        }
+        case 2: {
+            const S_vector dir(U(-1, 1), U(-1, 1), U(-1, 1));
+            const int type = I(0, 7), zone = I(0, 12);
+            PlCall("OnDamaged", [&] { p->OnDamaged(type, zone, dir); return 0; },
+                   [&](void *) { OPl<void>(0x00545dd0, type, zone, &dir); return 0; });
+            break;
+        }
+        case 3: {
+            // A save of both sides (byte for byte), then a load of the port's file into a new state on both sides (about
+            // 1,200 rounds: the files make them slow).
+            // (An interaction has its target, as part 33's: the original saves the target's id without a check.)
+            static const int kinds[] = {0, 1, 2, 9, 11, KIND_HUMAN};
+            if (P(0.6f)) {
+                p->m_interaction = P(0.2f) ? HUMAN_COMMAND_HEAL_SELF : I(0, 0x26);
+                p->m_interactionTarget = static_cast<C_Actor *>(PortActor(kinds[I(0, 5)]));
+            } else {
+                p->m_interaction = -1;
+            }
+            // (The pending command's actor and member saved as raw pointers by both: each side's own address, so
+            // none here.)
+            p->m_pendingCommand.actor = nullptr;
+            p->m_pendingCommand.member = nullptr;
+            // (The original's command object's padding, +0x34..+0x3F: saved as it is, the port's zeros; a load of a
+            // hand-written chunk leaves bytes there.)
+            std::memset(g_op + 0x4E0 + 0x34, 0, 12);
+            const std::string portFile = AiTempFile("_plport.sav"), origFile = AiTempFile("_plorig.sav");
+            std::remove(portFile.c_str());
+            std::remove(origFile.c_str());
+            auto save = [&](const std::string &file, bool orig) {
+                C_chunk c;
+                c.Open(file.c_str(), true);
+                c.Begin(0x7777);
+                if (orig)
+                    OPl<void>(0x005461f0, &c);
+                else
+                    p->SaveGame(c);
+                c.Ascend();
+                c.Begin(0x0BD1);
+                c.Ascend();
+                return 0;
+            };
+            PlCall("SaveGame", [&] { return save(portFile, false); }, [&](void *) { return save(origFile, true); });
+            const bool same = AiFileBytes(portFile) == AiFileBytes(origFile);
+            CHECK(same);
+            static int shown;
+            if (!same && shown++ < 3) {
+                const std::vector<uint8_t> a = AiFileBytes(portFile), b = AiFileBytes(origFile);
+                size_t k = 0;
+                while (k < a.size() && k < b.size() && a[k] == b[k])
+                    ++k;
+                std::printf("  SaveGame: the files differ (sizes %zu / %zu, at %zu: %02x / %02x)\n", a.size(), b.size(), k,
+                            k < a.size() ? a[k] : 0, k < b.size() ? b[k] : 0);
+            }
+            RandomPlayerC();
+            // (Now and then an older or shorter state chunk, a command chunk, an unknown chunk: written by hand.)
+            if (P(0.3f)) {
+                C_chunk c;
+                c.Open(portFile.c_str(), true);
+                c.Begin(0x7777);
+                c.Begin(0x0840);
+                const int n = I(0, 22);
+                for (int k = 0; k < n; ++k) {
+                    const uint8_t byte = uint8_t(I(0, 255));
+                    c.Write(&byte, 1);
+                }
+                c.Ascend();
+                if (P(0.5f)) {
+                    c.Begin(0x0841);
+                    // (The image's first word the original's vtable, as every save has it: its load copies it.)
+                    const uint32_t commandVt = 0x00810528;
+                    c.Write(&commandVt, 4);
+                    for (int k = 4; k < 0x44; ++k) {
+                        const uint8_t byte = uint8_t(I(0, 255));
+                        c.Write(&byte, 1);
+                    }
+                    c.Ascend();
+                }
+                if (P(0.5f)) {
+                    c.Begin(0x0123);
+                    const int word = 0x55AA;
+                    c.Write(&word, 4);
+                    c.Ascend();
+                }
+                c.Ascend();
+                c.Begin(0x0BD1);
+                c.Ascend();
+            }
+            auto load = [&](bool orig) {
+                C_chunk c;
+                c.Open(portFile.c_str(), false);
+                uint16_t id;
+                c.Descend(id);
+                if (orig)
+                    OPl<void>(0x005464b0, &c);
+                else
+                    p->LoadGame(c);
+                int depth;
+                std::memcpy(&depth, reinterpret_cast<const uint8_t *>(&c) + 0x410, 4);
+                const int at = c.GetPosition();
+                c.Ascend();
+                return depth * 0x10000 + (at & 0xFFFF) + AiNextChunk(c) * 0x100000;
+            };
+            PlCall("LoadGame", [&] { return load(false); }, [&](void *) { return load(true); });
+            std::remove(portFile.c_str());
+            std::remove(origFile.c_str());
+            break;
+        }
+        case 5:
+        case 6: {
+            const int mode = I(-1, 4);
+            // (The sights and the scope with a hands weapon: the original reads its scope unchecked.)
+            if (mode == C_PlayerController::VIEW_IRON_SIGHTS || mode == C_PlayerController::VIEW_SCOPE)
+                p->m_handsItem = reinterpret_cast<C_Item *>(g_weaponPort[I(0, 1)]);
+            PlCall("SetViewMode", [&] { p->SetViewMode(mode); return 0; }, [&](void *) { OPl<void>(0x005469e0, mode); return 0; });
+            break;
+        }
+        default: {
+            const int id = P(0.1f) ? I(3, 9) : I(1, 2);
+            const int uid = P(0.4f) ? -1 : I(0, 50);
+            PlCall("UseMedkit", [&] { return int(p->UseMedkit(id, uid)); },
+                   [&](void *) { return int(OPl<uint32_t>(0x00546dc0, id, uid) & 0xFF); });
+            break;
+        }
+        }
+    }
+}
+
 void TestPlayerController()
 {
     SetUpPlayerController();
@@ -1176,5 +1451,7 @@ void TestPlayerController()
     TestPlayerA();
     SetUpPlayerB();
     TestPlayerB();
+    SetUpPlayerC();
+    TestPlayerC();
 }
 }  // namespace
