@@ -1,5 +1,6 @@
 # Build output (build.py: build/msvc/LS3DF.dll, build/*.exe; intermediates go to %TEMP%)
 build/
+.worktrees/
 *.obj
 *.pdb
 *.ilk
