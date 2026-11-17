@@ -10,7 +10,7 @@
 - Last checkpoint: implementation/design `1e998bd2`; this handoff commit is the latest metadata checkpoint (`HEAD`)
 - Checkpoint location: `origin/docs/coop-003-preparation-ui`; worktree `.worktrees/COOP-003`
 - Review/integration: coordinator review passed; integrated through PR #3; actual merge `dd2aa98e2571eef5bd8d542d51d43113bd223745`
-- Pull request: https://github.com/xcntroller/HD2_BaseCoop/pull/3 (ready for coordinator review)
+- Pull request: https://github.com/xcntroller/HD2_BaseCoop/pull/3 (merged)
 
 ## Branch authority and completion PR
 
