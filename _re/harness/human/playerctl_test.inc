@@ -248,16 +248,30 @@ int AC CM_IsWhispering(void *self)
 void AC CM_ReleaseFollowers(void *self, void *leader) { Log(self, ("ReleaseFollowers " + NameOf(leader)).c_str()); }
 int AC FS_RequestAirAttack(void *self, const uint8_t *request)
 {
-    float f[5];
+    // (x, z, dirX, dirZ, kind, planes, height, caller, team.)
+    float f[4], height;
+    int kind, planes, team;
+    void *caller;
     std::memcpy(f, request, sizeof f);
-    Log(self, "RequestAirAttack", {f[0], f[1], f[2], f[3], f[4]});
+    std::memcpy(&kind, request + 0x10, 4);
+    std::memcpy(&planes, request + 0x14, 4);
+    std::memcpy(&height, request + 0x18, 4);
+    std::memcpy(&caller, request + 0x1C, 4);
+    std::memcpy(&team, request + 0x20, 4);
+    Log(self, ("RequestAirAttack " + NameOf(caller)).c_str(), {f[0], f[1], f[2], f[3], double(kind), double(planes), height, double(team)});
     return g_pcs.airAttack;
 }
 int AC FS_RequestArtillery(void *self, const uint8_t *request)
 {
+    // (x, z, caller, kind, team.)
     float f[2];
+    int kind, team;
+    void *caller;
     std::memcpy(f, request, sizeof f);
-    Log(self, "RequestArtillery", {f[0], f[1]});
+    std::memcpy(&caller, request + 0x08, 4);
+    std::memcpy(&kind, request + 0x0C, 4);
+    std::memcpy(&team, request + 0x10, 4);
+    Log(self, ("RequestArtillery " + NameOf(caller)).c_str(), {f[0], f[1], double(kind), double(team)});
     return g_pcs.artillery;
 }
 
@@ -376,7 +390,7 @@ PL_ROB(MsObjectives, std::vector<S_MissionObjective *> C_MissionDef::*, &C_Missi
 PL_ROB(GmCameraMode, int C_game::*, &C_game::m_cameraMode)
 PL_ROB(GmSpectatedSlot, int C_game::*, &C_game::m_spectatedSlot)
 #undef PL_ROB
-alignas(16) uint8_t g_plMissionPort[sizeof(C_MissionDef) + 0x40], g_plMissionOrig[0x100];
+alignas(16) uint8_t g_plMissionPort[sizeof(C_MpMissionDef) + 0x40], g_plMissionOrig[0x100];
 alignas(16) uint8_t g_plObjectivePort[4][sizeof(S_MpObjective) + 0x10], g_plObjectiveOrig[4][0x40];
 void *g_plObjectiveOrigList[4];
 C_MissionDef *PlMission() { return reinterpret_cast<C_MissionDef *>(g_plMissionPort); }
@@ -892,6 +906,267 @@ void TestPlayerA()
     }
 }
 
+}  // namespace
+
+// ---- part 40b: the squad commands, the radio's target, the soldier's comments, the sight, the sounds heard, the aim
+// The collision world's ray test (DesignateTarget's): the port's wrapped, the original's thunk (0x00718830) redirected;
+// answered from here while g_plRay.on (the port's own otherwise).
+namespace {
+struct S_PlRay {
+    bool on = false;
+    bool hit = true;
+    S_vector pos = {0, 0, 0};
+} g_plRay;
+uint8_t g_plRayVolume[0x40];
+void *PlRayAnswer(const S_vector *from, const S_vector *dir, S_vector *hitPos, const S_vector *hitNormal, uint32_t types, uint32_t flags)
+{
+    Log(nullptr, "RayTest", {from->x, from->y, from->z, dir->x, dir->y, dir->z, double(hitNormal != nullptr), double(types), double(flags)});
+    if (!g_plRay.hit)
+        return nullptr;
+    if (hitPos)
+        *hitPos = g_plRay.pos;
+    return g_plRayVolume;
+}
+void *CT_ PL_RayTestOrig(void *, const S_vector *from, const S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint32_t types,
+                         uint32_t flags)
+{
+    return PlRayAnswer(from, dir, hitPos, hitNormal, types, flags);
+}
+}  // namespace
+extern "C" S_CollisionVolume *__attribute__((thiscall))
+__real__ZNK16C_CollisionWorld7RayTestERK8S_vectorS2_PS0_S3_jj(const C_CollisionWorld *, const S_vector &, const S_vector &, S_vector *,
+                                                              S_vector *, uint32_t, uint32_t);
+extern "C" S_CollisionVolume *__attribute__((thiscall))
+__wrap__ZNK16C_CollisionWorld7RayTestERK8S_vectorS2_PS0_S3_jj(const C_CollisionWorld *world, const S_vector &from, const S_vector &dir,
+                                                              S_vector *hitPos, S_vector *hitNormal, uint32_t types, uint32_t flags)
+{
+    if (!g_plRay.on)
+        return __real__ZNK16C_CollisionWorld7RayTestERK8S_vectorS2_PS0_S3_jj(world, from, dir, hitPos, hitNormal, types, flags);
+    return static_cast<S_CollisionVolume *>(PlRayAnswer(&from, &dir, hitPos, hitNormal, types, flags));
+}
+
+namespace {
+// The mission's type and its two aircraft kinds (the original's +0x50 axis, +0x54 allied).
+struct MnType {
+    using type = int C_CampaignNode::*;
+    friend type PlGet(MnType);
+};
+template struct S_PlRob<MnType, &C_CampaignNode::m_type>;
+struct MpAxis {
+    using type = int C_MpMissionDef::*;
+    friend type PlGet(MpAxis);
+};
+template struct S_PlRob<MpAxis, &C_MpMissionDef::m_aircraftAttackAxis>;
+struct MpAllied {
+    using type = int C_MpMissionDef::*;
+    friend type PlGet(MpAllied);
+};
+template struct S_PlRob<MpAllied, &C_MpMissionDef::m_aircraftAttackAllied>;
+
+// The other human's body frame (the sight measures from body to body).
+I3D_frame *g_plOtherBody, *g_plSelfBody;
+
+void SetUpPlayerB()
+{
+    RedirectOriginal(0x00718830, FAKE(PL_RayTestOrig));
+    RedirectOriginal(0x00475dd0, FAKE(OC_GetActor));
+    RedirectOriginal(0x005a63f0, FAKE(OC_IsSpectating));
+    RedirectOriginal(0x005a63b0, FAKE(OC_IsInPlay));
+    g_actorByIndex = PlayerAt;
+    g_plRay.on = true;
+    g_names[g_plRayVolume] = "rayVolume";
+    CHECK(g_otherFrame != nullptr);
+    S_quat none;
+    none.Identity();
+    g_plOtherBody = NewFrame(FRAME_DUMMY, "otherBody", S_vector(0, 1.2f, 0), none, Box(S_vector(0.1f, 0.1f, 0.1f)), "", g_otherFrame);
+    g_plSelfBody = NewFrame(FRAME_DUMMY, "selfBody", S_vector(0, 1.2f, 0), none, Box(S_vector(0.1f, 0.1f, 0.1f)), "", g_h.frame);
+}
+
+// The state for part 40b: part 40a's, the mission's kinds, the ray's answer, the radios, the players around, the other
+// human placed (its frame, body and position), the stances and paces.
+void RandomPlayerB()
+{
+    RandomPlayer();
+    C_PlayerController *p = g_pp;
+    // The speech (part 23's RandomSpeech: a set or none, the delay, the code and its sample's length).
+    g_h.human->m_speechSet = P(0.1f) ? nullptr : reinterpret_cast<C_SpeechSet *>(g_speechSetBytes2);
+    p->m_speechDelay = P(0.7f) ? 0 : I(-5, 2000);
+    g_cs.speech = P(0.1f) ? I(-3, 0) : P(0.5f) ? I(0, 40000) : int(uint32_t(I(0, 0x7FFFFFFF)));
+    g_cs.sampleSize = P(0.1f) ? 0 : I(1, 3000);
+    auto *mp = reinterpret_cast<C_MpMissionDef *>(PlMission());
+    // (Multiplayer missions only: the original reads the kinds past a single player one; the port has 0.)
+    PlMission()->*PlGet(MnType()) = CAMPAIGN_NODE_MP_MISSION;
+    const int axis = I(-1, 15), allied = I(-1, 15);
+    mp->*PlGet(MpAxis()) = axis;
+    mp->*PlGet(MpAllied()) = allied;
+    std::memcpy(g_plMissionOrig + 0x50, &axis, 4);
+    std::memcpy(g_plMissionOrig + 0x54, &allied, 4);
+    g_plRay.hit = P(0.8f);
+    g_plRay.pos = S_vector(U(-200, 200), U(-5, 30), U(-200, 200));
+    g_cs.found = P(0.7f) ? reinterpret_cast<C_Item *>(g_weaponPort[I(0, 1)]) : nullptr;
+    for (int &who : g_players)
+        who = P(0.85f) ? 0 : I(1, 2);
+    g_cs.spectating = P(0.2f);
+    g_cs.inPlay = P(0.8f);
+    const int health = P(0.2f) ? I(-1, 0) : I(1, 100);
+    PortOther()->m_stats[STAT_HEALTH] = health;
+    std::memcpy(g_origOther + 0xEC, &health, 4);
+    // The other human about the tested one (up to 45 m: the comments' 20 m, the sight's range).
+    const S_vector at = g_h.frame->GetWorldPos() + S_vector(U(-1, 1), U(-0.2f, 0.2f), U(-1, 1)).Normalized() * U(0, 45);
+    g_otherFrame->SetPosInline(at);
+    UpdateTree(g_otherFrame);
+    PortOther()->m_frame = g_otherFrame;
+    std::memcpy(g_origOther + 0x20, &g_otherFrame, 4);
+    PortOther()->m_bodyFrame = g_plOtherBody;
+    std::memcpy(g_origOther + 0x260, &g_plOtherBody, 4);
+    const S_vector4 pos = {at.x, at.y, at.z, 1.0f};
+    PortOther()->m_position = pos;
+    std::memcpy(g_origOther + 0x30, &pos, 16);
+    g_h.human->m_position = {g_h.frame->GetWorldPos().x, g_h.frame->GetWorldPos().y, g_h.frame->GetWorldPos().z, 1.0f};
+    g_pcs.enemyKnown = P(0.5f);
+    g_pcs.viewDistance = P(0.5f) ? 100.0f : U(5, 60);
+    // The stance and the pace (the aim).
+    static const uint32_t stances[] = {MOVE_STANDING, MOVE_CROUCHING, 0};
+    static const uint32_t paces[] = {0, MOVE_PACE_1, MOVE_PACE_3, MOVE_PACE_4, MOVE_PACE_MARCH};
+    p->m_moveFlags = (p->m_moveFlags & MOVE_DEAD) | stances[I(0, 2)] | (P(0.5f) ? (MOVE_MOVING_MASK & (1u << I(0, 31))) : 0u) |
+                     paces[I(0, 4)];
+    g_h.human->m_stats[STAT_SHOOTING] = I(0, 100);
+}
+
+// A squad command's message: the port's and the original's (pos +0x10, the command +0x20 with its pointers mapped).
+alignas(16) uint8_t g_plActionOrig[0x60];
+void RandomAction(S_MsgAction &m, int action)
+{
+    m.pos = AiDir();
+    S_ActionCommand &c = m.command;
+    c.category = I(0, 5);
+    c.dir = AiDir();
+    c.action = action;
+    c.command = I(-1, 0x28);
+    c.actor = AiActor();
+    c.value = I(0, 100);
+    c.member = P(0.5f) ? nullptr : PortOther();
+    std::memset(g_plActionOrig, 0, sizeof g_plActionOrig);
+    std::memcpy(g_plActionOrig + 0x10, &m.pos, 16);
+    CopyMapped(reinterpret_cast<const uint8_t *>(&c) + 4, g_plActionOrig + 0x24, 0x30);
+}
+int RandomSquadAction()
+{
+    if (P(0.15f))
+        return P(0.5f) ? SQUAD_COMMAND_AIR_ATTACK : SQUAD_COMMAND_ARTILLERY;
+    if (P(0.2f))
+        return P(0.5f) ? SQUAD_COMMAND_ON_ACTOR : SQUAD_COMMAND_ON_ACTOR_QUIET;
+    // (Up to 0x3D: the original reads on past its tables for higher ones; the port has none.)
+    return I(0, 0x3D);
+}
+
+void TestPlayerB()
+{
+    std::printf("player controller: squad commands, the radio, comments, sight, sounds, aim\n");
+    for (int i = 0; i < 12000; ++i) {
+        RandomPlayerB();
+        C_PlayerController *p = g_pp;
+        switch (I(0, 11)) {
+        case 0: {
+            const int command = P(0.8f) ? I(0, 0x14) : I(0x15, 0x40);
+            PlCall("SetWhisperingFor", [&] { C_PlayerController::SetWhisperingFor(command); return 0; },
+                   [&](void *) { OriginalAt<void(__stdcall *)(int)>(0x0053d520)(command); return 0; });
+            break;
+        }
+        case 1:
+            PlCall("ExecutePendingCommand", [&] { p->ExecutePendingCommand(); return 0; }, [&](void *) { OPl<void>(0x0053d5b0); return 0; });
+            break;
+        case 2:
+        case 3: {
+            S_MsgAction m;
+            RandomAction(m, RandomSquadAction());
+            PlCall("OnSquadCommand", [&] { return int(p->OnSquadCommand(m)); },
+                   [&](void *) { return int(OPl<bool>(0x0053d5d0, static_cast<void *>(g_plActionOrig))); });
+            break;
+        }
+        case 4: {
+            S_MsgAction m;
+            RandomAction(m, RandomSquadAction());
+            PlCall("PlayCommandGesture", [&] { p->PlayCommandGesture(m); return 0; },
+                   [&](void *) { OPl<void>(0x0053d870, static_cast<void *>(g_plActionOrig)); return 0; });
+            break;
+        }
+        case 5: {
+            const int command = P(0.45f) ? SQUAD_COMMAND_AIR_ATTACK : P(0.8f) ? SQUAD_COMMAND_ARTILLERY : I(0, 0x40);
+            const S_vector origin(U(-50, 50), U(0, 5), U(-50, 50));
+            const S_vector4 d = AiDir();
+            const S_vector dir(d.x, d.y, d.z);
+            PlCall("DesignateTarget", [&] { return int(p->DesignateTarget(command, origin, dir)); },
+                   [&](void *) { return int(OPl<bool>(0x005467c0, command, &origin, &dir)); });
+            break;
+        }
+        case 6: {
+            const int sentence = I(0, 0x8A), delay = I(0, 5000);
+            PlCall("SayNear", [&] { p->SayNear(sentence, delay); return 0; }, [&](void *) { OPl<void>(0x00542060, sentence, delay); return 0; });
+            break;
+        }
+        case 7: {
+            C_Human *enemy = PortOther();
+            if (P(0.5f))
+                PlCall("OnEnemySeen", [&] { p->OnEnemySeen(enemy); return 0; },
+                       [&](void *) { OPl<void>(0x005421c0, ToOrig(enemy)); return 0; });
+            else
+                PlCall("OnEnemyLost", [&] { p->OnEnemyLost(enemy); return 0; },
+                       [&](void *) { OPl<void>(0x005422b0, ToOrig(enemy)); return 0; });
+            break;
+        }
+        case 8: {
+            C_Human *victim = PortOther();
+            PlCall("OnKilledEnemy", [&] { p->OnKilledEnemy(victim); return 0; },
+                   [&](void *) { OPl<void>(0x00542300, ToOrig(victim)); return 0; });
+            break;
+        }
+        case 9: {
+            C_Human *target = PortOther();
+            // (The tested human's body its own frame, turned and now and then tilted: the triangle's axes.)
+            I3D_frame *const body = g_h.human->m_bodyFrame;
+            S_vector axis(0, 1, 0);
+            if (P(0.4f)) {
+                axis = S_vector(U(-1, 1), U(0.2f, 1), U(-1, 1));
+                axis.Normalize();
+            }
+            S_quat turn;
+            turn.Make(axis, U(0, 6.2831f));
+            g_plSelfBody->SetRot(turn);
+            UpdateTree(g_plSelfBody);
+            g_h.human->m_bodyFrame = g_plSelfBody;
+            PlCall("TestSightOfHuman",
+                   [&] {
+                       int status = -7;
+                       float visibility = -7.0f;
+                       p->TestSightOfHuman(target, &status, &visibility);
+                       return status * 4 + (visibility == 100.0f ? 1 : visibility == 0.0f ? 0 : visibility == -7.0f ? 2 : 3);
+                   },
+                   [&](void *) {
+                       int status = -7;
+                       float visibility = -7.0f;
+                       OPl<void>(0x00542320, ToOrig(target), &status, &visibility);
+                       return status * 4 + (visibility == 100.0f ? 1 : visibility == 0.0f ? 0 : visibility == -7.0f ? 2 : 3);
+                   });
+            g_h.human->m_bodyFrame = body;
+            break;
+        }
+        case 10: {
+            S_RememberedSound sound = {};
+            sound.pos = S_vector(U(-50, 50), U(-5, 5), U(-50, 50));
+            sound.posW = 1.0f;
+            sound.chapter = P(0.6f) ? (P(0.33f) ? 0 : P(0.5f) ? 2 : 6) : I(0, 8);
+            PlCall("OnSoundHeard", [&] { p->OnSoundHeard(&sound); return 0; }, [&](void *) { OPl<void>(0x005449b0, &sound); return 0; });
+            break;
+        }
+        default:
+            PlCall("GetAimBonus", [&] { return int(FloatBits(p->GetAimBonus())); },
+                   [&](void *) { return int(FloatBits(OPl<float>(0x00542b10))); });
+            break;
+        }
+    }
+}
+
 void TestPlayerController()
 {
     SetUpPlayerController();
@@ -899,5 +1174,7 @@ void TestPlayerController()
     SetUpPlayerMission();
     SetUpPlayerSlots();
     TestPlayerA();
+    SetUpPlayerB();
+    TestPlayerB();
 }
 }  // namespace

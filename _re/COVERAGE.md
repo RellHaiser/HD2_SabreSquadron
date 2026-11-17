@@ -3366,3 +3366,32 @@ particles and the surface marks. Files are served from memory.
   baseline); the pace and mouse keys written inside the controls' loop; the shared buttons, the frame's on flag and
   the unlocks not compared at first (72 survivors, 37 after); I first read the original's frame flag after DiffCall
   had put the port's state back, and once took an already-killed mutant for a flaky one.
+
+## Human part 40b (the player controller: squad commands, the radio's target, comments, sight, sounds, aim, `player_controller.cpp`, 2026-11-16)
+
+- **The build:** part 40a's (`human/build_playerctl.bat`, `playerctl_test.inc`) with the collision world's RayTest
+  wrapped (the original's thunk 0x00718830 redirected): DesignateTarget's ray answered and logged from the test's
+  state (hit or not, where). Part 23's GetActor (the players: none, the tested human, the other), IsSpectating and
+  IsInPlay fakes on both sides; the heavy fire support's requests logged whole (target, way, kind, planes, height,
+  caller, team).
+  - The state: part 40a's; the mission a multiplayer one with its two aircraft kinds (the original's +0x50 / +0x54);
+    the radios found or not; the players in the first 32 slots; the other human up to 45 m away (its frame, a body
+    frame of its own, its position and health); the speech (part 23's: a set or none, the delay, the code, the
+    sample's length); the stance and pace; the shooting skill; the tested human's body turned and now and then
+    tilted for the sight.
+- **The tests:** 12,000 calls: SetWhisperingFor, ExecutePendingCommand, OnSquadCommand (each role; commands 0..0x3D,
+  the radios', SQUAD_COMMAND_ON_ACTOR and its quiet one with their sentences), PlayCommandGesture, DesignateTarget
+  (artillery, air attack, others; a ray hit or not; a radio or not), SayNear, OnEnemySeen, OnEnemyLost,
+  OnKilledEnemy, TestSightOfHuman, OnSoundHeard (each chapter), GetAimBonus.
+- **Results:** 51,024 checks for the build (parts 40a-b), 0 failures, 10 s; lines: 185 of 185 for part 40b's ranges.
+- **Port fixes:** none needed in this half.
+- **Not tested:** the port's fixes the original does not share: squad commands past 0x3D (the original reads past
+  its speech tables), the artillery kind on a single player mission (the original reads past the mission: the port
+  has 0), a non-human actor in the first 32 slots for SayNear (the original takes it for a human; the harness's
+  slots hold only humans); the real collision ray (faked).
+- **Mutations** (`human/mutations/mutate_playerctl2.py`): 211 mutants (197 generated, 14 for repeated lines); 20 not
+  building; 174 of 191 killed; the survivors are the fixes not reached (3), equivalent (5), ties (6) and weak (3:
+  the sight triangle's edges against 1 m^2).
+- **Harness lessons (my mistakes):** the first run's 27 survivors: the human had no speech set in this build, so Say
+  returned before logging any sentence (the comments' and the commands' sentences unchecked), and the body frame was
+  never tilted; a helper's name (FloatBits, not part 33's FloatBitsOf).
