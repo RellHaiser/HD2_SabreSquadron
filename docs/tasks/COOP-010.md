@@ -38,6 +38,17 @@ integration, and focused fixes discovered during play. Coordinate any legacy fil
 with active owners. Record the chosen mission, initial squad/loadouts, and launch procedure;
 the production loadout screen must not be replaced with multiplayer UI for this test.
 
+### COOP-002 scope refinement
+
+Contract implementation scope from COOP-002: own development launch, initial-world
+integration and live campaign attachment in `src/net/net_game.cpp`, `net_commands.cpp`,
+and `net_messages.cpp` after COOP-008/009 merge. Follow [the protocol boundary](../coop_contracts.md#protocol-compatibility-and-snapshot-boundaries):
+quarantine native join/spawn/respawn and actor input until campaign admission, reconstruct
+the frozen manifest/world and require matching snapshot acknowledgments before simulation.
+A Hello codec or preparation snapshot is insufficient. Reject new Running admissions
+with `JoinNotSupported` until the later current-world snapshot task. Record fixed development
+roster/loadouts/policies as fixtures, not approved production menu behavior.
+
 ## Acceptance criteria
 
 - Two actual game instances negotiate compatibility and enter the same original mission

@@ -20,16 +20,20 @@ merged into `main` before implementation starts; an open branch alone is insuffi
 | [COOP-001](COOP-001.md) | Reproducible build and baseline verification | None | `feature/coop-001-build-baseline` |
 | [COOP-002](COOP-002.md) | Shared session, ownership, preparation, and protocol contracts | None | `feature/coop-002-contracts` |
 | [COOP-003](COOP-003.md) | Campaign preparation UI feasibility and layout | None | `docs/coop-003-preparation-ui` |
-| [COOP-004](COOP-004.md) | Soldier ownership and session model | COOP-002 | `feature/coop-004-ownership` |
-| [COOP-005](COOP-005.md) | Loadout permissions and stock transactions | COOP-002 | `feature/coop-005-preparation-model` |
-| [COOP-006](COOP-006.md) | Protocol codecs and compatibility negotiation | COOP-002 | `feature/coop-006-protocol` |
-| [COOP-007](COOP-007.md) | Campaign preparation screen component | COOP-002, COOP-003 | `feature/coop-007-preparation-screen` |
+| [COOP-011](COOP-011.md) | Compiled shared declarations and fake-interface conformance | COOP-002 | `feature/coop-011-shared-declarations` |
+| [COOP-004](COOP-004.md) | Soldier ownership and session model | COOP-002, COOP-011 | `feature/coop-004-ownership` |
+| [COOP-005](COOP-005.md) | Loadout permissions and stock transactions | COOP-002, COOP-011 | `feature/coop-005-preparation-model` |
+| [COOP-006](COOP-006.md) | Protocol codecs and compatibility negotiation | COOP-002, COOP-011 | `feature/coop-006-protocol` |
+| [COOP-007](COOP-007.md) | Campaign preparation screen component | COOP-002, COOP-003, COOP-011 | `feature/coop-007-preparation-screen` |
 | [COOP-008](COOP-008.md) | Ownership-aware controller and input adapters | COOP-001, COOP-004, COOP-006 | `feature/coop-008-controller-adapters` |
 | [COOP-009](COOP-009.md) | Campaign mission lifecycle adapters | COOP-001, COOP-004, COOP-005, COOP-006 | `feature/coop-009-campaign-adapters` |
 | [COOP-010](COOP-010.md) | Two players and two AI in one original mission | COOP-008, COOP-009 | `feature/coop-010-two-player-mission` |
 
-COOP-004 through COOP-007 can proceed in parallel once their respective contracts and
-UI investigation are integrated. COOP-008 and COOP-009 share some legacy integration
+COOP-002 refines a small shared-declaration gate, COOP-011, before compiled consumers.
+COOP-004 through COOP-007 can proceed in parallel after COOP-011 is integrated;
+COOP-007 additionally needs the COOP-003 UI investigation. This keeps one owner for the
+shared headers without adding dependencies between the model, codec and fake UI
+implementations. COOP-008 and COOP-009 share some legacy integration
 files and need a coordinator-agreed edit sequence. COOP-010 is the first playable
 integration gate. The preparation screen is a separate component until it is connected
 to the complete campaign/menu flow in a subsequent task.

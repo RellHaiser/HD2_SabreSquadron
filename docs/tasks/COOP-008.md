@@ -37,6 +37,20 @@ Expected hotspots: `human_control.cpp`, `player_net.cpp`, `player_controller.cpp
 and actor creation overlap COOP-009; the coordinator must assign exact edits before starting.
 Use the COOP-002 coupling audit to split this task further if needed.
 
+### COOP-002 scope refinement
+
+Contract implementation scope from COOP-002: own `src/game/campaign_control_adapter.{h,cpp}`
+and the controller/input/presentation consumers in [the coupling audit](../coop_contracts.md#legacy-coupling-audit-and-adapter-allocation),
+including `actors_module.cpp` controller dispatch/removal safety, human/player/remote
+controllers, local team/camera/inventory/weapon view and driver ownership checks.
+Export a committed handoff and exact-incarnation disconnect helper for COOP-009.
+Do not edit `game_rounds.cpp`, `spawn_point.cpp`, `game_app.cpp` or profile layouts;
+COOP-009 owns lifecycle call sites and calls the helper before native destructive logic.
+Audit damage attribution, medic scoring, class messages and unowned AI indexing, not
+just movement. Tag/guard net-object control bits, reliable actions and queued operations
+with generation and control revision; a reliable-command guard alone is insufficient.
+Full vehicle gameplay acceptance remains a later interaction gate.
+
 ## Acceptance criteria
 
 - Player input resolves the controlled soldier independently of actor/player-slot equality.
