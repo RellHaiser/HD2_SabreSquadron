@@ -58,7 +58,7 @@ survive updates by persistent soldier identity, not array position.
 | Host, unclaimed AI soldier | Yes | Yes, same transaction path as own soldier | Host proposes squad changes; guest claims require an eligible available soldier. |
 | Host, another connected human | Yes | No, including auto-equip and essentials distribution | No ordinary takeover. Ownership changes use the shared ownership policy. |
 | Guest, another human or AI soldier | Yes | No | May request an eligible AI soldier under the proposed claim policy; viewing is never a claim. |
-| Spectator / no eligible soldier | Yes, subject to snapshot visibility | No | Explain mission restriction/full squad; offer eligible claims if any. No new soldier or extra life. |
+| Unassigned guest / mission-ineligible viewer | Yes, subject to snapshot visibility | No; a host without a claimed soldier still retains eligible AI editing rights | Explain mission restriction/full squad; offer eligible claims if any. No new soldier or extra life. |
 | Any viewer, unavailable/dead/nondeployed soldier | Explain availability; equipment inspection only if supplied | No | Cannot bypass mission restrictions or death. |
 
 Clicking an inventory place or stock row selects it; a second explicit action equips or
