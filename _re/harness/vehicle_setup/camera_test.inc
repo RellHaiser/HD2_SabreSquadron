@@ -887,7 +887,7 @@ alignas(16) uint8_t g_kpMem[sizeof(C_CameraFrameKeeper)];
 C_CameraFrameKeeper *KpNew(C_Actor *owner, I3D_frame *frame)
 {
     std::memset(g_kpMem, 0xCD, sizeof g_kpMem);
-    return new (g_kpMem) C_CameraFrameKeeper(owner, frame);
+    return ::new (g_kpMem) C_CameraFrameKeeper(owner, frame);
 }
 bool KpQuat(const S_quat &q, float s, float x, float y, float z)
 {

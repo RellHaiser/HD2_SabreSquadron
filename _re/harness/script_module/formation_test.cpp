@@ -37,11 +37,15 @@ S_vector Unit(S_vector v);
 }  // namespace formation
 using namespace formation;
 
-// How many slot arrays were freed.
+// How many slot arrays were freed: every _aligned_free comes here (formation_free_count.h, forced
+// into each unit); the slots' operator delete[] is the only one this test reaches.
 static int g_arraysFreed;
-void *operator new[](size_t size, std::align_val_t align) { return _aligned_malloc(size, static_cast<size_t>(align)); }
-void operator delete[](void *p, std::align_val_t) noexcept { ++g_arraysFreed; _aligned_free(p); }
-void operator delete[](void *p, size_t, std::align_val_t) noexcept { ++g_arraysFreed; _aligned_free(p); }
+#undef _aligned_free
+void FormationCountedFree(void *p)
+{
+    ++g_arraysFreed;
+    _aligned_free(p);
+}
 
 namespace {
 int checks, failures;

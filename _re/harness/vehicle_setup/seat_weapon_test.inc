@@ -654,7 +654,7 @@ void SeatWeapon3bTest(S_Sw3b &r, C_Car *car, I3D_frame *seatFrame, int seat, con
     }
     auto *item = reinterpret_cast<C_FakeWeaponItem *>(w->m_item);
     C_Vehicle &v = car->m_vehicle;
-    v.SetCallback(VEHICLE_CALLBACK_IMPULSE, reinterpret_cast<void *>(&SwNoteImpulse));
+    v.SetImpulseCallback(reinterpret_cast<void *>(&SwNoteImpulse));
     g_gameRole = GAME_ROLE_LOCAL;
     def.m_shellSound = 33;
 

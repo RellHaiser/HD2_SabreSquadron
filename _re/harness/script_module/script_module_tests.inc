@@ -81,7 +81,7 @@ I3D_animation_set *NewCacheAnim(const char *file)
 }
 S_RememberedFrame *Remember(I3D_frame *frame, uint32_t what)
 {
-    auto *r = new (_aligned_malloc(sizeof(S_RememberedFrame), 16)) S_RememberedFrame;
+    auto *r = new S_RememberedFrame;
     r->frame = frame;
     r->what = what;
     Module()->m_rememberedFrames.push_back(r);

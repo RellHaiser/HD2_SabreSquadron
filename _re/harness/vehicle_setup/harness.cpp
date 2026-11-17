@@ -6000,7 +6000,7 @@ void CarHelperTest(C_Vehicle *v)
 
     // --- a callback slot ---
     void *const slot0 = v->m_callbacks[VEHICLE_CALLBACK_GLASS_BROKEN];
-    v->SetCallback(VEHICLE_CALLBACK_GLASS_BROKEN, reinterpret_cast<void *>(&CarHelperTest));
+    v->SetGlassBrokenCallback(reinterpret_cast<void *>(&CarHelperTest));
     const bool callback = v->m_callbacks[VEHICLE_CALLBACK_GLASS_BROKEN] == reinterpret_cast<void *>(&CarHelperTest);
     v->m_callbacks[VEHICLE_CALLBACK_GLASS_BROKEN] = slot0;
 
@@ -11960,7 +11960,7 @@ void MissionTest(const char *path)
     g_lightNotes = 0;
     g_lightNoteContext = nullptr;
     g_lightVehicle = nullptr;
-    v.SetCallback(VEHICLE_CALLBACK_IMPULSE, reinterpret_cast<void *>(&NoteLights));
+    v.SetImpulseCallback(reinterpret_cast<void *>(&NoteLights));
     // A seat's camera dummy ("camera3RD*" anywhere under the seat dummy).
     const auto cameraOf = [&](int seat) -> I3D_frame * {
         return v.m_seats[seat].frame->FindChildFrame("camera3RD*", ENUMF_WILDMASK | FRAME_MASK_DUMMY);
@@ -13058,7 +13058,7 @@ void NetTest(const char *path)
             netObject.property.dir.angle = 1.25f;
             car->SetPosition4({1.0f, 1.0f, 1.0f, 1.0f});
             g_lightNotes = 0;
-            v.SetCallback(VEHICLE_CALLBACK_IMPULSE, reinterpret_cast<void *>(&NoteLights));
+            v.SetImpulseCallback(reinterpret_cast<void *>(&NoteLights));
             car->UpdateNetwork(40);
             Expect(replicated, o.unknown3C == 7 && o.sendMask == (role == GAME_ROLE_SERVER ? 7 : 2) &&
                                     o.property.flagSets == std::vector<uint32_t>{0xFFFDFFFFu} && o.ticks.empty() &&
@@ -13113,7 +13113,7 @@ void NetTest(const char *path)
         Expect(replicated, netObject.ticks.size() == 1 && netObject.updates.empty(), __LINE__);
         delete driver;
         g_gameRole = GAME_ROLE_CLIENT;
-        v.SetCallback(VEHICLE_CALLBACK_IMPULSE, nullptr);
+        v.SetImpulseCallback(nullptr);
     }
 
     // --- the state handlers: every 300 ms the sliding and locked wheels, the gear, the steering

@@ -440,12 +440,53 @@ void FontTest()
         g_foLanguage = "English";
     }
 
-    // --- 1.0 and 1.1: none (their set dropped); 1.2 on and 2.x: the fonts ---
+    // --- 1.0 and 1.1: their own set (LoadOldSet 0x0063f870): Set<n> of the text directory by the
+    // width, each font with its fallback (the original's paths "%sFonts\Set%d\%s.tbl" / ".tga" and
+    // "Text\Czech\Fonts\Set%d\%s.tbl"); 1.2 on and 2.x: the fonts ---
     {
-        for (int minor : {0, 1}) {
-            g_foMinor = minor;
-            WM(r.foVersion, FoLoad()->m_fonts.empty() && g_gfLog.empty());
-        }
+        const int oldWidth = g_foWidth;
+        g_foWidth = 800;                                // set 2
+        const std::string en = "Text\\English\\Fonts\\Set2\\", cz = "Text\\Czech\\Fonts\\Set2\\";
+        auto tga = [](const std::string &dir, const char *name) { return "texture " + dir + name + ".tga 0 402"; };
+        // SYMBOLS, the Czech BIG and SUBTITLES3 missing: SMALL as the symbols, the text directory's
+        // BIG as the central European one, SUBTITLES as the subtitles.
+        for (const char *f : {"BIG", "SMALL", "SUBTITLES"})
+            g_files[en + f + ".tbl"] = FoTable();
+        g_files[cz + "SMALL.tbl"] = FoTable();
+        g_foMinor = 0;
+        C_FontManager *m = FoLoad();
+        WM(r.foVersion, (FoIds(m) == std::vector<int>({2, 3, 4, 5, 6, 1}) && m->m_set == 2 &&
+                            FoLines("texture") == std::vector<std::string>{
+                                tga(en, "BIG"), tga(en, "SMALL"), tga(en, "SYMBOLS"), tga(en, "SMALL"),
+                                tga(cz, "BIG"), tga(en, "BIG"), tga(cz, "SMALL"), tga(en, "SUBTITLES3"),
+                                tga(en, "SUBTITLES")}));
+        // Every first choice there: no fallback tried.
+        for (const char *f : {"SYMBOLS", "SUBTITLES3"})
+            g_files[en + f + ".tbl"] = FoTable();
+        g_files[cz + "BIG.tbl"] = FoTable();
+        g_foMinor = 1;
+        m = FoLoad();
+        WM(r.foVersion, (FoIds(m) == std::vector<int>({2, 3, 4, 5, 6, 1}) &&
+                            FoLines("texture") == std::vector<std::string>{
+                                tga(en, "BIG"), tga(en, "SMALL"), tga(en, "SYMBOLS"), tga(cz, "BIG"),
+                                tga(cz, "SMALL"), tga(en, "SUBTITLES3")}));
+        // No subtitles font: SMALL in its place. Set 1 below 800, set 3 from 1024.
+        g_files.erase(en + "SUBTITLES3.tbl");
+        g_files.erase(en + "SUBTITLES.tbl");
+        m = FoLoad();
+        WM(r.foVersion, FoIds(m) == std::vector<int>({2, 3, 4, 5, 6, 1}) &&
+                            FoLines("texture").back() == tga(en, "SMALL") &&
+                            FoLines("texture")[FoLines("texture").size() - 2] == tga(en, "SUBTITLES"));
+        g_foWidth = 799;
+        m = FoLoad();
+        WM(r.foVersion, m->m_set == 1 && m->m_fonts.empty() && FoLines("texture").size() == 11);
+        g_foWidth = 1024;
+        WM(r.foVersion, FoLoad()->m_set == 3);
+        for (const char *f : {"BIG", "SMALL", "SYMBOLS"})
+            g_files.erase(en + f + ".tbl");
+        g_files.erase(cz + "BIG.tbl");
+        g_files.erase(cz + "SMALL.tbl");
+        g_foWidth = oldWidth;
         g_foMinor = 2;
         WM(r.foVersion, FoLoad()->m_fonts.size() == 5);
         g_foMajor = 2;
