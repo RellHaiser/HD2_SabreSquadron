@@ -2,14 +2,14 @@
 
 ## Coordination
 
-- Status: ready
-- Owner/session: unassigned
+- Status: active
+- Owner/session: Codex COOP-003 / 2026-11-18 user assignment
 - Canonical branch: `docs/coop-003-preparation-ui`
-- Base commit: not started
+- Base commit: `7e033adde95881baad06c6877cbbd6eef8197d96`
 - Dependencies: none
-- Last checkpoint: none
-- Checkpoint location: none
-- Review/integration: none
+- Last checkpoint: this initial claim commit (`HEAD`)
+- Checkpoint location: `origin/docs/coop-003-preparation-ui`; worktree `.worktrees/COOP-003`
+- Review/integration: claim recorded in coordination commit `7f54ee71`; COOP-001 coordinator notified of concurrent kickoff and acknowledged as sole ledger writer
 - Pull request: none
 
 ## Branch authority and completion PR
@@ -54,7 +54,7 @@ Do not change shipping menu behavior or commit extracted game assets.
 
 - Completed: product direction and candidate components identified in the design.
 - Remaining: layout, resource audit, state/interaction specification, consumer contract review.
-- Next action: inspect campaign equipment screen construction and list reusable controls.
+- Next action: inspect campaign equipment construction and resources; publish layout, resource audit, and original offline HTML preview. Coordinate immutable snapshot/command needs with COOP-002 (thread `01a1ebd2-902d-7e32-9876-9818a845d361`).
 - Blockers: none for code/layout investigation; game resources may limit visual verification.
 - Decisions: campaign-style UI and per-player loadout ownership are confirmed.
 - Validation: none for this task.
