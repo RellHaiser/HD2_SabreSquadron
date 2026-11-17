@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Campaign preparation — COOP-003 design fixture</title>
+<style>
+  *{box-sizing:border-box} body{margin:0;background:#252c25;color:#242b24;font:15px/1.45 Georgia,serif}
+  button,select{font:inherit;color:inherit} button,select{border:1px solid #777b66;background:#f2efdf;padding:8px 12px;border-radius:2px}
+  button{cursor:pointer} button:hover:not(:disabled){background:#fff9dc} button:disabled{opacity:.55;cursor:default}
+  :focus-visible{outline:3px solid #865616;outline-offset:3px} a{color:#f1e8b9} .skip{position:absolute;left:-9999px}.skip:focus{left:12px;top:12px;background:#252c25;padding:12px;z-index:2}
+  .fixture{max-width:1240px;margin:0 auto;padding:12px 22px;color:#ebe8d6;font:13px/1.5 system-ui,sans-serif}
+  .fixture summary{cursor:pointer;font-weight:700}.fixture p{margin:6px 0}.fixtures{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:9px}.fixture button,.fixture select{font-size:12px;padding:6px 9px;color:#242b24}
+  main{max-width:1196px;margin:0 auto 24px;padding:22px;background:#e5e0cc;box-shadow:0 12px 40px #0004;border-top:6px solid #98926f}
+  header{display:flex;gap:16px;justify-content:space-between;align-items:center;border-bottom:2px solid #666d55;padding-bottom:12px}.eyebrow{font:11px/1.5 system-ui,sans-serif;letter-spacing:2px;text-transform:uppercase}
+  h1{font-size:29px;font-weight:normal;margin:2px 0} h2{font-size:17px;font-weight:normal;margin:0 0 12px;border-bottom:1px solid #b1b19b;padding-bottom:7px} h3{font-size:15px;margin:15px 0 6px}
+  .stamp{border:1px solid #66735b;padding:7px 12px;font:12px system-ui,sans-serif;text-transform:uppercase;letter-spacing:1px}.subtle{color:#505747;font-size:13px}.squad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+  .slot{display:flex;text-align:left;gap:10px;align-items:center;width:100%;min-height:112px;padding:10px;background:#eeeadb;border:1px solid #aaa990}.slot[aria-pressed=true]{border:2px solid #384d34;background:#fff9e5;padding:9px}
+  .slot strong,.slot small{display:block}.slot strong{font-size:15px}.slot small{font:12px/1.55 system-ui,sans-serif}.portrait{flex-shrink:0;width:42px;height:59px;background:#465440;color:#f3edce;display:grid;place-items:center;font:22px Georgia,serif;border:3px solid #c6c2ac;box-shadow:0 1px 3px #0004}.unavailable .portrait{background:#797d72}
+  .columns{display:grid;grid-template-columns:.8fr 1.2fr 1fr;gap:16px}.pane{background:#f2efdf;padding:15px;min-width:0;border:1px solid #c3c0a9}.brief p{font-size:14px;margin:8px 0}.brief .orders{padding-left:18px;font-size:14px}.mission-note{border-top:1px solid #bdbda8;padding-top:9px}.access{font:13px system-ui,sans-serif;background:#dedfc9;padding:8px;margin-bottom:10px;min-height:34px}.access.readonly{background:#e7ddca}
+  .preview{height:95px;display:grid;place-items:center;border:1px solid #b9baa3;background:linear-gradient(120deg,#c2c5b1,#e9e6d5);text-align:center;font:12px/1.6 system-ui,sans-serif;color:#414e3e}.preview b{display:block;font:25px Georgia,serif}.inventory{list-style:none;padding:0;margin:10px 0}.inventory li{display:flex;justify-content:space-between;border-bottom:1px solid #d7d5bf;padding:5px 0;font-size:13px;gap:12px}.meter{height:6px;background:#d3d3be;margin:4px 0 12px}.meter span{display:block;width:51%;background:#62734e;height:100%}.actions{display:flex;flex-wrap:wrap;gap:8px}.actions button{font-size:13px}.stock-row{padding:12px 0;border-bottom:1px solid #d1d2b9;display:flex;align-items:start;justify-content:space-between;gap:10px}.stock-row strong,.stock-row small{display:block}.stock-row small{font-size:12px;color:#515948}.stock-count{font-size:20px}.tag{font:11px system-ui,sans-serif;letter-spacing:1px;text-transform:uppercase;color:#46533e}.essential{margin-top:15px;border-left:3px solid #526444;padding-left:10px}.essential p{font-size:13px}.notice{font:13px/1.5 system-ui,sans-serif;margin:14px 0 0;background:#d8dbc7;border-left:3px solid #526444;padding:9px;min-height:38px}.footer{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:2px solid #666d55;margin-top:16px;padding-top:12px}.footer p{margin:0}.primary{background:#374d35;color:#fff7d8;border-color:#374d35}.primary:hover:not(:disabled){background:#4c6445}.readyline{font:13px/1.5 system-ui,sans-serif}.footnote{font:11px/1.6 system-ui,sans-serif;margin:16px 0 0;color:#4f5749} .hint{font:12px/1.5 system-ui,sans-serif}.stats{font-size:13px;margin:8px 0}.muted{color:#57604e}
+  @media(max-width:1000px){main{padding:16px}.slot{gap:7px}.portrait{width:32px;height:48px;font-size:18px}.slot strong{font-size:13px}.slot small{font-size:11px}.columns{gap:10px}.pane{padding:11px}}
+  @media(max-width:720px){main{margin:0 8px 16px}.fixture{padding:10px 16px}.squad{grid-template-columns:repeat(2,minmax(0,1fr))}.columns{grid-template-columns:1fr}.footer,header{align-items:start;flex-direction:column}h1{font-size:25px}.slot{min-height:100px}}
+</style>
+<a href="#preparation" class="skip">Skip to preparation mockup</a>
+<aside class="fixture" aria-label="Design fixture controls">
+  <details open>
+    <summary>COOP-003 · Design fixture controls</summary>
+    <p>Original offline mockup. All mission text, soldiers and quantities are synthetic. These controls simulate events; they are outside the proposed game screen.</p>
+    <div class="fixtures">
+      <label for="role">View as</label><select id="role"><option value="host">Host · Morgan</option><option value="guest">Guest · Ellis</option></select>
+      <button id="reset">Reset fixture</button><button id="loading">Receiving snapshot</button>
+      <button id="scarce">Competing last item</button><button id="disconnect">Disconnect guest</button>
+      <button id="claim">Guest claims viewed AI</button><button id="restricted">Restricted squad</button>
+      <button id="reject">Reject next edit</button><button id="remote-ready">Other humans ready</button>
+      <a href="campaign_preparation.md">Design specification</a>
+    </div>
+  </details>
+</aside>
+<main id="preparation" tabindex="-1">
+  <header><div><div class="eyebrow">Co-operative campaign · mission preparation</div><h1>Operation Northlight</h1><div class="subtle">Synthetic mission · Coastal reconnaissance · Campaign difficulty: normal</div></div><div class="stamp" id="phase">Preparing</div></header>
+  <nav class="squad" aria-label="Squad soldiers" id="squad"></nav>
+  <div class="columns">
+    <section class="pane brief" aria-labelledby="brief-title">
+      <h2 id="brief-title">Mission briefing</h2><div class="eyebrow">Operational orders</div>
+      <p>Land north of the harbour, locate the radio station and collect the patrol documents. Keep the squad together until the observation post is secured.</p>
+      <ol class="orders"><li>Reach the observation post.</li><li>Recover the patrol documents.</li><li>Return to the landing point.</li></ol>
+      <p class="mission-note" id="restriction">Four deployed soldiers. Unclaimed soldiers remain under AI control.</p>
+      <div class="essential"><h3>Mission essentials</h3><p id="essentials"></p><p class="muted">Shown here as one required medical kit. The game model supplies actual campaign rules and carriers.</p></div>
+    </section>
+    <section class="pane" aria-labelledby="editor-title">
+      <h2 id="editor-title">Equipment · <span id="soldier-name"></span></h2>
+      <div class="access" id="access"></div>
+      <div class="preview" aria-label="Soldier preview placeholder"><div><b id="initials"></b>Soldier preview area · original placeholder<br>Installed campaign model to be reused in-engine</div></div>
+      <ul class="inventory" aria-label="Committed equipment" id="inventory"></ul>
+      <div class="hint" id="weight"></div><div class="meter" aria-hidden="true"><span></span></div>
+      <div class="actions"><button id="return">Return one medical kit</button><button id="claim-action">Claim this soldier</button><button id="stats-toggle" aria-expanded="false" aria-controls="stats">Soldier skills</button></div>
+      <p class="stats" id="stats" hidden>Shooting 72% · Strength 40 kg · Health 100<br>Endurance 78 · Stealth 61% · First aid 66% · Lockpick 40%</p>
+      <p class="hint" id="editor-hint"></p>
+    </section>
+    <section class="pane" aria-labelledby="stock-title">
+      <h2 id="stock-title">Military stock</h2><div class="tag">Available to the squad</div>
+      <div class="stock-row"><div><strong>Medical kit</strong><small>1 kit · 1 kg · Belt</small></div><span class="stock-count" id="stock-count"></span></div>
+      <p class="hint">Select a soldier, then equip one kit. Stock changes only after the request is accepted.</p>
+      <button id="equip">Equip one medical kit</button>
+      <div class="stock-row"><div><strong>Rifle ammunition</strong><small>Example inventory category</small></div><span>24</span></div>
+      <div class="stock-row"><div><strong>Field equipment</strong><small>Other item groups continue below</small></div><span>—</span></div>
+      <p class="hint">This layout fixture models one item. Full campaign stock filters, item places, presets and scrolling belong to the native screen component.</p>
+    </section>
+  </div>
+  <div id="status" class="notice" role="status" aria-live="polite" aria-atomic="true"></div>
+  <footer class="footer"><div><div class="eyebrow">Squad readiness</div><p class="readyline" id="readyline"></p><p class="hint" id="deploy-reason"></p></div><div class="actions"><button id="leave">Leave preparation</button><button id="ready">Ready</button><button class="primary" id="deploy">Deploy squad</button></div></footer>
+  <p class="footnote">Documentation-only · Proposed ready/claim policy: all deployed humans ready; eligible AI can be claimed. No networking, saves or game globals. Browser reflow does not establish engine layout support.</p>
+</main>
+<script>
+  'use strict';
+  const byId = id => document.getElementById(id);
+  let state, selected = 0, role = 'host', pending = null, rejectNext = false, serial = 0;
+  const names = ['Morgan Hale','Ellis Ward','Thomas Reed','Arthur Shaw'];
+  function initial() {
+    return {revision:1, phase:'editable', restricted:false, stock:2, message:'Select a soldier to inspect equipment. Only permitted soldiers can be edited.',
+      soldiers:names.map((name,i)=>({name, owner:i===0?'host':i===1?'guest':null, kits:i===0?1:0, eligible:true})), ready:{host:false,guest:false}};
+  }
+  const editable = i => state.phase==='editable' && state.soldiers[i].eligible &&
+    (state.soldiers[i].owner===role || (role==='host' && state.soldiers[i].owner===null));
+  const ownerName = owner => owner==='host'?'Morgan (host)':owner==='guest'?'Ellis':'AI';
+  const activeHumans = () => [...new Set(state.soldiers.filter(s=>s.eligible && s.owner).map(s=>s.owner))];
+  const ownSoldier = () => state.soldiers.find(s=>s.eligible && s.owner===role);
+  const requiredMet = () => state.soldiers.filter(s=>s.eligible).reduce((n,s)=>n+s.kits,0)>=1;
+  function change(message) {state.revision++;state.ready={host:false,guest:false};state.message=message;render();}
+  function reset() {serial++;pending=null;selected=0;rejectNext=false;state=initial();render();}
+  function render() {
+    const focused = document.activeElement;
+    const focusedSlot = focused?.dataset?.soldier;
+    const s=state.soldiers[selected], can=editable(selected), busy=!!pending;
+    const squad=byId('squad');squad.replaceChildren();
+    state.soldiers.forEach((soldier,i)=>{
+      const button=document.createElement('button');button.className='slot'+(soldier.eligible?'':' unavailable');button.dataset.soldier=i;
+      button.setAttribute('aria-pressed',String(selected===i));
+      const portrait=document.createElement('span');portrait.className='portrait';portrait.setAttribute('aria-hidden','true');portrait.textContent=soldier.eligible?soldier.name.split(' ').map(n=>n[0]).join(''):'—';
+      const text=document.createElement('span');const name=document.createElement('strong');name.textContent=soldier.eligible?soldier.name:'Unavailable slot';text.append(name);
+      [soldier.eligible?ownerName(soldier.owner):'Mission permits one soldier',soldier.eligible?(editable(i)?'Can edit':'View only'):'Not deployed',soldier.eligible?(soldier.owner?(state.ready[soldier.owner]?'Ready':'Preparing'):'AI · validation '+(requiredMet()?'clear':'needed')):'Cannot claim'].forEach(label=>{const small=document.createElement('small');small.textContent=label;text.append(small);});
+      button.append(portrait,text);button.addEventListener('click',()=>{selected=i;render();});squad.append(button);
+    });
+    // Retain keyboard focus when a snapshot replaces the slot rows.
+    if(focusedSlot!==undefined) squad.querySelector(`[data-soldier="${focusedSlot}"]`)?.focus();
+    byId('phase').textContent=state.phase==='editable'?'Preparing':state.phase==='loading'?'Receiving preparation':state.phase==='frozen'?'Deploying':'Session ended';
+    byId('soldier-name').textContent=s.eligible?s.name:'Unavailable';byId('initials').textContent=s.eligible?s.name.split(' ').map(n=>n[0]).join(''):'—';
+    const access=byId('access');access.classList.toggle('readonly',!can);
+    access.textContent=!s.eligible?'Read only — not deployed':can?(s.owner===role?'Editing your soldier':'Editing AI soldier'):`Read only — ${s.owner?'equipped by '+ownerName(s.owner):'host equips AI soldiers'}`;
+    const inv=byId('inventory');inv.replaceChildren();
+    const places=s.eligible?[['Head','Campaign headgear'],['Uniform','Campaign uniform'],['Shoulder','Service rifle'],['Belt',`${s.kits} medical kit(s)`],['Backpack','Field pack']]:[['Equipment','Not deployed in this mission']];
+    places.forEach(([label,value])=>{const li=document.createElement('li');const a=document.createElement('span'),b=document.createElement('span');a.textContent=label;b.textContent=value;li.append(a,b);inv.append(li);});
+    byId('weight').textContent=s.eligible?`Weight: ${18+s.kits}.0 / 40 kg · committed equipment`:'No deployable equipment';
+    byId('stock-count').textContent=state.stock;
+    byId('equip').disabled=!can||busy||state.stock<1;byId('return').disabled=!can||busy||s.kits<1;
+    byId('editor-hint').textContent=busy?'Request pending. Equipment stays committed until acknowledgement.':!can?'Inspect this loadout or select a soldier you may equip.':'Use Equip or Return to request one atomic equipment change.';
+    byId('claim-action').hidden=!(role==='guest' && s.eligible && s.owner===null);
+    byId('claim-action').disabled=state.phase!=='editable'||busy;
+    const total=state.soldiers.filter(s=>s.eligible).reduce((n,s)=>n+s.kits,0);
+    const carriers=state.soldiers.filter(s=>s.eligible&&s.kits).map(s=>s.name).join(', ');
+    byId('essentials').textContent=`Medical kit: ${total}/1 carried. ${carriers?'Carrier: '+carriers+'.':'Missing — equip an eligible soldier before deployment.'}`;
+    byId('restriction').textContent=state.restricted?'Mission permits one deployed soldier. Other players spectate; no extra soldiers are created.':'Four deployed soldiers. Unclaimed soldiers remain under AI control.';
+    byId('ready').disabled=state.phase!=='editable'||busy||!ownSoldier()||!requiredMet();
+    byId('ready').textContent=state.ready[role]?'Not ready':'Ready';
+    const ready=activeHumans().every(owner=>state.ready[owner]);
+    byId('readyline').textContent=activeHumans().map(owner=>`${ownerName(owner)}: ${state.ready[owner]?'ready':'preparing'}`).join(' · ')+(ownSoldier()?'':' · You are spectating');
+    byId('deploy').hidden=role!=='host';byId('deploy').disabled=state.phase!=='editable'||busy||!ready||!requiredMet();
+    byId('deploy-reason').textContent=state.phase!=='editable'?'Preparation is not editable.':busy?'Waiting for equipment acknowledgement.':!requiredMet()?'Mission essentials are missing.':!ready?'Waiting for deployed humans to be ready.':'Committed squad is ready for host deployment.';
+    byId('status').textContent=state.phase==='loading'?'Receiving preparation. Equipment actions are unavailable.':state.message;
+  }
+  function edit(delta) {
+    if(!editable(selected)||pending|| (delta>0?state.stock<1:state.soldiers[selected].kits<1))return;
+    const request={serial:++serial,target:selected,editor:role,revision:state.revision,delta};pending=request;
+    state.message='Request pending — waiting for authority. No stock or equipment has changed.';render();
+    setTimeout(()=>{
+      if(!pending||pending.serial!==request.serial)return;
+      pending=null;
+      if(state.phase!=='editable'||state.revision!==request.revision){state.message='Equipment or ownership changed; request rejected. Review current state and try again.';render();return;}
+      if(rejectNext){rejectNext=false;state.message='Edit rejected: item does not fit the requested place. Committed equipment and stock are unchanged.';render();return;}
+      state.soldiers[request.target].kits+=request.delta;state.stock-=request.delta;
+      change('Edit accepted. Committed equipment and stock updated together; human readiness cleared.');
+    },650);
+  }
+  function guestClaim(target) {
+    if(state.phase!=='editable'||!state.soldiers[target].eligible||state.soldiers[target].owner!==null){state.message='Claim rejected: select an eligible AI soldier.';render();return;}
+    state.soldiers.forEach(s=>{if(s.owner==='guest')s.owner=null;});state.soldiers[target].owner='guest';
+    change('Ellis claimed the soldier. Equipment is preserved; former AI editing rights are revoked.');
+  }
+  byId('role').addEventListener('change',event=>{role=event.target.value;render();});
+  byId('reset').addEventListener('click',reset);
+  byId('equip').addEventListener('click',()=>edit(1));byId('return').addEventListener('click',()=>edit(-1));
+  byId('stats-toggle').addEventListener('click',()=>{const stats=byId('stats');stats.hidden=!stats.hidden;byId('stats-toggle').setAttribute('aria-expanded',String(!stats.hidden));});
+  byId('claim-action').addEventListener('click',()=>guestClaim(selected));byId('claim').addEventListener('click',()=>guestClaim(selected));
+  byId('loading').addEventListener('click',()=>{if(!['editable','loading'].includes(state.phase))return;serial++;pending=null;state.phase=state.phase==='loading'?'editable':'loading';state.message='Snapshot received. Current preparation is available.';render();});
+  byId('scarce').addEventListener('click',()=>{
+    // Fixture leaves one kit in stock, starts a local request, then commits a rival edit first.
+    reset();state.stock=1;selected=role==='host'?0:1;edit(1);
+    const rival=role==='host'?1:0;state.stock=0;state.soldiers[rival].kits++;change('Another soldier received the last kit. Your pending request will be rejected.');
+  });
+  byId('disconnect').addEventListener('click',()=>{if(state.phase!=='editable')return;state.soldiers.forEach(s=>{if(s.owner==='guest')s.owner=null;});change('Ellis disconnected. The same soldier and equipment remain under AI control.');});
+  byId('restricted').addEventListener('click',()=>{reset();state.restricted=true;state.soldiers.forEach((s,i)=>{s.eligible=i===0;});change('Restricted mission: only Morgan is deployed; Ellis is spectating.');});
+  byId('reject').addEventListener('click',()=>{rejectNext=true;state.message='Fixture: the next equipment request will be rejected without changing stock or gear.';render();});
+  byId('remote-ready').addEventListener('click',()=>{if(state.phase!=='editable'||pending||!requiredMet())return;activeHumans().filter(owner=>owner!==role).forEach(owner=>{state.ready[owner]=true;});state.message='Fixture: other deployed humans acknowledged the current equipment revision.';render();});
+  byId('ready').addEventListener('click',()=>{if(byId('ready').disabled)return;state.ready[role]=!state.ready[role];state.message=state.ready[role]?'Ready acknowledged for the committed preparation.':'Returned to preparing.';render();});
+  byId('deploy').addEventListener('click',()=>{if(role!=='host'||byId('deploy').disabled)return;state.phase='frozen';state.message='Deployment accepted. Preparation is frozen at one committed squad state. Mission loading is outside this fixture.';render();});
+  byId('leave').addEventListener('click',()=>{if(state.phase==='ended')return;if(!window.confirm(role==='host'?'End this synthetic session?':'Leave this synthetic preparation?'))return;serial++;pending=null;state.phase='ended';state.message='Synthetic session ended. No campaign profile or game state was written.';render();});
+  reset();
+</script>
+</html>
