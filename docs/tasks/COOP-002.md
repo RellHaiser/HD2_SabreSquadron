@@ -8,9 +8,9 @@
 - Base commit: `7e033adde95881baad06c6877cbbd6eef8197d96`
 - Dependencies: none
 - Last checkpoint: final contract/review commit; this branch `HEAD` (claim checkpoint `4e28d883`)
-- Checkpoint location: `.worktrees/COOP-002`; `origin/feature/coop-002-contracts`
+- Checkpoint location: `.worktrees/COOP-002`; `origin/feature/coop-002-contracts`; contract checkpoint `6d3b5443`
 - Review/integration: document self-review and COOP-003 consumer review passed; coordinator integration review requested; not merged
-- Pull request: none
+- Pull request: https://github.com/xcntroller/HD2_BaseCoop/pull/4
 
 ## Branch authority and completion PR
 
@@ -175,7 +175,7 @@ After integration use the PR base/merge parents for comparison instead of update
   revisions, request deduplication and guard boundaries are engineering contracts;
   open selection/readiness/stock UX/persistence policies remain unconfirmed.
 - Local state: task changes live only in `.worktrees/COOP-002` and its canonical branch;
-  published checkpoint preserves the full handoff. Root `main` and other workers' files
+  published checkpoint and PR #4 preserve the full handoff. Root `main` and other workers' files
   are untouched. No new public headers or game artifacts.
 - Review notes: COOP-003 consumer review has no blocking findings. Keep COOP-011 as a
   separate future implementation claim; no duplicate DTO headers in downstream branches.
