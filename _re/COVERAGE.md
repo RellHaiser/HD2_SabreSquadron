@@ -3487,3 +3487,48 @@ particles and the surface marks. Files are served from memory.
   frame (real weapons have a "shdum" model); the cheat fake not redirected; the original asks GetBehaviour twice
   (the port fixed); the aim view byte (the layout fix above); the first mutation run's 29 survivors (weapons not
   compared, never lying, the edges); heredocs collapsed my "\n" three times (fixed with Edit).
+
+## Human part 42 (the player controller's network side, `player_net.cpp`, 2026-11-16)
+
+- **The build:** `human/build_playernet.bat` (`playernet_test.inc`, HUMAN_PLAYERNET): part 41's with player_net.cpp
+  linked (parts 33 and 40's stubs of its members, its callbacks and its messages' vtables taken out; the net messages'
+  bases' key functions defined, so that their vtables are emitted); its tests alone.
+  - Part 34's remote controller fakes copied (the client's item moves, the movement's OnRemoteAction, the visual's
+    SetDirection, the human store's and the net game's stats and rank, the net object's queue of net messages and
+    the property's tracks), the movement's UseObject, part 23's car ApplyControls and submarine SetControls (set only
+    in its own test), timeGetTime (the port's import slot, the original's 0x0080f3f8). The replication's local
+    object (+0x30 of part 22's and part 33's blocks) gets a logging vtable.
+  - The net messages the test hands out are kept by both QueueMessage fakes (ProcessNetMessages queues them again).
+  - The weapon component gets GetReloadTimeMs (the port's slot, the original's 0x20); the weapons' shot interval is
+    set (the port's offset, the original's +0x68).
+  - Compared besides part 40's: the messages queued for the server by their fields (part 33b's comparison; the
+    original's take-from-box and transfer messages carry a pick-up's and a move's type word, taken from their classes
+    first), the action's and the damage request's fields directly, the dive's fromClient flag; the shared controls
+    in every player build (they were shared only by the fighting's setup, which parts 41 and 42 never ran).
+  - The streams: the sender's quantization is the test's (+0x2C in the original and an MSVC build, +0x28 in this g++
+    build: m_unreliable sits in the base's tail padding).
+- **The tests:** 60,000 calls: UpdateRemote, TickLocal, ProcessNetMessages, ServerAction (part 42a); the action's,
+  the dive's and the binoculars' Write and Read, NetCreateMessage, NetReadControlBits, NetWriteControlBits; the
+  requests and FlushMessages (part 42b); OnMessage, OnMessage2, HandleMessage, HandleMessage2 (part 42c, each
+  handler's known types; the server's now and then a type it skips).
+- **Results:** 154,818 checks, 0 failures, 19 s; lines: 624 of 626 (the inventory check's Read on a client, left out:
+  the original leaves its message's human unset).
+- **Port fixes:** ApplySoldierClass asks the net game for the player's stats again before the profile's skills, as the
+  original (it read the class from the first answer).
+- **Not tested:** the port's fixes: the scope's view back without a hands weapon (TickLocal; the original reads it
+  unchecked: the test gives one), squad commands past the speech tables in a client's action message, the control
+  state message the original leaks, the messages it frees before reading their containers, the inventory check's stale
+  human; a net message whose reference count reaches 0 (ReleaseNetMessage's delete).
+- **Mutations:** `mutate_playernet1.py` (42a): 237 mutants; 15 not building; 204 of 222 killed (the survivors
+  equivalent 13, a tie, uncompared w words 2, a port fix not reached, a leak). `mutate_playernet2.py` (42b): 105; 10;
+  93 of 95 (a w word, an equivalent store). `mutate_playernet3.py` (42c): 177; 21; 143 of 156 (the inventory check
+  not reached 2, leaks 9, equivalent 2).
+- **Harness lessons (my mistakes):** stubs of player_net.cpp's members, callbacks and vtables clashed in three files
+  (gated); the test's net messages freed by the QueueMessage fakes; the replication's local object without a vtable
+  (part 22's block is the port's, part 33's the original's); the original's car and submarine controls were real; the
+  original crashed with no report inside TickLocal (its exception frame's MSVC6 handler cannot run here: a
+  first-chance handler found the scope read of a missing hands item); GetReloadTimeMs unfaked; the original lambda's
+  argument is DiffCall's movement, not the controller; the stream's sender offset (g++ tail padding); the inventory
+  check's stale human and squad commands past the tables in the input; the damage request's fields read only in
+  part; the first mutation summaries for 42a read one line of joined output (1 survivor instead of 35) before I
+  recounted.

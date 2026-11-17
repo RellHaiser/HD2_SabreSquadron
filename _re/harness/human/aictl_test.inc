@@ -51,9 +51,11 @@ void C_AIController::TestSightOfMeleeTracker(C_Actor *, int *, float *) { Log(th
 #endif
 
 // ---- the controller's network callbacks (controller_net.cpp, not linked: only their addresses are compared)
+#ifndef HUMAN_PLAYERNET   // (part 42 links player_net.cpp)
 C_NetObjectMessage *__fastcall NetCreateMessage(void *, C_BitStream *, bool) { AiUnexpected(__PRETTY_FUNCTION__); }
 void __fastcall NetReadControlBits(void *, C_BitStream *) { AiUnexpected(__PRETTY_FUNCTION__); }
 void __fastcall NetWriteControlBits(void *, C_BitStream *) { AiUnexpected(__PRETTY_FUNCTION__); }
+#endif
 
 namespace {
 #define AC __attribute__((thiscall))
@@ -109,13 +111,19 @@ void LogNetMessage(const void *object, const uint8_t *m, int sentTo, bool outgoi
     } else if (type == NET_MSG_BINOCULARS) {
         // (Part 40c: on, fromClient +0x2C.)
         nums.insert(nums.end(), {double(m[onAt]), double(m[0x2C])});
+    } else if (type == NET_MSG_DIVE) {
+        nums.push_back(m[0x2C]);   // (part 42: fromClient)
     }
     S_Call c{NameOf(object) + ".QueueMessage", nums};
     g_calls.push_back(c);
 }
+// (Part 42: the messages its test hands out and frees itself, queued again by ProcessNetMessages, kept.)
+bool (*g_aiTestMessage)(const void *m) = nullptr;
 void C_NetObject::QueueMessage(C_NetObjectMessage *m, int sentTo, bool outgoing)
 {
     LogNetMessage(this, reinterpret_cast<const uint8_t *>(m), sentTo, outgoing, offsetof(C_NetBinocularsMessage, on));
+    if (g_aiTestMessage && g_aiTestMessage(m))
+        return;
     // (The binoculars' message has no 16-aligned member: the plain new's; the action's and the dive's the aligned one.)
     if (m->GetType() == 2)
         ::operator delete(m);
@@ -124,11 +132,16 @@ void C_NetObject::QueueMessage(C_NetObjectMessage *m, int sentTo, bool outgoing)
 }
 int C_NetReplication::GetLocalId() const { return g_ai.localId; }
 C_NetObjectMessage::C_NetObjectMessage(int t) : type(t) {}
-// (Raw storage under the vtables' names: these classes' key functions are in net code not linked; part 33b.)
+// (Raw storage under the vtables' names: these classes' key functions are in net code not linked; part 33b. Part 42
+// defines their key functions, so that its linked messages' vtables have their bases'.)
+#ifndef HUMAN_PLAYERNET
 asm(".globl __ZTV14C_NetQuantized\n\t.data\n\t.balign 4\n__ZTV14C_NetQuantized:\n\t.space 64\n"
-    ".globl __ZTV18C_NetObjectMessage\n__ZTV18C_NetObjectMessage:\n\t.space 64\n"
-    ".globl __ZTV18C_NetActionMessage\n__ZTV18C_NetActionMessage:\n\t.space 64\n"
+    ".globl __ZTV18C_NetObjectMessage\n__ZTV18C_NetObjectMessage:\n\t.space 64\n\t.text");
+#endif
+#ifndef HUMAN_PLAYERNET   // (part 42 links player_net.cpp: their key functions)
+asm(".globl __ZTV18C_NetActionMessage\n\t.data\n\t.balign 4\n__ZTV18C_NetActionMessage:\n\t.space 64\n"
     ".globl __ZTV16C_NetDiveMessage\n__ZTV16C_NetDiveMessage:\n\t.space 64\n\t.text");
+#endif
 
 // The road network's paths (the driver's planner: part 32's) and the actors' walking points.
 bool C_CheckpointNetwork::FindPath(int, int, std::vector<uint16_t> *, uint32_t) { AiUnexpected(__PRETTY_FUNCTION__); }
@@ -181,6 +194,8 @@ int AC OA_ApplyAlertState(void *self, int)
 void AC OA_QueueMessage(void *self, uint8_t *m, int sentTo, int outgoing)
 {
     LogNetMessage(self, m, sentTo, (outgoing & 0xFF) != 0, 0x30);
+    if (g_aiTestMessage && g_aiTestMessage(m))
+        return;
     _aligned_free(m);
 }
 alignas(16) uint8_t g_aiReplication[0x100];
@@ -1244,6 +1259,8 @@ std::vector<S_AiMsgField> AiMsgFields(int type)
     case CTRL_MSG_SUSPEND:
     case CTRL_MSG_23: return {{8, 8, 'b'}};
     case CTRL_MSG_INVENTORY_CHECK: return {};
+    // (Part 42: the four values the real Read reads; the server's local message leaves them unset otherwise.)
+    case CTRL_MSG_17: return {{8, 8, 'i'}, {0xC, 0xC, 'i'}, {0x10, 0x10, 'i'}, {0x14, 0x14, 'i'}};
     default: return {{8, 8, 'i'}};
     }
 }

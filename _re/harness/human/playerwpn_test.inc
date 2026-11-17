@@ -17,6 +17,7 @@ struct S_PlayerWpnScript {
     uint32_t volumeFlags = 0xC0;
     int frameActor = 3;
     float dispersion = 1.0f;                            // the weapon component's GetAimedDispersion
+    int reloadTime = 1500;                              // GetReloadTimeMs (part 42's RequestAction)
 } g_pw;
 }  // namespace
 bool S_HumanBody::GetEquipmentFlag1() const
@@ -63,8 +64,23 @@ void *PwActor(int which, bool original)
         return nullptr;
     return original ? static_cast<void *>(g_actOrig[which]) : static_cast<void *>(g_actPort[which]);
 }
-// The weapon component's vtable per side (its virtuals at other slots in the two).
+// The weapon component's vtable per side (its virtuals at other slots in the two); the others unexpected, naming their
+// slot and caller.
 void *g_pwCompVt[2][32];
+int CT_ PW_GetReloadTimeMs(void *self)
+{
+    Log(self, "CompGetReloadTimeMs");
+    return g_pw.reloadTime;
+}
+template <int N> void CT_ PW_CompUnexpected(void *self)
+{
+    std::printf("unexpected call of %s's slot 0x%X from %p\n", NameOf(self).c_str(), N * 4, __builtin_return_address(0));
+    std::exit(3);
+}
+template <int... N> void PwFillStubs(void **out, std::integer_sequence<int, N...>)
+{
+    ((out[N] = reinterpret_cast<void *>(PW_CompUnexpected<N>)), ...);
+}
 float CT_ PW_GetAimedDispersion(void *self)
 {
     Log(self, "CompGetAimedDispersion");
@@ -153,7 +169,9 @@ void SetUpPlayerWeapons()
         {0x007d52f0, FAKE(PW_PlayEmptySound)},
         {0x007d5ee0, FAKE(PW_PlayShotSound)},
         {0x006f7cc0, FAKE(PW_RayTestDynamicOrig)},
+#ifndef HUMAN_PLAYERNET   // (part 42 links player_net.cpp)
         {0x0053d340, FAKE(PL_IssueCommandPort)},
+#endif
         {0x00720f50, FAKE(OH_GetCheatValue)},
     };
     for (const auto &r : redirects)
@@ -164,9 +182,10 @@ void SetUpPlayerWeapons()
     g_wornVt[VSlot(&C_ItemContainer::SetLockTime)] = reinterpret_cast<void *>(PW_SetLockTime);
     g_wornVt[0x4C / 4] = reinterpret_cast<void *>(PW_SetLockTime);
     for (int side = 0; side < 2; ++side)
-        for (void *&slot : g_pwCompVt[side])
-            slot = reinterpret_cast<void *>(CT_Unexpected);
+        PwFillStubs(g_pwCompVt[side], std::make_integer_sequence<int, 32>());
     g_pwCompVt[0][VSlot(&C_WeaponComp::GetAimedDispersion)] = reinterpret_cast<void *>(PW_GetAimedDispersion);
+    g_pwCompVt[0][VSlot(&C_WeaponComp::GetReloadTimeMs)] = reinterpret_cast<void *>(PW_GetReloadTimeMs);
+    g_pwCompVt[1][0x20 / 4] = reinterpret_cast<void *>(PW_GetReloadTimeMs);
     g_pwCompVt[1][0x10 / 4] = reinterpret_cast<void *>(PW_GetAimedDispersion);
     g_names[g_weaponCompBytes] = "weaponComp";
     g_names[g_pwVolume] = "volume";
@@ -248,6 +267,7 @@ void RandomPlayerWeapons()
     // The weapons' component: its dispersion (none now and then), its attack delay (the port's offset, the original's
     // +0x18), the definition's component back (part 23's).
     g_pw.dispersion = P(0.2f) ? 0.0f : U(0.1f, 20.0f);
+    g_pw.reloadTime = I(0, 4000);
     const float delay = float(I(0, 1500));
     std::memcpy(g_weaponCompBytes + g_attackDelayAt, &delay, 4);
     std::memcpy(g_weaponCompBytes + 0x18, &delay, 4);

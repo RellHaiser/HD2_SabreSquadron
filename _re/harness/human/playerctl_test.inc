@@ -111,13 +111,17 @@ void C_Team::ReleaseHoldingMembers(const C_Human *human) { Log(human, "TeamRelea
 // (The movement's OnFrozen, part 4's, logged: wrapped here.)
 extern "C" void __attribute__((thiscall)) __wrap__ZN15C_HumanMovement8OnFrozenEb(C_HumanMovement *m, bool on) { Log(m, "MovementOnFrozen", {double(on)}); }
 // The binoculars' net message (net code not linked: raw storage under its vtable's name).
+#ifndef HUMAN_PLAYERNET   // (part 42 links player_net.cpp)
 asm(".globl __ZTV22C_NetBinocularsMessage\n\t.data\n\t.balign 4\n__ZTV22C_NetBinocularsMessage:\n\t.space 64\n\t.text");
+#endif
 
 // The player controller's members in player_net.cpp and player_weapons.cpp (parts 41-42 link them): logged here, the
 // original's redirected alike; the ones not called from player_controller.cpp unexpected.
+#ifndef HUMAN_PLAYERNET   // (part 42 links player_net.cpp)
 void C_PlayerController::FlushMessages(bool toClients) { Log(this, "PlayerFlushMessages", {double(toClients)}); }
 void C_PlayerController::TickLocal(int timeDelta) { Log(this, "PlayerTickLocal", {double(timeDelta)}); }
 void C_PlayerController::UpdateRemote(int frameTime) { Log(this, "PlayerUpdateRemote", {double(frameTime)}); }
+#endif
 #ifndef HUMAN_PLAYERWPN   // (part 41 links player_weapons.cpp)
 // (With the four weapon keys Tick latches in: the buttons THROW, FIRE, 7, RELOAD.)
 void C_PlayerController::WeaponControls(int timeDelta)
@@ -127,6 +131,7 @@ void C_PlayerController::WeaponControls(int timeDelta)
                                        b ? b[BUTTON_RELOAD] : -1.0});
 }
 #endif
+#ifndef HUMAN_PLAYERNET   // (part 42 links player_net.cpp)
 // (player_net.cpp's: part 41's mines and car charges issue it.)
 void C_PlayerController::IssueCommand(const S_HumanCommand &command)
 {
@@ -146,6 +151,7 @@ void C_PlayerController::RequestPickUpItem(int, int) { AiUnexpected(__PRETTY_FUN
 void C_PlayerController::RequestTakeFromBox(int, int) { AiUnexpected(__PRETTY_FUNCTION__); }
 void C_PlayerController::RequestThrowItem(int, const S_vector &) { AiUnexpected(__PRETTY_FUNCTION__); }
 bool C_PlayerController::RequestTransferItem(int, int, int, int, int) { AiUnexpected(__PRETTY_FUNCTION__); }
+#endif
 
 namespace {
 // ---- the original's side
@@ -341,14 +347,18 @@ void SetUpPlayerFakes()
         {0x005a2c50, FAKE(PO_RequestThrowItem)},
         {0x0045e920, FAKE(PO_IsEnemyKnown)},
         {0x0045f110, FAKE(PO_ReleaseHoldingMembers)},
+#ifndef HUMAN_PLAYERNET
         {0x0053f370, FAKE(PO_FlushMessages)},
         {0x0053f9b0, FAKE(PO_TickLocal)},
         {0x0053f520, FAKE(PO_UpdateRemote)},
+#endif
 #ifndef HUMAN_PLAYERWPN
         {0x005433b0, FAKE(PO_WeaponControls)},
 #endif
         {0x0075c730, FAKE(PO_MovementOnFrozen)},
+#ifndef HUMAN_PLAYERNET
         {0x00542920, FAKE(PO_RequestAction)},
+#endif
     };
     for (const auto &r : redirects)
         RedirectOriginal(r.first, r.second);
@@ -501,6 +511,24 @@ std::string PlayerDiffers(const C_PlayerController *p, const uint8_t *o)
     why = AiMessages(p->m_toClients, o + 0x90);
     if (!why.empty())
         return why;
+    // (The messages to the server too, by their fields: part 23's comparison names only its own classes. The original
+    // stores the type of a pick-up in its take-from-box message and a move's in its transfer, whose Writes send their
+    // own: the type words taken from their classes, the vtables 0x00810c94 and 0x00810cac.)
+    {
+        void *const *first = *reinterpret_cast<void *const *const *>(o + 0x80 + 4);
+        void *const *last = *reinterpret_cast<void *const *const *>(o + 0x80 + 8);
+        for (void *const *q = first; q && q != last; ++q) {
+            uint8_t *m = static_cast<uint8_t *>(*q);
+            uint32_t vt;
+            std::memcpy(&vt, m, 4);
+            const int type = vt == 0x00810c94 ? CTRL_MSG_TAKE_FROM_BOX : vt == 0x00810cac ? CTRL_MSG_TRANSFER_ITEM : -1;
+            if (type >= 0)
+                std::memcpy(m + 4, &type, 4);
+        }
+    }
+    why = AiMessages(p->m_toServer, o + 0x80);
+    if (!why.empty())
+        return "(to the server) " + why;
     const auto *b = reinterpret_cast<const uint8_t *>(p);
     for (const S_LayoutField &f : kPlayerFields) {
         const int at = FirstDiff(b + f.port, o + f.orig, f.size);
@@ -607,11 +635,15 @@ void SetUpPlayerController()
     g_extraPointers.push_back({g_pp, g_op});
     g_extraPointers.push_back({g_pp->m_controlAxes, g_op + 0xC4});
     g_extraPointers.push_back({g_pp->m_controlButtons, g_op + 0x1C4});
-#ifndef HUMAN_AICOMBAT   // (the fighting's tests share them already)
-    // The controls Tick latches into and clears: each side's kept apart and compared.
-    ShareBlock(g_axes, sizeof g_axes, "axes");
-    ShareBlock(g_buttons, sizeof g_buttons, "buttons");
-#endif
+    // The controls Tick latches into and clears: each side's kept apart and compared (unless shared already: the
+    // fighting's setup shares them too, but parts 40-42 never run it).
+    bool shared = false;
+    for (const auto &w : g_sharedWords)
+        shared = shared || static_cast<const void *>(w.first) == static_cast<const void *>(g_axes);
+    if (!shared) {
+        ShareBlock(g_axes, sizeof g_axes, "axes");
+        ShareBlock(g_buttons, sizeof g_buttons, "buttons");
+    }
 }
 
 // The network game's player states (LockPlayers: the port's array; the original's 0xC4-byte states behind the vector

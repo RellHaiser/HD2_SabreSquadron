@@ -73,11 +73,11 @@ void StampActivity(const C_Human *human)
 
 void ApplySoldierClass(C_Human *human, int soldierClass)
 {
-    int *playerStats = g_netGame.GetPlayerStats(human->GetNetId());
-    playerStats[5] = soldierClass;
-    // The soldier's skills at that class (the defaults when the profile has none).
+    g_netGame.GetPlayerStats(human->GetNetId())[5] = soldierClass;
+    // The soldier's skills at that class (the defaults when the profile has none; the stats
+    // asked for again, as the original).
     int skills[STAT_COUNT] = {HUMAN_FULL_HEALTH, 80, 80, 80, 80, 80, 50, 30, 20, 50, 0, 80};
-    g_gameProfile.m_humanStore->GetStats(skills, human->GetProfileIndex(), playerStats[5]);
+    g_gameProfile.m_humanStore->GetStats(skills, human->GetProfileIndex(), g_netGame.GetPlayerStats(human->GetNetId())[5]);
     human->SetSkills(skills);
     // (The class is stored already: the message tells of a rise even when it went down.)
     g_netGame.SetPlayerRank(soldierClass, human->GetNetId());
