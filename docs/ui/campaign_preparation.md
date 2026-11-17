@@ -130,7 +130,7 @@ fixture and does not implement this API.
 | Campaign mission/operation/difficulty, briefing text/image references, restriction summary, essentials and validation results | Preserve campaign information and rules, including deployed carriers and special required-item semantics. |
 | Participants/eligible claim targets, ready acknowledgments for committed revision, deployment blockers | Explain readiness and restrictions, including spectators. Unresolved policy is an explicit PolicyRequired blocker in production; fixtures declare their proposed policy. |
 
-Requests carry generation, expected PreparationRevision and relevant ControlRevisions, target soldier,
+Equipment requests carry generation, expected PreparationRevision and relevant ControlRevisions, target soldier,
 request correlation ID, item/place/quantity and operation. The server derives editor identity
 from the authenticated connection. Never trust a client-supplied “host” or editor ID as
 authority. Snapshot capability flags guide display; every command still validates current

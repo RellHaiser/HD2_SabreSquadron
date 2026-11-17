@@ -65,6 +65,7 @@ Do not change shipping menu behavior or commit extracted game assets.
   reviewed the consumer boundary and confirmed semantic compatibility; requested explicit
   PreparationRevision/ViewRevision and seven interface methods, now incorporated.
   COOP-003 reciprocally reviewed its draft with no blocking consumer findings.
+  Contract checkpoint: `6d3b5443` on `feature/coop-002-contracts`.
   COOP-011 will supply compiled declarations; UI fake implementation does not depend on
   COOP-005 model implementation. No unmerged contract branch was stacked here.
 - Decisions: confirmed campaign style and per-human equipment ownership are preserved.
