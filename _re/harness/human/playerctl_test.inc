@@ -118,6 +118,7 @@ asm(".globl __ZTV22C_NetBinocularsMessage\n\t.data\n\t.balign 4\n__ZTV22C_NetBin
 void C_PlayerController::FlushMessages(bool toClients) { Log(this, "PlayerFlushMessages", {double(toClients)}); }
 void C_PlayerController::TickLocal(int timeDelta) { Log(this, "PlayerTickLocal", {double(timeDelta)}); }
 void C_PlayerController::UpdateRemote(int frameTime) { Log(this, "PlayerUpdateRemote", {double(frameTime)}); }
+#ifndef HUMAN_PLAYERWPN   // (part 41 links player_weapons.cpp)
 // (With the four weapon keys Tick latches in: the buttons THROW, FIRE, 7, RELOAD.)
 void C_PlayerController::WeaponControls(int timeDelta)
 {
@@ -125,7 +126,12 @@ void C_PlayerController::WeaponControls(int timeDelta)
     Log(this, "PlayerWeaponControls", {double(timeDelta), b ? b[BUTTON_THROW] : -1.0, b ? b[BUTTON_FIRE] : -1.0, b ? b[BUTTON_7] : -1.0,
                                        b ? b[BUTTON_RELOAD] : -1.0});
 }
-void C_PlayerController::IssueCommand(const S_HumanCommand &) { AiUnexpected(__PRETTY_FUNCTION__); }
+#endif
+// (player_net.cpp's: part 41's mines and car charges issue it.)
+void C_PlayerController::IssueCommand(const S_HumanCommand &command)
+{
+    Log(this, "PlayerIssueCommand", {double(command.category), double(command.type), double(command.param1), double(command.param2)});
+}
 bool C_PlayerController::OnCollisionEx(C_Actor *, const S_vector *, int, int, int, int, int) { AiUnexpected(__PRETTY_FUNCTION__); }
 void C_PlayerController::OnMessage(C_BitStream *) { AiUnexpected(__PRETTY_FUNCTION__); }
 void C_PlayerController::OnMessage2(C_BitStream *) { AiUnexpected(__PRETTY_FUNCTION__); }
@@ -338,7 +344,9 @@ void SetUpPlayerFakes()
         {0x0053f370, FAKE(PO_FlushMessages)},
         {0x0053f9b0, FAKE(PO_TickLocal)},
         {0x0053f520, FAKE(PO_UpdateRemote)},
+#ifndef HUMAN_PLAYERWPN
         {0x005433b0, FAKE(PO_WeaponControls)},
+#endif
         {0x0075c730, FAKE(PO_MovementOnFrozen)},
         {0x00542920, FAKE(PO_RequestAction)},
     };
@@ -513,8 +521,11 @@ std::string PlayerDiffers(const C_PlayerController *p, const uint8_t *o)
 // The worn definitions' vtable per side while set (part 40c: the port's GetCarryMode slot is the original's
 // GetBehaviour slot in part 23's shared one).
 void **g_plDefVt[2] = {nullptr, nullptr};
+void (*g_plSideHook)(int side) = nullptr;               // (part 41: per-side state of its own)
 void PlDefVtables(int side)
 {
+    if (g_plSideHook)
+        g_plSideHook(side);
     if (!g_plDefVt[0])
         return;
     for (auto &def : g_wornDefs)

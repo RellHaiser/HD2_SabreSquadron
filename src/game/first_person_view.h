@@ -151,10 +151,12 @@ private:
     I3D_model *m_hands = nullptr;                       // +0x44 "FPV_HANDS"
     I3D_model *m_weapon = nullptr;                      // +0x48 the item's first-person model
     I3D_frame *m_magazine = nullptr;                    // +0x4C
+    uint32_t m_unused50 = 0;                            // +0x50 (nothing reads it)
     int m_itemType = 0;                                 // +0x54 -1: none
     bool m_on = false;                                  // +0x58
     bool m_binoculars = false;                          // +0x59
     bool m_aimView = false;                             // +0x5A
+    uint32_t m_unused5C = 0;                            // +0x5C (nothing reads it)
     int m_pose = FPV_POSE_NONE;                         // +0x60
     float m_drop = 0.0f;                                // +0x64 the weapon's drop (0 .. -0.8)
     float m_dropSpeed = 0.0f;                           // +0x68

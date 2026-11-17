@@ -812,6 +812,9 @@ namespace {
 #ifdef HUMAN_PLAYERCTL
 #include "playerctl_test.inc"
 #endif
+#ifdef HUMAN_PLAYERWPN
+#include "playerwpn_test.inc"
+#endif
 #ifdef HUMAN_AISENSES
 #include "aisenses_test.inc"
 #endif
@@ -908,7 +911,9 @@ int main(int argc, char **argv)
     SetUpBase2();
     SetUpBase3();
 #endif
-#if defined(HUMAN_CROWD)
+#if defined(HUMAN_PLAYERWPN)
+    TestPlayerWeapons();
+#elif defined(HUMAN_CROWD)
     TestCrowd();
 #elif defined(HUMAN_SENSES)
     TestSenses();

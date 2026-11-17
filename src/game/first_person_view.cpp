@@ -2,6 +2,7 @@
 #include "game/first_person_view.h"
 
 #include <cmath>
+#include <cstddef>
 #include <cstring>
 #include <string>
 
@@ -118,7 +119,15 @@ S_FpvAnim::~S_FpvAnim()
 // ---------------------------------------------------------------------------------------------
 // Construction, mission start and end
 
-C_FirstPersonView::C_FirstPersonView() = default;
+C_FirstPersonView::C_FirstPersonView()
+{
+    static_assert(offsetof(C_FirstPersonView, m_itemType) == 0x54, "C_FirstPersonView layout");
+    static_assert(offsetof(C_FirstPersonView, m_aimView) == 0x5A, "C_FirstPersonView layout");
+    static_assert(offsetof(C_FirstPersonView, m_pose) == 0x60, "C_FirstPersonView layout");
+    static_assert(offsetof(C_FirstPersonView, m_current) == 0x70, "C_FirstPersonView layout");
+    static_assert(offsetof(C_FirstPersonView, m_fading) == 0x80, "C_FirstPersonView layout");
+    // (Past the vector the offsets are the original's only with MSVC6's 16-byte std::vector.)
+}
 
 C_FirstPersonView::~C_FirstPersonView() = default;
 

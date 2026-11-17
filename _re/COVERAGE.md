@@ -3440,3 +3440,50 @@ particles and the surface marks. Files are served from memory.
   original's GetBehaviour; the original's command vtable word was never set, and my hand-written command chunks
   loaded random words and padding into it; 2,400 save rounds made the test 29 s; the binoculars flags were not
   logged, and at first I read the port's at the MSVC offset.
+
+## Human part 41 (the player controller's weapons, `player_weapons.cpp`, 2026-11-16)
+
+- **The build:** `human/build_playerwpn.bat` (`playerwpn_test.inc`, HUMAN_PLAYERWPN): part 40's player build with
+  player_weapons.cpp linked (part 40's logging fakes of WeaponControls taken out) and part 33's senses and fighting
+  harness (HUMAN_AISENSES, HUMAN_AICOMBAT: its sources and fakes) alongside; its tests alone.
+  - Faked on both sides and logged: the body's GetEquipmentFlag1, RemoveCollision and RestoreCollision, the camera's
+    GetCameraPos (slot 0x64), the human's GetFacingDir and IssueCommand, the player's IssueCommand (player_net.cpp's),
+    the weapons' PlayEmptySound, PlayShotSound and GetMaxAmount (slot 0x10), the hands container's SetLockTime (slot
+    0x4C), the cheats (0x00720f50: part 23's fake), the collision world's RayTestDynamic (wrapped; the original's
+    0x006f7cc0). The static ray test is part 40b's.
+  - Per side while a call runs (part 40c's hook): the weapon component's vtable (its GetAimedDispersion at the port's
+    slot and the original's 0x10), the hit volume's actor (+0x48: a human, the other, part 23's actors), the car
+    charge's frame data (its actor).
+  - The copy protection checks (dropped by the port) made to pass: the one that drops the weapon now and then
+    (0x008cacda / 0x008cb3da) and the spread's (0x008cad08 / 0x008cb408; it runs only past mission 8, and the
+    harness's game is at 0, so it never ran).
+  - After each call the weapons are compared too: the attack time, the flags and the throw's strength (the original's
+    +0x58, +0x60, +0x98).
+  - The state: part 40c's; the buttons and axes (now and then none); the hands weapon (the gun, the grenade, none, a
+    stale one) and its behaviour (each the controls know, others); its amounts, reload, fire answer; the charge (its
+    time near the caps, its action); the throw delay; lying now and then; the spawn protection and its end; the
+    seat; the camera's position and the rays' answers (hits about 3 m from the muzzle); the cheat; the aim view; the
+    component's dispersion and attack delay; the scope (its kind, aim mode, or none).
+- **The tests:** 24,000 calls: WeaponControls, MeleeStrike, UpdateCharge (part 41a); ApplySpread and ApplyRecoil
+  (their directions compared word for word), UpdateZoom, UpdateWeaponReady (part 41b).
+- **Results:** 72,006 checks, 0 failures, 9 s; lines: 367 of 367.
+- **Port fixes:**
+  - ApplyRecoil asks the definition's behaviour again for behaviour 4 before the scope, as the original.
+  - C_FirstPersonView's layout: two unused words at +0x50 and +0x5C were missing, so m_itemType, m_on, m_binoculars,
+    m_aimView and m_pose sat 4 or 8 bytes before their documented offsets (harmless inside the port; found when the
+    harness's shared first-person view gave the aim view's byte at +0x5A to the original only). Static asserts now
+    hold the offsets up to the fading vector (past it only MSVC6's 16-byte vector keeps the original's).
+- **Not tested:** the port's fixes: MeleeStrike with no hands item, UpdateZoom with no buttons (the original reads
+  them), the belt throw's and the hands' grenade lock through a missing hands container, a weapon's fields of another
+  item kind; UpdateCharge and the spread/recoil without controls or a hands weapon (their callers check); the copy
+  protection checks (dropped); a launcher whose firing empties the hands (the fakes never change them).
+- **Mutations:** `human/mutations/mutate_playerwpn1.py` (part 41a): 245 mutants (220 generated, 25 for repeated
+  lines); 22 not building; 214 of 223 killed; the survivors equivalent (4) and ties (5).
+  `human/mutations/mutate_playerwpn2.py` (part 41b): 164 mutants (135, 29); 11 not building; 151 of 153 killed; the
+  survivors equivalent (2: BuildBasis's y squared, always 0).
+- **Harness lessons (my mistakes):** the dispatcher ran part 33's combat test first (its branch came earlier); the
+  original crashed reading a missing hands item (MeleeStrike) and missing buttons (UpdateZoom), the port on null
+  axes in a direct UpdateCharge (its caller checks); the weapon component had no vtable in this build; a null item
+  frame (real weapons have a "shdum" model); the cheat fake not redirected; the original asks GetBehaviour twice
+  (the port fixed); the aim view byte (the layout fix above); the first mutation run's 29 survivors (weapons not
+  compared, never lying, the edges); heredocs collapsed my "\n" three times (fixed with Edit).

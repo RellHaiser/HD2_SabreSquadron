@@ -48,11 +48,13 @@ S_HumanEvent *AllocHumanEvent()
 }
 int ActorToId(const C_Actor *actor) { return actor ? actor->GetNetId() : -1; }
 float g_asViewDistance = 100.0f;
+#ifndef HUMAN_PLAYERCTL   // (part 41's build: playerctl_test.inc's)
 float C_CameraModule::GetViewDistance()
 {
     Log(nullptr, "GetViewDistance");
     return g_asViewDistance;
 }
+#endif
 
 namespace {
 void AC OE_Raise(void *self, uint8_t *e) { LogEvent(self, "Raise", e); }

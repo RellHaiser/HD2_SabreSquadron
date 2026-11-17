@@ -492,9 +492,9 @@ void C_PlayerController::ApplyRecoil(S_vector4 &view)
         recoil *= 0.3f;
         break;
     case 4: {
-        // Through a reticle scope it stays.
+        // Through a reticle scope it stays. (The behaviour asked again, as the original.)
         const C_ItemComponent *scope = def->GetSecondaryComponent();
-        if (scope && scope->GetKind() == ICK_SCOPE &&
+        if (def->GetBehaviour() == 4 && scope && scope->GetKind() == ICK_SCOPE &&
             static_cast<const C_ScopeComp *>(scope)->GetAimMode() < SCOPE_RETICLE_MODES)
             break;
         recoil *= 0.4f;
