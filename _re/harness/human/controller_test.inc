@@ -84,10 +84,13 @@ int C_CheckpointNetwork::FindNearest(S_vector pos, float maxDist, float minDist)
     Log(this, "CheckpointsFindNearest", {pos.x, pos.y, pos.z, maxDist, minDist});
     return g_cs.nearest;
 }
+// (Part 43: the lookups not logged: the original makes some it drops.)
+bool g_checkpointGetSilent = false;
 S_Checkpoint *C_CheckpointNetwork::Get(int index)
 {
     if (g_checkpointAt) {
-        Log(this, "CheckpointsGet", {double(uint16_t(index))});
+        if (!g_checkpointGetSilent)
+            Log(this, "CheckpointsGet", {double(uint16_t(index))});
         return g_checkpointAt(uint16_t(index));
     }
     Log(this, "CheckpointsGet", {double(index)});
@@ -379,7 +382,8 @@ int CT_ OC_FindNearest(void *self, S_vector pos, float maxDist, float minDist)
 void *CT_ OC_CheckpointGet(void *self, int index)
 {
     if (g_checkpointAt) {
-        Log(self, "CheckpointsGet", {double(uint16_t(index))});
+        if (!g_checkpointGetSilent)
+            Log(self, "CheckpointsGet", {double(uint16_t(index))});
         return g_checkpointAt(uint16_t(index));
     }
     Log(self, "CheckpointsGet", {double(index)});
@@ -427,10 +431,11 @@ uint32_t CT_ OC_IsWorkState5(void *)
 // The items' definitions (the worn items of part 21: their behaviour through the vtable, the port's slot and the
 // original's 0x10, one fake for both).
 int g_behaviour = 0;
+int (*g_behaviourOf)(const void *def) = nullptr;     // (part 43: each definition its own)
 int CT_ DF_GetBehaviour(void *self)
 {
     Log(self, "DefGetBehaviour");
-    return g_behaviour;
+    return g_behaviourOf ? g_behaviourOf(self) : g_behaviour;
 }
 void *g_defVt[64];
 

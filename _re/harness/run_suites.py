@@ -202,6 +202,7 @@ SUITES = [
     T("human.playerctl", "human/build_playerctl.bat", TMP + r"\human_playerctl_test.exe", needs=("mingw", "original_exe")),
     T("human.playerwpn", "human/build_playerwpn.bat", TMP + r"\human_playerwpn_test.exe", needs=("mingw", "original_exe")),
     T("human.playernet", "human/build_playernet.bat", TMP + r"\human_playernet_test.exe", needs=("mingw", "original_exe")),
+    T("human.enemy", "human/build_enemy.bat", TMP + r"\human_enemy_test.exe", needs=("mingw", "original_exe")),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

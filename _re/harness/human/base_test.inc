@@ -496,7 +496,8 @@ C_Actor *g_actorAtIndex0 = nullptr;                      // what GetActor(0) ans
 C_Actor *(*g_actorByIndex)(int index, bool original) = nullptr;   // (part 23d: the players)
 C_Actor *C_ActorsModule::GetActor(int index) const
 {
-    Log(this, "GetActor", {double(index)});
+    if (!LookedUpBefore(index))
+        Log(this, "GetActor", {double(index)});
     if (g_actorByIndex)
         return g_actorByIndex(index, false);
     return index == 0 ? g_actorAtIndex0 : nullptr;

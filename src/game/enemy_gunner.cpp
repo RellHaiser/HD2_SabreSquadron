@@ -117,8 +117,10 @@ void C_EnemyController::GunnerEvent(S_HumanEvent *event)
     case AI_EVENT_HIT_5: {
         // Shot at by an enemy not in view: watching, picks a target; at a static gun, one
         // within 8 m or out of the gun's reach drives the gunner off it.
+        if (!m_human->GetVehicle())
+            return;
         C_Actor *source = IdToActor(event->sourceId);
-        if (!m_human->GetVehicle() || !source || m_human->IsFriendOf(source) || source->GetType() != ACTOR_HUMAN
+        if (!source || m_human->IsFriendOf(source) || source->GetType() != ACTOR_HUMAN
             || static_cast<C_Human *>(source)->GetHealth() < 1
             || m_human->HasSeenEnemy(static_cast<C_Human *>(source)))
             return;

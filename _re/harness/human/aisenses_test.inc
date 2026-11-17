@@ -92,16 +92,18 @@ struct S_SensesAi : S_TestAi {
 };
 S_SensesAi *SensesAi() { return static_cast<S_SensesAi *>(g_pa); }
 
-// The human's lists in the original's layout (the ToOriginal hook): enemies +0x264, friends +0x274.
+// The human's lists in the original's layout (the ToOriginal hook): enemies +0x264, friends +0x274, bodies +0x284 (part
+// 43's).
 void (*g_asBeforeLists)() = nullptr;
-std::vector<void *> g_asOrigLists[2];
+std::vector<void *> g_asOrigLists[3];
 void ListsToOriginal()
 {
     if (g_asBeforeLists)
         g_asBeforeLists();
     C_Human *h = g_h.human;
-    const std::vector<C_Human *> *lists[2] = {&h->m_seenEnemies, &h->m_seenFriends};
-    for (int l = 0; l < 2; ++l) {
+    const std::vector<C_Human *> *lists[3] = {&h->m_seenEnemies, &h->m_seenFriends, &h->m_seenBodies};
+    static const size_t at[3] = {0x264, 0x274, 0x284};
+    for (int l = 0; l < 3; ++l) {
         g_asOrigLists[l].clear();
         for (C_Human *p : *lists[l])
             g_asOrigLists[l].push_back(ToOrig(p));
@@ -110,7 +112,7 @@ void ListsToOriginal()
             v[1] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(g_asOrigLists[l].data()));
             v[2] = v[3] = v[1] + 4 * static_cast<uint32_t>(g_asOrigLists[l].size());
         }
-        std::memcpy(o_human + (l ? 0x274 : 0x264), v, 16);
+        std::memcpy(o_human + at[l], v, 16);
     }
 }
 

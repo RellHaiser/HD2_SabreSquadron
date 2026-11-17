@@ -13,8 +13,10 @@ const S_vector4 DIRECTION_VECTORS[8] = {               // (static init 0x005244b
     {-1.0f, 0.0f, 0.0f, 0.0f}, {-1.0f, 0.0f, 1.0f, 0.0f},
 };
 
-constexpr float COS_22_5 = 0.9238795f;
-constexpr float SIN_22_5 = 0.38268343f;
+// (Doubles, as the original compares (0x008109d0..0x008109e8): a direction at the sectors'
+// edge falls on the same side.)
+constexpr double COS_22_5 = 0.9238795325112867;
+constexpr double SIN_22_5 = 0.3826834323650898;
 
 } // namespace
 

@@ -3532,3 +3532,56 @@ particles and the surface marks. Files are served from memory.
   check's stale human and squad commands past the tables in the input; the damage request's fields read only in
   part; the first mutation summaries for 42a read one line of joined output (1 survivor instead of 35) before I
   recounted.
+
+## Human part 43 (the enemy AI, `enemy_controller.cpp`, `enemy_tasks.cpp`, `enemy_combat.cpp`, `enemy_gunner.cpp`, 2026-11-17)
+
+- **The build:** `human/build_enemy.bat` (`enemy_test.inc`, HUMAN_ENEMY): part 36's fighting build with the enemy's four
+  files and checkpoint.cpp linked (derived_ai.inc's copy of CoverAgainst left out); HUMAN_ENEMY_PART picks the parts (a,
+  b, c, d) to run. The original's controller: the AI constructor's object with a copy of the enemy's vtable (0x00811730,
+  0x1E0 bytes); its fields +0x140 .. +0x1E0 converted and compared around each call (the MSVC6 vectors of points and
+  guns; the search's event and the guard's gun share +0x148 in the original: the one set converted, an event the call
+  allocated compared by its fields).
+  - Faked on both sides and logged: the walking network's GetActor, FindActorPoint, FindNearestPoint, GetNeighbourCover,
+    GetReachable, GetReachableCopy, GetReachableCover (appending, as the flood fill does) and PickCoverPoint (dropping
+    the candidates the test names, each side's vector); the human's FindItemByRecordType, RequestMoveItem,
+    RequestTransferItem; the events' GetAttacker, GetStrongestStimulus, IsAwayFromNearbyActors; the body's GetSector,
+    GetUnknown6E0, RemoveCollision, RestoreCollision; RayTest and RayTestDynamic; the seat weapons' rounds, origin and
+    occupant (the seat car and part 23's actors as the post's guns); the car's and the submarine's controls. The events'
+    PopFront and GetNearbyActor and an event's SaveGame / LoadGame are the port's copies (the original runs its own).
+  - Shared harness changes: the original's ReleaseHumanEvent fake is __stdcall (RET 4: parts 38-39 never reached the
+    call); the AI lists' hook also converts the seen bodies (+0x284); the actors module's GetActor logged once per id in
+    a call (the original repeats the inline lookup); the checkpoints' Get not logged in this build (the original makes
+    lookups it drops); the definitions' behaviour per definition (g_behaviourOf); the 16-bit points the original pushes
+    compared as 16 bits; HUMAN_DUMP_CALLS (both sides' calls of the first differences, =2 with their numbers) and
+    HUMAN_FIRST_CHANCE (a first-chance access violation handler) in every human build.
+- **The tests:** 120,000 calls (30,000 a part): 43a the life cycle, events, the task's choice, weapons, firing, the
+  grenade, the line of fire, saved games (an older layout's chunks too); 43b the guard, the search, morale broken; 43c
+  the combat task, the weapon's range, stances, the points to fight from; 43d the gunner, the seat weapon's targets and
+  aim, the post's guns.
+- **Results:** 365,087 checks, 0 failures, 84 s (about 21 s a part; a part alone in its mutation runs); lines: 2,502 of
+  2,508 (the destructor: the port's fix releases a search's event the original leaves; the gunner's aim at a lying
+  target's position when rand() gives 0).
+- **Port fixes:** Tick in a vehicle that is not a car, a submarine, a static weapon or a Junkers walks and fires (the
+  port did nothing); the search's walk raises the weapon after sneaking crouched too; PlanGrenade's farthest point
+  summed z first (two groups as far from their middle tie and the rounding picks); S_Checkpoint::GetDirectionBit
+  compares with the original's double constants (a direction at a sector's edge); GunnerEvent asks for the vehicle
+  before it looks the shooter up (the original's order); human.h's ReleaseHumanEvent is __stdcall.
+- **Not tested:** the original's flaws the port shares, steered clear of: UpdateFiring reading the task StartGuard
+  leaves out (no home point); the combat's move and approach and the launcher's state measuring to a target UpdateTimers
+  forgot; PickGunnerTarget taking a stimulus's non-human source for a human (GetLeadPoint reads its controller);
+  network games' IsFriendOf taking any actor for a human. The port's fixes: FindApproachPoint's list run below empty
+  (the target kept 24 m away where the call can be reached, or the removals counted), CanFireMoving with no hands item,
+  StartSearch's missing body, the guard's missing gun, IsOutOfGunReach's missing vehicle, PickGunnerTarget's division by
+  a time left of 0, GunnerEvent's non-human killer and source, the destructor's event.
+- **Mutations:** `mutate_enemy1.py` (43a): 709 mutants; 52 not building; 616 of 657 killed (94 %). `mutate_enemy2.py`
+  (43b): 636; 17; 544 of 619 (88 %). `mutate_enemy3.py` (43c): 518; 13; 438 of 505 (87 %). `mutate_enemy4.py` (43d):
+  370; 32; 296 of 338 (88 %). The survivors: equivalent, ties, silent event releases, sums with heights 2 m apart, and
+  weakly tested state combinations (each file's docstring).
+- **Harness lessons (my mistakes):** the shared ReleaseHumanEvent fake's calling convention; the hands container left
+  to part 23's per-side swap; worn items with no vtable as hands items; the fakes answering -1 where the network answers
+  0xFFFF; part 23's second controller without a human; the other humans' velocities and containers not set on the
+  original's side; tasks released into one side's pool only; the test's off-network points where the code does not
+  check; the human among its own enemies in view (every distance threshold passed); everyone at height 0; the network
+  fakes replacing the lists their callers cleared; a height offset that accumulated; the mutation runs' first copy taken
+  from an older harness (its baseline failed in quick mode: a part must pass in quick mode too); a background chain
+  run from a script the edit tool had not rewritten (stopped); heredocs collapsing "\n" again.

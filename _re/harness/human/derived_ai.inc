@@ -42,6 +42,7 @@ struct S_DaScript {
     std::vector<uint16_t> neighbours;                   // GetNeighbours
     bool routeEnds = false;                             // UpdateMove ends the route (the move order's FLAG_ROUTE, +0x50)
 } g_da;
+bool g_daAppend = false;                                // (part 43: the network's answers appended, as the real ones)
 }  // namespace
 
 // ---- the port's side of the fakes
@@ -69,8 +70,11 @@ bool C_SightModule::TestNow(int observer, int target)
 }
 bool C_CheckpointNetwork::GetNeighbours(int from, float radius, std::vector<uint16_t> *out)
 {
-    Log(nullptr, "GetNeighbours", {double(from), radius});
-    *out = g_da.neighbours;
+    Log(nullptr, "GetNeighbours", {double(from & 0xFFFF), radius});   // (a 16-bit point, as the original pushes it)
+    if (g_daAppend)
+        out->insert(out->end(), g_da.neighbours.begin(), g_da.neighbours.end());
+    else
+        *out = g_da.neighbours;
     return true;
 }
 void C_Human::ProcessEvents() { Log(this, "ProcessEvents"); }
@@ -86,6 +90,7 @@ C_Actor *IdToActor(int id)
         return nullptr;
     return g_actorsModule.GetActor(id);
 }
+#ifndef HUMAN_ENEMY
 // (enemy_combat.cpp's, copied: that file is linked by the enemy's part.)
 uint32_t CoverAgainst(const S_Checkpoint *cp, const S_vector &pos, uint32_t stances)
 {
@@ -100,6 +105,7 @@ uint32_t CoverAgainst(const S_Checkpoint *cp, const S_vector &pos, uint32_t stan
         result |= 4;
     return result;
 }
+#endif
 
 namespace {
 // The shared events the event lists hold.
@@ -149,18 +155,26 @@ int AC DA_TestNow(void *, int observer, int target)
 // (Its vector: allocator, first, last, end; the original's new is the test's malloc.)
 int AC DA_GetNeighbours(void *, int from, float radius, uint32_t *out)
 {
+    from &= 0xFFFF;   // (a 16-bit point: the original's push leaves the high word stale)
     Log(nullptr, "GetNeighbours", {double(from), radius});
-    const size_t n = g_da.neighbours.size();
+    // (Part 43: appended to what the vector holds, as the network's flood fill does.)
+    std::vector<uint16_t> all;
+    if (g_daAppend && out[1]) {
+        const auto *first = reinterpret_cast<const uint16_t *>(static_cast<uintptr_t>(out[1]));
+        all.assign(first, first + (out[2] - out[1]) / 2);
+    }
+    all.insert(all.end(), g_da.neighbours.begin(), g_da.neighbours.end());
+    const size_t n = all.size();
     out[1] = out[2] = out[3] = 0;
     if (n) {
         auto *data = static_cast<uint16_t *>(std::malloc(n * 2));
-        std::memcpy(data, g_da.neighbours.data(), n * 2);
+        std::memcpy(data, all.data(), n * 2);
         out[1] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(data));
         out[2] = out[3] = out[1] + 2 * static_cast<uint32_t>(n);
     }
     return 1;
 }
-void DA_ReleaseHumanEvent(void *) {}
+void __stdcall DA_ReleaseHumanEvent(void *) {}   // (__stdcall: RET 4)
 void AC DA_ProcessEvents(void *self) { Log(self, "ProcessEvents"); }
 void AC DA_StartScriptedController(void *self) { Log(self, "StartScriptedController"); }
 void AC DA_RequestThrowItem(void *self, void *item, int arg, const S_vector *dir)
@@ -196,7 +210,8 @@ C_Actor *DaActorById(int id, bool original)
 }
 void *AC DA_GetActor(void *self, int index)
 {
-    Log(self, "GetActor", {double(index)});
+    if (!LookedUpBefore(index))
+        Log(self, "GetActor", {double(index)});
     return DaActorById(index, true);
 }
 void *AC DA_GetActorById(void *self, int id)

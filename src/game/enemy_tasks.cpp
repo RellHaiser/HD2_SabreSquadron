@@ -747,17 +747,21 @@ void C_EnemyController::UpdateSearch(int /*timeDelta*/)
             const float dz = event->pos.z - own.z;
             const float distance2 = dx * dx + dz * dz + dy * dy;
             const uint32_t pace = m_move->unknown54;
+            bool slowed = false;
             if (((pace & MOVE_PACE_MARCH) && (RandBell() - 0.5f) * 100.0f + 150.0f > distance2)
                 || ((pace & MOVE_PACE_4) && distance2 < ((RandBell() - 0.5f) + 1.0f) * 100.0f)) {
                 LookAround(4);
                 m_move->unknown54 = PACE_ALERT;
-                if (!m_weaponRaised)
-                    RaiseWeapon();
+                slowed = true;
             } else if (!(pace & MOVE_PACE_1) && distance2 < Rand01() * 24.0f + 25.0f) {
                 SetEnemyStance(MOVE_CROUCHING);
                 LookAround(4);
                 m_move->unknown54 = PACE_SNEAK;
+                slowed = true;
             }
+            // Either way the weapon is raised.
+            if (slowed && !m_weaponRaised)
+                RaiseWeapon();
             if (distance2 < 36.0f) {
                 // At the event: looks around it; a source that is a body seen ends the walk.
                 if (m_lookAroundTime == 0) {

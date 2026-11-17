@@ -288,25 +288,30 @@ void C_EnemyController::Tick(int timeDelta)
     UpdateTimers(timeDelta);
     if (UpdateTask(timeDelta)) {
         RunTask(timeDelta);
-        C_Actor *vehicle = m_human->m_vehicle;
-        if (!vehicle) {
-            ApplyAlertState();
-            UpdateMove(timeDelta);
-            UpdateFiring(timeDelta);
-            UpdateLook(timeDelta);
-            ApplyMoveControls();
-        } else {
+        // In a car, a submarine, a static weapon or a Junkers the vehicle is driven; on foot
+        // (and in any other vehicle) the human walks and fires.
+        bool driving = false;
+        if (C_Actor *vehicle = m_human->m_vehicle) {
             switch (vehicle->GetType()) {
             case ACTOR_CAR:
             case ACTOR_SUBMARINE:
             case ACTOR_STATIC_WEAPON:
             case ACTOR_JUNKERS88:
-                UpdateLook(timeDelta);
-                ControlVehicle();
+                driving = true;
                 break;
             default:
                 break;
             }
+        }
+        if (driving) {
+            UpdateLook(timeDelta);
+            ControlVehicle();
+        } else {
+            ApplyAlertState();
+            UpdateMove(timeDelta);
+            UpdateFiring(timeDelta);
+            UpdateLook(timeDelta);
+            ApplyMoveControls();
         }
         ApplyWeaponControls(timeDelta, 0);
     }
@@ -1058,7 +1063,9 @@ bool C_EnemyController::PlanGrenade()
             const float dx = points[i].x - middle.x;
             const float dy = points[i].y - middle.y;
             const float dz = points[i].z - middle.z;
-            const float distance2 = dx * dx + dy * dy + dz * dz;
+            // (Summed z first, as the original: two groups as far from their middle tie, and the
+            // rounding picks the one left out.)
+            const float distance2 = dz * dz + dy * dy + dx * dx;
             if (farthest2 < distance2) {
                 farthest = static_cast<int>(i);
                 farthest2 = distance2;

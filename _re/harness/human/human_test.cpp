@@ -100,6 +100,18 @@ void Log(const void *self, const char *what, std::initializer_list<double> nums 
 {
     g_calls.push_back({NameOf(self) + "." + what, nums});
 }
+// (Part 43: the actors module's GetActor logged once per id in a call: the original repeats the inline lookup the
+// port makes once.)
+bool g_actorLookupsOnce = false;
+bool LookedUpBefore(double id)
+{
+    if (!g_actorLookupsOnce)
+        return false;
+    for (const S_Call &c : g_calls)
+        if (c.nums.size() == 1 && c.nums[0] == id && c.what.size() >= 9 && c.what.compare(c.what.size() - 9, 9, ".GetActor") == 0)
+            return true;
+    return false;
+}
 // (Vectors of four: their w left out. The original passes undefined ones, and what is called reads x, y, z.)
 void LogV(const void *self, const char *what, const float *v, int n, std::initializer_list<double> more = {})
 {
@@ -833,6 +845,9 @@ namespace {
 #ifdef HUMAN_SCRIPTED
 #include "scripted_test.inc"
 #endif
+#ifdef HUMAN_ENEMY
+#include "enemy_test.inc"
+#endif
 #endif
 #ifdef HUMAN_MOVE
 #include "move_test.inc"
@@ -884,9 +899,29 @@ LONG WINAPI OnCrash(EXCEPTION_POINTERS *e)
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
+// HUMAN_FIRST_CHANCE: every access violation as it happens (one inside an original function with an MSVC6 exception
+// frame never reaches OnCrash).
+LONG CALLBACK FirstChance(EXCEPTION_POINTERS *e)
+{
+    if (e->ExceptionRecord->ExceptionCode == 0xC0000005) {
+        const CONTEXT *c = e->ContextRecord;
+        std::printf("{first chance AV at %p: eax %08lx ecx %08lx edx %08lx ebx %08lx esi %08lx edi %08lx esp %08lx, reading %p}\n",
+                    e->ExceptionRecord->ExceptionAddress, c->Eax, c->Ecx, c->Edx, c->Ebx, c->Esi, c->Edi, c->Esp,
+                    reinterpret_cast<void *>(e->ExceptionRecord->ExceptionInformation[1]));
+        const auto *sp = reinterpret_cast<const uint32_t *>(c->Esp);
+        for (int k = 0; k < 24 && !IsBadReadPtr(sp + k, 4); ++k)
+            std::printf("%08x ", sp[k]);
+        std::printf("\n");
+        std::fflush(stdout);
+    }
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
 int main(int argc, char **argv)
 {
     SetUnhandledExceptionFilter(OnCrash);
+    if (std::getenv("HUMAN_FIRST_CHANCE"))
+        AddVectoredExceptionHandler(1, FirstChance);
     int childExit;
     if (RunReservingOriginalBase(childExit))
         return childExit;
@@ -924,6 +959,8 @@ int main(int argc, char **argv)
     TestSenses();
 #elif defined(HUMAN_SNIPER)
     TestSniper();
+#elif defined(HUMAN_ENEMY)
+    TestEnemy();
 #elif defined(HUMAN_SCRIPTED)
     TestScripted();
 #elif defined(HUMAN_MTAI)

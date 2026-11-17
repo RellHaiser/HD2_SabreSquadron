@@ -195,7 +195,7 @@ enum : uint32_t {
 
 // The event pool (0x008ac430, blocks of 50). The AI code takes events from it inline.
 S_HumanEvent *AllocHumanEvent();
-void ReleaseHumanEvent(S_HumanEvent *event);            // 0x005add20 __cdecl
+void ReleaseHumanEvent(S_HumanEvent *event);            // 0x005add20 __stdcall
 // Actor <-> actor id (C_Actor::GetNetId) as events keep them; -1 / null for none.
 int ActorToId(const C_Actor *actor);                    // 0x005aca30 __cdecl
 C_Actor *IdToActor(int id);                             // 0x005aca50 __cdecl

@@ -484,8 +484,17 @@ std::string AiDiffers(S_TestAi *pa, const uint8_t *oa)
         at = 0;
     if (at < 0 && std::memcmp(pf + 0x1C, oa + 0xE0, 12) != 0)
         at = 0x1C;
-    if (at >= 0)
+    if (at >= 0) {
+        if (at == 0x1C) {
+            float a[3], b[3];
+            std::memcpy(a, pf + 0x1C, 12);
+            std::memcpy(b, oa + 0xE0, 12);
+            char words[160];
+            std::snprintf(words, sizeof words, " (throwPos port %.9g %.9g %.9g original %.9g %.9g %.9g)", a[0], a[1], a[2], b[0], b[1], b[2]);
+            return "fire+" + std::to_string(at) + words;
+        }
         return "fire+" + std::to_string(at);
+    }
     for (const S_LayoutField &f : kAiFields) {
         if (f.kind == 'p' || f.kind == 'm')
             continue;
@@ -544,8 +553,14 @@ std::string AiDiffers(S_TestAi *pa, const uint8_t *oa)
         return "facing+" + std::to_string(at);
     if ((at = FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_fireOrder), part(0x128), 0x50, {0x4C})) >= 0)
         return "fireOrder+" + std::to_string(at);
-    if ((at = FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x5C})) >= 0)
-        return "move+" + std::to_string(at);
+    if ((at = FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x5C})) >= 0) {
+        uint32_t a = 0, b = 0;
+        std::memcpy(&a, reinterpret_cast<const uint8_t *>(pa->m_move) + at, 4);
+        std::memcpy(&b, part(0x12C) + at, 4);
+        char words[48];
+        std::snprintf(words, sizeof words, " (port %08x original %08x)", a, b);
+        return "move+" + std::to_string(at) + words;
+    }
     if (std::memcmp(pa->m_alert, part(0x134), 5) != 0)
         return "alert";
     return DriverDiffers(*pa->m_driver, part(0x130));

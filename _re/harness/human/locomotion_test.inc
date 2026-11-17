@@ -418,8 +418,29 @@ template <class P, class O> int DiffCall(const char *what, P port, O original)
     std::string why;
     if (portResult != origResult)
         why = "result " + std::to_string(portResult) + " / " + std::to_string(origResult);
-    if (why.empty() && !CallsAgree(portCalls, origCalls, why))
+    if (why.empty() && !CallsAgree(portCalls, origCalls, why)) {
         why = "calls: " + why;
+        // (HUMAN_DUMP_CALLS: both sides' calls, the first few times.)
+        static int dumped;
+        if (std::getenv("HUMAN_DUMP_CALLS") && dumped++ < 4) {
+            const bool nums = std::getenv("HUMAN_DUMP_CALLS")[0] == '2';
+            auto dump = [&](const char *side, const std::vector<S_Call> &calls) {
+                std::printf("  [%s] %s:", what, side);
+                for (const S_Call &c : calls) {
+                    std::printf(" %s", c.what.c_str());
+                    if (nums && !c.nums.empty()) {
+                        std::printf("(");
+                        for (size_t k = 0; k < c.nums.size() && k < 8; ++k)
+                            std::printf(k ? ",%g" : "%g", c.nums[k]);
+                        std::printf(")");
+                    }
+                }
+                std::printf("\n");
+            };
+            dump("port", portCalls);
+            dump("original", origCalls);
+        }
+    }
     if (why.empty())
         why = FieldsDiffer(kActorFields, bh, o_human, "human");
     if (why.empty())
