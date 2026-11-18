@@ -76,6 +76,7 @@ struct S_SqAnswers {
     bool outdoors = true;                               // GetSector: the scene's primary sector
     int spheres = 0;                                    // GetUnknown6E0's count
     bool rayHit = false;                                // RayTest
+    S_vector rayNormal = {0, 1, 0};                     // ... its hit normal
     int dynamicHit = -1;                                // RayTestDynamic: -1 none, else part 23's kind
     S_vector facing = {0, 0, 1};                        // C_Human::GetFacingDir
     // the seat car's seats
@@ -137,9 +138,11 @@ void SqLogPoints(const void *self, const char *what, const std::vector<uint16_t>
     nums.insert(nums.end(), points.begin(), points.end());
     g_calls.push_back({NameOf(self) + "." + what, nums});
 }
+#ifndef HUMAN_COMMANDER
 // The commander's fake objects (the port's: raw bytes with a fake vtable).
 alignas(16) uint8_t g_sqCommanderPort[0x200];
 void *g_sqCommanderPortVt[64];
+#endif
 C_Human *SqMember(int index)
 {
     C_Human *const members[3] = {g_h.human, PortOther(), PortThird()};
@@ -148,8 +151,10 @@ C_Human *SqMember(int index)
 }  // namespace
 
 // ---- the port's side of the fakes
+#ifndef HUMAN_COMMANDER
 C_SquadCommander *GetSquadCommander() { return reinterpret_cast<C_SquadCommander *>(g_sqCommanderPort); }
 void C_SquadCommander::OnOrderMoveDone() { Log(this, "CommanderOnOrderMoveDone"); }
+#endif
 C_Human *C_Team::GetSelectedMember() const
 {
     Log(this, "TeamGetSelectedMember");
@@ -353,8 +358,12 @@ C_Item *C_Human::GetMedkit() const
 }
 int C_Human::GetControllerType() const
 {
+#ifdef HUMAN_COMMANDER
+    return CmControllerType(this);
+#else
     Log(this, "GetControllerType");
     return g_sq.controllerType;
+#endif
 }
 int C_Human::CountItems(int typeId) const
 {
@@ -410,6 +419,8 @@ namespace {
 void *SqRayAnswer(const S_vector *from, const S_vector *dir, const S_vector *hitNormal, uint32_t types, uint32_t flags)
 {
     Log(nullptr, "RayTest", {from->x, from->y, from->z, dir->x, dir->y, dir->z, double(hitNormal != nullptr), double(types), double(flags)});
+    if (g_sq.rayHit && hitNormal)
+        *const_cast<S_vector *>(hitNormal) = g_sq.rayNormal;
     return g_sq.rayHit ? g_sqVolume : nullptr;
 }
 void *SqDynamicAnswer(const S_vector *from, const S_vector *dir, const S_vector *hitPos, const S_vector *hitNormal, uint32_t types,
@@ -438,6 +449,7 @@ __wrap__ZNK16C_CollisionWorld14RayTestDynamicERK8S_vectorS2_PS0_S3_jj(const C_Co
 }
 
 namespace {
+#ifndef HUMAN_COMMANDER
 // ---- the commander's port side (its fake vtable's slots); the same functions serve the original's redirects
 C_Actor *AC SQ_GetSquadTargetPort(void *self)
 {
@@ -465,6 +477,7 @@ void *AC SQ_GetSquadTargetOrig(void *self)
     return SqOrigOf(g_sq.squadTarget);
 }
 void AC SQ_OnOrderMoveDone(void *self) { Log(self, "CommanderOnOrderMoveDone"); }
+#endif
 void *AC SQ_GetSelectedMember(void *self)
 {
     // (Not from PickCoverDir, 0x00525700: the original's answer goes unused there, and the port does not ask.)
@@ -665,8 +678,12 @@ void *AC SQ_GetMedkit(void *self)
 }
 int AC SQ_GetControllerType(void *self)
 {
+#ifdef HUMAN_COMMANDER
+    return CmControllerType(self);
+#else
     Log(self, "GetControllerType");
     return g_sq.controllerType;
+#endif
 }
 int AC SQ_CountItems(void *self, int typeId)
 {
@@ -837,6 +854,7 @@ void SetUpSquadFakes()
     g_weaponPortVt[VSlot(&C_Item::GetMaxAmount)] = reinterpret_cast<void *>(SQ_GetMaxAmount);
     g_weaponOrigVt[0x10 / 4] = reinterpret_cast<void *>(SQ_GetMaxAmount);
     const std::pair<uint32_t, const void *> redirects[] = {
+#ifndef HUMAN_COMMANDER
         {0x00456860, FAKE(SQ_GetSquadTargetOrig)},
         {0x00459500, FAKE(SQ_OnFriendlyFire)},
         {0x00459490, FAKE(SQ_DelayFormationChecks)},
@@ -845,6 +863,7 @@ void SetUpSquadFakes()
         {0x00459480, FAKE(SQ_IsWhispering)},
         {0x00455af0, FAKE(SQ_OnMemberIdle)},
         {0x00456f00, FAKE(SQ_OnOrderMoveDone)},
+#endif
         {0x0045d160, FAKE(SQ_GetSelectedMember)},
         {0x0045f110, FAKE(SQ_ReleaseHoldingMembers)},
         {0x0045e920, FAKE(SQ_IsEnemyKnown)},
@@ -910,6 +929,7 @@ void SetUpSquadFakes()
     };
     for (const auto &r : redirects)
         RedirectOriginal(r.first, r.second);
+#ifndef HUMAN_COMMANDER
     // The commander: the port's fake object and vtable; the original's global given its own vtable (its static
     // initialisers never ran here), its members redirected above.
     for (void *&slot : g_sqCommanderPortVt)
@@ -926,6 +946,7 @@ void SetUpSquadFakes()
     *OriginalAt<uint32_t *>(0x0089ad40) = 0x0080fb28;
     g_names[g_sqCommanderPort] = g_names[OriginalAt<void *>(0x0089ad40)] = "commander";
     g_extraPointers.push_back({g_sqCommanderPort, OriginalAt<void *>(0x0089ad40)});
+#endif
     g_names[g_sqSectorOther] = "otherSector";
     g_names[g_sqVolume] = "volume";
 }

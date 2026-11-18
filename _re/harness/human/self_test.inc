@@ -978,10 +978,12 @@ int ST TM_RemoveMember(void *, void *human)
     return 1;
 }
 // The scene's sector at a place (an LS3D method: stdcall, this on the stack; slot 0xE0 on both sides).
+// (g_sectorAt: another answer by the place, part 45's.)
+I3D_sector *(*g_sectorAt)(const S_vector &pos) = nullptr;
 I3D_sector *__stdcall SC_GetSector(void *, const S_vector *pos)
 {
     Log(nullptr, "SceneGetSector", {pos->x, pos->y, pos->z});
-    return reinterpret_cast<I3D_sector *>(g_sector);
+    return g_sectorAt ? g_sectorAt(*pos) : reinterpret_cast<I3D_sector *>(g_sector);
 }
 // A vehicle to leave the seat of (one vtable for both sides: LeaveSeat is the original's slot 0x80).
 alignas(16) uint8_t g_vehicleBytes[0x100];

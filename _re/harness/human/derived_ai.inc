@@ -63,10 +63,12 @@ bool C_Human::DrawSidearm(int reason)
     Log(this, "DrawSidearm", {double(reason)});
     return true;
 }
+// (The sight tests' answer: part 45's OnFriendlyFire asks for both.)
+bool g_daSight = true;
 bool C_SightModule::TestNow(int observer, int target)
 {
     Log(nullptr, "SightTestNow", {double(observer), double(target)});
-    return true;
+    return g_daSight;
 }
 bool C_CheckpointNetwork::GetNeighbours(int from, float radius, std::vector<uint16_t> *out)
 {
@@ -150,7 +152,7 @@ int AC DA_DrawSidearm(void *self, int reason)
 int AC DA_TestNow(void *, int observer, int target)
 {
     Log(nullptr, "SightTestNow", {double(observer), double(target)});
-    return 1;
+    return g_daSight;
 }
 // (Its vector: allocator, first, last, end; the original's new is the test's malloc.)
 int AC DA_GetNeighbours(void *, int from, float radius, uint32_t *out)

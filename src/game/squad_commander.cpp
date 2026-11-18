@@ -93,9 +93,10 @@ bool IsAxisUniform(const C_Item *uniform)
 // `member` carries a silenced weapon with rounds in it or ammunition for it.
 bool HasSilencedWeapon(const C_Human *member)
 {
-    // (The original looks the three types up first, then checks them in this order.)
-    for (int typeId : {ITEM_SILENCED_16, ITEM_SILENCED_7, ITEM_SILENCED_104}) {
-        C_Item *weapon = member->FindItem(typeId);
+    // (The three types looked up first, then checked in this order.)
+    C_Item *const weapons[3] = {member->FindItem(ITEM_SILENCED_16), member->FindItem(ITEM_SILENCED_7),
+                                member->FindItem(ITEM_SILENCED_104)};
+    for (C_Item *weapon : weapons) {
         if (!weapon)
             continue;
         if (weapon->GetAmount() != 0.0f)

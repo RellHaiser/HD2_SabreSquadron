@@ -3652,3 +3652,53 @@ particles and the surface marks. Files are served from memory.
   actions without their targets; a car actor without its "body" frame; the original's cover compass never initialised
   (its static initialiser); pooled tasks' stale words; the markers' pool handing one frame to every order; Git Bash's
   sed -i turning CRLF files LF-only (a mutation list made from one had to be redone); heredocs collapsing "\n" again.
+
+## Human part 45 (the squad commander, `squad_commander.cpp`, 2026-11-17)
+
+- **The build:** `human/build_commander.bat` (`commander_test.inc`, HUMAN_COMMANDER with part 44's HUMAN_SQUAD build):
+  squad_commander.cpp linked, the squad controller's 46 methods it calls faked and logged on both sides
+  (`commander_fakes.inc`, made by `gen_commander_fakes.py`: the port's by `--wrap`, the original's redirected; the wrap
+  flags are the bat's CMWRAP). HUMAN_COMMANDER_CASE runs one case alone (2,000 rounds).
+  - The commander: the port's g_squadCommander against the original's object 0x0089ad40 (its vtable 0x0080fb28) and
+    idle reports 0x0089ad30; its fields converted and compared around each call (the five groups and the manoeuvre's
+    members as MSVC6 vectors of mapped humans; the door's and ladder's places and the formation scale without their
+    w, stack words in the original). The port's idle reports (an unnamed namespace's vector) are found once in the
+    image's writable sections by their contents.
+  - The members: the three humans, each with a squad controller pair of its own (part 44's for the tested human, two
+    more made alike, their humans set: the original's ApplyOrder asks the controller's human for its leader); each
+    pair's fields compared as part 44 compares its own; the two others' orders made once (the commander does not change
+    the queues); CancelOrders logged on both sides.
+  - Faked and logged: the formation's SetType and SetScale; the human's GetOrderCount and CancelOrders copied
+    (human_control.cpp is not linked); GetControllerType answered per human, silently (the port's fixes ask where the
+    original does not): the squad's, the selected soldier's a player's now and then, with a block of a player
+    controller's size per side (the original writes its squad combat order at +0x548, past a squad controller).
+  - The original's static initialisers called: the cover slots 0x004595f0, the unused places 0x004596a0, MoveNear's
+    places 0x0045b7d0, the checkpoints' eight directions 0x005244c0 (all zero before: every place the point itself).
+  - Shared harness changes: the ray test's hit normal answered (g_sq.rayNormal: each side read its own stack before);
+    the sight test's answer (derived_ai.inc g_daSight), the scene's sector by place (self_test.inc g_sectorAt); the
+    task type's mismatch message gives both types; squad_test.inc's commander fakes left out of HUMAN_COMMANDER builds.
+- **The tests:** 30,000 calls: Tick (its timers' and idle reports' edges), OnMemberIdle, CollectGroup, HasGroupMembers,
+  IsInGroup, CollectFor, OnFriendlyFire, DelayFormationChecks, OnPlayerNoise, ReleaseFollowers, Reset, the getters and
+  trivial slots, ExecuteActionCommand on every action (TakeCover and MoveNear with the squad within 25 m of the
+  selected soldier and up to eight cover points), ExecuteCommand on the commands' own actors (doors, mines, explosives,
+  cars, the static gun, item actors, supply boxes and ladders standing in, humans, the wire), the manoeuvres
+  (OnOrderMoveDone in every stage); the doors' states and keys, the uniforms' sides, the third's own uniform.
+- **Results:** 90,005 checks, 0 failures, 17 s (quick mode 7,500 rounds); lines 711 of 733.
+- **Port fix:** HasSilencedWeapon looks the three silenced weapons up before checking them, as the original (the calls'
+  order only).
+- **Not covered:** TakeCover's empty slots filled from the spares and the nearest point (two members at most besides
+  the selected soldier: the harness has three humans); the grenade room's second member and the door's third (the
+  picks keep one and two: dead in the original too); the port's fixes (no ground point, no slot or member within
+  100 m, a ladder without its two points).
+- **Original flaws, steered clear of (the port fixes them):** TakeCover and MoveNear read the selected soldier through
+  null; TakeCover orders the word before its member list when nobody is within 100 m of a cover (seen as a crash at
+  0x0045a937), and reads the ground point through null; Reset keeps the last mission's groups and idle reports;
+  IsInGroup reads past the groups for GROUP_ALL.
+- **Mutations:** 710 mutants (630 T, 80 R); 67 not building; 540 of the 643 building killed (84 %), 103 survived: 38
+  not reachable with three humans, the port's fixes, equivalent ones (the w words, the uniform test flipped on both
+  sides, presets overwritten), ties and weak combinations (see mutate_commander.py).
+- **Harness lessons (my mistakes):** the original's tables zero (static initialisers not run: four of them); the hit
+  normal never answered; the original's getters called with an argument they do not take (the coverage build
+  crashed); the member pairs without their humans; groups listing a member twice; the selected soldier as a player on
+  a squad controller's 0x260 bytes (the original's +0x548 write landed in the harness's pointer map, which showed first as a
+  corrupted task type: I blamed the members' orders before finding it); heredocs collapsing "\n" again (four times).

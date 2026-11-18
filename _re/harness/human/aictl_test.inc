@@ -518,7 +518,7 @@ std::string AiDiffers(S_TestAi *pa, const uint8_t *oa)
         uint32_t otype;
         std::memcpy(&otype, ot + 4, 4);
         if (int(otype) != pa->m_task->type)
-            return "task type";
+            return "task type " + std::to_string(pa->m_task->type) + " / " + std::to_string(otype);
         for (const S_AiRun &r : TaskRuns(pa->m_task->type)) {
             // (The vectors' w, +0x2C and +0x3C: saved games keep 12 bytes, a loaded task keeps its pool object's.)
             const int at = FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_task) + r.port, ot + r.orig, r.size,
