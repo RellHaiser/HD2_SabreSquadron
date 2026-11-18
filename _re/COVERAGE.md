@@ -3805,3 +3805,36 @@ particles and the surface marks. Files are served from memory.
   order's checkpoint word (+0x20: 16 bits and stale padding) once made such a value, by the heap's addresses (hence the
   path), and was handed over as the original's pointer. That word is now copied and compared raw; sniper_test.inc
   prints where the saved games differ.
+
+## Human part 48 (the controls' base, `control.cpp`, 2026-11-18)
+
+- **The build:** `controls/build_base.bat` (`control_diff.cpp`): control.cpp and c_str.cpp linked, the original executable
+  mapped. The port's controls are real C_Control objects in a random tree (up to 10, ids by the children's fields, a
+  stray id, duplicate or -1 now and then; routes, callbacks, the any-callback); the original's are raw 0x6C blocks with
+  its own vtable (0x00813dd0: its virtual calls stay in its code), built from the port's before each call (MSVC6 vectors,
+  the routes' texts reps of their own) and compared field by field after it, with the message queue (the original's
+  MSVC6 deque at 0x008ae590: 170 messages a block, read and emptied by hand), the frames' data and the calls on the
+  fakes: the frames (one set, stdcall slots) and the callbacks (a cdecl fake on the port's side, a thiscall one on the
+  original's, the object in ECX and again as the argument: mapped to each other). The factory (CreateChild) is faked on
+  both sides: its controls are controls.cpp's (later parts). Self routes that raise notifications (show, hide, notify)
+  are kept off cycles. HD2_CONTROL_ROUNDS (default 20,000 per kind), HD2_CONTROL_QUICK (4,000), HD2_CONTROL_CASE,
+  HD2_CONTROL_TRACE (rounds printed), HD2_CONTROL_FIRST_CHANCE (faults under the original's exception frames).
+- **The tests:** FindChild, FindControl (up, down, the top bits), IsChild, TakesInput, Show, Hide, Refresh, SetInactive,
+  the trivial slots, the input slots (each notifies; OnKeyClick then clicks), HandleMessage (every code, routes added,
+  the get messages' values back), HandleMessageCopy, HandleMessages, Notify (callbacks, then routes posted or handled),
+  CallCallbacks, AddCallback, RemoveCallback (by object, notification, function, the any-callback), Create (the frame's
+  data, the type, a child per description), the constructor and the destructor (a subtree), the descriptions
+  (constructor, AddChild past 255 children, the four AddDescMessage, the destructor) and PostControlMessage (past a
+  block).
+- **Results:** 16,988,776 checks, 0 failures, 9 s; lines 226 of 226.
+- **Port fixes:** none. The original's refresh message to the children carries two stack words (value2, value3; the
+  port's are 0): never read. The original's text AddDescMessage takes its C_str by value (the port's a reference): the
+  same.
+- **Mutations:** 172 mutants (150 T, 22 R); 4 not building; 164 of the 168 building killed (98 %), 4 survived, all
+  equivalent: the destructors' deletes (a leak) and RemoveCallback's match reset (see mutate_control_base.py). A second
+  pass logged Refresh and HandleMessageCopy on both sides (the port's a C_LoggedControl, the original's a copy of its
+  vtable): the refresh's recursion into the children was not observable with base controls.
+- **Harness lessons (my mistakes):** a vectored handler written as a lambda (not stdcall) broke the build, and I ran the
+  stale executable for several rounds of tracing; a generator branch gave notify routes a callback's values, so a self
+  route notified itself (a stack overflow, no crash report: the first-chance handler found it); the original's text
+  AddDescMessage called with a reference to its C_str.
