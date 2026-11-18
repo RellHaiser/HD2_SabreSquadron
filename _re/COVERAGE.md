@@ -3944,3 +3944,35 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the mark's title deleted twice by my teardown (its destructor deletes it, and it
   was a node too); the zone's team written only at the original's offset (the port read its own: a difference that was
   the harness's).
+
+## Human part 52 (the edit control, edit box and selection list, `controls.cpp` lines 2200-2764, 2026-11-18)
+
+- **The build:** `controls/build_edit.bat` (`edit_diff.cpp` with the kit). New in the kit: the text box's editing,
+  selection, hover, runs and scroll (EditRun, TickCaret, SelectHovered, GetSelection, SelectRun, GetScrollRange, HoverAt,
+  InsertText, SetSelectedText; GetSelectedText, GetRunText and GetLineCentre returned through a hidden pointer: a round's
+  answers on both sides; the box's scroll compared), the cursor's screen place, EncodeUtf8 (the original's own on both
+  sides: text_box.cpp's is a later part's), the original's allocations zeroed, "select*" among the child names, and the
+  notifications loud self routes are on set by the part (here 05, 0B and the click: ending an edit notifies 02).
+  - The profile's unicode font a round's (the port's member, the original's byte at 0x008aea0c + 0x30); the original's
+    buffer (a char *) holds the port's bytes.
+  - The original's line arguments to EditRun, SelectRun and GetLineCentre are 16 bits (MOVSX of a word; the word above
+    the caller's stack): logged as 16 bits on both sides. The selection list's set count and the editing's start and
+    stop messages leave stack words (value2 / value3) in the original: not compared there (part 50's allowance).
+- **The tests:** part 49's cases on trees of these kinds, typing (OnChar while editing: Backspace, Tab, Return, Escape,
+  printable characters, digits only, the forbidden ones, full-width digits, unicode codes; the buffer's UTF-8 of 1 to 4
+  bytes, odd tails and the leads at their ranges' edges, stale bytes after the text, nearly full buffers), the editing's slots (BeginEdit, IsEditing, OnInput02, OnInput0B, OnKeyClick) and the kinds' own
+  messages sent straight to them (forbidden, longest, digits, edit, get text, end edit, the range and the number, clear,
+  items, insert first, remove selected, the position, select text).
+- **Results:** 8,370,627 checks, 0 failures, 7 s (typing, own and message cases also clean at 100,000 rounds alone); lines
+  2200-2764 all run.
+- **Port fixes:** none. Original flaws steered clear of (the port fixes them, by its comments): a new edit buffer not
+  cleared, the buffer shown through C_fstr (a '%' reads stray arguments), Backspace reading before the buffer at a lone
+  continuation byte, the 4-byte encoding buffer for 6, isdigit given a signed byte.
+- **Mutations:** 272 mutants (196 T, 76 R); 7 not building; 254 of the 265 building killed (96 %), 11 survived, all
+  equivalent (see mutate_controls_edit.py). Two more passes per the survivors: stale bytes after the texts (the
+  terminators' writes and BeginEdit's clearing were not observable), backspace often with the UTF-8 leads at their
+  ranges' edges, full buffers, key 0x7F, byte-mode keys of a 0 byte, the port's buffer's size checked, a range upside
+  down.
+- **Harness lessons (my mistakes):** the original's 16-bit line arguments taken for ints; the buffers' generator almost
+  never ended a text in a multi-byte sequence (the backspace's cases not run until it did), and left nothing after
+  the text's terminator (as a backspace does); a heredoc with backslashes once more (Edit instead).

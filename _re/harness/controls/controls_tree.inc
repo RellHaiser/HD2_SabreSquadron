@@ -18,7 +18,8 @@ const uint32_t NOTIFICATIONS[] = {CONTROL_NOTIFY_CLICK, CONTROL_NOTIFY_02, CONTR
                                   CONTROL_NOTIFY_PRESS, CONTROL_NOTIFY_RELEASE, CONTROL_NOTIFY_08, CONTROL_NOTIFY_09, CONTROL_NOTIFY_0A,
                                   CONTROL_NOTIFY_0B, CONTROL_NOTIFY_HIDDEN, CONTROL_NOTIFY_SHOWN, CONTROL_NOTIFY_WHEEL,
                                   CONTROL_NOTIFY_KEY_CLICK, CONTROL_NOTIFY_CHANGED, CONTROL_NOTIFY_13};
-const uint32_t NOTIFY_RAISING[] = {CONTROL_NOTIFY_02, CONTROL_NOTIFY_05, CONTROL_NOTIFY_0B};
+// The notifications loud self routes are on (a part may change them: none of its loud codes may raise one).
+std::vector<uint32_t> NOTIFY_RAISING = {CONTROL_NOTIFY_02, CONTROL_NOTIFY_05, CONTROL_NOTIFY_0B};
 const uint32_t NOTIFY_RAISED[] = {CONTROL_NOTIFY_08, CONTROL_NOTIFY_09, CONTROL_NOTIFY_0A, CONTROL_NOTIFY_13, CONTROL_NOTIFY_CHANGED};
 uint32_t RandomNotification() { return P(0.05) ? 0 : P(0.03) ? CONTROL_NOTIFY_ANY : Pick(NOTIFICATIONS); }
 uintptr_t RandomObject() { return P(0.2) ? 0 : reinterpret_cast<uintptr_t>(g_objects[I(0, 1)]); }
@@ -118,7 +119,7 @@ void RandomTree(const std::vector<int> &kinds = {})
                 m = RandomMessage(false);
             const uint32_t code = m.id & CONTROL_MSG_MASK;
             const bool loud = IsLoud(code);
-            const uint32_t on = loud ? Pick(NOTIFY_RAISING) : RandomNotification();
+            const uint32_t on = loud ? NOTIFY_RAISING[size_t(I(0, int(NOTIFY_RAISING.size()) - 1))] : RandomNotification();
             m.id = (m.id & ~CONTROL_NOTIFY_MASK) | (on & CONTROL_NOTIFY_MASK);
             // (Self routes only with the base's codes and the text's: a self route's message of another kind would need
             // its own state, a texture's message its face group.)

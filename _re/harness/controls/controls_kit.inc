@@ -113,7 +113,7 @@ struct alignas(16) S_Arena {
     int cursorDown;
     int loadResult;
     int numChildren[16];
-    int16_t child[16][32];       // FindChildFrame's answers, by CHILD_NAMES (-1 none)
+    int16_t child[16][40];       // FindChildFrame's answers, by CHILD_NAMES (-1 none)
     alignas(8) uint8_t zone[0x400];   // a multiplayer zone (its team: +0x98 the original's, the part sets the port's)
     S_vector cursorMove;
 };
@@ -124,8 +124,10 @@ const char *const CHILD_NAMES[] = {
     // (8: the check boxes', the toggle buttons', the highlighted check box's, the side indicator's, the mark's)
     "yes_full*", "yes_empty*", "no_full*", "no_empty*", "activeddown*", "normaldown*", "activedup*", "normalup*",
     "allactived", "allnormal", "xallactived", "xallnormal", "yesactived_full*", "noactived_full*", "noactived_empty*", "allied*",
-    "axis*", "text_*", "noactived*", "nonormal*", "yesactived*", "yesnormal*", "emptyactived*", "emptynormal*"};
-const int CHILD_NAME_COUNT = 32;
+    "axis*", "text_*", "noactived*", "nonormal*", "yesactived*", "yesnormal*", "emptyactived*", "emptynormal*",
+    // (32: the selection list's)
+    "select*"};
+const int CHILD_NAME_COUNT = 33;
 int ChildName(const char *name)
 {
     for (int k = 0; k < CHILD_NAME_COUNT; ++k)
@@ -387,6 +389,80 @@ bool __attribute__((thiscall)) OB_RemoveRun(void *b, int index) { BoxRemoveRun(b
 void __attribute__((thiscall)) OB_Clear(void *b) { BoxClear(b); }
 void __attribute__((thiscall)) OB_AttachTo(void *b, void *scene, void *frame) { BoxAttach(b, scene, frame); }
 void __attribute__((thiscall)) OB_Render(void *b) { BoxRender(b); }
+// The box's answers (both sides': a round's).
+struct S_BoxAnswers {
+    bool editRun = true, hoverAt = true, insert = true;
+    int16_t hovered = 0, selection = -1, selectRun = 0, scrollRange = 0;
+    float centreX = 0, centreY = 0;
+    const char *selected = "sel";
+} g_box;
+C_str RunText(int index)
+{
+    char text[32];
+    std::snprintf(text, sizeof text, index % 3 == 0 ? "Run%d" : "run%d", index);
+    return C_str(text);
+}
+bool __attribute__((thiscall)) OB_EditRun(void *b, int run)
+{
+    Log("%s EditRun %d", BoxName(b).c_str(), int16_t(run));   // (16 bits: the original reads a word)
+    return g_box.editRun;
+}
+void __attribute__((thiscall)) OB_TickCaret(void *b, int time) { Log("%s TickCaret %d", BoxName(b).c_str(), time); }
+int16_t __attribute__((thiscall)) OB_SelectHovered(void *b)
+{
+    Log("%s SelectHovered", BoxName(b).c_str());
+    return g_box.hovered;
+}
+int16_t __attribute__((thiscall)) OB_GetSelection(void *b)
+{
+    Log("%s GetSelection", BoxName(b).c_str());
+    return g_box.selection;
+}
+// (SelectRun's and GetLineCentre's line: 16 bits in the original, the word above it the caller's stack.)
+int16_t __attribute__((thiscall)) OB_SelectRun(void *b, int run)
+{
+    Log("%s SelectRun %d", BoxName(b).c_str(), int16_t(run));
+    return g_box.selectRun;
+}
+int16_t __attribute__((thiscall)) OB_GetScrollRange(void *b)
+{
+    Log("%s GetScrollRange", BoxName(b).c_str());
+    return g_box.scrollRange;
+}
+bool __attribute__((thiscall)) OB_HoverAt(void *b, int x, int y)
+{
+    Log("%s HoverAt %d %d", BoxName(b).c_str(), x, y);
+    return g_box.hoverAt;
+}
+bool __attribute__((thiscall)) OB_InsertText(void *b, const C_str &t, int style, int index)
+{
+    Log("%s InsertText %s %d %d", BoxName(b).c_str(), Text(t).c_str(), uint8_t(style), index);
+    return g_box.insert;
+}
+bool __attribute__((thiscall)) OB_SetSelectedText(void *b, const C_str &t)
+{
+    Log("%s SetSelectedText %s", BoxName(b).c_str(), Text(t).c_str());
+    return true;
+}
+// (Returned by value: through a hidden pointer, the original's convention for these.)
+void *__attribute__((thiscall)) OB_GetSelectedText(void *b, void *out)
+{
+    Log("%s GetSelectedText", BoxName(b).c_str());
+    new (out) C_str(g_box.selected);
+    return out;
+}
+void *__attribute__((thiscall)) OB_GetRunText(void *b, void *out, int index)
+{
+    Log("%s GetRunText %d", BoxName(b).c_str(), index);
+    new (out) C_str(RunText(index));
+    return out;
+}
+void *__attribute__((thiscall)) OB_GetLineCentre(void *b, void *out, int line)
+{
+    Log("%s GetLineCentre %d", BoxName(b).c_str(), int16_t(line));
+    *static_cast<S_vector4 *>(out) = S_vector4{g_box.centreX, g_box.centreY, 0.0f, 0.0f};
+    return out;
+}
 bool __attribute__((thiscall)) OB_SetHover(void *b, int line)
 {
     Log("%s SetHover %d", BoxName(b).c_str(), line);
@@ -446,6 +522,16 @@ bool __attribute__((thiscall)) OC_IsButtonDown(void *, uint32_t buttons)
     Log("cursor IsButtonDown %u", buttons);
     return g_arena.cursorDown != 0;
 }
+void __attribute__((thiscall)) OC_GetScreen(void *, float *x, float *y, float *buttons)
+{
+    Log("cursor GetScreenPosition %d %d %d", x != nullptr, y != nullptr, buttons != nullptr);
+    if (x)
+        *x = g_arena.cursorPos.x * 400.0f + 400.0f;
+    if (y)
+        *y = g_arena.cursorPos.y * 300.0f + 300.0f;
+    if (buttons)
+        *buttons = float(g_arena.cursorDown);
+}
 // (Both return their out pointer, as the original's do: its callers read it through EAX.)
 S_vector *__attribute__((thiscall)) OC_GetMove(void *, S_vector *move)
 {
@@ -489,7 +575,9 @@ uintptr_t ToOrigFn(uintptr_t f)
 }
 uint8_t g_objects[2][16];
 
-void *__cdecl O_New(size_t size) { return std::malloc(size ? size : 1); }
+// (Zeroed, as the port's members are: the original's new edit buffer is not cleared, a flaw the port fixes; typing comes
+// only after BeginEdit cleared it.)
+void *__cdecl O_New(size_t size) { return std::calloc(1, size ? size : 1); }
 void __cdecl O_Delete(void *p) { std::free(p); }
 
 // ---- messages ----
@@ -530,9 +618,11 @@ void MessageToOrig(const S_ControlMessage &m, uint8_t *o)
 // The codes of the messages the original builds on its stack with value2 / value3 unset (the port's Message and Route
 // helpers: 0): a 0 of the port's there not compared (the controls that take them read neither). value2: the arrows' and
 // the slider's routes (scroll up / down, previous / next, the slider moved), the slider's get, the set position; value3:
-// those, the tickers (their value2 always set) and the slider's set (its value2 the value).
-const uint32_t STACK_VALUE2_CODES[] = {0x1000023, 0x1000024, 0x1000025, 0x200001b, 0x200001c, 0x1000022, 0x200002b};
-const uint32_t STACK_VALUE3_CODES[] = {0x200007a, 0x1000023, 0x1000024, 0x1000025, 0x200001b, 0x200001c, 0x1000021, 0x1000022, 0x200002b};
+// those, the tickers (their value2 always set) and the slider's set (its value2 the value). Part 52: the selection
+// list's set count (both), the edit controls' start and stop editing (value3: value2 the control).
+const uint32_t STACK_VALUE2_CODES[] = {0x1000023, 0x1000024, 0x1000025, 0x200001b, 0x200001c, 0x1000022, 0x200002b, 0x1000020};
+const uint32_t STACK_VALUE3_CODES[] = {0x200007a, 0x1000023, 0x1000024, 0x1000025, 0x200001b, 0x200001c, 0x1000021, 0x1000022, 0x200002b,
+                                       0x1000020, 0x20000bf, 0x20000c0};
 std::string MessageDiffers(const S_ControlMessage &m, const uint8_t *o)
 {
     uint32_t w[6];
@@ -753,6 +843,7 @@ void BoxToOrig(C_TextBox *box, uint8_t *o, uint32_t at)
     OF<int16_t>(ob, 4) = box->m_screenWidth;
     OF<int16_t>(ob, 6) = box->m_screenHeight;
     OF<void *>(ob, 0x28) = box->m_fonts;
+    OF<int>(ob, 0x78) = box->m_scroll;
     OF<bool>(ob, OB_DIMMED) = box->m_dimmed;
     OF<uint8_t>(ob, OB_MARGIN) = box->m_margin;
     OF<uint32_t>(ob, OB_COLOUR) = box->m_colour;
@@ -790,7 +881,7 @@ std::string BoxDiffers(C_TextBox *box, const uint8_t *o, uint32_t at)
     const size_t runs = size_t(OF<uint8_t *>(ob, OB_RUNS + 4) - OF<uint8_t *>(ob, OB_RUNS)) / ORIG_RUN;
     if (OF<bool>(ob, OB_DIMMED) != box->m_dimmed || OF<uint8_t>(ob, OB_MARGIN) != box->m_margin || OF<uint32_t>(ob, OB_COLOUR) != box->m_colour ||
         runs != box->m_runs.size() || OF<int16_t>(ob, 4) != box->m_screenWidth || OF<int16_t>(ob, 6) != box->m_screenHeight ||
-        OF<void *>(ob, 0x28) != box->m_fonts) {
+        OF<void *>(ob, 0x28) != box->m_fonts || OF<int>(ob, 0x78) != box->m_scroll) {
         std::snprintf(text, sizeof text, "box fields %d %d %x %u / %d %d %x %u", OF<bool>(ob, OB_DIMMED), OF<uint8_t>(ob, OB_MARGIN),
                       OF<uint32_t>(ob, OB_COLOUR), unsigned(runs), box->m_dimmed, box->m_margin, box->m_colour, unsigned(box->m_runs.size()));
         return text;
@@ -806,6 +897,7 @@ void RandomBoxFields(C_TextBox *box)
     box->m_screenWidth = int16_t(I(0, 2000));
     box->m_screenHeight = int16_t(I(0, 2000));
     box->m_fonts = reinterpret_cast<C_FontManager *>(g_arena.fonts);
+    box->m_scroll = P(0.5) ? 0 : I(-5, 400);
 }
 void RandomPagedBox(C_PagedTextBox *&box)
 {
@@ -819,13 +911,7 @@ void RandomBox(C_TextBox *&box)
 {
     // (Always one: the controls use it unchecked but in Refresh and SetInactive, whose tests take it away.)
     box = new C_TextBox();
-    box->m_dimmed = P(0.3);
-    box->m_margin = P(0.5) ? 10 : uint8_t(I(0, 255));
-    box->m_colour = P(0.5) ? 0 : U32();
-    box->m_runs.resize(size_t(P(0.3) ? 0 : I(1, 6)));
-    box->m_screenWidth = int16_t(I(0, 2000));
-    box->m_screenHeight = int16_t(I(0, 2000));
-    box->m_fonts = reinterpret_cast<C_FontManager *>(g_arena.fonts);
+    RandomBoxFields(box);
 }
 
 // The base's fields (part 48's) into the original's block, and back compared.
@@ -1087,20 +1173,32 @@ bool C_TextBox::RemoveRun(int index)
 void C_TextBox::Clear() { BoxClear(this); }
 void C_TextBox::AttachTo(I3D_scene *scene, I3D_frame *visual) { BoxAttach(this, scene, visual); }
 // (Not this part's: they fail the test.)
-bool C_TextBox::InsertText(const C_str &, uint8_t, int) { Unexpected("C_TextBox::InsertText"); return false; }
-C_str C_TextBox::GetRunText(int) const { Unexpected("C_TextBox::GetRunText"); return C_str(); }
-bool C_TextBox::EditRun(int) { Unexpected("C_TextBox::EditRun"); return false; }
-void C_TextBox::TickCaret(int) { Unexpected("C_TextBox::TickCaret"); }
-int16_t C_TextBox::GetSelection() { Unexpected("C_TextBox::GetSelection"); return -1; }
-int16_t C_TextBox::SelectRun(int) { Unexpected("C_TextBox::SelectRun"); return -1; }
-C_str C_TextBox::GetSelectedText() const { Unexpected("C_TextBox::GetSelectedText"); return C_str(); }
-bool C_TextBox::SetSelectedText(const C_str &) { Unexpected("C_TextBox::SetSelectedText"); return false; }
+bool C_TextBox::InsertText(const C_str &text, uint8_t style, int index) { return OB_InsertText(this, text, style, index); }
+C_str C_TextBox::GetRunText(int index) const
+{
+    Log("%s GetRunText %d", BoxName(this).c_str(), index);
+    return RunText(index);
+}
+bool C_TextBox::EditRun(int run) { return OB_EditRun(this, run); }
+void C_TextBox::TickCaret(int time) { OB_TickCaret(this, time); }
+int16_t C_TextBox::GetSelection() { return OB_GetSelection(this); }
+int16_t C_TextBox::SelectRun(int run) { return OB_SelectRun(this, run); }   // (logged as 16 bits, as the original's)
+C_str C_TextBox::GetSelectedText() const
+{
+    Log("%s GetSelectedText", BoxName(this).c_str());
+    return C_str(g_box.selected);
+}
+bool C_TextBox::SetSelectedText(const C_str &text) { return OB_SetSelectedText(this, text); }
 bool C_TextBox::SetHover(int line) { return OB_SetHover(this, line); }
-bool C_TextBox::HoverAt(int, int) { Unexpected("C_TextBox::HoverAt"); return false; }
+bool C_TextBox::HoverAt(int x, int y) { return OB_HoverAt(this, x, y); }
 bool C_TextBox::ClearHover() { return OB_ClearHover(this); }
-int16_t C_TextBox::SelectHovered() { Unexpected("C_TextBox::SelectHovered"); return -1; }
-int16_t C_TextBox::GetScrollRange() { Unexpected("C_TextBox::GetScrollRange"); return 0; }
-S_vector4 C_TextBox::GetLineCentre(int) { Unexpected("C_TextBox::GetLineCentre"); return S_vector4(); }
+int16_t C_TextBox::SelectHovered() { return OB_SelectHovered(this); }
+int16_t C_TextBox::GetScrollRange() { return OB_GetScrollRange(this); }
+S_vector4 C_TextBox::GetLineCentre(int line)
+{
+    Log("%s GetLineCentre %d", BoxName(this).c_str(), int16_t(line));
+    return S_vector4{g_box.centreX, g_box.centreY, 0.0f, 0.0f};
+}
 // (The base's destructor logs the delete.)
 C_PagedTextBox::~C_PagedTextBox() { m_pages.clear(); }
 void C_PagedTextBox::Render() { BoxRender(this); }
@@ -1117,9 +1215,13 @@ void C_Cursor::GetPosition(S_vector *position) const { OC_GetPosition(const_cast
 int C_Cursor::GetStillTime() const { return *reinterpret_cast<const int *>(reinterpret_cast<const uint8_t *>(this) + 0x40); }
 void C_Cursor::SetDelay(int) { Unexpected("C_Cursor::SetDelay"); }
 void C_Cursor::GetMove(S_vector *move) const { OC_GetMove(const_cast<C_Cursor *>(this), move); }
-void C_Cursor::GetScreenPosition(float *, float *, float *) const { Unexpected("C_Cursor::GetScreenPosition"); }
+void C_Cursor::GetScreenPosition(float *x, float *y, float *buttons) const { OC_GetScreen(const_cast<C_Cursor *>(this), x, y, buttons); }
 
-int EncodeUtf8(char *, const uint32_t *, int) { Unexpected("EncodeUtf8"); return 0; }
+// (The original's own on both sides: text_box.cpp's is a later part's.)
+int EncodeUtf8(char *out, const uint32_t *codePoint, int maxBytes)
+{
+    return OriginalAt<int(__attribute__((fastcall)) *)(char *, const uint32_t *, int)>(0x0064d910)(out, codePoint, maxBytes);
+}
 bool IsLegalUtf8Range(const uint8_t *, const uint8_t *) { Unexpected("IsLegalUtf8Range"); return false; }
 bool HasUtf8Sequences(const char *) { Unexpected("HasUtf8Sequences"); return false; }
 C_ItemDef *GetItemDef(int) { Unexpected("GetItemDef"); return nullptr; }
@@ -1211,6 +1313,19 @@ void SetUpKit()
         {0x0064bb90, reinterpret_cast<const void *>(OPB_LastPageBreak)},
         {0x006e5380, reinterpret_cast<const void *>(OG_Get)},
         {0x00405100, reinterpret_cast<const void *>(O_Fstr)},
+        {0x00643c20, reinterpret_cast<const void *>(OB_EditRun)},
+        {0x00644280, reinterpret_cast<const void *>(OB_TickCaret)},
+        {0x00643f10, reinterpret_cast<const void *>(OB_SelectHovered)},
+        {0x00643fb0, reinterpret_cast<const void *>(OB_GetSelection)},
+        {0x00643f50, reinterpret_cast<const void *>(OB_SelectRun)},
+        {0x00644230, reinterpret_cast<const void *>(OB_GetScrollRange)},
+        {0x006440e0, reinterpret_cast<const void *>(OB_HoverAt)},
+        {0x00644b20, reinterpret_cast<const void *>(OB_InsertText)},
+        {0x00644320, reinterpret_cast<const void *>(OB_SetSelectedText)},
+        {0x006443a0, reinterpret_cast<const void *>(OB_GetSelectedText)},
+        {0x00643dd0, reinterpret_cast<const void *>(OB_GetRunText)},
+        {0x00643ca0, reinterpret_cast<const void *>(OB_GetLineCentre)},
+        {0x0066a480, reinterpret_cast<const void *>(OC_GetScreen)},
     };
     for (const auto &r : redirects)
         RedirectOriginal(r.first, r.second);
