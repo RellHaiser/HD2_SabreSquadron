@@ -3763,3 +3763,45 @@ particles and the surface marks. Files are served from memory.
   game's sums x, y, z), which cost a long detour hunt; an InsertDetours early return I added from a misread of the asm
   (its success path jumps past the decrement), taken out again when the long runs showed it; heredocs collapsing "\n"
   again.
+
+## Human part 47 (the controls, `input_controls.cpp`, 2026-11-18)
+
+- **The build:** `controls/build_diff.bat` (`controls_diff.cpp`, a new harness beside part 11c's expected-value test in
+  script_module): input_controls.cpp linked, the original executable mapped (collision/original_exe.cpp). The port's
+  C_Controls and the original's object (a raw block: MSVC6 vectors of 16 bytes) get the same random state before each
+  call (the original's vectors rebuilt in fresh buffers, now and then with spare room; its operator new / delete the
+  test's malloc / free) and are compared field by field after it, with the calls each side made on the fakes. The
+  graphics interface is one fake for both sides (stdcall slots); the joysticks one set per side (the original's vtable
+  the port's a slot down: g++ puts two destructors first). The render callback: per-side fake games (the original's
+  GetGame, GetGEffects, GetIGraph, the interface's Render / RenderOverlay, the quick messages, ApplyFade, the debug
+  statistics and drawing redirected to loggers; the interface's IsActive and the script module's two cutscene bytes the
+  original's own). HD2_CONTROLS_ROUNDS (default 20,000 per kind), HD2_CONTROLS_QUICK (4,000), HD2_CONTROLS_CASE (one
+  kind), HD2_CONTROLS_DUMP (the bindings or axes that differ).
+- **The tests:** Update, PollPress (the filters, the keyboard's modifiers and typed keys, the mouse's buttons and moves,
+  the joysticks' buttons, hats and axes in every axis mode), Bind, SetBinding (the keys' 64 slots full, none, out of
+  range), ClearAction and ClearKey (own arrays and the caller's), GetValues, GetValue, SetMouseScale, SetInvertMouse (a
+  byte store in the original), Attach and BindControls, InitControls, Shutdown, the constructor and destructor,
+  WideToAnsi (non-ASCII text, short buffers, nulls; the last error too) and GameRenderCallback (each phase, the in-game
+  menu's state, cutscenes, the fade's states and end delay); then a run of mixed calls on one object. States: bindings
+  made through SetBinding (the watched keys and counts agree), then now and then disturbed (keys, counts, a joystick
+  binding without its joystick); hat angles and axes at the thresholds and a step either side, NaN now and then.
+- **Results:** 7,351,028 checks, 0 failures, 18 s (100,000 rounds per kind also clean); lines 338 of 338.
+- **Port fixes:** HatDirections in the original's compare forms (a NaN angle is down: the port said up-left);
+  PollPress's axis thresholds are the floats 0.3f, 0.5f and 0.7f (the original's doubles hold the floats' values: an
+  axis at exactly 0.3f did not count as moved there, but did in the port) and its direction tests "not above" (a NaN
+  axis is negative). Neither matters with a real joystick (IJoy's angles come from hundredths of degrees, never NaN;
+  an axis exactly at 0.3f is rare) but both are now the original's.
+- **Not covered:** nothing in this file. Not tested: hats 4..15 in a binding's key (the original and the port read past
+  the four hats alike: no game binding has one).
+- **Mutations:** 350 mutants (320 T, 30 R); 21 not building; 311 of the 329 building killed (95 %), 18 survived, all
+  equivalent: the dedicated server's branches (not compiled here), the unused global, ties and unreachable variants
+  (see mutate_controls.py). A second pass added Attach over another graph and the watched keys' 63 slots full.
+- **Harness lessons (my mistakes):** the original-side joysticks' vtable left with a null destructor slot crashed the
+  run at exit (the static objects' destructors); a sed edit on a script with backslashes and the session path (its
+  "46" replaced) again.
+- **Shared harness fix (found by this part's suite run):** human.sniper failed in this checkout since part 46 (1 saved
+  game of 894 differing) but passed in a fresh worktree of the same commit, so part 46's "all suites pass" was wrong.
+  The AI parts' copy into the original (aictl_test.inc AiToOrig) maps every word that equals a port pointer; the move
+  order's checkpoint word (+0x20: 16 bits and stale padding) once made such a value, by the heap's addresses (hence the
+  path), and was handed over as the original's pointer. That word is now copied and compared raw; sniper_test.inc
+  prints where the saved games differ.

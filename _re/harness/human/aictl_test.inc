@@ -466,6 +466,9 @@ void AiToOrig(S_TestAi *pa, uint8_t *oa)
     CopyMapped(reinterpret_cast<const uint8_t *>(pa->m_facing), part(0x124), 0x60);
     CopyMapped(reinterpret_cast<const uint8_t *>(pa->m_fireOrder), part(0x128), 0x50);
     CopyMapped(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60);
+    // (The move's checkpoint +0x20, 16 bits and stale padding: raw. Mapped, a padding that happened to make a port
+    // pointer's value became the original's pointer, by the heap's addresses: part 47.)
+    std::memcpy(part(0x12C) + 0x20, reinterpret_cast<const uint8_t *>(pa->m_move) + 0x20, 4);
     std::memcpy(part(0x134), pa->m_alert, 8);
     DriverToOrigAi(*pa->m_driver, part(0x130));
 }
@@ -609,8 +612,10 @@ std::string AiDiffers(S_TestAi *pa, const uint8_t *oa)
         return "fireOrder+" + std::to_string(at) + words;
     }
     // (g_fireDirW false: the move's pos.w left out too, the squad's grenade flight leaves the original's a stack word.)
-    if ((at = g_fireDirW ? FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x5C})
-                         : FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x1C, 0x5C})) >= 0) {
+    // (The checkpoint's word compared raw, as copied.)
+    if ((at = std::memcmp(reinterpret_cast<const uint8_t *>(pa->m_move) + 0x20, part(0x12C) + 0x20, 4) != 0 ? 0x20
+              : g_fireDirW ? FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x20, 0x5C})
+                           : FirstDiff(reinterpret_cast<const uint8_t *>(pa->m_move), part(0x12C), 0x60, {0x1C, 0x20, 0x5C})) >= 0) {
         uint32_t a = 0, b = 0;
         std::memcpy(&a, reinterpret_cast<const uint8_t *>(pa->m_move) + at, 4);
         std::memcpy(&b, part(0x12C) + at, 4);

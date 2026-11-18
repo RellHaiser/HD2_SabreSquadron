@@ -368,8 +368,16 @@ void TestSniperA()
             const bool same = AiFileBytes(portFile) == AiFileBytes(origFile);
             CHECK(same);
             static int shown;
-            if (!same && shown++ < 3)
-                std::printf("  SaveGame: the files differ\n");
+            if (!same && shown++ < 3) {
+                const std::vector<uint8_t> pb = AiFileBytes(portFile), ob = AiFileBytes(origFile);
+                size_t at = 0;
+                while (at < pb.size() && at < ob.size() && pb[at] == ob[at])
+                    ++at;
+                std::printf("  SaveGame: the files differ (%u / %u bytes) at %u:", unsigned(pb.size()), unsigned(ob.size()), unsigned(at));
+                for (size_t k = at & ~size_t(3); k < at + 12 && k < pb.size() && k < ob.size(); ++k)
+                    std::printf(" %02x/%02x", pb[k], ob[k]);
+                std::printf(" (interaction %d)\n", s->m_interaction);
+            }
             RandomSniper(false);
             // (Every saved actor known: a task naming an unknown one keeps its pool object's, which differ per side.)
             g_daGoneId = -1000;

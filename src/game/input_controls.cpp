@@ -53,18 +53,19 @@ int MouseButtonIndex(int key)
     }
 }
 
-// A hat's angle (radians) as direction bits: 1 up, 2 right, 4 down, 8 left, with the corners between.
+// A hat's angle (radians) as direction bits: 1 up, 2 right, 4 down, 8 left, with the corners between. (The tests in the
+// original's forms: a NaN angle is down.)
 uint8_t HatDirections(float angle)
 {
-    if (angle <= 3.16f) {
-        if (angle >= 3.12f)
+    if (!(angle > 3.16f)) {
+        if (!(angle < 3.12f))
             return 4;
-        if (angle >= 1.5f)
-            return angle <= 1.6f ? 2 : 6;
-        return angle <= 0.1f ? 1 : 3;
+        if (!(angle < 1.5f))
+            return !(angle > 1.6f) ? 2 : 6;
+        return !(angle > 0.1f) ? 1 : 3;
     }
-    if (angle <= 4.72f)
-        return angle >= 4.69f ? 8 : 0xC;
+    if (!(angle > 4.72f))
+        return !(angle < 4.69f) ? 8 : 0xC;
     return 9;
 }
 
@@ -505,15 +506,17 @@ const C_Controls::S_Press *C_Controls::PollPress(int filter, bool reread)
                 const uint32_t mode = joy.joy->GetAxisMode(axis);
                 bool moved;
                 bool negative;
+                // (The direction's tests in the original's form: a NaN axis is negative. Its thresholds are floats: 0.3f
+                // and 0.7f, stored as doubles.)
                 if (mode & 8) {
                     moved = !(filter & 0x80) && value != rest;
-                    negative = value <= 0.0f;
+                    negative = !(value > 0.0f);
                 } else if (mode & 1) {
-                    moved = std::fabs(value) > ((mode & 4) ? 0.3 : 0.5);
-                    negative = value <= 0.0f;
+                    moved = std::fabs(value) > ((mode & 4) ? 0.3f : 0.5f);
+                    negative = !(value > 0.0f);
                 } else {
-                    moved = std::fabs(value - rest) > ((mode & 4) ? 0.5 : 0.7);
-                    negative = value <= rest;
+                    moved = std::fabs(value - rest) > ((mode & 4) ? 0.5f : 0.7f);
+                    negative = !(value > rest);
                 }
                 if (moved)
                     return result(JOY_DEVICE, axis, negative ? AXIS_DIRECTION_MINUS : AXIS_DIRECTION_PLUS, index);
