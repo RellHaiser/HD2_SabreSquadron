@@ -3838,3 +3838,41 @@ particles and the surface marks. Files are served from memory.
   stale executable for several rounds of tracing; a generator branch gave notify routes a callback's values, so a self
   route notified itself (a stack overflow, no crash report: the first-chance handler found it); the original's text
   AddDescMessage called with a reference to its C_str.
+
+## Human part 49 (the small controls, `controls.cpp` lines 135-765, 2026-11-18)
+
+- **The build:** `controls/build_small.bat` (`small_diff.cpp` with the kit `controls_kit.inc`, for the controls parts to
+  come): controls.cpp, control.cpp and c_str.cpp linked, the original executable mapped. What controls.cpp reaches outside
+  the controls is faked on both sides with one set of loggers:
+  - the engine's objects (frames, visuals, the mesh, its level, face groups, materials, textures, the graphics
+    interface, its image, the font manager): fakes in one arena both sides use (stdcall slots, the engine's field
+    layout), reset before each side's call and compared byte for byte after it (the frames' places, flags and data);
+  - the text boxes: the port's C_TextBox defined in the kit, the original's methods redirected to the same loggers (its
+    vtable 0x00810458's slots too: the original's text control makes its box inline, the screen's size and the font
+    manager asked there, as the kit's port constructor does); the fields the controls set inline compared at the
+    original's offsets (the runs' count, dimmed, margin, colour, the screen's size, the font manager);
+  - the cursor: one block (the still time at +0x40, read inline by the original), Acquire, Release, IsButtonDown and
+    GetPosition logged;
+  - everything else controls.cpp names (the paged boxes, key bindings, texts, the network game ...): stubs that fail the
+    test when reached (later parts fake what they use); its globals raw storage (controls_data.cpp).
+  The controls: random trees of the base, text controls, titles, labels, pictures, groups, frame switches, text buttons,
+  tooltips and buttons (the port's wrapped in C_Logged<T>, the original's with a copy of the class's vtable: Refresh and
+  HandleMessageCopy logged), compared field by field (part 48's base, each class's own at the original's offsets) with the
+  message queue after each call. HD2_SMALL_ROUNDS (default 20,000 per kind), HD2_SMALL_QUICK (4,000), HD2_SMALL_CASE,
+  HD2_SMALL_FIRST_CHANCE.
+- **The tests:** every slot without a message (the input slots, OnWheel, Tick, Unknown20, Refresh, SetInactive, Show,
+  Hide, IsChild, TakesInput, FindChild), HandleMessage and HandleMessageCopy with the base's and the text, picture and
+  frame switch codes (the get messages' values back), Create (with and without a description; the button's three frames,
+  the text button's two, the picture's face group, the tooltip's ticker) and the destructor (a subtree: the boxes deleted,
+  the cursors released), ticks on trees of tooltips, buttons and groups (the still time at its thresholds).
+- **Results:** 5,571,936 checks, 0 failures, 3 s; lines 135-765 all run.
+- **Port fixes:** none. The original's tooltip announces itself with a message whose value3 is a stack word (the port's
+  0, its comment's fix): not compared (the screen reads value2).
+- **Mutations:** 192 mutants (79 T, 113 R); 6 not building; 178 of the 186 building killed (96 %), 8 survived: the
+  dedicated server's branches, the frame data set twice, and three constructors' m_takesInput defaults (the original's
+  constructors are inlined in its factory: that part's). A second pass gave a third of the controls the catch-all
+  callback (Notify was not observable otherwise), logged Tick and added the ticks' case.
+- **Harness lessons (my mistakes):** the original's text control makes its text box inline (not through the box's
+  constructor I had redirected), so its first run went into the real font manager and the real box's vtable; text
+  controls without a box and face groups without a material crash both sides (the game never has them); the picture's
+  SET_TEXTURE (it shows or hides) generated as a quiet route message, a self route that showed itself for ever.
