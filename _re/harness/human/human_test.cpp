@@ -853,6 +853,9 @@ namespace {
 #ifdef HUMAN_ENEMY
 #include "enemy_test.inc"
 #endif
+#ifdef HUMAN_AIMOVE
+#include "aimove_test.inc"
+#endif
 #ifdef HUMAN_COMMANDER
 #include "commander_decls.inc"
 #endif
@@ -973,6 +976,8 @@ int main(int argc, char **argv)
     TestSenses();
 #elif defined(HUMAN_SNIPER)
     TestSniper();
+#elif defined(HUMAN_AIMOVE)
+    TestAiMove();
 #elif defined(HUMAN_ENEMY)
     TestEnemy();
 #elif defined(HUMAN_COMMANDER)

@@ -418,7 +418,7 @@ void TestSensesA()
 // hidden return pointer, 0xB4, 0xBC). The camera module's view distance: the port's member, the original's slot 0x58
 // of self_test's fake module. A MeleeTracker: its frame and body frame (+0x544 in both).
 alignas(16) uint8_t g_portThird[sizeof(C_Human) + 0x100], g_origThird[0x1000];
-alignas(16) uint8_t g_asCarPort[sizeof(C_Car) + 0x100], g_asCarOrig[0x800];
+alignas(16) uint8_t g_asCarPort[sizeof(C_Car) + 0x100], g_asCarOrig[0xA00];   // (part 46: the car's speed +0x958)
 size_t g_asCarFlagAt = 0;                               // the port's C_Car::GetUnknown5E0 field (private: found)
 alignas(16) uint8_t g_asMeleePort[sizeof(C_MeleeTracker) + 0x100], g_asMeleeOrig[0x800];
 alignas(16) uint8_t g_asSeatComponent[0x20];

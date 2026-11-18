@@ -30,11 +30,15 @@ int g_netPlayerCount = 0;
 #ifndef HUMAN_AICOMBAT   // (the combat build links game/ai_combat.cpp's)
 bool C_AIController::AdjustAim(S_vector *) { Log(this, "AI.AdjustAim"); return false; }
 #endif
+#ifndef HUMAN_AIMOVE   // (part 46 links game/ai_movement.cpp's)
 bool C_AIController::AdjustToPathHeight(S_vector *) { Log(this, "AI.AdjustToPathHeight"); return false; }
+#endif
 #ifndef HUMAN_AICOMBAT
 int C_AIController::ApplyAlertState() { Log(this, "ApplyAlertState"); return 0; }
 #endif
+#ifndef HUMAN_AIMOVE
 bool C_AIController::Unknown5C(float *, float *) { Log(this, "AI.Unknown5C"); return false; }
+#endif
 #ifndef HUMAN_AISENSES   // (the senses build links game/ai_senses.cpp's)
 void C_AIController::OnBodyHeard(C_Actor *) { Log(this, "AI.OnBodyHeard"); }
 void C_AIController::OnBodySeen(C_Human *) { Log(this, "AI.OnBodySeen"); }
@@ -390,6 +394,33 @@ std::string DriverDiffers(const C_AIDriver &d, const uint8_t *o)
 }
 
 // The port's AI fields into the original's (the base's by part 23's ControllerToOrig).
+// A waypoint against the original's: its fields (not the padding +0x27, +0x2C), the positions' w unless g_waypointW
+// (part 46: the original's corner cutting and new waypoints leave stale words there); the first differing word.
+bool g_waypointW = true;
+std::string WaypointDiffers(const S_AIWaypoint *p, const uint8_t *o)
+{
+    static const struct {
+        size_t at, size;
+    } fields[] = {{0x00, 12}, {0x0C, 4}, {0x10, 12}, {0x1C, 4}, {0x20, 4}, {0x24, 2}, {0x26, 1}, {0x28, 4}};
+    for (const auto &f : fields) {
+        if ((f.at == 0x0C || f.at == 0x1C) && !g_waypointW)
+            continue;
+        const auto *pb = reinterpret_cast<const uint8_t *>(p);
+        if (std::memcmp(pb + f.at, o + f.at, f.size) != 0) {
+            for (size_t at = f.at & ~size_t(3); at < f.at + f.size; at += 4) {
+                uint32_t a, b;
+                std::memcpy(&a, pb + at, 4);
+                std::memcpy(&b, o + at, 4);
+                if (a != b) {
+                    char text[64];
+                    std::snprintf(text, sizeof text, "+%u: port %08x original %08x", unsigned(at), a, b);
+                    return text;
+                }
+            }
+        }
+    }
+    return "";
+}
 void AiToOrig(S_TestAi *pa, uint8_t *oa)
 {
     ControllerToOrig(pa, oa);
@@ -542,15 +573,16 @@ std::string AiDiffers(S_TestAi *pa, const uint8_t *oa)
         return "waypoints: " + std::to_string(pa->m_waypoints.size()) + " / " + std::to_string(count);
     for (size_t k = 0; k < count; ++k) {
         const uint8_t *ow = reinterpret_cast<uint8_t *const *>(static_cast<uintptr_t>(v[1]))[k];
-        if (std::memcmp(ow, pa->m_waypoints[k], sizeof(S_AIWaypoint)) != 0)
-            return "waypoint " + std::to_string(k);
+        const std::string why = WaypointDiffers(pa->m_waypoints[k], ow);
+        if (!why.empty())
+            return "waypoint " + std::to_string(k) + why;
     }
     uint8_t *ow;
     std::memcpy(&ow, oa + 0x104, 4);
     if ((pa->m_waypoint != nullptr) != (ow != nullptr))
         return "waypoint passed (null on one side)";
-    if (ow && std::memcmp(ow, pa->m_waypoint, sizeof(S_AIWaypoint)) != 0)
-        return "waypoint passed";
+    if (ow && !WaypointDiffers(pa->m_waypoint, ow).empty())
+        return "waypoint passed" + WaypointDiffers(pa->m_waypoint, ow);
     // The parts.
     auto part = [&](size_t at) {
         uint8_t *p;

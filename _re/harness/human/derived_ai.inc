@@ -46,6 +46,7 @@ bool g_daAppend = false;                                // (part 43: the network
 }  // namespace
 
 // ---- the port's side of the fakes
+#ifndef HUMAN_AIMOVE   // (part 46 links game/ai_movement.cpp's)
 int C_AIController::UpdateMove(int timeDelta)
 {
     Log(this, "UpdateMove", {double(timeDelta)});
@@ -53,6 +54,7 @@ int C_AIController::UpdateMove(int timeDelta)
         m_move->flags &= ~S_AIMoveOrder::FLAG_ROUTE;
     return g_da.move;
 }
+#endif
 bool C_Human::DrawLongGun()
 {
     Log(this, "DrawLongGun");
@@ -126,6 +128,7 @@ void ReleaseHumanEvent(S_HumanEvent *) {}
 
 namespace {
 // ---- the original's side
+#ifndef HUMAN_AIMOVE
 int AC DA_UpdateMove(void *self, int timeDelta)
 {
     Log(self, "UpdateMove", {double(timeDelta)});
@@ -139,6 +142,7 @@ int AC DA_UpdateMove(void *self, int timeDelta)
     }
     return g_da.move;
 }
+#endif
 int AC DA_DrawLongGun(void *self)
 {
     Log(self, "DrawLongGun");
@@ -334,7 +338,9 @@ uint8_t *DaOrigController(C_AIController *port, size_t size, int type, uint32_t 
 void SetUpDerivedAi()
 {
     const std::pair<uint32_t, const void *> redirects[] = {
+#ifndef HUMAN_AIMOVE
         {0x0057a750, FAKE(DA_UpdateMove)},
+#endif
         {0x005a67c0, FAKE(DA_DrawLongGun)},
         {0x005a6830, FAKE(DA_DrawSidearm)},
         {0x0046f280, FAKE(DA_TestNow)},

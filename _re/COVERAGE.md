@@ -3702,3 +3702,64 @@ particles and the surface marks. Files are served from memory.
   crashed); the member pairs without their humans; groups listing a member twice; the selected soldier as a player on
   a squad controller's 0x260 bytes (the original's +0x548 write landed in the harness's pointer map, which showed first as a
   corrupted task type: I blamed the members' orders before finding it); heredocs collapsing "\n" again (four times).
+
+## Human part 46 (the AI controllers' movement, `ai_movement.cpp`, 2026-11-18)
+
+- **The build:** `human/build_aimove.bat` (`aimove_test.inc`, HUMAN_AIMOVE with part 43's HUMAN_ENEMY build): ai_movement.cpp
+  linked, the stand-ins for its functions left out (derived_ai.inc's UpdateMove, aicombat_test.inc's IsHumanWithin,
+  aictl_test.inc's AdjustToPathHeight and Unknown5C, both sides). The enemy pair is the AI pair, its type set to the
+  squad's, the scripted AI's, the sniper's or the neutral one's now and then (not the squad's for the driving:
+  OnDriveArrived's GetOrderCount casts such a controller to a squad controller). HUMAN_AIMOVE_CASE runs one case alone
+  (2,000 rounds, HUMAN_AIMOVE_ROUNDS more).
+  - Faked on both sides and logged: the walking network's FindNearestType15, FindNearestFree, FindPath and
+    FindEscapePath (16-bit "none" answers, as the network's: the original compares 16 bits); the body's movement
+    stance; IsAISuspended; the team's selected soldier; the script's OnActionDone (its three copies); the door's
+    GetSide; the car's SetInput and the vehicle's setters (part 34's loggers). GetOrderCount is human_control.cpp's,
+    copied.
+  - The state kept to the game's invariants: no two walking points at one place and none exactly at the human; a door
+    point's actor its door, a ladder point's its ladder; the flags of a ladder or a door with their actors, the door's
+    only on a route, a route followed with its waypoints; road paths of two points at least; the others near (not the
+    human itself), none gone; the humans' frames up to date; the ladder's climbers on both sides (+0x160).
+  - Shared harness changes: the waypoints compared field by field (the padding left out; g_waypointW: the positions' w
+    not compared here, stale words in the original); the sight test's answer (derived_ai.inc g_daSight, part 45's) and
+    the scene's sector by place used again; the seat car's original block 0xA00 bytes (its speed +0x958); the vehicle
+    harness's copy of SegmentDistance2 summed as the port's now.
+- **The tests:** 30,000 calls on UpdateMove, NeedsNewRoute, CheckCarsOnRoute, MakeWay, PlanRoute, RouteToPos,
+  RouteToCheckpoint, RouteAwayFromEnemies, SmoothRoute, SmoothRouteTo, FixRouteHeights, StartRoute, FollowStep,
+  UseLadder, PassDoor, ReachedWaypoint, FollowType15Route, FollowRoute (between doors, ladders and climbs),
+  Climb, WalkToWaypoint (the march), UpdateMoveStance, IsOnPlainPoints, the avoidance, EndMove, IsMarchBlocked,
+  UpdateCurrentCheckpoint, IsNearSegment, NearerPoint, AvoidOthersOnRoute (the other human on the way), IsHumanWithin,
+  AdjustToPathHeight, Unknown5C, ClearRoute, SkipPassedWaypoint, SetRoutePoints, IsNearSelectedSoldier, MustSlowDown,
+  HasAvoidance, CanAvoid, IsAwayFromOthers, UpdateDriving (the car standing, not getting nearer, reversing),
+  OnDriveArrived, SteerForward and SteerReverse, FindActorNear and IsPosNearSegment.
+- **Results:** 90,005 checks, 0 failures, 13 s (quick mode 7,500 rounds); every case also clean at 30,000 rounds alone;
+  lines 1,068 of 1,072.
+- **Port fixes:** float sums in the original's orders (from the x87 code; the port summed x, y, z): CutCorner (the
+  projection x, y, z over the length z, y, x; the offset's length z, y, x, its normalization y, z, x),
+  MoveWaypointToward (z, x, y), SegmentDistance2 (the length, the projection and the end distances z, y, x),
+  GetDetourPoints (y, z, x), IsNear (z, x, y), FilterBlockers (z, y, x), UpdateDriving (x, z, y; the segment's
+  remaining distance y, z, x; the distance to its end z, y, x). Compare semantics: AdjustToPathHeight and Unknown5C keep
+  a NaN position along the segment (two waypoints one above the other, as a ladder's) as the original's "not below 0"
+  tests do; UpdateDriving's moving test counts a NaN speed (no time passed, no move) as moving; IsNear includes 0.9 m.
+  EndMove reads the body's climb state as the original (no change in behaviour).
+- **Not covered:** the port's fixes (one-point road paths, an empty route in SmoothRouteTo), OnDriveArrived's squad
+  branch, GetDetourPoints' second root below 0. Not tested: a human standing exactly on a walking point (the corner cut
+  divides by zero on both sides, and the NaN goes on into S_AIFacing::SetFacing, where the port and the original take it
+  differently: worth a look with ai_parts.cpp).
+- **Original flaws, steered clear of (the port fixes them):** IsOnPlainPoints reads the first waypoint of an empty
+  route; FilterBlockers takes gone actors and other kinds for humans; FollowRoute takes a door point's actor for a door
+  unchecked; UpdateDriving reads a one-point road path past its end; SmoothRouteTo reads an empty route;
+  RouteToCheckpoint and NeedsNewRoute ask a missing network. BeginRoute keeps the door's flag with the door cleared
+  (FollowStep would then pass a null door): unreachable in the game (the flag is only set on a route, and Finish clears
+  both).
+- **Mutations:** 1,178 mutants (1,042 T, 136 R); 86 not building; 942 of the 1,092 building killed (86 %), 150 survived:
+  pool releases and stale words not observable, ties at the thresholds, weakly tested combinations (the detours'
+  geometry, the driver's resets), the squad branch and the port's fixes (see mutate_aimove.py).
+- **Harness lessons (my mistakes):** "none" answered as -1 by my network fakes (the original compares 16 bits); several
+  random states the game never has (two points at one place, a point on the human, a ladder flag without a ladder, a
+  door flag without a route, the AI's own human among its nearby actors, a squad type on another controller, the
+  original's "gone" actor id); the ladder's climbers 4 bytes off; the seat car's original block too small; one copy of
+  OnActionDone of three redirected; the port's S_vector::Dot read from the wrong header (ls3df's z, y, x where the
+  game's sums x, y, z), which cost a long detour hunt; an InsertDetours early return I added from a misread of the asm
+  (its success path jumps past the decrement), taken out again when the long runs showed it; heredocs collapsing "\n"
+  again.

@@ -79,11 +79,13 @@ void MoveWaypointToward(S_AIWaypoint &waypoint, const S_vector4 &target)
     S_vector offset = XYZ(target) - XYZ(waypoint.pos);
     if (waypoint.type == CHECKPOINT_TYPE_15)
         offset.y = 0.0f;
-    if (offset.Magnitude() <= waypoint.radius) {
+    // (The squared length summed z, x, y, for both, as the original.)
+    const float square = (offset.z * offset.z + offset.x * offset.x) + offset.y * offset.y;
+    if (MagnitudeBy(square) <= waypoint.radius) {
         waypoint.pos = target;
         return;
     }
-    offset.Normalize();
+    NormalizeBy(offset, square);
     waypoint.pos.x += offset.x * waypoint.radius;
     waypoint.pos.y += offset.y * waypoint.radius;
     waypoint.pos.z += offset.z * waypoint.radius;
@@ -99,14 +101,21 @@ void CutCorner(S_AIWaypoint &waypoint, const S_vector &prev, const S_vector &nex
         return;
     const S_vector point = XYZ(waypoint.pos);
     const S_vector line = next - prev;
-    const float t = (point - prev).Dot(line) / (prev - next).Square();
+    // (The sums as the original adds them: the projection x, y, z; the length z, y, x.)
+    const S_vector rel = point - prev;
+    const S_vector back = prev - next;
+    const float t = ((rel.x * line.x + rel.y * line.y) + rel.z * line.z) / ((back.z * back.z + back.y * back.y) + back.x * back.x);
     const S_vector foot = prev + line * t;
     const S_vector offset = foot - point;
     S_vector moved;
-    if (offset.Magnitude() <= waypoint.radius)
+    // (The offset's length summed z, y, x; its normalization y, z, x.)
+    if (MagnitudeBy((offset.z * offset.z + offset.y * offset.y) + offset.x * offset.x) <= waypoint.radius) {
         moved = foot;
-    else
-        moved = point + offset.Normalized() * (waypoint.radius - margin);
+    } else {
+        S_vector dir = offset;
+        NormalizeBy(dir, (offset.y * offset.y + offset.z * offset.z) + offset.x * offset.x);
+        moved = point + dir * (waypoint.radius - margin);
+    }
     // (The original writes a stale w with it; the port keeps the waypoint's.)
     waypoint.pos.x = moved.x;
     waypoint.pos.y = moved.y;
@@ -117,19 +126,22 @@ void CutCorner(S_AIWaypoint &waypoint, const S_vector &prev, const S_vector &nex
 
 float SegmentDistance2(const S_vector &p, const S_vector &a, const S_vector &b, float *t)   // 0x00581210 (DS 0x00586b50)
 {
+    // (The squares summed z, y, x as the original, but for the last one's.)
+    const auto zyx = [](const S_vector &v) { return (v.z * v.z + v.y * v.y) + v.x * v.x; };
     const S_vector ab = b - a;
     *t = 0.0f;
-    const float length2 = ab.Square();
+    const float length2 = zyx(ab);
     if (length2 < 1e-8f)
-        return (p - a).Square();
-    const float s = (p - a).Dot(ab) / length2;
+        return zyx(p - a);
+    const S_vector rel = p - a;
+    const float s = ((rel.z * ab.z + rel.y * ab.y) + rel.x * ab.x) / length2;   // (the projection z, y, x too)
     if (s <= 0.0f) {
         *t = 0.0f;
-        return (p - a).Square();
+        return zyx(p - a);
     }
     if (s >= 1.0f) {
         *t = 1.0f;
-        return (p - b).Square();
+        return zyx(p - b);
     }
     *t = s;
     return ((p - a) - ab * s).Square();
@@ -137,10 +149,12 @@ float SegmentDistance2(const S_vector &p, const S_vector &a, const S_vector &b, 
 
 namespace {
 
-// A human within 0.9 m of `pos` (0x00581aa0).
+// A human within 0.9 m of `pos`, 0.9 m included (0x00581aa0).
 bool IsNear(const C_Human *human, const S_vector4 &pos)
 {
-    return (human->GetFrame()->GetWorldPos() - XYZ(pos)).Square() < 0.81f;
+    // (Summed z, x, y, as the original.)
+    const S_vector d = human->GetFrame()->GetWorldPos() - XYZ(pos);
+    return (d.z * d.z + d.x * d.x) + d.y * d.y <= 0.81f;
 }
 
 // The first of `blockers` along from..to within 0.8 m of the way (0x005814d0).
@@ -183,9 +197,10 @@ void GetDetourPoints(std::vector<S_vector4> &points, const C_Human *blocker, con
     const S_vector back = XYZ(from) - foot;
     const S_vector side(back.z, 0.0f, -back.x);
     // The circle round the blocker must reach back along the way ...
-    const float c = rel.Square() - 0.81f;
-    float a = back.Square();
-    float b = back.Dot(rel);
+    // (These sums y, z, x, as the original.)
+    const float c = ((rel.y * rel.y + rel.z * rel.z) + rel.x * rel.x) - 0.81f;
+    float a = (back.y * back.y + back.z * back.z) + back.x * back.x;
+    float b = (back.y * rel.y + back.z * rel.z) + back.x * rel.x;
     float disc = b * b - c * a;
     if (!(disc >= 0.0f) || !((std::sqrt(disc) + b) / a >= 0.0f))
         return;
@@ -225,10 +240,12 @@ size_t FilterBlockers(std::vector<C_Human *> &others, const C_Human *self, const
         bool remove = other->IsAISuspended() || other->GetVehicle() || !other->GetController() || other->IsDead();
         if (!remove) {
             const S_vector offset = other->GetFrame()->GetWorldPos() - selfPos;
-            if (offset.Dot(XYZ(target) - selfPos) >= 0.0f) {
-                if (offset.Square() > 4.0f) {
+            // (The sums z, y, x, as the original: the squares and the dot products.)
+            const auto zyx = [](const S_vector &u, const S_vector &v) { return (u.z * v.z + u.y * v.y) + u.x * v.x; };
+            if (zyx(offset, XYZ(target) - selfPos) >= 0.0f) {
+                if (zyx(offset, offset) > 4.0f) {
                     const S_vector &walk = XYZ(other->GetController()->GetLookAt());
-                    remove = walk.Square() >= 1e-16f && offset.Dot(walk) > 0.0f;
+                    remove = zyx(walk, walk) >= 1e-16f && zyx(offset, walk) > 0.0f;
                 }
             } else {
                 remove = true;                          // behind
@@ -241,6 +258,10 @@ size_t FilterBlockers(std::vector<C_Human *> &others, const C_Human *self, const
     }
     return others.size();
 }
+
+// The driving's sums as the original adds them: x, z, y for most dot products and squares.
+float DotXZY(const S_vector &a, const S_vector &b) { return (a.x * b.x + a.z * b.z) + a.y * b.y; }
+float SquareXZY(const S_vector &v) { return (v.x * v.x + v.z * v.z) + v.y * v.y; }
 
 }  // namespace
 
@@ -315,9 +336,10 @@ int C_AIController::UpdateDriving(int timeDelta)
     if (!m_driver->m_moving) {
         if (speed2 > 0.0025f)
             m_driver->m_moving = true;
-    } else if (speed2 >= 0.0025f) {
+    } else if (!(speed2 < 0.0025f)) {   // (a NaN, no time passed and no move, counts as moving: as the original)
         // Getting nearer the segment's end; 5 s without, and it goes for the next segment.
-        const float distance2 = (XYZ(path[m_driver->m_pathIndex + 1].pos) - XYZ(vehiclePos)).Square();
+        const S_vector toEnd = XYZ(path[m_driver->m_pathIndex + 1].pos) - XYZ(vehiclePos);
+        const float distance2 = (toEnd.z * toEnd.z + toEnd.y * toEnd.y) + toEnd.x * toEnd.x;   // (z, y, x)
         if (distance2 <= m_driver->m_nearestDist2) {
             m_driver->m_nearestDist2 = distance2;
             m_driver->m_noProgressTime = 0;
@@ -355,18 +377,20 @@ int C_AIController::UpdateDriving(int timeDelta)
             const S_vector &p1 = XYZ(path[i + 1].pos);
             const S_vector offset = ahead - p0;
             const S_vector segment = p1 - p0;
-            float t = segment.Dot(offset);
+            float t = DotXZY(segment, offset);
             float distance2;
             if (std::signbit(t)) {
-                distance2 = offset.Square();
+                distance2 = SquareXZY(offset);
             } else {
-                t /= segment.Square();
-                if (t <= 1.0f)
-                    distance2 = (offset - segment * t).Square();
-                else if (i == static_cast<uint32_t>(count - 2))
-                    distance2 = (p1 - ahead).Square();
-                else
+                t /= SquareXZY(segment);
+                if (t <= 1.0f) {
+                    const S_vector rest = offset - segment * t;
+                    distance2 = (rest.y * rest.y + rest.z * rest.z) + rest.x * rest.x;   // (y, z, x)
+                } else if (i == static_cast<uint32_t>(count - 2)) {
+                    distance2 = SquareXZY(p1 - ahead);
+                } else {
                     continue;
+                }
             }
             if (distance2 < nearest) {
                 nearest = distance2;
@@ -387,11 +411,11 @@ int C_AIController::UpdateDriving(int timeDelta)
         const S_vector c3 = diff + diff + t1 + t0;
         const S_vector c2 = t0 * -2.0f - t1 - diff * 3.0f;
         const S_vector segment = p1 - p0;
-        float u = segment.Dot(ahead - p0);
+        float u = DotXZY(segment, ahead - p0);
         if (std::signbit(u))
             u = 0.1f;
         else
-            u /= segment.Square();
+            u /= SquareXZY(segment);
         u *= 1.3f;
         if (u > 1.0f)
             u = 1.0f;
@@ -418,7 +442,7 @@ int C_AIController::UpdateDriving(int timeDelta)
         // At the destination: within 2 m of it or past it.
         if (b.last) {
             const S_vector past = ahead - p1;
-            if (past.Square() < 4.0f || !std::signbit(past.Dot(segment)))
+            if (SquareXZY(past) < 4.0f || !std::signbit(DotXZY(past, segment)))
                 return OnDriveArrived(car);
         }
     } else {
@@ -431,7 +455,7 @@ int C_AIController::UpdateDriving(int timeDelta)
         else
             SteerReverse(car, ahead, -carDir, XYZ(b.pos), XYZ(b.dir), true, XYZ(b.pos));
         const S_vector past = ahead - XYZ(b.pos);
-        if (!std::signbit(past.Dot(XYZ(b.pos) - XYZ(a.pos))))
+        if (!std::signbit(DotXZY(past, XYZ(b.pos) - XYZ(a.pos))))
             m_driver->m_reversing = false;
         if (m_driver->m_pathIndex != static_cast<uint16_t>(i)) {
             m_driver->m_nearestDist2 = 1e8f;
@@ -1583,7 +1607,8 @@ void C_AIController::WalkAvoiding()
 
 void C_AIController::EndMove(int result)
 {
-    // (The original reads the body's climb state here and drops it.)
+    // (The original reads the body's climb state here and drops it: read alike.)
+    static_cast<void>(m_human->m_body.GetClimbState());
     ReleaseWaypoints(m_waypoints);
     ReleaseWaypoint(m_waypoint);
     m_waypoint = nullptr;
@@ -1653,7 +1678,8 @@ bool C_AIController::AdjustToPathHeight(S_vector *pos)
         const float sx = b.x - a.x;
         const float sz = b.z - a.z;
         float t = ((pos->x - a.x) * sx + (pos->z - a.z) * sz) / (sx * sx + sz * sz);
-        if (t >= 0.0f) {
+        // (A NaN, the two waypoints one above the other as a ladder's, is not below 0: kept, as in the original.)
+        if (!(t < 0.0f)) {
             if (t > 1.0f)
                 t = 1.0f;
         } else {
@@ -1696,8 +1722,9 @@ bool C_AIController::Unknown5C(float *intensity, float *reference)
             const S_vector segment = XYZ(next->pos) - XYZ(last->pos);
             const S_vector offset = m_human->GetFrame()->GetWorldPos() - XYZ(last->pos);
             const float t = offset.Dot(segment) / segment.Square();
-            if (t >= 0.0f) {
-                if (t <= 1.0f) {
+            // (A NaN, the two points at one place, interpolates, as in the original.)
+            if (!(t < 0.0f)) {
+                if (!(t > 1.0f)) {
                     float lastIntensity;
                     float lastReference;
                     float nextIntensity;
@@ -1752,21 +1779,24 @@ void C_AIController::InsertDetours(std::vector<C_Human *> &blockers)
         const S_vector4 to = m_waypoints[k]->pos;
         const C_Human *blocker = FindBlocker(blockers, from, to);
         if (blocker && !IsNear(blocker, from)) {
+            const bool atWaypoint = IsNear(blocker, to);
             GetDetourPoints(points, blocker, from, to);
+            // From the last point: the blocked ones dropped, the first free one used.
+            int j = static_cast<int>(points.size());
             bool found = false;
-            for (size_t j = points.size(); j-- > 0;) {
-                if (FindBlocker(blockers, from, points[j]))
-                    continue;
-                if (!IsNear(blocker, to))
-                    m_waypoints.insert(m_waypoints.begin() + static_cast<std::ptrdiff_t>(k),
-                                       AllocWaypoint(-1, points[j], 0, 0, 0.0f));
-                else
-                    m_waypoints[k]->pos = points[j];
-                found = true;
-                break;
+            while (j-- > 0) {
+                if (!FindBlocker(blockers, from, points.back())) {
+                    found = true;
+                    break;
+                }
+                points.pop_back();
             }
             if (!found)
                 return;
+            if (!atWaypoint)
+                m_waypoints.insert(m_waypoints.begin() + static_cast<std::ptrdiff_t>(k), AllocWaypoint(-1, points.back(), 0, 0, 0.0f));
+            else
+                m_waypoints[k]->pos = points.back();
         }
         from = m_waypoints[k]->pos;
     }

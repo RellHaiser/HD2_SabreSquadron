@@ -17,11 +17,13 @@ struct S_AiCombatScript {
     int animLength = 600;                               // GetCarryAnimLength
 } g_ac;
 
+#ifndef HUMAN_AIMOVE   // (part 46 links game/ai_movement.cpp's)
 bool C_AIController::IsHumanWithin(const S_vector *pos, float radius)
 {
     Log(this, "IsHumanWithin", {pos->x, pos->y, pos->z, radius});
     return g_ac.within;
 }
+#endif
 int C_Human::CountAmmo(int typeId, bool backpack) const
 {
     Log(this, "CountAmmo", {double(typeId), double(backpack)});
@@ -41,11 +43,13 @@ int S_HumanBody::GetCarryAnimLength(int id, int variant, int carryMode)
 }
 
 namespace {
+#ifndef HUMAN_AIMOVE
 int AC OA_IsHumanWithin(void *self, const S_vector *pos, float radius)
 {
     Log(self, "IsHumanWithin", {pos->x, pos->y, pos->z, radius});
     return g_ac.within;
 }
+#endif
 int AC OA_CountAmmo(void *self, int typeId, int backpack)
 {
     Log(self, "CountAmmo", {double(typeId), double(backpack & 0xFF)});
@@ -67,7 +71,9 @@ int AC OA_CarryAnimLength(void *, int id, int variant, int carryMode)
 void SetUpCombatAi()
 {
     const std::pair<uint32_t, const void *> redirects[] = {
+#ifndef HUMAN_AIMOVE
         {0x0057fe40, FAKE(OA_IsHumanWithin)},
+#endif
         {0x005a6c50, FAKE(OA_CountAmmo)},
         {0x0046f320, FAKE(OA_CanSee)},
         {0x005ac200, FAKE(OA_CarryAnimLength)},

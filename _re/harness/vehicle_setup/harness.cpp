@@ -8353,19 +8353,21 @@ bool C_CheckpointNetwork::GetNeighbours(int from, float radius, std::vector<uint
 }
 float SegmentDistance2(const S_vector &p, const S_vector &a, const S_vector &b, float *t)   // (as game/ai_movement.cpp)
 {
+    const auto zyx = [](const S_vector &v) { return (v.z * v.z + v.y * v.y) + v.x * v.x; };
     const S_vector ab = b - a;
     *t = 0.0f;
-    const float length2 = ab.Square();
+    const float length2 = zyx(ab);
     if (length2 < 1e-8f)
-        return (p - a).Square();
-    const float s = (p - a).Dot(ab) / length2;
+        return zyx(p - a);
+    const S_vector rel = p - a;
+    const float s = ((rel.z * ab.z + rel.y * ab.y) + rel.x * ab.x) / length2;
     if (s <= 0.0f) {
         *t = 0.0f;
-        return (p - a).Square();
+        return zyx(p - a);
     }
     if (s >= 1.0f) {
         *t = 1.0f;
-        return (p - b).Square();
+        return zyx(p - b);
     }
     *t = s;
     return ((p - a) - ab * s).Square();
