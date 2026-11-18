@@ -92,6 +92,16 @@ S_ControlMessage Route(uint32_t target, uint32_t id)
     return message;
 }
 
+// The scroll bar's step, 100 / (count - 1), rounded once as the original's (the count loaded exactly, FILD, then
+// divided in single precision): the float division while the count converts exactly, else in double.
+float ScrollStep(int count)
+{
+    const int divisor = count - 1;
+    if (divisor < (1 << 24))
+        return 100.0f / static_cast<float>(divisor);
+    return static_cast<float>(100.0 / static_cast<double>(divisor));
+}
+
 // A float in a message's value2 (its bits).
 uintptr_t FloatValue(float value)
 {
@@ -1224,7 +1234,7 @@ bool C_ScrollBar::HandleMessage(S_ControlMessage *message)
             SetInactive(false);
         }
         m_count = count;
-        m_step = 100.0f / static_cast<float>(count - 1);
+        m_step = ScrollStep(count);
         if (m_count <= m_position)
             m_position = m_count - 1;
         Update();

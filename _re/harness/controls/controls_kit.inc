@@ -60,6 +60,10 @@ void Log(const char *format, ...)
     std::vsnprintf(text, sizeof text, format, args);
     va_end(args);
     g_log.push_back(text);
+    // (HD2_CONTROLS_ECHO=round: that round's calls printed as they come, for a crash's last.)
+    static const char *echo = std::getenv("HD2_CONTROLS_ECHO");
+    if (echo && std::atoi(echo) == g_round)
+        std::printf("    > %s\n", text);
 }
 std::string Joined(const std::vector<std::string> &log)
 {
@@ -109,9 +113,13 @@ struct alignas(16) S_Arena {
     int cursorDown;
     int loadResult;
     int numChildren[16];
-    int16_t child[16][3];        // FindChildFrame's answers: "normal*", "actived*", "inactived*" (-1 none)
+    int16_t child[16][8];        // FindChildFrame's answers, by CHILD_NAMES (-1 none)
+    S_vector cursorMove;
 };
 S_Arena g_arena, g_arenaStart;
+// The child frames' names the controls ask for (FindChildFrame's answers: S_Arena::child).
+const char *const CHILD_NAMES[] = {"normal*", "actived*", "inactived*", "barrow up*", "barrow down*", "slider*", "sliderbase*", "page*"};
+const int CHILD_NAME_COUNT = 8;
 void *g_frameVt[64], *g_meshVt[8], *g_materialVt[32], *g_textureVt[4], *g_graphVt[128], *g_imageVt[8], *g_groupVt[8];
 I3D_frame *FrameAt(int i) { return reinterpret_cast<I3D_frame *>(g_arena.frames[i]); }
 int FrameIndex(const void *f)
@@ -153,11 +161,17 @@ int __stdcall F_NumChildren(void *f)
 void *__stdcall F_FindChild(void *f, const char *name, uint32_t mask)
 {
     Log("%s FindChildFrame %s %x", ArenaName(f).c_str(), name, mask);
-    static const char *const names[] = {"normal*", "actived*", "inactived*"};
-    for (int k = 0; k < 3; ++k)
-        if (std::strcmp(name, names[k]) == 0 && g_arena.child[FrameIndex(f)][k] >= 0)
+    for (int k = 0; k < CHILD_NAME_COUNT; ++k)
+        if (std::strcmp(name, CHILD_NAMES[k]) == 0 && g_arena.child[FrameIndex(f)][k] >= 0)
             return g_arena.frames[g_arena.child[FrameIndex(f)][k]];
     return nullptr;
+}
+void __stdcall F_UpdateBound(void *f) { Log("%s UpdateBound", ArenaName(f).c_str()); }
+// LS3DF's (the original's import 0x007e5296; thiscall): logged, the matrix taken as made.
+void __attribute__((thiscall)) O_UpdateWMatrix(void *f)
+{
+    Log("%s UpdateWMatrixProc", ArenaName(f).c_str());
+    reinterpret_cast<I3D_frame *>(f)->m_frameFlags |= FRMFLAGS_WMATRIX_VALID;
 }
 void __stdcall F_SetAlpha(void *f, float alpha) { Log("%s SetAlpha %08x", ArenaName(f).c_str(), Bits(alpha)); }
 void __stdcall F_Other(void *f) { Log("%s other slot", ArenaName(f).c_str()); }
@@ -217,8 +231,21 @@ void RandomArena()
         f->m_data = reinterpret_cast<S_FrameData *>(uintptr_t(U32()));
         *reinterpret_cast<void **>(g_arena.frames[i] + 0x1E0) = g_arena.mesh;
         g_arena.numChildren[i] = P(0.85) ? 3 : I(0, 5);
-        for (int k = 0; k < 3; ++k)
+        for (int k = 0; k < CHILD_NAME_COUNT; ++k)
             g_arena.child[i][k] = static_cast<int16_t>(P(0.9) ? I(0, 15) : -1);
+        // The bound (+0x10: min, max; valid now and then), the type, the visual's world bound (+0x170, valid).
+        f->m_frameFlags |= P(0.8) ? FRMFLAGS_BOUND_VALID : 0;
+        const S_vector a(F(-1.5f, 1.5f), F(-1.5f, 1.5f), F(-1, 1)), b(F(-1.5f, 1.5f), F(-1.5f, 1.5f), F(-1, 1));
+        f->m_bound.bbox.min = S_vector(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z));
+        f->m_bound.bbox.max = S_vector(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
+        if (P(0.05))
+            f->m_bound.bbox.max = f->m_bound.bbox.min;
+        f->m_type = P(0.8) ? FRAME_VISUAL : static_cast<E_I3D_FRAME_TYPE>(I(0, 8));
+        *reinterpret_cast<uint32_t *>(g_arena.frames[i] + 0x1D0) = VISFLAGS_WBOUND_VALID;
+        const S_vector c(F(-1, 1), F(-1, 1), F(-1, 1)), d(F(-1, 1), F(-1, 1), F(-1, 1));
+        *reinterpret_cast<S_vector *>(g_arena.frames[i] + 0x170) = S_vector(std::min(c.x, d.x), std::min(c.y, d.y), std::min(c.z, d.z));
+        // (I3D_bbox: min, its w, max at +0x10, its w.)
+        *reinterpret_cast<S_vector *>(g_arena.frames[i] + 0x180) = S_vector(std::max(c.x, d.x), std::max(c.y, d.y), std::max(c.z, d.z));
     }
     *reinterpret_cast<void ***>(g_arena.mesh) = g_meshVt;
     *reinterpret_cast<void **>(g_arena.level + 0x5C) = g_arena.groups[0];
@@ -241,6 +268,7 @@ void RandomArena()
     *reinterpret_cast<int *>(g_arena.cursor + 0x40) = P(0.3) ? Pick({0, 299, 300, 301, 499, 500, 501}) : I(0, 2000);
     g_arena.cursorPos = S_vector(F(-1, 1), F(-1, 1), -1.0f);
     g_arena.cursorDown = P(0.4);
+    g_arena.cursorMove = S_vector(P(0.3) ? 0.0f : F(-0.2f, 0.2f), P(0.3) ? 0.0f : F(-0.2f, 0.2f), -1.0f);
     g_arena.loadResult = P(0.3) ? -1 : 0;
     g_arena.scrnX = int16_t(Pick({640, 800, 1024, 1600}));
     g_arena.scrnY = int16_t(Pick({480, 600, 768, 1200}));
@@ -258,6 +286,7 @@ void SetUpArena()
     g_frameVt[0x3C / 4] = reinterpret_cast<void *>(F_NumChildren);
     g_frameVt[0x48 / 4] = reinterpret_cast<void *>(F_FindChild);
     g_frameVt[0xA8 / 4] = reinterpret_cast<void *>(F_SetAlpha);
+    g_frameVt[0x58 / 4] = reinterpret_cast<void *>(F_UpdateBound);
     for (void *&s : g_meshVt)
         s = reinterpret_cast<void *>(F_Other);
     g_meshVt[1] = reinterpret_cast<void *>(M_GetLevel);
@@ -339,6 +368,16 @@ bool __attribute__((thiscall)) OB_RemoveRun(void *b, int index) { BoxRemoveRun(b
 void __attribute__((thiscall)) OB_Clear(void *b) { BoxClear(b); }
 void __attribute__((thiscall)) OB_AttachTo(void *b, void *scene, void *frame) { BoxAttach(b, scene, frame); }
 void __attribute__((thiscall)) OB_Render(void *b) { BoxRender(b); }
+bool __attribute__((thiscall)) OB_SetHover(void *b, int line)
+{
+    Log("%s SetHover %d", BoxName(b).c_str(), line);
+    return true;
+}
+bool __attribute__((thiscall)) OB_ClearHover(void *b)
+{
+    Log("%s ClearHover", BoxName(b).c_str());
+    return true;
+}
 void __attribute__((thiscall)) OB_UpdateScrollRange(void *b) { Log("%s UpdateScrollRange", BoxName(b).c_str()); }
 bool __attribute__((thiscall)) OB_ScrollTo(void *b, int line) { Log("%s ScrollTo %d", BoxName(b).c_str(), line); return true; }
 void *__attribute__((thiscall)) OB_Delete(void *b, unsigned flags)
@@ -346,6 +385,32 @@ void *__attribute__((thiscall)) OB_Delete(void *b, unsigned flags)
     BoxDelete(b);
     (void)flags;   // (the test's blocks are freed with the round's)
     return b;
+}
+
+// The paged boxes' (0xC8 bytes: the page +0x9C, the pages' vector +0xB8 / +0xBC; vtable 0x008154a4).
+const uint32_t OPB_SIZE = 0xC8, OPB_PAGES = 0xB8;
+int g_pageBreak;   // LastPageBreak's answer
+void __attribute__((thiscall)) OPB_AddArea(void *b, void *scene, void *frame) { Log("%s AddArea %p %s", BoxName(b).c_str(), scene, ArenaName(frame).c_str()); }
+void __attribute__((thiscall)) OPB_SetPage(void *b, int page) { Log("%s SetPage %d", BoxName(b).c_str(), page); }
+void __attribute__((fastcall)) OPB_Relayout(void *b) { Log("%s Relayout", BoxName(b).c_str()); }
+int __attribute__((fastcall)) OPB_LastPageBreak(void *b)
+{
+    Log("%s LastPageBreak", BoxName(b).c_str());
+    return g_pageBreak;
+}
+
+// ---- the game's texts (Get: its C_str returned through a hidden pointer) ----
+C_str TextFor(int id)
+{
+    char text[32];
+    std::snprintf(text, sizeof text, "text#%d", id);
+    return C_str(text);
+}
+void *__attribute__((thiscall)) OG_Get(void *, void *out, int id)
+{
+    Log("texts Get %d", id);
+    new (out) C_str(TextFor(id));
+    return out;
 }
 
 // ---- the cursor (one block) ----
@@ -362,10 +427,18 @@ bool __attribute__((thiscall)) OC_IsButtonDown(void *, uint32_t buttons)
     Log("cursor IsButtonDown %u", buttons);
     return g_arena.cursorDown != 0;
 }
-void __attribute__((thiscall)) OC_GetPosition(void *, S_vector *pos)
+// (Both return their out pointer, as the original's do: its callers read it through EAX.)
+S_vector *__attribute__((thiscall)) OC_GetMove(void *, S_vector *move)
+{
+    Log("cursor GetMove");
+    *move = g_arena.cursorMove;
+    return move;
+}
+S_vector *__attribute__((thiscall)) OC_GetPosition(void *, S_vector *pos)
 {
     Log("cursor GetPosition");
     *pos = g_arena.cursorPos;
+    return pos;
 }
 
 // ---- the callbacks: per side, mapped (part 48's) ----
@@ -435,14 +508,21 @@ void MessageToOrig(const S_ControlMessage &m, uint8_t *o)
     const uint32_t words[6] = {m.target, m.id, m.value, ToOrigWord(m.value2), ToOrigWord(m.value3), OrigText(m.text)};
     std::memcpy(o, words, 0x18);
 }
-// Messages the original builds on its stack with value3 unset (the port's 0): value3 not compared.
-const uint32_t STACK_VALUE3_IDS[] = {0x200007a /* the tooltip's ADD_TICKER */};
+// The codes of the messages the original builds on its stack with value2 / value3 unset (the port's Message and Route
+// helpers: 0): a 0 of the port's there not compared (the controls that take them read neither). value2: the arrows' and
+// the slider's routes (scroll up / down, previous / next, the slider moved), the slider's get, the set position; value3:
+// those, the tickers (their value2 always set) and the slider's set (its value2 the value).
+const uint32_t STACK_VALUE2_CODES[] = {0x1000023, 0x1000024, 0x1000025, 0x200001b, 0x200001c, 0x1000022, 0x200002b};
+const uint32_t STACK_VALUE3_CODES[] = {0x200007a, 0x1000023, 0x1000024, 0x1000025, 0x200001b, 0x200001c, 0x1000021, 0x1000022, 0x200002b};
 std::string MessageDiffers(const S_ControlMessage &m, const uint8_t *o)
 {
     uint32_t w[6];
     std::memcpy(w, o, 0x18);
-    for (uint32_t id : STACK_VALUE3_IDS)
-        if (m.id == id && m.value3 == 0)
+    for (uint32_t code : STACK_VALUE2_CODES)
+        if ((m.id & CONTROL_MSG_MASK) == code && m.value2 == 0)
+            w[3] = 0;
+    for (uint32_t code : STACK_VALUE3_CODES)
+        if ((m.id & CONTROL_MSG_MASK) == code && m.value3 == 0)
             w[4] = 0;
     char text[200];
     if (w[0] != m.target || w[1] != m.id || w[2] != m.value || w[3] != ToOrigWord(m.value2) || w[4] != ToOrigWord(m.value3)) {
@@ -553,10 +633,31 @@ struct S_Kind {
     void (*toOrig)(C_Control *c, uint8_t *o);
     std::string (*differs)(C_Control *c, const uint8_t *o);
     uint32_t boxAt = 0;   // a text control's box (+0x6C), else 0
+    C_TextBox *(*portBox)(C_Control *c) = nullptr;   // its box (null: a C_TextControl's)
+    bool boxRequired = false;   // its box used unchecked everywhere (DropBox leaves it)
 };
 std::vector<const S_Kind *> g_nodeKinds;   // per node
+const S_Kind *g_kinds = nullptr;   // the part's kinds
+int g_kindCount = 0;
+// Nodes adopted during the call (made by it: the original's with its real vtable, not the logged copy).
+std::vector<bool> g_freshNodes;
+bool g_differsFresh;   // (set for the kinds' differs: the node was made by the call)
+const S_Kind *KindByVtable(uint32_t vtable)
+{
+    for (int k = 0; k < g_kindCount; ++k)
+        if (g_kinds[k].vtable == vtable)
+            return &g_kinds[k];
+    return nullptr;
+}
 uint32_t KindBoxAt(size_t node) { return node < g_nodeKinds.size() ? g_nodeKinds[node]->boxAt : 0; }
-C_TextBox *PortBoxOf(size_t node) { return KindBoxAt(node) ? static_cast<C_TextControl *>(g_portNodes[node])->m_box : nullptr; }
+C_TextBox *PortBoxOf(size_t node)
+{
+    if (!KindBoxAt(node))
+        return nullptr;
+    if (g_nodeKinds[node]->portBox)
+        return g_nodeKinds[node]->portBox(g_portNodes[node]);
+    return static_cast<C_TextControl *>(g_portNodes[node])->m_box;
+}
 
 std::string Name(const void *p)
 {
@@ -614,8 +715,15 @@ void BoxToOrig(C_TextBox *box, uint8_t *o, uint32_t at)
         OF<void *>(o, at) = nullptr;
         return;
     }
-    auto *ob = static_cast<uint8_t *>(OrigAlloc(OB_SIZE));
-    OF<uint32_t>(ob, 0) = 0x00810458;   // (the original's own: its slots redirected)
+    auto *paged = dynamic_cast<C_PagedTextBox *>(box);
+    auto *ob = static_cast<uint8_t *>(OrigAlloc(OPB_SIZE));
+    OF<uint32_t>(ob, 0) = paged ? 0x008154a4 : 0x00810458;   // (the original's own: its slots redirected)
+    if (paged) {
+        OF<int>(ob, 0x9C) = paged->m_page;
+        auto *pages = static_cast<uint8_t *>(OrigAlloc(paged->m_pages.size() * 4 + 1));
+        OF<uint8_t *>(ob, OPB_PAGES) = paged->m_pages.empty() && P(0.5) ? nullptr : pages;
+        OF<uint8_t *>(ob, OPB_PAGES + 4) = OF<uint8_t *>(ob, OPB_PAGES) + paged->m_pages.size() * 4;
+    }
     OF<int16_t>(ob, 4) = box->m_screenWidth;
     OF<int16_t>(ob, 6) = box->m_screenHeight;
     OF<void *>(ob, 0x28) = box->m_fonts;
@@ -648,6 +756,11 @@ std::string BoxDiffers(C_TextBox *box, const uint8_t *o, uint32_t at)
     }
     (void)paired;
     char text[120];
+    if (auto *paged = dynamic_cast<C_PagedTextBox *>(box)) {
+        const size_t pages = size_t(OF<uint8_t *>(ob, OPB_PAGES + 4) - OF<uint8_t *>(ob, OPB_PAGES)) / 4;
+        if (OF<uint32_t>(ob, 0) != 0x008154a4 || OF<int>(ob, 0x9C) != paged->m_page || pages != paged->m_pages.size())
+            return "paged box";
+    }
     const size_t runs = size_t(OF<uint8_t *>(ob, OB_RUNS + 4) - OF<uint8_t *>(ob, OB_RUNS)) / ORIG_RUN;
     if (OF<bool>(ob, OB_DIMMED) != box->m_dimmed || OF<uint8_t>(ob, OB_MARGIN) != box->m_margin || OF<uint32_t>(ob, OB_COLOUR) != box->m_colour ||
         runs != box->m_runs.size() || OF<int16_t>(ob, 4) != box->m_screenWidth || OF<int16_t>(ob, 6) != box->m_screenHeight ||
@@ -657,6 +770,24 @@ std::string BoxDiffers(C_TextBox *box, const uint8_t *o, uint32_t at)
         return text;
     }
     return "";
+}
+void RandomBoxFields(C_TextBox *box)
+{
+    box->m_dimmed = P(0.3);
+    box->m_margin = P(0.5) ? 10 : uint8_t(I(0, 255));
+    box->m_colour = P(0.5) ? 0 : U32();
+    box->m_runs.resize(size_t(P(0.3) ? 0 : I(1, 6)));
+    box->m_screenWidth = int16_t(I(0, 2000));
+    box->m_screenHeight = int16_t(I(0, 2000));
+    box->m_fonts = reinterpret_cast<C_FontManager *>(g_arena.fonts);
+}
+void RandomPagedBox(C_PagedTextBox *&box)
+{
+    box = new C_PagedTextBox();
+    RandomBoxFields(box);
+    box->m_page = I(-1, 5);
+    box->m_pages.resize(size_t(I(0, 5)), nullptr);
+    g_pageBreak = I(-1, 4);
 }
 void RandomBox(C_TextBox *&box)
 {
@@ -681,6 +812,7 @@ void ToOrig()
     g_origBlocks.clear();
     g_origNodes.clear();
     g_boxes.clear();
+    g_freshNodes.assign(g_portNodes.size(), false);
     for (size_t i = 0; i < g_portNodes.size(); ++i)
         g_origNodes.push_back(static_cast<uint8_t *>(OrigAlloc(g_nodeKinds[i]->size + 0x40)));
     for (size_t i = 0; i < g_portNodes.size(); ++i) {
@@ -724,7 +856,7 @@ void CompareTrees()
         C_Control &c = *g_portNodes[i];
         const uint8_t *o = g_origNodes[i];
         const std::string n = "c" + std::to_string(i) + " (" + g_nodeKinds[i]->name + ") ";
-        CHECK(OF<uint32_t>(o, 0) == LoggedVt(g_nodeKinds[i]->vtable), "%svtable", n.c_str());
+        CHECK(OF<uint32_t>(o, 0) == (g_freshNodes[i] ? g_nodeKinds[i]->vtable : LoggedVt(g_nodeKinds[i]->vtable)), "%svtable", n.c_str());
         CHECK(OVecBytes(o, O_CHILDREN) == c.m_children.size() * 4, "%schildren", n.c_str());
         if (OVecBytes(o, O_CHILDREN) == c.m_children.size() * 4)
             for (size_t k = 0; k < c.m_children.size(); ++k)
@@ -759,6 +891,7 @@ void CompareTrees()
               "%sflags %d%d%d / %d%d%d", n.c_str(), OF<bool>(o, O_INACTIVE), OF<bool>(o, O_SHOWN), OF<bool>(o, O_TAKES), c.m_inactive,
               c.m_shown, c.m_takesInput);
         CHECK(OF<I3D_scene *>(o, O_SCENE) == c.m_scene, "%sscene", n.c_str());
+        g_differsFresh = g_freshNodes[i];
         const std::string why = g_nodeKinds[i]->differs(&c, o);
         CHECK(why.empty(), "%s%s", n.c_str(), why.c_str());
     }
@@ -803,6 +936,31 @@ void CompareQueues()
         }
 }
 
+// The controls a call made (the scroll bar's arrows and slider ...): new children on both sides, paired by their place,
+// adopted into the trees to be compared (their kind the original's vtable's).
+void AdoptNewNodes()
+{
+    for (size_t i = 0; i < g_portNodes.size(); ++i) {
+        C_Control &c = *g_portNodes[i];
+        uint8_t *o = g_origNodes[i];
+        const size_t on = OVecBytes(o, O_CHILDREN) / 4;
+        for (size_t k = 0; k < c.m_children.size() && k < on; ++k) {
+            C_Control *pc = c.m_children[k];
+            uint8_t *oc = reinterpret_cast<uint8_t **>(OVecData(o, O_CHILDREN))[k];
+            if (std::find(g_portNodes.begin(), g_portNodes.end(), pc) != g_portNodes.end())
+                continue;
+            const S_Kind *kind = KindByVtable(OF<uint32_t>(oc, 0));
+            CHECK(kind, "a new child of c%u: the original's vtable %x unknown", unsigned(i), OF<uint32_t>(oc, 0));
+            if (!kind)
+                continue;
+            g_portNodes.push_back(pc);
+            g_origNodes.push_back(oc);
+            g_nodeKinds.push_back(kind);
+            g_freshNodes.push_back(true);
+        }
+    }
+}
+
 // ---- one call on both sides ----
 std::string ArenaDiffers(const S_Arena &a, const S_Arena &b)
 {
@@ -835,6 +993,7 @@ template <class PortCall, class OrigCall> void Diff(PortCall port, OrigCall orig
     CHECK(g_log == portLog, "calls: %s / %s", Joined(g_log).c_str(), Joined(portLog).c_str());
     const std::string arena = ArenaDiffers(portArena, g_arena);
     CHECK(arena.empty(), "%s", arena.c_str());
+    AdoptNewNodes();
     CompareTrees();
     CompareQueues();
 }
@@ -898,18 +1057,19 @@ int16_t C_TextBox::GetSelection() { Unexpected("C_TextBox::GetSelection"); retur
 int16_t C_TextBox::SelectRun(int) { Unexpected("C_TextBox::SelectRun"); return -1; }
 C_str C_TextBox::GetSelectedText() const { Unexpected("C_TextBox::GetSelectedText"); return C_str(); }
 bool C_TextBox::SetSelectedText(const C_str &) { Unexpected("C_TextBox::SetSelectedText"); return false; }
-bool C_TextBox::SetHover(int) { Unexpected("C_TextBox::SetHover"); return false; }
+bool C_TextBox::SetHover(int line) { return OB_SetHover(this, line); }
 bool C_TextBox::HoverAt(int, int) { Unexpected("C_TextBox::HoverAt"); return false; }
-bool C_TextBox::ClearHover() { Unexpected("C_TextBox::ClearHover"); return false; }
+bool C_TextBox::ClearHover() { return OB_ClearHover(this); }
 int16_t C_TextBox::SelectHovered() { Unexpected("C_TextBox::SelectHovered"); return -1; }
 int16_t C_TextBox::GetScrollRange() { Unexpected("C_TextBox::GetScrollRange"); return 0; }
 S_vector4 C_TextBox::GetLineCentre(int) { Unexpected("C_TextBox::GetLineCentre"); return S_vector4(); }
-C_PagedTextBox::~C_PagedTextBox() { Unexpected("C_PagedTextBox::~C_PagedTextBox"); }
-void C_PagedTextBox::Render() { Unexpected("C_PagedTextBox::Render"); }
-void C_PagedTextBox::AddArea(I3D_scene *, I3D_frame *) { Unexpected("C_PagedTextBox::AddArea"); }
-void C_PagedTextBox::SetPage(int) { Unexpected("C_PagedTextBox::SetPage"); }
-void C_PagedTextBox::Relayout() { Unexpected("C_PagedTextBox::Relayout"); }
-int C_PagedTextBox::LastPageBreak() const { Unexpected("C_PagedTextBox::LastPageBreak"); return -1; }
+// (The base's destructor logs the delete.)
+C_PagedTextBox::~C_PagedTextBox() { m_pages.clear(); }
+void C_PagedTextBox::Render() { BoxRender(this); }
+void C_PagedTextBox::AddArea(I3D_scene *scene, I3D_frame *visual) { OPB_AddArea(this, scene, visual); }
+void C_PagedTextBox::SetPage(int page) { OPB_SetPage(this, page); }
+void C_PagedTextBox::Relayout() { OPB_Relayout(this); }
+int C_PagedTextBox::LastPageBreak() const { return OPB_LastPageBreak(const_cast<C_PagedTextBox *>(this)); }
 
 C_Cursor *C_Cursor::Acquire(I3D_scene *scene) { return static_cast<C_Cursor *>(OC_Acquire(scene)); }
 void C_Cursor::Release() { OC_Release(this); }
@@ -918,7 +1078,7 @@ void C_Cursor::GetPosition(S_vector *position) const { OC_GetPosition(const_cast
 // (The original's reads +0x40 inline: no log.)
 int C_Cursor::GetStillTime() const { return *reinterpret_cast<const int *>(reinterpret_cast<const uint8_t *>(this) + 0x40); }
 void C_Cursor::SetDelay(int) { Unexpected("C_Cursor::SetDelay"); }
-void C_Cursor::GetMove(S_vector *) const { Unexpected("C_Cursor::GetMove"); }
+void C_Cursor::GetMove(S_vector *move) const { OC_GetMove(const_cast<C_Cursor *>(this), move); }
 void C_Cursor::GetScreenPosition(float *, float *, float *) const { Unexpected("C_Cursor::GetScreenPosition"); }
 
 int EncodeUtf8(char *, const uint32_t *, int) { Unexpected("EncodeUtf8"); return 0; }
@@ -928,14 +1088,18 @@ C_ItemDef *GetItemDef(int) { Unexpected("GetItemDef"); return nullptr; }
 int GetGameTypeTextId(int) { Unexpected("GetGameTypeTextId"); return 0; }
 const C_Controls::S_Press *C_Controls::PollPress(int, bool) { Unexpected("C_Controls::PollPress"); return nullptr; }
 void __stdcall I3D_visual::UpdateWBoundProc() { Unexpected("I3D_visual::UpdateWBoundProc"); }
-void I3D_frame::UpdateWMatrixProc() { Unexpected("I3D_frame::UpdateWMatrixProc"); }
+void I3D_frame::UpdateWMatrixProc() { O_UpdateWMatrix(this); }
 void __stdcall S_quat::Make(const S_matrix &) { Unexpected("S_quat::Make"); }
 bool C_KeyBindings::Bind(int, int, int, int) { Unexpected("C_KeyBindings::Bind"); return false; }
 C_str C_KeyBindings::GetBindingName(int) const { Unexpected("C_KeyBindings::GetBindingName"); return C_str(); }
 IImage *C_ItemDef::GetImage() { Unexpected("C_ItemDef::GetImage"); return nullptr; }
 S_NetPlayerState *C_NetGame::LockPlayers() { Unexpected("C_NetGame::LockPlayers"); return nullptr; }
 void C_NetGame::UnlockPlayers() { Unexpected("C_NetGame::UnlockPlayers"); }
-C_str C_GameTexts::Get(int) const { Unexpected("C_GameTexts::Get"); return C_str(); }
+C_str C_GameTexts::Get(int id) const
+{
+    Log("texts Get %d", id);
+    return TextFor(id);
+}
 extern "C" IGraph *GetIGraph() { return reinterpret_cast<IGraph *>(g_arena.graph); }
 extern "C" I3D_driver *I3DGetDriver() { Unexpected("I3DGetDriver"); return nullptr; }
 // The factory (control_factory.cpp is a later part's): faked.
@@ -984,6 +1148,18 @@ void SetUpKit()
         {0x0066aa80, reinterpret_cast<const void *>(OC_Release)},
         {0x0066a3a0, reinterpret_cast<const void *>(OC_IsButtonDown)},
         {0x0066a420, reinterpret_cast<const void *>(OC_GetPosition)},
+        {0x0066a450, reinterpret_cast<const void *>(OC_GetMove)},
+        {0x007e5296, reinterpret_cast<const void *>(O_UpdateWMatrix)},
+        {0x00644090, reinterpret_cast<const void *>(OB_SetHover)},
+        {0x00644120, reinterpret_cast<const void *>(OB_ClearHover)},
+        // The paged box (its vtable 0x008154a4: Render, the deleting destructor) and its methods.
+        {0x0064ae70, reinterpret_cast<const void *>(OB_Render)},
+        {0x006622f0, reinterpret_cast<const void *>(OB_Delete)},
+        {0x0064b200, reinterpret_cast<const void *>(OPB_AddArea)},
+        {0x0064bb30, reinterpret_cast<const void *>(OPB_SetPage)},
+        {0x0064bb80, reinterpret_cast<const void *>(OPB_Relayout)},
+        {0x0064bb90, reinterpret_cast<const void *>(OPB_LastPageBreak)},
+        {0x006e5380, reinterpret_cast<const void *>(OG_Get)},
     };
     for (const auto &r : redirects)
         RedirectOriginal(r.first, r.second);

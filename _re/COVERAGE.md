@@ -3876,3 +3876,48 @@ particles and the surface marks. Files are served from memory.
   constructor I had redirected), so its first run went into the real font manager and the real box's vtable; text
   controls without a box and face groups without a material crash both sides (the game never has them); the picture's
   SET_TEXTURE (it shows or hides) generated as a quiet route message, a self route that showed itself for ever.
+
+## Human part 50 (the paged text, slider, scroll bar and spin controls, `controls.cpp` lines 776-1528, 2026-11-18)
+
+- **The build:** `controls/build_medium.bat` (`medium_diff.cpp` with part 49's kit, whose trees, messages and tests now
+  live in `controls_tree.inc` for every part: the part gives its kinds, its quiet and loud codes, its ticking kinds and
+  hooks for a message's values, a tree's fix-ups, a Create's frames, the messages a node takes and the codes routes never
+  carry). New in the kit: the frames' bounds, type and the visuals' world bounds (the arena's), UpdateBound and LS3DF's
+  UpdateWMatrixProc logged (the original's import 0x007e5296), the cursor's GetMove, the box's hover, the paged box (the
+  original makes it inline as the text box; its vtable 0x008154a4's Render and destructor, AddArea, SetPage, Relayout,
+  LastPageBreak redirected; NumPages and Reattach the original's own), the game's texts' Get (its C_str through a hidden
+  pointer), and the controls a call makes adopted into the trees (the scroll bar's and the spin control's arrows, the
+  scroll bar's slider: paired by their place among the children, their kind by the original's vtable).
+  - The scroll bars have their arrows and (mostly) a slider, the spin controls their arrows and an item: the original
+    without them crashes (the port's fixes check them).
+  - Not compared: the value2 / value3 the original leaves unset in the messages it builds on its stack (the tickers, the
+    arrows' and the slider's routes, the slider's set and get, the set position: the port's 0, by its comment's fix;
+    their readers never look), the repeat time of a button the call made (the original's inlined constructor leaves it
+    unset; read only after OnPress sets it).
+- **The tests:** part 49's cases (every slot, the messages, Create, the destructor, the ticks) on trees of these kinds,
+  the slider's drags and SetLimits (through Create, its frames' bounds), and the scroll bars' own messages sent to them
+  (up and down past the ends, the count, the position, the page step, the slider moved; ticks at the repeat time's
+  end, presses toward a cursor before or just inside the start, square bounds, long lists), the slider's value at its
+  clamps and NaN, and the spin control's own messages (the wraps, the removal's clamp, the choice by index).
+- **Results:** 17,999,364 checks, 0 failures, 8 s (the message, slot, tick and drag cases also clean at 100,000 and
+  200,000 rounds alone); lines 776-1528 all run.
+- **Port fixes:** the scroll bar's step (100 / (count - 1)) is rounded once, as the original's (the count loaded
+  exactly, then divided in single precision): the port converted the count to a float first, a second rounding for
+  counts from 2^24 (never in the game; 1 ulp). Below that the float division is kept (bit for bit the same); above it,
+  double (its own second rounding is possible only at an exact tie of the double quotient: not seen).
+- **Original flaws, steered clear of (the port fixes them):** the spin control without items steps to the item past the
+  end; the scroll bar without arrows (SetInactive) or a slider (GET_SLIDER) crashes; SLIDER_MOVED without a slider
+  crashes both. The random states keep to what the original survives (a route emptying a spin control's items is never
+  generated).
+- **Mutations:** 413 mutants (285 T, 128 R); 9 not building; 379 of the 404 building killed (94 %), 25 survived, all
+  equivalent: clamps at a tie that assign the value they test, unreachable states, Reattach (empty on both sides), an
+  Update after SetInactive(true), [[fallthrough]] (see mutate_controls_medium.py). Further passes per the survivors:
+  the stack words' allowance per field (it had hidden a ticker's value2), the pages control without its box, odd divisors
+  past 2^24, the Slide and Spin cases, the scroll bar's ticks, presses, square bounds and long lists, the slider's base at
+  its limits.
+- **Harness lessons (my mistakes):** the cursor's GetPosition and GetMove return their out pointer (the original's
+  callers read it through EAX: my fakes returned nothing); a scroll bar's step of 0 (never made by SET_COUNT) sent an
+  infinite place to the original's own CRT floor, whose error path needs the CRT the test never starts (a crash in
+  ntdll); the arena's world bound written with its max at +0x0C (I3D_bbox pads its vectors: +0x10, the
+  original's and the port's); a spin control's box taken away for SetInactive, which uses it unchecked on both sides; the heredoc editing
+  scripts again (Write and a script file instead).
