@@ -63,10 +63,14 @@ S_ControlMessage RandomMessage(bool quiet)
 
 void ClearPortTree()
 {
-    for (C_Control *c : g_portNodes) {
-        c->m_children.clear();
-        delete c;
+    // (Each node deleted once: its children and owned control taken away first.)
+    for (size_t i = 0; i < g_portNodes.size(); ++i) {
+        g_portNodes[i]->m_children.clear();
+        if (g_nodeKinds[i]->ownedSlot)
+            *g_nodeKinds[i]->ownedSlot(g_portNodes[i]) = nullptr;
     }
+    for (C_Control *c : g_portNodes)
+        delete c;
     g_portNodes.clear();
     g_nodeKinds.clear();
 }
@@ -317,6 +321,9 @@ void TestDestructor()
         const size_t kids = OVecBytes(n, O_CHILDREN) / 4;
         for (size_t k = 0; k < kids; ++k)
             stack.push_back(reinterpret_cast<uint8_t **>(OVecData(n, O_CHILDREN))[k]);
+        const size_t at = size_t(std::find(g_origNodes.begin(), g_origNodes.end(), n) - g_origNodes.begin());
+        if (at < g_origNodes.size() && OrigOwned(at, n))
+            stack.push_back(OrigOwned(at, n));
     }
     for (auto &m : moved) {
         uint8_t **kids = reinterpret_cast<uint8_t **>(OVecData(m.second, O_CHILDREN));
@@ -324,6 +331,9 @@ void TestDestructor()
         for (size_t k = 0; k < n; ++k)
             if (moved.count(kids[k]))
                 kids[k] = moved[kids[k]];
+        const size_t at = size_t(std::find(g_origNodes.begin(), g_origNodes.end(), m.first) - g_origNodes.begin());
+        if (at < g_origNodes.size() && g_nodeKinds[at]->ownedAt && moved.count(OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt)))
+            OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt) = moved[OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt)];
     }
     // (The copies named as their originals in the logs.)
     std::vector<uint8_t *> saved = g_origNodes;
@@ -343,6 +353,9 @@ void TestDestructor()
         gone.push_back(n);
         for (C_Control *k : n->m_children)
             todo.push_back(k);
+        const size_t at = size_t(std::find(g_portNodes.begin(), g_portNodes.end(), n) - g_portNodes.begin());
+        if (at < g_portNodes.size() && PortOwned(at))
+            todo.push_back(PortOwned(at));
     }
     C_Control *root = g_portNodes[i];
     if (root->m_parent) {

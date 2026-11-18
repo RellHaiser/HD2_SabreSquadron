@@ -113,13 +113,26 @@ struct alignas(16) S_Arena {
     int cursorDown;
     int loadResult;
     int numChildren[16];
-    int16_t child[16][8];        // FindChildFrame's answers, by CHILD_NAMES (-1 none)
+    int16_t child[16][32];       // FindChildFrame's answers, by CHILD_NAMES (-1 none)
+    alignas(8) uint8_t zone[0x400];   // a multiplayer zone (its team: +0x98 the original's, the part sets the port's)
     S_vector cursorMove;
 };
 S_Arena g_arena, g_arenaStart;
 // The child frames' names the controls ask for (FindChildFrame's answers: S_Arena::child).
-const char *const CHILD_NAMES[] = {"normal*", "actived*", "inactived*", "barrow up*", "barrow down*", "slider*", "sliderbase*", "page*"};
-const int CHILD_NAME_COUNT = 8;
+const char *const CHILD_NAMES[] = {
+    "normal*", "actived*", "inactived*", "barrow up*", "barrow down*", "slider*", "sliderbase*", "page*",
+    // (8: the check boxes', the toggle buttons', the highlighted check box's, the side indicator's, the mark's)
+    "yes_full*", "yes_empty*", "no_full*", "no_empty*", "activeddown*", "normaldown*", "activedup*", "normalup*",
+    "allactived", "allnormal", "xallactived", "xallnormal", "yesactived_full*", "noactived_full*", "noactived_empty*", "allied*",
+    "axis*", "text_*", "noactived*", "nonormal*", "yesactived*", "yesnormal*", "emptyactived*", "emptynormal*"};
+const int CHILD_NAME_COUNT = 32;
+int ChildName(const char *name)
+{
+    for (int k = 0; k < CHILD_NAME_COUNT; ++k)
+        if (std::strcmp(name, CHILD_NAMES[k]) == 0)
+            return k;
+    return -1;
+}
 void *g_frameVt[64], *g_meshVt[8], *g_materialVt[32], *g_textureVt[4], *g_graphVt[128], *g_imageVt[8], *g_groupVt[8];
 I3D_frame *FrameAt(int i) { return reinterpret_cast<I3D_frame *>(g_arena.frames[i]); }
 int FrameIndex(const void *f)
@@ -167,6 +180,10 @@ void *__stdcall F_FindChild(void *f, const char *name, uint32_t mask)
     return nullptr;
 }
 void __stdcall F_UpdateBound(void *f) { Log("%s UpdateBound", ArenaName(f).c_str()); }
+void __stdcall F_LinkTo(void *f, void *parent, uint32_t flags)
+{
+    Log("%s LinkTo %s %u", ArenaName(f).c_str(), parent ? ArenaName(parent).c_str() : "null", flags);
+}
 // LS3DF's (the original's import 0x007e5296; thiscall): logged, the matrix taken as made.
 void __attribute__((thiscall)) O_UpdateWMatrix(void *f)
 {
@@ -271,6 +288,7 @@ void RandomArena()
     g_arena.cursorMove = S_vector(P(0.3) ? 0.0f : F(-0.2f, 0.2f), P(0.3) ? 0.0f : F(-0.2f, 0.2f), -1.0f);
     g_arena.loadResult = P(0.3) ? -1 : 0;
     g_arena.scrnX = int16_t(Pick({640, 800, 1024, 1600}));
+    *reinterpret_cast<int *>(g_arena.zone + 0x98) = P(0.8) ? I(0, 2) : I(-2, 5);
     g_arena.scrnY = int16_t(Pick({480, 600, 768, 1200}));
     *reinterpret_cast<void ***>(g_arena.graph) = g_graphVt;
     *reinterpret_cast<void ***>(g_arena.image) = g_imageVt;
@@ -287,6 +305,7 @@ void SetUpArena()
     g_frameVt[0x48 / 4] = reinterpret_cast<void *>(F_FindChild);
     g_frameVt[0xA8 / 4] = reinterpret_cast<void *>(F_SetAlpha);
     g_frameVt[0x58 / 4] = reinterpret_cast<void *>(F_UpdateBound);
+    g_frameVt[0x38 / 4] = reinterpret_cast<void *>(F_LinkTo);
     for (void *&s : g_meshVt)
         s = reinterpret_cast<void *>(F_Other);
     g_meshVt[1] = reinterpret_cast<void *>(M_GetLevel);
@@ -635,10 +654,17 @@ struct S_Kind {
     uint32_t boxAt = 0;   // a text control's box (+0x6C), else 0
     C_TextBox *(*portBox)(C_Control *c) = nullptr;   // its box (null: a C_TextControl's)
     bool boxRequired = false;   // its box used unchecked everywhere (DropBox leaves it)
+    // A control it owns outside its children (the mark's title; deleted with it): the original's offset and the port's
+    // field (0 / null: none).
+    uint32_t ownedAt = 0;
+    C_Control **(*ownedSlot)(C_Control *c) = nullptr;
 };
 std::vector<const S_Kind *> g_nodeKinds;   // per node
 const S_Kind *g_kinds = nullptr;   // the part's kinds
 int g_kindCount = 0;
+// A node's owned control on each side (null: none, or the kind owns none).
+C_Control *PortOwned(size_t node) { return g_nodeKinds[node]->ownedSlot ? *g_nodeKinds[node]->ownedSlot(g_portNodes[node]) : nullptr; }
+uint8_t *OrigOwned(size_t node, const uint8_t *o) { return g_nodeKinds[node]->ownedAt ? OF<uint8_t *>(o, g_nodeKinds[node]->ownedAt) : nullptr; }
 // Nodes adopted during the call (made by it: the original's with its real vtable, not the logged copy).
 std::vector<bool> g_freshNodes;
 bool g_differsFresh;   // (set for the kinds' differs: the node was made by the call)
@@ -958,6 +984,18 @@ void AdoptNewNodes()
             g_nodeKinds.push_back(kind);
             g_freshNodes.push_back(true);
         }
+        C_Control *po = PortOwned(i);
+        uint8_t *oo = OrigOwned(i, o);
+        if (po && oo && std::find(g_portNodes.begin(), g_portNodes.end(), po) == g_portNodes.end()) {
+            const S_Kind *kind = KindByVtable(OF<uint32_t>(oo, 0));
+            CHECK(kind, "an owned control of c%u: the original's vtable %x unknown", unsigned(i), OF<uint32_t>(oo, 0));
+            if (kind) {
+                g_portNodes.push_back(po);
+                g_origNodes.push_back(oo);
+                g_nodeKinds.push_back(kind);
+                g_freshNodes.push_back(true);
+            }
+        }
     }
 }
 
@@ -1111,6 +1149,18 @@ bool C_Control::CreateChild(I3D_frame *frame, I3D_frame *, const S_ControlDesc *
 
 namespace {
 void *__stdcall O_GetIGraph() { return g_arena.graph; }
+void **__cdecl O_Fstr(void **dest, const char *format, ...)
+{
+    char text[512];
+    va_list args;
+    va_start(args, format);
+    std::vsnprintf(text, sizeof text, format, args);
+    va_end(args);
+    C_str s(text);
+    *dest = s.m_rep;
+    s.m_rep = nullptr;
+    return dest;
+}
 void *__cdecl O_AcquireFonts() { return AcquireFontManager(); }
 bool __attribute__((thiscall)) O_CreateChild(void *self, void *frame, void *, void *desc)
 {
@@ -1160,6 +1210,7 @@ void SetUpKit()
         {0x0064bb80, reinterpret_cast<const void *>(OPB_Relayout)},
         {0x0064bb90, reinterpret_cast<const void *>(OPB_LastPageBreak)},
         {0x006e5380, reinterpret_cast<const void *>(OG_Get)},
+        {0x00405100, reinterpret_cast<const void *>(O_Fstr)},
     };
     for (const auto &r : redirects)
         RedirectOriginal(r.first, r.second);

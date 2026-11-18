@@ -3921,3 +3921,26 @@ particles and the surface marks. Files are served from memory.
   ntdll); the arena's world bound written with its max at +0x0C (I3D_bbox pads its vectors: +0x10, the
   original's and the port's); a spin control's box taken away for SetInactive, which uses it unchecked on both sides; the heredoc editing
   scripts again (Write and a script file instead).
+
+## Human part 51 (the check boxes, toggle buttons, side indicator and mark, `controls.cpp` lines 1529-2199, 2026-11-18)
+
+- **The build:** `controls/build_check.bat` (`check_diff.cpp` with the kit): the check box, the toggle button and the
+  "all" one, the highlighted check box and its halves, the side indicator, the mark (and the title it owns). New in the
+  kit: the child frames' names as a table (32), a multiplayer zone in the arena (its team at the original's +0x98 and at
+  the port's own offset: g++ lays C_MPZone out its own way), the frames' LinkTo logged, the original's C_fstr
+  (0x00405100: formats as the port's), and controls a kind owns outside its children (the mark's title: the original's
+  offset, the port's field) followed by the teardown, the destructor's walk and the adoption.
+  - The highlighted check boxes have their halves, the marks mostly their titles; Create's frames have the children
+    their Create asks for (the side indicator's and the highlight's halves are used unchecked by both sides).
+- **The tests:** part 49's cases on trees of these kinds, their own messages sent straight to them (checked, quiet,
+  the value's byte against the state, the side, the mark's number, the highlight's turn), and the halves' and the check
+  boxes' slots (over or not, empty or full, inactive).
+- **Results:** 9,365,671 checks, 0 failures, 6 s (the messages, own messages and halves' cases also clean at 100,000
+  rounds alone); lines 1529-2199 all run.
+- **Port fixes:** none.
+- **Mutations:** 323 mutants (199 T, 124 R); 15 not building; 305 of the 308 building killed (99 %), 3 survived, all
+  equivalent: two [[fallthrough]] deletions and the new no half's SetFull(false) (it starts empty; see
+  mutate_controls_check.py).
+- **Harness lessons (my mistakes):** the mark's title deleted twice by my teardown (its destructor deletes it, and it
+  was a node too); the zone's team written only at the original's offset (the port read its own: a difference that was
+  the harness's).
