@@ -128,8 +128,10 @@ const char *const CHILD_NAMES[] = {
     // (32: the selection list's)
     "select*",
     // (33: the groups': the scrolled text's, the combo box's, the titled combo box's, the chat input's)
-    "text*", "scroll*", "listbox*", "cbdown*", "header*", "text18", "game difficulty", "binput*", "bTeam"};
-const int CHILD_NAME_COUNT = 42;
+    "text*", "scroll*", "listbox*", "cbdown*", "header*", "text18", "game difficulty", "binput*", "bTeam",
+    // (42: the skill's)
+    "skill_text*", "skill_value*"};
+const int CHILD_NAME_COUNT = 44;
 // The names RandomArena draws answers for (the others none): the earlier parts' 33 unless a part asks for more (their
 // random streams kept).
 int g_arenaNames = 33;

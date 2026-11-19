@@ -4005,3 +4005,23 @@ particles and the surface marks. Files are served from memory.
   no text, read unchecked by the original); the buffer set for the chat line where GET_TEXT answers the box's selected
   text; a heredoc with backslashes once more (Edit instead); a survivor list misread (the flipped comparison was killed,
   its id twin survived).
+
+## Human part 54 (the skill, `controls.cpp` lines 3363-3622, 2026-11-18)
+
+- **The build:** `controls/build_skill.bat` (`skill_diff.cpp` with the kit). New in the kit: the skill's two frame names
+  (after the others: the earlier suites' random streams kept; the group suite draws its 42 as before).
+- **The tests:** part 49's cases on planned trees (one to three skills with their two titles, their buttons now and then
+  missing, two parts swapped or a child added); the skill's own messages straight to it (SKILL_UP / DOWN, SET_BASE,
+  SET_TOTAL past 0 and 100, GET_NUMBER, SET_TEXT, the rest passed to the titles); its input slots with ids of any last 4
+  bits and its keys (minus, plus, the keypad's, neighbours, bits above the byte); SetStrings. Each skill's pool (its
+  value: the control asked for a point): none, a control that is not a skill found from every skill, or another skill
+  found as itself whose pool is not a skill (SET_VALUE's values drawn from the same; no SET_VALUE routes).
+- **Results:** 18,446,276 checks, 0 failures, about 15 s; lines 3363-3622 all run (158 of 158).
+- **Port fixes:** none. Original flaws steered clear of (the port checks them, by its comments): the titles used
+  unchecked in Refresh, SetInactive, Update, HandleMessage and Create (both buttons there), and the pool FindControl
+  finds used unchecked in PointUp / PointDown. Not tested: two skills each other's pool (both sides recurse without end;
+  the game's pool is one skill with none).
+- **Mutations:** 76 mutants; 3 not building; 68 of the 73 building killed (93 %); 5 survived: 2 the item information's
+  constants (the next part's), 3 equivalent (see mutate_controls_skill.py).
+- **Harness lessons (my mistakes):** Create's button routes carry the original's stack words in value2 / value3 (as in
+  part 53: SKILL_UP / DOWN made stack-value codes); a vector given to the kit's array Pick.

@@ -658,7 +658,7 @@ void SetUp()
     SetUpKit();
     g_kinds = KINDS;
     g_kindCount = KIND_COUNT;
-    g_arenaNames = CHILD_NAME_COUNT;
+    g_arenaNames = 42;   // (its names: the skill's after them)
     g_treePlan = TreePlan;
     g_codes = {CONTROL_MSG_DEACTIVATE,      CONTROL_MSG_ACTIVATE,   CONTROL_MSG_IGNORE_INPUT,  CONTROL_MSG_TAKE_INPUT,
                CONTROL_MSG_SET_INDEX,       CONTROL_MSG_GET_INDEX,  CONTROL_MSG_SET_VALUE,     CONTROL_MSG_GET_VALUE,
