@@ -4025,3 +4025,27 @@ particles and the surface marks. Files are served from memory.
   constants (the next part's), 3 equivalent (see mutate_controls_skill.py).
 - **Harness lessons (my mistakes):** Create's button routes carry the original's stack words in value2 / value3 (as in
   part 53: SKILL_UP / DOWN made stack-value codes); a vector given to the kit's array Pick.
+
+## Human part 55 (the item information, `controls.cpp` lines 3623-3793, 2026-11-18)
+
+- **The build:** `controls/build_info.bat` (`info_diff.cpp` with the kit). New in the kit: a GetItemDef hook (g_itemDef),
+  GetImage's cached path (its picture or none without a name; loading is item_defs.cpp's part), two frame names (after
+  the others: the earlier suites' streams kept, the skill suite drawing its 44). The test defines the item definitions'
+  out-of-line members (item_defs.cpp is not linked) and builds each round's item table on both sides: a few ammo,
+  animated and static definitions at random ids (0 and 499 often), the original's in its table at 0x0098b030 with its
+  vtables, so its virtual calls (behaviour, ammo amount and item, headgear) are its own; their components (projectile
+  weapons, firearms, scopes: muzzle velocities, aim modes, field of view factors) and cached pictures.
+- **The tests:** part 49's cases on planned trees (one or two informations under a plain control, each with its two
+  pictures and its stats' title, now and then two swapped or a child added); its own messages straight to it (SET_ITEM
+  with ids set, empty, negative, past 499; the counts, the callbacks, REFRESH); its input slots with ids of any last 4
+  bits.
+- **Results:** 12,787,463 checks, 0 failures, 8 s; lines 3623-3793 all run but ShowPicture's return without a picture
+  (119 of 120: the original uses its pictures unchecked).
+- **Port fixes:** none. Original flaws steered clear of (the port checks them, by its comments): the pictures, the
+  stats' title and the parent (told of the counts) used unchecked; in Create the frame's ammo child looked up on a null
+  frame (both sides: the tests give one always).
+- **Mutations:** 49 mutants; 3 not building; all 46 building killed (one more pass: rifles with a scope in aim mode 4
+  drawn more often).
+- **Harness lessons (my mistakes):** the information's vtable is not in its destructor (the compiler left the group's
+  there): found by the slots holding its FindChild and HandleMessage; the zoom's limit too rare to be drawn at first; a
+  heredoc with a backslash once more (its result right, checked).

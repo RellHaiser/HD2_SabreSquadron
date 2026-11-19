@@ -130,8 +130,10 @@ const char *const CHILD_NAMES[] = {
     // (33: the groups': the scrolled text's, the combo box's, the titled combo box's, the chat input's)
     "text*", "scroll*", "listbox*", "cbdown*", "header*", "text18", "game difficulty", "binput*", "bTeam",
     // (42: the skill's)
-    "skill_text*", "skill_value*"};
-const int CHILD_NAME_COUNT = 44;
+    "skill_text*", "skill_value*",
+    // (44: the item information's)
+    "ammo*", "text_info*"};
+const int CHILD_NAME_COUNT = 46;
 // The names RandomArena draws answers for (the others none): the earlier parts' 33 unless a part asks for more (their
 // random streams kept).
 int g_arenaNames = 33;
@@ -1255,7 +1257,15 @@ int EncodeUtf8(char *out, const uint32_t *codePoint, int maxBytes)
 }
 bool IsLegalUtf8Range(const uint8_t *, const uint8_t *) { Unexpected("IsLegalUtf8Range"); return false; }
 bool HasUtf8Sequences(const char *) { Unexpected("HasUtf8Sequences"); return false; }
-C_ItemDef *GetItemDef(int) { Unexpected("GetItemDef"); return nullptr; }
+// The item table (a part's: g_itemDef set; null: none faked).
+static C_ItemDef *(*g_itemDef)(int typeId) = nullptr;
+C_ItemDef *GetItemDef(int typeId)
+{
+    if (g_itemDef)
+        return g_itemDef(typeId);
+    Unexpected("GetItemDef");
+    return nullptr;
+}
 int GetGameTypeTextId(int) { Unexpected("GetGameTypeTextId"); return 0; }
 const C_Controls::S_Press *C_Controls::PollPress(int, bool) { Unexpected("C_Controls::PollPress"); return nullptr; }
 void __stdcall I3D_visual::UpdateWBoundProc() { Unexpected("I3D_visual::UpdateWBoundProc"); }
@@ -1263,7 +1273,14 @@ void I3D_frame::UpdateWMatrixProc() { O_UpdateWMatrix(this); }
 void __stdcall S_quat::Make(const S_matrix &) { Unexpected("S_quat::Make"); }
 bool C_KeyBindings::Bind(int, int, int, int) { Unexpected("C_KeyBindings::Bind"); return false; }
 C_str C_KeyBindings::GetBindingName(int) const { Unexpected("C_KeyBindings::GetBindingName"); return C_str(); }
-IImage *C_ItemDef::GetImage() { Unexpected("C_ItemDef::GetImage"); return nullptr; }
+// (Its loaded picture or none without a name, as item_defs.cpp's; loading it is item_defs.cpp's part.)
+IImage *C_ItemDef::GetImage()
+{
+    if (m_image || !m_imageName)
+        return m_image;
+    Unexpected("C_ItemDef::GetImage");
+    return nullptr;
+}
 S_NetPlayerState *C_NetGame::LockPlayers() { Unexpected("C_NetGame::LockPlayers"); return nullptr; }
 void C_NetGame::UnlockPlayers() { Unexpected("C_NetGame::UnlockPlayers"); }
 C_str C_GameTexts::Get(int id) const
