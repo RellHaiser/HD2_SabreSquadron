@@ -116,7 +116,7 @@ struct alignas(16) S_Arena {
     int cursorDown;
     int loadResult;
     int numChildren[16];
-    int16_t child[16][56];       // FindChildFrame's answers, by CHILD_NAMES (-1 none; CHILD_NAME_COUNT at most)
+    int16_t child[16][72];       // FindChildFrame's answers, by CHILD_NAMES (-1 none; CHILD_NAME_COUNT at most)
     alignas(8) uint8_t zone[0x400];   // a multiplayer zone (its team: +0x98 the original's, the part sets the port's)
     S_vector cursorMove;
 };
@@ -139,8 +139,11 @@ const char *const CHILD_NAMES[] = {
     // (46: the list group's)
     "selector*",
     // (47: the upgrade bar's)
-    "name_*", "hlcpct*", "upgrade*"};
-const int CHILD_NAME_COUNT = 50;
+    "name_*", "hlcpct*", "upgrade*",
+    // (50: the server list's rows, the rows' icons)
+    "Server1", "Server2", "Server3", "Server4", "Server5", "Server6", "Server7", "Server8", "Server9", "Server10", "Server11",
+    "xpassword", "xdedicated", "xvoice", "xpassword01", "xdedicated01", "xvoice01"};
+const int CHILD_NAME_COUNT = 67;
 static_assert(CHILD_NAME_COUNT <= int(sizeof g_arena.child[0] / sizeof g_arena.child[0][0]), "S_Arena::child too small");
 // The names RandomArena draws answers for (the others none): the earlier parts' 33 unless a part asks for more (their
 // random streams kept).
@@ -1303,8 +1306,11 @@ int EncodeUtf8(char *out, const uint32_t *codePoint, int maxBytes)
 {
     return OriginalAt<int(__attribute__((fastcall)) *)(char *, const uint32_t *, int)>(0x0064d910)(out, codePoint, maxBytes);
 }
-bool IsLegalUtf8Range(const uint8_t *, const uint8_t *) { Unexpected("IsLegalUtf8Range"); return false; }
-bool HasUtf8Sequences(const char *) { Unexpected("HasUtf8Sequences"); return false; }
+bool IsLegalUtf8Range(const uint8_t *begin, const uint8_t *end)
+{
+    return OriginalAt<bool(__attribute__((fastcall)) *)(const uint8_t *, const uint8_t *)>(0x0064d3d0)(begin, end);
+}
+bool HasUtf8Sequences(const char *text) { return OriginalAt<bool(__attribute__((fastcall)) *)(const char *)>(0x0064d9e0)(text); }
 // The item table (a part's: g_itemDef set; null: none faked).
 static C_ItemDef *(*g_itemDef)(int typeId) = nullptr;
 C_ItemDef *GetItemDef(int typeId)
@@ -1314,7 +1320,10 @@ C_ItemDef *GetItemDef(int typeId)
     Unexpected("GetItemDef");
     return nullptr;
 }
+// (Not in the server list's build: it links mp_text_ids.cpp's. MinGW's PE weak symbols don't resolve across objects.)
+#ifndef CONTROLS_KIT_HAS_GAME_TYPE_TEXT
 int GetGameTypeTextId(int) { Unexpected("GetGameTypeTextId"); return 0; }
+#endif
 const C_Controls::S_Press *C_Controls::PollPress(int, bool) { Unexpected("C_Controls::PollPress"); return nullptr; }
 void __stdcall I3D_visual::UpdateWBoundProc() { Unexpected("I3D_visual::UpdateWBoundProc"); }
 void I3D_frame::UpdateWMatrixProc() { O_UpdateWMatrix(this); }

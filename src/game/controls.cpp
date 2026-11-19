@@ -4846,7 +4846,7 @@ bool C_ServerList::HandleMessage(S_ControlMessage *message)
             m_lastEntry = static_cast<int>(entries) - 1;
             m_firstEntry = m_lastEntry - m_visible + 1;
         } else {
-            m_lastEntry = m_firstEntry + m_visible - 1;
+            m_lastEntry = static_cast<int>(static_cast<uint32_t>(m_firstEntry) + visible - 1);
         }
         HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
         return true;
@@ -4859,7 +4859,7 @@ bool C_ServerList::HandleMessage(S_ControlMessage *message)
     case CONTROL_MSG_SET_POSITION:
         if (count > visible) {
             m_firstEntry = static_cast<int>(message->value);
-            m_lastEntry = m_visible + m_firstEntry - 1;
+            m_lastEntry = static_cast<int>(visible + message->value - 1);
         }
         HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
         return true;

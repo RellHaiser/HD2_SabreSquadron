@@ -4147,3 +4147,41 @@ particles and the surface marks. Files are served from memory.
   crash until AfterTree cleared them); ADD_ITEM among the loud codes reached pools as ADD_ENTRY with a random value2
   (the original faulted reading its map: the codes now sent only by the Own case); Edit dropped a trailing space in the
   summary line ("hide_diff:N checks").
+
+## Human part 59 (the server list and its rows, `controls.cpp` lines 4558-4901, 2026-11-19)
+
+- **The build:** `controls/build_server.bat` (`server_diff.cpp` with the kit; links `mp_text_ids.cpp`, the kit's
+  GetGameTypeTextId stub left out by CONTROLS_KIT_HAS_GAME_TYPE_TEXT). New in the kit: 17 frame names (the rows' "Server1" .. "Server11", the six icons;
+  S_Arena::child widened to 72); IsLegalUtf8Range and HasUtf8Sequences the original's own on the port's side (text_box.cpp
+  is a later part's). The suite redirects the original's _aligned_malloc (0x007e53c2: its CRT heap never made in the
+  copy) to MinGW's.
+- **The tests:** planned trees of server lists (up to 11 rows, mostly 11; the rows' ids as Create gives them, their
+  callbacks to the list: the port's RowClicked / RowNotified paired with the original's 0x00666650 / 0x00666630), a
+  round's pool of 300 server entries (the same blocks on both sides: names and maps with case ties, '_' and brackets,
+  UTF-8 valid and not, full length; game types out of range; pings, players and maximums with ties and 32-bit values;
+  versions the round's or not; the unicode font on or off); lists of 0 to 250 entries, selections in and out of them,
+  sort keys of every field and direction (other bits too), windows in, past and before the entries. The kit's cases on
+  them; the list's own messages straight to it (ADD_ITEM with entries or none, CLEAR, SET_POSITION within, past,
+  negative, near INT_MAX, SORT, REFRESH, the gets) and the rows' (ADD_ENTRY with entries or none, ADD_CURRENT_ENTRY,
+  REMOVE_ITEM, GET_ITEM, run texts); the inputs (a row's click: RowClicked, the list's refresh and notification);
+  Create (the rows made, their icons found or not, the origin from the last row's place); Construct (the factory's
+  fields from its asm, the row's).
+- **Results:** 24,510,617 checks, 0 failures; lines 4558-4901 all 234 measured lines run.
+- **Port fix (no behaviour change):** the window's last entry (ADD_ITEM, SET_POSITION) computed unsigned: a position
+  near INT_MAX overflowed a signed int in the port (undefined; the compiled code wrapped as the original's ADD).
+- **Original's flaws, port already fixed:** the row formats the entry's name and map as C_fstr's format (a server named
+  "a%sb" shows stack garbage, or faults in the original's printf; the port's "%s"): the tests keep '%' out of them.
+  The row's ADD_ENTRY without a box (the port checks it; the rows always have one: not tested).
+- **Original's flaws kept (both sides, states the tests keep to):** a row whose Create failed (a frame or an icon
+  missing from the model) keeps null icons, and the list's refresh shows an entry on it unchecked (both crash; the
+  Create tests give complete rows, or a list without entries). A click on a row past the entries (the list's Select
+  scrolls on for ever after RowClicked's refresh made the last shown the entries' last, part 56's endless Select): the
+  game hides those rows; the click cases' lists show all their rows with an entry each.
+- **Not tested:** a row's ADD_ENTRY without its box (above); '%' in names and maps (above).
+- **Mutations:** 171 mutants, 9 not building, 151 of 162 killed, 11 equivalent (mutate_controls_server.py).
+- **Harness lessons (my mistakes):** the first runs crashed without a report: the original's printf on a '%' name, and
+  its _aligned_malloc on an unmade heap (a first-chance handler and the echo of the round found them); the Input case
+  hung (bisected by rounds, the hung child's stack taken with gdb -p: Select); timed-out runs left their relaunched
+  children running (the timeout killed only the parent: taskkill them after a hang); a heredoc mangled a script's
+  backslashes again (Write for such scripts); the kit's stub made weak broke the ten other controls builds (MinGW's PE
+  weak symbols don't resolve across objects: a macro now; build every harness of a shared kit).
