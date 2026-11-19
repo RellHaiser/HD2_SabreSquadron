@@ -4211,3 +4211,52 @@ particles and the surface marks. Files are served from memory.
 - **Mutations:** 142 mutants, 1 not building, 137 of 141 killed, 4 equivalent (mutate_controls_hotkey.py).
 - **Harness lessons (my mistakes):** the generator made only 34 mutants (the range's lines repeat elsewhere in the
   file): the other 108 written by hand with their neighbours, each checked unique before the run.
+
+## Human part 61a (the item pictures, `controls.cpp` lines 5161-5296, 2026-11-19)
+
+- **The build:** `controls/build_pictures.bat` (`pictures_diff.cpp` with the kit). The item table part 55's (a few
+  definitions of each record type on both sides, the original's at 0x0098b030; their pictures cached).
+- **The tests:** planned trees: item pictures under a plain control (the original tells the parent of the counts
+  unchecked), each with its two pictures (id | 1, id | 2), now and then swapped or a child added. The kit's cases; the
+  own messages straight to them (SET_ITEM with items of each record type, ammo, uniforms' headgear, ids out of the table;
+  the counts below, at and above 0; the callbacks; REFRESH); the input slots, FindChild and Refresh shown or not; without
+  the second picture the port alone (the original crashes): its own messages and Refresh, no call reaching the second;
+  the constructor's fields. A texture named "X_SQUARE.BMP" in half the rounds (Create's face group found).
+- **Results:** 11,337,094 checks, 0 failures; lines 5163-5165 and 5173-5296 all 83 measured lines run.
+- **Original's flaws, port already fixed:** the second picture used unchecked by Refresh, the counts, the callbacks,
+  REFRESH and SET_ITEM (an item pictures without "ammo*" crashes on nearly anything; the port checks).
+- **Not tested:** Create on no frame (the original's `if (frame)` then the frame used anyway: both crash); the pictures
+  under no parent (both tell it unchecked).
+- **Mutations:** 159 mutants, 7 not building, 151 of 152 killed, 1 equivalent (mutate_controls_pictures.py).
+- **Harness lessons (my mistakes):** no fake texture was named "X_SQUARE.BMP", so the face group was never found and two
+  mutants survived (the name changed, the second picture's search sent to the first): one texture named so in half the
+  rounds now (part 55's item information has the same blind spot: its generator skipped those lines). The first no-second
+  check matched node names in hex values ("c3"): only the call's object word compared now. Scratch scripts written
+  through Bash heredocs lost their backslashes twice: rewritten with the Write and Edit tools.
+
+## Human part 61b (the players' list and the check group, `controls.cpp` lines 5166-5169, 5298-5420, 2026-11-19)
+
+- **The build:** `controls/build_players.bat` (`players_diff.cpp` with the kit). New in the kit: the stubs of
+  C_NetGame::LockPlayers and UnlockPlayers left out by CONTROLS_KIT_HAS_PLAYERS. The part's fakes, both sides: the
+  network game's players (the port's g_netGame.m_players; the original's LockPlayers, 0x0072f040, answering an MSVC 6
+  vector of the same 0xC4-byte blocks; UnlockPlayers, 0x0072f100): none to six, free (no name) or not, names with
+  '%', UTF-8, 51 letters, stats of all sizes. The scrolled text, scroll bar, buttons and slider part 53's, the
+  highlighted check box and its halves part 51's.
+- **The tests:** planned trees: players' lists with their scrolled text (its list always, its bar mostly) and title,
+  and a third child always (a plain control, a label, a title, a check box's half: the one kind refusing a leave);
+  check groups with their highlighted check box or none, now and then another child. The kit's cases; the own messages
+  (SHOW_PLAYERS often, the two ignored, the others; targets kept by the list or routed to its children); the input slots
+  with the focus anywhere, FindChild, SetInactive, SetStrings; the constructors' fields. SHOW_PLAYERS counted: about 600
+  runs in a quick run.
+- **Results:** 16,678,068 checks, 0 failures; lines 5166-5169 and 5298-5420 all 79 measured lines run.
+- **Original's flaws (both, not fixed):** the list's FindChild answers 2 for the title's id (its index is 1):
+  FindControl uses the index unchecked, so with Create's two children only, finding the title's id reads past them (the
+  tests give the list a third child; not changed: main stays faithful). SetInactive and SHOW_PLAYERS use the title
+  unchecked (Create makes it only with "header*").
+- **Not tested:** a players' list without its title or scrolled text (both crash); SHOW_PLAYERS' messages' unset words
+  (the original's stack: the columns' value3, the rows' value2 and value3; the port's 0; no difference seen).
+- **Mutations:** 139 mutants, 9 not building, 122 of 130 killed, 8 equivalent (mutate_controls_players.py).
+- **Harness lessons (my mistakes):** the first tree plan crashed both sides in FindControl (the title's 2 past the
+  children); SHOW_PLAYERS ran 47 times in a quick run at first (most targets went to a child): steered now. The first
+  coverage run crashed with no report, run beside the mutation run (likely the cause; alone it passed). The generator's title substitution also
+  rewrote PLAYERS_TITLE in a mutant: a placeholder now.

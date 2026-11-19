@@ -1366,8 +1366,11 @@ IImage *C_ItemDef::GetImage()
     Unexpected("C_ItemDef::GetImage");
     return nullptr;
 }
+// (Not in the players' list's build: it fakes them itself.)
+#ifndef CONTROLS_KIT_HAS_PLAYERS
 S_NetPlayerState *C_NetGame::LockPlayers() { Unexpected("C_NetGame::LockPlayers"); return nullptr; }
 void C_NetGame::UnlockPlayers() { Unexpected("C_NetGame::UnlockPlayers"); }
+#endif
 C_str C_GameTexts::Get(int id) const
 {
     Log("texts Get %d", id);
