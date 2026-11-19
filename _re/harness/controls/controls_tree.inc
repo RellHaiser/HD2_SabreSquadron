@@ -78,6 +78,8 @@ void ClearPortTree()
         g_portNodes[i]->m_children.clear();
         if (g_nodeKinds[i]->ownedSlot)
             *g_nodeKinds[i]->ownedSlot(g_portNodes[i]) = nullptr;
+        if (g_nodeKinds[i]->heldVec)
+            g_nodeKinds[i]->heldVec(g_portNodes[i])->clear();
     }
     for (C_Control *c : g_portNodes)
         delete c;
@@ -340,6 +342,9 @@ void TestDestructor()
         const size_t at = size_t(std::find(g_origNodes.begin(), g_origNodes.end(), n) - g_origNodes.begin());
         if (at < g_origNodes.size() && OrigOwned(at, n))
             stack.push_back(OrigOwned(at, n));
+        if (at < g_origNodes.size() && g_nodeKinds[at]->heldAt)
+            for (size_t k = 0; k < OVecBytes(n, g_nodeKinds[at]->heldAt) / 4; ++k)
+                stack.push_back(reinterpret_cast<uint8_t **>(OVecData(n, g_nodeKinds[at]->heldAt))[k]);
     }
     for (auto &m : moved) {
         uint8_t **kids = reinterpret_cast<uint8_t **>(OVecData(m.second, O_CHILDREN));
@@ -348,6 +353,12 @@ void TestDestructor()
             if (moved.count(kids[k]))
                 kids[k] = moved[kids[k]];
         const size_t at = size_t(std::find(g_origNodes.begin(), g_origNodes.end(), m.first) - g_origNodes.begin());
+        if (at < g_origNodes.size() && g_nodeKinds[at]->heldAt) {
+            uint8_t **held = reinterpret_cast<uint8_t **>(OVecData(m.second, g_nodeKinds[at]->heldAt));
+            for (size_t k = 0; k < OVecBytes(m.second, g_nodeKinds[at]->heldAt) / 4; ++k)
+                if (moved.count(held[k]))
+                    held[k] = moved[held[k]];
+        }
         if (at < g_origNodes.size() && g_nodeKinds[at]->ownedAt && moved.count(OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt)))
             OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt) = moved[OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt)];
     }
@@ -372,11 +383,19 @@ void TestDestructor()
         const size_t at = size_t(std::find(g_portNodes.begin(), g_portNodes.end(), n) - g_portNodes.begin());
         if (at < g_portNodes.size() && PortOwned(at))
             todo.push_back(PortOwned(at));
+        if (at < g_portNodes.size() && g_nodeKinds[at]->heldVec)
+            for (C_Control *k : *g_nodeKinds[at]->heldVec(n))
+                todo.push_back(k);
     }
     C_Control *root = g_portNodes[i];
     if (root->m_parent) {
         std::vector<C_Control *> &siblings = root->m_parent->m_children;
         siblings.erase(std::remove(siblings.begin(), siblings.end(), root), siblings.end());
+        const size_t pi = size_t(std::find(g_portNodes.begin(), g_portNodes.end(), root->m_parent) - g_portNodes.begin());
+        if (pi < g_portNodes.size() && g_nodeKinds[pi]->heldVec) {
+            std::vector<C_Control *> &held = *g_nodeKinds[pi]->heldVec(root->m_parent);
+            held.erase(std::remove(held.begin(), held.end(), root), held.end());
+        }
     }
     g_log.clear();
     delete root;

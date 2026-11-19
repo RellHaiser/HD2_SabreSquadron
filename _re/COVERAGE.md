@@ -4122,3 +4122,28 @@ particles and the surface marks. Files are served from memory.
   frame names took the kit's arena past its 48 names a frame (four controls suites crashed until the full run: widened,
   a static_assert now); the vehicle harness's hand-written texts had MinGW's rounding (0.25 "+ 0.2", 12.25 kg "12.2",
   612.5 "612", 64.5 " 64"): now the original's ("+ 0.3", "12.3", "613", " 65").
+
+## Human part 58 (the hiding list and the pool list, `controls.cpp` lines 4411-4542, 2026-11-19)
+
+- **The build:** `controls/build_hide.bat` (`hide_diff.cpp`: part 56's list suite with the two kinds). New in the kit:
+  S_Kind::heldAt / heldVec (controls a kind owns in a vector outside its children: the hiding list's hidden items at
+  +0xA0), walked by ClearPortTree and the destructor's test on both sides (a hidden item deleted alone taken out of its
+  list's vector).
+- **The tests:** planned trees of lists of the three kinds, the hiding and pool lists with hidden items (items, now and
+  then a label; ids now and then a child's), the pool's held item (a child, a hidden one, none); the earlier parts'
+  cases on them; their own messages straight to them (ITEM_COUNTED of hidden items, children and others, HIDE_ITEM,
+  HIDE_ALL, the pool's ADD_ENTRY and ADD_CURRENT_ENTRY with maps: the port's C_MpMap and the original's block, its name
+  at +0x01, paired as the descriptions are, none now and then; a pool's ADD_ITEM code is its ADD_ENTRY); the pool's
+  inputs 08, 09, 0A; Construct: the constructors' fields as the original's factory (inline there) sets them.
+- **Results:** 17,957,625 checks, 0 failures; lines 4411-4542 all 81 measured lines run. The port: no differences. HIDE_ALL's
+  scroll loop signed and HIDE_ITEM's unsigned, both the original's (a negative first shown would loop for ever: nothing
+  sets one in these lists).
+- **Original's flaw kept (both sides):** an item removed or the list cleared while the pool holds it (a drag) leaves the
+  held pointer dangling (the test accepts it deleted on both sides).
+- **Not tested:** the hidden controls' OnLeave id (see the mutations); the factory's own construction (redirected by the
+  kit: its fields checked from its asm).
+- **Mutations:** 37 mutants, all building, 35 killed, 2 equivalent (mutate_controls_hide.py).
+- **Harness lessons (my mistakes):** the plan's hidden flags outlived their tree (the ticks' trees are not planned: a
+  crash until AfterTree cleared them); ADD_ITEM among the loud codes reached pools as ADD_ENTRY with a random value2
+  (the original faulted reading its map: the codes now sent only by the Own case); Edit dropped a trailing space in the
+  summary line ("hide_diff:N checks").

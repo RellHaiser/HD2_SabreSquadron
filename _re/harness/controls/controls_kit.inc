@@ -796,6 +796,10 @@ struct S_Kind {
     // field (0 / null: none).
     uint32_t ownedAt = 0;
     C_Control **(*ownedSlot)(C_Control *c) = nullptr;
+    // Controls it owns in a vector outside its children (the hiding list's hidden items; deleted with it): the original's
+    // vector's offset and the port's vector (0 / null: none).
+    uint32_t heldAt = 0;
+    std::vector<C_Control *> *(*heldVec)(C_Control *c) = nullptr;
 };
 std::vector<const S_Kind *> g_nodeKinds;   // per node
 const S_Kind *g_kinds = nullptr;   // the part's kinds
