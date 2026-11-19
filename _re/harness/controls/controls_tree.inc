@@ -78,6 +78,8 @@ void ClearPortTree()
         g_portNodes[i]->m_children.clear();
         if (g_nodeKinds[i]->ownedSlot)
             *g_nodeKinds[i]->ownedSlot(g_portNodes[i]) = nullptr;
+        if (g_nodeKinds[i]->ownedSlot2)
+            *g_nodeKinds[i]->ownedSlot2(g_portNodes[i]) = nullptr;
         if (g_nodeKinds[i]->heldVec)
             g_nodeKinds[i]->heldVec(g_portNodes[i])->clear();
     }
@@ -340,8 +342,9 @@ void TestDestructor()
         for (size_t k = 0; k < kids; ++k)
             stack.push_back(reinterpret_cast<uint8_t **>(OVecData(n, O_CHILDREN))[k]);
         const size_t at = size_t(std::find(g_origNodes.begin(), g_origNodes.end(), n) - g_origNodes.begin());
-        if (at < g_origNodes.size() && OrigOwned(at, n))
-            stack.push_back(OrigOwned(at, n));
+        for (int which = 0; which < 2; ++which)
+            if (at < g_origNodes.size() && OrigOwned(at, n, which))
+                stack.push_back(OrigOwned(at, n, which));
         if (at < g_origNodes.size() && g_nodeKinds[at]->heldAt)
             for (size_t k = 0; k < OVecBytes(n, g_nodeKinds[at]->heldAt) / 4; ++k)
                 stack.push_back(reinterpret_cast<uint8_t **>(OVecData(n, g_nodeKinds[at]->heldAt))[k]);
@@ -359,8 +362,11 @@ void TestDestructor()
                 if (moved.count(held[k]))
                     held[k] = moved[held[k]];
         }
-        if (at < g_origNodes.size() && g_nodeKinds[at]->ownedAt && moved.count(OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt)))
-            OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt) = moved[OF<uint8_t *>(m.second, g_nodeKinds[at]->ownedAt)];
+        for (int which = 0; which < 2 && at < g_origNodes.size(); ++which) {
+            const uint32_t owned = which ? g_nodeKinds[at]->ownedAt2 : g_nodeKinds[at]->ownedAt;
+            if (owned && moved.count(OF<uint8_t *>(m.second, owned)))
+                OF<uint8_t *>(m.second, owned) = moved[OF<uint8_t *>(m.second, owned)];
+        }
     }
     // (The copies named as their originals in the logs.)
     std::vector<uint8_t *> saved = g_origNodes;
@@ -381,8 +387,9 @@ void TestDestructor()
         for (C_Control *k : n->m_children)
             todo.push_back(k);
         const size_t at = size_t(std::find(g_portNodes.begin(), g_portNodes.end(), n) - g_portNodes.begin());
-        if (at < g_portNodes.size() && PortOwned(at))
-            todo.push_back(PortOwned(at));
+        for (int which = 0; which < 2; ++which)
+            if (at < g_portNodes.size() && PortOwned(at, which))
+                todo.push_back(PortOwned(at, which));
         if (at < g_portNodes.size() && g_nodeKinds[at]->heldVec)
             for (C_Control *k : *g_nodeKinds[at]->heldVec(n))
                 todo.push_back(k);

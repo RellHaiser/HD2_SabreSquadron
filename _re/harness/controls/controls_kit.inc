@@ -142,8 +142,10 @@ const char *const CHILD_NAMES[] = {
     "name_*", "hlcpct*", "upgrade*",
     // (50: the server list's rows, the rows' icons)
     "Server1", "Server2", "Server3", "Server4", "Server5", "Server6", "Server7", "Server8", "Server9", "Server10", "Server11",
-    "xpassword", "xdedicated", "xvoice", "xpassword01", "xdedicated01", "xvoice01"};
-const int CHILD_NAME_COUNT = 67;
+    "xpassword", "xdedicated", "xvoice", "xpassword01", "xdedicated01", "xvoice01",
+    // (67: the hot key's title)
+    "hktext*"};
+const int CHILD_NAME_COUNT = 68;
 static_assert(CHILD_NAME_COUNT <= int(sizeof g_arena.child[0] / sizeof g_arena.child[0][0]), "S_Arena::child too small");
 // The names RandomArena draws answers for (the others none): the earlier parts' 33 unless a part asks for more (their
 // random streams kept).
@@ -803,13 +805,24 @@ struct S_Kind {
     // vector's offset and the port's vector (0 / null: none).
     uint32_t heldAt = 0;
     std::vector<C_Control *> *(*heldVec)(C_Control *c) = nullptr;
+    // A second owned control (the hot key's edit box; its title the first).
+    uint32_t ownedAt2 = 0;
+    C_Control **(*ownedSlot2)(C_Control *c) = nullptr;
 };
 std::vector<const S_Kind *> g_nodeKinds;   // per node
 const S_Kind *g_kinds = nullptr;   // the part's kinds
 int g_kindCount = 0;
-// A node's owned control on each side (null: none, or the kind owns none).
-C_Control *PortOwned(size_t node) { return g_nodeKinds[node]->ownedSlot ? *g_nodeKinds[node]->ownedSlot(g_portNodes[node]) : nullptr; }
-uint8_t *OrigOwned(size_t node, const uint8_t *o) { return g_nodeKinds[node]->ownedAt ? OF<uint8_t *>(o, g_nodeKinds[node]->ownedAt) : nullptr; }
+// A node's owned control on each side (null: none, or the kind owns none; `which` 1: the second).
+C_Control *PortOwned(size_t node, int which = 0)
+{
+    C_Control **(*slot)(C_Control *) = which ? g_nodeKinds[node]->ownedSlot2 : g_nodeKinds[node]->ownedSlot;
+    return slot ? *slot(g_portNodes[node]) : nullptr;
+}
+uint8_t *OrigOwned(size_t node, const uint8_t *o, int which = 0)
+{
+    const uint32_t at = which ? g_nodeKinds[node]->ownedAt2 : g_nodeKinds[node]->ownedAt;
+    return at ? OF<uint8_t *>(o, at) : nullptr;
+}
 // Nodes adopted during the call (made by it: the original's with its real vtable, not the logged copy).
 std::vector<bool> g_freshNodes;
 bool g_differsFresh;   // (set for the kinds' differs: the node was made by the call)
@@ -1126,16 +1139,18 @@ void AdoptNewNodes()
             g_nodeKinds.push_back(kind);
             g_freshNodes.push_back(true);
         }
-        C_Control *po = PortOwned(i);
-        uint8_t *oo = OrigOwned(i, o);
-        if (po && oo && std::find(g_portNodes.begin(), g_portNodes.end(), po) == g_portNodes.end()) {
-            const S_Kind *kind = KindByVtable(OF<uint32_t>(oo, 0));
-            CHECK(kind, "an owned control of c%u: the original's vtable %x unknown", unsigned(i), OF<uint32_t>(oo, 0));
-            if (kind) {
-                g_portNodes.push_back(po);
-                g_origNodes.push_back(oo);
-                g_nodeKinds.push_back(kind);
-                g_freshNodes.push_back(true);
+        for (int which = 0; which < 2; ++which) {
+            C_Control *po = PortOwned(i, which);
+            uint8_t *oo = OrigOwned(i, o, which);
+            if (po && oo && std::find(g_portNodes.begin(), g_portNodes.end(), po) == g_portNodes.end()) {
+                const S_Kind *kind = KindByVtable(OF<uint32_t>(oo, 0));
+                CHECK(kind, "an owned control of c%u: the original's vtable %x unknown", unsigned(i), OF<uint32_t>(oo, 0));
+                if (kind) {
+                    g_portNodes.push_back(po);
+                    g_origNodes.push_back(oo);
+                    g_nodeKinds.push_back(kind);
+                    g_freshNodes.push_back(true);
+                }
             }
         }
     }
@@ -1297,7 +1312,6 @@ bool C_Cursor::IsButtonDown(uint32_t buttons) const { return OC_IsButtonDown(con
 void C_Cursor::GetPosition(S_vector *position) const { OC_GetPosition(const_cast<C_Cursor *>(this), position); }
 // (The original's reads +0x40 inline: no log.)
 int C_Cursor::GetStillTime() const { return *reinterpret_cast<const int *>(reinterpret_cast<const uint8_t *>(this) + 0x40); }
-void C_Cursor::SetDelay(int) { Unexpected("C_Cursor::SetDelay"); }
 void C_Cursor::GetMove(S_vector *move) const { OC_GetMove(const_cast<C_Cursor *>(this), move); }
 void C_Cursor::GetScreenPosition(float *x, float *y, float *buttons) const { OC_GetScreen(const_cast<C_Cursor *>(this), x, y, buttons); }
 
@@ -1324,7 +1338,13 @@ C_ItemDef *GetItemDef(int typeId)
 #ifndef CONTROLS_KIT_HAS_GAME_TYPE_TEXT
 int GetGameTypeTextId(int) { Unexpected("GetGameTypeTextId"); return 0; }
 #endif
+// (Not in the hot key's build: it fakes them, and the cursor's SetDelay, itself.)
+#ifndef CONTROLS_KIT_HAS_HOT_KEY
 const C_Controls::S_Press *C_Controls::PollPress(int, bool) { Unexpected("C_Controls::PollPress"); return nullptr; }
+bool C_KeyBindings::Bind(int, int, int, int) { Unexpected("C_KeyBindings::Bind"); return false; }
+C_str C_KeyBindings::GetBindingName(int) const { Unexpected("C_KeyBindings::GetBindingName"); return C_str(); }
+void C_Cursor::SetDelay(int) { Unexpected("C_Cursor::SetDelay"); }
+#endif
 void __stdcall I3D_visual::UpdateWBoundProc() { Unexpected("I3D_visual::UpdateWBoundProc"); }
 void I3D_frame::UpdateWMatrixProc() { O_UpdateWMatrix(this); }
 // (SetScale's rotation: LS3DF's, as the original's calls it; the bars'.)
@@ -1338,8 +1358,6 @@ void __stdcall S_quat::Make(const S_matrix &m)
     }
     make(this, m);
 }
-bool C_KeyBindings::Bind(int, int, int, int) { Unexpected("C_KeyBindings::Bind"); return false; }
-C_str C_KeyBindings::GetBindingName(int) const { Unexpected("C_KeyBindings::GetBindingName"); return C_str(); }
 // (Its loaded picture or none without a name, as item_defs.cpp's; loading it is item_defs.cpp's part.)
 IImage *C_ItemDef::GetImage()
 {

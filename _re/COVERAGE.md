@@ -4185,3 +4185,29 @@ particles and the surface marks. Files are served from memory.
   children running (the timeout killed only the parent: taskkill them after a hang); a heredoc mangled a script's
   backslashes again (Write for such scripts); the kit's stub made weak broke the ten other controls builds (MinGW's PE
   weak symbols don't resolve across objects: a macro now; build every harness of a shared kit).
+
+## Human part 60 (the hot key and the titled edit box, `controls.cpp` lines 4902-5159, 2026-11-19)
+
+- **The build:** `controls/build_hotkey.bat` (`hotkey_diff.cpp` with the kit). New in the kit: a kind's second owned
+  control (S_Kind::ownedAt2 / ownedSlot2: the hot key owns its title, +0x74, and its edit box, +0x78; adopted, cleared and
+  deleted as the first); the frame name "hktext*"; the stubs of PollPress, Bind, GetBindingName and the cursor's SetDelay
+  left out by CONTROLS_KIT_HAS_HOT_KEY. The part's fakes, both sides: the input's PollPress (0x006c87f0 on 0x008aeb58: a
+  round's press or none), the key bindings' Bind (0x006a8670) and GetBindingName (0x006ab840: its name through the
+  hidden pointer) on one player profile block (the port's g_gameProfile.m_player, the original's 0x008aea2c; the
+  bindings at +0xEC), the cursor's SetDelay (0x0066ab50).
+- **The tests:** planned trees of hot keys and titled edit boxes, each with its edit box (id | 1) and title (id | 2) owned;
+  armed or not, bindings in range and not; the round's press (Escape on the keyboard, its neighbours: another key or
+  device, any), Bind's answer, the binding's name (empty, long, UTF-8, none). The kit's cases; the own messages straight
+  to them (the bindings' get, get 2 and set with the title's text id, REFRESH; the titled box's text messages to its
+  title, the edit ones to its edit box, the others to the base); the input (the slots with the edit box editing or not,
+  Unknown20's keys with high bytes, the tick armed or not, the refresh, SetInactive, SetBinding +0x84); Create (the
+  titles' frames found or not); the constructors' fields.
+- **Results:** 10,564,418 checks, 0 failures; lines 4902-5159 all 141 measured lines run.
+- **Original's flaws, port already fixed:** the factory never sets the binding (+0x70: whatever the block held until a
+  SET_BINDING; the port's 0); the tick sets the cursor's delay without a cursor check (a crash without one; the port
+  checks: the tests always have one).
+- **Not tested:** the dedicated server's Unknown20 (HD2_DEDICATED, not built); a hot key without its edit box or title
+  (both use them unchecked, both crash); Create on no frame (the base's crash, both).
+- **Mutations:** 142 mutants, 1 not building, 137 of 141 killed, 4 equivalent (mutate_controls_hotkey.py).
+- **Harness lessons (my mistakes):** the generator made only 34 mutants (the range's lines repeat elsewhere in the
+  file): the other 108 written by hand with their neighbours, each checked unique before the run.
