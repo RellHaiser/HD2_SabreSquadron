@@ -371,7 +371,8 @@ void EquipmentPanelTest(I3D_scene *)
         g_epBeltFill = 0.375f;
         g_epBackpackFill = 0.5f;
         p.UpdateLoad();
-        const std::string weight = CmText("%s: %3.1f / %d Kg", g_texts.Get(0xAB4).c_str(), 12.25, 30);
+        // (12.25 shown "12.3": the original's CRT rounds the decimal digits half up.)
+        const std::string weight = std::string(g_texts.Get(0xAB4).c_str()) + ": 12.3 / 30 Kg";
         ok &= MsLogIs({EpMsg(0x101, 0x1000092, 0, EpFloat(0.75f)), EpMsg(0x102, 0x1000092, 0, 0),
                        EpMsg(0x121, 0x1000014, 0xb, 0, weight.c_str()), EpMsg(0x103, 0x1000092, 0, EpFloat(0.375f)),
                        EpMsg(0x122, 0x1000014, 0xb, 0, "37.5%"), EpMsg(0x104, 0x1000092, 0, EpFloat(0.5f)),

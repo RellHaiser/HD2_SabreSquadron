@@ -116,7 +116,7 @@ struct alignas(16) S_Arena {
     int cursorDown;
     int loadResult;
     int numChildren[16];
-    int16_t child[16][48];       // FindChildFrame's answers, by CHILD_NAMES (-1 none)
+    int16_t child[16][56];       // FindChildFrame's answers, by CHILD_NAMES (-1 none; CHILD_NAME_COUNT at most)
     alignas(8) uint8_t zone[0x400];   // a multiplayer zone (its team: +0x98 the original's, the part sets the port's)
     S_vector cursorMove;
 };
@@ -137,8 +137,11 @@ const char *const CHILD_NAMES[] = {
     // (44: the item information's)
     "ammo*", "text_info*",
     // (46: the list group's)
-    "selector*"};
-const int CHILD_NAME_COUNT = 47;
+    "selector*",
+    // (47: the upgrade bar's)
+    "name_*", "hlcpct*", "upgrade*"};
+const int CHILD_NAME_COUNT = 50;
+static_assert(CHILD_NAME_COUNT <= int(sizeof g_arena.child[0] / sizeof g_arena.child[0][0]), "S_Arena::child too small");
 // The names RandomArena draws answers for (the others none): the earlier parts' 33 unless a part asks for more (their
 // random streams kept).
 int g_arenaNames = 33;
@@ -1164,6 +1167,9 @@ void DropDeletedNodes()
     }
 }
 
+// A part's fix-up of the original's side after its call (null: none; the bars': a scale's fourth word the original's
+// stack's).
+void (*g_afterOrig)() = nullptr;
 template <class PortCall, class OrigCall> void Diff(PortCall port, OrigCall orig)
 {
     ToOrig();
@@ -1182,6 +1188,8 @@ template <class PortCall, class OrigCall> void Diff(PortCall port, OrigCall orig
     g_log.clear();
     g_cbNext = 0;
     orig();
+    if (g_afterOrig)
+        g_afterOrig();
     CHECK(g_log == portLog, "calls: %s / %s", Joined(g_log).c_str(), Joined(portLog).c_str());
     const std::string arena = ArenaDiffers(portArena, g_arena);
     CHECK(arena.empty(), "%s", arena.c_str());
@@ -1306,7 +1314,17 @@ int GetGameTypeTextId(int) { Unexpected("GetGameTypeTextId"); return 0; }
 const C_Controls::S_Press *C_Controls::PollPress(int, bool) { Unexpected("C_Controls::PollPress"); return nullptr; }
 void __stdcall I3D_visual::UpdateWBoundProc() { Unexpected("I3D_visual::UpdateWBoundProc"); }
 void I3D_frame::UpdateWMatrixProc() { O_UpdateWMatrix(this); }
-void __stdcall S_quat::Make(const S_matrix &) { Unexpected("S_quat::Make"); }
+// (SetScale's rotation: LS3DF's, as the original's calls it; the bars'.)
+void __stdcall S_quat::Make(const S_matrix &m)
+{
+    using T_Make = void(__stdcall *)(S_quat *, const S_matrix &);
+    static const T_Make make = reinterpret_cast<T_Make>(GetProcAddress(GetModuleHandleA("LS3DF.dll"), "?Make@S_quat@@QAGXABUS_matrix@@@Z"));
+    if (!make) {
+        Unexpected("S_quat::Make (not in LS3DF.dll)");
+        return;
+    }
+    make(this, m);
+}
 bool C_KeyBindings::Bind(int, int, int, int) { Unexpected("C_KeyBindings::Bind"); return false; }
 C_str C_KeyBindings::GetBindingName(int) const { Unexpected("C_KeyBindings::GetBindingName"); return C_str(); }
 // (Its loaded picture or none without a name, as item_defs.cpp's; loading it is item_defs.cpp's part.)
@@ -1345,12 +1363,17 @@ bool C_Control::CreateChild(I3D_frame *frame, I3D_frame *root, const S_ControlDe
 
 namespace {
 void *__stdcall O_GetIGraph() { return g_arena.graph; }
+// The original's C_fstr (its C_str made here, as the test's): the text its own CRT makes (its static _vsnprintf,
+// 0x007e5ad2; the floats as the game shows them: part 57), the CRT's float conversions set first (its start-up's
+// _cfltcvt_init, 0x007e599c, never ran in the copy).
 void **__cdecl O_Fstr(void **dest, const char *format, ...)
 {
-    char text[512];
+    static const bool ready = (OriginalAt<void(__cdecl *)()>(0x007e599c)(), true);
+    (void)ready;
+    char text[2048] = {};
     va_list args;
     va_start(args, format);
-    std::vsnprintf(text, sizeof text, format, args);
+    OriginalAt<int(__cdecl *)(char *, size_t, const char *, va_list)>(0x007e5ad2)(text, sizeof text - 1, format, args);
     va_end(args);
     C_str s(text);
     *dest = s.m_rep;

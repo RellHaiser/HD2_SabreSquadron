@@ -1,4 +1,5 @@
 #include "common/c_str.h"
+#include "common/msvc_printf.h"
 
 #include <cctype>
 #include <cstdarg>
@@ -128,11 +129,11 @@ C_fstr::C_fstr(const char *format, ...)
     if (!format)
         return;
 
-    // The original formats into a fixed 2 KB stack buffer.
+    // The original formats into a fixed 2 KB stack buffer (its CRT's floats: msvc_printf.h).
     char buffer[2048];
     va_list args;
     va_start(args, format);
-    std::vsnprintf(buffer, sizeof(buffer), format, args);
+    msvc6::VsnPrintf(buffer, sizeof(buffer), format, args);
     va_end(args);
     C_str::operator=(buffer);
 }

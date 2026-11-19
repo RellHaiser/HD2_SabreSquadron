@@ -4,6 +4,7 @@
 // the saved games in game_save.cpp.
 #include "game/first_person_view.h"
 #include "game/game.h"
+#include "common/msvc_printf.h"
 
 #include <cmath>
 #include <cstdarg>
@@ -592,7 +593,7 @@ void C_game::PrintMessage(const S_vector &color, const char *format, ...)   // 0
     char line[512];
     va_list args;
     va_start(args, format);
-    std::vsprintf(line, format, args);
+    msvc6::VsnPrintf(line, sizeof line, format, args);   // (its CRT's floats)
     va_end(args);
     if (IsClient()) {
         m_interface->AddMessage(color, line);

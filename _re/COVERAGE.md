@@ -4081,3 +4081,44 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the shared infinite loops above found as hangs first (the cases bisected by rounds,
   then traced); the list's value never naming a node (the wheel's pages unrun) until AfterTree drew node ids; the earlier
   rounds' bad_alloc was the empty list's endless scroll filling the call log.
+
+## Human part 57 (the bar and the upgrade bar, `controls.cpp` lines 4225-4411; the original CRT's printf, 2026-11-19)
+
+- **The build:** `controls/build_bar.bat` (`bar_diff.cpp` with the kit). New in the kit: the upgrade bar's frame names;
+  g_afterOrig (a part's fix-up after the original's call: the bars put back the scale's fourth word, the original's
+  SetScale copies 16 bytes from its 12-byte vector, the last its stack's); S_quat::Make LS3DF's on the port's side (the
+  original's SetScale calls it); the original's C_fstr stand-in (O_Fstr) now formats with the original's own CRT
+  (_vsnprintf 0x007e5ad2 after its _cfltcvt_init 0x007e599c: MinGW's before).
+- **The tests:** the earlier parts' cases on planned trees (bars, upgrade bars with their two titles, under a control
+  or alone); the bars' own messages straight to them (the gets and sets of min, max, value, axis; the upgrade bar's
+  value, upgrade and suffix; its text messages; a title taken away for the bar's messages); UpdateBar and Refresh
+  straight, values half way between the shown tenths; Format: the port's formatter against the original's _vsnprintf
+  (ties at the precisions, big values, random bit patterns, infinities and NaNs, flags, widths, precisions, '*', the
+  integers, I64, %p, %n, an unknown conversion, a buffer too small).
+- **Results:** 10,055,593 checks, 0 failures; lines 4225-4411 128 of 128 measured lines run (msvc_printf.h 236 of 237: the one left S_Flt's declaration, gcov's line for its inlined constructor). Format: values tied past the 17th significant digit
+  counted, not compared (the original's 80-bit digits go either way there; their texts differ only where 17 or more
+  digits are shown, values of 1e14 and up printed whole: no format of the game's).
+- **Port fix (observable in the game):** the original's statically linked MSVC6 CRT formats floats unlike today's
+  (UCRT, MinGW): the decimal digits rounded half up (12.5 "%3.0f" "13", the port "12"; 0.25 "%.1f" "0.3", 1.25 kg
+  "1.3"), 17 significant digits then zeros, a zero's sign dropped ("0.0"), three exponent digits, "1.#INF", "1.#QNAN",
+  "1.#IND" digit-rounded ("1.$"), a signalling NaN quieted, a '#' point on %g, an unknown conversion its character
+  alone. New `common/msvc_printf.h` (msvc6::VsnPrintf / SnPrintf, header only, exact digits by integer arithmetic)
+  used by C_fstr (the weights, the equipment screen's stats, the upgrade bar), PrintMessage, PrintText,
+  PrintNamedText and GameSpy's %f. The bar's port itself: no differences (its compares, NaN paths included, as the
+  original's).
+- **Not tested:** the bars with NaNs of different signs on both sides of a division (x87 and SSE pick differently: the
+  tests draw the one NaN arithmetic makes); range overflow (the original's x87 keeps a wider exponent); the original's
+  crashes the port's checks avoid (an upgrade bar without its name's title taking a text message, without either title
+  refreshed); %lld and %zu (C's in the port; MSVC6 knows neither, the original uses neither).
+- **Mutations:** the bars 67 mutants, 2 not building, 63 of 65 killed, 2 equivalent (mutate_controls_bar.py); the
+  formatter 334, 19 not building, 275 of 315 killed, 40 equivalent (mutate_msvc_printf.py). Per the survivors: the
+  formatter's redundant code taken out (a %g carry's resize, a layout flag, a sign skip, %I32d), the tests given
+  widths with 9, %.0d of 0, %I32d, the doubles whose 17 digits carry to a power of ten (1e-14 and others), small
+  buffers.
+- **Harness lessons (my mistakes):** the kit's MinGW stand-in for the original's C_fstr hid the CRT difference until
+  the original's _vsnprintf was called directly (the first check compared the port with itself); MinGW's printf gives
+  wrong digits under the game's 24-bit x87 precision (62789200642048 printed 62789199551562.718), so the formatter
+  makes its digits with integers; the original's %f traps until its CRT start-up's _cfltcvt_init has run; three new
+  frame names took the kit's arena past its 48 names a frame (four controls suites crashed until the full run: widened,
+  a static_assert now); the vehicle harness's hand-written texts had MinGW's rounding (0.25 "+ 0.2", 12.25 kg "12.2",
+  612.5 "612", 64.5 " 64"): now the original's ("+ 0.3", "12.3", "613", " 65").

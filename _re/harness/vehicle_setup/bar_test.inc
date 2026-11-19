@@ -211,11 +211,12 @@ void BarTest(I3D_scene *scene)
         WM(r.ubText, CbRuns(u->m_text) == "1.0 /43 pts/43 ");
         handled &= BrSet(u, CONTROL_MSG_SET_BAR_VALUE, 0.75f, 0);
         handled &= BrSet(u, CONTROL_MSG_SET_BAR_VALUE, 0.5f, 1);
-        WM(r.ubText, CbRuns(u->m_text) == "0.8 /43 + 0.2/44 pts/43 " && upgrade->GetScale() == S_vector(1.0f, 1.0f, 1.0f));
+        // (0.25 shown "0.3": the original's CRT rounds the decimal digits half up.)
+        WM(r.ubText, CbRuns(u->m_text) == "0.8 /43 + 0.3/44 pts/43 " && upgrade->GetScale() == S_vector(1.0f, 1.0f, 1.0f));
         // Exactly the maximum: divided.
         handled &= BrSet(u, CONTROL_MSG_SET_BAR_VALUE, 0.25f, 1);
         WM(r.ubScale, upgrade->GetScale() == S_vector(1.0f, 1.0f, 1.0f) && value->GetScale() == S_vector(0.75f, 1.0f, 1.0f));
-        WM(r.ubText, CbRuns(u->m_text) == "0.8 /43 + 0.2/44 pts/43 ");
+        WM(r.ubText, CbRuns(u->m_text) == "0.8 /43 + 0.3/44 pts/43 ");
         handled &= BrSet(u, CONTROL_MSG_SET_BAR_MAX, 2.0f);
         handled &= BrSet(u, CONTROL_MSG_SET_BAR_VALUE, 2.0f, 0);
         WM(r.ubScale, value->GetScale() == S_vector(1.0f, 1.0f, 1.0f));

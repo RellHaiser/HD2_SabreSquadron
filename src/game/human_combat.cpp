@@ -2,6 +2,7 @@
 // disguise, visibility and the bones shots aim at (original source 0x005a0220..0x005a2740,
 // 0x005a3ab0..0x005a3dd0 and smaller functions between 0x005a4600 and 0x005a8820).
 #include "game/human.h"
+#include "common/msvc_printf.h"
 
 #include <cstdarg>
 #include <cstdio>
@@ -131,7 +132,7 @@ void C_Human::PrintText(const C_Human * /*human*/, const S_vector &color, int te
     char text[1024];
     va_list args;
     va_start(args, textId);
-    std::vsprintf(text, format, args);
+    msvc6::VsnPrintf(text, sizeof text, format, args);   // (its CRT's floats)
     va_end(args);
     GetGame()->PrintMessage(color, text);
 }
@@ -143,7 +144,7 @@ void C_Human::PrintNamedText(const C_Human *human, const S_vector & /*color*/, i
     char text[1024];
     va_list args;
     va_start(args, textId);
-    std::vsprintf(text, format, args);
+    msvc6::VsnPrintf(text, sizeof text, format, args);   // (its CRT's floats)
     va_end(args);
     char named[1024];
     std::sprintf(named, "%s: %s", human->GetShortName(), text);

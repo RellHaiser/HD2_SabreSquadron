@@ -1,5 +1,6 @@
 // The GameSpy SDK's utilities (part 10f-i): its dynamic array and hash table, MD5, small helpers. See gamespy_internal.h.
 #include "net/gamespy_internal.h"
+#include "common/msvc_printf.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -575,7 +576,8 @@ void AppendBucket(void *element, void *data)           // 0x00733870 (DS 0x0078e
     if (bucket->type == BUCKET_INT)
         out->length += std::sprintf(end, "\\%s\\%d", bucket->name, bucket->value.asInt);
     else if (bucket->type == BUCKET_DOUBLE)
-        out->length += std::sprintf(end, "\\%s\\%f", bucket->name, bucket->value.asDouble);
+        // (The original's CRT's float; unbounded, as its sprintf.)
+        out->length += msvc6::SnPrintf(end, static_cast<std::size_t>(-1), "\\%s\\%f", bucket->name, bucket->value.asDouble);
     else if (bucket->type == BUCKET_STRING)
         out->length += std::sprintf(end, "\\%s\\%s", bucket->name, bucket->value.asString);
 }

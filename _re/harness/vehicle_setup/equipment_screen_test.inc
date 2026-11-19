@@ -541,9 +541,10 @@ void EquipmentScreenTest(I3D_scene *scene)
         const auto rowText = [](uint32_t bar, float fill, const char *value) {
             return CmText("%x 1000092 0 %x ; %x 1000014 17 0 %s; ", bar, GmBits(fill), bar + 0x1000, value);
         };
+        // (The halves rounded up, as the original's CRT does: 612.5 "613", 64.5 " 65".)
         const std::string full = "4201000 1000014 d 0 Custom; " + rowText(0x4502000, 55.5f * 0.01f, " 56 %") +
-                                 rowText(0x4505000, 37.25f * 0.01f, " 37 Kg") + rowText(0x4508000, 1.0f, "612") +
-                                 rowText(0x450b000, 64.5f * 0.01f, " 64") + rowText(0x450e000, 75.0f * 0.01f, " 75 %") +
+                                 rowText(0x4505000, 37.25f * 0.01f, " 37 Kg") + rowText(0x4508000, 1.0f, "613") +
+                                 rowText(0x450b000, 64.5f * 0.01f, " 65") + rowText(0x450e000, 75.0f * 0.01f, " 75 %") +
                                  rowText(0x4511000, 12.25f * 0.01f, " 12 %") + rowText(0x4514000, 99.5f * 0.01f, "100 %");
         const std::string got = GmQueue();
         okt &= got == full;
