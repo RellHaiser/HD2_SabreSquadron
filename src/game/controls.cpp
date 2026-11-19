@@ -3803,8 +3803,8 @@ constexpr int SCROLL_NONE = 0, SCROLL_BACK = 1, SCROLL_ON = 2;
 // The enter / leave id the list's focus moves use; the item's unpick id.
 constexpr int FOCUS_MOVE_ID = 0xF;
 constexpr int UNPICK_ID = 1;
-// The selector just in front of its item (a double: the original's).
-constexpr double SELECTOR_DEPTH = 0.1;
+// The selector just in front of its item (a float: the original's FSUB of 0x0080f550).
+constexpr float SELECTOR_DEPTH = 0.1f;
 
 } // namespace
 
@@ -3911,7 +3911,7 @@ void C_ListGroup::Select(int index)
         Scroll(SCROLL_ON);
     if (m_selector) {
         const S_vector place = m_children[index]->GetFrame()->GetPos();
-        m_selector->SetPosInline(S_vector(place.x, place.y, static_cast<float>(place.z - SELECTOR_DEPTH)));
+        m_selector->SetPosInline(S_vector(place.x, place.y, place.z - SELECTOR_DEPTH));
         m_selector->SetOn(true);
     }
     PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
@@ -4039,7 +4039,8 @@ void C_ListGroup::Sort()
     const int count = ItemCount();
     for (int i = 0; i < count - 1; ++i)
         for (int j = i + 1; j < count; ++j)
-            if (m_children[j]->GetId() < m_children[i]->GetId())
+            // (Signed, the original's: ids with the top bit set first.)
+            if (static_cast<int32_t>(m_children[j]->GetId()) < static_cast<int32_t>(m_children[i]->GetId()))
                 std::swap(m_children[i], m_children[j]);
 }
 
@@ -4081,7 +4082,8 @@ bool C_ListGroup::HandleMessage(S_ControlMessage *message)
             m_picked = nullptr;
         delete item;
         m_children.erase(m_children.begin() + index);
-        while (m_first != 0 && ItemCount() - m_first < m_visible)
+        // (Unsigned, the original's: a first shown past the items scrolls no back.)
+        while (m_first != 0 && static_cast<uint32_t>(ItemCount() - m_first) < static_cast<uint32_t>(m_visible))
             Scroll(SCROLL_BACK);
         HandleMessageCopy(refresh);
         return true;
@@ -4153,9 +4155,10 @@ bool C_ListGroup::HandleMessage(S_ControlMessage *message)
         message->value = static_cast<uint32_t>(m_first);
         return true;
     case CONTROL_MSG_SET_POSITION: {
-        const int position = static_cast<int>(message->value);
-        while (position != m_first) {
-            if (!(position > m_first ? Scroll(SCROLL_ON) : Scroll(SCROLL_BACK)))
+        // (Unsigned, the original's: a negative position is past the end, scrolled on to.)
+        const uint32_t position = message->value;
+        while (position != static_cast<uint32_t>(m_first)) {
+            if (!(position > static_cast<uint32_t>(m_first) ? Scroll(SCROLL_ON) : Scroll(SCROLL_BACK)))
                 break;
         }
         return true;

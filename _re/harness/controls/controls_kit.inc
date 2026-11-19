@@ -85,6 +85,9 @@ void Unexpected(const char *what)
 std::vector<C_Control *> g_portNodes;
 std::vector<uint8_t *> g_origNodes;
 std::vector<void *> g_origBlocks;   // (the test's blocks of the original's side, freed before the next call)
+// The nodes a call deleted (a list's items): the port's (C_Logged's destructor), the original's (its operator delete on
+// a test block: not freed there, ToOrig frees it).
+std::vector<const void *> g_portDeleted, g_origDeleted;
 void *OrigAlloc(size_t bytes)
 {
     void *p = std::calloc(1, bytes ? bytes : 1);
@@ -132,8 +135,10 @@ const char *const CHILD_NAMES[] = {
     // (42: the skill's)
     "skill_text*", "skill_value*",
     // (44: the item information's)
-    "ammo*", "text_info*"};
-const int CHILD_NAME_COUNT = 46;
+    "ammo*", "text_info*",
+    // (46: the list group's)
+    "selector*"};
+const int CHILD_NAME_COUNT = 47;
 // The names RandomArena draws answers for (the others none): the earlier parts' 33 unless a part asks for more (their
 // random streams kept).
 int g_arenaNames = 33;
@@ -602,7 +607,14 @@ uint8_t g_objects[2][16];
 // (Zeroed, as the port's members are: the original's new edit buffer is not cleared, a flaw the port fixes; typing comes
 // only after BeginEdit cleared it.)
 void *__cdecl O_New(size_t size) { return std::calloc(1, size ? size : 1); }
-void __cdecl O_Delete(void *p) { std::free(p); }
+void __cdecl O_Delete(void *p)
+{
+    if (std::find(g_origBlocks.begin(), g_origBlocks.end(), p) != g_origBlocks.end()) {
+        g_origDeleted.push_back(p);
+        return;
+    }
+    std::free(p);
+}
 
 // ---- messages ----
 uint32_t OrigText(const C_str &text)
@@ -745,6 +757,7 @@ void AddLoggedVt(uint32_t original)
 template <class T> class C_Logged : public T {
 public:
     using T::T;
+    ~C_Logged() override { g_portDeleted.push_back(this); }
     void Refresh() override
     {
         Log("refresh %s", Name(this).c_str());
@@ -1131,9 +1144,31 @@ std::string ArenaDiffers(const S_Arena &a, const S_Arena &b)
         }
     return "";
 }
+// The nodes the call deleted (on either side) out of the trees: the same nodes on both sides.
+void DropDeletedNodes()
+{
+    std::vector<size_t> gone;
+    for (size_t i = 0; i < g_portNodes.size(); ++i) {
+        const bool p = std::find(g_portDeleted.begin(), g_portDeleted.end(), g_portNodes[i]) != g_portDeleted.end();
+        const bool o = i < g_origNodes.size() && std::find(g_origDeleted.begin(), g_origDeleted.end(), g_origNodes[i]) != g_origDeleted.end();
+        CHECK(p == o, "c%u (%s) deleted: %d / %d", unsigned(i), g_nodeKinds[i]->name, o, p);
+        if (p || o)
+            gone.push_back(i);
+    }
+    for (size_t k = gone.size(); k-- > 0;) {
+        const auto at = std::ptrdiff_t(gone[k]);
+        g_portNodes.erase(g_portNodes.begin() + at);
+        g_origNodes.erase(g_origNodes.begin() + at);
+        g_nodeKinds.erase(g_nodeKinds.begin() + at);
+        g_freshNodes.erase(g_freshNodes.begin() + at);
+    }
+}
+
 template <class PortCall, class OrigCall> void Diff(PortCall port, OrigCall orig)
 {
     ToOrig();
+    g_portDeleted.clear();
+    g_origDeleted.clear();
     ClearQueues();
     g_newPortBoxes.clear();
     g_newOrigBoxes.clear();
@@ -1150,6 +1185,7 @@ template <class PortCall, class OrigCall> void Diff(PortCall port, OrigCall orig
     CHECK(g_log == portLog, "calls: %s / %s", Joined(g_log).c_str(), Joined(portLog).c_str());
     const std::string arena = ArenaDiffers(portArena, g_arena);
     CHECK(arena.empty(), "%s", arena.c_str());
+    DropDeletedNodes();
     AdoptNewNodes();
     CompareTrees();
     CompareQueues();
@@ -1291,9 +1327,19 @@ C_str C_GameTexts::Get(int id) const
 extern "C" IGraph *GetIGraph() { return reinterpret_cast<IGraph *>(g_arena.graph); }
 extern "C" I3D_driver *I3DGetDriver() { Unexpected("I3DGetDriver"); return nullptr; }
 // The factory (control_factory.cpp is a later part's): faked.
-bool C_Control::CreateChild(I3D_frame *frame, I3D_frame *, const S_ControlDesc *desc)
+// (A description paired in g_fnPairs by its pair's index: the list's ADD_ITEM's; others by their address.)
+static std::string DescName(const void *desc)
 {
-    Log("CreateChild %s %s %p", Name(this).c_str(), ArenaName(frame).c_str(), static_cast<const void *>(desc));
+    for (size_t k = 0; k < g_fnPairs.size(); ++k)
+        if (uintptr_t(desc) == g_fnPairs[k].first || uintptr_t(desc) == g_fnPairs[k].second)
+            return "pair" + std::to_string(k);
+    char text[24];
+    std::snprintf(text, sizeof text, "%p", desc);
+    return text;
+}
+bool C_Control::CreateChild(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    Log("CreateChild %s %s %s %s", Name(this).c_str(), ArenaName(frame).c_str(), ArenaName(root).c_str(), DescName(desc).c_str());
     return true;
 }
 
@@ -1312,9 +1358,9 @@ void **__cdecl O_Fstr(void **dest, const char *format, ...)
     return dest;
 }
 void *__cdecl O_AcquireFonts() { return AcquireFontManager(); }
-bool __attribute__((thiscall)) O_CreateChild(void *self, void *frame, void *, void *desc)
+bool __attribute__((thiscall)) O_CreateChild(void *self, void *frame, void *root, void *desc)
 {
-    Log("CreateChild %s %s %p", Name(self).c_str(), ArenaName(frame).c_str(), desc);
+    Log("CreateChild %s %s %s %s", Name(self).c_str(), ArenaName(frame).c_str(), ArenaName(root).c_str(), DescName(desc).c_str());
     return true;
 }
 

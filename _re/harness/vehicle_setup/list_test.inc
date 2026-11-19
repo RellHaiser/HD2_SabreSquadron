@@ -153,9 +153,13 @@ void ListTest(I3D_scene *scene)
         m = CsMessage(CONTROL_MSG_PREVIOUS_ITEM);
         handled &= l->HandleMessage(&m);
         WM(r.lsScroll, l->m_first == 0 && frame->GetPos() == S_vector(0.0f, 0.0f, 0.0f));
+        // (Unsigned, the original's: -1 is past the end, scrolled on to it; then back to the start.)
         m = CsMessage(CONTROL_MSG_SET_POSITION, -1);
         handled &= l->HandleMessage(&m);
-        WM(r.lsScroll, l->m_first == 0);
+        WM(r.lsScroll, l->m_first == 2 && l->m_last == 3);
+        m = CsMessage(CONTROL_MSG_SET_POSITION, 0);
+        handled &= l->HandleMessage(&m);
+        WM(r.lsScroll, l->m_first == 0 && frame->GetPos() == S_vector(0.0f, 0.0f, 0.0f));
 
         // Selected: scrolled to, the selector just in front of it (on), the position posted.
         g_controlMessages.clear();

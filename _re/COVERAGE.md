@@ -4049,3 +4049,35 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the information's vtable is not in its destructor (the compiler left the group's
   there): found by the slots holding its FindChild and HandleMessage; the zoom's limit too rare to be drawn at first; a
   heredoc with a backslash once more (its result right, checked).
+
+## Human part 56 (the list group and its items, `controls.cpp` lines 3794-4224, 2026-11-18)
+
+- **The build:** `controls/build_list.bat` (`list_diff.cpp` with the kit). New in the kit: nodes deleted during a call
+  (an item removed, a list cleared): the port's recorded by C_Logged's destructor, the original's by its operator delete
+  on a test block (not freed there: ToOrig frees it), checked to be the same nodes and dropped before the trees are
+  compared; CreateChild's log with its root frame and paired descriptions named alike (g_fnPairs: the original's ADD_ITEM
+  description built beside the port's); the selector's frame name (the earlier suites' streams kept). The original's
+  _aligned_free import made a no-op (the origin is freed by the port's destructor).
+- **The tests:** part 49's cases on planned trees (one or two lists of up to 8 items, items sharing an id now and then,
+  an extra control owned by the list, origins, steps, selector frames, cursors); the list's own messages straight to it
+  (REMOVE_ITEM, ADD_ITEM with its description, CLEAR, the scroll ones, SET_POSITION with negative values on lists with
+  items, SET_ORIGIN, the steps, REFRESH, SELECT_INDEX); its and its items' input slots, the navigation keys, the wheel at
+  its 120 steps' edges (the value naming a node: the scroll bar paged), ScrollRange.
+- **Results:** 13,573,775 checks, 0 failures, 8 s; lines 3794-4224 all run (259 of 259).
+- **Port fixes (four, all observable in the game's lists):** REMOVE_ITEM's scroll back compares the items left past the
+  first shown unsigned (a first past the items scrolled back to 0 in the port; the original stays); SET_POSITION compares
+  unsigned (a negative position is past the end: the original scrolls on to the end, the port scrolled back); the sort
+  compares the ids signed (ids with the top bit set first, as the original's); the selector's depth is a float 0.1
+  (FSUB float ptr [0x0080f550]; the port subtracted a double and rounded twice: one ulp off now and then).
+  vehicle_setup/list_test.inc expected the port's former SET_POSITION -1 (staying at the start): now the original's (on
+  to the end, then back with SET_POSITION 0).
+- **Original flaws steered clear of (shared, game states the tests keep to):** Select loops for ever when the last shown
+  is negative (SET_VISIBLE 0, or a last below the first: Scroll on never passes the unsigned compare) and an empty list
+  scrolls on without end to a far or negative SET_POSITION; the tests keep the last at first + visible - 1, visible at
+  least 1, SET_VISIBLE sent at the first, negative positions only to lists with items. An item's click takes its parent
+  to be a list (items only under lists).
+- **Mutations:** 140 mutants; 5 not building; 128 of the 135 building killed (95 %), 7 survived, all equivalent (see
+  mutate_controls_list.py). One more pass per the survivors: items sharing an id.
+- **Harness lessons (my mistakes):** the shared infinite loops above found as hangs first (the cases bisected by rounds,
+  then traced); the list's value never naming a node (the wheel's pages unrun) until AfterTree drew node ids; the earlier
+  rounds' bad_alloc was the empty list's endless scroll filling the call log.

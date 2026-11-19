@@ -472,7 +472,7 @@ void SetUp()
     SetUpKit();
     g_kinds = KINDS;
     g_kindCount = KIND_COUNT;
-    g_arenaNames = CHILD_NAME_COUNT;
+    g_arenaNames = 46;   // (its names: the list group's after them)
     g_treePlan = TreePlan;
     g_itemDef = PortItem;
     g_codes = {CONTROL_MSG_DEACTIVATE, CONTROL_MSG_ACTIVATE,  CONTROL_MSG_IGNORE_INPUT, CONTROL_MSG_TAKE_INPUT, CONTROL_MSG_SET_INDEX,

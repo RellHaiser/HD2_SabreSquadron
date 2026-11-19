@@ -227,6 +227,8 @@ SUITES = [
       tree_copy="controls/skill_diff.exe"),
     T("human.controls_info", "controls/build_info.bat", TMP + r"\info_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="controls/info_diff.exe"),
+    T("human.controls_list", "controls/build_list.bat", TMP + r"\list_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="controls/list_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
