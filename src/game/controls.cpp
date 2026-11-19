@@ -3316,7 +3316,7 @@ bool C_ChatInput::LineEntered(void *object, void *, C_Control *control, uint32_t
     }
     S_ControlMessage prompt = ValueMessage(CONTROL_MSG_SET_TEXT_ID, CHAT_PROMPT_STYLE);
     prompt.value2 = CHAT_PROMPT_TEXT;
-    control->HandleMessageCopy(prompt);
+    control->HandleMessage(&prompt);
     S_ControlMessage edit = Message(CONTROL_MSG_EDIT);
     edit.target = control->GetId();
     PostControlMessage(edit);
@@ -3341,8 +3341,10 @@ bool C_ChatInput::HandleMessage(S_ControlMessage *message)
             // The oldest line removed past 8.
             S_ControlMessage runs = Message(CONTROL_MSG_GET_RUNS);
             m_label->HandleMessage(&runs);
-            if (runs.value > CHAT_LINES)
-                m_label->HandleMessageCopy(Message(CONTROL_MSG_REMOVE_RUN));
+            if (runs.value > CHAT_LINES) {
+                S_ControlMessage remove = Message(CONTROL_MSG_REMOVE_RUN);
+                m_label->HandleMessage(&remove);
+            }
             return true;
         }
         case CONTROL_MSG_TEAM_TOGGLED: {

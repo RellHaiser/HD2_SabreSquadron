@@ -11,6 +11,15 @@ void (*g_afterTree)() = nullptr;
 void (*g_beforeCreate)(size_t node, int frame) = nullptr;
 bool (*g_messageFits)(size_t node, const S_ControlMessage &m) = nullptr;   // (false: another message drawn)
 void (*g_beforeMessage)(size_t node, const S_ControlMessage &m) = nullptr;   // (the node's state for the message)
+// A part's tree plan (null: RandomTree's draws): each node's parent (an earlier node's index, -1 none), kind, its id's
+// last 4 bits OR'd to its parent's (-1: RandomTree's id) and whether it is among its parent's children.
+struct S_PlanNode {
+    int parent;
+    int kind;
+    int bits;
+    bool child;
+};
+std::vector<S_PlanNode> (*g_treePlan)() = nullptr;
 bool IsLoud(uint32_t code) { return std::find(g_loudCodes.begin(), g_loudCodes.end(), code) != g_loudCodes.end(); }
 
 // ---- random trees (part 48's rules: self routes that raise notifications only on these, notifying only those) ----
@@ -82,12 +91,16 @@ void RandomTree(const std::vector<int> &kinds = {})
     ClearPortTree();
     RandomArena();
     g_cursorMade = P(0.9);
-    const int count = P(0.1) ? 1 : I(2, 8);
+    std::vector<S_PlanNode> plan;
+    if (g_treePlan && kinds.empty())
+        plan = g_treePlan();
+    const int count = !plan.empty() ? int(plan.size()) : P(0.1) ? 1 : I(2, 8);
     std::vector<int> depth;
     const uint32_t top = P(0.8) ? (uint32_t(I(1, 63)) << 26) : 0;
     for (int i = 0; i < count; ++i) {
         // (Parents: groups or plain controls mostly.)
-        C_Control *parent = i == 0 ? nullptr : g_portNodes[size_t(I(0, i - 1))];
+        C_Control *parent = !plan.empty() ? (plan[size_t(i)].parent < 0 ? nullptr : g_portNodes[size_t(plan[size_t(i)].parent)])
+                            : i == 0 ? nullptr : g_portNodes[size_t(I(0, i - 1))];
         int d = 0;
         uint32_t id = top;
         if (parent) {
@@ -97,11 +110,13 @@ void RandomTree(const std::vector<int> &kinds = {})
             const int shift = d == 1 ? 20 : d == 2 ? 12 : 4;
             id = d <= 3 ? parent->m_id | (index << shift) : parent->m_id;
         }
-        if (P(0.05))
+        if (!plan.empty() && plan[size_t(i)].bits >= 0)
+            id = (parent ? parent->m_id : top) | uint32_t(plan[size_t(i)].bits);
+        else if (P(0.05))
             id = P(0.5) ? 0xFFFFFFFF : U32();
-        const int k = kinds.empty() ? I(0, g_kindCount - 1) : kinds[size_t(I(0, int(kinds.size()) - 1))];
+        const int k = !plan.empty() ? plan[size_t(i)].kind : kinds.empty() ? I(0, g_kindCount - 1) : kinds[size_t(I(0, int(kinds.size()) - 1))];
         C_Control *c = g_kinds[k].make(reinterpret_cast<I3D_scene *>(uintptr_t(0x5CE0E000 + I(0, 3))), id, parent);
-        if (parent && P(0.95))
+        if (parent && (!plan.empty() ? plan[size_t(i)].child : P(0.95)))
             parent->m_children.push_back(c);
         g_portNodes.push_back(c);
         g_nodeKinds.push_back(&g_kinds[k]);

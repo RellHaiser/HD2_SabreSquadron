@@ -113,7 +113,7 @@ struct alignas(16) S_Arena {
     int cursorDown;
     int loadResult;
     int numChildren[16];
-    int16_t child[16][40];       // FindChildFrame's answers, by CHILD_NAMES (-1 none)
+    int16_t child[16][48];       // FindChildFrame's answers, by CHILD_NAMES (-1 none)
     alignas(8) uint8_t zone[0x400];   // a multiplayer zone (its team: +0x98 the original's, the part sets the port's)
     S_vector cursorMove;
 };
@@ -126,8 +126,13 @@ const char *const CHILD_NAMES[] = {
     "allactived", "allnormal", "xallactived", "xallnormal", "yesactived_full*", "noactived_full*", "noactived_empty*", "allied*",
     "axis*", "text_*", "noactived*", "nonormal*", "yesactived*", "yesnormal*", "emptyactived*", "emptynormal*",
     // (32: the selection list's)
-    "select*"};
-const int CHILD_NAME_COUNT = 33;
+    "select*",
+    // (33: the groups': the scrolled text's, the combo box's, the titled combo box's, the chat input's)
+    "text*", "scroll*", "listbox*", "cbdown*", "header*", "text18", "game difficulty", "binput*", "bTeam"};
+const int CHILD_NAME_COUNT = 42;
+// The names RandomArena draws answers for (the others none): the earlier parts' 33 unless a part asks for more (their
+// random streams kept).
+int g_arenaNames = 33;
 int ChildName(const char *name)
 {
     for (int k = 0; k < CHILD_NAME_COUNT; ++k)
@@ -251,7 +256,7 @@ void RandomArena()
         *reinterpret_cast<void **>(g_arena.frames[i] + 0x1E0) = g_arena.mesh;
         g_arena.numChildren[i] = P(0.85) ? 3 : I(0, 5);
         for (int k = 0; k < CHILD_NAME_COUNT; ++k)
-            g_arena.child[i][k] = static_cast<int16_t>(P(0.9) ? I(0, 15) : -1);
+            g_arena.child[i][k] = static_cast<int16_t>(k >= g_arenaNames ? -1 : P(0.9) ? I(0, 15) : -1);
         // The bound (+0x10: min, max; valid now and then), the type, the visual's world bound (+0x170, valid).
         f->m_frameFlags |= P(0.8) ? FRMFLAGS_BOUND_VALID : 0;
         const S_vector a(F(-1.5f, 1.5f), F(-1.5f, 1.5f), F(-1, 1)), b(F(-1.5f, 1.5f), F(-1.5f, 1.5f), F(-1, 1));
@@ -550,15 +555,25 @@ S_vector *__attribute__((thiscall)) OC_GetPosition(void *, S_vector *pos)
 std::vector<int> g_cbResults;
 size_t g_cbNext;
 bool CbResult() { return g_cbResults.empty() ? true : g_cbResults[g_cbNext++ % g_cbResults.size()]; }
+// A callback's value as logged (a part's: a pointer to a text shown as the text; null: hex).
+std::string (*g_cbValue)(uint32_t notification, uint32_t value) = nullptr;
+std::string CbValue(uint32_t notification, uint32_t value)
+{
+    if (g_cbValue)
+        return g_cbValue(notification, value);
+    char text[16];
+    std::snprintf(text, sizeof text, "%x", value);
+    return text;
+}
 #define CALLBACK_PAIR(K)                                                                                                     \
     bool PortCb##K(void *object, void *argument, C_Control *control, uint32_t notification, uint32_t value)                \
     {                                                                                                                        \
-        Log("cb%d %p %p %s %x %x", K, object, argument, Name(control).c_str(), notification, value);                        \
+        Log("cb%d %p %p %s %x %s", K, object, argument, Name(control).c_str(), notification, CbValue(notification, value).c_str()); \
         return CbResult();                                                                                                   \
     }                                                                                                                        \
     bool __attribute__((thiscall)) OrigCb##K(void *object, void *argument, void *control, uint32_t notification, uint32_t value) \
     {                                                                                                                        \
-        Log("cb%d %p %p %s %x %x", K, object, argument, Name(control).c_str(), notification, value);                        \
+        Log("cb%d %p %p %s %x %s", K, object, argument, Name(control).c_str(), notification, CbValue(notification, value).c_str()); \
         return CbResult();                                                                                                   \
     }
 CALLBACK_PAIR(0)
@@ -566,11 +581,16 @@ CALLBACK_PAIR(1)
 CALLBACK_PAIR(2)
 const uintptr_t g_portCbs[3] = {reinterpret_cast<uintptr_t>(PortCb0), reinterpret_cast<uintptr_t>(PortCb1), reinterpret_cast<uintptr_t>(PortCb2)};
 const uintptr_t g_origCbs[3] = {reinterpret_cast<uintptr_t>(OrigCb0), reinterpret_cast<uintptr_t>(OrigCb1), reinterpret_cast<uintptr_t>(OrigCb2)};
+// The port's functions the original's are (a part's: the controls' own callbacks).
+std::vector<std::pair<uintptr_t, uintptr_t>> g_fnPairs;
 uintptr_t ToOrigFn(uintptr_t f)
 {
     for (int i = 0; i < 3; ++i)
         if (f == g_portCbs[i])
             return g_origCbs[i];
+    for (const auto &pair : g_fnPairs)
+        if (f == pair.first)
+            return pair.second;
     return f;
 }
 uint8_t g_objects[2][16];
@@ -623,10 +643,18 @@ void MessageToOrig(const S_ControlMessage &m, uint8_t *o)
 const uint32_t STACK_VALUE2_CODES[] = {0x1000023, 0x1000024, 0x1000025, 0x200001b, 0x200001c, 0x1000022, 0x200002b, 0x1000020};
 const uint32_t STACK_VALUE3_CODES[] = {0x200007a, 0x1000023, 0x1000024, 0x1000025, 0x200001b, 0x200001c, 0x1000021, 0x1000022, 0x200002b,
                                        0x1000020, 0x20000bf, 0x20000c0};
+// A part's (the same allowance for its codes).
+std::vector<uint32_t> g_stackValue2Codes, g_stackValue3Codes;
 std::string MessageDiffers(const S_ControlMessage &m, const uint8_t *o)
 {
     uint32_t w[6];
     std::memcpy(w, o, 0x18);
+    for (uint32_t code : g_stackValue2Codes)
+        if ((m.id & CONTROL_MSG_MASK) == code && m.value2 == 0)
+            w[3] = 0;
+    for (uint32_t code : g_stackValue3Codes)
+        if ((m.id & CONTROL_MSG_MASK) == code && m.value3 == 0)
+            w[4] = 0;
     for (uint32_t code : STACK_VALUE2_CODES)
         if ((m.id & CONTROL_MSG_MASK) == code && m.value2 == 0)
             w[3] = 0;
@@ -942,12 +970,12 @@ void ToOrig()
         std::vector<uint32_t> callbacks;
         for (const S_ControlCallback &cb : c.m_callbacks) {
             callbacks.push_back(cb.notification);
-            callbacks.push_back(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(cb.object)));
+            callbacks.push_back(ToOrigWord(reinterpret_cast<uintptr_t>(cb.object)));
             callbacks.push_back(static_cast<uint32_t>(ToOrigFn(reinterpret_cast<uintptr_t>(cb.function))));
         }
         OVecPut(o, O_CALLBACKS, callbacks.data(), callbacks.size() * 4);
         OF<uint32_t>(o, O_ANY) = c.m_anyCallback.notification;
-        OF<void *>(o, O_ANY + 4) = c.m_anyCallback.object;
+        OF<uint32_t>(o, O_ANY + 4) = ToOrigWord(reinterpret_cast<uintptr_t>(c.m_anyCallback.object));
         OF<uint32_t>(o, O_ANY + 8) = static_cast<uint32_t>(ToOrigFn(reinterpret_cast<uintptr_t>(c.m_anyCallback.function)));
         OF<uint8_t *>(o, O_PARENT) = c.m_parent ? ToOrigNode(c.m_parent) : nullptr;
         OF<I3D_frame *>(o, O_FRAME) = c.m_frame;
@@ -986,11 +1014,12 @@ void CompareTrees()
             for (size_t k = 0; k < c.m_callbacks.size(); ++k) {
                 const uint32_t *w = reinterpret_cast<uint32_t *>(OVecData(o, O_CALLBACKS) + k * 12);
                 const S_ControlCallback &cb = c.m_callbacks[k];
-                CHECK(w[0] == cb.notification && w[1] == reinterpret_cast<uintptr_t>(cb.object) &&
+                CHECK(w[0] == cb.notification && w[1] == ToOrigWord(reinterpret_cast<uintptr_t>(cb.object)) &&
                           w[2] == ToOrigFn(reinterpret_cast<uintptr_t>(cb.function)),
                       "%scallback %u", n.c_str(), unsigned(k));
             }
-        CHECK(OF<uint32_t>(o, O_ANY) == c.m_anyCallback.notification && OF<void *>(o, O_ANY + 4) == c.m_anyCallback.object &&
+        CHECK(OF<uint32_t>(o, O_ANY) == c.m_anyCallback.notification &&
+                  OF<uint32_t>(o, O_ANY + 4) == ToOrigWord(reinterpret_cast<uintptr_t>(c.m_anyCallback.object)) &&
                   OF<uint32_t>(o, O_ANY + 8) == ToOrigFn(reinterpret_cast<uintptr_t>(c.m_anyCallback.function)),
               "%sany callback", n.c_str());
         CHECK(PtrName(OF<uint8_t *>(o, O_PARENT)) == PtrName(c.m_parent), "%sparent", n.c_str());

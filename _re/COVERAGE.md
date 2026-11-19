@@ -3976,3 +3976,32 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the original's 16-bit line arguments taken for ints; the buffers' generator almost
   never ended a text in a multi-byte sequence (the backspace's cases not run until it did), and left nothing after
   the text's terminator (as a backspace does); a heredoc with backslashes once more (Edit instead).
+
+## Human part 53 (the scrolled text, the combo boxes and the chat input, `controls.cpp` lines 2765-3362, 2026-11-18)
+
+- **The build:** `controls/build_group.bat` (`group_diff.cpp` with the kit). New in the kit: `controls_kinds.inc` (parts
+  49-52's kinds' helpers for the later parts' groups), a tree plan hook (each group with its parts as its Create makes
+  them, now and then one left out with a plain control in its place, two swapped or an extra child; the scroll bars with
+  their arrows and slider), nine more child frame names (drawn only when a part asks: the earlier suites' random streams
+  kept), the controls' own callbacks mapped to the original's (the header's edit 0x00658930, the chat line 0x006571f0;
+  callback objects mapped as nodes), a callback value's text (the chat line's SEND carries a pointer to its text) and
+  per-part stack-value codes (the routes Create adds and the chat line's EDIT carry stack words in value2 / value3: in
+  one, LineEntered's own address).
+- **The tests:** part 49's cases on the planned trees; the groups' own messages straight to them with targets of any last
+  4 bits (to a part or not); their input slots with such ids and the wheel at its 120 steps' edges; SetStrings (the
+  lists' list taken away now and then); the callbacks called straight (the header edited; the chat line with spaces
+  first, commands, empty, bytes past 0x7F); a titled combo box without a part (FindChild, SetInactive).
+- **Results:** 21,827,362 checks, 0 failures, 12 s; lines 2765-3362 all run.
+- **Port fixes:** two calls made as the original's: LineEntered's prompt and the chat input's oldest line removed went
+  through HandleMessageCopy; the original calls HandleMessage on its stack message (not observable in the game, only in
+  the logged calls). Original flaws steered clear of (the port checks the parts, by its comments): the scrolled text's
+  list, the combo box's three parts, the titled combo box's two and the chat input's label used unchecked; and the
+  game's frames always have the parts FindChild names (FindControl uses its indices unchecked, on both sides).
+- **Mutations:** 217 mutants (160 T, 57 R); 5 not building; 200 of the 212 building killed (94 %), 12 survived, all
+  equivalent (see mutate_controls_group.py). One more pass per the survivors: a titled combo box without a part.
+- **Harness lessons (my mistakes):** missing parts left FindChild naming children that did not exist (a crash in
+  FindControl, the trees' and not the port's); the scroll bar's arrows wired by their ids' last bits (under a scrolled
+  text they are the bar's | 1 and 2, its own bits 4 .. 7); a selection list given to LineEntered (its GET_TEXT answers
+  no text, read unchecked by the original); the buffer set for the chat line where GET_TEXT answers the box's selected
+  text; a heredoc with backslashes once more (Edit instead); a survivor list misread (the flipped comparison was killed,
+  its id twin survived).
