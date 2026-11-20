@@ -1345,7 +1345,10 @@ bool C_KeyBindings::Bind(int, int, int, int) { Unexpected("C_KeyBindings::Bind")
 C_str C_KeyBindings::GetBindingName(int) const { Unexpected("C_KeyBindings::GetBindingName"); return C_str(); }
 void C_Cursor::SetDelay(int) { Unexpected("C_Cursor::SetDelay"); }
 #endif
+// (Not in the movie's build: it fakes it, and I3DGetDriver, itself.)
+#ifndef CONTROLS_KIT_HAS_MOVIE
 void __stdcall I3D_visual::UpdateWBoundProc() { Unexpected("I3D_visual::UpdateWBoundProc"); }
+#endif
 void I3D_frame::UpdateWMatrixProc() { O_UpdateWMatrix(this); }
 // (SetScale's rotation: LS3DF's, as the original's calls it; the bars'.)
 void __stdcall S_quat::Make(const S_matrix &m)
@@ -1377,7 +1380,9 @@ C_str C_GameTexts::Get(int id) const
     return TextFor(id);
 }
 extern "C" IGraph *GetIGraph() { return reinterpret_cast<IGraph *>(g_arena.graph); }
+#ifndef CONTROLS_KIT_HAS_MOVIE
 extern "C" I3D_driver *I3DGetDriver() { Unexpected("I3DGetDriver"); return nullptr; }
+#endif
 // The factory (control_factory.cpp is a later part's): faked.
 // (A description paired in g_fnPairs by its pair's index: the list's ADD_ITEM's; others by their address.)
 static std::string DescName(const void *desc)

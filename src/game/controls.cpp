@@ -5486,18 +5486,21 @@ void C_MovieControl::FitRect()
     const auto videoWidth = static_cast<float>(size.width);
     const auto videoHeight = static_cast<float>(size.height);
     S_showRect rect = {};
+    // (Truncated through 64 bits as __ftol does: a video of no size gives an infinity or a NaN,
+    // whose 64-bit "indefinite" value has a low word of 0; a 32-bit conversion gives INT_MIN.)
+    const auto ftol = [](float f) { return static_cast<int>(static_cast<int64_t>(f)); };
     // The area at least as tall as the video's shape: its width; else its height (a NaN: the
-    // height). (Truncated, as __ftol.)
+    // height).
     if (m_height / m_width >= videoHeight / videoWidth) {
-        rect.x = static_cast<int>(m_left);
-        rect.width = static_cast<int>(m_width);
-        rect.height = static_cast<int>(m_width / videoWidth * videoHeight);
-        rect.y = static_cast<int>(m_top);
+        rect.x = ftol(m_left);
+        rect.width = ftol(m_width);
+        rect.height = ftol(m_width / videoWidth * videoHeight);
+        rect.y = ftol(m_top);
     } else {
-        rect.y = static_cast<int>(m_top);
-        rect.height = static_cast<int>(m_height);
-        rect.width = static_cast<int>(m_height / videoHeight * videoWidth);
-        rect.x = static_cast<int>((m_width - static_cast<float>(rect.width)) * 0.5f + m_left);
+        rect.y = ftol(m_top);
+        rect.height = ftol(m_height);
+        rect.width = ftol(m_height / videoHeight * videoWidth);
+        rect.x = ftol((m_width - static_cast<float>(rect.width)) * 0.5f + m_left);
     }
     m_stream->SetRect(&rect);
 }

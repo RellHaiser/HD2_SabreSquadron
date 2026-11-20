@@ -4260,3 +4260,31 @@ particles and the surface marks. Files are served from memory.
   children); SHOW_PLAYERS ran 47 times in a quick run at first (most targets went to a child): steered now. The first
   coverage run crashed with no report, run beside the mutation run (likely the cause; alone it passed). The generator's title substitution also
   rewrote PLAYERS_TITLE in a mutant: a placeholder now.
+
+## Human part 62 (the movie control, `controls.cpp` lines 5422-5562, 2026-11-19)
+
+- **The build:** `controls/build_movie.bat` (`movie_diff.cpp` with the kit). New in the kit: the stubs of
+  I3DGetDriver and I3D_visual::UpdateWBoundProc left out by CONTROLS_KIT_HAS_MOVIE. The part's fakes, both sides with
+  the same loggers (stdcall, this on the stack): one video stream object (ISND_stream: IsPlaying, Open, Close, Play,
+  Stop, SetRect, GetVideoSize, GetState, SetVolume, UpdateVideo, Draw, Release; a round's answers) and a second for
+  CreateStream's, the graph's CreateStream (0x38: a stream or none), SetRenderState and GetRenderState (0x74, 0x78), the
+  driver's SetState and GetState (I3DGetDriver: the original's import 0x007e529c; the getter not logged: the port asks
+  twice in Refresh, the original three times), the visual's UpdateWBoundProc (the original's import 0x007e5356).
+- **The tests:** planned trees of movies (alone or under a plain control); the frames' world bounds now and then
+  empty, flat, swapped or out of date. The kit's cases; the own messages straight to it (PLAY_MOVIE with names, empty,
+  none, '%'; Open answering success or failure, the stream playing or not; STOP, CLOSE; the others); Refresh (playing or
+  not, the stream's state finished, -1, others; the driver's and the graph's states), FindArea (also without a frame),
+  FitRect (videos of every shape, of no width, height or size, negative; areas with zeros, infinities, NaNs),
+  CloseStream (also without a stream) straight; the constructor's fields.
+- **Results:** 5,078,272 checks, 0 failures; lines 5422-5562 all 81 measured lines run (the dedicated server's lines not
+  built).
+- **Port bug found and fixed (on main; a port mistake):** FitRect converted its floats to int in 32 bits: a video of no
+  width or height (an infinity, a NaN) gave the stream's rectangle INT_MIN where the original's __ftol, truncating
+  through 64 bits, gives 0 (the low word of the "indefinite" value). Now through 64 bits, as human_combat.cpp's percents.
+- **Original's flaws, port already fixed:** the factory never sets the stream (+0x6C: whatever the block held until
+  Create; deleting a movie that was never made would close and release it; the port's null).
+- **Not tested:** the dedicated server's Create and HandleMessage (HD2_DEDICATED, not built); Refresh and the messages
+  without a stream (both crash: Create failing leaves the control without one, used unchecked).
+- **Mutations:** 150 mutants, 10 not building, 138 of 140 killed, 2 equivalent (mutate_controls_movie.py).
+- **Harness lessons (my mistakes):** I read the first failure the wrong way round (port / original): the log's first
+  half is the original's. The generator's range ran one line past the file's end.
