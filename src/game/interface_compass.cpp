@@ -2,7 +2,9 @@
 #include "game/interface.h"
 
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 
 #include "common/c_str.h"
 #include "game/controller_internal.h"
@@ -34,7 +36,7 @@ constexpr float SOUND_MARK_FADE = 0.002f;
 constexpr int DIFFICULTY_NO_RADAR = 4;
 
 // The step's wobble: how fast it decays (per ms) and how many steps are skipped between kicks.
-float s_wobbleDecay = 1.0f;                             // 0x0089bc5c
+float s_wobbleDecay = 0.0f;                             // 0x0089bc5c (Init sets 1)
 float s_unused89bc58 = 0.0f;                            // 0x0089bc58 (Init clears it; nothing reads it)
 int s_wobbleSkip = 0;                                   // 0x0089bc64
 
@@ -52,6 +54,38 @@ float WrapAngle(float angle)
     return angle;
 }
 
+// The SDK's Magnitude of a squared length as the original inlines it (and LS3DF computes it):
+// "below 1e-8" an integer compare of the float's bits (CMP 0x322bcc77 / SETL), so a NaN with its
+// sign bit set (the x87's and SSE's default NaN) counts as 0; exactly 1 for unit lengths.
+float MagnitudeOfSquare(float square)
+{
+    int32_t bits;
+    std::memcpy(&bits, &square, sizeof bits);
+    if (bits < 0x322bcc77)
+        return 0.0f;
+    if (std::fabs(square - 1.0f) < 1e-8f)
+        return 1.0f;
+    return std::sqrt(square);
+}
+
+// dir.AngleTo((0, 0, 1)) before its float rounding: LS3DF's steps (S_vector::AngleTo,
+// 0x1002e8c0) and its acos (the CRT's _CIacos: atan2(sqrt((1 + c)(1 - c)), c), the x87's FPATAN
+// unrounded), as ls3df/src/math computes them.
+double AngleToNorth(const S_vector &dir)
+{
+    const float length = MagnitudeOfSquare((dir.x * dir.x + dir.y * dir.y) + dir.z * dir.z);
+    const float len = 1.0f * length;
+    if (len < 1e-8f)
+        return 0.0;
+    float c = ((0.0f * dir.x + 1.0f * dir.z) + 0.0f * dir.y) / len;
+    if (!(c > -1.0f))
+        c = -1.0f;
+    else if (!(c < 1.0f))
+        c = 1.0f;
+    const float t = std::sqrt((1.0f + c) * (1.0f - c));
+    return std::atan2(static_cast<double>(t), static_cast<double>(c));
+}
+
 } // namespace
 
 // ---------------------------------------------------------------------------------------------
@@ -66,7 +100,7 @@ S_RadarBlip::S_RadarBlip(C_Human *human_, I3D_frame *ally, I3D_frame *enemy) : h
     visual->LinkTo(source->GetParent(), 1);
     visual->SetPosInline(source->GetPos());
     const S_vector &pos = source->GetPos();
-    radius = MagnitudeBy((pos.z * pos.z + pos.y * pos.y) + pos.x * pos.x);
+    radius = MagnitudeOfSquare((pos.x * pos.x + pos.y * pos.y) + pos.z * pos.z);
     visual->SetRot(source->GetRot());
     visual->Update();
     static_cast<I3D_object_visual *>(visual)->SetAlpha(0.0f);
@@ -324,7 +358,8 @@ float C_Compass::UpdateWobble(int timeDelta)
     // (FSIN on the x87 stack.)
     const float time = static_cast<float>(static_cast<double>(GetGame()->GetTime()) * static_cast<double>(0.03f));
     const float swing = static_cast<float>(std::sin(static_cast<double>(time)) * m_wobble);
-    const float tilt = static_cast<float>(std::sin(static_cast<double>(m_needle + m_needle)) * 0.1);
+    // (The double 0x008104a8 is 0.1f widened, 0.10000000149.)
+    const float tilt = static_cast<float>(std::sin(static_cast<double>(m_needle + m_needle)) * static_cast<double>(0.1f));
     return swing + tilt;
 }
 
@@ -336,11 +371,12 @@ void C_Compass::UpdateHeading()
     const S_vector &view = active->GetViewDir();
     S_vector dir(view.x, 0.0f, view.z);
     NormalizeBy(dir, dir.x * dir.x + dir.z * dir.z);
-    float heading = dir.AngleTo(S_vector(0.0f, 0.0f, 1.0f));
-    m_heading = heading;
-    // (The original's test: (z + y) * 0 + x, x for any finite vector.)
+    const double heading = AngleToNorth(dir);
+    m_heading = static_cast<float>(heading);
+    // (The original's test: (z + y) * 0 + x, x for any finite vector. It subtracts the angle
+    // unrounded: AngleTo's x87 result left on the stack.)
     if ((dir.z + dir.y) * 0.0f + dir.x < 0.0f)
-        m_heading = TWO_PI - heading;
+        m_heading = static_cast<float>(static_cast<double>(TWO_PI) - heading);
     m_heading = WrapAngle(m_heading);
 }
 
@@ -380,8 +416,9 @@ void C_Compass::ShowSound(const S_vector &dir, int chapter)
     float angle = AngleBetween2D(flat, north);
     if (angle < 0.0f)
         angle += TWO_PI;
-    // Eight directions of 45 degrees.
-    int direction = static_cast<int>(angle * 1.27323949f);
+    // Eight directions of 45 degrees. (Truncated through 64 bits as __ftol does: a NaN direction
+    // gives the "indefinite" value, whose low word is 0; a 32-bit conversion gives INT_MIN.)
+    int direction = static_cast<int>(static_cast<int64_t>(angle * 1.27323949f));
     // Fix: a tiny negative angle (+ 2 pi) gave direction 8, past the marks.
     if (direction > 7)
         direction = 7;

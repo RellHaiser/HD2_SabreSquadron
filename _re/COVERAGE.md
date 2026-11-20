@@ -4288,3 +4288,48 @@ particles and the surface marks. Files are served from memory.
 - **Mutations:** 150 mutants, 10 not building, 138 of 140 killed, 2 equivalent (mutate_controls_movie.py).
 - **Harness lessons (my mistakes):** I read the first failure the wrong way round (port / original): the log's first
   half is the original's. The generator's range ran one line past the file's end.
+
+## Human part 63 (the compass and its radar, `interface_compass.cpp`, 2026-11-19)
+
+- **The build:** `interface/build_compass.bat` (`compass_diff.cpp`, which includes `interface_compass.cpp` to reach its
+  statics; `interface_globals.cpp`: raw blocks for the team manager, the profile, the game role). The first suite of the
+  interface (`_re/harness/interface`).
+- **Fakes, both sides with the same loggers (stdcall, this on the stack):** an arena of frames (Release, SetWorldDir,
+  Update, SetOn, LinkTo, FindChildFrame, Duplicate, SetAlpha; the original's UpdateWMatrixProc import), the scene's
+  FindFrame, the driver's CreateVisual (the original's I3DGetDriver import), the humans' methods (IsSurrendered,
+  IsUnconscious, GetFacingDir, GetViewDir, GetMoveMode, GetStateFlags, IsLeftFootForward: the original's redirected;
+  role, health and frame at both sides' offsets in raw blocks: g++ lays C_Human out its own way), the active player, the
+  difficulty, the game's time (the original's game pointer), RandFloat (a sequence), the CRT's rand (seeded the same), the
+  original's new and delete. LS3DF's own AngleTo, S_quat::Make and Normalize on both sides.
+- **The tests:** scenarios of up to 16 operations (Init, Show, Update, ShowSound, the radar's Add, Remove and Update,
+  Done; between them the active soldier, the humans' answers, health, role and places, the game's time, difficulty and
+  role, the compass's angles and speeds set straight) run from one start on each side, the logs of every call and the
+  fields after each operation compared, the frames byte for byte at the end; no float tolerance needed. UpdateWobble
+  straight; the statics as loaded; the port's ShowSound fix and Forget alone.
+- **Results:** 11,494,590 checks, 0 failures; all 235 measured lines run.
+- **Port bugs found and fixed (on main; port mistakes):**
+  - UpdateWobble's tilt multiplied by the double 0.1; the original's constant (0x008104a8) is 0.1f widened
+    (0.10000000149): the arrow one ulp off in most frames.
+  - UpdateHeading subtracted the rounded angle from 2 pi; the original subtracts AngleTo's unrounded x87 result: now
+    AngleToNorth computes LS3DF's AngleTo in double (its acos as the CRT's atan2 form, as ls3df/src/math does) and the
+    difference rounds once (up to 4 ulps of the heading before).
+  - A blip's radius summed z first; the original sums (x x + y y) + z z.
+  - The magnitudes (the blip's radius, the heading's length) tested "below 1e-8" as a float compare; the original's
+    inline test compares the bits as integers, so a NaN with its sign bit set counts as 0 (a NaN view: heading 0, the
+    port's pi). A local MagnitudeOfSquare as LS3DF's.
+  - ShowSound converted the direction to int in 32 bits: a NaN direction gave INT_MIN where the original's __ftol,
+    truncating through 64 bits, gives 0. Undefined behaviour without a visible effect (INT_MIN rows of 8 bytes wrap to the
+    first mark on x86: the hand mutant undoing it survives); now through 64 bits, as part 62's FitRect.
+  - s_wobbleDecay started at 1; the original's is in .bss (0 until Init sets 1; nothing reads it before: no effect).
+- **Original's flaws, port already fixed:** ShowSound's direction a hair west of north (+ 2 pi rounds to 2 pi) made a
+  ninth direction: the original writes its 500 ms past the marks' times (over m_leftFoot, or past the compass for the
+  red mark); the port clamps to 7 (checked on both: the original's write past the marks every time). The radar kept a
+  deleted human's blips; the port's Forget drops them (tested alone).
+- **Not tested:** NaN sign propagation (x87 and SSE pick different NaN signs: a NaN radius times a NaN bearing; the +NaN
+  template left out); AngleBetween2D (the
+  original's on both sides: the human movement's suite).
+- **Mutations:** 466 mutants (6 by hand: the fixes undone), 28 not building, 402 of 438 killed, 36 equivalent (mutate_interface_compass.py).
+- **Harness lessons (my mistakes):** I first took the port's 1-ulp misses for x87 precision until a direct UpdateWobble
+  test showed every miss on one side: a constant, not precision. A full-length run found NaN-sign differences the quick
+  runs never reached: run the full length after adding special inputs. Writing this section I first noted a NaN sound
+  direction as crashing both sides: the original's __ftol makes it 0; checking that claim found the port's 32-bit conversion, which the address arithmetic then made harmless.
