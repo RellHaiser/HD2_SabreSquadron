@@ -4548,3 +4548,43 @@ particles and the surface marks. Files are served from memory.
   nothing); GetLocalTeam logged although the sides call it different times (a pure read: not logged now); the first
   run left 3 killable survivors (Init's clearing of hints: none before Init; a hint with '>' but no '<'; SaveHints'
   Ascend: the chunk's depth not logged): inputs and a log added.
+
+## Human part 70 (the signals panel, `interface_signals.cpp`, 2026-11-20)
+
+- **The build:** `interface/build_signals.bat` (`signals_diff.cpp`, including `interface_signals.cpp`). The kit's globals
+  gained raw storage for the controls, the collision world and the items module (the unoptimised coverage build calls
+  their members on them).
+- **Fakes:** each side its own 12 objects of any actor type (the port's actors are laid out their own way: the type at
+  +0x0C, the original's at +0x18; the humans' vehicle, seat, carried body, health; the doors', radios', supply boxes'
+  (the lists in both vectors' layouts), places' and animations' fields), per-side vtables (GetName, HasSeatWeapon, the
+  weapons' GetAmmoItemId, the commander's CollectGroup and spacing; the port's slots from its member pointers); the
+  team, the humans' queries and PlayerSendActionCommand, the cars' CanEnter / HasEnemyAboard / IsDestroyed, the
+  bodies' collision, HighlightMembers, CanAddItemToInventory, the items' definitions (the original's table), the
+  controls, the graph's keys, the camera module, the ray test, the click sound (a frame), the game role and type.
+- **The tests:** scenarios of up to 24 operations (Init, Done, Open, IsOpen, SetEntry, HasTargetCommands, BuildPage,
+  BuildTargetPage, Refresh, Activate, SelectNext, SelectPrevious, HandleInput, Issue, Render, SetTarget, Update,
+  Relayout, OnTargetDeleted, AimPoint; pages and entries chosen) with the world changing between them, from the same
+  start words on both sides: single player and multiplayer, every target type, cars with members aboard (or in another
+  vehicle), supply boxes with lists or ammunition at the box's most, keys digits and others (high bits set), the roll
+  button, the wheel both ways. Operations naming a target page without a target (both crash) are left out, as are
+  SelectPrevious from -1 and OnTargetDeleted keeping the target (the original's target cleared first: the port's fix).
+  A port-only case (SignalsFixes): a supply box of more than ten items, a member's name with '%', SelectPrevious from
+  -1, OnTargetDeleted on the target (open and closed).
+- **Results:** 3,562,249 checks, 0 failures; 484 of the 485 measured lines of `interface_signals.cpp` run (BuildPage's
+  multiplayer check of the radios inside the single player branch cannot run; the original's is dead code too).
+- **Port bug found and fixed (on main; a port mistake):** the unlocked door's lock entry used the selected soldier
+  fetched at the start; the original asks the team for it again first (the same soldier: a call less, now made).
+- **Original's weaknesses (the port's fixes, tested alone):** a supply box of more than ten items wrote past the
+  entries; a member's name was used as the format; SelectPrevious from nothing chosen walked back through memory;
+  OnTargetDeleted kept the freed target. Also: the command's dir.w is a stack word or the word after the view direction
+  (not sent); a target page without a target crashes (reached only through entries the menus never make).
+- **Not tested:** Init's text box's inline construction beyond the kit's (the same as earlier parts).
+- **Mutations:** 886 mutants, 151 not building, 728 of 735 killed, 7 equivalent
+  (mutate_interface_signals.py).
+- **Harness lessons (my mistakes):** the port's CollectGroup is virtual (its slot first left to the "other" fake); the
+  first run crashed silently in the original under its exception frame (a target page reached from start-word entries:
+  found with the first-chance handler); the first mutation run left 25 killable survivors (Init's clearing of the
+  target, member and selection: no start words there; the target pages rarely reached with their actors' states):
+  start words, a focus object and a target-page script added; the next full run left 15 more that depended on the
+  random draws (a body a member carries, explosives not planted with a member, the combat page's fire launcher): the
+  focus and the script widened, the last full run left only the 7 equivalents.

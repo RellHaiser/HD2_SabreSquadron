@@ -498,8 +498,9 @@ void C_SignalsPanel::BuildTargetPage()
                  !door->GetUnknown118() && (door->GetPortal() != nullptr || door->GetOtherPortal() != nullptr)
                      ? 0x12
                      : SIGNAL_DISABLED_COMMAND);
-        // Locking: a closed door, the selected soldier has the key.
-        if (door->GetMotion() == 0 && selected->FindItem(door->GetLockKey()))
+        // Locking: a closed door, the selected soldier has the key (asked for again, as the original does).
+        C_Human *keyHolder = PlayerTeam()->GetSelectedMember();
+        if (door->GetMotion() == 0 && keyHolder->FindItem(door->GetLockKey()))
             SetEntry(4, 0x1B6B, HUMAN_COMMAND_LOCK_DOOR);
         else
             SetEntry(4, 0x1B6B, SIGNAL_DISABLED_COMMAND);
