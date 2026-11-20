@@ -4,6 +4,7 @@
 #include "game/interface.h"
 #include "game/interface_internal.h"
 
+#include <cstdint>
 #include <cstdio>
 
 #include "common/c_str.h"
@@ -53,6 +54,13 @@ void SetPosY(I3D_frame *frame, float y)
 C_Human *ActivePlayer()
 {
     return g_teamManager.GetPlayerTeam()->GetActivePlayer();
+}
+
+// A float to int as the original's __ftol: truncated through 64 bits, the low word (out of range
+// the low word, a NaN or an infinity 0; a 32-bit conversion gives INT_MIN).
+int Ftol(float v)
+{
+    return static_cast<int>(static_cast<int64_t>(v));
 }
 
 const float WHITE[4] = {1.0f, 1.0f, 1.0f, 0.0f};
@@ -294,7 +302,7 @@ void C_WeaponPanel::Update(int /*timeDelta*/)
                 // Launchers count their rounds in the backpack too.
                 const bool backpack = item->GetDef()->GetBehaviour() == ITEM_BEHAVIOUR_LAUNCHER;
                 ammo = human->CountAmmo(item->GetDef()->GetAmmoItemId(), backpack);
-                rounds = static_cast<int>(item->GetAmount());
+                rounds = Ftol(item->GetAmount());
             }
         } else {
             ShowHandsItem(nullptr);
@@ -309,7 +317,7 @@ void C_WeaponPanel::Update(int /*timeDelta*/)
         if (item->GetKind() == ITEM_KIND_WEAPON) {
             const bool backpack = item->GetDef()->GetBehaviour() == ITEM_BEHAVIOUR_LAUNCHER;
             ammo = human->CountAmmo(item->GetDef()->GetAmmoItemId(), backpack);
-            rounds = static_cast<int>(item->GetAmount());
+            rounds = Ftol(item->GetAmount());
         }
     } else {
         ShowShoulderItem(nullptr);
@@ -346,16 +354,17 @@ bool C_Crosshair::Init(I3D_scene *scene)
     m_right = m_frame->FindChildFrame("cross_R", FRAME_MASK_VISUAL);
     m_top = m_frame->FindChildFrame("cross_T", FRAME_MASK_VISUAL);
     m_bottom = m_frame->FindChildFrame("cross_B", FRAME_MASK_VISUAL);
-    // Each part: its own unlit material and a fixed light level.
+    // Each part: its own unlit material and a fixed light level. (The original asks the mesh for
+    // the level and its first face group again for each call.)
     for (I3D_frame *part : {m_left, m_right, m_top, m_bottom}) {
-        I3D_mesh_level *level = static_cast<I3D_visual *>(part)->GetVisualMesh()->GetLevel(0);
-        level->FaceGroups()[0].DuplicateMaterial();
-        I3D_material *material = level->GetFaceGroup(0)->material;
-        material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-        material->SetEmissiveColor(S_vector(0.0f, 0.0f, 0.0f));
-        material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
-        material->SetDiffuseColor(S_vector(1.0f, 1.0f, 1.0f));
-        material->SetPower(0.0f);
+        I3D_mesh *mesh = static_cast<I3D_visual *>(part)->GetVisualMesh();
+        mesh->GetLevel(0)->FaceGroups()[0].DuplicateMaterial();
+        const auto material = [mesh] { return mesh->GetLevel(0)->GetFaceGroup(0)->material; };
+        material()->Flags() |= I3DMATERIAL_TRACE_FLAG;
+        material()->SetEmissiveColor(S_vector(0.0f, 0.0f, 0.0f));
+        material()->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
+        material()->SetDiffuseColor(S_vector(1.0f, 1.0f, 1.0f));
+        material()->SetPower(0.0f);
         static_cast<I3D_object_visual *>(part)->SetLightLevel(0.6f);
     }
     // The target's name, doubled, on "cross_name" (or the cross).
@@ -467,11 +476,14 @@ void C_Crosshair::SetTarget(C_Actor *actor, bool usable)
             m_name->AddText(*actor->GetName(), STYLE_CROSSHAIR_NAME);
             return;
         }
-        // A player: the rank and the name; a medic also sees the health.
-        const C_str rank = g_texts.Get(g_rankNames[human->GetProfileUnknown24()].textId);
+        // A player: the rank and the name; a medic also sees the health. (The rank's text is fetched
+        // after the first aid test, in each branch, as the original does.)
+        const int rankIndex = human->GetProfileUnknown24();
         if (self->GetStat(STAT_FIRST_AID) < 50) {
+            const C_str rank = g_texts.Get(g_rankNames[rankIndex].textId);
             m_name->AddText(C_fstr("%s %s", rank.c_str(), human->GetFullName()), STYLE_CROSSHAIR_NAME);
         } else {
+            const C_str rank = g_texts.Get(g_rankNames[rankIndex].textId);
             m_name->AddText(C_fstr("%s %s - %d%%", rank.c_str(), human->GetFullName(), human->GetHealthPercent()),
                             STYLE_CROSSHAIR_NAME);
         }

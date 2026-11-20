@@ -249,6 +249,10 @@ SUITES = [
       tree_copy="interface/messages_diff.exe"),
     T("human.interface_members", "interface/build_members.bat", TMP + r"\members_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="interface/members_diff.exe"),
+    T("human.interface_status", "interface/build_status.bat", TMP + r"\status_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="interface/status_diff.exe"),
+    T("human.interface_crosshair", "interface/build_crosshair.bat", TMP + r"\crosshair_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="interface/crosshair_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

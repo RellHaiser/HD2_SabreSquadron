@@ -4398,3 +4398,43 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the original CRT's float formatting crashes until _cfltcvt_init runs (part 57's
   lesson, forgotten: a hang under ntdll's heap lock); the earshot's edge needed a placed scenario (random places never
   made 1600 exactly); the coverage build kept a g_texts reference the optimised one dropped (raw storage added).
+
+## Human part 66 (the status panels and the crosshair, `interface_status.cpp`, 2026-11-20)
+
+- **The builds:** `interface/build_status.bat` (66a: `status_diff.cpp`: the speedometer, the reticles, the weapon panel,
+  the stance panel, the progress bar, the helpers FindTexture and DuplicateMaterial) and `interface/build_crosshair.bat`
+  (66b: `crosshair_diff.cpp`), both including `interface_status.cpp`. New: `interface/interface_gfx.inc`, the text boxes
+  (the port's C_TextBox; the original's built inline, its methods redirected; AddTextId added) and the graphics (meshes,
+  levels, face groups, materials with all their colour slots, textures with names and reference counts, the frames'
+  DuplicateMesh and SetLightLevel) for the parts from here on.
+- **Fakes:** the humans' item and stance getters, GetActionProgress, the items (GetAmount), the definitions (GetCarryMode,
+  GetBehaviour, GetAmmoItemId, GetImage), the vehicle (the seat weapon's four virtuals), the actors (GetName,
+  GetSeatOccupant, GetSeatCount; type, vehicle, carried body, health, role at both sides' offsets), IsFriendOf (the
+  original's IsHostileTo run as it is), GetFullName, GetProfileUnknown24, GetStat, GetHealthPercent, GetAccuracy, the car's
+  HasEnemyAboard, the team's IsMember and IndexOf, the texts, the rank names, IsCrosshairAllowed. Objects with virtuals are
+  shared blocks given each side's vtable before its run (the port's slots 4 bytes on: g++'s second destructor slot).
+- **The tests:** a case per panel (66a: up to 16 operations with the world changing between them; the helpers straight on
+  random meshes) and scenarios of up to 20 crosshair operations (Init, Done, Show, SetTarget on every kind of actor,
+  SetColor, Update, Render); the panels start from the same random words on both sides (Init must set every field), the
+  boxes' margins logged after Init. Amounts NaN, infinite, 1e10, 2^31.
+- **Results:** 10,736,917 checks (66a) and 5,002,777 (66b), 0 failures; all measured lines run (66a 282 of 282
+  with SetPosX / SetPosY in 66b's; 66b 168 of 168).
+- **Port bugs found and fixed (on main; port mistakes):**
+  - The weapon panel's rounds (a float amount) converted in 32 bits: -1e10, NaN or 2^31 gave INT_MIN where the
+    original's __ftol gives the low word. Through 64 bits now (Ftol).
+  - The crosshair's Init asked the mesh for the level once per part; the original asks again (GetLevel, GetFaceGroup)
+    before each of the material's five calls. The same calls now.
+  - The crosshair's player name fetched the rank's text before the first aid test; the original fetches it after, in
+    each branch. The same order now.
+- **Original's weaknesses (shared, the port's the same):** FindTexture tests neither the face groups' materials nor their
+  textures; the weapon panel's Init uses the "X_SQUARE.BMP" texture unchecked (and a second Init after an item's picture
+  replaced it would find none: the game inits once); the reticle's Init checks the binoculars' frame, then switches it off
+  unchecked (a quirk kept); SetColor's and SetScale's 16-byte copies carry a stack word (the colour's w, the frame's +0xDC:
+  left out of the comparisons).
+- **Not tested:** the reticles missing with SetMode (both crash); the scene's "scope" or "sniper" missing (both crash).
+- **Mutations:** 66a 497 mutants, 29 not building, 461 of 468 killed, 7 equivalent (mutate_interface_status.py); 66b 217,
+  32 not building, 182 of 185 killed, 3 equivalent (mutate_interface_crosshair.py).
+- **Harness lessons (my mistakes):** the item blocks were not restored between the sides at first (an item's definition
+  changed by the original's run leaked into the port's); the icons' face groups shared materials, so a later group
+  overwrote the "X_SQUARE.BMP" texture; Init's resets survived until the panels started from random words; I authored a
+  backslash through a Bash heredoc again (a printf's "\n" became a line break; fixed with Edit).
