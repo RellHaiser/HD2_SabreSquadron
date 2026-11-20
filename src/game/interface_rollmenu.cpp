@@ -207,7 +207,9 @@ void C_RollMenu::SetTarget(C_Actor *actor, float distance)
     } else {
         m_target = actor;
         m_distance = distance;
-        if (!(distance <= REACH)) {
+        // (Beyond reach only when greater: a NaN distance counts as within it, as in the original's
+        // x87 test; the same below and in HasActions.)
+        if (distance > REACH) {
             if (m_open)
                 Open(false);
             m_target = nullptr;
@@ -217,7 +219,7 @@ void C_RollMenu::SetTarget(C_Actor *actor, float distance)
         return;
     if (m_open) {
         // The open menu follows the new target (reopened on it).
-        if (m_target && m_distance <= REACH) {
+        if (m_target && !(m_distance > REACH)) {
             Open(false);
             Open(true);
             return;
@@ -243,7 +245,7 @@ bool C_RollMenu::HasActions(C_Actor *actor, float distance)
     // Not while the weapon in the hands is busy.
     if (selected->GetHandsWeapon() && selected->GetHandsWeapon()->GetReadyTime() > GetGame()->GetMissionTime())
         return false;
-    if (!(distance <= REACH))
+    if (distance > REACH)
         return false;
     switch (actor->GetType()) {
     case ACTOR_MINE:
@@ -274,7 +276,9 @@ bool C_RollMenu::HasActions(C_Actor *actor, float distance)
         if (g_gameProfile.IsCooperativeGame() && human->GetRole() != HUMAN_ROLE_PLAYER &&
             (human->IsDead() || human->IsUnconscious() || human->IsSurrendered()))
             return true;
-        return human->GetTeam(false) == selected->GetTeam(false);
+        // (The selected soldier's side asked for first, as the original does.)
+        const int team = selected->GetTeam(false);
+        return human->GetTeam(false) == team;
     }
     case ACTOR_CAR: {
         auto *car = static_cast<C_Car *>(actor);
@@ -376,7 +380,8 @@ void C_RollMenu::BuildActions()
                     action = ROLL_DISABLED;
                 } else if (C_Actor *occupant = vehicle->GetSeatOccupant(seat)) {
                     if (!local) {
-                        text = NameText(occupant);
+                        // (The occupant asked for again for his name, as the original does; the same below.)
+                        text = NameText(vehicle->GetSeatOccupant(seat));
                         action = ROLL_DISABLED;
                     } else if (static_cast<C_Human *>(occupant)->IsDead()) {
                         text = 0x1B71;
@@ -399,8 +404,8 @@ void C_RollMenu::BuildActions()
                 int action = ROLL_SEAT + seat;
                 if (selected->GetVehicleSeat() == seat)
                     action = ROLL_DISABLED;
-                else if (C_Actor *occupant = vehicle->GetSeatOccupant(seat))
-                    text = NameText(occupant);
+                else if (vehicle->GetSeatOccupant(seat))
+                    text = NameText(vehicle->GetSeatOccupant(seat));
                 SetEntry(seat, text, action);
             }
             break;
@@ -414,8 +419,10 @@ void C_RollMenu::BuildActions()
             break;
         case ACTOR_HUMAN: {
             auto *human = static_cast<C_Human *>(target);
-            // Picking up a body: crouched, not busy, not in the water.
-            const bool canPickUp = !selected->IsBodyWorkState5() && (selected->GetStanceFlags() & 4) && !human->IsInWater();
+            // Picking up a body: crouched, not busy, not in the water (asked only for a body, as the original does).
+            auto canPickUp = [selected, human]() {
+                return !selected->IsBodyWorkState5() && (selected->GetStanceFlags() & 4) && !human->IsInWater();
+            };
             if (!local) {
                 if (human->GetTeam(false) == selected->GetTeam(false)) {
                     // A team mate: healing.
@@ -436,7 +443,7 @@ void C_RollMenu::BuildActions()
                 if (human->IsDead()) {
                     SetEntry(1, 0x1B7F, ROLL_DISABLED);
                     SetEntry(2, 0x1B7A, ROLL_DISABLED);
-                    SetEntry(3, 0x1B71, canPickUp ? ROLL_PICK_UP : ROLL_DISABLED);
+                    SetEntry(3, 0x1B71, canPickUp() ? ROLL_PICK_UP : ROLL_DISABLED);
                     break;
                 }
                 if (selected->GetCarried()) {
@@ -454,7 +461,7 @@ void C_RollMenu::BuildActions()
             }
             if (human->IsDead()) {
                 SetEntry(0, 0x1B72, ROLL_INVENTORY);
-                SetEntry(1, 0x1B71, canPickUp ? ROLL_PICK_UP : ROLL_DISABLED);
+                SetEntry(1, 0x1B71, canPickUp() ? ROLL_PICK_UP : ROLL_DISABLED);
             } else if (human->IsUnconscious()) {
                 SetEntry(0, 0x1B72, ROLL_INVENTORY);
             } else if (human->GetRole() == HUMAN_ROLE_ENEMY && human->IsSurrendered()) {
@@ -470,7 +477,7 @@ void C_RollMenu::BuildActions()
                 int action = ROLL_SEAT + seat;
                 if (C_Actor *occupant = target->GetSeatOccupant(seat)) {
                     if (!local) {
-                        text = NameText(occupant);
+                        text = NameText(target->GetSeatOccupant(seat));
                         action = ROLL_DISABLED;
                     } else if (static_cast<C_Human *>(occupant)->IsDead() && (selected->GetStanceFlags() & 4)) {
                         text = 0x1B71;
@@ -525,8 +532,9 @@ void C_RollMenu::BuildActions()
             if (!empty && weapon) {
                 // Quirk kept: it counts the items of type 1 (0 for weapons whose ammunition is item
                 // 0), not the weapon's ammunition.
-                const int ammoId = weapon->GetDef()->GetAmmoItemId();
-                offered = selected->CountAmmo(ammoId != 0 || ammoId > 0 ? 1 : 0, false) < maxCarried;
+                // (Asked for again when 0, as the original does.)
+                const bool any = weapon->GetDef()->GetAmmoItemId() != 0 || weapon->GetDef()->GetAmmoItemId() > 0;
+                offered = selected->CountAmmo(any ? 1 : 0, false) < maxCarried;
             }
             SetEntry(0, 0x1B8D, offered ? ROLL_PICK_UP : ROLL_DISABLED);
             break;
@@ -953,6 +961,8 @@ void C_RollMenu::HandleInput(float *held, float *pressed)
 
 void C_RollMenu::SelectPrevious()
 {
+    // Fix: from no choice (-1) nothing is chosen (the original walked back through the fields before
+    // the entries).
     int index = m_selected;
     if (index != 0) {
         do {

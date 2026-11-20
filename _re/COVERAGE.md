@@ -4630,3 +4630,47 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the port-only case first inherited a world without "map*" (a crash); the first
   mutation run left 11 killable survivors (no start words in the frame, the map and the markers; no exact bounds for
   the depth and the squares): added.
+
+## Human part 72 (the roll menu, `interface_rollmenu.cpp`, 2026-11-20)
+
+- **The build:** `interface/build_rollmenu.bat` (`rollmenu_diff.cpp`, including `interface_rollmenu.cpp`).
+- **Fakes:** each side its own 12 objects of any actor type (the humans' health, vehicle, seat, carried body, role, net
+  id; the doors', radios', supply boxes' (both lists in both vectors' layouts, state, flags), static weapons', item
+  actors', places' and animations' fields), the hands weapons (+0x5C the ready time) and their definitions, the game
+  (the mission time); per-side vtables (GetName, GetSeatOccupant, GetSeatCount, GetSeatText, GetAmmoItemId; the port's
+  slots from its member pointers). Logged on both sides: the team (GetSelectedMember, GetCommandedMember, IsMember), the
+  humans' queries, IssueCommand, PlayerSendActionCommand, RequestTakeFromBox, RequestPickUpItem, the bodies' climb and
+  work states, the cars, the radios' CanUse, IsCooperativeGame, the texts' Get, GetActorById, CanPutItem, ShowInventory,
+  the controls, the graph's keys, the visuals' UpdateWBoundProc (the bound: S_vector4s at +0x170 / +0x180), the click
+  sound. Seats hold humans only; the team stays human.
+- **The tests:** scenarios of Init (the crosshair's menu or the command map's) then up to 20 operations (SetTarget,
+  HasActions, Open, Prepare, HandleInput, Update, Render, Relayout, IsCursorOver, Select, SelectAt, MoveTo, Refresh,
+  BuildEntries, HasCommandMapActions, SetEntry, Activate, SelectPrevious, SelectNext; the target and the choice set
+  directly) with the world changing between them, mostly aimed at a focus actor of every type and opened or built,
+  an entry chosen and acted on; the selected soldier mostly free to act (else busy, in a vehicle, carrying a body);
+  distances at the reach's edges and NaN, points on the bound's edges and far off. Left out (both crash or read past):
+  a seat entry's occupant without a target, the actions on a null target or by nobody, the command map's entries
+  without a target or a soldier, IsCursorOver without "kurzor", SelectPrevious from -1 and SelectAt's lines past the
+  entries (the port's fixes). The original's Done leaves its freed text box in the menu (cleared after it, as the port
+  does); the heal request's dir.w (a stack word) is not compared. A port-only case (RollMenuFixes): a supply box of 14
+  items and a car of 12 seats, a player's name with '%', Activate without a choice, Select and SelectAt past the
+  entries.
+- **Results:** 5477197 checks, 0 failures; 625 of the 627 measured lines of `interface_rollmenu.cpp` run (the member's
+  entries while the soldier carries a body: his body's branch comes first; the original's dead code too).
+- **Port bugs found and fixed (on main; port mistakes):** the body's pick-up test (busy, stance, water) asked for
+  every human target (the original only for a body); HasActions asked the target's side before the soldier's; the
+  seats' occupants not asked for again for their names (the network game's seats, the Junkers'); the weapon's
+  ammunition type not asked for again when 0; a NaN distance counted as out of reach (the original's x87 tests take it
+  as within: SetTarget, its reopening, HasActions).
+- **Original's weaknesses (the port's fixes, tested alone):** a supply box of more than ten items or a vehicle of more
+  than nine seats wrote over the choice and the target; a player's name was used as the format; Activate without a
+  choice read the field before the entries; Select and SelectAt read past the entries; SelectPrevious from -1 walked
+  back through the fields before them (now noted in the port). Also: Done leaves the freed text box in the menu.
+- **Not tested:** Init's text box's inline construction beyond the kit's (the same as earlier parts).
+- **Mutations:** 1269 mutants, 261 not building, 994 of 1008 killed, 14 equivalent
+  (mutate_interface_rollmenu.py).
+- **Harness lessons (my mistakes):** the menu's bound first written as six packed floats (the engine's I3D_bbox has a
+  w after each corner: the max at +0x180); SetTarget left out whenever a start entry was a seat (it refreshes only
+  after building: most scenarios lost); the seats' occupants turned into humans (nearly every object became one, the
+  targets with them; now a seat of another actor is emptied); a vehicle drawn for one soldier could be the other (the
+  team made human again); found by the per-line counts and a crash under the first-chance handler.
