@@ -324,6 +324,18 @@ void TestCreate()
     CHECK(rp == ro, "Create (%s): %d / %d", g_nodeKinds[i]->name, ro, rp);
 }
 
+// An original's node's kind by its vtable: the real one (made by a call) or the logged copy's.
+const S_Kind *OrigKindOf(const uint8_t *n)
+{
+    const uint32_t vt = OF<uint32_t>(n, 0);
+    if (const S_Kind *k = KindByVtable(vt))
+        return k;
+    for (int k = 0; k < g_kindCount; ++k)
+        if (LoggedVt(g_kinds[k].vtable) == vt)
+            return &g_kinds[k];
+    return nullptr;
+}
+
 // The destructor: a subtree deleted on both sides (the original's blocks copies its operator delete may free).
 void TestDestructor()
 {
@@ -334,8 +346,13 @@ void TestDestructor()
     while (!stack.empty()) {
         uint8_t *n = stack.back();
         stack.pop_back();
-        const size_t size = 0x100;
-        auto *copy = static_cast<uint8_t *>(std::malloc(size));
+        // Only the node's own bytes (its kind's size): a fixed 0x100 read past the end of the smaller blocks (0x40
+        // spare on the test's nodes, none on those the original's new made) and faulted when one ended a heap region.
+        const size_t at0 = size_t(std::find(g_origNodes.begin(), g_origNodes.end(), n) - g_origNodes.begin());
+        const S_Kind *kind = at0 < g_origNodes.size() ? g_nodeKinds[at0] : OrigKindOf(n);
+        CHECK(kind, "the destructor: node %p's kind unknown (vtable %x)", static_cast<void *>(n), OF<uint32_t>(n, 0));
+        const size_t size = kind ? kind->size : 0x6C;
+        auto *copy = static_cast<uint8_t *>(std::calloc(1, std::max<size_t>(size, 0x100)));
         std::memcpy(copy, n, size);
         moved[n] = copy;
         const size_t kids = OVecBytes(n, O_CHILDREN) / 4;
