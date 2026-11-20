@@ -4588,3 +4588,45 @@ particles and the surface marks. Files are served from memory.
   start words, a focus object and a target-page script added; the next full run left 15 more that depended on the
   random draws (a body a member carries, explosives not planted with a member, the combat page's fire launcher): the
   focus and the script widened, the last full run left only the 7 equivalents.
+
+## Human part 71 (the map screen, `interface_map.cpp`, 2026-11-20)
+
+- **The build:** `interface/build_map.bat` (`map_diff.cpp`, including `interface_map.cpp`; 96 arena frames). The kit's
+  globals' items module grew to 0x1000 bytes (the port's respawning items are at +0x7F8).
+- **Fakes:** each side its own 12 humans (frame, net id, health, chat line and time), 6 items (their owners), up to 18
+  map actors (mostly zones: type, objective, side, net id, a named frame), the game (mission name, scene, mission), the
+  mission (its objectives' vector) and the squad (its soldiers' vector; the soldiers' spawn zones read back after each
+  operation); shared: the objectives, the zones' frames, the scenes (the interface's: primary sector, camera with its
+  range; the game's camera), the play mode, the settings. Logged on both sides: the team (GetActivePlayer,
+  GetMemberCount, GetMember, GetSeenLivingEnemies), GetHuman, the humans' GetViewDir / IsUnconscious / IsInPlay /
+  IsSpectating / GetTeam, GetVipSlot, the items' GetFrame, the cursor's SetMode / GetHoveredId, ClearAction,
+  GetLocalTeam, the text boxes' SetRect, the driver's CreateFrame / GetState / SetState, the model's Open; the scene's
+  templates and the parts the map's frames find (a hash of the frame and the name, some missing). The original's chat
+  rectangle statics set beforehand (their first call registers an atexit in the mapped CRT).
+- **The tests:** scenarios of Init then up to 16 operations (Show, Update, Render, HandleInput, SelectSpawnZone,
+  ShowSelectedZone; the world changing between them: humans, team, VIP, items, zones' sides, objectives' statuses,
+  squad, input, frames moved) and now and then Done, from the same start words on both sides (the kind, the count, the
+  frame, the map, the selection marker, the markers): single player, deathmatch, occupation, objectives, cooperative
+  and unknown game types, the model failing to open, no "center", no "map*" (where nothing is put on it), no
+  "selectzone", no "allied" template, the user properties' scales (atof's corners), more than 15 zones, the views' and
+  the camera's degenerate directions, a depth of exactly 0. Left out (both crash): Done with a marker never made, Show /
+  Update / ShowSelectedZone without the selection marker in a team game, Update without an active soldier, single
+  player with more members than markers (the port's fix). The original's SetScale writes m_scaleW from a stack word:
+  not compared. A port-only case (MapFixes): a zone without "zone_disabled*", an objective without its parts, single
+  player without an active soldier and with more members than markers.
+- **Results:** 3528663 checks, 0 failures; 603 of the 604 measured lines of `interface_map.cpp` run (UpdateTeams' marker
+  without a visual: only after Done, where both sides crash on the cleared selection marker first).
+- **Port bugs found and fixed (on main; port mistakes, all orders of calls):** UpdateTeams asked the active soldier's
+  side before the player's (the original the player's first); UpdateVip asked for the VIP slot before the active
+  soldier; an objective's Update did not ask for the local side again before comparing it.
+- **Original's weaknesses (the port's fixes, tested alone):** a zone's "zone_disabled*" written unchecked; single player
+  read the active soldier's frame without one; more squad members than markers went past the markers; a multiplayer
+  objective without its parts was kept half set up (its later Update and Done on null parts and a stale text box).
+  Shared, not fixed: a team game without "selectzone" crashes in Show and Update; "map*" is read unchecked (Init's
+  zones and objectives, Show); the VIP's slot is read unchecked; SetScale's m_scaleW is a stack word.
+- **Not tested:** the text boxes' inline construction beyond the kit's (the same as earlier parts).
+- **Mutations:** 1064 mutants, 162 not building, 852 of 902 killed, 50 equivalent
+  (mutate_interface_map.py).
+- **Harness lessons (my mistakes):** the port-only case first inherited a world without "map*" (a crash); the first
+  mutation run left 11 killable survivors (no start words in the frame, the map and the markers; no exact bounds for
+  the depth and the squares): added.

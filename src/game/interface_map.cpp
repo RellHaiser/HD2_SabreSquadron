@@ -217,10 +217,10 @@ bool C_MapScreen::S_Objective::Init(I3D_frame *frame_, S_MpObjective *objective_
 
 void C_MapScreen::S_Objective::Update()
 {
-    const int localSide = g_netGame.GetLocalTeam();
-    if (localSide == 2)
+    if (g_netGame.GetLocalTeam() == 2)
         return;
-    if (status == objective->status && side == localSide)
+    // (The side asked for again, as the original does.)
+    if (status == objective->status && side == g_netGame.GetLocalTeam())
         return;
     status = objective->status;
     side = g_netGame.GetLocalTeam();
@@ -638,8 +638,9 @@ void C_MapScreen::UpdateVip()
     float x = view.x;
     float z = view.z;
     NormalizeXZ(x, z);
-    // Larger for the VIP himself.
-    const float scale = GetGame()->GetVipSlot() == PlayerTeam()->GetActivePlayer()->GetNetId() ? ACTIVE_SCALE : 1.0f;
+    // Larger for the VIP himself (the active soldier asked for first, as the original does).
+    const int activeId = PlayerTeam()->GetActivePlayer()->GetNetId();
+    const float scale = GetGame()->GetVipSlot() == activeId ? ACTIVE_SCALE : 1.0f;
     m_vipMarker->SetScale(S_vector(scale, scale, scale));
     m_vipMarker->SetDir(S_vector(x, z, 0.0f), HALF_PI);
     m_vipMarker->SetOn(true);
@@ -769,8 +770,13 @@ void C_MapScreen::UpdateTeams(int /*timeDelta*/)
         S_Marker &marker = m_markers[i];
         if (!marker.visual)
             continue;
-        if (!human || !human->IsInPlay() || human->IsDead() || human->IsSpectating() ||
-            active->GetTeam(false) != human->GetTeam(false)) {
+        bool shown = human && human->IsInPlay() && !human->IsDead() && !human->IsSpectating();
+        if (shown) {
+            // (The player's side asked for before the active one's, as the original does.)
+            const int team = human->GetTeam(false);
+            shown = active->GetTeam(false) == team;
+        }
+        if (!shown) {
             marker.visual->SetOn(false);
             continue;
         }

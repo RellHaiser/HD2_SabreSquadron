@@ -11,6 +11,6 @@ alignas(16) unsigned char g_scriptModule[0x1000];
 alignas(16) unsigned char g_modelCache[0x400];
 alignas(16) unsigned char g_controls[0x400];
 alignas(16) unsigned char g_collisionWorld[0x430];
-alignas(16) unsigned char g_itemsModule[0x400];
+alignas(16) unsigned char g_itemsModule[0x1000];
 int g_localPlayerSlot;
 uint32_t g_gameRole = 7;                                // GAME_ROLE_LOCAL
