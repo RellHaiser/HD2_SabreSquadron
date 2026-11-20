@@ -4333,3 +4333,37 @@ particles and the surface marks. Files are served from memory.
   test showed every miss on one side: a constant, not precision. A full-length run found NaN-sign differences the quick
   runs never reached: run the full length after adding special inputs. Writing this section I first noted a NaN sound
   direction as crashing both sides: the original's __ftol makes it 0; checking that claim found the port's 32-bit conversion, which the address arithmetic then made harmless.
+
+## Human part 64 (the message log and the chat line, `interface_messages.cpp`, 2026-11-20)
+
+- **The build:** `interface/build_messages.bat` (`messages_diff.cpp`, which includes `interface_messages.cpp`). New: the
+  interface's kit (`interface/interface_kit.inc`: checks, logs, an arena of frames with logged slots, the scene, the
+  driver, the graph, the original's common redirects, the log and arena comparisons, the crash handlers, LS3DF's
+  S_quat::Make and Normalize forwarded) for the parts from here on.
+- **Fakes, both sides with the same loggers:** the font manager (Acquire, Release, FindFont, the manager's Release) and
+  the fonts (each side its own object: g++ gives the virtual destructor two slots; Select logged, GetGlyph from the
+  round's table), the graph's screen, DrawPrimitives (every vertex logged), GetAsciiKey, ReadChar, FlushChars, IsKeyDown
+  (its key a byte: the original pushes a register with other bits above it), the driver's states, the area frame's
+  bound (UpdateBound: a new one each call, following the frame's place), the console's line and command, ReadUnicodeInput,
+  the game's SetPaused. The port's DecodeUtf8 and EncodeUtf8 are the original's (the text box's).
+- **The tests:** scenarios of up to 24 operations (Init, Done, Update with the keyboard's answers, Render, AddMessage,
+  SetMode, StartSay, StartSayTeam, OpenInput; the unicode flag, the game's role, the font found or not), with bursts: a
+  1 to 4 byte character typed byte by byte then a unicode backspace, the line filled to its 255 bytes (one by one or at
+  once) then backspaces, closed, opened, a backspace on the empty line. Colours and areas with NaNs, infinities, 1e10,
+  edges exactly on 0 (-0 pixels) or on a whole pixel. No float tolerance needed.
+- **Results:** 34,758,606 checks, 0 failures; all 343 measured lines run (the dedicated server's 3 lines not built).
+- **Port bugs found and fixed (on main; port mistakes):**
+  - The float to int conversions were 32 bits (a line's colour from AddMessage, the layout's pixels): a NaN or an out
+    of range value gave INT_MIN where the original's __ftol gives the low word (NaN 0, 1e10 1410065408; the glyphs drawn
+    from x = 0, not -2^31). One helper (Ftol) for all of them.
+  - The caret: the original draws its quad without the blank test (the width straight to __ftol); the port's AddGlyph
+    skipped a blank '_'. Now AddGlyphQuads, the quads whatever the width.
+  - The blank's width: the original's double 0.4, not 0.4f widened (the same pixels: faithful only).
+- **Original's flaws, port already fixed:** a backspace in the unicode mode on a line of only continuation bytes reads
+  the byte before the buffer (the history rectangle's last float's top byte, never a lead byte: harmless); the port stops.
+- **Not tested:** a log of 0 lines (Init's maxLines 0: both delete the front of none; the game passes 50); the dedicated
+  server's lines; DecodeUtf8 and EncodeUtf8 (the original's on both sides: the text box's suite).
+- **Mutations:** 589 mutants, 51 not building, 520 of 538 killed, 18 equivalent (mutate_interface_messages.py).
+- **Harness lessons (my mistakes):** IsKeyDown's first difference was the original's register junk above a byte
+  parameter, not a port bug. An edit dropped the scenario generator's closing brace and its tail (caught by the build). The
+  long-input bursts were needed: random typing never reached the 255-byte limit (enter in almost every long string).

@@ -1,6 +1,7 @@
 // The message log and the chat line (see interface.h; the original's 0x00494950..0x00496360).
 #include "game/interface.h"
 
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 
@@ -38,8 +39,8 @@ constexpr float AREA_Y_HISTORY = -0.3f;
 // The interface's screen space: x 0..1, y 0..-0.75 (4:3).
 constexpr float SCREEN_Y_SCALE = -1.33333337f;
 constexpr float AREA_MARGIN = 0.005f;
-// A blank glyph is 0.4 of the height wide.
-constexpr float BLANK_WIDTH = 0.4f;
+// A blank glyph is 0.4 of the height wide (the double 0x008104d0).
+constexpr double BLANK_WIDTH = 0.4;
 constexpr float VERTEX_Z = 0.02f;
 
 const S_vector INPUT_ECHO_COLOR(255.0f, 255.0f, 0.0f);
@@ -47,6 +48,13 @@ const S_vector INPUT_ECHO_COLOR(255.0f, 255.0f, 0.0f);
 int StrLen(const char *text)
 {
     return static_cast<int>(std::strlen(text));
+}
+
+// A float to int as the original's __ftol: truncated through 64 bits, the low word (out of range
+// the low word, a NaN or an infinity 0; a 32-bit conversion gives INT_MIN).
+int Ftol(double v)
+{
+    return static_cast<int>(static_cast<int64_t>(v));
 }
 
 } // namespace
@@ -125,9 +133,9 @@ void C_MessageLog::AddLine(const char *text, const S_vector &color)
     AgeLines();
     S_LogLine line;
     line.age = 0;
-    line.r = static_cast<int>(color.x);
-    line.g = static_cast<int>(color.y);
-    line.b = static_cast<int>(color.z);
+    line.r = Ftol(color.x);
+    line.g = Ftol(color.y);
+    line.b = Ftol(color.z);
     line.text = new char[length + 1];
     line.font = LOG_FONT;
     std::memcpy(line.text, text, length + 1);
@@ -352,19 +360,19 @@ int C_MessageLog::GetInputScroll()
 {
     const float *rect = m_mode == 0 ? m_rect : m_historyRect;
     const float left = rect[0];
-    const int height = static_cast<int>(m_lineHeight * m_screenHeight);
+    const int height = Ftol(m_lineHeight * m_screenHeight);
     C_Font *font = m_fonts->FindFont(LOG_FONT);
     if (!font)
         return 0;
     // The room left of the end of the area, less the caret's ('_').
     const float heightF = static_cast<float>(height);
-    int pos = static_cast<int>(rect[2]) - static_cast<int>(heightF * font->GetGlyph('_')->aspect);
+    int pos = Ftol(rect[2]) - Ftol(heightF * font->GetGlyph('_')->aspect);
     for (int i = StrLen(m_input) - 1; i >= 0; --i) {
         const float width = heightF * font->GetGlyph(static_cast<uint8_t>(m_input[i]))->aspect;
         if (width == 0.0f)
-            pos += static_cast<int>(static_cast<double>(height) * -0.4);
+            pos += Ftol(static_cast<double>(height) * -0.4);
         else
-            pos -= static_cast<int>(width);
+            pos -= Ftol(width);
         if (static_cast<float>(pos) <= left)
             return i;
     }
@@ -389,8 +397,13 @@ int C_MessageLog::AddGlyph(const S_Glyph &glyph, int x, int y, int height, uint3
 {
     const float width = static_cast<float>(height) * glyph.aspect;
     if (width == 0.0f)
-        return static_cast<int>(static_cast<double>(height) * BLANK_WIDTH);
-    const int advance = static_cast<int>(width);
+        return Ftol(static_cast<double>(height) * BLANK_WIDTH);
+    return AddGlyphQuads(glyph, x, y, height, color);
+}
+
+int C_MessageLog::AddGlyphQuads(const S_Glyph &glyph, int x, int y, int height, uint32_t color)
+{
+    const int advance = Ftol(static_cast<float>(height) * glyph.aspect);
     const float x0 = static_cast<float>(x);
     const float y0 = static_cast<float>(y);
     const float y1 = static_cast<float>(y + height);
@@ -455,7 +468,7 @@ void C_MessageLog::DrawInput(int x, int y, int height, int right)
     // The caret ('_') shows in the second half of its cycle.
     if (m_caretTime >= CARET_ON) {
         if (m_caretTime <= CARET_CYCLE)
-            AddGlyph(*font->GetGlyph('_'), x, y, height, INPUT_COLOR);
+            AddGlyphQuads(*font->GetGlyph('_'), x, y, height, INPUT_COLOR);   // (no blank test)
         else
             m_caretTime = 0;
     }
@@ -470,11 +483,11 @@ void C_MessageLog::DrawLines()
     const float left = rect[0];
     const float right = rect[2];
     const float limit = rect[3];
-    const int lineHeight = static_cast<int>(m_lineHeight * m_screenHeight);
+    const int lineHeight = Ftol(m_lineHeight * m_screenHeight);
     const float lineHeightF = static_cast<float>(lineHeight);
-    int y = static_cast<int>(rect[1] - lineHeightF);
+    int y = Ftol(rect[1] - lineHeightF);
     if (m_inputOpen)
-        DrawInput(static_cast<int>(left), y, lineHeight, static_cast<int>(right));
+        DrawInput(Ftol(left), y, lineHeight, Ftol(right));
     y -= lineHeight;
     m_vertexCount = 0;
     int line = 0;
@@ -492,7 +505,7 @@ void C_MessageLog::DrawLines()
         C_Font *font = m_fonts->FindFont(entry.font);
         if (!font)
             continue;
-        int x = static_cast<int>(left);
+        int x = Ftol(left);
         const uint32_t color = static_cast<uint32_t>(((entry.r - 0x100) * 0x100 + entry.g) * 0x100 + entry.b);
         const int length = StrLen(entry.text);
         if (!g_gameProfile.UsesUnicodeFont()) {

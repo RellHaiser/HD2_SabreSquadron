@@ -182,8 +182,10 @@ private:
     // The first character of the chat line to show so that its end fits.
     int GetInputScroll();                               // 0x00495190
     void AddVertex(float x, float y, float u, float v, uint32_t color);   // 0x004952c0
-    // Glyph quads of one character from `x`; the advance.
+    // Glyph quads of one character from `x` (a blank only advances); the advance.
     int AddGlyph(const S_Glyph &glyph, int x, int y, int height, uint32_t color);
+    // The glyph's quads whatever its width (the caret's: no blank test); the advance.
+    int AddGlyphQuads(const S_Glyph &glyph, int x, int y, int height, uint32_t color);
     void DrawInput(int x, int y, int height, int right);   // 0x00495360
     void DrawLines();                                   // 0x00495a00
     void Flush(C_Font *font);
