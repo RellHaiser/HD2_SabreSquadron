@@ -6805,8 +6805,15 @@ void CarTest(const char *path)
 {
     if (!LoadModel(path))
         return;
+    // The counter read around the reset, so the bound on time0 is the time that really passed (a
+    // fixed bound failed when the thread was preempted under the full suite run's load).
+    LARGE_INTEGER initFrequency, initBefore, initAfter;
+    QueryPerformanceFrequency(&initFrequency);
+    QueryPerformanceCounter(&initBefore);
     InitPerfTime();
     const int64_t time0 = GetPerfTimeMs();
+    QueryPerformanceCounter(&initAfter);
+    const int64_t time0Max = (initAfter.QuadPart - initBefore.QuadPart) * 1000 / initFrequency.QuadPart + 1;
     while (GetPerfTimeMs() < 3) {
     }
     C_ActorCreator *creator = g_actorCreators[ACTOR_CAR];
@@ -6954,16 +6961,25 @@ void CarTest(const char *path)
     delete a;
     released &= partsModel->m_refCount == 1;
     list &= g_cars.size() == cars0;
-    // The timer against the performance counter: 50 ms.
-    LARGE_INTEGER frequency, start, now;
+    // The timer against the performance counter: at least 50 ms between the reads (49 after the
+    // truncation), at most the time between counter reads taken outside both calls (+1). Wall-clock
+    // bounds (49..60) failed when the thread was preempted under the full suite run's load.
+    LARGE_INTEGER frequency, outerStart, start, now, outerEnd;
     QueryPerformanceFrequency(&frequency);
-    QueryPerformanceCounter(&start);
+    QueryPerformanceCounter(&outerStart);
     const int64_t before = GetPerfTimeMs();
+    QueryPerformanceCounter(&start);
     do {
         QueryPerformanceCounter(&now);
     } while ((now.QuadPart - start.QuadPart) * 1000 < frequency.QuadPart * 50);
     const int64_t elapsed = GetPerfTimeMs() - before;
-    const bool timer = time0 >= 0 && time0 < 3 && elapsed >= 49 && elapsed <= 60;
+    QueryPerformanceCounter(&outerEnd);
+    const int64_t elapsedMax = (outerEnd.QuadPart - outerStart.QuadPart) * 1000 / frequency.QuadPart + 1;
+    const bool timer = time0 >= 0 && time0 <= time0Max && elapsed >= 49 && elapsed <= elapsedMax;
+    if (!timer)
+        std::printf("car timer: time0 %lld (max %lld) elapsed %lld (max %lld)\n", static_cast<long long>(time0),
+                    static_cast<long long>(time0Max), static_cast<long long>(elapsed),
+                    static_cast<long long>(elapsedMax));
     std::printf("car: named %d made %d frame %d refused %d properties %d copy %d released %d list %d timer %d\n", named,
                 made, frame, refused, props, copy, released, list, timer);
 }
@@ -8071,8 +8087,11 @@ void SeatTest(const char *path)
         car->m_seatLeftIds = ids;
         car->m_seatLeftTimes = times;
         car->SetSeatOccupant(0, h0);
-        const int64_t now = GetPerfTimeMs();
-        net &= car->LeaveSeat(0) == h0 && ids[0] == 20 && times[0] >= now && times[0] <= now + 5 &&
+        // (Clock reads on both sides, not a fixed slack: a preempted thread passes any slack.)
+        const int64_t leftFrom = GetPerfTimeMs();
+        const bool left = car->LeaveSeat(0) == h0;
+        const int64_t leftTo = GetPerfTimeMs();
+        net &= left && ids[0] == 20 && times[0] >= leftFrom && times[0] <= leftTo &&
                !(v.m_unknown600 & VEHICLE_PHYSICS_KEEP_AWAKE);
         // A client: the local player's net id getting out of the driver's seat sends the state.
         g_gameRole = GAME_ROLE_CLIENT;
@@ -8853,6 +8872,7 @@ void CarUpdateTest(const char *path)
             for (C_Human *h : crew)
                 h->hits.clear();
             g_waterRays.clear();
+            const int64_t checkedFrom = GetPerfTimeMs();  // (bounds the timer's start, load or not)
             car->CheckWater();
             const bool rayed = c.top != -FLT_MAX && carY < c.top && c.engine > 0.0f;
             Expect(water, g_waterRays.size() == (rayed ? 1u : 0u), __LINE__);
@@ -8866,7 +8886,7 @@ void CarUpdateTest(const char *path)
                                         h->hits[0].flags == 0)), __LINE__);
             const int64_t now = GetPerfTimeMs();
             Expect(water, car->m_respawnTimer.running == c.timer &&
-                     (!c.timer || (car->m_respawnTimer.start >= now - 5 && car->m_respawnTimer.start <= now)), __LINE__);
+                     (!c.timer || (car->m_respawnTimer.start >= checkedFrom && car->m_respawnTimer.start <= now)), __LINE__);
         }
         for (int i = 0; i < std::min(n, 2); ++i) {
             v.m_seats[i].occupant = nullptr;
@@ -9359,9 +9379,10 @@ void CarUpdateTest(const char *path)
     // --- the timer, the messages.
     bool timer = true;
     {
+        const int made = static_cast<int>(GetPerfTimeMs());  // (both sides: no slack to outlast)
         S_PerfTimer t(500);
         const int now = static_cast<int>(GetPerfTimeMs());
-        Expect(timer, t.period == 500 && !t.running && t.start >= now - 5 && t.start <= now && !t.Fire(), __LINE__);
+        Expect(timer, t.period == 500 && !t.running && t.start >= made && t.start <= now && !t.Fire(), __LINE__);
         t.start -= 1000;
         Expect(timer, !t.Fire(), __LINE__);                // (idle)
         t.Start();
