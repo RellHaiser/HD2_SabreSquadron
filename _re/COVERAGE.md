@@ -4367,3 +4367,34 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** IsKeyDown's first difference was the original's register junk above a byte
   parameter, not a port bug. An edit dropped the scenario generator's closing brace and its tail (caught by the build). The
   long-input bursts were needed: random typing never reached the 255-byte limit (enter in almost every long string).
+
+## Human part 65 (the squad members' panels, `interface_members.cpp`, 2026-11-20)
+
+- **The build:** `interface/build_members.bat` (`members_diff.cpp`, which includes `interface_members.cpp`, with the kit).
+- **Fakes, both sides with the same loggers:** the text boxes (the port's C_TextBox defined in the test; the original
+  builds its own inline: operator new, the graph's screen, AcquireFontManager; its AttachTo, SetText, SetTextId, AddText,
+  Clear, Render and deleting destructor redirected; boxes named by their first appearance, a deleted one giving its name
+  up), the parts' meshes, levels, face groups (DuplicateMaterial) and materials (SetAmbientColor, SetTexture,
+  ResolveTexture), the graph's LoadTexture, the humans' methods (GetProfileUnknown24, GetLastName, GetShortName,
+  GetTeam, GetHandsWeapon, FindItem, GetStat, the health, stamina and disguise per cents, GetVisibility, GetOrderCount,
+  the squad icons, IsLocalPlayer; role, health, frame, net id, containers, profile, inventory flag and scale at both
+  sides' offsets in raw blocks: g++ lays C_Human out its own way), the uniform's container (GetItem: each side its own
+  object, the port's slot 4 bytes on), the texts ("T" + the id), the rank names, the multiplayer settings, the profile's
+  IsCooperativeGame, the game's GetVipSlot, the active player. C_fstr and printf each side's own (the original CRT's
+  float formatting set up first: _cfltcvt_init).
+- **The tests:** scenarios of up to 20 operations (Init, SetHuman, SetSelected, Update, Render, Relayout, Done; the
+  humans' answers and fields, the active soldier, the game's role and type, the VIP slot, the co-operative flag, the
+  uniform, the humans' places (at times exactly 40 m apart at a height), the panel shown or hidden); the panel's fields
+  Init leaves alone given each scenario's start values on both sides. The death image failing to load only without Done.
+- **Results:** 5,233,625 checks, 0 failures; all 245 measured lines run.
+- **Port bugs found:** none.
+- **Original's flaws, port already fixed:** "AImode*" may be missing (Init allows it) but Update and the death use it
+  unchecked: a crash; the port checks (tested on the port alone: never asked for it). Init's photo colour copies a stack
+  word into its w (nothing reads w: left out of the comparison). The inline SetScale copies a 16-byte temporary into the
+  frame (+0xDC a stack word on both sides: put back before the comparison, as part 50's bars).
+- **Not tested:** the death image failing with Done (both release it unchecked); the dedicated server's line.
+- **Mutations:** 446 mutants, 23 not building, 420 of 423 killed, 3 equivalent (mutate_interface_members.py; the
+  last full run, then a health of 1 added to the answers' picks: G 261 num killed in the survivors' rerun).
+- **Harness lessons (my mistakes):** the original CRT's float formatting crashes until _cfltcvt_init runs (part 57's
+  lesson, forgotten: a hang under ntdll's heap lock); the earshot's edge needed a placed scenario (random places never
+  made 1600 exactly); the coverage build kept a g_texts reference the optimised one dropped (raw storage added).
