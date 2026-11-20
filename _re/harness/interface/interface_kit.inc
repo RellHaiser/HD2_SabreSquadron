@@ -80,7 +80,10 @@ std::string FloatText(float f)
 std::string VecText(const S_vector &v) { return FloatText(v.x) + " " + FloatText(v.y) + " " + FloatText(v.z); }
 
 // ---- the arena of frames ----
-constexpr int FRAMES = 32;
+#ifndef INTERFACE_FRAMES
+#define INTERFACE_FRAMES 32
+#endif
+constexpr int FRAMES = INTERFACE_FRAMES;   // (a part may ask for more: INTERFACE_FRAMES before the include)
 constexpr int FRAME_BYTES = 0x400;
 struct alignas(16) S_Arena {
     uint8_t frames[FRAMES][FRAME_BYTES];

@@ -5,6 +5,7 @@
 #include "game/interface_internal.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 
@@ -52,6 +53,13 @@ constexpr int PHOTO_TIME = 2000;
 
 // The players' actor slots counted by the score table.
 constexpr int PLAYER_SLOTS = 32;
+
+// A float to int as the original's __ftol: truncated through 64 bits, the low word (out of range
+// the low word, a NaN or an infinity 0; a 32-bit conversion gives INT_MIN).
+int Ftol(float v)
+{
+    return static_cast<int>(static_cast<int64_t>(v));
+}
 
 C_TextBox *NewText(I3D_scene *scene, I3D_frame *frame, bool clear90)
 {
@@ -302,8 +310,8 @@ void C_ScoreTable::Update(int /*timeDelta*/)
     C_game *game = GetGame();
     switch (m_gameType) {
     case MP_GAME_OCCUPATION: {
-        const int axis = static_cast<int>(g_netGame.GetTeamScore(0));
-        const int allied = static_cast<int>(g_netGame.GetTeamScore(1));
+        const int axis = Ftol(g_netGame.GetTeamScore(0));
+        const int allied = Ftol(g_netGame.GetTeamScore(1));
         const int respawn = game->GetRespawnTimeLeft() / 1000;
         const int round = game->GetRoundTimeLeft() / 1000;
         m_text->SetText(C_fstr("%d", axis), STYLE_SCORE_1, 0);
@@ -415,7 +423,10 @@ void C_PhotoFlash::Update(int timeDelta)
     if (m_timeLeft < 1000 && m_soundPending) {
         S_SoundRequest request;
         request.chapter = SOUND_CHAPTER_OBJECT_MANIPULATION;
-        request.pos = GetGame()->GetScene()->GetActiveCamera()->GetWorldPos();
+        // (The original copies the camera's world row as 16 bytes: its w too.)
+        const S_matrix &world = GetGame()->GetScene()->GetActiveCamera()->GetMatrix();
+        request.pos = world(3);
+        request.posW = world.m[3][3];
         request.flags = SOUND_AMBIENT | SOUND_SILENT_TO_AI;
         request.attachTo = nullptr;
         request.source = nullptr;

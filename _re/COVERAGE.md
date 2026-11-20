@@ -4438,3 +4438,35 @@ particles and the surface marks. Files are served from memory.
   changed by the original's run leaked into the port's); the icons' face groups shared materials, so a later group
   overwrote the "X_SQUARE.BMP" texture; Init's resets survived until the panels started from random words; I authored a
   backslash through a Bash heredoc again (a printf's "\n" became a line break; fixed with Edit).
+
+## Human part 67 (the overlays, `interface_overlays.cpp`, 2026-11-20)
+
+- **The build:** `interface/build_overlays.bat` (`overlays_diff.cpp`, including `interface_overlays.cpp`; linking
+  `common/radix_sort.cpp` for the score table's sort). The kit's frame arena is now sized per harness (INTERFACE_FRAMES).
+- **Fakes:** the video streams (the graph's CreateStream; Open's answers, Release, Close, Play, Stop, SetPosition,
+  GetVideoTexture, UpdateVideo), the CRT's rand, the sound module's Play (every field of the request logged), the effects'
+  SetFadeLevel (the original's slot 0x88, the port's from its member pointer), the scene's camera, the game (scene, round
+  and respawn time left), the texts, the actors module (its actors vector at the original's address, the carnage count),
+  the net game (team scores, the players' states and their lock), the local player's slot, the game role, the settings,
+  the cutscene flag, the humans' IsSpectating and GetTeam. The world is written to both sides' memory before each
+  operation (the port's objects, the original's addresses).
+- **The tests:** a case per overlay (Injury, BigMessage, Objectives, Voting, Photo, Carnage, Pause, Countdown, Score,
+  Timers): scenarios of its operations with the world changing between them, from the same random start words on both
+  sides; the boxes' margins logged right after Init and the timers' SetPos; the fields snapped after each operation, the
+  frames and graphics compared at the end. Scores and times NaN, infinite, 1e10, 2^31.
+- **Results:** 26,300,268 checks, 0 failures; all 369 measured lines of `interface_overlays.cpp` run (`radix_sort.cpp` 61 of
+  64: the sort's other key widths).
+- **Port bugs found and fixed (on main; port mistakes):**
+  - The score table's team scores (floats) converted in 32 bits: NaN, 1e10 or 2^31 gave INT_MIN where the original's
+    __ftol gives the low word. Through 64 bits now (Ftol).
+  - The photo's shutter sound took the camera's world position (x, y, z) and left the request's w its default; the
+    original copies the matrix's whole fourth row, w too. The same 16 bytes now.
+- **Original's weaknesses:** the occupation score reads 32 actor slots whatever the actors vector's count (the port, from
+  its translation, stops at the count; the harness's slots past the count are null, where both count the same).
+- **Not tested:** the score table's actors other than humans and explosive places (the harness's actor blocks overlap
+  between the two types' fields, so the score case uses humans only); a video failing to open on one side only.
+- **Mutations:** 549 mutants, 42 not building, 496 of 507 killed, 11 equivalent (mutate_interface_overlays.py).
+- **Harness lessons (my mistakes):** the original's settings pointer was left unset at first (the original read null);
+  a human's and an explosive place's fields overlap in the shared actor blocks (now type-specific writes); a static_assert
+  on a port size that g++ pads differently; I authored backslashes through a Bash heredoc again (the build file's
+  "\\radix_sort" became a carriage return; the file rewritten with Write).
