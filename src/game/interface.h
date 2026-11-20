@@ -255,8 +255,8 @@ private:
     void AddDeathmatchPlayers();                        // 0x004977e0
     // The two teams side by side: the allies left, the axis right.
     void AddTeamPlayers();                              // 0x00497e60
-    // A player of the left (0: allies; null: an empty row; a line break follows) or right (1:
-    // axis) column (the original's 0x00498430 and 0x00498730, one per column).
+    // A player of the left (0: allies; null: an empty row, a blank line in its place) or right
+    // (1: axis) column (the original's 0x00498430 and 0x00498730, one per column).
     void AddTeamPlayer(S_NetPlayerState *player, bool local, int column);
     void AddServer();                                   // 0x004996b0
     void AddMissionName();                              // 0x00499770

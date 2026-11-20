@@ -55,6 +55,9 @@ def tree(n, port):
     # (Not tier 1: the copies filled C: once.)
     shutil.copytree(ROOT + r"\src", d + r"\src", ignore=shutil.ignore_patterns("tier1", "*.gch", "*.obj"))
     shutil.copytree(HARNESS, d + r"\h", ignore=shutil.ignore_patterns("*.exe"))
+    # (rw_data's interface: src/ls3d/rw_data.h includes it from ../../rw_data.)
+    if os.path.isdir(ROOT + r"\rw_data\include"):
+        shutil.copytree(ROOT + r"\rw_data\include", d + r"\rw_data\include")
     objs = {}
     for s in SRCS:
         objs[s] = d + "\\" + s.replace("\\", "_") + ".o"

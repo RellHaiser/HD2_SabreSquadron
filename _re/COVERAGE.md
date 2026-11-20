@@ -4509,3 +4509,42 @@ particles and the surface marks. Files are served from memory.
   each let a few of the earlier kills through (the new inputs moved the random streams: rectangles' edges on the cursor,
   key repeats reaching 0 and 1 ms, the previous key firing again, a medkit chosen while carried had been luck), so they
   are now made on purpose (rectangles around the cursor, a scripted key sequence in both orders ending in a choice).
+
+## Human part 69 (the mission information and the scores, `interface_info.cpp`, 2026-11-20)
+
+- **The build:** `interface/build_info.bat` (`info_diff.cpp`, including `interface_info.cpp`; common/chunk.cpp linked: the
+  original's inline chunk code runs on the port's C_chunk, the same layout). The kit's net game storage grew to 0x8000
+  (the server's name at +0x4E00); `mutrun.py` copies rw_data's include directory into its trees.
+- **Fakes:** the driver's CreateFrame and states (up to 0x3F), the model's SetName, the scene's AddFrame and primary
+  sector, the model cache (the port's OpenInto; the original's inline lookup answered by FUN_00409660's slot and the
+  cache's slot 0x30), the text styles (every word logged: the 73 styles' table compared), the graph's render states, the
+  texts (kept alive: the original reads a hint's characters after releasing its copy), ReplaceTags (three tags), the
+  campaign's mission, the missions and objectives (per side), the game, the settings, the net game (the players,
+  scores, wins, server's name), IsSpectating, the humans' health and uniform (the original's inline path), the items'
+  teams, rw_data's files (in memory).
+- **The tests:** scenarios of up to 20 operations (Init, Done, Update, Render, Show, IsShown, AddHint (hints before Init
+  too), ClearHints, SaveHints, LoadHints) with the world changing between them (players, game, settings, mission, the
+  frame, a player's spectating and health), from the same random start words on both sides: every game type, single
+  player and multiplayer roles, up to 24 players (over 16 with distinct names and scores), equal scores and names
+  differing in case, ranks out of range, scores NaN, infinite, 1e10, 2^31, hints with tags known and not and '<', '>'
+  in every order. A port-only case (InfoFixes): Init without the model or its "game_info", LoadHints with part of an
+  id at a chunk's end.
+- **Results:** 5,127,170 checks, 0 failures; all 365 measured lines of `interface_info.cpp` run.
+- **Port bugs found and fixed (on main; port mistakes):**
+  - The teams' scores (floats) converted in 32 bits: NaN, 1e10 or 2^31 gave INT_MIN where the original's __ftol gives
+    the low word. Through 64 bits now (Ftol).
+  - The team columns put a blank line after every allied player; the original's only in place of an empty left row
+    (the axis' player follows on the same line).
+- **Original's weaknesses:** Init goes on without the model or its "game_info" (a crash; the port returns false: tested
+  alone); LoadHints loops forever on part of an id at a chunk's end (the port skips it: tested alone); the original
+  reads a hint's characters after releasing the text's copy (harmless while the texts table holds it); it fetches text
+  0xA40 and does not use it (left out of its log); past 16 players its sort is not stable (equal scores or names may
+  come in another order than the port's: not compared).
+- **Not tested:** the original's model cache when "ingame_info" is not cached yet (its file loading: the cached path
+  only); a malformed chunk (sizes past their parent).
+- **Mutations:** 647 mutants, 104 not building, 529 of 543 killed, 14 equivalent
+  (mutate_interface_info.py).
+- **Harness lessons (my mistakes):** the mutation trees lacked rw_data's include directory (the first run built
+  nothing); GetLocalTeam logged although the sides call it different times (a pure read: not logged now); the first
+  run left 3 killable survivors (Init's clearing of hints: none before Init; a hint with '>' but no '<'; SaveHints'
+  Ascend: the chunk's depth not logged): inputs and a log added.

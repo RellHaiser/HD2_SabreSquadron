@@ -177,6 +177,13 @@ constexpr int REFRESH_TIME = 500;
 constexpr int DRIVER_STATE_15 = 0x15;
 constexpr int DRIVER_STATE_19 = 0x19;
 
+// A float to int as the original's __ftol: truncated through 64 bits, the low word (out of range
+// the low word, a NaN or an infinity 0; a 32-bit conversion gives INT_MIN).
+int Ftol(float v)
+{
+    return static_cast<int>(static_cast<int64_t>(v));
+}
+
 int ClampRank(int rank)
 {
     return rank < 8 ? (rank < 0 ? 0 : rank) : MAX_RANK;
@@ -579,7 +586,7 @@ void C_InfoScreen::AddTeamPlayers()
     auto teamValue = [this](int team) {
         if (m_kind == 3)
             return C_str(C_fstr("%d %s", g_netGame.GetTeamWins()[team], g_texts.Get(TEXT_ROUNDS_WON).c_str()));
-        const int score = static_cast<int>(g_netGame.GetTeamScore(team));
+        const int score = Ftol(g_netGame.GetTeamScore(team));
         return C_str(C_fstr("%d %s", score, g_texts.Get(TEXT_TEAM_SCORE).c_str()));
     };
     C_str value = teamValue(TEAM_ALLIES);
@@ -631,23 +638,25 @@ void C_InfoScreen::AddTeamPlayers()
 
 void C_InfoScreen::AddTeamPlayer(S_NetPlayerState *player, bool local, int column)
 {
-    if (player) {
-        const S_ColumnStyles &styles = COLUMN_STYLES[column];
-        // Nobody dims during the warm-up.
-        bool inactive = false;
-        if (GetGame()->GetRoundState() != ROUND_WARMUP)
-            inactive = IsInactive(player);
-        const int rank = ClampRank(player->stats[PLAYER_RANK]);
-        m_text->AddText(C_fstr("%c", RANK_GLYPHS[column][rank]), Style(styles.insignia));
-        const int dim = inactive ? 1 : 0;
-        m_text->AddText(C_fstr("%s", player->name), Style(local ? styles.localName[dim] : styles.name[dim]));
-        AddNumber(player->stats[PLAYER_STAT4], styles.stat4[dim]);
-        AddNumber(player->stats[PLAYER_KILLS], styles.kills[dim]);
-        AddNumber(player->stats[PLAYER_DEATHS], styles.deaths[dim]);
-        AddNumber(player->stats[PLAYER_SCORE], styles.score[dim]);
+    // An empty row of the left column: a blank line in its place.
+    if (!player) {
+        if (column == 0)
+            AddBlankLine();
+        return;
     }
-    if (column == 0)
-        AddBlankLine();
+    const S_ColumnStyles &styles = COLUMN_STYLES[column];
+    // Nobody dims during the warm-up.
+    bool inactive = false;
+    if (GetGame()->GetRoundState() != ROUND_WARMUP)
+        inactive = IsInactive(player);
+    const int rank = ClampRank(player->stats[PLAYER_RANK]);
+    m_text->AddText(C_fstr("%c", RANK_GLYPHS[column][rank]), Style(styles.insignia));
+    const int dim = inactive ? 1 : 0;
+    m_text->AddText(C_fstr("%s", player->name), Style(local ? styles.localName[dim] : styles.name[dim]));
+    AddNumber(player->stats[PLAYER_STAT4], styles.stat4[dim]);
+    AddNumber(player->stats[PLAYER_KILLS], styles.kills[dim]);
+    AddNumber(player->stats[PLAYER_DEATHS], styles.deaths[dim]);
+    AddNumber(player->stats[PLAYER_SCORE], styles.score[dim]);
 }
 
 void C_InfoScreen::AddServer()
