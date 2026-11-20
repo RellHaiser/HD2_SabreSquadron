@@ -630,7 +630,8 @@ bool C_InventoryScreen::Init(I3D_scene *scene, C_MapCursor *cursor)
     // sector.
     m_dragIcon = I3DGetDriver()->CreateVisual(I3DVISUAL_OBJECT);
     m_dragIcon->Duplicate(m_slots[0][0].icon);
-    m_dragIcon->SetDir(m_slots[0][0].icon->GetWorldDir(), 0.0f);
+    // (The world z axis normalised as the original's inline copy: (y² + z²) + x².)
+    m_dragIcon->SetDir(m_slots[0][0].icon->GetMatrix()(2).NormalizedGame(), 0.0f);
     static_cast<I3D_visual *>(m_dragIcon)->VisualFlags() |= VISFLAGS_1000;
     m_dragIcon->SetName("DraggingFrame");
     static_cast<I3D_object_visual *>(m_dragIcon)->DuplicateMesh();
@@ -773,7 +774,8 @@ void C_InventoryScreen::ShowSlots(C_Human *human, int page)
             slot.amount.Clear();
             continue;
         }
-        slot.item = item;
+        // (The container asked for its item again for the slot, as the original does.)
+        slot.item = items->GetItem();
         if (i == SLOT_UNIFORM) {
             // The searched body's uniform is dimmed unless it can be taken (see DragSlot).
             const bool takeable = page == 0 || (human->IsUnconscious() && !human->GetUnknown1A5());
@@ -1248,9 +1250,11 @@ void C_InventoryScreen::UpdateDescription(int timeDelta)
     if (behaviour < 2 || (behaviour > 5 && behaviour != 12))
         return;
     if (def->GetAmmoItemId() >= 0) {
-        m_descriptionText.AddText(C_fstr("%s : %d/%d", g_texts.Get(TEXT_ROUNDS).c_str(),
-                                         static_cast<int>(item->GetAmount()), static_cast<int>(item->GetMaxAmount())),
-                                  STYLE_DESCRIPTION);
+        // (The text, the most, then the rounds: the original's order of the calls.)
+        const C_str label = g_texts.Get(TEXT_ROUNDS);
+        const int most = static_cast<int>(item->GetMaxAmount());
+        const int rounds = static_cast<int>(item->GetAmount());
+        m_descriptionText.AddText(C_fstr("%s : %d/%d", label.c_str(), rounds, most), STYLE_DESCRIPTION);
     }
     const E_ItemComponentKind kind = def->GetComponentKind();
     if (kind == ICK_PROJECTILE_WEAPON || kind == ICK_FIREARM) {

@@ -4704,3 +4704,44 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the original's floor of an infinity set errno through its unstarted CRT and broke
   the heap (seen only as crashes in ntdll at later rounds; my memory notes had the cause); the first run's "a part
   missing" scenarios all crashed in Init (now left out, the parts' own Inits tested instead).
+
+## Human part 73b (the inventory screen, `interface_inventory.cpp` lines 530-1357, 2026-11-20)
+
+- **The build:** `interface/build_inventory.bat` (`inventory_diff.cpp`, including `interface_inventory.cpp`; 128 arena
+  frames; its scroll bars run as they are, part 73a).
+- **Fakes:** each side's screen built once (the original's constructor 0x0049fef0, the port's) and its bytes restored
+  before each scenario (the original's text boxes are 0x9C bytes, the port's 0x84; its scroll bars 0x94 and 0x84: the
+  screens snapped by each side's layout, the boxes by name, margin and dimming). Each side its own 4 humans (type,
+  health, role, the containers' array, the carried weight, the inventory's flag, +0x1A5; GetName and GetHitPoints
+  virtuals), their containers (GetMaxSpace, GetTotalSpace, GetUsedSlotCount, GetSlots: the original's an array of
+  pointers to MSVC vectors, the port's libstdc++ vectors; GetItem), 16 items (definition, kind; GetAmount,
+  GetMaxAmount), 8 definitions (text, weight, components; GetBehaviour, GetAmmoItemId, GetImage) and their components
+  (kind, aim mode, aimed field of view; GetMuzzleVelocity). Logged on both sides: the humans' GetFullName,
+  GetProfileUnknown24, IsUnconscious, GetHealthPercent, GetStat, GetStatFactor, GetViewDir and the item requests, the
+  cursor (GetHoveredId, GetMove: the original's returns its argument, its caller passes that on; IsInRect; GetPos read,
+  not logged: the port's is inline), the texts' Get, FindTexture and DuplicateMaterial (__fastcall in the original),
+  the scene's PickFrame and AddFrame, the frames' SetName, the meshes' DuplicateMaterials; the rank names' texts (the
+  original's table 0x008ae960). The pages' children found by a hash of the frame and the name.
+- **The tests:** scenarios of Init, Open (the soldier, a body or another actor, modes 1 / 3 and others) and Show, then
+  scripts (a press, holds and a release or a double click; the cursor resting on an icon for the description; a scroll
+  bar hovered and clicked or dragged; a drag between the pages to a place, the drop place or none) and up to 14 other
+  operations (Open, Show, Refresh, Update, Render, HandleInput, ShowSlots, StartDrag, SendAcross, Drop, OnPress,
+  OnHold, OnRelease, OnDoubleClick, UpdateDescription, UpdateSkills, IsCursorInside, HideSelections, HandleScrollBars,
+  IsShown; the world changing between them), from the same start words on both sides. Left out (both crash): the
+  operations without a soldier, the right page without its actor, a drop by nobody, Init twice. The original's
+  SetScale writes m_scaleW from a stack word (not compared). The original's copy protection in DragSlot (single
+  player from campaign mission 14 on; dropped by the port) is not reached: the game's mission index stays below 14.
+- **Results:** 7673048 checks, 0 failures; all 559 measured lines of the range (the file's helpers and the screen) run.
+- **Port bugs found and fixed (on main; port mistakes):** ShowSlots asked a container for its item twice (the
+  original three times: the test, the slot, the picture); Init's dragged icon took the slot icon's world direction
+  normalised as x² + y² + z² (the original's inline copy sums (y² + z²) + x²: an ulp apart); the description's rounds
+  asked for GetAmount before GetMaxAmount and the text after them (the original: the text, the most, the rounds).
+- **Original's weaknesses:** none new (the shared crashes above are reached only through states the interface does not
+  make).
+- **Not tested:** the copy protection (above); the screen's destructor (each side's screen is built once).
+- **Mutations:** 1297 mutants, 100 not building, 1177 of 1197 killed, 20 equivalent
+  (mutate_interface_inventory.py).
+- **Harness lessons (my mistakes):** the original's GetMove returns its argument and its caller passes that on (my fake
+  returned nothing: the slider's Follow read a garbage motion and crashed once the scroll scripts ran); the first runs
+  reached the description's end 21 times in 10,000 scenarios (the picked frame now mostly an icon's, as the pages find
+  them).
