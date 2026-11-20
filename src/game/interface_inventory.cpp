@@ -416,10 +416,20 @@ void C_InventoryScrollBar::Step(int id)
     m_owner->OnScroll(m_id, m_index);
 }
 
+// The original's __ftol of an integral value: its 64-bit integer's low word (0 for NaN and the
+// infinities, whose 64-bit result is the "indefinite" 0x8000000000000000).
+static uint32_t FtolLow(double value)
+{
+    if (!(value > -9.2233720368547758e18 && value < 9.2233720368547758e18))
+        return 0;
+    return static_cast<uint32_t>(static_cast<uint64_t>(static_cast<int64_t>(value)));
+}
+
 void C_InventoryScrollBar::OnSliderMoved(float position)
 {
-    // (Compared unsigned, as the original did.)
-    uint32_t index = static_cast<uint32_t>(static_cast<int>(std::floor(static_cast<double>(position / m_step + 0.5f))));
+    // (Compared unsigned, as the original did. An infinite or NaN position (a slider over a base
+    // without height) gives index 0, as the original's __ftol does.)
+    uint32_t index = FtolLow(std::floor(static_cast<double>(position / m_step + 0.5f)));
     const uint32_t last = static_cast<uint32_t>(m_count - 1);
     if (index > last)
         index = last;

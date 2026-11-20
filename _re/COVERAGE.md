@@ -4674,3 +4674,33 @@ particles and the surface marks. Files are served from memory.
   after building: most scenarios lost); the seats' occupants turned into humans (nearly every object became one, the
   targets with them; now a seat of another actor is emptied); a vehicle drawn for one soldier could be the other (the
   team made human again); found by the per-line counts and a crash under the first-chance handler.
+
+## Human part 73a (the inventory's scroll bars, `interface_inventory.cpp` lines 98-520, 2026-11-20)
+
+- **The build:** `interface/build_scrollbar.bat` (`scrollbar_diff.cpp`, including `interface_inventory.cpp`; the
+  screen's outside references stubbed to abort: not run here).
+- **Fakes:** the kit's frames (the bar, its arrows and slider, their looks: found by name, some missing; the bounds'
+  UpdateBound); the owner's OnScroll patched on both sides to one logger (the original's 0x004a2590 redirected, the
+  port's C_InventoryScreen::OnScroll overwritten with a jump); the original's floor redirected to the harness's (its
+  CRT never started: an infinity's errno would go through a null heap). The original's bar, arrows and slider have
+  vtables at +0 (their fields 4 bytes above the port's): each side snapped by its own layout.
+- **The tests:** scenarios of the constructor, Init (the bar's, an arrow's, the slider's), then up to 16 operations
+  (SetCount, Hover, Unhover, Press, Drag, Release, SetDisabled, Step, OnSliderMoved; the arrows' Show, SetDisabled,
+  Activate, Deactivate, Press; the slider's Layout, Show, SetDisabled, Activate, Deactivate, SetPosition, Follow,
+  SetPositionAt, Drag; frames moved and their flags flipped) and now and then the destructor, from the same start on
+  both sides: counts from INT_MIN + 1 to a million, positions past both ends, NaN and the infinities, flat bounds (a
+  zero range), sliders larger than their bases. Left out (both crash): the bar's Init with a part or a look missing
+  (its SetDisabled shows the null looks), the parts' operations without their looks. After the destructor the
+  original clears its parts' pointers (not compared). A port-only case (ScrollBarFixes): a second Init's range.
+- **Results:** 6581125 checks, 0 failures; 249 of the 253 measured lines in the range run (GetFrameId: the screen's;
+  Step's clamps after its guards: they cannot fire).
+- **Port bug found and fixed (on main; a port mistake):** OnSliderMoved converted floor's value with a 32-bit cast:
+  an infinite or NaN position (a slider over a base without height) gave INT_MIN, past the unsigned clamp, and
+  scrolled to it; the original's __ftol gives 0 (the 64-bit result's low word). Now FtolLow, as the original.
+- **Original's weaknesses:** the bar's Init does not check its parts (a missing one crashes in SetDisabled; shared by
+  the port, not fixed); a second Init leaks the slider's range (the port frees it; tested alone).
+- **Mutations:** 555 mutants, 32 not building, 485 of 523 killed, 38 survived: 5 in the screen's
+  helpers (part 73b), the rest equivalent (mutate_interface_scrollbar.py).
+- **Harness lessons (my mistakes):** the original's floor of an infinity set errno through its unstarted CRT and broke
+  the heap (seen only as crashes in ntdll at later rounds; my memory notes had the cause); the first run's "a part
+  missing" scenarios all crashed in Init (now left out, the parts' own Inits tested instead).
