@@ -47,6 +47,13 @@ constexpr float CLIP_MARGIN = 0.002f;
 constexpr int REPEAT_TIME = 200;
 constexpr int IDLE_TIME = 2000;
 
+// A float to int as the original's __ftol: truncated through 64 bits, the low word (out of range
+// the low word, a NaN or an infinity 0; a 32-bit conversion gives INT_MIN).
+int Ftol(float v)
+{
+    return static_cast<int>(static_cast<int64_t>(v));
+}
+
 C_Team *PlayerTeam()
 {
     return g_teamManager.GetPlayerTeam();
@@ -319,8 +326,8 @@ void C_MapCursor::GetScreenPos(int *x, int *y) const
 {
     const float width = static_cast<float>(GetIGraph()->ScrnX());
     const int height = GetIGraph()->ScrnY();
-    *x = static_cast<int>(m_pos.x * width);
-    *y = static_cast<int>(static_cast<float>(m_pos.y * -1.3333333333333333) * static_cast<float>(height));
+    *x = Ftol(m_pos.x * width);
+    *y = Ftol(static_cast<float>(m_pos.y * -1.3333333333333333) * static_cast<float>(height));
 }
 
 bool C_MapCursor::IsInRect(const float *rect) const
@@ -515,7 +522,7 @@ void C_WeaponSelector::UpdateAmounts()
         case ITEM_BEHAVIOUR_LAUNCHER: {
             // The rounds loaded / the ammo carried (the backpack's too).
             const int ammo = human->CountAmmo(def->GetAmmoItemId(), true);
-            const int rounds = static_cast<int>(item->GetAmount());
+            const int rounds = Ftol(item->GetAmount());
             entry->text.SetText(C_fstr("%d/%d", rounds, ammo), STYLE_WEAPON_AMOUNT, 0);
             break;
         }
@@ -534,7 +541,7 @@ void C_WeaponSelector::UpdateAmounts()
         }
         default: {
             const int ammo = human->CountAmmo(def->GetAmmoItemId(), false);
-            const int rounds = static_cast<int>(item->GetAmount());
+            const int rounds = Ftol(item->GetAmount());
             entry->text.SetText(C_fstr("%d/%d", rounds, ammo), STYLE_WEAPON_AMOUNT, 0);
             break;
         }

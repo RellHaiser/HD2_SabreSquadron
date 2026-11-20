@@ -255,6 +255,8 @@ SUITES = [
       tree_copy="interface/crosshair_diff.exe"),
     T("human.interface_overlays", "interface/build_overlays.bat", TMP + r"\overlays_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="interface/overlays_diff.exe"),
+    T("human.interface_selectors", "interface/build_selectors.bat", TMP + r"\selectors_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="interface/selectors_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

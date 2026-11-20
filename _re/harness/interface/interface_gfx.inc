@@ -30,7 +30,13 @@ void BoxSetTextId(const void *b, int id, int style, int index) { Log("%s SetText
 void BoxAddText(const void *b, const C_str &t, int style) { Log("%s AddText %s %d", BoxName(b).c_str(), Text(t).c_str(), style); }
 void BoxAddTextId(const void *b, int id, int style) { Log("%s AddTextId %d %d", BoxName(b).c_str(), id, style); }
 void BoxClear(const void *b) { Log("%s Clear", BoxName(b).c_str()); }
-void BoxRender(const void *b) { Log("%s Render", BoxName(b).c_str()); }
+bool g_logMargins;   // Render logs the box's margin too (+0x90 the original's)
+void BoxRender(const void *b, int margin)
+{
+    Log("%s Render", BoxName(b).c_str());
+    if (g_logMargins)
+        Log("%s margin %d", BoxName(b).c_str(), margin);
+}
 void BoxDelete(const void *b)
 {
     Log("%s delete", BoxName(b).c_str());
@@ -58,7 +64,7 @@ bool __attribute__((thiscall)) OB_AddTextId(void *b, int id, int style)
     return true;
 }
 void __attribute__((thiscall)) OB_Clear(void *b) { BoxClear(b); }
-void __attribute__((thiscall)) OB_Render(void *b) { BoxRender(b); }
+void __attribute__((thiscall)) OB_Render(void *b) { BoxRender(b, static_cast<const uint8_t *>(b)[0x90]); }
 void *__attribute__((thiscall)) OB_Delete(void *b, unsigned flags)
 {
     BoxDelete(b);
@@ -93,6 +99,7 @@ struct S_Gfx {
     int nextMaterial;
 };
 S_Gfx g_gfx, g_gfxStart;
+int g_materialPoolEnd = MATERIALS;   // the duplicates' pool: m8 up to this (a harness may keep the rest its own)
 void *g_meshVt[8], *g_levelVt[16], *g_groupVt[16], *g_materialVt[24], *g_textureVt[4];
 const char *const TEXTURE_NAMES[] = {"X_SQUARE.BMP", "x_square.bmp", "X_SQUARE.BMP2", "menu.bmp", "face.tga", "", "icon.bmp", "X_SQUAR.BMP"};
 char g_textureNames[TEXTURES][16];
@@ -127,7 +134,7 @@ void *__stdcall L_GetFaceGroup(void *level, int index)
 }
 void __stdcall G_DuplicateMaterial(void *group)
 {
-    const int m = g_gfx.nextMaterial < MATERIALS ? g_gfx.nextMaterial++ : MATERIALS - 1;
+    const int m = g_gfx.nextMaterial < g_materialPoolEnd ? g_gfx.nextMaterial++ : g_materialPoolEnd - 1;
     Log("%s DuplicateMaterial -> m%d", Name(group).c_str(), m);
     void *&material = *reinterpret_cast<void **>(static_cast<uint8_t *>(group) + 4);
     if (material)
@@ -246,7 +253,7 @@ C_TextBox::C_TextBox()
 }
 C_TextBox::~C_TextBox() { H::BoxDelete(this); }
 void C_TextBox::UpdateScrollRange() { H::Log("%s UpdateScrollRange", H::BoxName(this).c_str()); }
-void C_TextBox::Render() { H::BoxRender(this); }
+void C_TextBox::Render() { H::BoxRender(this, m_margin); }
 bool C_TextBox::ScrollTo(int line)
 {
     H::Log("%s ScrollTo %d", H::BoxName(this).c_str(), line);

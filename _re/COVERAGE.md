@@ -4470,3 +4470,42 @@ particles and the surface marks. Files are served from memory.
   a human's and an explosive place's fields overlap in the shared actor blocks (now type-specific writes); a static_assert
   on a port size that g++ pads differently; I authored backslashes through a Bash heredoc again (the build file's
   "\\radix_sort" became a carriage return; the file rewritten with Write).
+
+## Human part 68 (the pickers, `interface_selectors.cpp`, 2026-11-20)
+
+- **The build:** `interface/build_selectors.bat` (`selectors_diff.cpp`, including `interface_selectors.cpp`). The kit's
+  graphics can keep materials out of the duplicates' pool (g_materialPoolEnd) and log a box's margin on Render
+  (g_logMargins).
+- **Fakes:** the humans' orders (raw blocks per side: the port's S_HumanOrder has no vtable word and its own layout), the
+  scene's PickFrame and TransformPoints, the graph's screen size; for the weapon selector the driver's visuals (a pool, an
+  "i_frehnd.bmp" face group each, released ones reused and their scales logged), the team's selected member and active
+  player, the containers (per-side vtables; the original's GetSlots an array of pointers to MSVC vectors, the port's of
+  std::vector), the items and definitions, the humans' breath, order, ammo and item counts, RequestMoveItem,
+  RequestTransferItem, IssueCommand, the item images.
+- **The tests:** a case per class (Info, Cursor, Weapons) of up to 16 or 20 operations with the world changing between
+  them, from the same random start words on both sides; the cursor's motions also landing exactly on the screen's and the
+  clip rectangle's bounds, IsInRect's rectangles with an edge on the cursor, the weapon keys held through whole scenarios
+  and a scripted sequence running both keys' repeats (both orders, then a choice), times adding up to the 2 s idle limit, amounts NaN,
+  infinite, 1e10, 2^31. A port-only case (QueueFixes) on queues of more than 10 orders and orders without icons.
+- **Results:** 25,128,284 checks, 0 failures; all 398 measured lines of `interface_selectors.cpp` run.
+- **Port bugs found and fixed (on main; port mistakes):**
+  - The cursor's screen position and the weapon list's rounds (floats) converted in 32 bits: NaN, 1e10 or 2^31 gave
+    INT_MIN where the original's __ftol gives the low word. Through 64 bits now (Ftol).
+- **Original's weaknesses:** a queue of more than 10 orders runs the original past its icons, and an order without an icon
+  of its own shows the previous order's (for the first one an unset stack word): the port's fixes (from its translation)
+  are tested alone; Show(true) while shown builds the weapon list again after the old one (the entries doubled until Done;
+  shared; the harness shows at most 4 times per scenario); HandleInput and Update use the human unchecked when no list was shown (shared; not run); the cursor's
+  Init copies a stack word into the positions' w (set to the port's 0 after Init).
+- **Not tested:** the weapon selector without a human (both crash); a template entry's visual without the "i_frehnd.bmp"
+  face group (both crash).
+- **Mutations:** 697 mutants, 69 not building, 611 of 628 killed, 17 equivalent
+  (mutate_interface_selectors.py).
+- **Harness lessons (my mistakes):** stubs declared without their bool returns; the order blocks shared between the sides
+  at first (layouts differ); the cursor's pick and transform leaked from one side's run into the other's; the port's
+  vector at +0x14 was overwritten by start words; the visuals' pool ran out (repeated Show(true) doubles the list) and the
+  duplicates' pool overwrote the visuals' "i_frehnd.bmp" materials, crashing the original once in 20,000 scenarios; the
+  first mutation run left 25 killable survivors (the visuals' scales, the entries' margins, RequestMoveItem's slot, the
+  held keys, the bounds, the idle limit, the marker past the last icon): inputs and logs added; the next two full runs
+  each let a few of the earlier kills through (the new inputs moved the random streams: rectangles' edges on the cursor,
+  key repeats reaching 0 and 1 ms, the previous key firing again, a medkit chosen while carried had been luck), so they
+  are now made on purpose (rectangles around the cursor, a scripted key sequence in both orders ending in a choice).
