@@ -17,6 +17,12 @@ often), the hovered id a member's, the command map's key more often), 5 survived
 - The slot's start -2 (G 1268 num): below 0 either way.
 - The signals' keys to 6 and the soldiers' to 4 (G 1269, 1276 cmp): the menu's and the squad's signal keys, handled
   before.
+
+Rerun (2026-11-21) after ui_diff.cpp kept the scenario generator around the operations' reseeds (the
+scenarios had fallen into a short cycle once a seed recurred): at first 244 of 252 (the open signals' timer and roll menu, G 1294 del,
+1295 del / bool, no longer reached in the quick rounds); with the fields operation setting the member panels
+more often in this case (HandleInput's lower half reached 650 times in a full run, was about 400), the same
+result again: 247 of 252, the same 5 equivalent.
 """
 import os
 

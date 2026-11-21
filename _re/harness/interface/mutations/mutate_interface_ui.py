@@ -16,6 +16,9 @@ Init, the information screen's hints filled), 5 survived, all equivalent:
 - Done's clearing of the picked and usable actors (G 274, 275 del) and its ClearPicks (G 277 del): each repeats the
   other.
 - The icons' name buffers one longer (G 395, 420 num).
+
+Rerun (2026-11-21) after ui_diff.cpp kept the scenario generator around the operations' reseeds (the
+scenarios had fallen into a short cycle once a seed recurred): the same result.
 """
 import os
 

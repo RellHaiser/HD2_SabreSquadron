@@ -12,6 +12,9 @@ Result (2026-11-21): 258 mutants, 50 not building (declarations deleted, names s
 208 of the 208 building killed (9 of them after the first run's survivors: the command map's and the signals'
 IsOpen from the world (the speedometer reached), the ray's hits at exactly 2, 0.65 and 0.2 from the body), 0
 survived.
+
+Rerun (2026-11-21) after ui_diff.cpp kept the scenario generator around the operations' reseeds (the
+scenarios had fallen into a short cycle once a seed recurred): the same result.
 """
 import os
 

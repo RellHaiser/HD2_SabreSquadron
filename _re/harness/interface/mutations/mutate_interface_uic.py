@@ -16,6 +16,9 @@ Result (2026-11-21): 210 mutants, 25 not building (declarations deleted, names s
   margin assigned where the edge was), the minimum size's (G 747, 753 cmp: a pad of 0).
 - The vertices' specular (G 782 del, num): left unset by the original, not compared.
 - A 17th vertex (G 774 cmp): written past the arrays, never drawn (8 lines).
+
+Rerun (2026-11-21) after ui_diff.cpp kept the scenario generator around the operations' reseeds (the
+scenarios had fallen into a short cycle once a seed recurred): the same result.
 """
 import os
 

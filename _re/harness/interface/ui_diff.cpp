@@ -862,22 +862,29 @@ void Run(int side, const S_Op &op)
         break;
     }
 
-    case W_SOLDIERS:
+    case W_SOLDIERS: {
+        // (The op's own draws: the shared generator kept, else the scenarios after it repeat a cycle.)
+        const std::mt19937 kept = g_rng;
         g_rng.seed(uint32_t(op.a));
         RandomSoldiers();
+        g_rng = kept;
         SetSoldiers(side);
         SetActorVts(side);
         Put<bool>(side ? static_cast<void *>(g_portGame) : static_cast<void *>(g_origGame), side ? uint32_t(offsetof(C_game, m_paused)) : 0x64,
                   g_s.paused);
         Log("soldiers %d", op.a);
         break;
-    case W_PANELS:
+    }
+    case W_PANELS: {
         // (The panels' fields drawn again: their frames shown or hidden, the menus open, ...)
+        const std::mt19937 kept = g_rng;
         g_rng.seed(uint32_t(op.a));
         RandomPanels();
+        g_rng = kept;
         SetPanelFields(side);
         Log("panels %d", op.a);
         break;
+    }
     case OP_FIELDS: {
         // (The test's: the flags, the picks and the forced flags as the other parts leave them.)
         uint8_t *b = side ? reinterpret_cast<uint8_t *>(g_port) : g_orig;
@@ -1017,6 +1024,10 @@ S_Op RandomOp()
     case OP_FIELDS:
         op.a = int(U32() & 0x3FF);
         op.b = I(0, 80);
+        // (The input's: the member panels shown more often, else HandleInput's lower half (the signals, the soldiers'
+        // selection, the clicks) is rare.)
+        if (g_input && P(0.6))
+            op.a |= INTERFACE_MEMBERS;
         break;
     case W_WORLD:
         op.a = int(U32() & 0x7FFFFFFF);
@@ -1120,9 +1131,11 @@ void TestScenarios()
         for (const S_Op &op : ops) {
             Log("-- %d %d %d", op.kind, op.a, op.b);
             if (op.kind == W_WORLD) {
-                std::mt19937 rng(uint32_t(op.a));
+                // (The world's own draws: the shared generator kept, else the scenarios after it repeat a cycle.)
+                const std::mt19937 kept = g_rng;
                 g_rng.seed(uint32_t(op.a));
                 RandomWorld();
+                g_rng = kept;
                 SetGlobals(side);
             } else
                 Run(side, op);

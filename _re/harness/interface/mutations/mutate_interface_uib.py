@@ -12,6 +12,9 @@ their partners, && / ||, string literals; each line's text widened until found o
 Result (2026-11-21): 197 mutants, 21 not building (declarations deleted, names swapped into the wrong types);
 176 of the 176 building killed (2 of them after the first run's survivors: the clock stepping exactly the
 double click's 300 ms), 0 survived.
+
+Rerun (2026-11-21) after ui_diff.cpp kept the scenario generator around the operations' reseeds (the
+scenarios had fallen into a short cycle once a seed recurred): the same result.
 """
 import os
 

@@ -16,6 +16,9 @@ module's chunk, the interface chunk short or empty), 3 survived, all equivalent:
 - LoadGame's loop while more than 1 byte is left (G 1661 num): one byte left only in a corrupt save (where both sides'
   chunk ids are then stack words: not tested).
 - LoadGame's timer started 1 (G 1685 num): its chunk is never empty (the original's local is a stack word then).
+
+Rerun (2026-11-21) after ui_diff.cpp kept the scenario generator around the operations' reseeds (the
+scenarios had fallen into a short cycle once a seed recurred): the same result (also after the input case's change, which moves this case's scenarios).
 """
 import os
 

@@ -4891,7 +4891,8 @@ particles and the surface marks. Files are served from memory.
   LookAtOnCommandMap, the fields as other parts leave them, the world changing. Left out (both crash): the icons and
   the lower panel looked for without a scene. The port's fix, tested alone: Init where no directory has the model (the
   original keeps the model it made, leaked; the port releases it); the destructor.
-- **Results:** 4,863,241 checks, 0 failures; all 208 measured lines of the range run.
+- **Results:** 4,863,241 checks, 0 failures; all 208 measured lines of the range run (206 measured on 2026-11-21's
+  rerun: all run).
 - **Port bugs found:** none.
 - **Original's weaknesses (the port's fixes, tested alone):** Init without the model kept (and leaked) it.
 - **Not tested here:** the file's helpers the later parts use (PlaceExplosiveTimer, IsSeatVehicle, Distance).
@@ -4976,17 +4977,23 @@ particles and the surface marks. Files are served from memory.
   the roll menu, the clicks, the signals, the soldiers' selection; the soldier's controls), the keys held down (Alt,
   Shift: the graph's IsKeyDown), the members' health (IsDead inline) and IsLocalPlayer, the signals' IsOpen call by
   call, the roll menu's Open and the map's Show hand-written (their flags set), the hovered id, a calm profile of the
-  panels half the time (the menus closed, the map and the weapon selector hidden), the lower panel always in the model.
+  panels half the time (the menus closed, the map and the weapon selector hidden), the lower panel always in the model,
+  the fields operation setting the member panels six times in ten (HandleInput's lower half: about 400 calls of a
+  full run before, 650 now).
 - **The tests:** scenarios of Init then up to 14 of HandleInput, ReturnControlOnInput, CloseAll, the fields, the
   panels' and the soldiers' worlds drawn again, the clock, Done; the arrays hashed after each call. Left out (both
   crash): the input on an interface the fields operation made active without Init (no scene, no lower panel).
 - **Results:** 17,196,700 checks (all part 75 cases), 0 failures; all 156 measured lines of the range run.
 - **Port bugs found:** none.
 - **Mutations:** 289 mutants, 37 not building, 247 of 252 killed, 5 equivalent
-  (mutate_interface_uie.py).
+  (mutate_interface_uie.py; rerun after the generator fix below: 244 at first, 247 again with the member panels
+  shown more often).
 - **Harness lessons (my mistakes):** the hashed answers never gave a member's hovered id (100..105), so the click
   handling was never observable; the generated Open / Show fakes left the menus' flags as they were; the rare key
-  combinations needed more rounds and a calm profile before the mutations saw them.
+  combinations needed more rounds and a calm profile before the mutations saw them. The world, the panels' and the
+  soldiers' operations reseeded the shared scenario generator without keeping it, so the scenarios after one fell
+  into a short cycle once a seed recurred (found in part 77; kept and restored now, all part 75 cases rerun: the
+  same results but this case's, whose signals path the old cycle had reached by luck).
 
 ## Human part 75f (the game interface's panels, screens and saves, `interface.cpp` lines 1326-1445 and 1524-1696, 2026-11-21)
 
@@ -5005,7 +5012,9 @@ particles and the surface marks. Files are served from memory.
   original's local a stack word), a corrupt save's stray byte. The port's fix, tested alone: a deleted human's radar
   blip.
 - **Results:** 17,508,200 checks (all part 75 cases), 0 failures; all 199 measured lines of the ranges run; with parts
-  75a-e every line of `interface.cpp` (1,019 of 1,019).
+  75a-e every line of `interface.cpp` (1,019 of 1,019). Rerun after the generator fix (part 75e's lessons):
+  17,594,367 checks, 0 failures; all 198 measured lines of the ranges run, and still every line of the file; the
+  six mutation files' results the same.
 - **Port bugs found and fixed (on main; port mistakes):** SetScreen(2) switched the objectives off once (the original
   twice, as the port's own comment said); LoadGame zeroed the interface chunk's value for each chunk (the original once,
   before its loop: a later chunk too short keeps the value read before).
