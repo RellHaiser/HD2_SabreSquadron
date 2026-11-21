@@ -4944,3 +4944,26 @@ particles and the surface marks. Files are served from memory.
   (mutate_interface_uic.py).
 - **Harness lessons (my mistakes):** the panels' values drawn again on the original's side carried into the port's
   start (restored per side now); the fakes' block first went outside the harness's namespace.
+
+## Human part 75d (the game interface's updates, `interface.cpp` lines 154-174 and 793-1068, 2026-11-21)
+
+- **The build:** part 75a's (`interface/build_ui.bat`, `ui_diff.cpp`'s "Update" case).
+- **The world added (`ui_common.inc`):** the soldiers' fields on both sides (type, frame, vehicle, seat, the
+  inventory's changed flag, the body frame; a door's flag), three vehicles (each side its blocks; GetSeatFlags and
+  IsSeatFirstPersonOnly through each side's vtable; a car's physics at each side's offset: speed, fuel, tank), two
+  weapons (the item, its definition with GetBehaviour through its vtable and its secondary component's kind and aim
+  mode), the rays (C_CollisionWorld::RayTest and the camera module's GetCameraDir hand-written: their out parameters;
+  the hits' volumes, flags and points, now and then at exactly 2, 0.65 and 0.2 from a body at the origin), the game's
+  paused flag and first-person view, the menus open, the soldiers' camera dummies (the frames' children).
+- **The tests:** scenarios of Init then up to 14 of Update, UpdateCrosshair, UpdatePick, UpdateCompassShown, the
+  fields, the panels' and the soldiers' worlds drawn again, the clock, Done. The port's fixes, tested alone: the
+  crosshair, the pick and the speedometer without an active soldier (the original went on with the null soldier).
+- **Results:** 12,829,750 checks (all part 75 cases), 0 failures; all 179 measured lines of the ranges run.
+- **Port bugs found:** none.
+- **Original's weaknesses (the port's fixes, tested alone):** UpdateCrosshair, UpdatePick and Update's speedometer
+  read the active soldier unchecked.
+- **Mutations:** 258 mutants, 50 not building, 208 of 208 killed, 0 survived
+  (mutate_interface_uid.py).
+- **Harness lessons (my mistakes):** the generated fakes of methods with out parameters (RayTest, GetCameraDir) left
+  them unwritten (hand-written now); the hashed answers made the menus open seven times in eight, so the speedometer
+  was almost never reached until the world set them; a car's physics named by offset differed between the sides.

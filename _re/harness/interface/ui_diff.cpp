@@ -17,6 +17,13 @@
 // as actors (GetBoxCorners through each side's vtable), the game scene's TransformPoints (the points moved off and
 // to the screen's edges), the graph's SetTexture and DrawPrimitives (every vertex but the unset specular), the panels'
 // fields drawn again between the operations.
+// Human part 75d (the "Update" case): the updates (lines 154-174, 793-1068: IsSeatVehicle, Distance; Update,
+// UpdateCrosshair, UpdatePick, UpdateCompassShown; the original's 0x0049bd50, 0x0049d530, 0x0049d6e0, 0x0049f1c0): the
+// soldiers' fields (vehicle, seat, frames, the inventory flag), the vehicles (seat flags and first-person seats through
+// each side's vtable; a car's physics: speed, fuel, tank), the weapons (the item, its definition's behaviour through
+// its vtable, the scope component's kind and aim mode), the rays (RayTest and GetCameraDir hand-written: their out
+// parameters) and the volumes they hit, the game's paused flag and first-person view, the menus open; an active
+// soldier always (without one: the port's fixes, tested alone).
 // HD2_UI_ROUNDS: scenarios (default 6,000; HD2_UI_QUICK: 2,000); HD2_UI_CASE: one case only; HD2_INTERFACE_ULPS,
 // HD2_INTERFACE_SHOW, HD2_INTERFACE_FIRST_CHANCE: the kit's.
 #include <windows.h>
@@ -97,6 +104,22 @@ I3D_frame *FindFrame(const char *name)
 }
 bool RetBool(const char *name, int, bool &value)
 {
+    if (g_noActive && std::strcmp(name, "C_CommandPanel::IsOpen") == 0) {
+        value = false;   // (the fixes' case: the command map closed)
+        return true;
+    }
+    if (std::strcmp(name, "C_CommandPanel::IsOpen") == 0 && !g_noActive) {
+        value = g_s.commandOpen;
+        return true;
+    }
+    if (std::strcmp(name, "C_SignalsPanel::IsOpen") == 0) {
+        value = g_s.signalsOpen;
+        return true;
+    }
+    if (std::strcmp(name, "C_game::IsFirstPersonView") == 0) {
+        value = g_s.firstPersonView;
+        return true;
+    }
     if (std::strcmp(name, "C_CameraModule::HasScriptedView") == 0) {
         value = g_w.scripted;
         return true;
@@ -105,6 +128,11 @@ bool RetBool(const char *name, int, bool &value)
 }
 bool RetInt(const char *name, int count, int &value)
 {
+    if (std::strcmp(name, "C_Human::GetPlayerViewMode") == 0) {
+        // (The active player's: the world's last asked human is not known here; the first human's mode.)
+        value = g_s.viewMode[0];
+        return true;
+    }
     if (std::strcmp(name, "GetCheatValue") == 0) {
         value = g_w.noGi;
         return true;
@@ -119,8 +147,21 @@ bool RetInt(const char *name, int count, int &value)
     }
     return false;
 }
-void *RetPtr(const char *name, uint32_t)
+// A frame's children (the soldiers' camera dummies): a pool frame by the parent and the name.
+I3D_frame *FindChild(I3D_frame *f, const char *name)
 {
+    return FrameAt(F_POOL + int(Fnv(name, uint32_t(FrameIndex(f)) * 2654435761u) % uint32_t(PANEL_FRAMES_FROM - 30 - F_POOL)));
+}
+bool g_activeAlways;
+   // (the updates' case: the original goes on without an active soldier; the port's fix, tested alone)
+void *RetPtr(const char *name, uint32_t w)
+{
+    if (g_activeAlways && std::strcmp(name, "C_Team::GetActivePlayer") == 0)
+        return Hum(int(w >> 4 & 7));
+    if (std::strcmp(name, "C_Human::GetHandsWeapon") == 0) {
+        const int k = g_s.weapon[w % HUMANS];
+        return k < 0 ? nullptr : static_cast<void *>(g_items[g_side][k]);
+    }
     if (std::strcmp(name, "I3D_scene::GetPrimarySector") == 0)
         return FrameAt(F_SECTOR);
     return nullptr;
@@ -266,6 +307,8 @@ std::string PartName(const void *p)
         return "team";
     if (!CommonName(p).empty())
         return CommonName(p);
+    if (!SoldierName(p).empty())
+        return SoldierName(p);
     for (const void *b : g_boxes)
         if (b && p == b)
             return BoxName(p);
@@ -350,6 +393,7 @@ enum {
     OP_SHOWMESSAGE, OP_SHOWTIMER, OP_SOUNDDIR, OP_SHOWSCORES, OP_RESPAWN, OP_ISRESPAWN, OP_FLASH, OP_OBJICON, OP_PHOTO,
     OP_REFRESHINV, OP_TIME,
     OP_RENDEROVERLAY, OP_RENDER, OP_OUTLINE, W_PANELS,
+    OP_UPDATE, OP_CROSSHAIR, OP_PICK, OP_COMPASSSHOWN, W_SOLDIERS,
     W_WORLD = 100,
 };
 struct S_Op {
@@ -572,6 +616,27 @@ void Run(int side, const S_Op &op)
     case OP_OUTLINE:
         side ? port->DrawPickOutline() : OriginalAt<T_Void>(0x0049e260)(orig);
         break;
+    case OP_UPDATE:
+        side ? port->Update(op.a) : OriginalAt<T_I>(0x0049bd50)(orig, op.a);
+        break;
+    case OP_CROSSHAIR:
+        side ? port->UpdateCrosshair() : OriginalAt<T_Void>(0x0049d530)(orig);
+        break;
+    case OP_PICK:
+        side ? port->UpdatePick(op.a) : OriginalAt<T_I>(0x0049d6e0)(orig, op.a);
+        break;
+    case OP_COMPASSSHOWN:
+        side ? port->UpdateCompassShown() : OriginalAt<T_Void>(0x0049f1c0)(orig);
+        break;
+    case W_SOLDIERS:
+        g_rng.seed(uint32_t(op.a));
+        RandomSoldiers();
+        SetSoldiers(side);
+        SetActorVts(side);
+        Put<bool>(side ? static_cast<void *>(g_portGame) : static_cast<void *>(g_origGame), side ? uint32_t(offsetof(C_game, m_paused)) : 0x64,
+                  g_s.paused);
+        Log("soldiers %d", op.a);
+        break;
     case W_PANELS:
         // (The panels' fields drawn again: their frames shown or hidden, the menus open, ...)
         g_rng.seed(uint32_t(op.a));
@@ -602,6 +667,7 @@ void Run(int side, const S_Op &op)
 
 bool g_squad;   // the squad case (75b) or the life cycle (75a)
 bool g_draw;    // the drawing case (75c)
+bool g_update;  // the updates' case (75d)
 S_Op RandomOp()
 {
     static const int SQUAD[] = {OP_ADDMEMBER, OP_ADDMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBERS, OP_REMOVEFROMMAP,
@@ -612,7 +678,10 @@ S_Op RandomOp()
                                 W_WORLD};
     static const int DRAW[] = {OP_RENDEROVERLAY, OP_RENDER, OP_RENDER, OP_RENDER, OP_OUTLINE, OP_OUTLINE, OP_FIELDS, OP_FIELDS,
                                W_PANELS, W_PANELS, W_WORLD, OP_DONE};
-    S_Op op{g_draw    ? Pick(DRAW)
+    static const int UPDATE[] = {OP_UPDATE, OP_UPDATE, OP_UPDATE, OP_CROSSHAIR, OP_CROSSHAIR, OP_PICK, OP_PICK, OP_PICK, OP_COMPASSSHOWN,
+                                 OP_FIELDS, OP_FIELDS, W_PANELS, W_SOLDIERS, W_SOLDIERS, W_WORLD, OP_DONE, OP_TIME};
+    S_Op op{g_update  ? Pick(UPDATE)
+            : g_draw  ? Pick(DRAW)
             : g_squad ? Pick(SQUAD)
                     : Pick({OP_INIT, OP_INIT, OP_DONE, OP_DONE, OP_RESET, OP_INITPANELS, OP_DONEPANELS, OP_INITDOWN, OP_CLEARPICKS,
                             OP_STATEICONS, OP_ACTIONICONS, OP_CLEARMOVE, OP_CLEARALL, OP_LOOKAT, OP_FIELDS, W_WORLD})};
@@ -674,7 +743,12 @@ S_Op RandomOp()
         op.a = P(0.5);
         break;
     case W_PANELS:
+    case W_SOLDIERS:
         op.a = int(U32() & 0x7FFFFFFF);
+        break;
+    case OP_UPDATE:
+    case OP_PICK:
+        op.a = P(0.5) ? Pick({0, 16, 99, 100, 200}) : I(-10, 400);
         break;
     case OP_TIME:
         op.a = P(0.3) ? 300 : P(0.5) ? I(0, 299) : I(301, 5000);   // (300: the double click's limit exactly)
@@ -711,6 +785,8 @@ void TestScenarios()
     SetKinds();
     RandomWorld();
     RandomPanels();
+    RandomSoldiers();
+    const S_Soldiers soldiersStart = g_s;
     int panelStart[PANEL_FIELD_COUNT];
     std::copy(g_panelValues, g_panelValues + PANEL_FIELD_COUNT, panelStart);
     std::vector<S_Op> ops;
@@ -754,6 +830,11 @@ void TestScenarios()
         *OriginalAt<void **>(0x0089bc8c) = nullptr;
         SetGlobals(side);
         std::copy(panelStart, panelStart + PANEL_FIELD_COUNT, g_panelValues);
+        g_s = soldiersStart;
+        SetSoldiers(side);
+        SetActorVts(side);
+        Put<bool>(side ? static_cast<void *>(g_portGame) : static_cast<void *>(g_origGame), side ? uint32_t(offsetof(C_game, m_paused)) : 0x64,
+                  g_s.paused);
         SetPanelFields(side);
         s_lastMemberClick = g_w.lastClick;
         *OriginalAt<uint32_t *>(0x0089bc90) = g_w.lastClick;
@@ -831,6 +912,37 @@ void TestFixes()
             selected += l.find("C_MemberPanel::SetSelected") != std::string::npos;
         CHECK(selected == 6, "HighlightMembers with eight members: %d panels", selected);
     }
+    // The updates without an active soldier: the crosshair hidden, no pick, the speedometer off (the original went on
+    // with the null soldier).
+    std::memcpy(static_cast<void *>(g_port), g_portPristine, sizeof(C_Interface));
+    RandomPanels();
+    for (int k = 0; k < PANEL_FIELD_COUNT; ++k)
+        if (PANEL_FIELDS[k].kind == PF_BOOL)
+            g_panelValues[k] = 0;   // (no menu open, the command map closed)
+    SetPanelFields(1);
+    RandomSoldiers();
+    SetSoldiers(1);
+    SetActorVts(1);
+    g_port->m_flags = INTERFACE_ACTIVE | INTERFACE_MEMBERS | INTERFACE_PANEL_UP;
+    g_w.scripted = false;
+    g_noActive = true;
+    g_log.clear();
+    g_port->UpdateCrosshair();
+    CHECK(std::find_if(g_log.begin(), g_log.end(), [](const std::string &l) { return l.find("C_Crosshair::Show 0") != std::string::npos; }) !=
+              g_log.end(),
+          "UpdateCrosshair without a soldier: hidden");
+    g_port->m_pickTime = 500;
+    g_port->m_pickedActor = static_cast<C_Actor *>(Hum(1));
+    g_log.clear();
+    g_port->UpdatePick(16);
+    CHECK(g_port->m_pickedActor == Hum(1), "UpdatePick without a soldier: nothing picked");
+    CHECK(std::none_of(g_log.begin(), g_log.end(), [](const std::string &l) { return l.find("RayTest") != std::string::npos; }),
+          "UpdatePick without a soldier: no ray");
+    g_log.clear();
+    g_port->Update(16);
+    CHECK(std::none_of(g_log.begin(), g_log.end(), [](const std::string &l) { return l.find("GetEngineRpm") != std::string::npos; }),
+          "Update without a soldier: no speedometer");
+    g_noActive = false;
     // (The destructor: a second interface made and destroyed.)
     auto *other = new (_aligned_malloc(sizeof(C_Interface), 16)) C_Interface();
     other->~C_Interface();
@@ -842,6 +954,7 @@ void SetUp()
 {
     g_partName = PartName;
     g_findFrame = FindFrame;
+    g_findChild = FindChild;
     g_retPtr = RetPtr;
     g_retInt = RetInt;
     g_retBool = RetBool;
@@ -849,6 +962,7 @@ void SetUp()
     SetUpEngine();
     SetUpCameraModule();
     SetUpDrawing();
+    SetUpSoldiers();
     for (int side = 0; side < 2; ++side) {
         for (void *&v : g_commanderVt[side])
             v = reinterpret_cast<void *>(V_CommanderOther);
@@ -878,6 +992,7 @@ void SetUp()
         {0x004563e0, reinterpret_cast<const void *>(O_GetSquadCommander)},
         {0x00720f50, reinterpret_cast<const void *>(O_GetCheatValue)},
         {0x004a26d0, reinterpret_cast<const void *>(O_InventoryRefresh)},
+        {0x006f8060, reinterpret_cast<const void *>(O_RayTest)},
         {0x007e562e, reinterpret_cast<const void *>(O_Atexit)},
         {0x007e6334, reinterpret_cast<const void *>(O_Sprintf)},
     };
@@ -931,6 +1046,13 @@ int main()
     for (g_round = 0; g_round < rounds; ++g_round)
         TestScenarios();
     g_draw = false;
+    g_case = "Update";
+    g_update = true;
+    g_activeAlways = true;
+    for (g_round = 0; g_round < rounds; ++g_round)
+        TestScenarios();
+    g_update = false;
+    g_activeAlways = false;
     g_case = "Fixes";
     for (g_round = 0; g_round < 50; ++g_round)
         TestFixes();

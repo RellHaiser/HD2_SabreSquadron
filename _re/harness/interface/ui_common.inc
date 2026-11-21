@@ -148,9 +148,13 @@ template <> float Ret<float>(const char *name)
     const uint32_t w = RetWord(name);
     return (w & 3) == 0 ? 0.0f : float(w >> 8 & 0xFF) / 64.0f;
 }
+// (No active soldier: GetActivePlayer null; a part's fixes.)
+bool g_noActive;
 template <> void *Ret<void *>(const char *name)
 {
     const uint32_t w = RetWord(name);
+    if (g_noActive && std::strstr(name, "GetActivePlayer"))
+        return nullptr;
     if (g_retPtr)
         if (void *p = g_retPtr(name, w))
             return p;
@@ -490,7 +494,7 @@ void SetUpCameraModule()
     for (void *&v : g_origCameraModuleVt)
         v = reinterpret_cast<void *>(V_Other0);
     g_origCameraModuleVt[0x58 / 4] = reinterpret_cast<void *>(O_C_CameraModule_GetViewDistance);
-    g_origCameraModuleVt[0x68 / 4] = reinterpret_cast<void *>(O_C_CameraModule_GetCameraDir);
+    // (0x68 GetCameraDir: part 75d's hand-written fake, set in SetUpSoldiers.)
     g_origCameraModuleVt[0x80 / 4] = reinterpret_cast<void *>(O_C_CameraModule_HasScriptedView);
     g_origCameraModuleVt[0x88 / 4] = reinterpret_cast<void *>(O_C_CameraModule_GetHumanEffects);
     *reinterpret_cast<void ***>(g_origCameraModule) = g_origCameraModuleVt;
@@ -540,3 +544,251 @@ bool C_chunk::Read(void *, int) { H::Log("chunk Read"); return false; }
 int C_chunk::RemainingSize() const { H::Log("chunk RemainingSize"); return 0; }
 bool C_chunk::Write(const void *, int) { H::Log("chunk Write"); return true; }
 extern "C" void dbgPrintf(const char *format, ...) { H::Log("dbgPrintf %s", format); }
+
+// ---- part 75d's: the soldiers' world (vehicles, weapons), the rays, the camera's direction ----
+namespace H {
+// Vehicles (each side its blocks and vtables: GetSeatFlags 0x8C, IsSeatFirstPersonOnly 0xCC), weapons (an item, its
+// definition with GetBehaviour 0x10 and its secondary component), the collision volumes the rays hit.
+constexpr int VEHICLES = 3, WEAPONS = 2;
+alignas(16) uint8_t g_vehicles[2][VEHICLES][0x8000], g_items[2][WEAPONS][0x100], g_defs[2][WEAPONS][0x100], g_comps[2][WEAPONS][0x40],
+    g_volumes[2][3][0x60];
+void *g_vehicleVt[2][0x80], *g_defVt[2][0x20];
+struct S_Soldiers {
+    int type[HUMANS], frame[HUMANS], body[HUMANS], vehicle[HUMANS], seat[HUMANS], weapon[HUMANS], viewMode[HUMANS];
+    bool changed[HUMANS], door118[HUMANS];
+    int vehicleType[VEHICLES];
+    uint32_t seatFlags[VEHICLES][4];
+    bool firstPerson[VEHICLES][4];
+    float fuel[VEHICLES], tank[VEHICLES], speed[VEHICLES];
+    int behaviour[WEAPONS], compKind[WEAPONS], aimMode[WEAPONS];
+    bool hasComp[WEAPONS];
+    // The rays: each call's volume (-1 none) and hit point; the volumes' flags and actors.
+    int rayHit[2];
+    float rayPoint[2][3];
+    uint32_t volFlags[3];
+    int volActor[3];
+    float cameraDir[4];
+    bool firstPersonView, paused;
+    bool commandOpen, signalsOpen;   // the command map's and the signals' IsOpen
+    bool tie;                        // the bodies at the origin, the hits at exactly 2, 0.65 or 0.2 from them
+};
+constexpr int F_TIE_BODY = PANEL_FRAMES_FROM - 31;
+S_Soldiers g_s;
+int g_rayCalls;
+std::string SoldierName(const void *p)
+{
+    for (int side = 0; side < 2; ++side) {
+        for (int k = 0; k < VEHICLES; ++k) {
+            // (A car's physics: the original's at +0x90, the port's at its member's offset.)
+            if (p == g_vehicles[side][k] + (side ? uint32_t(offsetof(C_Car, m_vehicle)) : 0x90))
+                return "v" + std::to_string(k) + ".physics";
+            if (p >= g_vehicles[side][k] && p < g_vehicles[side][k] + sizeof g_vehicles[side][k])
+                return "v" + std::to_string(k) + (p == g_vehicles[side][k] ? "" : "+" + std::to_string(static_cast<const uint8_t *>(p) - g_vehicles[side][k]));
+        }
+        for (int k = 0; k < WEAPONS; ++k) {
+            if (p == g_items[side][k])
+                return "weapon" + std::to_string(k);
+            if (p == g_defs[side][k])
+                return "def" + std::to_string(k);
+            if (p == g_comps[side][k])
+                return "comp" + std::to_string(k);
+        }
+        for (int k = 0; k < 3; ++k)
+            if (p == g_volumes[side][k])
+                return "volume" + std::to_string(k);
+    }
+    return "";
+}
+uint32_t __attribute__((thiscall)) V_SeatFlags(void *v, int seat)
+{
+    Log("%s GetSeatFlags %d", Name(v).c_str(), seat);
+    for (int k = 0; k < VEHICLES; ++k)
+        if (v == g_vehicles[g_side][k])
+            return seat >= 0 && seat < 4 ? g_s.seatFlags[k][seat] : 0;
+    return 0;
+}
+bool __attribute__((thiscall)) V_FirstPersonOnly(void *v, int seat)
+{
+    Log("%s IsSeatFirstPersonOnly %d", Name(v).c_str(), seat);
+    for (int k = 0; k < VEHICLES; ++k)
+        if (v == g_vehicles[g_side][k])
+            return seat >= 0 && seat < 4 && g_s.firstPerson[k][seat];
+    return false;
+}
+void __attribute__((thiscall)) V_VehicleOther(void *v) { Log("%s vehicle other slot", Name(v).c_str()); }
+int __attribute__((thiscall)) V_Behaviour(void *def)
+{
+    Log("%s GetBehaviour", Name(def).c_str());
+    for (int k = 0; k < WEAPONS; ++k)
+        if (def == g_defs[g_side][k])
+            return g_s.behaviour[k];
+    return 0;
+}
+void __attribute__((thiscall)) V_DefOther(void *d) { Log("%s def other slot", Name(d).c_str()); }
+// The rays (C_CollisionWorld::RayTest: the original's 0x006f8060, its thunk 0x00718830; __thiscall).
+void *Ray(const float *from, const float *dir, float *hit, float *normal, uint32_t types, uint32_t flags)
+{
+    const int call = g_rayCalls++ % 2;
+    const int v = g_s.rayHit[call];
+    Log("RayTest %s %s %s %x %x -> %d", F3(from).c_str(), F3(dir).c_str(), normal ? "normal" : "null", types, flags, v);
+    if (v < 0)
+        return nullptr;
+    if (hit)
+        std::memcpy(hit, g_s.rayPoint[call], 12);
+    return g_volumes[g_side][v];
+}
+void *__attribute__((thiscall)) O_RayTest(void *, const float *from, const float *dir, float *hit, float *normal, uint32_t types,
+                                           uint32_t flags)
+{
+    return Ray(from, dir, hit, normal, types, flags);
+}
+bool CameraDir(int index, float *dir)
+{
+    Log("cameraModule GetCameraDir %d", index);
+    std::memcpy(dir, g_s.cameraDir, 16);
+    return true;
+}
+bool __attribute__((thiscall)) O_CameraDir(void *, int index, float *dir) { return CameraDir(index, dir); }
+// Each side's soldiers' fields (the humans' blocks shared: cleared and written per side), vehicles, weapons, volumes.
+void SetSoldiers(int side)
+{
+    for (int h = 0; h < HUMANS; ++h) {
+        uint8_t *b = g_humans[h];
+        std::memset(b + 4, 0, sizeof g_humans[h] - 4);
+        auto put = [b](uint32_t at, const void *v, size_t n) { std::memcpy(b + at, v, n); };
+        void *frame = FrameAt(g_s.frame[h]), *body = FrameAt(g_s.body[h]);
+        void *vehicle = g_s.vehicle[h] < 0 ? nullptr : static_cast<void *>(g_vehicles[side][g_s.vehicle[h]]);
+        const uint8_t changed = g_s.changed[h], door = g_s.door118[h];
+        if (!side) {
+            put(0x18, &g_s.type[h], 4);
+            put(0x20, &frame, 4);
+            put(0x160, &vehicle, 4);
+            put(0x164, &g_s.seat[h], 4);
+            put(0x178, &changed, 1);
+            put(0x260, &body, 4);
+            put(0x118, &door, 1);
+        } else {
+            put(offsetof(C_Actor, m_type), &g_s.type[h], 4);
+            put(offsetof(C_Actor, m_frame), &frame, 4);
+            put(offsetof(C_Human, m_vehicle), &vehicle, 4);
+            put(offsetof(C_Human, m_seat), &g_s.seat[h], 4);
+            put(offsetof(C_Human, m_inventoryChanged), &changed, 1);
+            put(offsetof(C_Human, m_bodyFrame), &body, 4);
+            put(offsetof(C_Door, m_unknown118), &door, 1);
+        }
+    }
+    for (int k = 0; k < VEHICLES; ++k) {
+        uint8_t *v = g_vehicles[side][k];
+        std::memset(v, 0, sizeof g_vehicles[side][k]);
+        *reinterpret_cast<void ***>(v) = g_vehicleVt[side];
+        const uint32_t type = side ? uint32_t(offsetof(C_Actor, m_type)) : 0x18;
+        std::memcpy(v + type, &g_s.vehicleType[k], 4);
+        const uint32_t physics = side ? uint32_t(offsetof(C_Car, m_vehicle)) : 0x90;
+        const uint32_t fuel = side ? uint32_t(offsetof(C_Vehicle, m_fuel)) : 0xF5C, tank = side ? uint32_t(offsetof(C_Vehicle, m_tankSize)) : 0x2220,
+                       speed = side ? uint32_t(offsetof(C_Vehicle, m_speed)) : 0x8C8;
+        std::memcpy(v + physics + fuel, &g_s.fuel[k], 4);
+        std::memcpy(v + physics + tank, &g_s.tank[k], 4);
+        std::memcpy(v + physics + speed, &g_s.speed[k], 4);
+    }
+    for (int k = 0; k < WEAPONS; ++k) {
+        uint8_t *item = g_items[side][k], *def = g_defs[side][k], *comp = g_comps[side][k];
+        std::memset(item, 0, 0x100);
+        std::memset(def, 0, 0x100);
+        std::memset(comp, 0, 0x40);
+        *reinterpret_cast<void ***>(def) = g_defVt[side];
+        void *d = def, *c = g_s.hasComp[k] ? static_cast<void *>(comp) : nullptr;
+        std::memcpy(item + (side ? uint32_t(offsetof(C_WeaponItem, m_def)) : 4), &d, 4);
+        std::memcpy(def + (side ? uint32_t(offsetof(C_ItemDef, m_secondaryComponent)) : 0x4C), &c, 4);
+        std::memcpy(comp + (side ? uint32_t(offsetof(C_ItemComponent, m_kind)) : 8), &g_s.compKind[k], 4);
+        std::memcpy(comp + (side ? uint32_t(offsetof(C_ScopeComp, m_aimMode)) : 0xC), &g_s.aimMode[k], 4);
+    }
+    for (int k = 0; k < 3; ++k) {
+        auto *volume = reinterpret_cast<S_CollisionVolume *>(g_volumes[side][k]);
+        std::memset(static_cast<void *>(volume), 0, 0x60);
+        volume->flags = g_s.volFlags[k];
+        volume->actor = static_cast<C_Actor *>(Hum(g_s.volActor[k]));
+    }
+    g_rayCalls = 0;
+    // (The tie's body frame at the origin, its world matrix taken as made.)
+    I3D_frame *body = FrameAt(F_TIE_BODY);
+    body->m_frameFlags |= FRMFLAGS_WMATRIX_VALID;
+    body->m_worldMatrix(3) = S_vector(0.0f, 0.0f, 0.0f);
+}
+void RandomSoldiers()
+{
+    for (int h = 0; h < HUMANS; ++h) {
+        g_s.type[h] = P(0.75) ? int(ACTOR_HUMAN) : Pick({int(ACTOR_DOOR), int(ACTOR_DOOR), int(ACTOR_CAR), 0});
+        g_s.frame[h] = PANEL_FRAMES_FROM - 30 + I(0, 29);
+        g_s.body[h] = PANEL_FRAMES_FROM - 30 + I(0, 29);
+        g_s.vehicle[h] = P(0.6) ? -1 : I(0, VEHICLES - 1);
+        g_s.seat[h] = I(0, 3);
+        g_s.weapon[h] = P(0.3) ? -1 : I(0, WEAPONS - 1);
+        g_s.viewMode[h] = I(0, 4);
+        g_s.changed[h] = P(0.3);
+        g_s.door118[h] = P(0.5);
+    }
+    for (int k = 0; k < VEHICLES; ++k) {
+        g_s.vehicleType[k] = Pick({int(ACTOR_CAR), int(ACTOR_CAR), int(ACTOR_STATIC_WEAPON), int(ACTOR_JUNKERS88), int(ACTOR_SUBMARINE), 0});
+        for (int s = 0; s < 4; ++s) {
+            g_s.seatFlags[k][s] = (P(0.5) ? uint32_t(SEAT_FLAG_WEAPON) : 0u) | (P(0.5) ? uint32_t(SEAT_FLAG_ARMED) : 0u) | (U32() & 0x0Fu);
+            g_s.firstPerson[k][s] = P(0.4);
+        }
+        g_s.fuel[k] = F(0, 60);
+        g_s.tank[k] = P(0.9) ? F(20, 80) : 1.0f;
+        g_s.speed[k] = F(-5, 40);
+    }
+    for (int k = 0; k < WEAPONS; ++k) {
+        g_s.behaviour[k] = P(0.6) ? Pick({4, 6}) : I(0, 8);
+        g_s.hasComp[k] = P(0.7);
+        g_s.compKind[k] = P(0.7) ? 4 : I(0, 6);
+        g_s.aimMode[k] = P(0.5) ? I(0, 3) : I(4, 6);
+    }
+    for (int c = 0; c < 2; ++c) {
+        g_s.rayHit[c] = P(0.15) ? -1 : I(0, 2);
+        for (float &f : g_s.rayPoint[c])
+            f = P(0.2) ? 0.0f : F(-3, 3);
+    }
+    for (int k = 0; k < 3; ++k) {
+        g_s.volFlags[k] = (P(0.7) ? uint32_t(COLLISION_FLAG_DYNAMIC) : 0u) | (P(0.3) ? uint32_t(COLLISION_FLAG_WATER) : 0u) |
+                          (P(0.3) ? uint32_t(COLLISION_VOLUME_SHOOT_THROUGH) : 0u);
+        g_s.volActor[k] = P(0.85) ? I(0, HUMANS - 1) : -1;
+    }
+    for (float &f : g_s.cameraDir)
+        f = F(-1, 1);
+    g_s.firstPersonView = P(0.5);
+    g_s.paused = P(0.3);
+    g_s.commandOpen = P(0.3);
+    g_s.signalsOpen = P(0.3);
+    g_s.tie = P(0.3);
+    if (g_s.tie) {
+        for (int &b : g_s.body)
+            b = F_TIE_BODY;
+        for (auto &p : g_s.rayPoint) {
+            p[0] = Pick({2.0f, 0.65f, 0.2f});
+            p[1] = p[2] = 0.0f;
+        }
+    }
+}
+void SetUpSoldiers()
+{
+    for (int side = 0; side < 2; ++side) {
+        for (void *&v : g_vehicleVt[side])
+            v = reinterpret_cast<void *>(V_VehicleOther);
+        for (void *&v : g_defVt[side])
+            v = reinterpret_cast<void *>(V_DefOther);
+    }
+    g_vehicleVt[0][0x8C / 4] = reinterpret_cast<void *>(V_SeatFlags);
+    g_vehicleVt[0][0xCC / 4] = reinterpret_cast<void *>(V_FirstPersonOnly);
+    g_vehicleVt[1][Slot(&C_Actor::GetSeatFlags) / 4] = reinterpret_cast<void *>(V_SeatFlags);
+    g_vehicleVt[1][Slot(&C_Actor::IsSeatFirstPersonOnly) / 4] = reinterpret_cast<void *>(V_FirstPersonOnly);
+    g_defVt[0][0x10 / 4] = reinterpret_cast<void *>(V_Behaviour);
+    g_defVt[1][Slot(&C_ItemDef::GetBehaviour) / 4] = reinterpret_cast<void *>(V_Behaviour);
+    g_origCameraModuleVt[0x68 / 4] = reinterpret_cast<void *>(O_CameraDir);
+}
+}  // namespace H
+S_CollisionVolume *C_CollisionWorld::RayTest(const S_vector &from, const S_vector &dir, S_vector *hit, S_vector *normal, uint32_t types,
+                                             uint32_t flags) const
+{
+    return static_cast<S_CollisionVolume *>(H::Ray(&from.x, &dir.x, hit ? &hit->x : nullptr, normal ? &normal->x : nullptr, types, flags));
+}
+bool C_CameraModule::GetCameraDir(int index, S_vector4 *dir) { return H::CameraDir(index, &dir->x); }

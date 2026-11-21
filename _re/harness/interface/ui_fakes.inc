@@ -77,12 +77,6 @@ void * F_C_CameraModule_GetHumanEffects(const void *self)
     return Ret<void *>("C_CameraModule::GetHumanEffects");
 }
 void * __attribute__((thiscall)) O_C_CameraModule_GetHumanEffects(void *self) { return F_C_CameraModule_GetHumanEffects(self); }
-bool F_C_CameraModule_GetCameraDir(const void *self, int index, const void * dir)
-{
-    Log("%s C_CameraModule::GetCameraDir %d %s", Name(self).c_str(), int(index), Name(dir).c_str());
-    return Ret<bool>("C_CameraModule::GetCameraDir");
-}
-bool __attribute__((thiscall)) O_C_CameraModule_GetCameraDir(void *self, int index, const void * dir) { return F_C_CameraModule_GetCameraDir(self, index, dir); }
 float F_C_CameraModule_GetViewDistance(const void *self)
 {
     Log("%s C_CameraModule::GetViewDistance", Name(self).c_str());
@@ -945,12 +939,6 @@ void F_C_Controls_ClearKey(const void *self, int key, const void * held, const v
     Log("%s C_Controls::ClearKey %d %s %s", Name(self).c_str(), int(key), Name(held).c_str(), Name(pressed).c_str());
 }
 void __attribute__((thiscall)) O_C_Controls_ClearKey(void *self, int key, const void * held, const void * pressed) { F_C_Controls_ClearKey(self, key, held, pressed); }
-void * F_C_CollisionWorld_RayTest(const void *self, const float * from, const float * dir, const void * hitPos, const void * hitNormal, int excludeTypes, int excludeFlags)
-{
-    Log("%s C_CollisionWorld::RayTest %s %s %s %s %d %d", Name(self).c_str(), F3(from).c_str(), F3(dir).c_str(), Name(hitPos).c_str(), Name(hitNormal).c_str(), int(excludeTypes), int(excludeFlags));
-    return Ret<void *>("C_CollisionWorld::RayTest");
-}
-void * __attribute__((thiscall)) O_C_CollisionWorld_RayTest(void *self, const float * from, const float * dir, const void * hitPos, const void * hitNormal, int excludeTypes, int excludeFlags) { return F_C_CollisionWorld_RayTest(self, from, dir, hitPos, hitNormal, excludeTypes, excludeFlags); }
 }  // namespace H
 #define IFAKE_REDIRECTS \
     {0x0045d160, reinterpret_cast<const void *>(H::O_C_Team_GetSelectedMember)},   /* team.h:271 */ \
@@ -966,7 +954,6 @@ void * __attribute__((thiscall)) O_C_CollisionWorld_RayTest(void *self, const fl
     {0x00462780, reinterpret_cast<const void *>(H::O_C_CameraHumanEffects_LookAt)},   /* camera_module.h:38 */ \
     {0x00465080, reinterpret_cast<const void *>(H::O_C_CameraModule_HasScriptedView)},   /* camera_module.h:217 */ \
     {0x004650a0, reinterpret_cast<const void *>(H::O_C_CameraModule_GetHumanEffects)},   /* camera_module.h:220 */ \
-    {0x00465b40, reinterpret_cast<const void *>(H::O_C_CameraModule_GetCameraDir)},   /* camera_module.h:202 */ \
     {0x00465de0, reinterpret_cast<const void *>(H::O_C_CameraModule_GetViewDistance)},   /* camera_module.h:196 */ \
     {0x00493d10, reinterpret_cast<const void *>(H::O_C_Radar_Add)},   /* interface.h:92 */ \
     {0x00493f40, reinterpret_cast<const void *>(H::O_C_Radar_Remove)},   /* interface.h:94 */ \
@@ -1130,8 +1117,7 @@ void * __attribute__((thiscall)) O_C_CollisionWorld_RayTest(void *self, const fl
     {0x0069a780, reinterpret_cast<const void *>(H::O_C_game_IsFirstPersonView)},   /* game.h:166 */ \
     {0x0069bb80, reinterpret_cast<const void *>(H::O_C_game_SetPaused)},   /* game.h:125 */ \
     {0x006b69d0, reinterpret_cast<const void *>(H::O_C_GameProfile_IsCooperativeGame)},   /* profile.h:517 */ \
-    {0x006c7510, reinterpret_cast<const void *>(H::O_C_Controls_ClearKey)},   /* pending.h:136 */ \
-    {0x006f8060, reinterpret_cast<const void *>(H::O_C_CollisionWorld_RayTest)},   /* collision.h:374 */
+    {0x006c7510, reinterpret_cast<const void *>(H::O_C_Controls_ClearKey)},   /* pending.h:136 */
 #else
 C_Human * C_Team::GetSelectedMember() const { return static_cast<C_Human *>(H::F_C_Team_GetSelectedMember(this)); }
 C_Human * C_Team::GetCommandedMember() const { return static_cast<C_Human *>(H::F_C_Team_GetCommandedMember(this)); }
@@ -1146,7 +1132,6 @@ int C_TeamBase::GetMemberCount() const { return static_cast<int>(H::F_C_TeamBase
 void C_CameraHumanEffects::LookAt(C_Human * human) { H::F_C_CameraHumanEffects_LookAt(this, human); }
 bool C_CameraModule::HasScriptedView() { return static_cast<bool>(H::F_C_CameraModule_HasScriptedView(this)); }
 C_CameraHumanEffects * C_CameraModule::GetHumanEffects() { return static_cast<C_CameraHumanEffects *>(H::F_C_CameraModule_GetHumanEffects(this)); }
-bool C_CameraModule::GetCameraDir(int index, S_vector4 * dir) { return static_cast<bool>(H::F_C_CameraModule_GetCameraDir(this, index, dir)); }
 float C_CameraModule::GetViewDistance() { return static_cast<float>(H::F_C_CameraModule_GetViewDistance(this)); }
 void C_Radar::Add(C_Human * human) { H::F_C_Radar_Add(this, human); }
 void C_Radar::Remove(C_Human * human) { H::F_C_Radar_Remove(this, human); }
@@ -1311,5 +1296,4 @@ bool C_game::IsFirstPersonView() const { return static_cast<bool>(H::F_C_game_Is
 void C_game::SetPaused(bool paused) { H::F_C_game_SetPaused(this, paused); }
 bool C_GameProfile::IsCooperativeGame() const { return static_cast<bool>(H::F_C_GameProfile_IsCooperativeGame(this)); }
 void C_Controls::ClearKey(int key, float * held, float * pressed) { H::F_C_Controls_ClearKey(this, key, held, pressed); }
-S_CollisionVolume * C_CollisionWorld::RayTest(const S_vector & from, const S_vector & dir, S_vector * hitPos, S_vector * hitNormal, uint32_t excludeTypes, uint32_t excludeFlags) const { return static_cast<S_CollisionVolume *>(H::F_C_CollisionWorld_RayTest(this, &from.x, &dir.x, hitPos, hitNormal, excludeTypes, excludeFlags)); }
 #endif
