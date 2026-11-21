@@ -4790,3 +4790,44 @@ particles and the surface marks. Files are served from memory.
   differed); [[noreturn]] stubs and GCC's interprocedural analysis broke the patched functions (an endless loop, a
   dropped store of the wait order's direction: three false port differences); the first mutation run built without
   those flags (mutrun.py takes its own: the baseline failed and every mutant read "killed"; rerun).
+
+## Human part 74b (the command map's orders, markers, lines and brackets, `interface_command.cpp` lines 253-374 and 941-1338, 2026-11-20)
+
+- **The build:** `interface/build_commandb.bat` (`commandb_diff.cpp`, made from part 74a's harness: the same panel,
+  world, fakes and set-up, run for real). The 74c functions these call (PickTarget, ShowRollMenu) are patched on both
+  sides to the same loggers, with the same build flags as 74a (MUT_DEFS for the mutation runner).
+- **Fakes added:** the humans' order requests (AllocHumanOrder from a pool of new orders, AddOrder, InsertOrder,
+  RemoveOrder, SetOrder, HaveOrdersChanged; the change's InitPlain and destructor), the orders' UpdatePath and their
+  paths (1 to 5 points), the info selector's GetSelectedIndex, the actors' vtables (GetBoxCorners 0xDC, GetSeatCount,
+  GetSeatOccupant; the port's slots from its member pointers), the humans' vehicles and seats, the frames' and the game
+  scene's render stamps, the game camera, the game scene's TransformPoints (now and then moved off the screen), the
+  graph's SetTexture, SetWorldMatrix and DrawPrimitives (the screen lines' vertices a log line each, the order lines'
+  by a hash), the cursor's SetFromWorld, the roll menu's Render, the frames' children (a pool frame by the parent and
+  the name). The member lines snapped by a hash of their vertices; the members' first path vertices start not zero.
+- **The tests:** 74a's scenarios with 15 more operations: RemoveSelectedOrder, RemoveOrderAt, AddOrder, AddActorOrder,
+  ApplyFlags, AcquireOrderMarker, ReleaseOrderMarker, UpdateOrderMarker, AddPath, UpdateMember, RenderOverlay, Render,
+  RenderMarkers, DrawBrackets (against each of the original's three copies 0x004bb260, 0x004bc300, 0x004bd3d0) and
+  DrawBox; the input's state also sets the target and the members' route counts; now and then the camera faces along z
+  with the humans in its plane (the facing test's tie). Left out (the original writes outside the panel): AddPath for a
+  member outside the six buffers or with an empty path, UpdateMember for a seventh member (the port's fixes, tested
+  alone). Stack words not compared: the w of AddActorOrder's and ApplyFlags' zero vectors (3 components in the
+  original) and of a follow order's data, the screen lines' specular.
+- **Results:** 9,750,370 checks, 0 failures; all 343 measured lines of the range run (XYZ, used only by 74c's input,
+  left for 74c).
+- **Port bugs found and fixed (on main; port mistakes):** AddOrder asked for the selected index for every order (the
+  original skips it for a follow order and asks again for the insertion's index); AllocHumanOrder and InitPlain got
+  the pace, stance and mode (the original passes the mode before the stance: ORed, the same flags, now in its order);
+  the brackets asked the graph for the screen's size again for their growth (the original uses the box's);
+  PrepareMarkerPart fetched the material once (the original goes through the mesh, level and face group for each of its
+  five uses).
+- **Original's weaknesses (the port's fixes, tested alone):** AddPath wrote past the six members' buffers and past a
+  buffer's points, and an empty path left the segment count at -1 (the next path written before the buffer);
+  UpdateMember wrote a seventh member's lines past the panel (the port keeps its markers up to date, a guard after the
+  panel checked).
+- **Not tested here:** the 74c functions (patched: part 74c).
+- **Mutations:** 660 mutants, 74 not building, 571 of 586 killed, 15 equivalent
+  (mutate_interface_commandb.py).
+- **Harness lessons (my mistakes):** the frames had no children (FindChildFrame null: the first run crashed); the
+  original's AddPath for member -1 wrote into the pristine copy before its panel (a later round's start differed: skip
+  guards); Log's 600-byte buffer cut the brackets' vertex line after seven vertices (the bottom corners were not
+  compared: 18 survivors); Init got 4 state icons where the markers read up to the 20th (null icons: 30 survivors).

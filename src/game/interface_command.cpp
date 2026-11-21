@@ -280,12 +280,13 @@ void PrepareMarkerPart(I3D_frame *part, const S_vector &emissive, bool own)
         visual->DuplicateMesh();
         visual->GetVisualMesh()->GetLevel(0)->FaceGroups()[0].DuplicateMaterial();
     }
-    I3D_material *material = visual->GetVisualMesh()->GetLevel(0)->GetFaceGroup(0)->material;
-    material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-    material->SetEmissiveColor(emissive);
-    material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetDiffuseColor(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetPower(0.0f);
+    // (The material asked for again for each use, as the original does.)
+    auto material = [visual] { return visual->GetVisualMesh()->GetLevel(0)->GetFaceGroup(0)->material; };
+    material()->Flags() |= I3DMATERIAL_TRACE_FLAG;
+    material()->SetEmissiveColor(emissive);
+    material()->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
+    material()->SetDiffuseColor(S_vector(0.0f, 0.0f, 0.0f));
+    material()->SetPower(0.0f);
     visual->SetLightLevel(MARKER_LIGHT);
 }
 
@@ -294,6 +295,7 @@ void PrepareMarkerPart(I3D_frame *part, const S_vector &emissive, bool own)
 struct S_ScreenBox {
     float left, top, right, bottom;
     float width, height;                                // the box's
+    float screenWidth, screenHeight;                    // (the screen's, as read for the box)
 };
 bool ActorScreenBox(I3D_scene *scene, C_Actor *actor, S_ScreenBox &box)
 {
@@ -312,6 +314,8 @@ bool ActorScreenBox(I3D_scene *scene, C_Actor *actor, S_ScreenBox &box)
     scene->TransformPoints(corners, screen, 8);
     const float screenWidth = static_cast<float>(GetIGraph()->ScrnX());
     const float screenHeight = static_cast<float>(GetIGraph()->ScrnY());
+    box.screenWidth = screenWidth;
+    box.screenHeight = screenHeight;
     box.left = screenWidth;
     box.right = 0.0f;
     box.bottom = 0.0f;
@@ -954,19 +958,20 @@ void C_CommandPanel::RemoveOrderAt(int id)
 void C_CommandPanel::AddOrder(int kind, const S_vector4 &pos, const S_vector4 &data)
 {
     C_Human *human = PlayerTeam()->GetCommandedMember();
-    const int index = m_selector->GetSelectedIndex();
-    S_HumanOrder *order = AllocHumanOrder(human, kind, -1, pos, data, m_pace, m_stance, m_mode, nullptr, 0);
-    if (kind != HUMAN_ORDER_FOLLOW && index > -1)
-        human->InsertOrder(order, index);
-    else
-        human->AddOrder(order);
+    // (The selected index asked for the test and again for the insertion, as the original does. Here and below the
+    // mode goes where the stance is declared, as in the original: the three are ORed.)
+    if (kind != HUMAN_ORDER_FOLLOW && m_selector->GetSelectedIndex() >= 0) {
+        const int index = m_selector->GetSelectedIndex();
+        human->InsertOrder(AllocHumanOrder(human, kind, -1, pos, data, m_pace, m_mode, m_stance, nullptr, 0), index);
+    } else
+        human->AddOrder(AllocHumanOrder(human, kind, -1, pos, data, m_pace, m_mode, m_stance, nullptr, 0));
 }
 
 void C_CommandPanel::AddActorOrder(int command, C_Actor *actor, int entry)
 {
     C_Human *human = PlayerTeam()->GetCommandedMember();
     const S_vector4 zero = {0.0f, 0.0f, 0.0f, 0.0f};
-    S_HumanOrder *order = AllocHumanOrder(human, HUMAN_ORDER_ACT, command, zero, zero, m_pace, m_stance, m_mode,
+    S_HumanOrder *order = AllocHumanOrder(human, HUMAN_ORDER_ACT, command, zero, zero, m_pace, m_mode, m_stance,
                                           actor, entry);
     human->AddOrder(order);
 }
@@ -979,7 +984,7 @@ void C_CommandPanel::ApplyFlags()
     C_Human *human = PlayerTeam()->GetCommandedMember();
     const S_vector4 zero = {0.0f, 0.0f, 0.0f, 0.0f};
     S_HumanOrder change;
-    change.InitPlain(human, zero, zero, m_pace, m_stance, m_mode);
+    change.InitPlain(human, zero, zero, m_pace, m_mode, m_stance);
     human->SetOrder(index, &change);
 }
 
@@ -1282,9 +1287,9 @@ void C_CommandPanel::DrawBrackets(C_Actor *actor, const float *color, float grow
         return;
     const float cornerWidth = box.width * 0.25f;
     const float cornerHeight = box.height * 0.25f;
-    // (The corners are measured on the box before it grows.)
-    const float growX = static_cast<float>(GetIGraph()->ScrnX()) * grow;
-    const float growY = static_cast<float>(GetIGraph()->ScrnY()) * grow;
+    // (The corners are measured on the box before it grows; the screen's size is not asked again.)
+    const float growX = box.screenWidth * grow;
+    const float growY = box.screenHeight * grow;
     const float left = box.left - growX;
     const float right = box.right + growX;
     const float top = box.top - growY;
