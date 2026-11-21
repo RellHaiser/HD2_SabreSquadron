@@ -1,10 +1,54 @@
 // (Part 10d-iii.) The LAN search, the GameSpy reporting and the CD-key checks (net/net_search.cpp). Included by
 // netgame_test.cpp after netplayers_tests.inc.
 
-// The tests' UDP ports: a band of 100 of the process's own (the mutation runs go in parallel).
+// The tests' UDP ports: a band of 100 of the process's own (the mutation runs and the suites go in parallel). The
+// band is probed free at the first call: every port bound (no SO_REUSEADDR, so one held by anyone fails), then
+// released. Bands lie below the dynamic range (49152+, where any process's unbound sendto takes a port) and the
+// excluded ranges (netsh int ipv4 show excludedportrange udp: 50000-50059 and 59290+ here). The old fixed band,
+// 20000 + pid % 400 * 100, reached both; C_NetSocket::Open ignores bind's result (as the original), so a taken
+// port left the transport unbound and TestHost's port + 1 check failed in a parallel run of all suites (2026-11-20).
+static bool TestPortBandFree(int base)
+{
+    SOCKET sockets[100];
+    int bound = 0;
+    for (; bound < 100; ++bound) {
+        sockets[bound] = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        sockaddr_in address = {};
+        address.sin_family = AF_INET;
+        address.sin_port = htons(static_cast<u_short>(base + bound));
+        if (sockets[bound] == INVALID_SOCKET ||
+            bind(sockets[bound], reinterpret_cast<const sockaddr *>(&address), sizeof address) != 0) {
+            if (sockets[bound] != INVALID_SOCKET)
+                closesocket(sockets[bound]);
+            break;
+        }
+    }
+    for (int i = 0; i < bound; ++i)
+        closesocket(sockets[i]);
+    return bound == 100;
+}
+
 int TestPort(int offset)
 {
-    static const int base = 20000 + static_cast<int>(GetCurrentProcessId() % 400) * 100;
+    static const int base = [] {
+        WSADATA data;
+        WSAStartup(0x202, &data);
+        const int bands = (49152 - 20000) / 100;
+        // (Windows pids are multiples of 4: pid / 4 spreads the parallel processes' first tries.)
+        const int first = static_cast<int>(GetCurrentProcessId() / 4 % bands);
+        int found = 0;
+        for (int i = 0; i < bands && found == 0; ++i) {
+            const int candidate = 20000 + (first + i) % bands * 100;
+            if (TestPortBandFree(candidate))
+                found = candidate;
+        }
+        WSACleanup();
+        if (found == 0) {
+            std::printf("TestPort: no free band of 100 UDP ports in 20000-49151\n");
+            std::exit(1);
+        }
+        return found;
+    }();
     return base + offset;
 }
 
