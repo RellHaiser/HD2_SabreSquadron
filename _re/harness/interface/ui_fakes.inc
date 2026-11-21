@@ -244,11 +244,6 @@ void F_C_MapScreen_Done(const void *self)
     Log("%s C_MapScreen::Done", Name(self).c_str());
 }
 void __attribute__((thiscall)) O_C_MapScreen_Done(void *self) { F_C_MapScreen_Done(self); }
-void F_C_MapScreen_Show(const void *self, bool show, bool commandMap)
-{
-    Log("%s C_MapScreen::Show %d %d", Name(self).c_str(), int(show), int(commandMap));
-}
-void __attribute__((thiscall)) O_C_MapScreen_Show(void *self, bool show, bool commandMap) { F_C_MapScreen_Show(self, show, commandMap); }
 void F_C_MapScreen_Update(const void *self, int timeDelta)
 {
     Log("%s C_MapScreen::Update %d", Name(self).c_str(), int(timeDelta));
@@ -691,11 +686,6 @@ bool F_C_RollMenu_HasActions(const void *self, const void * actor, float distanc
     return Ret<bool>("C_RollMenu::HasActions");
 }
 bool __attribute__((thiscall)) O_C_RollMenu_HasActions(void *self, const void * actor, float distance) { return F_C_RollMenu_HasActions(self, actor, distance); }
-void F_C_RollMenu_Open(const void *self, bool open)
-{
-    Log("%s C_RollMenu::Open %d", Name(self).c_str(), int(open));
-}
-void __attribute__((thiscall)) O_C_RollMenu_Open(void *self, bool open) { F_C_RollMenu_Open(self, open); }
 void F_C_RollMenu_HandleInput(const void *self, const void * held, const void * pressed)
 {
     Log("%s C_RollMenu::HandleInput %s %s", Name(self).c_str(), Name(held).c_str(), Name(pressed).c_str());
@@ -986,7 +976,6 @@ void __attribute__((thiscall)) O_C_Controls_ClearKey(void *self, int key, const 
     {0x004a4380, reinterpret_cast<const void *>(H::O_C_InventoryScreen_Open)},   /* interface.h:412 */ \
     {0x004a4ae0, reinterpret_cast<const void *>(H::O_C_MapScreen_Init)},   /* interface.h:848 */ \
     {0x004a4f60, reinterpret_cast<const void *>(H::O_C_MapScreen_Done)},   /* interface.h:849 */ \
-    {0x004a5630, reinterpret_cast<const void *>(H::O_C_MapScreen_Show)},   /* interface.h:851 */ \
     {0x004a6fa0, reinterpret_cast<const void *>(H::O_C_MapScreen_Update)},   /* interface.h:852 */ \
     {0x004a6fe0, reinterpret_cast<const void *>(H::O_C_MapScreen_Render)},   /* interface.h:853 */ \
     {0x004a7010, reinterpret_cast<const void *>(H::O_C_MapScreen_HandleInput)},   /* interface.h:855 */ \
@@ -1071,7 +1060,6 @@ void __attribute__((thiscall)) O_C_Controls_ClearKey(void *self, int key, const 
     {0x004b0900, reinterpret_cast<const void *>(H::O_C_RollMenu_Done)},   /* interface.h:622 */ \
     {0x004b0920, reinterpret_cast<const void *>(H::O_C_RollMenu_SetTarget)},   /* interface.h:624 */ \
     {0x004b0f30, reinterpret_cast<const void *>(H::O_C_RollMenu_HasActions)},   /* interface.h:626 */ \
-    {0x004b27b0, reinterpret_cast<const void *>(H::O_C_RollMenu_Open)},   /* interface.h:627 */ \
     {0x004b2dc0, reinterpret_cast<const void *>(H::O_C_RollMenu_HandleInput)},   /* interface.h:630 */ \
     {0x004b2fa0, reinterpret_cast<const void *>(H::O_C_RollMenu_Render)},   /* interface.h:632 */ \
     {0x004b2fc0, reinterpret_cast<const void *>(H::O_C_RollMenu_Update)},   /* interface.h:631 */ \
@@ -1164,7 +1152,6 @@ void C_InventoryScreen::Render() { H::F_C_InventoryScreen_Render(this); }
 void C_InventoryScreen::Open(int mode, C_Human * human, C_Actor * other) { H::F_C_InventoryScreen_Open(this, mode, human, other); }
 bool C_MapScreen::Init(I3D_scene * scene, C_MapCursor * cursor) { return static_cast<bool>(H::F_C_MapScreen_Init(this, scene, cursor)); }
 void C_MapScreen::Done() { H::F_C_MapScreen_Done(this); }
-void C_MapScreen::Show(bool show, bool commandMap) { H::F_C_MapScreen_Show(this, show, commandMap); }
 void C_MapScreen::Update(int timeDelta) { H::F_C_MapScreen_Update(this, timeDelta); }
 void C_MapScreen::Render() { H::F_C_MapScreen_Render(this); }
 void C_MapScreen::HandleInput(float * held, float * pressed) { H::F_C_MapScreen_HandleInput(this, held, pressed); }
@@ -1249,7 +1236,6 @@ bool C_RollMenu::Init(C_Interface * ui, I3D_scene * scene, bool commandMap) { re
 void C_RollMenu::Done() { H::F_C_RollMenu_Done(this); }
 void C_RollMenu::SetTarget(C_Actor * actor, float distance) { H::F_C_RollMenu_SetTarget(this, actor, distance); }
 bool C_RollMenu::HasActions(C_Actor * actor, float distance) { return static_cast<bool>(H::F_C_RollMenu_HasActions(this, actor, distance)); }
-void C_RollMenu::Open(bool open) { H::F_C_RollMenu_Open(this, open); }
 void C_RollMenu::HandleInput(float * held, float * pressed) { H::F_C_RollMenu_HandleInput(this, held, pressed); }
 void C_RollMenu::Render() { H::F_C_RollMenu_Render(this); }
 void C_RollMenu::Update(int timeDelta) { H::F_C_RollMenu_Update(this, timeDelta); }

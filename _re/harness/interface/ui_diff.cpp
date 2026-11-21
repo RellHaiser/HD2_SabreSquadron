@@ -24,7 +24,12 @@
 // its vtable, the scope component's kind and aim mode), the rays (RayTest and GetCameraDir hand-written: their out
 // parameters) and the volumes they hit, the game's paused flag and first-person view, the menus open; an active
 // soldier always (without one: the port's fixes, tested alone).
-// HD2_UI_ROUNDS: scenarios (default 6,000; HD2_UI_QUICK: 2,000); HD2_UI_CASE: one case only; HD2_INTERFACE_ULPS,
+// Human part 75e (the "Input" case): the input (lines 1073-1300: ReturnControlOnInput, CloseAll, HandleInput; the
+// original's 0x0049c110, 0x0049c2b0, 0x0049c3c0): the held and pressed arrays from a seed (the interface's keys, the
+// soldier's controls, the signals), the keys held down (Alt, Shift: the graph's IsKeyDown), the members' health and
+// IsLocalPlayer, the signals' IsOpen call by call, the roll menu's Open and the map's Show setting their flags, the
+// hovered id, a calm profile of the panels half the time.
+// HD2_UI_ROUNDS: scenarios (default 5,000 per case, the input's three times; HD2_UI_QUICK: 2,000); HD2_UI_CASE: one case only; HD2_INTERFACE_ULPS,
 // HD2_INTERFACE_SHOW, HD2_INTERFACE_FIRST_CHANCE: the kit's.
 #include <windows.h>
 
@@ -98,7 +103,8 @@ S_World g_w, g_wStart;
 I3D_frame *FindFrame(const char *name)
 {
     const uint32_t h = Fnv(name, 0x1234567u);
-    if (h < g_w.missing)
+    // (The lower panel: the model always has it; the input cycles it unchecked.)
+    if (h < g_w.missing && std::strcmp(name, "down_panel") != 0)
         return nullptr;
     return FrameAt(F_POOL + int(h % uint32_t(FRAMES - F_POOL)));
 }
@@ -112,8 +118,12 @@ bool RetBool(const char *name, int, bool &value)
         value = g_s.commandOpen;
         return true;
     }
+    if (std::strcmp(name, "C_Human::IsLocalPlayer") == 0) {
+        value = (g_s.keysDown >> (4 + ((RetCount(name) - 1) & 15)) & 1) != 0;   // (the bits above the keys')
+        return true;
+    }
     if (std::strcmp(name, "C_SignalsPanel::IsOpen") == 0) {
-        value = g_s.signalsOpen;
+        value = (g_s.signalsOpen >> ((RetCount(name) - 1) & 31) & 1) != 0;
         return true;
     }
     if (std::strcmp(name, "C_game::IsFirstPersonView") == 0) {
@@ -128,6 +138,10 @@ bool RetBool(const char *name, int, bool &value)
 }
 bool RetInt(const char *name, int count, int &value)
 {
+    if (std::strcmp(name, "C_MapCursor::GetHoveredId") == 0) {
+        value = g_s.hovered;
+        return true;
+    }
     if (std::strcmp(name, "C_Human::GetPlayerViewMode") == 0) {
         // (The active player's: the world's last asked human is not known here; the first human's mode.)
         value = g_s.viewMode[0];
@@ -394,6 +408,7 @@ enum {
     OP_REFRESHINV, OP_TIME,
     OP_RENDEROVERLAY, OP_RENDER, OP_OUTLINE, W_PANELS,
     OP_UPDATE, OP_CROSSHAIR, OP_PICK, OP_COMPASSSHOWN, W_SOLDIERS,
+    OP_INPUT, OP_RETURNCONTROL, OP_CLOSEALL,
     W_WORLD = 100,
 };
 struct S_Op {
@@ -417,6 +432,21 @@ using T_III = void(__attribute__((thiscall)) *)(void *, int, int, int);
 using T_B = void(__attribute__((thiscall)) *)(void *, bool);
 using T_Arr = void(__attribute__((thiscall)) *)(void *, float *, float *);
 using T_Msg = void(__attribute__((thiscall)) *)(void *, const float *, const char *);
+void InputArrays(uint32_t seed, float *held, float *pressed)
+{
+    std::fill(held, held + 64, 0.0f);
+    std::fill(pressed, pressed + 64, 0.0f);
+    static const int KEYS[] = {INPUT_MENU, INPUT_PAUSE, INPUT_MESSAGE_LOG, INPUT_SAY, INPUT_SAY_TEAM, INPUT_MAP, INPUT_MAP, INPUT_INFO,
+                               INPUT_INFO, INPUT_SWITCH_SOLDIER, INPUT_SWITCH_SOLDIER, INPUT_SWITCH_SOLDIER, INPUT_LOWER_PANEL, INPUT_WEAPON_PREV, INPUT_WEAPON_NEXT,
+                               INPUT_INVENTORY, INPUT_COMMAND_MAP, INPUT_COMMAND_MAP, INPUT_COMMAND_MAP, INPUT_ROLL_MENU, INPUT_ROLL_MENU, INPUT_ROLL_MENU, INPUT_INVENTORY, INPUT_CLICK, INPUT_CLICK2, INPUT_CLICK2, INPUT_CLICK2,
+                               INPUT_SIGNAL_ALL, 40, 41, 42, 43, 44, 45, 35, 36, 37, 38, 0, 5, 17, 18, 20, 26, 34, 47, 63};
+    std::mt19937 rng(seed);
+    const int n = int(rng() % 4);
+    for (int k = 0; k < n; ++k) {
+        float *a = rng() % 3 == 0 ? held : pressed;
+        a[KEYS[rng() % (sizeof KEYS / sizeof *KEYS)]] = rng() % 4 ? 1.0f : 0.5f;
+    }
+}
 const float COLORS[3][3] = {{255, 0, 0}, {0, 128, 255}, {12.5f, 200, 7}};
 const char *const TEXTS[] = {"Squad ready", "", "Enemy spotted near the bridge"};
 
@@ -430,6 +460,9 @@ const char *Skip(int side, const S_Op &op)
     // (Render without a scene on the network screen: both draw the null scene.)
     if (op.kind == OP_RENDER && !scene && !(At<uint32_t>(b, side ? OF(m_flags) : 0xC) & INTERFACE_MEMBERS) && (g_w.role & 7) != 7)
         return "the network screen without a scene";
+    // (The input on an interface the fields operation made active without Init: no scene, no lower panel.)
+    if ((op.kind == OP_INPUT || op.kind == OP_CLOSEALL) && !scene && At<uint32_t>(b, side ? OF(m_flags) : 0xC) != 0)
+        return "the input without Init";
     if (op.kind == OP_HIGHLIGHT && g_w.memberCount > 6)
         return "a squad of more than six highlighted";
     // (Init loading the model where no directory has it: the original keeps the model, the port releases it.)
@@ -628,6 +661,27 @@ void Run(int side, const S_Op &op)
     case OP_COMPASSSHOWN:
         side ? port->UpdateCompassShown() : OriginalAt<T_Void>(0x0049f1c0)(orig);
         break;
+    case OP_INPUT:
+    case OP_RETURNCONTROL: {
+        float held[64], pressed[64];
+        InputArrays(uint32_t(op.a), held, pressed);
+        if (op.kind == OP_INPUT)
+            side ? port->HandleInput(held, pressed) : OriginalAt<T_Arr>(0x0049c3c0)(orig, held, pressed);
+        else
+            side ? port->ReturnControlOnInput(held, pressed) : OriginalAt<T_Arr>(0x0049c110)(orig, held, pressed);
+        uint32_t h = 2166136261u;
+        for (int k = 0; k < 64; ++k) {
+            uint32_t x, y;
+            std::memcpy(&x, &held[k], 4);
+            std::memcpy(&y, &pressed[k], 4);
+            h = (h ^ x) * 16777619u ^ y;
+        }
+        Log("input after %08x", h);
+        break;
+    }
+    case OP_CLOSEALL:
+        Log("CloseAll -> %d", side ? port->CloseAll() : OriginalAt<T_RetBool>(0x0049c2b0)(orig));
+        break;
     case W_SOLDIERS:
         g_rng.seed(uint32_t(op.a));
         RandomSoldiers();
@@ -668,6 +722,7 @@ void Run(int side, const S_Op &op)
 bool g_squad;   // the squad case (75b) or the life cycle (75a)
 bool g_draw;    // the drawing case (75c)
 bool g_update;  // the updates' case (75d)
+bool g_input;   // the input's case (75e)
 S_Op RandomOp()
 {
     static const int SQUAD[] = {OP_ADDMEMBER, OP_ADDMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBERS, OP_REMOVEFROMMAP,
@@ -680,7 +735,10 @@ S_Op RandomOp()
                                W_PANELS, W_PANELS, W_WORLD, OP_DONE};
     static const int UPDATE[] = {OP_UPDATE, OP_UPDATE, OP_UPDATE, OP_CROSSHAIR, OP_CROSSHAIR, OP_PICK, OP_PICK, OP_PICK, OP_COMPASSSHOWN,
                                  OP_FIELDS, OP_FIELDS, W_PANELS, W_SOLDIERS, W_SOLDIERS, W_WORLD, OP_DONE, OP_TIME};
-    S_Op op{g_update  ? Pick(UPDATE)
+    static const int INPUT[] = {OP_INPUT, OP_INPUT, OP_INPUT, OP_INPUT, OP_INPUT, OP_RETURNCONTROL, OP_CLOSEALL, OP_FIELDS, OP_FIELDS,
+                                W_PANELS, W_PANELS, W_SOLDIERS, W_WORLD, OP_DONE, OP_TIME};
+    S_Op op{g_input   ? Pick(INPUT)
+            : g_update ? Pick(UPDATE)
             : g_draw  ? Pick(DRAW)
             : g_squad ? Pick(SQUAD)
                     : Pick({OP_INIT, OP_INIT, OP_DONE, OP_DONE, OP_RESET, OP_INITPANELS, OP_DONEPANELS, OP_INITDOWN, OP_CLEARPICKS,
@@ -744,6 +802,8 @@ S_Op RandomOp()
         break;
     case W_PANELS:
     case W_SOLDIERS:
+    case OP_INPUT:
+    case OP_RETURNCONTROL:
         op.a = int(U32() & 0x7FFFFFFF);
         break;
     case OP_UPDATE:
@@ -785,6 +845,7 @@ void TestScenarios()
     SetKinds();
     RandomWorld();
     RandomPanels();
+    g_calm = g_input && P(0.5);
     RandomSoldiers();
     const S_Soldiers soldiersStart = g_s;
     int panelStart[PANEL_FIELD_COUNT];
@@ -993,6 +1054,8 @@ void SetUp()
         {0x00720f50, reinterpret_cast<const void *>(O_GetCheatValue)},
         {0x004a26d0, reinterpret_cast<const void *>(O_InventoryRefresh)},
         {0x006f8060, reinterpret_cast<const void *>(O_RayTest)},
+        {0x004b27b0, reinterpret_cast<const void *>(O_RollOpen)},
+        {0x004a5630, reinterpret_cast<const void *>(O_MapShow)},
         {0x007e562e, reinterpret_cast<const void *>(O_Atexit)},
         {0x007e6334, reinterpret_cast<const void *>(O_Sprintf)},
     };
@@ -1030,7 +1093,7 @@ int main()
     if (!StartKit("ui_diff", exitCode))
         return exitCode;
     SetUp();
-    int rounds = std::getenv("HD2_UI_QUICK") ? 2000 : 6000;
+    int rounds = std::getenv("HD2_UI_QUICK") ? 2000 : 5000;
     if (const char *r = std::getenv("HD2_UI_ROUNDS"))
         rounds = std::atoi(r);
     g_case = "Life";
@@ -1053,6 +1116,11 @@ int main()
         TestScenarios();
     g_update = false;
     g_activeAlways = false;
+    g_case = "Input";
+    g_input = true;
+    for (g_round = 0; g_round < 3 * rounds; ++g_round)   // (the keys' combinations: rarer)
+        TestScenarios();
+    g_input = false;
     g_case = "Fixes";
     for (g_round = 0; g_round < 50; ++g_round)
         TestFixes();

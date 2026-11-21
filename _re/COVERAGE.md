@@ -4967,3 +4967,23 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the generated fakes of methods with out parameters (RayTest, GetCameraDir) left
   them unwritten (hand-written now); the hashed answers made the menus open seven times in eight, so the speedometer
   was almost never reached until the world set them; a car's physics named by offset differed between the sides.
+
+## Human part 75e (the game interface's input, `interface.cpp` lines 1073-1300, 2026-11-21)
+
+- **The build:** part 75a's (`interface/build_ui.bat`, `ui_diff.cpp`'s "Input" case, three times the rounds).
+- **The world added:** the held and pressed arrays from a seed (the interface's keys: the menu, pause, the messages,
+  the chat, the map, the information, the soldier switch, the lower panel, the weapons, the inventory, the command map,
+  the roll menu, the clicks, the signals, the soldiers' selection; the soldier's controls), the keys held down (Alt,
+  Shift: the graph's IsKeyDown), the members' health (IsDead inline) and IsLocalPlayer, the signals' IsOpen call by
+  call, the roll menu's Open and the map's Show hand-written (their flags set), the hovered id, a calm profile of the
+  panels half the time (the menus closed, the map and the weapon selector hidden), the lower panel always in the model.
+- **The tests:** scenarios of Init then up to 14 of HandleInput, ReturnControlOnInput, CloseAll, the fields, the
+  panels' and the soldiers' worlds drawn again, the clock, Done; the arrays hashed after each call. Left out (both
+  crash): the input on an interface the fields operation made active without Init (no scene, no lower panel).
+- **Results:** 17,196,700 checks (all part 75 cases), 0 failures; all 156 measured lines of the range run.
+- **Port bugs found:** none.
+- **Mutations:** 289 mutants, 37 not building, 247 of 252 killed, 5 equivalent
+  (mutate_interface_uie.py).
+- **Harness lessons (my mistakes):** the hashed answers never gave a member's hovered id (100..105), so the click
+  handling was never observable; the generated Open / Show fakes left the menus' flags as they were; the rare key
+  combinations needed more rounds and a calm profile before the mutations saw them.

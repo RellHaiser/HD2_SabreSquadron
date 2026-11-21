@@ -441,6 +441,7 @@ void RandomPanels()
         }
     }
 }
+bool g_calm;   // (the input case, half the time: the menus closed, the map and the weapon selector hidden)
 void SetPanelFields(int side)
 {
     uint8_t *b = side ? reinterpret_cast<uint8_t *>(g_port) : g_orig;
@@ -470,6 +471,19 @@ void SetPanelFields(int side)
         default:
             std::memcpy(at, &v, 4);
             break;
+        }
+        if (g_calm) {
+            if (f.kind == PF_BOOL)
+                *at = 0;
+            if (f.kind == PF_INT && std::strstr(f.what, "m_mode")) {
+                const int mode = v == 1 ? 0 : (v & 1) ? 2 : v;   // (the history's mode closed; 2 often)
+                std::memcpy(at, &mode, 4);
+            }
+            if (f.kind == PF_FRAME && (std::strstr(f.what, "m_map.") || std::strstr(f.what, "m_weaponSelector."))) {
+                I3D_frame *frame = *reinterpret_cast<I3D_frame **>(at);
+                if (frame)
+                    frame->m_frameFlags &= ~1u;
+            }
         }
     }
 }
@@ -569,7 +583,12 @@ struct S_Soldiers {
     int volActor[3];
     float cameraDir[4];
     bool firstPersonView, paused;
-    bool commandOpen, signalsOpen;   // the command map's and the signals' IsOpen
+    bool commandOpen;                // the command map's IsOpen
+    uint32_t signalsOpen;            // the signals' IsOpen: the bit of each call in turn
+    bool rollOpens;                  // the roll menu's Open(true) opens it
+    int health[HUMANS];
+    int hovered;                     // the map cursor's hovered id
+    uint32_t keysDown;               // Alt / Shift held: bits 0..3 for the keys 0x38, 0xB8, 0x2A, 0x36; 4..: IsLocalPlayer
     bool tie;                        // the bodies at the origin, the hits at exactly 2, 0.65 or 0.2 from them
 };
 constexpr int F_TIE_BODY = PANEL_FRAMES_FROM - 31;
@@ -667,6 +686,7 @@ void SetSoldiers(int side)
             put(0x178, &changed, 1);
             put(0x260, &body, 4);
             put(0x118, &door, 1);
+            put(0xEC, &g_s.health[h], 4);
         } else {
             put(offsetof(C_Actor, m_type), &g_s.type[h], 4);
             put(offsetof(C_Actor, m_frame), &frame, 4);
@@ -675,6 +695,7 @@ void SetSoldiers(int side)
             put(offsetof(C_Human, m_inventoryChanged), &changed, 1);
             put(offsetof(C_Human, m_bodyFrame), &body, 4);
             put(offsetof(C_Door, m_unknown118), &door, 1);
+            put(uint32_t(offsetof(C_Human, m_stats) + 4 * STAT_HEALTH), &g_s.health[h], 4);
         }
     }
     for (int k = 0; k < VEHICLES; ++k) {
@@ -758,7 +779,12 @@ void RandomSoldiers()
     g_s.firstPersonView = P(0.5);
     g_s.paused = P(0.3);
     g_s.commandOpen = P(0.3);
-    g_s.signalsOpen = P(0.3);
+    g_s.hovered = P(0.7) ? 100 + I(0, 5) : Pick({0, 0, 99, 106, 3});
+    for (int &h : g_s.health)
+        h = P(0.8) ? I(1, 100) : Pick({0, -5});
+    g_s.keysDown = (P(0.5) ? 0u : U32() & 15u) | (U32() << 4);   // (bits 4..: the soldiers' IsLocalPlayer in turn)
+    g_s.signalsOpen = P(0.4) ? 0u : P(0.3) ? ~0u : U32();
+    g_s.rollOpens = P(0.6);
     g_s.tie = P(0.3);
     if (g_s.tie) {
         for (int &b : g_s.body)
@@ -769,8 +795,32 @@ void RandomSoldiers()
         }
     }
 }
+bool __stdcall G_IsKeyDown(void *, int key)
+{
+    const int bit = key == 0x38 ? 0 : key == 0xB8 ? 1 : key == 0x2A ? 2 : key == 0x36 ? 3 : -1;
+    const bool down = bit >= 0 && (g_s.keysDown >> bit & 1);
+    Log("graph IsKeyDown %x -> %d", key, down);
+    return down;
+}
+// The roll menu's Open (0x004b27b0): its open flag set (Open(true) opens it as the world says).
+void RollOpen(void *menu, bool open)
+{
+    Log("%s C_RollMenu::Open %d", Name(menu).c_str(), open);
+    *(static_cast<uint8_t *>(menu) + (g_side ? uint32_t(offsetof(C_RollMenu, m_open)) : 0x30)) = open && g_s.rollOpens;
+}
+void __attribute__((thiscall)) O_RollOpen(void *menu, bool open) { RollOpen(menu, open); }
+// The map's Show (0x004a5630): its frame shown or hidden (the frame from its field, each side's offset).
+void MapShow(void *map, bool show, bool commandMap)
+{
+    Log("%s C_MapScreen::Show %d %d", Name(map).c_str(), show, commandMap);
+    I3D_frame *frame = *reinterpret_cast<I3D_frame **>(static_cast<uint8_t *>(map) + (g_side ? uint32_t(offsetof(C_MapScreen, m_frame)) : 4));
+    if (frame)
+        frame->m_frameFlags = show ? frame->m_frameFlags | 1u : frame->m_frameFlags & ~1u;
+}
+void __attribute__((thiscall)) O_MapShow(void *map, bool show, bool commandMap) { MapShow(map, show, commandMap); }
 void SetUpSoldiers()
 {
+    g_graphVt[0xB0 / 4] = reinterpret_cast<void *>(G_IsKeyDown);
     for (int side = 0; side < 2; ++side) {
         for (void *&v : g_vehicleVt[side])
             v = reinterpret_cast<void *>(V_VehicleOther);
@@ -792,3 +842,5 @@ S_CollisionVolume *C_CollisionWorld::RayTest(const S_vector &from, const S_vecto
     return static_cast<S_CollisionVolume *>(H::Ray(&from.x, &dir.x, hit ? &hit->x : nullptr, normal ? &normal->x : nullptr, types, flags));
 }
 bool C_CameraModule::GetCameraDir(int index, S_vector4 *dir) { return H::CameraDir(index, &dir->x); }
+void C_RollMenu::Open(bool open) { H::RollOpen(this, open); }
+void C_MapScreen::Show(bool show, bool commandMap) { H::MapShow(this, show, commandMap); }
