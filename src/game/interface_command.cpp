@@ -653,8 +653,11 @@ void C_CommandPanel::Update(int timeDelta)
 
 void C_CommandPanel::ShowHint(int group, int textId)
 {
-    for (int i = 0; i < HINTS; ++i)
-        m_hints[i].SetTextId(HINT_DEFS[i].title, HINT_STYLE, 0);
+    // (The titles in the original's order: the options' before the camera's.)
+    for (int i = 0; i < HINTS; ++i) {
+        const int hint = i == HINT_CAMERA ? HINT_OPTIONS : i == HINT_OPTIONS ? HINT_CAMERA : i;
+        m_hints[hint].SetTextId(HINT_DEFS[hint].title, HINT_STYLE, 0);
+    }
     if (!m_rollMenu.IsOpen() && group != HINT_NONE)
         m_hints[group].SetTextId(textId, HINT_STYLE, 0);
 }
@@ -850,13 +853,14 @@ void C_CommandPanel::PressOrderButton(int id, int index)
     C_Team *team = PlayerTeam();
     if (!button.IsLit() || team->GetCommandedIndex() < 0)
         return;
-    C_Human *commanded = team->GetCommandedMember();
+    // (The soldier asked for in the follow and wait cases only, his order count again for the last
+    // order: the original's calls.)
     switch (id) {
     case MAP_BUTTON_FOLLOW: {
         // From the last order's place.
-        const int count = commanded->GetOrderCount();
-        const S_vector4 pos =
-            count != 0 ? OrderPoint(commanded->GetOrder(count - 1)) : FramePos4(commanded->GetFrame());
+        C_Human *commanded = team->GetCommandedMember();
+        const S_vector4 pos = commanded->GetOrderCount() != 0 ? OrderPoint(commanded->GetOrder(commanded->GetOrderCount() - 1))
+                                                              : FramePos4(commanded->GetFrame());
         AddOrder(HUMAN_ORDER_FOLLOW, pos, S_vector4{0.0f, 0.0f, 0.0f, 0.0f});
         button.Light(false, true);
         break;
@@ -872,18 +876,19 @@ void C_CommandPanel::PressOrderButton(int id, int index)
     case MAP_BUTTON_WAIT_1:
     case MAP_BUTTON_WAIT_2: {
         // At the last order's place, facing its way (or the soldier's).
+        C_Human *commanded = team->GetCommandedMember();
         S_vector4 pos;
         S_vector4 dir;
-        const int count = commanded->GetOrderCount();
-        if (count != 0) {
-            const S_HumanOrder *last = commanded->GetOrder(count - 1);
+        if (commanded->GetOrderCount() != 0) {
+            const S_HumanOrder *last = commanded->GetOrder(commanded->GetOrderCount() - 1);
             pos = OrderPoint(last);
             dir = last->data;
         } else {
             I3D_frame *frame = commanded->GetFrame();
             pos = FramePos4(frame);
             const S_matrix &m = frame->GetMatrix();
-            dir = Vector4(m(2).Normalized(), m.m[2][3]);
+            // (Normalised as the original's inline copy: (y² + z²) + x².)
+            dir = Vector4(m(2).NormalizedGame(), m.m[2][3]);
         }
         AddOrder(id == MAP_BUTTON_WAIT_1 ? HUMAN_ORDER_6 : HUMAN_ORDER_7, pos, dir);
         button.Light(false, true);

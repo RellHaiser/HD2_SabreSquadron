@@ -269,6 +269,8 @@ SUITES = [
       tree_copy="interface/scrollbar_diff.exe"),
     T("human.interface_inventory", "interface/build_inventory.bat", TMP + r"\inventory_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="interface/inventory_diff.exe"),
+    T("human.interface_command", "interface/build_command.bat", TMP + r"\command_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="interface/command_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

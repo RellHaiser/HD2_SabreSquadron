@@ -4745,3 +4745,48 @@ particles and the surface marks. Files are served from memory.
   returned nothing: the slider's Follow read a garbage motion and crashed once the scroll scripts ran); the first runs
   reached the description's end 21 times in 10,000 scenarios (the picked frame now mostly an icon's, as the pages find
   them).
+
+## Human part 74a (the command map's set-up, opening, hints and buttons, `interface_command.cpp` lines 373-935, 2026-11-20)
+
+- **The build:** `interface/build_command.bat` (`command_diff.cpp`, including `interface_command.cpp`; 128 arena
+  frames). The file's 74b / 74c functions it calls (UpdateMember, PickTarget, ShowRollMenu, AddOrder,
+  RemoveSelectedOrder, ApplyFlags) are patched on both sides to the same loggers (the original's redirected, the
+  port's overwritten with jumps), so the build turns off what would optimise the callers against the real bodies:
+  -fno-inline-functions-called-once, -fno-ipa-modref, -fno-ipa-pure-const, -fno-ipa-reference(-addressable); the
+  mutation runner gets them through MUT_DEFS. The rest of the file's references are stubs that exit (not
+  [[noreturn]]).
+- **Fakes:** each side's panel built once (the original's hint boxes by its text box constructor 0x00496cc0, the
+  port's panel by its constructor) and restored before each scenario; snapped by each side's layout (its text boxes
+  0x9C / 0x84 bytes; the member lines by their counts). Each side its own 8 humans (type, frame, health, role) with 4
+  orders each (kind, data, place, actor, flags, marker), the game (its scene, checkpoints, paused flag and state in
+  place; SetPaused), the camera module (every slot of the original's gives the human effects); the team's commanded
+  index and the enemy records' tactical flag written in place (the original's team in its own memory). Logged on both
+  sides: the team (GetActivePlayer, GetCommandedMember, GetMember, GetMemberCount, IsMember, GetSeenEnemies,
+  RefreshSight), the humans (GetOrderCount, GetOrder, GetStateFlags, GetAIModeFlags, GetStanceFlags, IsAISuspended,
+  IsUnconscious, FadeOut, FadeIn, CancelOrders, the body's Unknown5ac470), the human effects (SetTactical,
+  SetTacticalMode, UpdateTactical, SetTacticalZoom), the effects module's SetThunderstorm and Update (the port's slots
+  the original's + 4), the profile's SetControlMode, the model cache's OpenInto, the info selector, the cursor's
+  GetHoveredId (its mode, position and frame read in place), HighlightMembers, the roll menu (Init, Done, SelectAt,
+  Update; its open flag from the world), the click sound; the scene's frames by a hash of the name.
+- **The tests:** scenarios of Init and mostly Open, then up to 18 operations (Open, IsOpen, Update, ShowHint,
+  UpdateHint, ReadOrderFlags, DarkenButtons, LightOrderButtons, LightFlagButtons, Press, SetFlag, PressToolButton,
+  PressOrderButton, CycleZoom, S_Button::Light; the input's state set as 74c's handlers leave it; the world changing)
+  and now and then Done, from the same start words on both sides (what Init clears or leaves; spare markers for
+  Done). Left out (both crash): the original's Init without "Border" (the port's fix, tested alone), the operations
+  before Init, an order button with a commanded index but no soldier, closing with a null member. The original's
+  SetScale writes m_scaleW from a stack word (not compared); a follow order's data.w and PickTarget's time (the
+  original's __fastcall PickTarget: EDX) are stack words, not compared.
+- **Results:** 9396798 checks, 0 failures; all 390 measured lines of the range (the helpers used here and the
+  functions above) run.
+- **Port bugs found and fixed (on main; port mistakes):** PressOrderButton asked for the commanded soldier for every
+  button (the original in the follow and wait cases only) and his order count once (the original again for the last
+  order); ShowHint set the titles in array order (the original sets the options' before the camera's); the wait order's
+  direction without orders was normalised as x² + y² + z² (the original's inline copy: (y² + z²) + x²).
+- **Original's weaknesses (the port's fixes, tested alone):** Init updated "Border" without checking it.
+- **Not tested here:** the 74b / 74c functions (patched: their parts).
+- **Mutations:** 747 mutants, 83 not building, 653 of 664 killed, 11 equivalent
+  (mutate_interface_command.py).
+- **Harness lessons (my mistakes):** the start pace drawn from the random generator on each side (the sides
+  differed); [[noreturn]] stubs and GCC's interprocedural analysis broke the patched functions (an endless loop, a
+  dropped store of the wait order's direction: three false port differences); the first mutation run built without
+  those flags (mutrun.py takes its own: the baseline failed and every mutant read "killed"; rerun).
