@@ -4831,3 +4831,38 @@ particles and the surface marks. Files are served from memory.
   original's AddPath for member -1 wrote into the pristine copy before its panel (a later round's start differed: skip
   guards); Log's 600-byte buffer cut the brackets' vertex line after seven vertices (the bottom corners were not
   compared: 18 survivors); Init got 4 state icons where the markers read up to the 20th (null icons: 30 survivors).
+
+## Human part 74c (the command map's mouse and input, `interface_command.cpp` lines 250-252 and 1339-1888, 2026-11-20)
+
+- **The build:** `interface/build_commandc.bat` (`commandc_diff.cpp`, made from part 74b's harness: the same panel,
+  world, fakes and set-up; parts 74a and 74b run for real). Nothing of the file is patched any more (the build flags
+  kept).
+- **Fakes added:** the collision world's RayTest (the original's thunk 0x00718830, __thiscall) and CollisionRayTest
+  (0x00718770): the world's hit (one of four volumes of the world's: flags, type, actor, a frame whose data is an order;
+  or nothing), point and normal (flat, steep, upside down, random); the game scene's UnmapScreenPoint; the cursor's
+  GetScreenPos, SetMode (its mode written in place and kept), ClampMotion and clip rectangle (snapped by its frame); the
+  info selector's SelectOrder; the team's SetCommanded; the roll menu's HandleInput, IsCursorOver, Select, MoveTo,
+  Prepare, Open (its open flag written from the world's answer) and SetTarget, its choice, target and actions written in
+  place; the controls' ClearKey; the graph's GetAsciiKey and KeyToChar; the profile's GetDetailSettings (the inverted
+  mouse); the camera's SetTacticalMotion; the visuals' UpdateWBoundProc. The humans' faded flag and position, a static
+  weapon's state, an animation actor's no-info flag, the orders' soldiers; more kinds of actors (cars, static weapons,
+  submarines, animation actors). The panel snapped with the ground under the cursor, the dragged marker and its grip.
+- **The tests:** 74b's scenarios with 11 more operations: IsOnMap (at and beside its edges), PickTarget, OnLeftPress,
+  OnLeftDrag, OnLeftRelease, OnRightPress, OnRightRelease, ShowRollMenu, HandleInput, UpdateCursorMode and MoveCamera
+  (their held and pressed arrays a few of the map's keys and buttons from a seed, hashed after the call), new rays now
+  and then; the cursor now and then on the map, over nothing and exactly on the edges. Left out (both crash): a click
+  or key with a commanded index but no soldier (74a's order buttons, OnRightPress's position), a marker dragged without
+  a commanded soldier. Stack words not compared: the w of OnRightPress's and OnLeftDrag's orders' vectors.
+- **Results:** 9,389,165 checks, 0 failures; all 377 measured lines of the range run (with parts 74a and 74b every line
+  of the file).
+- **Port bugs found and fixed (on main; port mistakes):** OnLeftDrag asked for the selected index before the order
+  count and once for the order after the dragged one (the original asks for the count first and for the index again for
+  its SetOrder); OnRightPress normalised the move order's direction as x² + y² + z² (the original's inline copy: (z² +
+  y²) + x²).
+- **Not tested here:** the dedicated server's HandleInput (no keyboard: not compiled here).
+- **Mutations:** 651 mutants, 92 not building, 550 of 559 killed, 9 equivalent
+  (mutate_interface_commandc.py).
+- **Harness lessons (my mistakes):** the cursor's clip pointer carried over between the sides and rounds (the cursor
+  block is not restored); the roll menu's actions written where its entries keep their texts (the vehicle pick-up never
+  ran; I first swapped a struct that was right, the signals panel's, and put it back); OnLeftDrag's direction changed to
+  the game's sum order from a misread of the asm (the test showed the original sums x first there; put back).

@@ -1528,14 +1528,15 @@ void C_CommandPanel::OnLeftDrag(float * /*held*/, float * /*pressed*/)
     S_HumanOrder change;
     change.InitPlain(human, Vector4(hitPos, 0.0f), zero, 0, 0, 0);
     human->SetOrder(m_selector->GetSelectedIndex(), &change);
-    // A waiting order right after it goes along.
-    if (m_selector->GetSelectedIndex() < human->GetOrderCount() - 1) {
-        const int next = m_selector->GetSelectedIndex() + 1;
-        const int kind = human->GetOrder(next)->kind;
+    // A waiting order right after it goes along. (The order count asked first, the selected index asked again for
+    // each use, as the original does.)
+    const int count = human->GetOrderCount();
+    if (m_selector->GetSelectedIndex() < count - 1) {
+        const int kind = human->GetOrder(m_selector->GetSelectedIndex() + 1)->kind;
         if (kind == HUMAN_ORDER_WATCH || kind == HUMAN_ORDER_6 || kind == HUMAN_ORDER_7) {
             S_HumanOrder follow;
             follow.InitPlain(human, Vector4(hitPos, 0.0f), zero, 0, 0, 0);
-            human->SetOrder(next, &follow);
+            human->SetOrder(m_selector->GetSelectedIndex() + 1, &follow);
         }
     }
 }
@@ -1579,7 +1580,7 @@ void C_CommandPanel::OnRightPress()
         if (!(normal.y > FLAT_GROUND) || PlayerTeam()->GetCommandedIndex() < 0 || followsLast())
             return;
         S_vector away = hitPos - XYZ(PlayerTeam()->GetCommandedMember()->GetPosition4());
-        away.Normalize();
+        away = away.NormalizedGame();   // (the original's inline copy: (z² + y²) + x²)
         AddOrder(HUMAN_ORDER_MOVE, Vector4(hitPos, 0.0f), Vector4(away, 0.0f));
         return;
     }
