@@ -125,7 +125,16 @@ int RetCount(const char *name)
     return 0;
 }
 template <class T> T Ret(const char *name);
-template <> bool Ret<bool>(const char *name) { return (RetWord(name) & 7) != 0; }
+// (A part's own bool answers: true when it gives one.)
+bool (*g_retBool)(const char *name, int count, bool &value) = nullptr;
+template <> bool Ret<bool>(const char *name)
+{
+    const uint32_t w = RetWord(name);
+    bool value;
+    if (g_retBool && g_retBool(name, RetCount(name), value))
+        return value;
+    return (w & 7) != 0;
+}
 template <> int Ret<int>(const char *name)
 {
     const uint32_t w = RetWord(name);
@@ -274,6 +283,79 @@ void *__cdecl O_ISndGetDriver() { return &g_sndDriver; }
 }  // namespace H
 
 ISND_driver *ISndGetDriver() { return reinterpret_cast<ISND_driver *>(&H::g_sndDriver); }
+
+
+namespace H {
+// ---- the humans as actors (their boxes), the game scene's transform, the graph's texture and lines ----
+template <class M> int Slot(M m)   // a port virtual's byte offset in its vtable (g++: the member pointer holds 1 + it)
+{
+    struct {
+        uintptr_t p;
+        ptrdiff_t adjust;
+    } r;
+    static_assert(sizeof r == sizeof m, "member pointer");
+    std::memcpy(&r, &m, sizeof r);
+    return int(r.p - 1);
+}
+float g_boxScale[HUMANS], g_shiftX, g_shiftY;
+void *g_actorVt[2][0x80];
+void __attribute__((thiscall)) V_BoxCorners(void *actor, float *corners)
+{
+    Log("%s GetBoxCorners", Name(actor).c_str());
+    const int i = HumIndex(actor);
+    const float scale = i >= 0 ? g_boxScale[i] : 1.0f;
+    for (int k = 0; k < 8; ++k) {
+        corners[4 * k + 0] = float(i) + (k & 1 ? 0.5f : -0.5f) * scale;
+        corners[4 * k + 1] = float(k & 2 ? 1 : 0) * scale + 0.25f * float(i);
+        corners[4 * k + 2] = float(k & 4 ? 1 : -1) * (0.3f + 0.1f * float(i)) * scale;
+        corners[4 * k + 3] = 1.0f;
+    }
+}
+void __attribute__((thiscall)) V_ActorOther(void *a) { Log("%s actor other slot", Name(a).c_str()); }
+// Each side's actor vtable in the humans' blocks (the port's slots by its member pointers).
+void SetActorVts(int side)
+{
+    for (int h = 0; h < HUMANS; ++h)
+        *reinterpret_cast<void ***>(g_humans[h]) = g_actorVt[side];
+}
+void __stdcall SC_Transform(void *self, const float *points, float *out, int count)
+{
+    Log("%s TransformPoints %d", Name(self).c_str(), count);
+    for (int k = 0; k < count; ++k) {
+        out[4 * k + 0] = 512.0f + 140.0f * points[4 * k] - 30.0f * points[4 * k + 2] + g_shiftX;
+        out[4 * k + 1] = 384.0f - 120.0f * points[4 * k + 1] + 20.0f * points[4 * k + 2] + g_shiftY;
+        out[4 * k + 2] = 0.5f;
+        out[4 * k + 3] = 1.0f;
+    }
+}
+void __stdcall G_Texture(void *, void *texture, int stage) { Log("graph SetTexture %s %d", Name(texture).c_str(), stage); }
+void __stdcall G_Draw(void *, int kind, int count, const void *vertices, int transformed)
+{
+    // (Lines on the screen: S_TLVertex 0x20 bytes, 2 per line, a log line each; their specular is not set.)
+    Log("graph DrawPrimitives %d %d %d", kind, count, transformed);
+    const uint8_t *v = static_cast<const uint8_t *>(vertices);
+    for (int k = 0; k < 2 * count && kind == 1; ++k, v += 0x20) {
+        float f[7];
+        uint32_t color;
+        std::memcpy(f, v, 16);
+        std::memcpy(&color, v + 0x10, 4);
+        std::memcpy(f + 5, v + 0x18, 8);
+        Log("  vertex %s,%s,%s,%s,%u,%s,%s", FloatText(f[0]).c_str(), FloatText(f[1]).c_str(), FloatText(f[2]).c_str(),
+            FloatText(f[3]).c_str(), color, FloatText(f[5]).c_str(), FloatText(f[6]).c_str());
+    }
+}
+void SetUpDrawing()
+{
+    for (int side = 0; side < 2; ++side)
+        for (void *&v : g_actorVt[side])
+            v = reinterpret_cast<void *>(V_ActorOther);
+    g_actorVt[0][0xDC / 4] = reinterpret_cast<void *>(V_BoxCorners);
+    g_actorVt[1][Slot(&C_Actor::GetBoxCorners) / 4] = reinterpret_cast<void *>(V_BoxCorners);
+    g_sceneVt[0x98 / 4] = reinterpret_cast<void *>(SC_Transform);   // (the game scene's: the kit's scene vtable)
+    g_graphVt[0x44 / 4] = reinterpret_cast<void *>(G_Texture);
+    g_graphVt[0x88 / 4] = reinterpret_cast<void *>(G_Draw);
+}
+}  // namespace H
 
 // ---- by hand: the free functions and objects the interface reaches, the methods the original inlines ----
 namespace H {

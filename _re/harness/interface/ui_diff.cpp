@@ -12,6 +12,11 @@
 // RefreshInventory; the original's 0x0049b7e0 .. 0x0049fc10): the team's members, the squad commander's groups
 // (CollectGroup through each side's vtable), the active index, the clock (timeGetTime: the port's renamed, the
 // original's import slot) and the last member click (each side's static); the panels' fields snapped.
+// Human part 75c (the "Draw" case): the drawing (lines 614-788: RenderOverlay, Render, DrawPickOutline; the original's
+// 0x0049b9b0, 0x0049b9f0, 0x0049e260): the camera's scripted view and the console's NO_GI from the world, the humans
+// as actors (GetBoxCorners through each side's vtable), the game scene's TransformPoints (the points moved off and
+// to the screen's edges), the graph's SetTexture and DrawPrimitives (every vertex but the unset specular), the panels'
+// fields drawn again between the operations.
 // HD2_UI_ROUNDS: scenarios (default 6,000; HD2_UI_QUICK: 2,000); HD2_UI_CASE: one case only; HD2_INTERFACE_ULPS,
 // HD2_INTERFACE_SHOW, HD2_INTERFACE_FIRST_CHANCE: the kit's.
 #include <windows.h>
@@ -76,6 +81,10 @@ struct S_World {
     int memberCount, activeIndex;
     uint32_t groups[6];
     uint32_t time, lastClick;
+    // Part 75c: the camera's scripted view, the console's NO_GI, the actors' boxes, the screen points moved.
+    bool scripted;
+    int noGi;
+    float boxScale[HUMANS], shiftX, shiftY;
     bool noScene;
 };
 S_World g_w, g_wStart;
@@ -86,8 +95,20 @@ I3D_frame *FindFrame(const char *name)
         return nullptr;
     return FrameAt(F_POOL + int(h % uint32_t(FRAMES - F_POOL)));
 }
+bool RetBool(const char *name, int, bool &value)
+{
+    if (std::strcmp(name, "C_CameraModule::HasScriptedView") == 0) {
+        value = g_w.scripted;
+        return true;
+    }
+    return false;
+}
 bool RetInt(const char *name, int count, int &value)
 {
+    if (std::strcmp(name, "GetCheatValue") == 0) {
+        value = g_w.noGi;
+        return true;
+    }
     if (std::strcmp(name, "C_TeamBase::GetMemberCount") == 0) {
         value = g_w.memberCount;
         return true;
@@ -111,6 +132,10 @@ void SetGlobals(int side)
     g_noScene = g_w.noScene;
     g_states[0x15] = g_w.state15;
     g_time = g_w.time;
+    std::copy(g_w.boxScale, g_w.boxScale + HUMANS, g_boxScale);
+    g_shiftX = g_w.shiftX;
+    g_shiftY = g_w.shiftY;
+    SetActorVts(side);
     Put<int>(OriginalAt<uint8_t *>(0x0089ae78 + 0x1C), 0x2C, g_w.activeIndex);
     Put<int>(&g_teamManager, uint32_t(offsetof(C_TeamManager, m_playerTeam) + offsetof(C_Team, m_active)), g_w.activeIndex);
     g_states[0x19] = g_w.state19;
@@ -145,19 +170,16 @@ void RandomWorld()
         g = U32() & 0xFF;
     g_w.time = P(0.3) ? 0u : U32() % 100000;
     g_w.lastClick = P(0.5) ? g_w.time - uint32_t(I(0, 400)) : P(0.5) ? 0u : U32();
+    g_w.scripted = P(0.1);
+    g_w.noGi = P(0.9) ? 0 : I(1, 3);
+    for (float &b : g_w.boxScale)
+        b = P(0.5) ? 1.0f : P(0.5) ? F(0.0f, 0.2f) : Pick({0.0f, 0.05f, 2.0f, 30.0f});
+    g_w.shiftX = P(0.8) ? 0.0f : Pick({-3000.0f, 3000.0f, -600.0f, 600.0f});
+    // (370..380: a box's bottom within the 10 pixels above the screen's edge.)
+    g_w.shiftY = P(0.7) ? 0.0f : Pick({-3000.0f, 3000.0f, -450.0f, 450.0f, 370.0f, 375.0f, 380.0f});
 }
 
 // ---- the squad commander's CollectGroup (virtual on both sides: each its vtable) ----
-template <class M> int Slot(M m)   // a port virtual's byte offset in its vtable (g++: the member pointer holds 1 + it)
-{
-    struct {
-        uintptr_t p;
-        ptrdiff_t adjust;
-    } r;
-    static_assert(sizeof r == sizeof m, "member pointer");
-    std::memcpy(&r, &m, sizeof r);
-    return int(r.p - 1);
-}
 void *g_commanderVt[2][16];
 std::vector<int> GroupOf(int group)
 {
@@ -327,6 +349,7 @@ enum {
     OP_SWITCH, OP_CLICK, OP_CLICK2, OP_FILTER, OP_CAPTURING, OP_ADDMESSAGE, OP_SETTIMER, OP_ROUNDRESULT, OP_COUNTDOWN,
     OP_SHOWMESSAGE, OP_SHOWTIMER, OP_SOUNDDIR, OP_SHOWSCORES, OP_RESPAWN, OP_ISRESPAWN, OP_FLASH, OP_OBJICON, OP_PHOTO,
     OP_REFRESHINV, OP_TIME,
+    OP_RENDEROVERLAY, OP_RENDER, OP_OUTLINE, W_PANELS,
     W_WORLD = 100,
 };
 struct S_Op {
@@ -360,6 +383,9 @@ const char *Skip(int side, const S_Op &op)
     const bool scene = At<void *>(b, side ? OF(m_scene) : 0) != nullptr;
     if (!scene && (op.kind == OP_STATEICONS || op.kind == OP_ACTIONICONS || op.kind == OP_INITDOWN))
         return "no scene";
+    // (Render without a scene on the network screen: both draw the null scene.)
+    if (op.kind == OP_RENDER && !scene && !(At<uint32_t>(b, side ? OF(m_flags) : 0xC) & INTERFACE_MEMBERS) && (g_w.role & 7) != 7)
+        return "the network screen without a scene";
     if (op.kind == OP_HIGHLIGHT && g_w.memberCount > 6)
         return "a squad of more than six highlighted";
     // (Init loading the model where no directory has it: the original keeps the model, the port releases it.)
@@ -537,6 +563,22 @@ void Run(int side, const S_Op &op)
         g_time += uint32_t(op.a);
         Log("time %u", g_time);
         break;
+    case OP_RENDEROVERLAY:
+        side ? port->RenderOverlay() : OriginalAt<T_Void>(0x0049b9b0)(orig);
+        break;
+    case OP_RENDER:
+        side ? port->Render() : OriginalAt<T_Void>(0x0049b9f0)(orig);
+        break;
+    case OP_OUTLINE:
+        side ? port->DrawPickOutline() : OriginalAt<T_Void>(0x0049e260)(orig);
+        break;
+    case W_PANELS:
+        // (The panels' fields drawn again: their frames shown or hidden, the menus open, ...)
+        g_rng.seed(uint32_t(op.a));
+        RandomPanels();
+        SetPanelFields(side);
+        Log("panels %d", op.a);
+        break;
     case OP_FIELDS: {
         // (The test's: the flags, the picks and the forced flags as the other parts leave them.)
         uint8_t *b = side ? reinterpret_cast<uint8_t *>(g_port) : g_orig;
@@ -559,6 +601,7 @@ void Run(int side, const S_Op &op)
 }
 
 bool g_squad;   // the squad case (75b) or the life cycle (75a)
+bool g_draw;    // the drawing case (75c)
 S_Op RandomOp()
 {
     static const int SQUAD[] = {OP_ADDMEMBER, OP_ADDMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBERS, OP_REMOVEFROMMAP,
@@ -567,7 +610,10 @@ S_Op RandomOp()
                                 OP_ROUNDRESULT, OP_COUNTDOWN, OP_SHOWMESSAGE, OP_SHOWTIMER, OP_SOUNDDIR, OP_SHOWSCORES, OP_RESPAWN,
                                 OP_ISRESPAWN, OP_FLASH, OP_OBJICON, OP_PHOTO, OP_REFRESHINV, OP_TIME, OP_TIME, OP_DONE, OP_FIELDS,
                                 W_WORLD};
-    S_Op op{g_squad ? Pick(SQUAD)
+    static const int DRAW[] = {OP_RENDEROVERLAY, OP_RENDER, OP_RENDER, OP_RENDER, OP_OUTLINE, OP_OUTLINE, OP_FIELDS, OP_FIELDS,
+                               W_PANELS, W_PANELS, W_WORLD, OP_DONE};
+    S_Op op{g_draw    ? Pick(DRAW)
+            : g_squad ? Pick(SQUAD)
                     : Pick({OP_INIT, OP_INIT, OP_DONE, OP_DONE, OP_RESET, OP_INITPANELS, OP_DONEPANELS, OP_INITDOWN, OP_CLEARPICKS,
                             OP_STATEICONS, OP_ACTIONICONS, OP_CLEARMOVE, OP_CLEARALL, OP_LOOKAT, OP_FIELDS, W_WORLD})};
     switch (op.kind) {
@@ -627,6 +673,9 @@ S_Op RandomOp()
     case OP_RESPAWN:
         op.a = P(0.5);
         break;
+    case W_PANELS:
+        op.a = int(U32() & 0x7FFFFFFF);
+        break;
     case OP_TIME:
         op.a = P(0.3) ? 300 : P(0.5) ? I(0, 299) : I(301, 5000);   // (300: the double click's limit exactly)
         break;
@@ -662,6 +711,8 @@ void TestScenarios()
     SetKinds();
     RandomWorld();
     RandomPanels();
+    int panelStart[PANEL_FIELD_COUNT];
+    std::copy(g_panelValues, g_panelValues + PANEL_FIELD_COUNT, panelStart);
     std::vector<S_Op> ops;
     if (P(0.3)) {
         // (The fields as an earlier life left them: Init sets them.)
@@ -702,6 +753,7 @@ void TestScenarios()
         g_clickSound = nullptr;
         *OriginalAt<void **>(0x0089bc8c) = nullptr;
         SetGlobals(side);
+        std::copy(panelStart, panelStart + PANEL_FIELD_COUNT, g_panelValues);
         SetPanelFields(side);
         s_lastMemberClick = g_w.lastClick;
         *OriginalAt<uint32_t *>(0x0089bc90) = g_w.lastClick;
@@ -792,9 +844,11 @@ void SetUp()
     g_findFrame = FindFrame;
     g_retPtr = RetPtr;
     g_retInt = RetInt;
+    g_retBool = RetBool;
     SetUpGfx();
     SetUpEngine();
     SetUpCameraModule();
+    SetUpDrawing();
     for (int side = 0; side < 2; ++side) {
         for (void *&v : g_commanderVt[side])
             v = reinterpret_cast<void *>(V_CommanderOther);
@@ -872,6 +926,11 @@ int main()
     for (g_round = 0; g_round < rounds; ++g_round)
         TestScenarios();
     g_squad = false;
+    g_case = "Draw";
+    g_draw = true;
+    for (g_round = 0; g_round < rounds; ++g_round)
+        TestScenarios();
+    g_draw = false;
     g_case = "Fixes";
     for (g_round = 0; g_round < 50; ++g_round)
         TestFixes();

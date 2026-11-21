@@ -4926,3 +4926,21 @@ particles and the surface marks. Files are served from memory.
   (mutate_interface_uib.py).
 - **Harness lessons (my mistakes):** the original's inventory Refresh ran for real (its header declaration has no
   address, so the generator left it: a crash); my edit scripts again met CRLF files and heredoc backslashes.
+
+## Human part 75c (the game interface's drawing, `interface.cpp` lines 614-788, 2026-11-21)
+
+- **The build:** part 75a's (`interface/build_ui.bat`, `ui_diff.cpp`'s "Draw" case).
+- **The world added:** the camera module's scripted view and the console's NO_GI (answers the world sets: a hook for
+  bools in `ui_common.inc`), the humans as actors (GetBoxCorners 0xDC through each side's vtable; the boxes' sizes),
+  the game scene's TransformPoints (the points moved off the screen and to its edges), the graph's SetTexture and
+  DrawPrimitives (every vertex logged but the unset specular); the panels' fields (their frames shown or hidden, the
+  menus open, the counts) drawn again between operations.
+- **The tests:** scenarios of Init then up to 14 of RenderOverlay, Render, DrawPickOutline, the fields (the panel's
+  position, the members, the picked and usable actors, the forced screens), the panels' fields drawn again, the world
+  changing, Done. Left out (both crash): Render on the network screen before Init (the null scene drawn).
+- **Results:** 10,038,264 checks (all part 75 cases), 0 failures; all 118 measured lines of the range run.
+- **Port bugs found:** none.
+- **Mutations:** 210 mutants, 25 not building, 169 of 185 killed, 16 not observable
+  (mutate_interface_uic.py).
+- **Harness lessons (my mistakes):** the panels' values drawn again on the original's side carried into the port's
+  start (restored per side now); the fakes' block first went outside the harness's namespace.
