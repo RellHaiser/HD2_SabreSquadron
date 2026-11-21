@@ -4866,3 +4866,38 @@ particles and the surface marks. Files are served from memory.
   block is not restored); the roll menu's actions written where its entries keep their texts (the vehicle pick-up never
   ran; I first swapped a struct that was right, the signals panel's, and put it back); OnLeftDrag's direction changed to
   the game's sum order from a misread of the asm (the test showed the original sums x first there; put back).
+
+## Human part 75a (the game interface's life cycle, `interface.cpp` lines 124-152 and 185-431, 2026-11-21)
+
+- **The build:** `interface/build_ui.bat` (`ui_diff.cpp`, including `interface.cpp`, with `ui_common.inc`: what the
+  part 75 tests share). The port's C_Interface and the original's (0x6B900 bytes, built by its constructor 0x0049a420)
+  are built once and restored before each scenario. Every method of the panels and the game's objects the file calls is
+  faked on both sides by generated loggers (`ui_fakes.inc`: the scratch generator reads each method's declaration and
+  address from the headers; the original's address redirected, the port's method defined); the engine's objects by
+  generated slot loggers (`ui_vt.inc`: the scene, the driver, cameras, lights, sounds, sectors, models, the sound
+  driver; each kind of frame its own vtable, I3D_frame's slots under the kit's). Answers drawn from the scenario's seed,
+  the method's name and its count of calls on the side. The model and sound caches are real on both sides
+  (`game/resource_cache.cpp` compiled in, -DINTERFACE_REAL_CACHES; the original's Init inlines the model cache's
+  OpenInto): the original's built by their constructors 0x006d5030 / 0x006d5370, two search directories each, emptied
+  before each side. The original's atexit (0x007e562e: its static constructors' destructor registration), sprintf
+  (0x007e6334: the unstarted CRT's locks) and dbgPrintf redirected.
+- **The world:** the interface's own scene (its primary sector and viewport inline fields), the model's frames found or
+  missing by name, the model's Open in either search directory or none, the driver's states, the play mode and game
+  role, the camera module (its methods through its vtable on the original's side), the squad commander; the panels'
+  fields the file reads inline (frames, the member panels' humans, the radar, flags and counts: `PANEL_FIELDS`, both
+  sides' offsets); the information screen's hints.
+- **The tests:** scenarios of Init (mostly first), then up to 14 of Init, Done, Reset, InitPanels, DonePanels,
+  InitDownPanel, ClearPicks, LoadStateIcons, LoadActionIcons, ClearMoveControls, ClearAllControls,
+  LookAtOnCommandMap, the fields as other parts leave them, the world changing. Left out (both crash): the icons and
+  the lower panel looked for without a scene. The port's fix, tested alone: Init where no directory has the model (the
+  original keeps the model it made, leaked; the port releases it); the destructor.
+- **Results:** 4,863,241 checks, 0 failures; all 208 measured lines of the range run.
+- **Port bugs found:** none.
+- **Original's weaknesses (the port's fixes, tested alone):** Init without the model kept (and leaked) it.
+- **Not tested here:** the file's helpers the later parts use (PlaceExplosiveTimer, IsSeatVehicle, Distance).
+- **Mutations:** 287 mutants, 38 not building, 244 of 249 killed, 5 equivalent
+  (mutate_interface_ui.py).
+- **Harness lessons (my mistakes):** slot fakes with the wrong number of arguments (the model's Open and EnumFrames:
+  declarations over two lines the generator skipped; the kit's one-argument catch-all left in the frames' slots) moved
+  the stack and showed as a clobbered register later; the debugging prints went to stderr, which the relaunched copy
+  loses; the inline fields of the panels (frames, the radar) found one crash at a time before I listed them all.

@@ -1,0 +1,587 @@
+// Human part 75a: the game interface's life cycle (game/interface.cpp lines 119-431: the file's helpers, C_Interface's
+// Init, Done, Reset, InitPanels, DonePanels, InitDownPanel, ClearPicks, LoadStateIcons, LoadActionIcons) against the
+// original's (0x0049a940, 0x0049b1b0, 0x0049f5e0, 0x0049b280, 0x0049b490, 0x0049b5e0, 0x0049b610, 0x0049b620,
+// 0x0049b730; the helpers 0x0049c1a0, 0x0049c1d0, 0x004bf210). MinGW; build_ui.bat; runs ui_diff.exe ("ui_diff: N
+// checks, 0 failures"). interface.cpp is compiled into this file; ui_common.inc builds both interfaces and fakes the
+// panels, the game's objects and the engine's (see there). Scenarios: from the interface's pristine state (or set up
+// by Init), operations of the life cycle in any order, the world changing between them (the model's frames found or
+// not, the scene made or not, the viewport, the play mode); the logs (every call out, the interface's fields after
+// each operation) and the arena compared.
+// HD2_UI_ROUNDS: scenarios (default 6,000; HD2_UI_QUICK: 2,000); HD2_UI_CASE: one case only; HD2_INTERFACE_ULPS,
+// HD2_INTERFACE_SHOW, HD2_INTERFACE_FIRST_CHANCE: the kit's.
+#include <windows.h>
+
+#include <algorithm>
+#include <climits>
+#include <cmath>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <random>
+#include <string>
+#include <type_traits>
+#include <vector>
+
+#include <mmsystem.h>
+// (The interface's clock: the harness's, deterministic.)
+DWORD HarnessTimeGetTime();
+#define timeGetTime HarnessTimeGetTime
+
+#define INTERFACE_FRAMES 128
+#define protected public
+#define private public
+#include "game/interface.cpp"
+#include "game/game_texts.h"
+#include "game/text_box.h"
+#include "ls3d/igraph.h"
+#undef private
+#undef protected
+
+#include "original_exe.h"
+
+#include "interface_kit.inc"
+#include "interface_gfx.inc"
+#include "ui_common.inc"
+
+// ---- the port's globals the interface reads ----
+uint32_t g_gameRoleValue;
+alignas(16) static uint8_t g_playModeBlock[2][0x40];
+static S_PlayMode *g_playModePointer = reinterpret_cast<S_PlayMode *>(g_playModeBlock[1]);
+S_PlayMode *&g_playMode = g_playModePointer;
+
+namespace H {
+
+uint32_t g_seed;
+template <class T> void Put(void *b, uint32_t o, T v) { std::memcpy(static_cast<uint8_t *>(b) + o, &v, sizeof v); }
+
+// ---- the world ----
+struct S_World {
+    uint32_t missing;      // the model's frames missing: a frame name's hash below it (of 2^32)
+    int viewport[4];
+    int playMode;
+    uint32_t role;
+    int modelOpen;   // the model's Open succeeds in this search directory (1, 2; 0: none)
+    uint32_t state15, state19;   // the driver's states
+    int hints;                   // the information screen's hints at the start
+    bool noScene;
+};
+S_World g_w, g_wStart;
+I3D_frame *FindFrame(const char *name)
+{
+    const uint32_t h = Fnv(name, 0x1234567u);
+    if (h < g_w.missing)
+        return nullptr;
+    return FrameAt(F_POOL + int(h % uint32_t(FRAMES - F_POOL)));
+}
+bool RetInt(const char *name, int count, int &value)
+{
+    if (std::strcmp(name, "I3D_model::Open") == 0) {
+        value = count == g_w.modelOpen ? 0 : int(0x80004005);
+        return true;
+    }
+    return false;
+}
+void *RetPtr(const char *name, uint32_t)
+{
+    if (std::strcmp(name, "I3D_scene::GetPrimarySector") == 0)
+        return FrameAt(F_SECTOR);
+    return nullptr;
+}
+uint32_t &OrigRole() { return *OriginalAt<uint32_t *>(0x00982100); }
+void SetGlobals(int side)
+{
+    g_gameRole = g_w.role;
+    g_noScene = g_w.noScene;
+    g_states[0x15] = g_w.state15;
+    g_states[0x19] = g_w.state19;
+    OrigRole() = g_w.role;
+    for (int s = 0; s < 2; ++s)
+        std::memcpy(g_playModeBlock[s] + offsetof(S_PlayMode, mode), &g_w.playMode, 4);
+    *OriginalAt<void **>(0x008aea34) = g_playModeBlock[0];
+    *reinterpret_cast<void **>(g_uiScene) = g_bigSceneVt;
+    Put<void *>(g_uiScene, 0x1F8, FrameAt(F_SECTOR));
+    std::memcpy(g_uiScene + 0x224, g_w.viewport, 16);
+    std::memcpy(g_uiScene + 0x244, g_w.viewport, 16);
+    (void)side;
+}
+void RandomWorld()
+{
+    g_w.missing = P(0.5) ? 0u : P(0.5) ? U32() / 4 : U32();
+    const bool whole = P(0.6);
+    g_w.viewport[0] = whole ? 0 : Pick({0, 1, 5});
+    g_w.viewport[1] = whole ? 0 : Pick({0, 2});
+    g_w.viewport[2] = whole ? 1024 : Pick({1024, 800, 640});
+    g_w.viewport[3] = whole ? 768 : Pick({768, 600, 480});
+    g_w.playMode = P(0.5) ? int(PLAY_MODE_CARNAGE) : I(0, 4);
+    g_w.role = P(0.7) ? 7u : Pick({0u, 1u, 3u, 6u});
+    g_w.noScene = P(0.05);
+    g_w.modelOpen = P(0.85) ? 1 : P(0.5) ? 2 : 0;
+    g_w.state15 = P(0.5) ? 0u : Pick({1u, 2u, 7u});
+    g_w.state19 = P(0.5) ? 0u : Pick({1u, 3u});
+    g_w.hints = P(0.5) ? 0 : I(1, 4);
+}
+
+// ---- the original's game, model and sound caches, debug prints ----
+alignas(16) uint8_t g_origGame[0x200], g_portGame[0x800];
+S_Fake g_gameScene{g_sceneVt};
+void *__cdecl O_GetGame() { return g_origGame; }
+HRESULT CacheOpen(const char *which, const void *object, const char *name, uint32_t flags)
+{
+    const bool ok = (RetWord(which) & 7) != 0;
+    Log("%s OpenInto %s %s %x -> %d", which, Name(object).c_str(), name, flags, ok);
+    return ok ? I3D_OK : HRESULT(0x80004005);
+}
+HRESULT __attribute__((thiscall)) O_ModelOpen(void *, void *object, const char *name, uint32_t flags, void *, void *, int)
+{
+    return CacheOpen("models", object, name, flags);
+}
+HRESULT __attribute__((thiscall)) O_SoundOpen(void *, void *object, const char *name, uint32_t flags, void *, void *, int)
+{
+    return CacheOpen("sounds", object, name, flags);
+}
+void __cdecl O_DbgPrintf(const char *format, ...) { Log("dbgPrintf %s", format); }
+// (The original's atexit: its static constructors register their destructors with the unstarted CRT; not kept.)
+int __cdecl O_Atexit(void (*)()) { return 0; }
+// (The original's sprintf takes the unstarted CRT's locks; the interface formats integers only: "%02d".)
+int __cdecl O_Sprintf(char *buffer, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    const int n = std::vsprintf(buffer, format, args);
+    va_end(args);
+    return n;
+}
+
+std::string PartName(const void *p)
+{
+    const std::string g = GfxName(p);
+    if (!g.empty())
+        return g;
+    const std::string m = MemberName(p);
+    if (!m.empty())
+        return m;
+    if (HumIndex(p) >= 0)
+        return "h" + std::to_string(HumIndex(p));
+    if (p == &g_sndDriver)
+        return "snddriver";
+    if (p == &g_gameScene)
+        return "gscene";
+    if (p == g_origGame || p == g_portGame)
+        return "game";
+    if (p == g_playModeBlock[0] || p == g_playModeBlock[1])
+        return "playMode";
+    if (p == g_w.viewport)
+        return "viewport";
+    if (p == g_uiScene)
+        return "uiscene";
+    if (!CommonName(p).empty())
+        return CommonName(p);
+    for (const void *b : g_boxes)
+        if (b && p == b)
+            return BoxName(p);
+    return "";
+}
+
+}  // namespace H
+
+C_game *GetGame() { return reinterpret_cast<C_game *>(H::g_portGame); }
+
+namespace H {
+
+// ---- each side's interface: its fields snapped ----
+template <class T> T At(const void *b, uint32_t o)
+{
+    T v;
+    std::memcpy(&v, static_cast<const uint8_t *>(b) + o, sizeof v);
+    return v;
+}
+std::string Snap(int side)
+{
+    const uint8_t *b = side ? reinterpret_cast<const uint8_t *>(g_port) : g_orig;
+    auto o = [side](uint32_t orig, uint32_t port) { return side ? port : orig; };
+    char text[400];
+    std::snprintf(text, sizeof text, "ui scene %s camera %s model %s flags %x pick %d %d saved %x forced %d %d down %s picked %s usable %s click %s carnage %s",
+                  Name(At<void *>(b, o(0, OF(m_scene)))).c_str(), Name(At<void *>(b, o(4, OF(m_camera)))).c_str(),
+                  Name(At<void *>(b, o(8, OF(m_model)))).c_str(), At<uint32_t>(b, o(0xC, OF(m_flags))), At<int>(b, o(0x10, OF(m_pickTime))),
+                  At<int>(b, o(0x14, OF(m_pickMisses))), At<uint32_t>(b, o(0x18, OF(m_savedFlags))), At<uint8_t>(b, o(0x20, OF(m_infoForced))),
+                  At<uint8_t>(b, o(0x21, OF(m_respawnForced))), Name(At<void *>(b, o(0x24, OF(m_downPanel)))).c_str(),
+                  Name(At<void *>(b, o(0x6B8F8, OF(m_pickedActor)))).c_str(), Name(At<void *>(b, o(0x6B8FC, OF(m_usableActor)))).c_str(),
+                  Name(side ? static_cast<void *>(g_clickSound) : *OriginalAt<void **>(0x0089bc8c)).c_str(),
+                  Name(At<void *>(b, o(0x6B6B0, OF(m_carnage) + offsetof(C_CarnageStats, m_frame)))).c_str());
+    std::string s = text;
+    s += " hints " + std::to_string(side ? int(g_port->m_info.m_hints.size())
+                                         : int((At<uint8_t *>(b, 0x6B3A0 + 8) - At<uint8_t *>(b, 0x6B3A0 + 4)) / 4));
+    for (const auto &icons : {std::make_pair(o(0x6B6D0, OF(m_stateIcons)), 20), std::make_pair(o(0x6B720, OF(m_stateIcons2)), 40),
+                              std::make_pair(o(0x6B7C0, OF(m_actionIcons)), 39)}) {
+        s += " |";
+        for (int k = 0; k < icons.second; ++k)
+            s += " " + Name(At<void *>(b, icons.first + 4 * k));
+    }
+    return s;
+}
+
+// The panels' fields the interface reads inline, as their (faked) Inits leave them: the frames of the carnage panel,
+// the inventory, the information screen and the big message (their on flags the frames'), the message log's mode.
+void PanelFields(int side)
+{
+    void *b = side ? static_cast<void *>(g_port) : g_orig;
+    const struct {
+        uint32_t orig, port;
+        int frame;
+    } frames[] = {
+        {0x6B6B0, OF(m_carnage) + uint32_t(offsetof(C_CarnageStats, m_frame)), 0},
+        {0x30 + 4, OF(m_inventory) + uint32_t(offsetof(C_InventoryScreen, m_frame)), 1},
+        {0x6B3A0 + 0x14, OF(m_info) + uint32_t(offsetof(C_InfoScreen, m_frame)), 2},
+        {0x6B550, OF(m_bigMessage) + uint32_t(offsetof(C_BigMessage, m_frame)), 3},
+    };
+    for (const auto &f : frames)
+        Put<void *>(b, side ? f.port : f.orig, FrameAt(F_POOL + int((g_seed >> (4 * f.frame)) % 20)));
+    Put<int>(b, side ? OF(m_messages) + uint32_t(offsetof(C_MessageLog, m_mode)) : 0x2F90 + 0x10, int(g_seed >> 20) % 3);
+}
+
+// ---- the scenarios ----
+enum {
+    OP_INIT, OP_DONE, OP_RESET, OP_INITPANELS, OP_DONEPANELS, OP_INITDOWN, OP_CLEARPICKS, OP_STATEICONS, OP_ACTIONICONS,
+    OP_CLEARMOVE, OP_CLEARALL, OP_LOOKAT, OP_FIELDS,
+    W_WORLD = 100,
+};
+struct S_Op {
+    int kind;
+    int a = 0, b = 0;
+};
+using T_Bool = bool(__attribute__((thiscall)) *)(void *);
+using T_Void = void(__attribute__((thiscall)) *)(void *);
+using T_Arrays = void(__stdcall *)(float *, float *);
+using T_Ptr = void(__stdcall *)(void *);
+using T_Ctor = void *(__attribute__((thiscall)) *)(void *);
+
+// Both sides crash: the model's frames looked for without a scene (before Init, after Done).
+const char *Skip(int side, const S_Op &op)
+{
+    const uint8_t *b = side ? reinterpret_cast<const uint8_t *>(g_port) : g_orig;
+    const bool scene = At<void *>(b, side ? OF(m_scene) : 0) != nullptr;
+    if (!scene && (op.kind == OP_STATEICONS || op.kind == OP_ACTIONICONS || op.kind == OP_INITDOWN))
+        return "no scene";
+    // (Init loading the model where no directory has it: the original keeps the model, the port releases it.)
+    const uint32_t flags = At<uint32_t>(b, side ? OF(m_flags) : 0xC);
+    // (Reset's Init always runs: its Done clears the flags. A cached model is copied, whatever the directories.)
+    const bool opens = op.kind == OP_RESET || (op.kind == OP_INIT && !(flags & INTERFACE_ACTIVE));
+    const bool cached = side ? g_modelCache.NumEntries() > 0 : *OriginalAt<uint32_t *>(0x008aedbc) != *OriginalAt<uint32_t *>(0x008aedb8);
+    if (opens && !g_w.noScene && g_w.modelOpen == 0 && !cached)
+        return "Init without the model";
+    return nullptr;
+}
+
+void Run(int side, const S_Op &op)
+{
+    C_Interface *port = g_port;
+    uint8_t *orig = g_orig;
+    if (const char *why = Skip(side, op)) {
+        Log("skipped: %s", why);
+        return;
+    }
+    switch (op.kind) {
+    case OP_INIT:
+        Log("Init -> %d", side ? port->Init() : OriginalAt<T_Bool>(0x0049a940)(orig));
+        break;
+    case OP_DONE:
+        Log("Done -> %d", side ? port->Done() : OriginalAt<T_Bool>(0x0049b1b0)(orig));
+        break;
+    case OP_RESET:
+        side ? port->Reset() : OriginalAt<T_Void>(0x0049f5e0)(orig);
+        break;
+    case OP_INITPANELS:
+        Log("InitPanels -> %d", side ? port->InitPanels() : OriginalAt<T_Bool>(0x0049b280)(orig));
+        break;
+    case OP_DONEPANELS:
+        side ? port->DonePanels() : OriginalAt<T_Void>(0x0049b490)(orig);
+        break;
+    case OP_INITDOWN:
+        Log("InitDownPanel -> %d", side ? port->InitDownPanel() : OriginalAt<T_Bool>(0x0049b5e0)(orig));
+        break;
+    case OP_CLEARPICKS:
+        side ? port->ClearPicks() : OriginalAt<T_Void>(0x0049b610)(orig);
+        break;
+    case OP_STATEICONS:
+        side ? port->LoadStateIcons() : OriginalAt<T_Void>(0x0049b620)(orig);
+        break;
+    case OP_ACTIONICONS:
+        side ? port->LoadActionIcons() : OriginalAt<T_Void>(0x0049b730)(orig);
+        break;
+    case OP_CLEARMOVE:
+    case OP_CLEARALL: {
+        float held[128], pressed[128];
+        for (int k = 0; k < 128; ++k) {
+            held[k] = float((k * 7 + op.a) % 5) - 1.0f;
+            pressed[k] = float((k * 3 + op.a) % 4) * 0.5f;
+        }
+        if (side)
+            op.kind == OP_CLEARMOVE ? ClearMoveControls(held, pressed) : ClearAllControls(held, pressed);
+        else
+            OriginalAt<T_Arrays>(op.kind == OP_CLEARMOVE ? 0x0049c1a0 : 0x0049c1d0)(held, pressed);
+        uint32_t h = 2166136261u;
+        for (int k = 0; k < 128; ++k) {
+            uint32_t a, b;
+            std::memcpy(&a, &held[k], 4);
+            std::memcpy(&b, &pressed[k], 4);
+            h = (h ^ a) * 16777619u ^ b;
+        }
+        Log("arrays after %08x", h);
+        break;
+    }
+    case OP_LOOKAT:
+        side ? LookAtOnCommandMap(static_cast<C_Human *>(Hum(op.a))) : OriginalAt<T_Ptr>(0x004bf210)(Hum(op.a));
+        break;
+    case OP_FIELDS: {
+        // (The test's: the flags, the picks and the forced flags as the other parts leave them.)
+        uint8_t *b = side ? reinterpret_cast<uint8_t *>(g_port) : g_orig;
+        const uint32_t flags = uint32_t(op.a) & 0x3FF;
+        std::memcpy(b + (side ? OF(m_flags) : 0xC), &flags, 4);
+        void *picked = Hum(op.b % 9 - 1), *usable = Hum(op.b / 9 % 9 - 1);
+        std::memcpy(b + (side ? OF(m_pickedActor) : 0x6B8F8), &picked, 4);
+        std::memcpy(b + (side ? OF(m_usableActor) : 0x6B8FC), &usable, 4);
+        const int pickTime = op.b % 7 * 20, misses = op.b % 5;
+        const uint32_t saved = uint32_t(op.a) >> 3 & 0x7F;
+        std::memcpy(b + (side ? OF(m_pickTime) : 0x10), &pickTime, 4);
+        std::memcpy(b + (side ? OF(m_pickMisses) : 0x14), &misses, 4);
+        std::memcpy(b + (side ? OF(m_savedFlags) : 0x18), &saved, 4);
+        b[side ? OF(m_infoForced) : 0x20] = uint8_t(op.b & 1);
+        b[side ? OF(m_respawnForced) : 0x21] = uint8_t(op.b >> 1 & 1);
+        Log("fields %x %d", flags, op.b);
+        break;
+    }
+    }
+}
+
+S_Op RandomOp()
+{
+    S_Op op{Pick({OP_INIT, OP_INIT, OP_DONE, OP_DONE, OP_RESET, OP_INITPANELS, OP_DONEPANELS, OP_INITDOWN, OP_CLEARPICKS, OP_STATEICONS,
+                  OP_ACTIONICONS, OP_CLEARMOVE, OP_CLEARALL, OP_LOOKAT, OP_FIELDS, W_WORLD})};
+    switch (op.kind) {
+    case OP_CLEARMOVE:
+    case OP_CLEARALL:
+        op.a = I(0, 100);
+        break;
+    case OP_LOOKAT:
+        op.a = P(0.9) ? I(0, HUMANS - 1) : -1;
+        break;
+    case OP_FIELDS:
+        op.a = int(U32() & 0x3FF);
+        op.b = I(0, 80);
+        break;
+    case W_WORLD:
+        op.a = int(U32() & 0x7FFFFFFF);
+        break;
+    }
+    return op;
+}
+
+struct S_Run {
+    std::vector<std::string> log;
+    S_Arena arena;
+    S_Gfx gfx;
+};
+S_Run g_runs[2];
+void TestScenarios()
+{
+    g_seed = U32();
+    g_retSeed = U32();
+    for (int i = 0; i < FRAMES; ++i)
+        RandomFrame(i);
+    RandomGfx();
+    // (Every face group with a material: the icons' textures are read unchecked, on both sides.)
+    for (int i = 0; i < FRAMES; ++i)
+        for (int g = 0; g < GROUPS; ++g)
+            if (!At<void *>(g_gfx.groups[i][g], 4))
+                *reinterpret_cast<void **>(g_gfx.groups[i][g] + 4) = g_gfx.materials[g];
+    SetKinds();
+    RandomWorld();
+    RandomPanels();
+    std::vector<S_Op> ops;
+    if (P(0.3)) {
+        // (The fields as an earlier life left them: Init sets them.)
+        S_Op fields{OP_FIELDS};
+        fields.a = int(U32() & 0x3FE);
+        fields.b = I(0, 80);
+        ops.push_back(fields);
+    }
+    if (P(0.8))
+        ops.push_back(S_Op{OP_INIT});
+    for (int n = I(1, 14); n > 0; --n)
+        ops.push_back(RandomOp());
+    std::memcpy(&g_arenaStart, &g_arena, sizeof g_arena);
+    std::memcpy(&g_gfxStart, &g_gfx, sizeof g_gfx);
+    g_wStart = g_w;
+    for (int side = 0; side < 2; ++side) {
+        g_side = side;
+        std::memcpy(&g_arena, &g_arenaStart, sizeof g_arena);
+        std::memcpy(&g_gfx, &g_gfxStart, sizeof g_gfx);
+        g_w = g_wStart;
+        g_log.clear();
+        g_boxes.clear();
+        g_retCounts.clear();
+        std::srand(g_seed);
+        std::memcpy(g_orig, g_origPristine, ORIG_SIZE);
+        std::memcpy(static_cast<void *>(g_port), g_portPristine, sizeof(C_Interface));
+        // (The caches emptied: what an earlier run left; not logged.)
+        if (side) {
+            g_modelCache.Clear();
+            g_soundCache.Clear();
+        } else {
+            using T_Clear = void(__attribute__((thiscall)) *)(void *);
+            for (uint32_t cache : {0x008aeda0u, 0x008aed64u})
+                reinterpret_cast<T_Clear>((*OriginalAt<void ***>(cache))[0x10 / 4])(OriginalAt<void *>(cache));
+        }
+        g_models = g_sounds = 0;
+        g_log.clear();
+        g_clickSound = nullptr;
+        *OriginalAt<void **>(0x0089bc8c) = nullptr;
+        SetGlobals(side);
+        SetPanelFields(side);
+        if (side)
+            g_port->m_info.m_hints.assign(size_t(g_w.hints), 0x1C80);
+        else {
+            int *hints = g_w.hints ? static_cast<int *>(std::malloc(4 * size_t(g_w.hints))) : nullptr;
+            for (int k = 0; k < g_w.hints; ++k)
+                hints[k] = 0x1C80;
+            Put<int *>(g_orig, 0x6B3A0 + 4, hints);
+            Put<int *>(g_orig, 0x6B3A0 + 8, hints ? hints + g_w.hints : nullptr);
+            Put<int *>(g_orig, 0x6B3A0 + 0xC, hints ? hints + g_w.hints : nullptr);
+        }
+        for (const S_Op &op : ops) {
+            Log("-- %d %d %d", op.kind, op.a, op.b);
+            if (op.kind == W_WORLD) {
+                std::mt19937 rng(uint32_t(op.a));
+                g_rng.seed(uint32_t(op.a));
+                RandomWorld();
+                SetGlobals(side);
+            } else
+                Run(side, op);
+            g_log.push_back(Snap(side));
+        }
+        g_runs[side].log.swap(g_log);
+        std::memcpy(&g_runs[side].arena, &g_arena, sizeof g_arena);
+        std::memcpy(&g_runs[side].gfx, &g_gfx, sizeof g_gfx);
+    }
+    // (+0xDC, m_scaleW: the inline SetScale's stack word; put back from the start on both sides.)
+    for (int i = 0; i < FRAMES; ++i)
+        for (S_Run &r : g_runs)
+            std::memcpy(r.arena.frames[i] + 0xDC, g_arenaStart.frames[i] + 0xDC, 4);
+    CompareLogs(g_runs[0].log, g_runs[1].log);
+    CompareArenas(g_runs[0].arena, g_runs[1].arena);
+    ++checks;
+    if (std::memcmp(&g_runs[0].gfx, &g_runs[1].gfx, sizeof g_gfx) != 0)
+        CHECK(false, "the graphics differ");
+    ShowLogs(g_runs[0].log, g_runs[1].log);
+}
+
+// ---- the port's fix, alone: Init without the model (the original kept the model and leaked it; the port releases
+// it); and the destructor (the game's one interface lives to the end) ----
+void TestFixes()
+{
+    g_side = 1;
+    for (int i = 0; i < FRAMES; ++i)
+        RandomFrame(i);
+    RandomGfx();
+    SetKinds();
+    RandomWorld();
+    g_w.noScene = false;
+    g_w.modelOpen = 0;
+    SetGlobals(1);
+    g_modelCache.Clear();
+    g_models = g_sounds = 0;
+    std::memcpy(static_cast<void *>(g_port), g_portPristine, sizeof(C_Interface));
+    g_log.clear();
+    g_retCounts.clear();
+    CHECK(!g_port->Init(), "Init without the model: failed");
+    CHECK(g_port->m_scene == nullptr && g_port->m_model == nullptr && g_port->m_flags == 0, "Init without the model: nothing kept");
+    const std::string model = Name(FrameAt(F_MODEL)) + " I3D_frame Release";
+    CHECK(std::count(g_log.begin(), g_log.end(), model) + std::count(g_log.begin(), g_log.end(), Name(FrameAt(F_MODEL)) + " Release") == 1,
+          "Init without the model: the model released");
+    CHECK(std::count(g_log.begin(), g_log.end(), std::string("uiscene I3D_scene Release")) == 1 ||
+              std::count(g_log.begin(), g_log.end(), std::string("uiscene other slot")) == 1,
+          "Init without the model: the scene released");
+    // (The destructor: a second interface made and destroyed.)
+    auto *other = new (_aligned_malloc(sizeof(C_Interface), 16)) C_Interface();
+    other->~C_Interface();
+    _aligned_free(other);
+    CHECK(true, "destructor");
+}
+
+void SetUp()
+{
+    g_partName = PartName;
+    g_findFrame = FindFrame;
+    g_retPtr = RetPtr;
+    g_retInt = RetInt;
+    SetUpGfx();
+    SetUpEngine();
+    SetUpCameraModule();
+    Put<void *>(g_origGame, 0x18, &g_gameScene);
+    Put<void *>(g_portGame, offsetof(C_game, m_scene), &g_gameScene);
+    const struct {
+        uint32_t at;
+        const void *to;
+    } redirects[] = {
+        IFAKE_REDIRECTS
+        {0x006987d0, reinterpret_cast<const void *>(O_GetGame)},
+        {0x007e531a, reinterpret_cast<const void *>(O_ISndGetDriver)},
+        {0x007e52d8, reinterpret_cast<const void *>(O_DbgPrintf)},
+        {0x00464e90, reinterpret_cast<const void *>(O_GetCameraModule)},
+        {0x004563e0, reinterpret_cast<const void *>(O_GetSquadCommander)},
+        {0x00720f50, reinterpret_cast<const void *>(O_GetCheatValue)},
+        {0x007e562e, reinterpret_cast<const void *>(O_Atexit)},
+        {0x007e6334, reinterpret_cast<const void *>(O_Sprintf)},
+    };
+    for (const auto &r : redirects)
+        RedirectOriginal(r.at, r.to);
+    // The model and sound caches (real on both sides: the original's Init inlines the model cache's OpenInto): the
+    // original's built by its static initialisers' constructors; two search directories each.
+    OriginalAt<void (*)()>(0x006d5030)();
+    OriginalAt<void (*)()>(0x006d5370)();
+    using T_AddDir = void(__attribute__((thiscall)) *)(void *, const char *);
+    for (const char *dir : {"data\\", "maps\\"}) {
+        for (uint32_t cache : {0x008aeda0u, 0x008aed64u})
+            reinterpret_cast<T_AddDir>((*OriginalAt<void ***>(cache))[0x18 / 4])(OriginalAt<void *>(cache), dir);
+        g_modelCache.AddDir(dir);
+        g_soundCache.AddDir(dir);
+    }
+    // The interfaces, built once: the original's by its constructor, the port's by its own.
+    g_orig = static_cast<uint8_t *>(std::calloc(1, ORIG_SIZE));
+    OriginalAt<T_Ctor>(0x0049a420)(g_orig);
+    g_origPristine = static_cast<uint8_t *>(std::malloc(ORIG_SIZE));
+    std::memcpy(g_origPristine, g_orig, ORIG_SIZE);
+    g_port = new (_aligned_malloc(sizeof(C_Interface), 16)) C_Interface();
+    g_portPristine = static_cast<uint8_t *>(std::malloc(sizeof(C_Interface)));
+    std::memcpy(g_portPristine, static_cast<void *>(g_port), sizeof(C_Interface));
+    g_log.clear();
+    g_boxes.clear();
+}
+
+}  // namespace H
+
+int main()
+{
+    using namespace H;
+    int exitCode = 0;
+    if (!StartKit("ui_diff", exitCode))
+        return exitCode;
+    SetUp();
+    int rounds = std::getenv("HD2_UI_QUICK") ? 2000 : 6000;
+    if (const char *r = std::getenv("HD2_UI_ROUNDS"))
+        rounds = std::atoi(r);
+    g_case = "Life";
+    for (g_round = 0; g_round < rounds; ++g_round)
+        TestScenarios();
+    g_case = "Fixes";
+    for (g_round = 0; g_round < 50; ++g_round)
+        TestFixes();
+    std::printf("ui_diff: %d checks, %d failures\n", checks, failures);
+    // (The port's caches emptied here: their static destructors would release into the fakes after the log is gone.)
+    g_modelCache.Clear();
+    g_soundCache.Clear();
+    return failures != 0;
+}

@@ -8,7 +8,9 @@ alignas(16) unsigned char g_texts[0x100];
 alignas(16) unsigned char g_actorsModule[0x400];
 alignas(16) unsigned char g_netGame[0x8000];
 alignas(16) unsigned char g_scriptModule[0x1000];
+#ifndef INTERFACE_REAL_CACHES   // (part 75 compiles the real caches: game/resource_cache.cpp)
 alignas(16) unsigned char g_modelCache[0x400];
+#endif
 alignas(16) unsigned char g_controls[0x400];
 alignas(16) unsigned char g_collisionWorld[0x430];
 alignas(16) unsigned char g_itemsModule[0x1000];
