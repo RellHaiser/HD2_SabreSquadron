@@ -644,7 +644,7 @@ void C_Team::OnMemberDied(C_Human *human)               // 0x0045e790 (DS 0x0047
 #endif
     if (human == GetCommandedMember())
         SetCommandedIndex(-1);
-    GetGame()->Print("%s is dead !!!", human->GetFullName());
+    GetGame()->PrintColored(S_vector(255.0f, 0.0f, 0.0f), "%s is dead !!!", human->GetFullName());
     // Allied NPCs do not keep the mission going.
     for (int i = GetMemberCount(); i-- > 0;) {
         const C_Human *member = m_members[i];

@@ -5056,3 +5056,34 @@ particles and the surface marks. Files are served from memory.
   table files the original misreads into writes outside its table looked like port crashes until simulated
   (fpvsim.py); start fields the game cannot reach (a model with type -1, a flash time without a flash) crashed both
   sides; the body named by offset (g++ lays C_Human out otherwise); heredoc backslashes once more.
+
+## Human part 77a (the squad, the co-op team and the enemy records, `team.cpp` lines 38-906 and 1120-1134, 2026-11-21)
+
+- **The build:** `team/build_team.bat`, `team_diff.cpp` (team.cpp compiled into it; the interface kit's frames,
+  `team_fakes.inc` for the game's methods), the chunks real on both sides over data files in memory; suite `human.team`.
+- **The world:** soldiers (type, model and its place, health, vehicle and seat, role, fade, net and sight ids, the
+  enemies each sees, the controller and its type and combat order, environment flags: the original's and the port's
+  offsets written per side), vehicles (seat flags, the car's +0x5E0), the actors module's actors (some null), the
+  mission's objectives (the original inlines AreObjectivesDecided), the game's role, the difficulty, the co-op flag, the
+  models' collision volumes (EnumFrames), the answers of the faked methods (unconscious and spectating now and then).
+- **The tests:** 6,000 scenarios: both sides' C_Team and C_CoopTeam built (the original's by its constructors), up to
+  six members added, up to 20 operations (every method, the records' Add / Remove / tactical view, saves followed by the
+  next module's chunk and compared byte by byte, loads from files the world builds: members' ids, names, unknown chunks,
+  the wrong chunk, empty files, the next module's chunk after; where the reader is left logged), crafted sequences
+  (an enemy seen twice / lost / forgotten, the selected member apart from the active one, the commanded member's death,
+  network games), the world changing between them, both destroyed; "Fixes" alone. Left out: removing the active member
+  (the port's fix), what reads an index left past the members by a removal (both read past), a volume of an empty
+  list, switching without an active member.
+- **Results:** 807,876 checks, 0 failures; every line of the part's ranges (487 of 487); a full run about 2 s.
+- **Port bugs found and fixed (on main; port mistakes):** OnMemberDied printed "%s is dead !!!" with Print; the
+  original uses PrintColored in red (255, 0, 0) (both empty in the release build).
+- **Original's weaknesses (the port's fixes, tested alone):** RemoveMember of the active member showed the member moved
+  into its slot and read past the members when it was the last one. Not fixed by the port: C_TeamBase::LoadGame reads
+  the name into a buffer it does not end (the game's saves always end it).
+- **Mutations:** 716 mutants, 48 not building, 624 of 668 killed, 44 equivalent or out of reach (mutate_team.py).
+- **Harness lessons (my mistakes):** reseeding the shared scenario generator inside an operation (a world change, a
+  load's file) made the scenarios repeat a 65-round cycle; the generator is now kept around those reseeds here and in
+  part 76's fpv_diff.cpp (still 0 failures and every line; a targeted case added for the belt grenade's throw ending
+  with the weapon put away, which the cycle had happened to reach). The interface harnesses of parts 64-75 reseed the
+  same way (a separate task). Also: _exit skipped gcov's counts; a skip of every index past the members hid the
+  selected member's removal; the generated IsUnconscious was mostly true, so the records were never lost.

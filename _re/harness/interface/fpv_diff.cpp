@@ -1462,7 +1462,17 @@ void Target(std::vector<S_Op> &ops)
     // (The table loaded first: Init does not run here.)
     ops.push_back(S_Op{OP_LOADTABLE});
     f.pose = FPV_POSE_RAISED;
-    switch (I(0, 4)) {
+    switch (I(0, 5)) {
+    case 5: {   // a belt grenade's throw ends (the weapon put away or not)
+        f.pose = FPV_POSE_GRENADE;
+        f.event = FPV_EVENT_FIRE;
+        f.aim = false;
+        g_w.putAway[f.human] = P(0.5);
+        S_Op op{OP_UPDATEANIM};
+        op.a = 1000;
+        ops.push_back(op);
+        break;
+    }
     case 0: {   // the drops: a start and the update that ends it exactly, or any
         static const struct {
             int pose;
@@ -1594,8 +1604,11 @@ void TestScenarios()
         for (const S_Op &op : ops) {
             Log("-- %d %d %d %d %s", op.kind, op.a, op.b, op.c, FloatText(op.f).c_str());
             if (op.kind == W_WORLD) {
+                // (The world's own draws: the shared generator kept, else the scenarios after it repeat a cycle.)
+                const std::mt19937 kept = g_rng;
                 g_rng.seed(uint32_t(op.a));
                 RandomWorld();
+                g_rng = kept;
                 SetWorld(side);
                 g_hudBlock[0] = g_w.hudShown;
                 **OriginalAt<uint8_t **>(0x008aea18) = g_w.hudShown;
