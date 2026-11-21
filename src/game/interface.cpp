@@ -508,8 +508,9 @@ void C_Interface::ShowSquadMember(C_Human *human)
         m_members[0].GetFrame()->SetOn(true);
         return;
     }
-    if (C_Human *selected = PlayerTeam()->GetSelectedMember()) {
-        m_members[0].SetHuman(selected);
+    // (The selected member asked again for the panel, as the original does.)
+    if (PlayerTeam()->GetSelectedMember()) {
+        m_members[0].SetHuman(PlayerTeam()->GetSelectedMember());
         m_members[0].GetFrame()->SetOn(true);
         PlaceExplosiveTimer(m_explosiveTimer, TIMER_POS);
         return;
@@ -520,23 +521,24 @@ void C_Interface::ShowSquadMember(C_Human *human)
 void C_Interface::HighlightMembers(C_Human *human, int group)
 {
     C_Team *team = PlayerTeam();
-    // Fix: the original went through all the members, past the six panels with a squad of more
-    // (the command map calls this every frame).
-    const int count = team->GetMemberCount() < MEMBER_PANELS ? team->GetMemberCount() : MEMBER_PANELS;
+    // (The member count asked again for each member, as the original does.) Fix: the original went
+    // through all the members, past the six panels with a squad of more (the command map calls
+    // this every frame).
+    auto more = [team](int i) { return i < team->GetMemberCount() && i < MEMBER_PANELS; };
     if (group == HIGHLIGHT_COMMANDED) {
         C_Human *commanded = team->GetCommandedMember();
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; more(i); ++i)
             m_members[i].SetSelected(team->GetMember(i) == commanded);
         return;
     }
     if (group == HIGHLIGHT_NONE) {
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; more(i); ++i)
             m_members[i].SetSelected(false);
         return;
     }
     std::vector<C_Human *> members;
     GetSquadCommander()->CollectGroup(members, group);
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; more(i); ++i) {
         C_Human *member = team->GetMember(i);
         bool inGroup = false;
         for (std::size_t j = members.size(); j-- > 0;) {

@@ -333,7 +333,9 @@ void RandomPanels()
         switch (PANEL_FIELDS[k].kind) {
         case PF_FRAME:
             // (Only the objectives' frame is ever missing: maps without objectives.)
-            g_panelValues[k] = std::strstr(PANEL_FIELDS[k].what, "objectives") && P(0.3) ? -1 : PANEL_FRAMES_FROM + I(0, 31);
+            g_panelValues[k] = (std::strstr(PANEL_FIELDS[k].what, "objectives") || std::strstr(PANEL_FIELDS[k].what, "m_map.")) && P(0.3)
+                                   ? -1
+                                   : PANEL_FRAMES_FROM + I(0, 31);
             break;
         case PF_HUMAN:
             g_panelValues[k] = P(0.3) ? -1 : I(0, HUMANS - 1);
@@ -398,6 +400,8 @@ int CheatValue(int index)
     return v;
 }
 int __attribute__((fastcall)) O_GetCheatValue(int index) { return CheatValue(index); }
+// (The inventory's Refresh: 0x004a26d0, no address in the header; the port's logs the same.)
+void __attribute__((thiscall)) O_InventoryRefresh(void *self) { Log("%s C_InventoryScreen::Refresh", Name(self).c_str()); }
 // (The original reaches the camera module's methods through its vtable.)
 void SetUpCameraModule()
 {

@@ -7,6 +7,11 @@
 // by Init), operations of the life cycle in any order, the world changing between them (the model's frames found or
 // not, the scene made or not, the viewport, the play mode); the logs (every call out, the interface's fields after
 // each operation) and the arena compared.
+// Human part 75b (the "Squad" case): the squad and the small setters (lines 119-122, 436-612, 1302-1324, 1446-1523:
+// PlaceExplosiveTimer; AddSquadMember .. OnMemberClicked2, FilterInput, IsCapturingInput, AddMessage, SetTimer ..
+// RefreshInventory; the original's 0x0049b7e0 .. 0x0049fc10): the team's members, the squad commander's groups
+// (CollectGroup through each side's vtable), the active index, the clock (timeGetTime: the port's renamed, the
+// original's import slot) and the last member click (each side's static); the panels' fields snapped.
 // HD2_UI_ROUNDS: scenarios (default 6,000; HD2_UI_QUICK: 2,000); HD2_UI_CASE: one case only; HD2_INTERFACE_ULPS,
 // HD2_INTERFACE_SHOW, HD2_INTERFACE_FIRST_CHANCE: the kit's.
 #include <windows.h>
@@ -66,6 +71,11 @@ struct S_World {
     int modelOpen;   // the model's Open succeeds in this search directory (1, 2; 0: none)
     uint32_t state15, state19;   // the driver's states
     int hints;                   // the information screen's hints at the start
+    // Part 75b: the team's members (more than six: the port's fix), the squad commander's groups (a bit per human), the
+    // active index, the clock and the last member click.
+    int memberCount, activeIndex;
+    uint32_t groups[6];
+    uint32_t time, lastClick;
     bool noScene;
 };
 S_World g_w, g_wStart;
@@ -78,6 +88,10 @@ I3D_frame *FindFrame(const char *name)
 }
 bool RetInt(const char *name, int count, int &value)
 {
+    if (std::strcmp(name, "C_TeamBase::GetMemberCount") == 0) {
+        value = g_w.memberCount;
+        return true;
+    }
     if (std::strcmp(name, "I3D_model::Open") == 0) {
         value = count == g_w.modelOpen ? 0 : int(0x80004005);
         return true;
@@ -96,6 +110,9 @@ void SetGlobals(int side)
     g_gameRole = g_w.role;
     g_noScene = g_w.noScene;
     g_states[0x15] = g_w.state15;
+    g_time = g_w.time;
+    Put<int>(OriginalAt<uint8_t *>(0x0089ae78 + 0x1C), 0x2C, g_w.activeIndex);
+    Put<int>(&g_teamManager, uint32_t(offsetof(C_TeamManager, m_playerTeam) + offsetof(C_Team, m_active)), g_w.activeIndex);
     g_states[0x19] = g_w.state19;
     OrigRole() = g_w.role;
     for (int s = 0; s < 2; ++s)
@@ -122,7 +139,53 @@ void RandomWorld()
     g_w.state15 = P(0.5) ? 0u : Pick({1u, 2u, 7u});
     g_w.state19 = P(0.5) ? 0u : Pick({1u, 3u});
     g_w.hints = P(0.5) ? 0 : I(1, 4);
+    g_w.memberCount = P(0.9) ? I(0, 6) : Pick({7, 8, -1});
+    g_w.activeIndex = P(0.2) ? -1 : I(0, 5);
+    for (uint32_t &g : g_w.groups)
+        g = U32() & 0xFF;
+    g_w.time = P(0.3) ? 0u : U32() % 100000;
+    g_w.lastClick = P(0.5) ? g_w.time - uint32_t(I(0, 400)) : P(0.5) ? 0u : U32();
 }
+
+// ---- the squad commander's CollectGroup (virtual on both sides: each its vtable) ----
+template <class M> int Slot(M m)   // a port virtual's byte offset in its vtable (g++: the member pointer holds 1 + it)
+{
+    struct {
+        uintptr_t p;
+        ptrdiff_t adjust;
+    } r;
+    static_assert(sizeof r == sizeof m, "member pointer");
+    std::memcpy(&r, &m, sizeof r);
+    return int(r.p - 1);
+}
+void *g_commanderVt[2][16];
+std::vector<int> GroupOf(int group)
+{
+    std::vector<int> out;
+    if (group >= 0 && group < 6)
+        for (int h = 0; h < HUMANS; ++h)
+            if (g_w.groups[group] >> h & 1)
+                out.push_back(h);
+    return out;
+}
+// (The original's: an MSVC vector {allocator, first, last, end}; its memory freed by the caller's delete: malloc'd.)
+void __attribute__((thiscall)) O_CollectGroup(void *, void **vector, int group)
+{
+    Log("squadCommander CollectGroup %d", group);
+    const std::vector<int> g = GroupOf(group);
+    void **data = g.empty() ? nullptr : static_cast<void **>(std::malloc(4 * g.size()));
+    for (size_t k = 0; k < g.size(); ++k)
+        data[k] = Hum(g[k]);
+    vector[1] = data;
+    vector[2] = vector[3] = data ? data + g.size() : nullptr;
+}
+void __attribute__((thiscall)) P_CollectGroup(void *, std::vector<C_Human *> *out, int group)
+{
+    Log("squadCommander CollectGroup %d", group);
+    for (int h : GroupOf(group))
+        out->push_back(static_cast<C_Human *>(Hum(h)));
+}
+void __attribute__((thiscall)) V_CommanderOther(void *self) { Log("squadCommander other slot"); }
 
 // ---- the original's game, model and sound caches, debug prints ----
 alignas(16) uint8_t g_origGame[0x200], g_portGame[0x800];
@@ -177,6 +240,8 @@ std::string PartName(const void *p)
         return "viewport";
     if (p == g_uiScene)
         return "uiscene";
+    if (p == OriginalAt<uint8_t *>(0x0089ae78 + 0x1C) || p == &g_teamManager.m_playerTeam)
+        return "team";
     if (!CommonName(p).empty())
         return CommonName(p);
     for (const void *b : g_boxes)
@@ -212,6 +277,18 @@ std::string Snap(int side)
                   Name(side ? static_cast<void *>(g_clickSound) : *OriginalAt<void **>(0x0089bc8c)).c_str(),
                   Name(At<void *>(b, o(0x6B6B0, OF(m_carnage) + offsetof(C_CarnageStats, m_frame)))).c_str());
     std::string s = text;
+    s += " click " + std::to_string(side ? s_lastMemberClick : *OriginalAt<uint32_t *>(0x0089bc90));
+    for (int k = 0; k < PANEL_FIELD_COUNT; ++k) {
+        const S_PanelField &f = PANEL_FIELDS[k];
+        const uint8_t *at = b + (side ? f.port : f.orig);
+        s += " ";
+        if (f.kind == PF_FRAME || f.kind == PF_HUMAN || f.kind == PF_RADAR)
+            s += Name(At<void *>(at, 0));
+        else if (f.kind == PF_BOOL)
+            s += std::to_string(*at);
+        else
+            s += std::to_string(At<int>(at, 0));
+    }
     s += " hints " + std::to_string(side ? int(g_port->m_info.m_hints.size())
                                          : int((At<uint8_t *>(b, 0x6B3A0 + 8) - At<uint8_t *>(b, 0x6B3A0 + 4)) / 4));
     for (const auto &icons : {std::make_pair(o(0x6B6D0, OF(m_stateIcons)), 20), std::make_pair(o(0x6B720, OF(m_stateIcons2)), 40),
@@ -246,17 +323,35 @@ void PanelFields(int side)
 enum {
     OP_INIT, OP_DONE, OP_RESET, OP_INITPANELS, OP_DONEPANELS, OP_INITDOWN, OP_CLEARPICKS, OP_STATEICONS, OP_ACTIONICONS,
     OP_CLEARMOVE, OP_CLEARALL, OP_LOOKAT, OP_FIELDS,
+    OP_ADDMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBERS, OP_REMOVEFROMMAP, OP_SHOWENEMY, OP_GETSHOWN, OP_SHOWMEMBER, OP_HIGHLIGHT,
+    OP_SWITCH, OP_CLICK, OP_CLICK2, OP_FILTER, OP_CAPTURING, OP_ADDMESSAGE, OP_SETTIMER, OP_ROUNDRESULT, OP_COUNTDOWN,
+    OP_SHOWMESSAGE, OP_SHOWTIMER, OP_SOUNDDIR, OP_SHOWSCORES, OP_RESPAWN, OP_ISRESPAWN, OP_FLASH, OP_OBJICON, OP_PHOTO,
+    OP_REFRESHINV, OP_TIME,
     W_WORLD = 100,
 };
 struct S_Op {
     int kind;
-    int a = 0, b = 0;
+    int a = 0, b = 0, c = 0;
 };
 using T_Bool = bool(__attribute__((thiscall)) *)(void *);
 using T_Void = void(__attribute__((thiscall)) *)(void *);
 using T_Arrays = void(__stdcall *)(float *, float *);
 using T_Ptr = void(__stdcall *)(void *);
 using T_Ctor = void *(__attribute__((thiscall)) *)(void *);
+using T_BoolPI = bool(__attribute__((thiscall)) *)(void *, void *, int);
+using T_RetBool = bool(__attribute__((thiscall)) *)(void *);
+using T_P = void(__attribute__((thiscall)) *)(void *, void *);
+using T_PB = void(__attribute__((thiscall)) *)(void *, void *, bool);
+using T_RetP = void *(__attribute__((thiscall)) *)(void *);
+using T_PI = void(__attribute__((thiscall)) *)(void *, void *, int);
+using T_I = void(__attribute__((thiscall)) *)(void *, int);
+using T_II = void(__attribute__((thiscall)) *)(void *, int, int);
+using T_III = void(__attribute__((thiscall)) *)(void *, int, int, int);
+using T_B = void(__attribute__((thiscall)) *)(void *, bool);
+using T_Arr = void(__attribute__((thiscall)) *)(void *, float *, float *);
+using T_Msg = void(__attribute__((thiscall)) *)(void *, const float *, const char *);
+const float COLORS[3][3] = {{255, 0, 0}, {0, 128, 255}, {12.5f, 200, 7}};
+const char *const TEXTS[] = {"Squad ready", "", "Enemy spotted near the bridge"};
 
 // Both sides crash: the model's frames looked for without a scene (before Init, after Done).
 const char *Skip(int side, const S_Op &op)
@@ -265,6 +360,8 @@ const char *Skip(int side, const S_Op &op)
     const bool scene = At<void *>(b, side ? OF(m_scene) : 0) != nullptr;
     if (!scene && (op.kind == OP_STATEICONS || op.kind == OP_ACTIONICONS || op.kind == OP_INITDOWN))
         return "no scene";
+    if (op.kind == OP_HIGHLIGHT && g_w.memberCount > 6)
+        return "a squad of more than six highlighted";
     // (Init loading the model where no directory has it: the original keeps the model, the port releases it.)
     const uint32_t flags = At<uint32_t>(b, side ? OF(m_flags) : 0xC);
     // (Reset's Init always runs: its Done clears the flags. A cached model is copied, whatever the directories.)
@@ -335,6 +432,111 @@ void Run(int side, const S_Op &op)
     case OP_LOOKAT:
         side ? LookAtOnCommandMap(static_cast<C_Human *>(Hum(op.a))) : OriginalAt<T_Ptr>(0x004bf210)(Hum(op.a));
         break;
+    case OP_ADDMEMBER:
+        Log("AddSquadMember -> %d", side ? port->AddSquadMember(static_cast<C_Human *>(Hum(op.a)), op.b)
+                                         : OriginalAt<T_BoolPI>(0x0049b7e0)(orig, Hum(op.a), op.b));
+        break;
+    case OP_REMOVEMEMBER:
+        Log("RemoveSquadMember -> %d", side ? port->RemoveSquadMember(static_cast<C_Human *>(Hum(op.a)), op.b)
+                                            : OriginalAt<T_BoolPI>(0x0049b870)(orig, Hum(op.a), op.b));
+        break;
+    case OP_REMOVEMEMBERS:
+        Log("RemoveSquadMembers -> %d", side ? port->RemoveSquadMembers() : OriginalAt<T_RetBool>(0x0049b900)(orig));
+        break;
+    case OP_REMOVEFROMMAP:
+        side ? port->RemoveFromMap(static_cast<C_Human *>(Hum(op.a))) : OriginalAt<T_P>(0x0049b960)(orig, Hum(op.a));
+        break;
+    case OP_SHOWENEMY:
+        side ? port->ShowEnemy(static_cast<C_Human *>(Hum(op.a)), op.b != 0) : OriginalAt<T_PB>(0x0049b980)(orig, Hum(op.a), op.b != 0);
+        break;
+    case OP_GETSHOWN:
+        Log("GetShownSquadMember -> %s", Name(side ? static_cast<void *>(port->GetShownSquadMember()) : OriginalAt<T_RetP>(0x0049f0e0)(orig)).c_str());
+        break;
+    case OP_SHOWMEMBER:
+        side ? port->ShowSquadMember(static_cast<C_Human *>(Hum(op.a))) : OriginalAt<T_P>(0x0049f100)(orig, Hum(op.a));
+        break;
+    case OP_HIGHLIGHT:
+        side ? port->HighlightMembers(static_cast<C_Human *>(Hum(op.a)), op.b) : OriginalAt<T_PI>(0x0049d340)(orig, Hum(op.a), op.b);
+        break;
+    case OP_SWITCH:
+        side ? port->SwitchToMember(op.a) : OriginalAt<T_I>(0x0049c200)(orig, op.a);
+        break;
+    case OP_CLICK:
+        side ? port->OnMemberClicked(op.a) : OriginalAt<T_I>(0x0049dce0)(orig, op.a);
+        break;
+    case OP_CLICK2:
+        side ? port->OnMemberClicked2(op.a) : OriginalAt<T_I>(0x0049dd60)(orig, op.a);
+        break;
+    case OP_FILTER: {
+        float held[128], pressed[128];
+        for (int k = 0; k < 128; ++k) {
+            held[k] = float((k * 7 + op.a) % 5) - 1.0f;
+            pressed[k] = float((k * 3 + op.a) % 4) * 0.5f;
+        }
+        side ? port->FilterInput(held, pressed) : OriginalAt<T_Arr>(0x0049fc10)(orig, held, pressed);
+        uint32_t h = 2166136261u;
+        for (int k = 0; k < 128; ++k) {
+            uint32_t x, y;
+            std::memcpy(&x, &held[k], 4);
+            std::memcpy(&y, &pressed[k], 4);
+            h = (h ^ x) * 16777619u ^ y;
+        }
+        Log("arrays after %08x", h);
+        break;
+    }
+    case OP_CAPTURING:
+        Log("IsCapturingInput -> %d", side ? port->IsCapturingInput() : OriginalAt<T_RetBool>(0x0049d300)(orig));
+        break;
+    case OP_ADDMESSAGE: {
+        const S_vector color(COLORS[op.a % 3][0], COLORS[op.a % 3][1], COLORS[op.a % 3][2]);
+        side ? port->AddMessage(color, TEXTS[op.b % 3]) : OriginalAt<T_Msg>(0x0049d2e0)(orig, &color.x, TEXTS[op.b % 3]);
+        break;
+    }
+    case OP_SETTIMER:
+        side ? port->SetTimer(op.a) : OriginalAt<T_I>(0x0049dde0)(orig, op.a);
+        break;
+    case OP_ROUNDRESULT:
+        side ? port->ShowRoundResult(op.a, op.b, op.c) : OriginalAt<T_III>(0x0049ddf0)(orig, op.a, op.b, op.c);
+        break;
+    case OP_COUNTDOWN:
+        side ? port->ShowCountdown(op.a, op.b) : OriginalAt<T_II>(0x0049de10)(orig, op.a, op.b);
+        break;
+    case OP_SHOWMESSAGE:
+        side ? port->ShowMessage(op.a) : OriginalAt<T_I>(0x0049de30)(orig, op.a);
+        break;
+    case OP_SHOWTIMER:
+        side ? port->ShowTimer(op.a, op.b) : OriginalAt<T_II>(0x0049de50)(orig, op.a, op.b);
+        break;
+    case OP_SOUNDDIR: {
+        const S_vector dir(float(op.a % 5) * 0.25f - 0.5f, 0.0f, float(op.a % 3) * 0.5f - 0.5f);
+        side ? port->ShowSoundDirection(dir, op.b) : OriginalAt<T_PI>(0x0049de80)(orig, const_cast<float *>(&dir.x), op.b);
+        break;
+    }
+    case OP_SHOWSCORES:
+        side ? port->ShowScores(op.a != 0) : OriginalAt<T_B>(0x0049f020)(orig, op.a != 0);
+        break;
+    case OP_RESPAWN:
+        side ? port->ShowRespawnScreen(op.a != 0) : OriginalAt<T_B>(0x0049f040)(orig, op.a != 0);
+        break;
+    case OP_ISRESPAWN:
+        Log("IsRespawnScreenShown -> %d", side ? port->IsRespawnScreenShown() : OriginalAt<T_RetBool>(0x0049f090)(orig));
+        break;
+    case OP_FLASH:
+        side ? port->FlashDamage() : OriginalAt<T_Void>(0x0049f0b0)(orig);
+        break;
+    case OP_OBJICON:
+        side ? port->SetObjectiveIcon(op.a, op.b) : OriginalAt<T_II>(0x0049f0c0)(orig, op.a, op.b);
+        break;
+    case OP_PHOTO:
+        side ? port->ShowPhotoFlash() : OriginalAt<T_Void>(0x0049f5d0)(orig);
+        break;
+    case OP_REFRESHINV:
+        side ? port->RefreshInventory() : OriginalAt<T_Void>(0x0049fbf0)(orig);
+        break;
+    case OP_TIME:
+        g_time += uint32_t(op.a);
+        Log("time %u", g_time);
+        break;
     case OP_FIELDS: {
         // (The test's: the flags, the picks and the forced flags as the other parts leave them.)
         uint8_t *b = side ? reinterpret_cast<uint8_t *>(g_port) : g_orig;
@@ -356,10 +558,18 @@ void Run(int side, const S_Op &op)
     }
 }
 
+bool g_squad;   // the squad case (75b) or the life cycle (75a)
 S_Op RandomOp()
 {
-    S_Op op{Pick({OP_INIT, OP_INIT, OP_DONE, OP_DONE, OP_RESET, OP_INITPANELS, OP_DONEPANELS, OP_INITDOWN, OP_CLEARPICKS, OP_STATEICONS,
-                  OP_ACTIONICONS, OP_CLEARMOVE, OP_CLEARALL, OP_LOOKAT, OP_FIELDS, W_WORLD})};
+    static const int SQUAD[] = {OP_ADDMEMBER, OP_ADDMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBER, OP_REMOVEMEMBERS, OP_REMOVEFROMMAP,
+                                OP_SHOWENEMY, OP_GETSHOWN, OP_SHOWMEMBER, OP_HIGHLIGHT, OP_HIGHLIGHT, OP_HIGHLIGHT, OP_SWITCH,
+                                OP_CLICK, OP_CLICK, OP_CLICK2, OP_CLICK2, OP_FILTER, OP_CAPTURING, OP_ADDMESSAGE, OP_SETTIMER,
+                                OP_ROUNDRESULT, OP_COUNTDOWN, OP_SHOWMESSAGE, OP_SHOWTIMER, OP_SOUNDDIR, OP_SHOWSCORES, OP_RESPAWN,
+                                OP_ISRESPAWN, OP_FLASH, OP_OBJICON, OP_PHOTO, OP_REFRESHINV, OP_TIME, OP_TIME, OP_DONE, OP_FIELDS,
+                                W_WORLD};
+    S_Op op{g_squad ? Pick(SQUAD)
+                    : Pick({OP_INIT, OP_INIT, OP_DONE, OP_DONE, OP_RESET, OP_INITPANELS, OP_DONEPANELS, OP_INITDOWN, OP_CLEARPICKS,
+                            OP_STATEICONS, OP_ACTIONICONS, OP_CLEARMOVE, OP_CLEARALL, OP_LOOKAT, OP_FIELDS, W_WORLD})};
     switch (op.kind) {
     case OP_CLEARMOVE:
     case OP_CLEARALL:
@@ -367,6 +577,58 @@ S_Op RandomOp()
         break;
     case OP_LOOKAT:
         op.a = P(0.9) ? I(0, HUMANS - 1) : -1;
+        break;
+    case OP_ADDMEMBER:
+    case OP_REMOVEMEMBER:
+        op.a = P(0.9) ? I(0, HUMANS - 1) : -1;
+        op.b = P(0.9) ? I(0, 5) : Pick({-1, 6, 7});
+        break;
+    case OP_REMOVEFROMMAP:
+    case OP_SHOWMEMBER:
+        op.a = P(0.8) ? I(0, HUMANS - 1) : -1;
+        break;
+    case OP_SHOWENEMY:
+        op.a = I(0, HUMANS - 1);
+        op.b = P(0.5);
+        break;
+    case OP_HIGHLIGHT:
+        op.a = P(0.5) ? -1 : I(0, HUMANS - 1);
+        op.b = P(0.6) ? Pick({3, 5}) : I(0, 6);
+        break;
+    case OP_SWITCH:
+        op.a = P(0.8) ? I(0, 5) : Pick({-1, 6});
+        break;
+    case OP_CLICK:
+    case OP_CLICK2:
+        op.a = P(0.8) ? 100 + I(0, 5) : Pick({99, 106, 0, 5});
+        break;
+    case OP_FILTER:
+    case OP_ADDMESSAGE:
+        op.a = I(0, 100);
+        op.b = I(0, 2);
+        break;
+    case OP_SETTIMER:
+    case OP_SHOWMESSAGE:
+        op.a = P(0.3) ? Pick({-1, 0}) : I(1, 0x2000);
+        break;
+    case OP_ROUNDRESULT:
+    case OP_COUNTDOWN:
+    case OP_SHOWTIMER:
+    case OP_OBJICON:
+        op.a = P(0.3) ? Pick({-1, 0, 15, 16}) : I(1, 0x2000);
+        op.b = I(-2, 3000);
+        op.c = I(0, 9);
+        break;
+    case OP_SOUNDDIR:
+        op.a = I(0, 100);
+        op.b = I(0, 4);
+        break;
+    case OP_SHOWSCORES:
+    case OP_RESPAWN:
+        op.a = P(0.5);
+        break;
+    case OP_TIME:
+        op.a = P(0.3) ? 300 : P(0.5) ? I(0, 299) : I(301, 5000);   // (300: the double click's limit exactly)
         break;
     case OP_FIELDS:
         op.a = int(U32() & 0x3FF);
@@ -441,6 +703,8 @@ void TestScenarios()
         *OriginalAt<void **>(0x0089bc8c) = nullptr;
         SetGlobals(side);
         SetPanelFields(side);
+        s_lastMemberClick = g_w.lastClick;
+        *OriginalAt<uint32_t *>(0x0089bc90) = g_w.lastClick;
         if (side)
             g_port->m_info.m_hints.assign(size_t(g_w.hints), 0x1C80);
         else {
@@ -504,6 +768,17 @@ void TestFixes()
     CHECK(std::count(g_log.begin(), g_log.end(), std::string("uiscene I3D_scene Release")) == 1 ||
               std::count(g_log.begin(), g_log.end(), std::string("uiscene other slot")) == 1,
           "Init without the model: the scene released");
+    // HighlightMembers with a squad of eight: the six panels only (the original went past them).
+    std::memcpy(static_cast<void *>(g_port), g_portPristine, sizeof(C_Interface));
+    g_w.memberCount = 8;
+    for (int group : {3, 5, 0}) {
+        g_log.clear();
+        g_port->HighlightMembers(nullptr, group);
+        int selected = 0;
+        for (const std::string &l : g_log)
+            selected += l.find("C_MemberPanel::SetSelected") != std::string::npos;
+        CHECK(selected == 6, "HighlightMembers with eight members: %d panels", selected);
+    }
     // (The destructor: a second interface made and destroyed.)
     auto *other = new (_aligned_malloc(sizeof(C_Interface), 16)) C_Interface();
     other->~C_Interface();
@@ -520,6 +795,21 @@ void SetUp()
     SetUpGfx();
     SetUpEngine();
     SetUpCameraModule();
+    for (int side = 0; side < 2; ++side) {
+        for (void *&v : g_commanderVt[side])
+            v = reinterpret_cast<void *>(V_CommanderOther);
+        *reinterpret_cast<void ***>(g_squadCommander[side]) = g_commanderVt[side];
+    }
+    g_commanderVt[0][0x08 / 4] = reinterpret_cast<void *>(O_CollectGroup);
+    g_commanderVt[1][Slot(&C_SquadCommander::CollectGroup) / 4] = reinterpret_cast<void *>(P_CollectGroup);
+    // (The original's timeGetTime: its import slot.)
+    {
+        void **slot = OriginalAt<void **>(0x0080f3f8);
+        DWORD old;
+        VirtualProtect(slot, 4, PAGE_READWRITE, &old);
+        *slot = reinterpret_cast<void *>(O_TimeGetTime);
+        VirtualProtect(slot, 4, old, &old);
+    }
     Put<void *>(g_origGame, 0x18, &g_gameScene);
     Put<void *>(g_portGame, offsetof(C_game, m_scene), &g_gameScene);
     const struct {
@@ -533,6 +823,7 @@ void SetUp()
         {0x00464e90, reinterpret_cast<const void *>(O_GetCameraModule)},
         {0x004563e0, reinterpret_cast<const void *>(O_GetSquadCommander)},
         {0x00720f50, reinterpret_cast<const void *>(O_GetCheatValue)},
+        {0x004a26d0, reinterpret_cast<const void *>(O_InventoryRefresh)},
         {0x007e562e, reinterpret_cast<const void *>(O_Atexit)},
         {0x007e6334, reinterpret_cast<const void *>(O_Sprintf)},
     };
@@ -576,6 +867,11 @@ int main()
     g_case = "Life";
     for (g_round = 0; g_round < rounds; ++g_round)
         TestScenarios();
+    g_case = "Squad";
+    g_squad = true;
+    for (g_round = 0; g_round < rounds; ++g_round)
+        TestScenarios();
+    g_squad = false;
     g_case = "Fixes";
     for (g_round = 0; g_round < 50; ++g_round)
         TestFixes();

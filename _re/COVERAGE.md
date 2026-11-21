@@ -4901,3 +4901,28 @@ particles and the surface marks. Files are served from memory.
   declarations over two lines the generator skipped; the kit's one-argument catch-all left in the frames' slots) moved
   the stack and showed as a clobbered register later; the debugging prints went to stderr, which the relaunched copy
   loses; the inline fields of the panels (frames, the radar) found one crash at a time before I listed them all.
+
+## Human part 75b (the game interface's squad and small setters, `interface.cpp` lines 119-122, 436-612, 1302-1324 and 1446-1523, 2026-11-21)
+
+- **The build:** part 75a's (`interface/build_ui.bat`, `ui_diff.cpp`'s "Squad" case).
+- **The world added:** the team's member count (up to six; more: the port's fix, left out), the squad commander's
+  groups (its CollectGroup virtual on both sides: each side's vtable filling its vector, the original's an MSVC one),
+  the active index (inline in the port: the team's field on both sides), the clock (the port's timeGetTime renamed to
+  the harness's, the original's import slot 0x0080f3f8 patched) and the last member click (each side's static); the
+  original's inventory Refresh (0x004a26d0, no address in the header) faked like the port's. The panels' inline fields
+  snapped after each operation (the stance panel's timer, the map's frame, ...).
+- **The tests:** scenarios of Init then up to 14 of AddSquadMember, RemoveSquadMember, RemoveSquadMembers,
+  RemoveFromMap, ShowEnemy, GetShownSquadMember, ShowSquadMember, HighlightMembers, SwitchToMember, OnMemberClicked,
+  OnMemberClicked2, FilterInput, IsCapturingInput, AddMessage, SetTimer, ShowRoundResult, ShowCountdown, ShowMessage,
+  ShowTimer, ShowSoundDirection, ShowScores, ShowRespawnScreen, IsRespawnScreenShown, FlashDamage, SetObjectiveIcon,
+  ShowPhotoFlash, RefreshInventory, Done, the clock moving (exactly 300 ms now and then), the world changing.
+- **Results:** 7,403,318 checks, 0 failures; all 158 measured lines of the ranges run.
+- **Port bugs found and fixed (on main; port mistakes):** HighlightMembers read the member count once, before the
+  commanded member and the group (the original asks for those first and for the count again at each member);
+  ShowSquadMember asked for the selected member once (the original again for the panel).
+- **Original's weaknesses (the port's fixes, tested alone):** HighlightMembers went through every member, past the six
+  panels, with a squad of more.
+- **Mutations:** 197 mutants, 21 not building, 176 of 176 killed, 0 survived
+  (mutate_interface_uib.py).
+- **Harness lessons (my mistakes):** the original's inventory Refresh ran for real (its header declaration has no
+  address, so the generator left it: a crash); my edit scripts again met CRLF files and heredoc backslashes.
