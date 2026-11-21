@@ -13,6 +13,12 @@
 // volumes, the deaths, the environment, the items, the squad's reactions, the enemies seen and forgotten, the tactical
 // view, saves compared byte by byte, loads from files the world builds), the world changing between them, and destroys
 // them; the logs (every call out, the teams' fields after each operation) and the arena compared.
+// Part 77b (the "Manager" case): the formations (C_Formation) and the team manager (C_TeamManager): each scenario builds
+// both managers (the original's by its constructor 0x00461430), its teams the team operations' teams, and adds the
+// manager's operations (Tick, StartMission, StopMission, RestartMission, formations made, found, joined, left, destroyed,
+// ticked, their saves and loads, the manager's saves compared byte by byte and its loads from files the world builds:
+// the team's chunk, formations by an existing soldier's id with or without their shape's chunk); the formation shapes
+// faked (formation.cpp: logged, the leader kept for GetLeader, named by their order while they live).
 // HD2_TEAM_ROUNDS: scenarios (default 6,000; HD2_TEAM_QUICK: 2,500); HD2_INTERFACE_ULPS, HD2_INTERFACE_SHOW,
 // HD2_INTERFACE_ECHO, HD2_INTERFACE_FIRST_CHANCE: the kit's.
 #include <windows.h>
@@ -51,6 +57,8 @@
 namespace H {
 
 int g_side;
+std::vector<void *> g_shapes[2];   // each side's formation shapes, named by their order
+bool g_managerCase;                // part 77b: the team manager built, its teams the team operations' teams
 template <class T> void Put(void *b, uint32_t o, T v) { std::memcpy(static_cast<uint8_t *>(b) + o, &v, sizeof v); }
 template <class T> T At(const void *b, uint32_t o)
 {
@@ -203,6 +211,9 @@ std::string PartName(const void *p)
         if (p == g_mission[side])
             return "mission";
     }
+    for (size_t k = 0; k < g_shapes[g_side].size(); ++k)
+        if (p == g_shapes[g_side][k])
+            return "shape" + std::to_string(k);
     if (p == g_item)
         return "item";
     if (p == g_origGame || p == g_portGame)
@@ -211,6 +222,9 @@ std::string PartName(const void *p)
         return "ui";
     if (p == g_fpv)
         return "fpv";
+    // (The original reaches the squad commander at its global, 0x0089ad40, as well as through GetSquadCommander.)
+    if (p == OriginalAt<void *>(0x0089ad40))
+        return "commander";
     if (p == g_origActors || p == &g_actorsModule)
         return "actors";
     if (p == OriginalAt<void *>(0x0089b288) || p == &g_sightModule)
@@ -376,24 +390,40 @@ bool C_MissionDef::AreObjectivesDecided() const
 namespace H {
 void ShapeNew(void *shape)
 {
-    Log("shape construct");
+    g_shapes[g_side].push_back(shape);
+    Log("%s construct", Name(shape).c_str());
     Put<void *>(shape, 0x74, nullptr);
     Put<bool>(shape, 0x8C, false);
 }
+// SetLeader: logged, the leader kept (+0x74: GetLeader reads it inline).
+bool ShapeLeader(void *shape, void *leader)
+{
+    Log("%s C_FormationShape::SetLeader %s", Name(shape).c_str(), Name(leader).c_str());
+    Put<void *>(shape, 0x74, leader);
+    return true;
+}
+bool __attribute__((thiscall)) O_ShapeLeader(void *shape, void *leader) { return ShapeLeader(shape, leader); }
 void *__attribute__((fastcall)) O_ShapeNew(void *shape)
 {
     std::memset(shape, 0, 0xA0);
     ShapeNew(shape);
     return shape;
 }
-void __attribute__((fastcall)) O_ShapeDelete(void *) { Log("shape destroy"); }
+// (Destroyed: its name no longer its address's, which the allocator may hand out again.)
+void ShapeDelete(void *shape)
+{
+    Log("%s destroy", Name(shape).c_str());
+    std::replace(g_shapes[g_side].begin(), g_shapes[g_side].end(), shape, static_cast<void *>(nullptr));
+}
+void __attribute__((fastcall)) O_ShapeDelete(void *shape) { ShapeDelete(shape); }
 }  // namespace H
+bool C_FormationShape::SetLeader(C_Human *leader) { return H::ShapeLeader(this, leader); }
 C_FormationShape::C_FormationShape()
 {
     static_assert(offsetof(C_FormationShape, m_leader) == 0x74 && offsetof(C_FormationShape, m_scripted) == 0x8C, "shape layout");
     H::ShapeNew(this);
 }
-C_FormationShape::~C_FormationShape() { H::Log("shape destroy"); }
+C_FormationShape::~C_FormationShape() { H::ShapeDelete(this); }
 // The base module (module.cpp, not compiled here).
 C_Module *g_modules[MODULE_COUNT];
 C_Module::C_Module(int id, const char *name) : m_name(name), m_id(id) {}
@@ -569,7 +599,10 @@ void RandomWorld()
         g_w.seen[h] = P(0.4) ? 0u : U32() & ((1u << HUMANS) - 1);
         g_w.hasController[h] = P(0.9);
         // (No controller: no controller type.)
-        g_w.controllerType[h] = !g_w.hasController[h] ? 0 : P(0.6) ? int(HUMAN_CONTROLLER_SQUAD) : I(0, 6);
+        g_w.controllerType[h] = !g_w.hasController[h] ? 0
+                                : P(g_managerCase ? 0.5 : 0.0)  ? int(HUMAN_CONTROLLER_AI)
+                                : P(0.6)                         ? int(HUMAN_CONTROLLER_SQUAD)
+                                                                 : I(0, 6);
         g_w.combatOrder[h] = P(0.6) ? Pick({int(SQUAD_ORDER_MODE2), int(SQUAD_ORDER_MODE2_ALT)}) : I(0, 0x12);
         g_w.env[h] = P(0.7) ? 0u : Pick({uint32_t(HUMAN_ENV_DEADLY), uint32_t(HUMAN_ENV_RESTRICTED), 0x1u, 0x6000u});
         g_w.volumes[h] = P(0.1) ? 0 : I(1, 4);
@@ -596,9 +629,10 @@ void RandomWorld()
 }
 
 // ---- the teams: each side's, their fields snapped ----
-uint8_t *g_orig, *g_origCoop;
+uint8_t *g_orig, *g_origCoop, *g_origManager;
 C_Team *g_port;
 C_CoopTeam *g_portCoop;
+C_TeamManager *g_portManager;
 // An MSVC6 vector's elements / a g++ one's.
 std::vector<uint32_t> Words(const void *b, uint32_t at, int side, uint32_t elem = 4)
 {
@@ -660,6 +694,19 @@ std::string Snap(int side)
     const uint8_t *c = side ? reinterpret_cast<const uint8_t *>(g_portCoop) : g_origCoop;
     s += " | coop " + Base(c, side) + Records(c, side ? uint32_t(offsetof(C_CoopTeam, m_enemyRecords)) : 0x28, side) + " unknown48 " +
          std::to_string(At<int>(c, side ? uint32_t(offsetof(C_CoopTeam, m_unknown48)) : 0x48));
+    if (g_managerCase) {
+        // The formations (their members, name, id, shape and its leader), the flags.
+        const uint8_t *m = side ? reinterpret_cast<const uint8_t *>(g_portManager) : g_origManager;
+        s += " | manager formations";
+        for (uint32_t w : Words(m, side ? uint32_t(offsetof(C_TeamManager, m_formations)) : 0x0C, side)) {
+            const void *f = reinterpret_cast<const void *>(uintptr_t(w));
+            const void *shape = At<void *>(f, side ? uint32_t(offsetof(C_Formation, m_shape)) : 0x28);
+            s += " [" + Base(f, side) + " " + Name(shape) + " leader " + Name(shape ? At<void *>(shape, 0x74) : nullptr) + " scripted " +
+                 std::to_string(shape ? At<uint8_t>(shape, 0x8C) : 9) + "]";
+        }
+        s += " running " + std::to_string(At<uint8_t>(m, side ? uint32_t(offsetof(C_TeamManager, m_clientRunning)) : 0x134)) + " 135 " +
+             std::to_string(At<uint8_t>(m, side ? uint32_t(offsetof(C_TeamManager, m_unknown135)) : 0x135));
+    }
     return s;
 }
 
@@ -681,6 +728,8 @@ std::string MakeLoadFile(bool coop)
         case 1: {
             const int count = I(0, 4);
             base += chunk(1000, int4(count));
+            // (As many ids as the count: with fewer the reads run past the chunk and the file, the original's id a stack word
+            // there, or the reader loops for ever on both sides.)
             for (int k = 0; k < count; ++k)
                 base += int4(P(0.8) ? g_w.netId[I(0, HUMANS - 1)] : I(-1, 50));
             break;
@@ -709,6 +758,47 @@ std::string MakeLoadFile(bool coop)
     return P(0.05) ? std::string() : f;
 }
 
+std::string MakeManagerFile()
+{
+    auto chunk = [](uint16_t id, const std::string &payload) {
+        std::string c;
+        const uint32_t size = uint32_t(6 + payload.size());
+        c.append(reinterpret_cast<const char *>(&id), 2);
+        c.append(reinterpret_cast<const char *>(&size), 4);
+        return c + payload;
+    };
+    auto int4 = [](int x) { return std::string(reinterpret_cast<const char *>(&x), 4); };
+    std::string m;
+    for (int n = I(0, 4); n > 0; --n) {
+        switch (I(0, 3)) {
+        case 0: {
+            std::string team = MakeLoadFile(false);
+            if (team.empty())
+                team = chunk(0xDFB, std::string());
+            m += chunk(1000, team);
+            break;
+        }
+        case 1:
+        case 2: {
+            // (A formation: an existing soldier's id; the original reads the id from an empty chunk too and makes a
+            // formation for whatever it finds, crashing for none: the port's fix, alone.)
+            std::string f = int4(g_w.netId[I(0, HUMANS - 1)]);
+            if (P(0.8))
+                f += chunk(9999, P(0.8) ? chunk(1000, int4(I(0, 9))) : chunk(1001, std::string()));
+            m += chunk(2000, f);
+            break;
+        }
+        default:
+            m += chunk(uint16_t(3000 + I(0, 2)), int4(5));
+            break;
+        }
+    }
+    std::string f = chunk(P(0.95) ? 0x2694 : 0x2695, m);
+    if (P(0.5))
+        f += chunk(0x7777, int4(1));
+    return P(0.04) ? std::string() : f;
+}
+
 // ---- the scenarios ----
 enum {
     OP_CLEAR, OP_ADD, OP_REMOVE, OP_NPC, OP_UPDATE, OP_TICK, OP_RESTART, OP_ACTIVE, OP_SELECTED, OP_COMMANDED, OP_SELECT, OP_SWITCH,
@@ -717,6 +807,9 @@ enum {
     OP_UNSEEN, OP_TRACKER, OP_REC_ADD, OP_REC_REMOVE, OP_TACTICAL, OP_SAVE, OP_LOAD, OP_ALIVE, OP_MEMBER, OP_INDEX, OP_KILLED,
     OP_COOP_CLEAR, OP_COOP_ADD, OP_COOP_REMOVE, OP_COOP_TICK, OP_COOP_RESTART, OP_COOP_DIED, OP_COOP_ITEM, OP_COOP_REC_ADD,
     OP_COOP_REC_REMOVE, OP_COOP_SAVE, OP_COOP_LOAD, OP_COUNT,
+    // Part 77b: the manager's and its formations' (formation op.b of the side's list).
+    OP_M_TICK = OP_COUNT, OP_M_START, OP_M_STOP, OP_M_RESTART, OP_M_SAVE, OP_M_LOAD, OP_M_REMOVE_FROM, OP_M_GET, OP_M_DESTROY,
+    OP_F_ADD, OP_F_REMOVE, OP_F_TICK, OP_F_SAVE, OP_F_LOAD, OP_M_COUNT,
     W_WORLD = 100,
     W_ROLE = 101,   // the game's role changed alone
 };
@@ -732,8 +825,11 @@ S_Op RandomOp()
         op.a = int(U32());
         return op;
     }
-    // (The members added more often: the rest needs them.)
+    // (The members added more often: the rest needs them; the manager's case: its operations half the time, formations
+    // made and joined more often.)
     op.kind = P(0.2) ? Pick({int(OP_ADD), int(OP_COOP_ADD), int(OP_REC_ADD)}) : I(0, OP_COUNT - 1);
+    if (g_managerCase && P(0.5))
+        op.kind = P(0.3) ? Pick({int(OP_M_GET), int(OP_F_ADD), int(OP_F_ADD)}) : I(OP_COUNT, OP_M_COUNT - 1);
     op.a = P(0.1) ? -1 : I(0, HUMANS - 1);
     op.b = I(-1, 6);
     switch (op.kind) {
@@ -752,6 +848,25 @@ S_Op RandomOp()
     case OP_HAS_ITEM:
     case OP_COOP_ITEM:
         op.a = I(0, 300);
+        break;
+    case OP_M_TICK:
+    case OP_F_TICK:
+        op.a = I(0, 200);
+        op.b = I(-1, 3);
+        break;
+    case OP_M_DESTROY:
+    case OP_F_SAVE:
+    case OP_F_LOAD:
+        op.b = I(-1, 3);
+        break;
+    case OP_M_START:
+    case OP_M_STOP:
+    case OP_M_RESTART:
+        op.b = I(-1, 0);   // (the client's half the time)
+        break;
+    case OP_F_ADD:
+    case OP_F_REMOVE:
+        op.b = I(0, 3);
         break;
     default:
         break;
@@ -781,6 +896,19 @@ using T_ChunkBegin = bool(__attribute__((thiscall)) *)(void *, uint16_t);
 using T_ChunkWrite = bool(__attribute__((thiscall)) *)(void *, const void *, int);
 using T_ChunkAscend = bool(__attribute__((thiscall)) *)(void *, uint32_t *);
 using T_Killed = void(__stdcall *)(const void *);
+void *Formation(int side, int k)
+{
+    const uint8_t *m = side ? reinterpret_cast<const uint8_t *>(g_portManager) : g_origManager;
+    const std::vector<uint32_t> f = Words(m, side ? uint32_t(offsetof(C_TeamManager, m_formations)) : 0x0C, side);
+    return k >= 0 && k < int(f.size()) ? reinterpret_cast<void *>(uintptr_t(f[size_t(k)])) : nullptr;
+}
+int FormationIndex(int side, const void *formation)
+{
+    for (int k = 0; Formation(side, k); ++k)
+        if (Formation(side, k) == formation)
+            return k;
+    return -1;
+}
 // What both sides would crash on (or read past their members, the vectors' spare room differing) is skipped; from the
 // side's own state (the same while the sides agree).
 bool Skip(int side, const S_Op &op, std::string &why)
@@ -838,9 +966,22 @@ bool Skip(int side, const S_Op &op, std::string &why)
         if (op.a < 0 || op.a >= count || op.a > int(Words(b, o(0x5C, OT(m_volumes)), side).size()))
             why = "the volumes of no member";
         break;
-    case OP_RELEASE:
-    case OP_NEARBY:
-    case OP_UNSEEN:
+    case OP_M_GET:
+        // (A formation for no leader: both add the null human.)
+        if (!Hum(op.a) && op.b >= 0)
+            why = "a formation for no leader";
+        break;
+    case OP_F_ADD:
+        // (Both ask the null human for its controller.)
+        if (!Hum(op.a))
+            why = "no human into a formation";
+        [[fallthrough]];
+    case OP_F_REMOVE:
+    case OP_F_TICK:
+    case OP_F_SAVE:
+    case OP_F_LOAD:
+        if (!Formation(side, op.b))
+            why = "no formation";
         break;
     case OP_REMOVE:
     case OP_NPC: {
@@ -1017,20 +1158,48 @@ void Run(int side, const S_Op &op)
     case OP_SAVE:
     case OP_COOP_SAVE:
     case OP_LOAD:
-    case OP_COOP_LOAD: {
-        const bool save = op.kind == OP_SAVE || op.kind == OP_COOP_SAVE, coop = op.kind == OP_COOP_SAVE || op.kind == OP_COOP_LOAD;
+    case OP_COOP_LOAD:
+    case OP_M_SAVE:
+    case OP_M_LOAD:
+    case OP_F_SAVE:
+    case OP_F_LOAD: {
+        const bool save = op.kind == OP_SAVE || op.kind == OP_COOP_SAVE || op.kind == OP_M_SAVE || op.kind == OP_F_SAVE,
+                   coop = op.kind == OP_COOP_SAVE || op.kind == OP_COOP_LOAD;
+        const bool manager = op.kind == OP_M_SAVE || op.kind == OP_M_LOAD, formation = op.kind == OP_F_SAVE || op.kind == OP_F_LOAD;
         const char *name = save ? "save.sav" : "load.sav";
         if (!save) {
             const std::mt19937 kept = g_rng;
             g_rng.seed(uint32_t(op.a) * 7919u + uint32_t(op.b));
-            g_files[name] = MakeLoadFile(coop);
+            g_files[name] = manager ? MakeManagerFile() : formation ? std::string() : MakeLoadFile(coop);
+            if (formation && P(0.9)) {
+                // (A formation's: 9999 { 1000 { the shape } } and unknown chunks.)
+                std::string f;
+                auto chunk = [](uint16_t id, const std::string &payload) {
+                    std::string c;
+                    const uint32_t size = uint32_t(6 + payload.size());
+                    c.append(reinterpret_cast<const char *>(&id), 2);
+                    c.append(reinterpret_cast<const char *>(&size), 4);
+                    return c + payload;
+                };
+                if (P(0.8))
+                    f += chunk(1000, std::string(4, char(I(0, 9))));
+                if (P(0.3))
+                    f += chunk(1002, std::string());
+                g_files[name] = chunk(uint16_t(P(0.9) ? 9999 : 9998), f) + (P(0.5) ? chunk(0x7777, std::string(4, char(1))) : std::string());
+            }
             g_rng = kept;
         }
         bool result;
         if (side) {
             C_chunk chunk;
             chunk.Open(name, save);
-            result = coop ? (save ? pc->SaveGame(chunk) : pc->LoadGame(chunk)) : (save ? p->SaveGame(chunk) : p->LoadGame(chunk));
+            if (manager)
+                result = save ? g_portManager->SaveGame(chunk) : g_portManager->LoadGame(chunk);
+            else if (formation) {
+                C_Formation *f = static_cast<C_Formation *>(Formation(1, op.b));
+                result = save ? f->SaveGame(chunk) : f->LoadGame(chunk);
+            } else
+                result = coop ? (save ? pc->SaveGame(chunk) : pc->LoadGame(chunk)) : (save ? p->SaveGame(chunk) : p->LoadGame(chunk));
             // (The game's save goes on: the next module's chunk; a load: where the reader is left.)
             if (save) {
                 chunk.Begin(0x7777);
@@ -1043,8 +1212,11 @@ void Run(int side, const S_Op &op)
             alignas(16) uint8_t chunk[0x500] = {};
             OriginalAt<T_ChunkOpen>(0x00405620)(chunk, name, save);
             // (The base's SaveGame / LoadGame through the co-op team's vtable: its slots 0x1C / 0x20.)
-            void *self = coop ? oc : o;
-            const uint32_t fn = coop ? (*reinterpret_cast<uint32_t **>(oc))[(save ? 0x1C : 0x20) / 4] : (save ? 0x0045de90u : 0x0045e040u);
+            void *self = manager ? static_cast<void *>(g_origManager) : formation ? Formation(0, op.b) : coop ? oc : o;
+            const uint32_t fn = manager     ? (save ? 0x00460cd0u : 0x00460fb0u)
+                                : formation ? (save ? 0x00460410u : 0x004605c0u)
+                                : coop      ? (*reinterpret_cast<uint32_t **>(oc))[(save ? 0x1C : 0x20) / 4]
+                                            : (save ? 0x0045de90u : 0x0045e040u);
             result = reinterpret_cast<T_RetBP>(uintptr_t(fn))(self, chunk);
             if (save) {
                 const int next = 0x12345678;
@@ -1111,6 +1283,51 @@ void Run(int side, const S_Op &op)
         if (h)
             side ? pc->GetEnemyRecords().Remove(h) : OriginalAt<T_P>(0x0045e540)(ocrec, h);
         break;
+    case OP_M_TICK:
+        side ? g_portManager->Tick(op.a) : OriginalAt<T_I>(0x00460ae0)(g_origManager, op.a);
+        break;
+    case OP_M_START:
+        side ? g_portManager->StartMission(op.b >= 0) : OriginalAt<T_B>(0x00460aa0)(g_origManager, op.b >= 0);
+        break;
+    case OP_M_STOP:
+        side ? g_portManager->StopMission(op.b >= 0) : OriginalAt<T_B>(0x00460b30)(g_origManager, op.b >= 0);
+        break;
+    case OP_M_RESTART:
+        side ? g_portManager->RestartMission(op.b >= 0) : OriginalAt<T_B>(0x00460c20)(g_origManager, op.b >= 0);
+        break;
+    case OP_M_REMOVE_FROM:
+        Log("result %d", side ? g_portManager->RemoveFromFormation(h) : OriginalAt<T_RetBP>(0x00461240)(g_origManager, h));
+        break;
+    case OP_M_GET: {
+        void *f = side ? static_cast<void *>(g_portManager->GetFormation(h, op.b >= 0)) : OriginalAt<T_RetPPB>(0x00461290)(g_origManager, h, op.b >= 0);
+        Log("result formation %d", FormationIndex(side, f));
+        break;
+    }
+    case OP_M_DESTROY: {
+        // (A formation of the list, or a pointer that is none.)
+        void *f = Formation(side, op.b);
+        if (!f)
+            f = g_item;
+        side ? g_portManager->DestroyFormation(static_cast<C_Formation *>(f)) : OriginalAt<T_P>(0x00461390)(g_origManager, f);
+        break;
+    }
+    case OP_F_ADD: {
+        void *f = Formation(side, op.b);
+        // (Its vtable's AddMember on the original's: 0x004603c0.)
+        Log("result %d", side ? static_cast<C_Formation *>(f)->AddMember(h) : OriginalAt<T_RetBP>(0x004603c0)(f, h));
+        break;
+    }
+    case OP_F_REMOVE: {
+        void *f = Formation(side, op.b);
+        int index = -7;
+        using T_Remove = bool(__attribute__((thiscall)) *)(void *, void *, int *);
+        const bool r = side ? static_cast<C_Formation *>(f)->RemoveMember(h, &index) : OriginalAt<T_Remove>(0x00460850)(f, h, &index);
+        Log("result %d %d", r, index);
+        break;
+    }
+    case OP_F_TICK:
+        side ? static_cast<C_Formation *>(Formation(side, op.b))->Tick(op.a) : OriginalAt<T_I>(0x00460a10)(Formation(side, op.b), op.a);
+        break;
     default:
         break;
     }
@@ -1139,7 +1356,24 @@ void TestScenarios()
         o.b = b;
         return o;
     };
-    switch (P(0.5) ? I(0, 6) : -1) {
+    switch (P(0.55) ? I(0, 8) : -1) {
+    case 7: {
+        // The tactical view up: an enemy seen and lost (faded out), then forgotten.
+        const int h = I(0, HUMANS - 1);
+        g_w.health[h] = 50;
+        for (S_Op o : {op(OP_TACTICAL, 0, 1), op(OP_REC_ADD, h), op(OP_REC_REMOVE, h), op(OP_UPDATE, 10000)})
+            ops.push_back(o);
+        break;
+    }
+    case 8: {
+        // A server: the co-op team's enemy seen, lost and forgotten on its tick.
+        const int h = I(0, HUMANS - 1);
+        g_w.role = Pick({1u, 5u});
+        g_w.health[h] = 50;
+        for (S_Op o : {op(OP_COOP_REC_ADD, h), op(OP_COOP_REC_REMOVE, h), op(OP_COOP_TICK, 10000)})
+            ops.push_back(o);
+        break;
+    }
     case 4: {
         // An enemy seen by two members, lost by one.
         const int h = I(0, HUMANS - 1);
@@ -1210,8 +1444,22 @@ void TestScenarios()
         g_nextFile = 1;
         std::srand(randSeed);
         SetWorld(side);
-        // The teams, built: the original's by its constructors (in malloc'd blocks), the port's.
-        if (side) {
+        g_shapes[side].clear();
+        // The teams, built: the original's by its constructors (in malloc'd blocks), the port's; in the manager's case
+        // the manager's (the original's constructor 0x00461430).
+        if (g_managerCase) {
+            if (side) {
+                g_portManager = new C_TeamManager(MODULE_TEAM, "TeamMgr");
+                g_port = &g_portManager->m_playerTeam;
+                g_portCoop = &g_portManager->m_coopTeam;
+            } else {
+                using T_ManagerCtor = void *(__attribute__((thiscall)) *)(void *, int, const char *);
+                g_origManager = static_cast<uint8_t *>(std::calloc(1, 0x138));
+                OriginalAt<T_ManagerCtor>(0x00461430)(g_origManager, MODULE_TEAM, "TeamMgr");
+                g_orig = g_origManager + 0x1C;
+                g_origCoop = g_origManager + 0xE8;
+            }
+        } else if (side) {
             g_port = new C_Team();
             g_portCoop = new C_CoopTeam();
         } else {
@@ -1238,7 +1486,15 @@ void TestScenarios()
             g_log.push_back(Snap(side));
         }
         Log("-- destroy");
-        if (side) {
+        if (g_managerCase) {
+            // (Neither frees the formations left.)
+            if (side)
+                delete g_portManager;
+            else {
+                OriginalAt<T_V>(0x004614e0)(g_origManager);
+                std::free(g_origManager);
+            }
+        } else if (side) {
             delete g_port;
             delete g_portCoop;
         } else {
@@ -1276,6 +1532,25 @@ void TestFixes()
         CHECK(team.RemoveMember(static_cast<C_Human *>(Hum(removed))), "the active member %d removed", removed);
         CHECK(Logged(Name(FrameAt(F_BODY + removed)) + " SetOn 1"), "the removed active member %d's model shown", removed);
         CHECK(team.GetActiveIndex() == 0 && team.GetMemberCount() == 2, "the first member active after removing %d", removed);
+    }
+    // The manager's load: a formation's chunk empty (the original read the next bytes as the leader's id) or of an id no
+    // actor has (the original made a formation for the null human): no formation.
+    for (int empty = 0; empty < 2; ++empty) {
+        auto chunk = [](uint16_t id, const std::string &payload) {
+            std::string c;
+            const uint32_t size = uint32_t(6 + payload.size());
+            c.append(reinterpret_cast<const char *>(&id), 2);
+            c.append(reinterpret_cast<const char *>(&size), 4);
+            return c + payload;
+        };
+        const int unknown = 999;
+        g_files["fix.sav"] = chunk(0x2694, chunk(2000, empty ? std::string() : std::string(reinterpret_cast<const char *>(&unknown), 4)));
+        C_TeamManager manager(MODULE_TEAM, "TeamMgr");
+        C_chunk file;
+        file.Open("fix.sav", false);
+        g_log.clear();
+        CHECK(manager.LoadGame(file) && manager.m_formations.empty(), "the manager's load: no formation from %s", empty ? "an empty chunk" : "an unknown id");
+        file.Close();
     }
 }
 
@@ -1321,6 +1596,7 @@ void SetUp()
         {0x006b6a20, reinterpret_cast<const void *>(O_Difficulty)},
         {0x006b69d0, reinterpret_cast<const void *>(O_Coop)},
         {0x005949c0, reinterpret_cast<const void *>(O_ShapeNew)},
+        {0x00597c50, reinterpret_cast<const void *>(O_ShapeLeader)},
         {0x00594a70, reinterpret_cast<const void *>(O_ShapeDelete)},
         {0x007e53c2, reinterpret_cast<const void *>(O_AlignedMalloc)},
         {0x007e559c, reinterpret_cast<const void *>(O_AlignedFree)},
@@ -1352,6 +1628,11 @@ int main()
     g_case = "Team";
     for (g_round = 0; g_round < rounds; ++g_round)
         TestScenarios();
+    g_case = "Manager";
+    g_managerCase = true;
+    for (g_round = 0; g_round < rounds; ++g_round)
+        TestScenarios();
+    g_managerCase = false;
     g_case = "Fixes";
     g_round = 0;
     TestFixes();

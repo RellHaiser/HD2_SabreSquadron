@@ -249,7 +249,8 @@ bool C_TeamBase::LoadGame(C_chunk &chunk)               // 0x00461f30
     // (The chunk's id is not checked.)
     if (!chunk.Descend(id))
         return true;
-    while (chunk.RemainingSize() > 0) {
+    // (While the size left is not 0, negative too: the original's test.)
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         switch (id) {
         case CHUNK_TEAM_BASE_COUNT: {
@@ -441,7 +442,8 @@ bool C_Team::LoadGame(C_chunk &chunk)                   // 0x0045e040
     uint16_t id = 0;
     if (!chunk.Descend(id))
         return true;
-    while (chunk.RemainingSize() > 0) {
+    // (While the size left is not 0, negative too: the original's test.)
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_TEAM_MEMBERS)
             C_TeamBase::LoadGame(chunk);
@@ -959,7 +961,8 @@ bool C_Formation::LoadGame(C_chunk &chunk)              // 0x004605c0
     uint16_t id = 0;
     if (!chunk.Descend(id))
         return false;
-    while (chunk.RemainingSize() > 0) {
+    // (While the size left is not 0, negative too: the original's test.)
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_FORMATION_SHAPE)
             m_shape->LoadGame(chunk);
@@ -1063,7 +1066,8 @@ bool C_TeamManager::LoadGame(C_chunk &chunk)            // 0x00460fb0
     uint16_t id = 0;
     if (!chunk.Descend(id))
         return true;
-    while (chunk.RemainingSize() > 0) {
+    // (While the size left is not 0, negative too: the original's test.)
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_TEAM_MANAGER_PLAYER_TEAM) {
             m_playerTeam.LoadGame(chunk);

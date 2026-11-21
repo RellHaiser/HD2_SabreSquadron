@@ -5089,10 +5089,39 @@ particles and the surface marks. Files are served from memory.
 - **Original's weaknesses (the port's fixes, tested alone):** RemoveMember of the active member showed the member moved
   into its slot and read past the members when it was the last one. Not fixed by the port: C_TeamBase::LoadGame reads
   the name into a buffer it does not end (the game's saves always end it).
-- **Mutations:** 716 mutants, 48 not building, 624 of 668 killed, 44 equivalent or out of reach (mutate_team.py).
+- **Mutations:** 716 mutants, 48 not building, 624 of 668 killed, 44 equivalent or out of reach (mutate_team.py;
+  regenerated in part 77b: see there).
 - **Harness lessons (my mistakes):** reseeding the shared scenario generator inside an operation (a world change, a
   load's file) made the scenarios repeat a 65-round cycle; the generator is now kept around those reseeds here and in
   part 76's fpv_diff.cpp (still 0 failures and every line; a targeted case added for the belt grenade's throw ending
   with the weapon put away, which the cycle had happened to reach). The interface harnesses of parts 64-75 reseed the
   same way (a separate task). Also: _exit skipped gcov's counts; a skip of every index past the members hid the
   selected member's removal; the generated IsUnconscious was mostly true, so the records were never lost.
+
+## Human part 77b (the formations and the team manager, `team.cpp` lines 907-1123, 2026-11-21)
+
+- **The build:** part 77a's (`team/team_diff.cpp`, the "Manager" case): both sides' C_TeamManager (the original's by its
+  constructor; its C_Module base registering itself in the original's module table), its player and co-op teams the
+  team operations' teams; the formation shapes faked by hand (constructed, destroyed, SetLeader keeping the leader at
+  +0x74 that GetLeader reads inline, named by their order while they live: the allocator reuses their addresses).
+- **The tests:** 6,000 scenarios of the team's operations and, half of them, the manager's and its formations': Tick,
+  StartMission / StopMission / RestartMission (server and client), GetFormation (found or made), joining and leaving
+  (script-driven soldiers more often), RemoveFromFormation, DestroyFormation (also of a pointer that is none), the
+  formations' Tick, saves (followed by the next module's chunk, compared byte by byte) and loads (with or without the
+  shape's chunk, unknown chunks, empty files), the manager's saves and loads (the team's chunk, formations by an
+  existing soldier's id); the snapshot: the formations' members, name, id, shape, leader and scripted flag, the
+  manager's flags. "Fixes": the manager's load of an empty formation chunk or of an id no actor has. Left out: a
+  formation for no leader and no human into a formation (both crash); files whose reads run past their chunks.
+- **Results:** 1,628,733 checks (both cases), 0 failures; every line of `team.cpp` but one (611 of 612): SaveGame's
+  `continue` for a null formation (nothing puts one in the list).
+- **Port bugs found and fixed (on main; port mistakes):** the four load loops (C_TeamBase, C_Team, C_Formation,
+  C_TeamManager) stopped once the size left was not positive; the original's go on while it is not 0 (HasMore: a
+  formation's chunk without its shape chunk leaves its loop a level too deep, and the original then reads on).
+- **Original's weaknesses (the port's fixes, tested alone):** the manager's load read the leader's id also from an
+  empty formation chunk and made a formation for whatever it found (a crash for none).
+- **Mutations:** 150 mutants, 5 not building, 136 of 145 killed, 9 equivalent or out of reach (mutate_team_b.py).
+  Part 77a's file regenerated on the changed source: 714 mutants, 48 not building, 622 of 666 killed, 44 survived.
+- **Harness lessons (my mistakes):** the original reaches the squad commander at its global as well as through
+  GetSquadCommander; shapes named by address got the allocator's reused addresses mixed up; files short of ids made
+  both sides read past the file (the original's id then a stack word) or loop for ever: left out; a change to the
+  source after part 77a's mutation file was made broke five of its entries: regenerated and rerun.

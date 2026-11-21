@@ -66,12 +66,6 @@ void F_C_FormationShape_SetType(const void *self, int type)
     Log("%s C_FormationShape::SetType %d", Name(self).c_str(), int(type));
 }
 void __attribute__((thiscall)) O_C_FormationShape_SetType(void *self, int type) { F_C_FormationShape_SetType(self, type); }
-bool F_C_FormationShape_SetLeader(const void *self, const void * leader)
-{
-    Log("%s C_FormationShape::SetLeader %s", Name(self).c_str(), Name(leader).c_str());
-    return Ret<bool>("C_FormationShape::SetLeader");
-}
-bool __attribute__((thiscall)) O_C_FormationShape_SetLeader(void *self, const void * leader) { return F_C_FormationShape_SetLeader(self, leader); }
 bool F_C_FormationShape_AddMember(const void *self, const void * member)
 {
     Log("%s C_FormationShape::AddMember %s", Name(self).c_str(), Name(member).c_str());
@@ -186,7 +180,6 @@ void __attribute__((thiscall)) O_C_CameraModule_SelectView(void *self, int unuse
     {0x005942d0, reinterpret_cast<const void *>(H::O_C_FormationShape_SaveGame)},   /* team.h:88 */ \
     {0x00594560, reinterpret_cast<const void *>(H::O_C_FormationShape_LoadGame)},   /* team.h:89 */ \
     {0x00597420, reinterpret_cast<const void *>(H::O_C_FormationShape_SetType)},   /* team.h:77 */ \
-    {0x00597c50, reinterpret_cast<const void *>(H::O_C_FormationShape_SetLeader)},   /* team.h:83 */ \
     {0x00597f80, reinterpret_cast<const void *>(H::O_C_FormationShape_AddMember)},   /* team.h:81 */ \
     {0x005981c0, reinterpret_cast<const void *>(H::O_C_FormationShape_RemoveMember)},   /* team.h:82 */ \
     {0x0059ba70, reinterpret_cast<const void *>(H::O_C_FormationShape_Tick)},   /* team.h:87 */ \
@@ -218,7 +211,6 @@ void C_ScriptedController::SetFormation(C_FormationShape * formation) { H::F_C_S
 bool C_FormationShape::SaveGame(C_chunk & chunk) { return static_cast<bool>(H::F_C_FormationShape_SaveGame(this, &chunk)); }
 bool C_FormationShape::LoadGame(C_chunk & chunk) { return static_cast<bool>(H::F_C_FormationShape_LoadGame(this, &chunk)); }
 void C_FormationShape::SetType(E_FormationType type) { H::F_C_FormationShape_SetType(this, type); }
-bool C_FormationShape::SetLeader(C_Human * leader) { return static_cast<bool>(H::F_C_FormationShape_SetLeader(this, leader)); }
 bool C_FormationShape::AddMember(C_Human * member) { return static_cast<bool>(H::F_C_FormationShape_AddMember(this, member)); }
 bool C_FormationShape::RemoveMember(C_Human * member) { return static_cast<bool>(H::F_C_FormationShape_RemoveMember(this, member)); }
 void C_FormationShape::Tick(int timeDelta) { H::F_C_FormationShape_Tick(this, timeDelta); }
