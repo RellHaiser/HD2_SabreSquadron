@@ -5016,3 +5016,43 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** LoadGame read nothing until its file was wrapped in a parent chunk (its loop runs
   inside one); the MD5 stamp fake first copied the port's stamp over the original's loaded one; a stray byte made both
   sides read stack words; my edit scripts met heredoc backslashes and non-idempotent half-applied steps.
+
+## Human part 76 (the first-person view, `first_person_view.cpp`, 2026-11-21)
+
+- **The build:** `interface/build_fpv.bat`, `fpv_diff.cpp` (the view compiled into it; the interface kit's frames, the
+  generated engine slot loggers of part 75, `fpv_fakes.inc` for the game's methods), the chunks real on both sides over
+  the animation table in memory; suite `human.first_person_view`.
+- **The world:** the game (its scene's first-person root and primary sector, the interface, the camera mode, the
+  field of view), the camera module by hand (the fields of view kept, so the easing compares), soldiers (vehicle, seat,
+  health, velocity, hands weapon, uniform, belt grenade, stance, view mode, put away) answering by the soldier asked,
+  items and definitions (first-person models, magazines, behaviours, sounds, the uniforms' hands names; the original's
+  inline GetItemDef table filled), the children and finds of the frames (the flash, the warhead, the dummies, the
+  visual "a"), meshes with sleeve textures, animation sets with end times, the caches' answers, RandFloat, the table
+  file (items, 13 events, variants, ratios; empty events and variants, missing ratios, the wrong root).
+- **The tests:** "View": 6,000 scenarios from start fields an earlier life could leave, Init now and then, up to 16
+  operations (all public methods and the private ones the original has on their own) with the world changing between
+  them; "Targeted": 3,000 of the states that random scenarios seldom combine; "Destructors"; "Fixes" alone. Left out
+  (both crash, or the original reads or writes outside its table): a variant without a file chunk or with an empty one
+  (the reader a level too deep: the original then writes names far outside its table), PlayAnim of an item type or
+  event outside the table, a Panzerfaust or belt grenade without a first-person model or the hands, ApplySleeves or the
+  updates without a soldier or a model, a flash time without a flash, an idle event or a draw's sound the original
+  takes for granted. Not compared: the first unused vector's w (a stack word in the original).
+- **Results:** 1,544,028 checks (quick 2,500 rounds in the mutation runs), 0 failures; every line of
+  `first_person_view.cpp` (607 of 607); a full run about 9 s.
+- **Port bugs found and fixed (on main; port mistakes):** the fields of view eased at 0.00314159 a ms (0x3B4DE322) where
+  the original's constant is 0x3B4DE32F; LoadAnimTable below the items stopped once the size left was not positive (the
+  original goes on while it is not 0, HasMore) and kept an id per level (the original one, a failed Descend leaving the
+  last); Refresh stopped the animations before asking whether the hands item is put away; Refresh and RefreshWeapon
+  asked the Panzerfaust's rounds before looking for its warhead; Init left the third unused vector's w 0 (the
+  original's 1, the rotation's).
+- **Original's weaknesses (the port's fixes, tested alone):** LoadAnimTable writes wherever the chunk ids point; the
+  warhead frame taken for granted; a uniform without a first-person model name; the idle event without a hands weapon;
+  PlayAnim outside the table; the draw's sound of a type without a definition. Not this file's: the shared name reader
+  (0x00415d00) does not end the names it reads (the game's FpvAnims.sav ends all 546; the port's ReadChunkString does).
+- **Mutations:** 1,247 mutants, 64 not building, 1,141 of 1,183 killed, 42 equivalent or out of reach
+  (mutate_first_person_view.py).
+- **Harness lessons (my mistakes):** `#define private public` hid that C_chunk::Tell is private (the MSVC check found
+  it; HasMore is the original's test anyway); a mutation run started before the last source edit (restarted);
+  table files the original misreads into writes outside its table looked like port crashes until simulated
+  (fpvsim.py); start fields the game cannot reach (a model with type -1, a flash time without a flash) crashed both
+  sides; the body named by offset (g++ lays C_Human out otherwise); heredoc backslashes once more.

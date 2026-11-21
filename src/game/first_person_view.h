@@ -15,6 +15,7 @@
 
 class C_chunk;
 class C_Human;
+class C_WeaponItem;
 class I3D_animation_set;
 class I3D_frame;
 class I3D_model;
@@ -139,6 +140,8 @@ private:
     void PlayEventSound(int event);                     // 0x004933c0
     // The Panzerfaust's warhead ("ammo"; shown while it is loaded).
     void ShowWarhead(bool on);
+    // ... shown while `weapon` is loaded.
+    void ShowWarhead(C_WeaponItem *weapon);
 
     S_vector4 m_unused00 = {};                          // +0x00 (Init clears them; nothing reads them)
     S_quat m_unused10 = {};                             // +0x10

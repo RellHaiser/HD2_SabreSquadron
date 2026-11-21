@@ -38,7 +38,7 @@ constexpr float FOV2_NORMAL = 1.13446403f;              // 0x3F91361E
 constexpr float FOV2_AIM = 0.69813174f;                 // 0x3F32B8C3
 constexpr float FOV_BINOCULARS = 0.17453294f;           // 0x3E32B8C3
 // The fields of view ease to their targets at pi / 1000 per ms.
-constexpr float FOV_SPEED = 0.00314159f;                // 0x0080ff1c
+constexpr float FOV_SPEED = 0.003141593f;               // 0x0080ff1c (0x3B4DE32F)
 
 // How far the weapon drops: lowered, lowered again after a refresh, put away for a belt grenade.
 constexpr float DROP_LOWERED = -0.2f;
@@ -155,11 +155,11 @@ void C_FirstPersonView::Init()
     m_initialized = true;
     m_pose = FPV_POSE_NONE;
     // (The original also reads the performance counter and its frequency, and drops them.)
-    m_unused00 = {0.0f, 0.0f, 0.0f, 0.0f};
+    m_unused00 = {0.0f, 0.0f, 0.0f, 0.0f};             // (the original's w: a stack word)
     m_magazine = nullptr;
     m_weapon = nullptr;
     m_on = false;
-    m_unused10.Make(S_vector(0.0f, 0.0f, 0.0f), 0.0f);
+    m_unused10.Make(S_vector(0.0f, 0.0f, 1.0f), 0.0f);
     m_fading.clear();
     m_current.anim = nullptr;
     m_itemType = 0;
@@ -171,7 +171,8 @@ void C_FirstPersonView::Init()
     m_aimView = false;
     m_lightLevel = 1.0f;
     LoadAnimTable();
-    m_unused20 = {0.0f, 0.0f, 0.0f, 0.0f};
+    // (The original copies the rotation's temporary: its last word, 1.)
+    m_unused20 = {0.0f, 0.0f, 0.0f, 1.0f};
     m_swayPhase = 0.0f;
     m_flash = nullptr;
     m_flashTime = -1.0f;
@@ -253,24 +254,22 @@ void C_FirstPersonView::LoadAnimTable()
         chunk.Close();
         return;
     }
-    // Quirks kept: the 13 event chunks are read whether the item's chunk has them or not, and a
-    // variant whose first chunk is not 1000 leaves the reader a level too deep.
+    // Quirks kept: one chunk id for every level (a Descend that fails leaves the last one read);
+    // the 13 event chunks are read whether the item's chunk has them or not; a variant whose
+    // first chunk is not 1000 leaves the reader a level too deep, and below the items the reader
+    // goes on while the size left is not 0 (then negative too: HasMore).
     while (chunk.RemainingSize() > 0) {
-        uint16_t itemId = 0;
-        chunk.Descend(itemId);
+        chunk.Descend(id);
+        const int item = id - CHUNK_FPV_ITEM_BASE;
         for (int e = 0; e < FPV_EVENT_COUNT; ++e) {
-            uint16_t eventId = 0;
-            chunk.Descend(eventId);
-            if (chunk.RemainingSize() > 0) {
-                for (int variant = 0; chunk.RemainingSize() > 0;) {
-                    uint16_t variantId = 0;
-                    chunk.Descend(variantId);
-                    if (chunk.RemainingSize() > 0) {
-                        uint16_t fileId = variantId;
-                        chunk.Descend(fileId);
-                        if (fileId == CHUNK_FPV_ANIM_FILE && chunk.RemainingSize() != 0) {
-                            const int item = itemId - CHUNK_FPV_ITEM_BASE;
-                            const int event = eventId - CHUNK_FPV_EVENT_BASE;
+            chunk.Descend(id);
+            if (chunk.HasMore()) {
+                const int event = id - CHUNK_FPV_EVENT_BASE;
+                for (int variant = 0; variant < 4 && chunk.HasMore(); ++variant) {
+                    chunk.Descend(id);
+                    if (chunk.HasMore()) {
+                        chunk.Descend(id);
+                        if (id == CHUNK_FPV_ANIM_FILE && chunk.HasMore()) {
                             // Fix: the original writes wherever the chunk ids point.
                             if (item >= 0 && item < MAX_ITEM_TYPES && event >= 0 && event < FPV_EVENT_COUNT) {
                                 S_FpvAnim &anim = m_anims[item][event];
@@ -280,8 +279,6 @@ void C_FirstPersonView::LoadAnimTable()
                         }
                     }
                     chunk.Ascend();
-                    if (++variant > 3)
-                        break;
                 }
             }
             chunk.Ascend();
@@ -361,6 +358,18 @@ void C_FirstPersonView::ShowWarhead(bool on)
     warhead->Update();
 }
 
+void C_FirstPersonView::ShowWarhead(C_WeaponItem *weapon)
+{
+    // (The frame looked for before the rounds are asked, as the original.)
+    I3D_frame *warhead = m_model->FindChildFrame("ammo", FRAME_MASK_VISUAL);
+    const bool loaded = weapon->GetAmount() > 0.0f;
+    // Fix: the original takes the frame for granted.
+    if (!warhead)
+        return;
+    warhead->SetOn(loaded);
+    warhead->Update();
+}
+
 void C_FirstPersonView::Refresh()
 {
     if (!IsClient() || !m_initialized)
@@ -393,8 +402,10 @@ void C_FirstPersonView::Refresh()
     LoadHands(hands.c_str());
 
     C_WeaponItem *weapon = m_human->GetHandsWeapon();
+    // (Asked before the animations stop, as the original.)
+    const bool none = !weapon || m_human->IsHandsItemPutAway();
     StopAnims();
-    if (!weapon || m_human->IsHandsItemPutAway()) {
+    if (none) {
         SetWeaponView(nullptr, nullptr, -1);
     } else {
         C_AnimatedItemDef *def = static_cast<C_AnimatedItemDef *>(weapon->GetDef());
@@ -402,7 +413,7 @@ void C_FirstPersonView::Refresh()
         I3D_frame *model = def->GetFpvModel();
         SetWeaponView(static_cast<I3D_model *>(model), def->GetFpvMagazine(), weapon->GetTypeId());
         if (weapon->GetTypeId() == ITEM_TYPE_PANZERFAUST)
-            ShowWarhead(weapon->GetAmount() > 0.0f);
+            ShowWarhead(weapon);
         OnInventoryEvent(FPV_EVENT_IDLE, FPV_EVENT_IDLE);
     }
     if (m_model) {
@@ -435,7 +446,7 @@ void C_FirstPersonView::RefreshWeapon()
     I3D_frame *model = def->GetFpvModel();
     SetWeaponView(static_cast<I3D_model *>(model), def->GetFpvMagazine(), weapon->GetTypeId());
     if (weapon->GetTypeId() == ITEM_TYPE_PANZERFAUST)
-        ShowWarhead(weapon->GetAmount() > 0.0f);
+        ShowWarhead(weapon);
     if (m_model) {
         C_Actor *vehicle = m_human->GetVehicle();
         if (vehicle && vehicle->GetType() == ACTOR_CAR && m_human->GetVehicleSeat() == 0)
