@@ -4987,3 +4987,32 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the hashed answers never gave a member's hovered id (100..105), so the click
   handling was never observable; the generated Open / Show fakes left the menus' flags as they were; the rare key
   combinations needed more rounds and a calm profile before the mutations saw them.
+
+## Human part 75f (the game interface's panels, screens and saves, `interface.cpp` lines 1326-1445 and 1524-1696, 2026-11-21)
+
+- **The build:** part 75a's (`interface/build_ui.bat`, `ui_diff.cpp`'s "Panels" case), with the chunks real on both
+  sides (`common/chunk.cpp`; the original's own, its saves inlining them) over data files in memory (the port's
+  rw_data functions defined by the harness, the original's six imports redirected to them).
+- **The world added:** the game's tactical mode, the save stamp (the original's MD5 stamp left to its buffer: the same
+  bytes as the port's, which writes what it last loaded), the files a load reads (inside a chunk of the game's: the
+  interface's chunk, some short or empty, the hints, the stamp, some short, the timer, unknown chunks around one of
+  the interface's), the signals' OnTargetDeleted hand-written (the original's takes no argument: the generated fake
+  popped one).
+- **The tests:** scenarios of Init then up to 14 of ShowInventory, CycleDownPanel, RefreshDownPanel, SetViewMode,
+  OnActorEvent, SetScreen, OpenCommandMap, SaveGame (followed by the next module's chunk; the files compared byte by
+  byte), LoadGame, the fields, the panels' and the soldiers' worlds drawn again, Done. Left out (both crash): the lower
+  panel cycled, placed or loaded before Init; the scope's view without a scope. Not compared: an empty timer chunk (the
+  original's local a stack word), a corrupt save's stray byte. The port's fix, tested alone: a deleted human's radar
+  blip.
+- **Results:** 17,508,200 checks (all part 75 cases), 0 failures; all 199 measured lines of the ranges run; with parts
+  75a-e every line of `interface.cpp` (1,019 of 1,019).
+- **Port bugs found and fixed (on main; port mistakes):** SetScreen(2) switched the objectives off once (the original
+  twice, as the port's own comment said); LoadGame zeroed the interface chunk's value for each chunk (the original once,
+  before its loop: a later chunk too short keeps the value read before).
+- **Original's weaknesses (the port's fixes, tested alone):** OnActorEvent left a deleted human in the radar's blips
+  (read after it was freed).
+- **Mutations:** 249 mutants, 13 not building, 233 of 236 killed, 3 equivalent
+  (mutate_interface_uif.py).
+- **Harness lessons (my mistakes):** LoadGame read nothing until its file was wrapped in a parent chunk (its loop runs
+  inside one); the MD5 stamp fake first copied the port's stamp over the original's loaded one; a stray byte made both
+  sides read stack words; my edit scripts met heredoc backslashes and non-idempotent half-applied steps.

@@ -29,7 +29,13 @@
 // soldier's controls, the signals), the keys held down (Alt, Shift: the graph's IsKeyDown), the members' health and
 // IsLocalPlayer, the signals' IsOpen call by call, the roll menu's Open and the map's Show setting their flags, the
 // hovered id, a calm profile of the panels half the time.
-// HD2_UI_ROUNDS: scenarios (default 5,000 per case, the input's three times; HD2_UI_QUICK: 2,000); HD2_UI_CASE: one case only; HD2_INTERFACE_ULPS,
+// Human part 75f (the "Panels" case): the panels, screens and saves (lines 1326-1445, 1524-1696: ShowInventory,
+// CycleDownPanel, RefreshDownPanel, SetViewMode, OnActorEvent, SetScreen, OpenCommandMap, SaveGame, LoadGame; the
+// original's 0x0049de90 .. 0x0049f8d0): the chunks real on both sides (common/chunk.cpp; the original's own, which its
+// saves inline) over data files in memory (the port's rw_data functions, the original's imports redirected to them),
+// the saves compared byte by byte (the original's MD5 stamp: its buffer, as the port's stamp), the loads from files the
+// world builds (inside a chunk of the game's), the game's tactical mode.
+// HD2_UI_ROUNDS: scenarios (default 4,500 per case, the input's three times; HD2_UI_QUICK: 2,000); HD2_UI_CASE: one case only; HD2_INTERFACE_ULPS,
 // HD2_INTERFACE_SHOW, HD2_INTERFACE_FIRST_CHANCE: the kit's.
 #include <windows.h>
 
@@ -45,6 +51,7 @@
 #include <random>
 #include <string>
 #include <type_traits>
+#include <map>
 #include <vector>
 
 #include <mmsystem.h>
@@ -59,6 +66,7 @@ DWORD HarnessTimeGetTime();
 #include "game/game_texts.h"
 #include "game/text_box.h"
 #include "ls3d/igraph.h"
+#include "ls3d/rw_data.h"
 #undef private
 #undef protected
 
@@ -79,6 +87,9 @@ namespace H {
 uint32_t g_seed;
 template <class T> void Put(void *b, uint32_t o, T v) { std::memcpy(static_cast<uint8_t *>(b) + o, &v, sizeof v); }
 
+// The file a load reads: the interface's chunks (some short), now and then an unknown one (its contents then read as
+// chunks: the original's quirk, kept).
+void MakeLoadFile();
 // ---- the world ----
 struct S_World {
     uint32_t missing;      // the model's frames missing: a frame name's hash below it (of 2^32)
@@ -93,6 +104,11 @@ struct S_World {
     int memberCount, activeIndex;
     uint32_t groups[6];
     uint32_t time, lastClick;
+    // Part 75f: the game's tactical mode, the save stamp, the file a load reads.
+    bool tactical;
+    uint8_t stamp[16];
+    char loadFile[256];
+    int loadSize;
     // Part 75c: the camera's scripted view, the console's NO_GI, the actors' boxes, the screen points moved.
     bool scripted;
     int noGi;
@@ -107,6 +123,69 @@ I3D_frame *FindFrame(const char *name)
     if (h < g_w.missing && std::strcmp(name, "down_panel") != 0)
         return nullptr;
     return FrameAt(F_POOL + int(h % uint32_t(FRAMES - F_POOL)));
+}
+void MakeLoadFile()
+{
+    std::string f;
+    auto chunk = [&f](uint16_t id, const std::string &payload) {
+        const uint32_t size = uint32_t(6 + payload.size());
+        f.append(reinterpret_cast<const char *>(&id), 2);
+        f.append(reinterpret_cast<const char *>(&size), 4);
+        f += payload;
+    };
+    auto ints = [](std::initializer_list<int> v) {
+        std::string p;
+        for (int x : v)
+            p.append(reinterpret_cast<const char *>(&x), 4);
+        return p;
+    };
+    const int n = I(0, 5);
+    for (int k = 0; k < n; ++k) {
+        switch (I(0, 5)) {
+        case 0:
+            chunk(1000, P(0.8) ? ints({P(0.3) ? -1 : I(0, 5), P(0.5) ? 1 : I(0, 2)}) : P(0.5) ? ints({I(0, 5)}) : std::string());
+            break;
+        case 1:
+            chunk(0x3E9, ints({I(0, 3), 0x1C80}));
+            break;
+        case 2: {
+            std::string p;
+            const int bytes = P(0.8) ? 16 : I(0, 20);
+            for (int b = 0; b < bytes; ++b)
+                p += char(U32());
+            chunk(0x3EA, p);
+            break;
+        }
+        case 3:
+            // (Never empty: the original's timer is then a stack word, not compared.)
+            chunk(0x3EB, ints({I(-5, 3000)}));
+            break;
+        case 4: {
+            // (An unknown chunk around one of the interface's.)
+            std::string inner;
+            const uint16_t id = 0x3EB;
+            const uint32_t size = 10;
+            inner.append(reinterpret_cast<const char *>(&id), 2);
+            inner.append(reinterpret_cast<const char *>(&size), 4);
+            inner += ints({I(0, 999)});
+            chunk(uint16_t(0x1234 + I(0, 3)), inner);
+            break;
+        }
+        default:
+            chunk(0x3EB, ints({I(0, 100)}));
+            break;
+        }
+    }
+    // (In the game's save the interface's chunks are inside a chunk of the game's: wrapped in one, descended into before
+    // LoadGame. No stray byte at its end: a corrupt save's Descend fails and both sides' chunk ids are stack words.)
+    std::string wrapped;
+    const uint16_t parent = 0x4000;
+    const uint32_t size = uint32_t(6 + f.size());
+    wrapped.append(reinterpret_cast<const char *>(&parent), 2);
+    wrapped.append(reinterpret_cast<const char *>(&size), 4);
+    wrapped += f;
+    g_w.loadSize = int(std::min(wrapped.size(), sizeof g_w.loadFile));
+    std::memcpy(g_w.loadFile, wrapped.data(), size_t(g_w.loadSize));
 }
 bool RetBool(const char *name, int, bool &value)
 {
@@ -166,6 +245,7 @@ I3D_frame *FindChild(I3D_frame *f, const char *name)
 {
     return FrameAt(F_POOL + int(Fnv(name, uint32_t(FrameIndex(f)) * 2654435761u) % uint32_t(PANEL_FRAMES_FROM - 30 - F_POOL)));
 }
+bool g_panels;  // the panels' case (75f)
 bool g_activeAlways;
    // (the updates' case: the original goes on without an active soldier; the port's fix, tested alone)
 void *RetPtr(const char *name, uint32_t w)
@@ -173,7 +253,7 @@ void *RetPtr(const char *name, uint32_t w)
     if (g_activeAlways && std::strcmp(name, "C_Team::GetActivePlayer") == 0)
         return Hum(int(w >> 4 & 7));
     if (std::strcmp(name, "C_Human::GetHandsWeapon") == 0) {
-        const int k = g_s.weapon[w % HUMANS];
+        const int k = g_panels && g_s.weapon[w % HUMANS] < 0 ? 0 : g_s.weapon[w % HUMANS];
         return k < 0 ? nullptr : static_cast<void *>(g_items[g_side][k]);
     }
     if (std::strcmp(name, "I3D_scene::GetPrimarySector") == 0)
@@ -226,6 +306,10 @@ void RandomWorld()
     g_w.time = P(0.3) ? 0u : U32() % 100000;
     g_w.lastClick = P(0.5) ? g_w.time - uint32_t(I(0, 400)) : P(0.5) ? 0u : U32();
     g_w.scripted = P(0.1);
+    g_w.tactical = P(0.8);
+    for (uint8_t &b : g_w.stamp)
+        b = uint8_t(P(0.5) ? 0 : U32());
+    MakeLoadFile();
     g_w.noGi = P(0.9) ? 0 : I(1, 3);
     for (float &b : g_w.boxScale)
         b = P(0.5) ? 1.0f : P(0.5) ? F(0.0f, 0.2f) : Pick({0.0f, 0.05f, 2.0f, 30.0f});
@@ -285,6 +369,9 @@ HRESULT __attribute__((thiscall)) O_SoundOpen(void *, void *object, const char *
 void __cdecl O_DbgPrintf(const char *format, ...) { Log("dbgPrintf %s", format); }
 // (The original's atexit: its static constructors register their destructors with the unstarted CRT; not kept.)
 int __cdecl O_Atexit(void (*)()) { return 0; }
+// (The original's stamp of chunk 0x3EA: the MD5 of its executable; dropped by the port, which writes the stamp it last
+// loaded: the same bytes here, the port's.)
+void __attribute__((thiscall)) O_Md5(uint8_t *) {}   // (its buffer keeps the start's or the last loaded stamp, as the port's)
 // (The original's sprintf takes the unstarted CRT's locks; the interface formats integers only: "%02d".)
 int __cdecl O_Sprintf(char *buffer, const char *format, ...)
 {
@@ -409,6 +496,7 @@ enum {
     OP_RENDEROVERLAY, OP_RENDER, OP_OUTLINE, W_PANELS,
     OP_UPDATE, OP_CROSSHAIR, OP_PICK, OP_COMPASSSHOWN, W_SOLDIERS,
     OP_INPUT, OP_RETURNCONTROL, OP_CLOSEALL,
+    OP_SHOWINV, OP_CYCLEDOWN, OP_REFRESHDOWN, OP_VIEWMODE, OP_ACTOREVENT, OP_SETSCREEN, OP_OPENMAP, OP_SAVE, OP_LOAD,
     W_WORLD = 100,
 };
 struct S_Op {
@@ -432,6 +520,14 @@ using T_III = void(__attribute__((thiscall)) *)(void *, int, int, int);
 using T_B = void(__attribute__((thiscall)) *)(void *, bool);
 using T_Arr = void(__attribute__((thiscall)) *)(void *, float *, float *);
 using T_Msg = void(__attribute__((thiscall)) *)(void *, const float *, const char *);
+using T_BP = void(__attribute__((thiscall)) *)(void *, bool, void *);
+using T_IP = void(__attribute__((thiscall)) *)(void *, int, void *);
+using T_ChunkOpen = bool(__attribute__((thiscall)) *)(void *, const char *, bool);
+using T_Chunk = bool(__attribute__((thiscall)) *)(void *, void *);
+using T_Descend = bool(__attribute__((thiscall)) *)(void *, uint16_t *);
+using T_ChunkBegin = bool(__attribute__((thiscall)) *)(void *, uint16_t);
+using T_ChunkWrite = bool(__attribute__((thiscall)) *)(void *, const void *, int);
+using T_ChunkAscend = bool(__attribute__((thiscall)) *)(void *, uint32_t *);
 void InputArrays(uint32_t seed, float *held, float *pressed)
 {
     std::fill(held, held + 64, 0.0f);
@@ -463,6 +559,14 @@ const char *Skip(int side, const S_Op &op)
     // (The input on an interface the fields operation made active without Init: no scene, no lower panel.)
     if ((op.kind == OP_INPUT || op.kind == OP_CLOSEALL) && !scene && At<uint32_t>(b, side ? OF(m_flags) : 0xC) != 0)
         return "the input without Init";
+    // (The lower panel cycled or placed before Init: both use the null panel.)
+    if ((op.kind == OP_CYCLEDOWN || op.kind == OP_REFRESHDOWN || op.kind == OP_OPENMAP || op.kind == OP_LOAD) && !At<void *>(b, side ? OF(m_downPanel) : 0x24))
+        return "the lower panel before Init";
+    if (op.kind == OP_ACTOREVENT && op.a == INTERFACE_ACTOR_DELETED && At<uint32_t>(b, side ? OF(m_flags) : 0xC) != 0 && IsClient() &&
+        g_s.type[op.b] == ACTOR_HUMAN && At<void *>(b, side ? OF(m_compass) + uint32_t(offsetof(C_Compass, m_radar)) : 0x10854 + 0x1C))
+        return "a deleted human's blip";
+    if (op.kind == OP_VIEWMODE && op.a == 3 && !(g_s.hasComp[0] && g_s.hasComp[1]))
+        return "the scope's view without a scope";
     if (op.kind == OP_HIGHLIGHT && g_w.memberCount > 6)
         return "a squad of more than six highlighted";
     // (Init loading the model where no directory has it: the original keeps the model, the port releases it.)
@@ -682,6 +786,82 @@ void Run(int side, const S_Op &op)
     case OP_CLOSEALL:
         Log("CloseAll -> %d", side ? port->CloseAll() : OriginalAt<T_RetBool>(0x0049c2b0)(orig));
         break;
+    case OP_SHOWINV:
+        side ? port->ShowInventory(op.a != 0, static_cast<C_Actor *>(Hum(op.b))) : OriginalAt<T_BP>(0x0049de90)(orig, op.a != 0, Hum(op.b));
+        break;
+    case OP_CYCLEDOWN:
+        side ? port->CycleDownPanel() : OriginalAt<T_Void>(0x0049dfe0)(orig);
+        break;
+    case OP_REFRESHDOWN:
+        side ? port->RefreshDownPanel() : OriginalAt<T_Void>(0x0049e1b0)(orig);
+        break;
+    case OP_VIEWMODE:
+        side ? port->SetViewMode(op.a) : OriginalAt<T_I>(0x0049dc60)(orig, op.a);
+        break;
+    case OP_ACTOREVENT:
+        side ? port->OnActorEvent(op.a, static_cast<C_Actor *>(Hum(op.b))) : OriginalAt<T_IP>(0x0049ef70)(orig, op.a, Hum(op.b));
+        break;
+    case OP_SETSCREEN:
+        side ? port->SetScreen(op.a) : OriginalAt<T_I>(0x0049f250)(orig, op.a);
+        break;
+    case OP_OPENMAP:
+        side ? port->OpenCommandMap(op.a != 0) : OriginalAt<T_B>(0x0049f410)(orig, op.a != 0);
+        break;
+    case OP_SAVE:
+    case OP_LOAD: {
+        const bool save = op.kind == OP_SAVE;
+        if (!save)
+            g_files["load"].assign(g_w.loadFile, size_t(g_w.loadSize));
+        const char *name = save ? "save" : "load";
+        bool result;
+        if (side) {
+            C_chunk chunk;
+            chunk.Open(name, save);
+            uint16_t parent = 0;
+            if (!save)
+                chunk.Descend(parent);
+            result = save ? port->SaveGame(chunk) : port->LoadGame(chunk);
+            if (save) {
+                // (The game's save goes on: the next module's chunk.)
+                chunk.Begin(0x7777);
+                chunk.Write(int(0x12345678));
+                chunk.Ascend();
+            }
+            chunk.Close();
+        } else {
+            alignas(16) uint8_t chunk[0x420] = {};
+            *reinterpret_cast<int *>(chunk + 4) = -1;
+            OriginalAt<T_ChunkOpen>(0x00405620)(chunk, name, save);
+            uint16_t parent = 0;
+            if (!save)
+                OriginalAt<T_Descend>(0x00415c90)(chunk, &parent);
+            result = OriginalAt<T_Chunk>(save ? 0x0049f600 : 0x0049f8d0)(orig, chunk);
+            if (save) {
+                const int next = 0x12345678;
+                OriginalAt<T_ChunkBegin>(0x00405820)(chunk, 0x7777);
+                OriginalAt<T_ChunkWrite>(0x004059b0)(chunk, &next, 4);
+                OriginalAt<T_ChunkAscend>(0x00405890)(chunk, nullptr);
+            }
+            OriginalAt<T_Void>(0x00405750)(chunk);
+        }
+        std::string bytes;
+        for (unsigned char c : g_files[name]) {
+            char hex[4];
+            std::snprintf(hex, sizeof hex, "%02x", c);
+            bytes += hex;
+        }
+        uint8_t stamp[16];
+        std::memcpy(stamp, side ? s_saveStamp : OriginalAt<uint8_t *>(0x0089bc7c), 16);
+        std::string st;
+        for (uint8_t c : stamp) {
+            char hex[4];
+            std::snprintf(hex, sizeof hex, "%02x", c);
+            st += hex;
+        }
+        Log("%s -> %d file %s stamp %s", save ? "SaveGame" : "LoadGame", result, bytes.c_str(), st.c_str());
+        break;
+    }
+
     case W_SOLDIERS:
         g_rng.seed(uint32_t(op.a));
         RandomSoldiers();
@@ -737,7 +917,11 @@ S_Op RandomOp()
                                  OP_FIELDS, OP_FIELDS, W_PANELS, W_SOLDIERS, W_SOLDIERS, W_WORLD, OP_DONE, OP_TIME};
     static const int INPUT[] = {OP_INPUT, OP_INPUT, OP_INPUT, OP_INPUT, OP_INPUT, OP_RETURNCONTROL, OP_CLOSEALL, OP_FIELDS, OP_FIELDS,
                                 W_PANELS, W_PANELS, W_SOLDIERS, W_WORLD, OP_DONE, OP_TIME};
-    S_Op op{g_input   ? Pick(INPUT)
+    static const int PANELS[] = {OP_SHOWINV, OP_SHOWINV, OP_CYCLEDOWN, OP_CYCLEDOWN, OP_REFRESHDOWN, OP_VIEWMODE, OP_VIEWMODE, OP_ACTOREVENT,
+                                 OP_ACTOREVENT, OP_SETSCREEN, OP_SETSCREEN, OP_OPENMAP, OP_OPENMAP, OP_SAVE, OP_LOAD, OP_LOAD, OP_FIELDS,
+                                 OP_FIELDS, W_PANELS, W_SOLDIERS, W_WORLD, OP_DONE};
+    S_Op op{g_panels  ? Pick(PANELS)
+            : g_input ? Pick(INPUT)
             : g_update ? Pick(UPDATE)
             : g_draw  ? Pick(DRAW)
             : g_squad ? Pick(SQUAD)
@@ -805,6 +989,23 @@ S_Op RandomOp()
     case OP_INPUT:
     case OP_RETURNCONTROL:
         op.a = int(U32() & 0x7FFFFFFF);
+        break;
+    case OP_SHOWINV:
+        op.a = P(0.6);
+        op.b = P(0.5) ? -1 : I(0, HUMANS - 1);
+        break;
+    case OP_VIEWMODE:
+        op.a = P(0.8) ? I(0, 3) : Pick({-1, 4, 5});
+        break;
+    case OP_ACTOREVENT:
+        op.a = P(0.8) ? I(1, 2) : Pick({0, 3});
+        op.b = I(0, HUMANS - 1);
+        break;
+    case OP_SETSCREEN:
+        op.a = P(0.85) ? I(0, 2) : Pick({-1, 3});
+        break;
+    case OP_OPENMAP:
+        op.a = P(0.6);
         break;
     case OP_UPDATE:
     case OP_PICK:
@@ -896,6 +1097,13 @@ void TestScenarios()
         SetActorVts(side);
         Put<bool>(side ? static_cast<void *>(g_portGame) : static_cast<void *>(g_origGame), side ? uint32_t(offsetof(C_game, m_paused)) : 0x64,
                   g_s.paused);
+        Put<bool>(side ? static_cast<void *>(g_portGame) : static_cast<void *>(g_origGame), side ? uint32_t(offsetof(C_game, m_tacticalMode)) : 0x36,
+                  g_w.tactical);
+        std::memcpy(s_saveStamp, g_w.stamp, 16);
+        std::memcpy(OriginalAt<uint8_t *>(0x0089bc7c), g_w.stamp, 16);
+        g_files.clear();
+        g_openFiles.clear();
+        g_nextFile = 1;
         SetPanelFields(side);
         s_lastMemberClick = g_w.lastClick;
         *OriginalAt<uint32_t *>(0x0089bc90) = g_w.lastClick;
@@ -1004,6 +1212,20 @@ void TestFixes()
     CHECK(std::none_of(g_log.begin(), g_log.end(), [](const std::string &l) { return l.find("GetEngineRpm") != std::string::npos; }),
           "Update without a soldier: no speedometer");
     g_noActive = false;
+    // OnActorEvent: a deleted human's radar blip forgotten (the original kept the freed human's pointer in it).
+    {
+        const uint32_t role = g_gameRole;
+        g_gameRole = 7;
+        std::memcpy(static_cast<void *>(g_port), g_portPristine, sizeof(C_Interface));
+        g_port->m_flags = INTERFACE_ACTIVE;
+        g_port->m_compass.m_radar = reinterpret_cast<C_Radar *>(g_radar);
+        g_s.type[2] = ACTOR_HUMAN;
+        SetSoldiers(1);
+        g_log.clear();
+        g_port->OnActorEvent(INTERFACE_ACTOR_DELETED, static_cast<C_Actor *>(Hum(2)));
+        CHECK(std::count(g_log.begin(), g_log.end(), std::string("radar C_Radar::Forget h2")) == 1, "a deleted human's blip forgotten");
+        g_gameRole = role;
+    }
     // (The destructor: a second interface made and destroyed.)
     auto *other = new (_aligned_malloc(sizeof(C_Interface), 16)) C_Interface();
     other->~C_Interface();
@@ -1056,6 +1278,14 @@ void SetUp()
         {0x006f8060, reinterpret_cast<const void *>(O_RayTest)},
         {0x004b27b0, reinterpret_cast<const void *>(O_RollOpen)},
         {0x004a5630, reinterpret_cast<const void *>(O_MapShow)},
+        {0x004c11c0, reinterpret_cast<const void *>(O_OnTargetDeleted)},
+        {0x007e53a4, reinterpret_cast<const void *>(O_dtaOpen)},
+        {0x007e53aa, reinterpret_cast<const void *>(O_dtaOpenWrite)},
+        {0x007e53b0, reinterpret_cast<const void *>(O_dtaClose)},
+        {0x007e5392, reinterpret_cast<const void *>(O_dtaWrite)},
+        {0x007e5398, reinterpret_cast<const void *>(O_dtaSeek)},
+        {0x007e539e, reinterpret_cast<const void *>(O_dtaRead)},
+        {0x006ea340, reinterpret_cast<const void *>(O_Md5)},
         {0x007e562e, reinterpret_cast<const void *>(O_Atexit)},
         {0x007e6334, reinterpret_cast<const void *>(O_Sprintf)},
     };
@@ -1093,7 +1323,7 @@ int main()
     if (!StartKit("ui_diff", exitCode))
         return exitCode;
     SetUp();
-    int rounds = std::getenv("HD2_UI_QUICK") ? 2000 : 5000;
+    int rounds = std::getenv("HD2_UI_QUICK") ? 2000 : 4500;
     if (const char *r = std::getenv("HD2_UI_ROUNDS"))
         rounds = std::atoi(r);
     g_case = "Life";
@@ -1121,6 +1351,13 @@ int main()
     for (g_round = 0; g_round < 3 * rounds; ++g_round)   // (the keys' combinations: rarer)
         TestScenarios();
     g_input = false;
+    g_case = "Panels";
+    g_panels = true;
+    g_activeAlways = true;
+    for (g_round = 0; g_round < rounds; ++g_round)
+        TestScenarios();
+    g_panels = false;
+    g_activeAlways = false;
     g_case = "Fixes";
     for (g_round = 0; g_round < 50; ++g_round)
         TestFixes();

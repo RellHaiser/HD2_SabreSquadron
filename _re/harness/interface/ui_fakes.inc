@@ -841,11 +841,6 @@ void F_C_SignalsPanel_Relayout(const void *self)
     Log("%s C_SignalsPanel::Relayout", Name(self).c_str());
 }
 void __attribute__((thiscall)) O_C_SignalsPanel_Relayout(void *self) { F_C_SignalsPanel_Relayout(self); }
-void F_C_SignalsPanel_OnTargetDeleted(const void *self, const void * actor)
-{
-    Log("%s C_SignalsPanel::OnTargetDeleted %s", Name(self).c_str(), Name(actor).c_str());
-}
-void __attribute__((thiscall)) O_C_SignalsPanel_OnTargetDeleted(void *self, const void * actor) { F_C_SignalsPanel_OnTargetDeleted(self, actor); }
 float F_C_Vehicle_GetEngineRpm(const void *self)
 {
     Log("%s C_Vehicle::GetEngineRpm", Name(self).c_str());
@@ -1090,7 +1085,6 @@ void __attribute__((thiscall)) O_C_Controls_ClearKey(void *self, int key, const 
     {0x004c0ef0, reinterpret_cast<const void *>(H::O_C_SignalsPanel_SetTarget)},   /* interface.h:571 */ \
     {0x004c0f70, reinterpret_cast<const void *>(H::O_C_SignalsPanel_Update)},   /* interface.h:568 */ \
     {0x004c10d0, reinterpret_cast<const void *>(H::O_C_SignalsPanel_Relayout)},   /* interface.h:574 */ \
-    {0x004c11c0, reinterpret_cast<const void *>(H::O_C_SignalsPanel_OnTargetDeleted)},   /* interface.h:573 */ \
     {0x004f4c50, reinterpret_cast<const void *>(H::O_C_Vehicle_GetEngineRpm)},   /* vehicle.h:738 */ \
     {0x005a0890, reinterpret_cast<const void *>(H::O_C_Human_IsLocalPlayer)},   /* human.h:498 */ \
     {0x005a2b10, reinterpret_cast<const void *>(H::O_C_Human_GetHandsWeapon)},   /* human.h:759 */ \
@@ -1266,7 +1260,6 @@ void C_SignalsPanel::Render() { H::F_C_SignalsPanel_Render(this); }
 void C_SignalsPanel::SetTarget(C_Actor * actor) { H::F_C_SignalsPanel_SetTarget(this, actor); }
 void C_SignalsPanel::Update(int timeDelta) { H::F_C_SignalsPanel_Update(this, timeDelta); }
 void C_SignalsPanel::Relayout() { H::F_C_SignalsPanel_Relayout(this); }
-void C_SignalsPanel::OnTargetDeleted(C_Actor * actor) { H::F_C_SignalsPanel_OnTargetDeleted(this, actor); }
 float C_Vehicle::GetEngineRpm() const { return static_cast<float>(H::F_C_Vehicle_GetEngineRpm(this)); }
 bool C_Human::IsLocalPlayer() const { return static_cast<bool>(H::F_C_Human_IsLocalPlayer(this)); }
 C_WeaponItem * C_Human::GetHandsWeapon() const { return static_cast<C_WeaponItem *>(H::F_C_Human_GetHandsWeapon(this)); }

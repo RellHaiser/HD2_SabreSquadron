@@ -1568,7 +1568,9 @@ void C_Interface::SetScreen(int screen)
         m_map.Show(false, false);
         m_cursor.SetMode(-1);
         m_scoreTable.GetFrame()->SetOn(false);
-        // (The original switches the objectives off twice.)
+        // (The objectives switched off twice, as the original does.)
+        if (I3D_frame *objectives = m_objectives.GetFrame())
+            objectives->SetOn(false);
         if (I3D_frame *objectives = m_objectives.GetFrame())
             objectives->SetOn(false);
     } else if (screen == 1) {
@@ -1654,12 +1656,13 @@ bool C_Interface::SaveGame(C_chunk &chunk)
 
 bool C_Interface::LoadGame(C_chunk &chunk)
 {
+    // (Zeroed once, as the original's: a later interface chunk too short keeps the value read before.)
+    int value = 0;
     while (chunk.RemainingSize() > 0) {
         uint16_t id;
         chunk.Descend(id);
         switch (id) {
         case CHUNK_INTERFACE: {
-            int value = 0;
             chunk.Read(value);
             if (value >= 0)
                 PlayerTeam()->SetCommandedIndex(value);

@@ -550,13 +550,6 @@ void C_Radar::Forget(const C_Human *human)
 {
     H::Log("%s C_Radar::Forget %s", H::Name(this).c_str(), H::Name(human).c_str());
 }
-// (The saved game's chunks: part 75f's.)
-bool C_chunk::Begin(uint16_t) { H::Log("chunk Begin"); return true; }
-bool C_chunk::Ascend(uint32_t *) { H::Log("chunk Ascend"); return true; }
-bool C_chunk::Descend(uint16_t &) { H::Log("chunk Descend"); return false; }
-bool C_chunk::Read(void *, int) { H::Log("chunk Read"); return false; }
-int C_chunk::RemainingSize() const { H::Log("chunk RemainingSize"); return 0; }
-bool C_chunk::Write(const void *, int) { H::Log("chunk Write"); return true; }
 extern "C" void dbgPrintf(const char *format, ...) { H::Log("dbgPrintf %s", format); }
 
 // ---- part 75d's: the soldiers' world (vehicles, weapons), the rays, the camera's direction ----
@@ -844,3 +837,72 @@ S_CollisionVolume *C_CollisionWorld::RayTest(const S_vector &from, const S_vecto
 bool C_CameraModule::GetCameraDir(int index, S_vector4 *dir) { return H::CameraDir(index, &dir->x); }
 void C_RollMenu::Open(bool open) { H::RollOpen(this, open); }
 void C_MapScreen::Show(bool show, bool commandMap) { H::MapShow(this, show, commandMap); }
+
+// ---- part 75f's: the data files in memory (both sides: the port's rw_data functions, the original's imports
+// redirected to them), the signals' OnTargetDeleted (the original's takes no argument), the stamp ----
+namespace H {
+std::map<std::string, std::string> g_files;
+struct S_OpenFile {
+    std::string name;
+    size_t at = 0;
+};
+std::map<int, S_OpenFile> g_openFiles;
+int g_nextFile = 1;
+int FileOpen(const char *name, bool write)
+{
+    if (!write && !g_files.count(name))
+        return -1;
+    if (write)
+        g_files[name].clear();
+    g_openFiles[g_nextFile] = S_OpenFile{name, 0};
+    Log("dta open %s %d -> %d", name, write, g_nextFile);
+    return g_nextFile++;
+}
+int FileSeek(int handle, int offset, int origin)
+{
+    S_OpenFile &o = g_openFiles[handle];
+    const std::string &f = g_files[o.name];
+    o.at = origin == 0 ? size_t(offset) : origin == 1 ? o.at + offset : f.size() + offset;
+    return int(o.at);
+}
+int FileRead(int handle, void *data, int size)
+{
+    S_OpenFile &o = g_openFiles[handle];
+    const std::string &f = g_files[o.name];
+    const int got = std::max(0, std::min(int(f.size()) - int(o.at), size));
+    if (got)
+        std::memcpy(data, f.data() + o.at, size_t(got));
+    o.at += size_t(got);
+    return got;
+}
+int FileWrite(int handle, const void *data, int size)
+{
+    S_OpenFile &o = g_openFiles[handle];
+    std::string &f = g_files[o.name];
+    if (o.at + size_t(size) > f.size())
+        f.resize(o.at + size_t(size));
+    std::memcpy(&f[o.at], data, size_t(size));
+    o.at += size_t(size);
+    return size;
+}
+bool FileClose(int handle)
+{
+    Log("dta close %d", handle);
+    return g_openFiles.erase(handle) != 0;
+}
+int __stdcall O_dtaOpen(const char *name, bool archives) { return FileOpen(name, false); }
+int __stdcall O_dtaOpenWrite(const char *name, int) { return FileOpen(name, true); }
+int __stdcall O_dtaSeek(int h, int offset, int origin) { return FileSeek(h, offset, origin); }
+int __stdcall O_dtaRead(int h, void *data, int size) { return FileRead(h, data, size); }
+int __stdcall O_dtaWrite(int h, const void *data, int size) { return FileWrite(h, data, size); }
+bool __stdcall O_dtaClose(int h) { return FileClose(h); }
+void SignalsTargetDeleted(const void *signals) { Log("%s C_SignalsPanel::OnTargetDeleted", Name(signals).c_str()); }
+void __attribute__((thiscall)) O_OnTargetDeleted(void *signals) { SignalsTargetDeleted(signals); }
+}  // namespace H
+int RW_DATA_CALL dtaOpen(const char *name, bool archives) { return H::FileOpen(name, false); }
+int RW_DATA_CALL dtaOpenWrite(const char *name, int) { return H::FileOpen(name, true); }
+int RW_DATA_CALL dtaSeek(int h, int offset, int origin) { return H::FileSeek(h, offset, origin); }
+int RW_DATA_CALL dtaRead(int h, void *data, int size) { return H::FileRead(h, data, size); }
+int RW_DATA_CALL dtaWrite(int h, const void *data, int size) { return H::FileWrite(h, data, size); }
+bool RW_DATA_CALL dtaClose(int h) { return H::FileClose(h); }
+void C_SignalsPanel::OnTargetDeleted(C_Actor *) { H::SignalsTargetDeleted(this); }
