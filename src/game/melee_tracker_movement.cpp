@@ -98,17 +98,17 @@ void NormalizeDir(S_vector &v)
     const float sq = v.x * v.x + v.y * v.y + v.z * v.z;
     if (std::fabs(sq - 1.0f) < 1e-08f)
         return;
-    if (sq >= 1e-08f) {
+    if (!(sq < 1e-08f)) {                               // (a NaN normalised: NaN)
         const float inv = 1.0f / std::sqrt(sq);
         v.x *= inv;
         v.y *= inv;
         v.z *= inv;
     } else if (v.x != 0.0f) {
-        v.x = v.x >= 0.0f ? 1.0f : -1.0f;
+        v.x = v.x < 0.0f ? -1.0f : 1.0f;
     } else if (v.z == 0.0f) {
-        v.y = v.y >= 0.0f ? 1.0f : -1.0f;
+        v.y = v.y < 0.0f ? -1.0f : 1.0f;
     } else {
-        v.z = v.z >= 0.0f ? 1.0f : -1.0f;
+        v.z = v.z < 0.0f ? -1.0f : 1.0f;
     }
 }
 
@@ -118,17 +118,37 @@ void NormalizeDirZYX(S_vector &v)
     const float sq = v.z * v.z + v.y * v.y + v.x * v.x;
     if (std::fabs(sq - 1.0f) < 1e-08f)
         return;
-    if (sq >= 1e-08f) {
+    if (!(sq < 1e-08f)) {                               // (a NaN normalised: NaN)
         const float inv = 1.0f / std::sqrt(sq);
         v.x *= inv;
         v.y *= inv;
         v.z *= inv;
     } else if (v.x != 0.0f) {
-        v.x = v.x >= 0.0f ? 1.0f : -1.0f;
+        v.x = v.x < 0.0f ? -1.0f : 1.0f;
     } else if (v.z == 0.0f) {
-        v.y = v.y >= 0.0f ? 1.0f : -1.0f;
+        v.y = v.y < 0.0f ? -1.0f : 1.0f;
     } else {
-        v.z = v.z >= 0.0f ? 1.0f : -1.0f;
+        v.z = v.z < 0.0f ? -1.0f : 1.0f;
+    }
+}
+
+// NormalizeDir with the square summed x, z, y (AlignToSlope's copies).
+void NormalizeDirXZY(S_vector &v)
+{
+    const float sq = (v.x * v.x + v.z * v.z) + v.y * v.y;
+    if (std::fabs(sq - 1.0f) < 1e-08f)
+        return;
+    if (!(sq < 1e-08f)) {
+        const float inv = 1.0f / std::sqrt(sq);
+        v.x *= inv;
+        v.y *= inv;
+        v.z *= inv;
+    } else if (v.x != 0.0f) {
+        v.x = v.x < 0.0f ? -1.0f : 1.0f;
+    } else if (v.z == 0.0f) {
+        v.y = v.y < 0.0f ? -1.0f : 1.0f;
+    } else {
+        v.z = v.z < 0.0f ? -1.0f : 1.0f;
     }
 }
 
@@ -136,7 +156,10 @@ void NormalizeDirZYX(S_vector &v)
 // original's inlined pattern).
 float SafeLength(float sq)
 {
-    if (sq < 1e-08f)
+    // (The original compares the float's bits as an int: negatives, -0 and a negative NaN are 0.)
+    int32_t bits;
+    std::memcpy(&bits, &sq, sizeof bits);
+    if (bits < 0x322BCC77)                              // 1e-8f
         return 0.0f;
     if (std::fabs(sq - 1.0f) < 1e-08f)
         return 1.0f;
@@ -170,7 +193,7 @@ const S_matrix &MeleeTrackerMatrix(I3D_frame *frame)
 
 void C_MeleeTrackerMovement::Init()
 {
-    m_airSteps = 0.0f;
+    m_airSteps = 0;
     // The collision sphere source frames ("col dummy1/2/.."): kept only when they are dummies.
     for (int i = 0; i < 3; ++i) {
         I3D_frame *frame = m_meleeTracker->GetFrame()->FindChildFrame(COL_FRAME_NAMES[i], FRAME_MASK_ANY);
@@ -230,7 +253,7 @@ void C_MeleeTrackerMovement::Init()
 
     m_speed = 1.0f;
     m_speedTarget = 1.0f;
-    m_240 = 0.0f;
+    m_240 = 0;
     m_250 = 0.0f;
     m_254 = 0.0f;
     m_258 = -10000.1f;                                  // 0xC61C4066, the "no ground height" sentinel
@@ -793,11 +816,8 @@ void C_MeleeTrackerMovement::Bite()
     C_Actor *target = AiTarget(m_meleeTracker);
     if (!target || (m_364 != 5 && m_364 != 6))
         return;
-    // Within 2.1 m of the target (exactly 2.1 bites; a NaN does not) and on the ground (the original tests the
-    // counter's bits: -0 counts as airborne).
-    uint32_t airBits;
-    std::memcpy(&airBits, &m_airSteps, sizeof airBits);
-    if (!(AiTargetDistance(m_meleeTracker) <= 2.1f) || airBits != 0)
+    // Within 2.1 m of the target (exactly 2.1 bites; a NaN does not) and on the ground.
+    if (!(AiTargetDistance(m_meleeTracker) <= 2.1f) || m_airSteps != 0)
         return;
     if (IsServer()) {
         // Dropped: the copy protection makes a cracked copy bite for ten times the damage
@@ -1000,16 +1020,17 @@ void C_MeleeTrackerMovement::Update(int timeDelta)
     const S_vector4 framePos = m_meleeTracker->GetPosition4();
     ClearNetBit(&framePos.x);
 
-    // Deadly / damaging ground materials (server only).
+    // Deadly / damaging ground materials (server only; the time step read unsigned).
     if (IsServer() && m_material > 0x45) {
+        const double t = static_cast<double>(static_cast<uint32_t>(timeDelta));
         float amount = 0.0f;
         E_HitType type = HIT_ENVIRONMENT;
         bool hit = true;
         switch (m_material) {
-        case 0x46: amount = static_cast<float>(timeDelta) * 0.01f; break;
-        case 0x47: amount = static_cast<float>(timeDelta) * 0.03f; break;
-        case 0x5A: amount = static_cast<float>(timeDelta) * 0.02f; break;
-        case 0x48: amount = static_cast<float>(timeDelta) * 0.5f; break;
+        case 0x46: amount = static_cast<float>(t * 0.01f); break;
+        case 0x47: amount = static_cast<float>(t * 0.03f); break;
+        case 0x5A: amount = static_cast<float>(t * 0.02f); break;
+        case 0x48: amount = static_cast<float>(t * 0.5f); break;
         case 0x5D: amount = -1.0f; type = HIT_9; break;
         default: hit = false; break;
         }
@@ -1019,21 +1040,27 @@ void C_MeleeTrackerMovement::Update(int timeDelta)
         }
     }
 
-    // Move the collision volumes to the new sphere positions and update the frame's sector.
+    // The spheres follow the simulated position: the frame is put there for UpdateSpheres (and
+    // its sector updated), then back where it was (the original's order: the frame's own
+    // position is the interpolated one, set elsewhere).
     I3D_frame *frame = m_meleeTracker->GetFrame();
-    const S_vector &framePosNow = MeleeTrackerMatrix(frame)(3);
+    const S_matrix &fm = MeleeTrackerMatrix(frame);
+    const S_vector4 frameWas{fm.m[3][0], fm.m[3][1], fm.m[3][2], fm.m[3][3]};
     const S_vector4 simPos = m_meleeTracker->GetPosition4();
-    if ((framePosNow.x - simPos.x) * (framePosNow.x - simPos.x) +
-            (framePosNow.y - simPos.y) * (framePosNow.y - simPos.y) +
-            (framePosNow.z - simPos.z) * (framePosNow.z - simPos.z) >
-        0.0001f) {
-        frame->SetPos(S_vector(simPos.x, simPos.y, simPos.z));
-        const S_vector sectorPos(simPos.x, simPos.y + 0.5f, simPos.z);
-        I3D_sector *oldSector = static_cast<I3D_sector *>(frame->GetParent());
+    const float dx = frameWas.x - simPos.x, dy = frameWas.y - simPos.y, dz = frameWas.z - simPos.z;
+    bool placed = false;
+    const auto place = [&](const S_vector4 &at) {
+        frame->SetPos(S_vector(at.x, at.y, at.z));
+        const S_vector sectorPos(at.x, at.y + 0.5f, at.z);
+        I3D_frame *oldSector = frame->GetParent();
         I3D_sector *newSector = GetGame()->GetScene()->GetSector(sectorPos);
         if (oldSector && oldSector->GetType() == FRAME_SECTOR && oldSector != newSector)
             frame->LinkTo(newSector, 0);
         frame->Update();
+    };
+    if ((dz * dz + dy * dy) + dx * dx > 0.0001f) {
+        place(simPos);
+        placed = true;
     }
 
     UpdateSpheres();
@@ -1051,10 +1078,12 @@ void C_MeleeTrackerMovement::Update(int timeDelta)
         if (!m_volumeB[i])
             continue;
         m_volumeB[i]->center = S_vector(m_spherePos[i].x, m_spherePos[i].y + 0.22f, m_spherePos[i].z);
-        m_volumeB[i]->centerW = m_spherePos[i].w;
+        m_volumeB[i]->centerW = simPos.w;                // (the original's: the position's w, left in its copy)
         m_volumeB[i]->radius = m_sphereRadius[i] * 2.5f;
         g_collisionWorld.MoveVolume(m_volumeB[i]);
     }
+    if (placed)
+        place(frameWas);
 }
 
 // ===========================================================================
@@ -1101,8 +1130,9 @@ int VolumeMaterial(const S_CollisionVolume *volume)
 bool IsGrounded(const S_MoveContacts &contacts)
 {
     bool grounded = true;
-    for (int i = 0; i < contacts.count; ++i) {
-        const bool floor = contacts.normals[i].y > 0.707f ||
+    // (The normal dotted with up as the original's: (x + z) * 0 + y; an infinite x or z is no floor.)
+    for (uint32_t i = 0; i < static_cast<uint32_t>(contacts.count); ++i) {
+        const bool floor = (contacts.normals[i].x + contacts.normals[i].z) * 0.0f + contacts.normals[i].y > 0.707f ||
                            ((contacts.volumes[i]->flags & 0x40) != 0 &&
                             (contacts.volumes[i]->type & 0x100) != 0);
         grounded = grounded && floor;
@@ -1126,25 +1156,27 @@ void MeleeTrackerSlideStep(int timeDelta, float *velocity, float *phase)
     *phase = static_cast<float>(t) + *phase;
 }
 
-// The fall distance over `timeDelta` ms from gravity `velocity` at `phase` (same 85 ms stepping; a
-// faithful transcription of the original's x87, dimensional quirks included). (0x005c62c0)
+// The fall distance over `timeDelta` ms from gravity `velocity` (m/s) at `phase`: the velocity
+// times the time up to each 85 ms step, the velocity gaining 9.81 / 3 at each (as SlideStep).
+// (0x005c62c0)
 float MeleeTrackerGravityDistance(int timeDelta, float velocity, float phase)
 {
     float dist = 0.0f;
-    if (timeDelta > 0) {
-        float vel = velocity;
-        int t = timeDelta;
-        while (phase + static_cast<float>(t) > 85.0f) {
-            dist = 9.81f * 0.33333334f + vel;
-            t = static_cast<int>(static_cast<float>(t) - (85.0f - phase));
-            phase = 0.0f;
-            vel = dist;
-            if (t < 1)
-                return dist;
-        }
-        dist = static_cast<float>(t) * 0.001f * vel + dist;
+    if (timeDelta <= 0)
+        return dist;
+    float vel = velocity;
+    int t = timeDelta;
+    while (phase + static_cast<float>(t) > 85.0f) {
+        const float left = 85.0f - phase;
+        dist = 0.001f * left * vel + dist;
+        vel = 9.81f * 0.33333334f + vel;
+        // (__ftol: the 64-bit integer's low word.)
+        t = static_cast<int>(static_cast<int64_t>(static_cast<float>(t) - left));
+        phase = 0.0f;
+        if (t < 1)
+            return dist;
     }
-    return dist;
+    return static_cast<float>(t) * 0.001f * vel + dist;
 }
 
 }  // namespace
@@ -1170,7 +1202,7 @@ void C_MeleeTrackerMovement::ContactResponse(S_CollisionVolume *hit, char ground
             if (ground) {
                 const S_vector4 sim = m_meleeTracker->GetPosition4();
                 drop = std::fabs(sim.y - hitPos.y) + 0.5f;
-                if (drop <= 1.0f)
+                if (!(drop > 1.0f))
                     doSphere = false;
             }
             if (doSphere && m_374 == 0) {
@@ -1197,7 +1229,7 @@ void C_MeleeTrackerMovement::ContactResponse(S_CollisionVolume *hit, char ground
             }
             g_collisionWorld.SetIgnoredVolume(nullptr, 0);
         }
-        if (move[0] * move[0] + move[1] * move[1] + move[2] * move[2] >= 1e-16f && hit == nullptr) {
+        if (!(move[0] * move[0] + move[1] * move[1] + move[2] * move[2] < 1e-16f) && hit == nullptr) {
             S_vector4 sim = m_meleeTracker->GetPosition4();
             sim.x += move[0] * 0.9f;
             sim.y += move[1] * 0.9f;
@@ -1211,7 +1243,7 @@ void C_MeleeTrackerMovement::ContactResponse(S_CollisionVolume *hit, char ground
             m_258 = -10000.1f;
     } else {
         MeleeTrackerSlideStep(timeDelta, &m_250, &m_254);
-        if (move[0] * move[0] + move[1] * move[1] + move[2] * move[2] >= 1e-16f) {
+        if (!(move[0] * move[0] + move[1] * move[1] + move[2] * move[2] < 1e-16f)) {
             S_vector4 sim = m_meleeTracker->GetPosition4();
             sim.x += move[0] * 0.9f;
             sim.y += move[1] * 0.9f;
@@ -1288,7 +1320,7 @@ void C_MeleeTrackerMovement::AlignToSlope(int timeDelta)
         const float a1 = AngleBetween2D(z1, slopeXZ);
         slope *= RotateYMatrix(-a1);
         S_vector4 s4{slope.x, slope.y, slope.z, 0.0f};
-        RotateAboutX(s4, slopeAngle < 1.5707964f ? -1.5707964f : 1.5707964f);
+        RotateAboutX(s4, !(slopeAngle >= 1.5707964f) ? -1.5707964f : 1.5707964f);   // (a NaN: down)
         slope = S_vector(s4.x, s4.y, s4.z);
         float facingXZ[3] = {dir.x, dir.z, 0.0f};
         float slopeXZ2[3] = {slope.x, slope.z, 0.0f};
@@ -1300,14 +1332,15 @@ void C_MeleeTrackerMovement::AlignToSlope(int timeDelta)
         slope.x = w * dir.x + slope.x * m_200;
         slope.y = w * 0.0f + slope.y * m_200;
         slope.z = w * dir.z + slope.z * m_200;
-        NormalizeDir(slope);
+        NormalizeDirXZY(slope);
 
         if (rate < std::fabs(slope.y - dir.y)) {
-            const float step = slope.y <= dir.y ? -rate : rate;
+            const float step = slope.y > dir.y ? rate : -rate;
             slope.y = step + dir.y;
             NormalizeDir(slope);
         }
-        m_meleeTracker->SetDirection4({slope.x, slope.y, slope.z, dir.w});
+        // (Its w the position's: the original's copy of the slope sits over it.)
+        m_meleeTracker->SetDirection4({slope.x, slope.y, slope.z, sim.w});
         m_turned = 1;
         return;
     }
@@ -1315,12 +1348,12 @@ void C_MeleeTrackerMovement::AlignToSlope(int timeDelta)
     // No ground: flatten the direction's pitch toward level.
     m_200 = 1.0f;
     float y = dir.y;
-    if (std::fabs(y) <= rate)
+    if (!(rate < std::fabs(y)))                         // (a NaN levelled)
         y = 0.0f;
     else
-        y += (y >= 0.0f) ? -rate : rate;
+        y += (y < 0.0f) ? rate : -rate;
     S_vector flat(dir.x, y, dir.z);
-    NormalizeDir(flat);
+    NormalizeDirXZY(flat);
     m_meleeTracker->SetDirection4({flat.x, flat.y, flat.z, dir.w});
     m_turned = 1;
 }
@@ -1333,46 +1366,47 @@ void C_MeleeTrackerMovement::SlopeSlide(S_MoveContacts *contacts, const float *n
 {
     float factor = 0.0f;
     if (hit != nullptr && moving && m_364 <= 4 &&
-        std::fabs(contacts->pos.y - contacts->spheres[0].y) <= 1.0f && m_250 <= 19.62f) {
-        const float ny = normal[1];
+        !(std::fabs(contacts->pos.y - contacts->spheres[0].y) > 1.0f) && !(9.81f + 9.81f < m_250)) {
+        // (The normal dotted with up as the original's: (z + x) * 0 + y.)
+        const float ny = (normal[2] + normal[0]) * 0.0f + normal[1];
         // The move direction (xz) and the surface normal (xz), normalised, dotted.
         S_vector moveDir(contacts->move.x, 0.0f, contacts->move.z);
         NormalizeDir(moveDir);
         S_vector nrm(normal[0], 0.0f, normal[2]);
         NormalizeDir(nrm);
-        float dotXZ = moveDir.x * nrm.x + moveDir.y * nrm.y + moveDir.z * nrm.z;
-        if (ny <= 0.5f && dotXZ <= 0.6f && dotXZ >= -0.6f) {
+        float dotXZ = (moveDir.z * nrm.z + moveDir.x * nrm.x) + moveDir.y * nrm.y;
+        if (!(ny > 0.5f) && !(dotXZ > 0.6f) && !(dotXZ < -0.6f)) {
             factor = m_1fc;
-        } else if (ny <= 0.95f) {
+        } else if (!(ny > 0.95f)) {
             float vertical = (1000.0f / static_cast<float>(timeDelta)) * (contacts->pos.y - groundPos[1]);
             float horizSq = move[0] * move[0] + move[2] * move[2];
             float horiz = SafeLength(horizSq);
             horiz = (horiz * 1000.0f) / static_cast<float>(timeDelta);
             if (horiz > 0.0f && horiz < 1.0f)
                 vertical = vertical / horiz;
-            if (ny <= 0.0f || vertical <= 0.2f || m_1f8 != -10000.1f) {
+            if (!(ny > 0.0f) || !(vertical > 0.2f) || m_1f8 != -10000.1f) {
                 factor = 0.0f;
             } else {
                 if (dotXZ < 0.0f)
                     dotXZ = -dotXZ;
                 factor = (1.0f - ny) * dotXZ * 2.1f;
-                if (factor > 1.0f || ny < 0.55f)
+                if (factor > 1.0f || ny <= 0.55f)
                     factor = 1.0f;
             }
         }
     }
 
-    // Ease m_1fc toward the target factor.
-    if (0.17f < std::fabs((m_1fc - factor) * 100.0f) / static_cast<float>(timeDelta)) {
+    // Ease m_1fc toward the target factor (by more than 0.17 per 100 ms: the double 0.17).
+    if (static_cast<double>(std::fabs((m_1fc - factor) * 100.0f) / static_cast<float>(timeDelta)) > 0.17) {
         const float d = static_cast<float>(timeDelta) * 0.17f * 0.01f;
-        factor = m_1fc <= factor ? m_1fc + d : m_1fc - d;
+        factor = factor < m_1fc ? m_1fc - d : m_1fc + d;
     }
     m_1fc = factor;
     float rate = 1.0f - factor * 0.5f;
     if (rate < 0.65f)
         rate = 0.65f;
     if (factor != 0.0f) {
-        if (factor < 0.9f) {
+        if (!(factor >= 0.9f)) {                       // (a NaN blends)
             contacts->pos.x -= (contacts->pos.x - groundPos[0]) * factor;
             contacts->pos.y -= (contacts->pos.y - groundPos[1]) * factor;
             contacts->pos.z -= (contacts->pos.z - groundPos[2]) * factor;
@@ -1406,14 +1440,15 @@ void C_MeleeTrackerMovement::Move(int timeDelta)
     if (m_240 > 0)
         --m_240;
 
-    const S_vector mv = m_mixer.GetMove();
+    const S_vector4 mv = m_mixer.GetMove4();
     float moveX = mv.x;
     float moveY = mv.y;
     float moveZ = mv.z;
-    const float moveW = 0.0f;                            // local_2c4 (the move's w, carried through)
+    const float moveW = mv.w;                            // local_2c4 (the mixer's scratch w, carried through)
 
     S_CollisionVolume *hit = nullptr;                   // local_314
-    if (moveX * moveX + moveY * moveY + moveZ * moveZ < 1e-16f) {
+    bool grounded = false;                              // the bundle's byte +0x10: every contact is ground
+    if ((moveZ * moveZ + moveX * moveX) + moveY * moveY < 1e-16f) {
         // The root motion is still: settle with a standing ray test under both spheres.
         m_1f8 = -10000.1f;
         if (static_cast<int>(m_1f4) >= 0x8C) {
@@ -1460,7 +1495,7 @@ void C_MeleeTrackerMovement::Move(int timeDelta)
         const S_vector4 sim = m_meleeTracker->GetPosition4();
         int sc = 0;
         for (int i = 0; i < 2; ++i) {
-            bool include = std::fabs(dir.y) >= 0.05f || animClass == 2 || m_240 != 0;
+            bool include = !(std::fabs(dir.y) < 0.05f) || animClass == 2 || m_240 != 0;
             if (!include) {
                 const bool skip = (animClass == 0) ? (i == 0) : (i == 1);
                 include = !skip;
@@ -1494,8 +1529,9 @@ void C_MeleeTrackerMovement::Move(int timeDelta)
                 moveY = -0.1f;
             }
         } else {
+            // Three contacts near the target (within 1.65 m), four farther (or a NaN distance).
             const float biteDist = AiTargetDistance(m_meleeTracker);
-            g_moveIterations = biteDist <= 1.65f ? 4.0f : 3.0f;
+            g_moveIterations = biteDist <= 1.65f ? 3.0f : 4.0f;
         }
         hit = g_collisionWorld.MoveSpheresStepping(contacts);
         g_collisionWorld.SetIgnoredVolume(nullptr, 0);
@@ -1504,8 +1540,8 @@ void C_MeleeTrackerMovement::Move(int timeDelta)
             const float dx = (delta.x + contacts.pos.x) - sim.x;
             const float dy = (contacts.pos.y + delta.y) - sim.y;
             const float dz = (delta.z + contacts.pos.z) - sim.z;
-            if (dy > 0.2f && contacts.move.y < 0.0f && dy - contacts.move.y > 0.3f) {
-                contacts.move = {0.0f, -dy, 0.0f, moveW};
+            if (dy > 0.2f && moveY < 0.0f && dy - moveY > 0.3f) {
+                contacts.move = {0.0f, -dy, 0.0f, sim.w};
                 for (unsigned s = 0; s < contacts.sphereCount; ++s) {
                     contacts.spheres[s].x += dx;
                     contacts.spheres[s].y += dy;
@@ -1519,7 +1555,8 @@ void C_MeleeTrackerMovement::Move(int timeDelta)
                 hit = g_collisionWorld.MoveSpheresStepping(contacts);
                 g_collisionWorld.SetIgnoredVolume(nullptr, 0);
                 if (!hit) {
-                    contacts.pos = {contacts.move.x + dx, dy + contacts.move.y, contacts.move.z + dz, moveW};
+                    // (Into the move: ContactResponse then slides the body by it.)
+                    contacts.move = {contacts.move.x + dx, dy + contacts.move.y, contacts.move.z + dz, sim.w};
                 }
             }
         }
@@ -1545,19 +1582,20 @@ void C_MeleeTrackerMovement::Move(int timeDelta)
             contacts.count = 1;
             contacts.sphere[0] = 0;
             contacts.normals[0] = {rayP.x, rayP.y, rayP.z, 0.0f};
-            contacts.pos = {rayN.x - delta.x, rayN.y - delta.y, rayN.z - delta.z, 0.0f};
+            // (Its w the position's; the original's, for animation class 0, a stack word.)
+            contacts.pos = {rayN.x - delta.x, rayN.y - delta.y, rayN.z - delta.z, sim.w};
             contacts.volumes[0] = hit;
         }
-        m_airSteps = 0.0f;
+        m_airSteps = 0;
     }
 
     {
         S_CollisionVolume *savedHit = hit;
-        const bool grounded = IsGrounded(contacts);
+        grounded = IsGrounded(contacts);
         if (!grounded)
-            m_airSteps = m_airSteps + 1.0f;
+            ++m_airSteps;
         else
-            m_airSteps = 0.0f;
+            m_airSteps = 0;
         // Fix: the original builds a "moving" flag and a surface normal from an uninitialised stack
         // vector here; the port zeroes them (deterministic: the slope-slide via that path stays off).
         const float normal[3] = {0.0f, 0.0f, 0.0f};
@@ -1574,12 +1612,13 @@ applyPosition:
         contacts.pos.z += delta.z;
         const S_vector4 sim = m_meleeTracker->GetPosition4();
         if (moveX == 0.0f && moveZ == 0.0f && static_cast<int>(m_1f4) >= 0) {
+            // Not moving sideways: stay put across (the contact's height kept).
             m_264 += timeDelta;
-            contacts.pos = {sim.x, sim.y, sim.z, sim.w};
+            contacts.pos.x = sim.x;
+            contacts.pos.z = sim.z;
         } else {
             m_264 = 0;
         }
-        const bool grounded = IsGrounded(contacts);
         if (!grounded) {
             m_240 = 5;
         } else {
@@ -1598,12 +1637,12 @@ applyPosition:
 
     // On a slope (the frame pitches), mark moved so the frame is refreshed.
     S_vector forward = MeleeTrackerMatrix(m_meleeTracker->GetFrame())(2);
-    const float sq = forward.x * forward.x + forward.y * forward.y + forward.z * forward.z;
-    if (std::fabs(sq - 1.0f) >= 1e-08f) {
-        if (sq >= 1e-08f)
+    const float sq = (forward.y * forward.y + forward.z * forward.z) + forward.x * forward.x;
+    if (!(std::fabs(sq - 1.0f) < 1e-08f)) {
+        if (!(sq < 1e-08f))
             forward.y *= 1.0f / std::sqrt(sq);
         else if (forward.x == 0.0f && forward.z == 0.0f)
-            forward.y = forward.y >= 0.0f ? 1.0f : -1.0f;
+            forward.y = forward.y < 0.0f ? -1.0f : 1.0f;
     }
     if (std::fabs(forward.y) > 0.01f)
         m_moved = 1;
@@ -1612,8 +1651,9 @@ applyPosition:
         AlignToSlope(timeDelta);
 
     // A debug trajectory line from the body to where it moved (rendered only in a debug build).
-    const S_vector &world = MeleeTrackerMatrix(m_meleeTracker->GetFrame())(3);
-    const float from[4] = {world.x, world.y, world.z, 1.0f};
+    const S_matrix &wm = MeleeTrackerMatrix(m_meleeTracker->GetFrame());
+    const S_vector world(wm.m[3][0], wm.m[3][1], wm.m[3][2]);
+    const float from[4] = {world.x, world.y, world.z, wm.m[3][3]};
     const float to[4] = {world.x + moveX, world.y + moveY, world.z + moveZ, 1.0f};
     DrawDebugLine(from, to, 0xFFFF00, 0);
 }

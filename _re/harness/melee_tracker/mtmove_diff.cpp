@@ -1,7 +1,7 @@
-// Human part 81a: the meleeTracker's movement (game/melee_tracker_movement.cpp: C_MeleeTrackerMovement, the tracker's
+// Human parts 81a and 81b: the meleeTracker's movement (game/melee_tracker_movement.cpp: C_MeleeTrackerMovement, the tracker's
 // field at +0x90, 0x410 bytes in the original's layout), its life cycle, modes, animation sequences, turning, sounds,
-// network position, ground check, bite and saved games, against the original's (0x005c0d10 .. 0x005c8b10, 0x005d09b0
-// .. 0x005d1f50; Update and Move are part 81b's). MinGW; build_mtmove.bat; runs mtmove_diff.exe ("mtmove_diff: N
+// network position, ground check, bite and saved games (81a), Update, Move and their collision helpers (81b), against
+// the original's (0x005c0d10 .. 0x005c8b30, 0x005d09b0 .. 0x005d1f50). MinGW; build_mtmove.bat; runs mtmove_diff.exe ("mtmove_diff: N
 // checks, 0 failures"). melee_tracker_movement.cpp is compiled into this file, the mixer (part 80's) linked; each side
 // runs its own mixer.
 // Each side has its movement (the same start bytes but for the tracker's pointer and the volumes'), its tracker (the
@@ -10,14 +10,18 @@
 // its target. Shared: the frames (the interface kit's arena: the tracker's model with its stages (as part 80's), the
 // collision dummies, "anim2", the bones), the animation table (0x008ac5c0), the animation sets, the materials. Faked on
 // both sides with the same loggers: the collision world (AddVolume, RemoveVolume, MoveVolume; the volumes named by
-// their slot), CollisionSphereTest (a scripted answer), the sound module (Play: the whole request; Stop), the game
+// their slot; SetIgnoredVolume(s)), CollisionSphereTest (a scripted answer; 81b's operations: the stream below),
+// CollisionRayTest and the body sweep MoveSpheresStepping (one scripted answer stream per scenario, taken in call order;
+// the sweep's request logged), the debug trajectory line, the tracker's Hit, the scene's GetSector (two sectors), the sound module (Play: the whole request; Stop), the game
 // (GetCameraModule, SetViewDir, Print, the scene's UpdateFrameSector), the player's MouseLook, the player team's
 // AddSeenMeleeTracker, the target's Hit, the graph's mouse; AngleBetween2D and RotateAboutY are the original's on both
-// sides. _aligned_malloc / _aligned_free and rand are the test's CRT's on both sides.
+// sides. _aligned_malloc / _aligned_free and rand are the test's CRT's on both sides. The original's Move reads stack
+// words it never wrote: its stack is zeroed first (Update's call of it patched to the zeroing wrapper), and after a Move
+// the w words that can carry them (the tracker's position, the net positions', the facing's...) are not compared.
 // Each scenario sets the world, then runs up to 14 operations; the logs (every call out, the results, the movement's
 // bytes (the pointers by name), its volumes, the tracker's position and direction, the model's stages after each
 // operation) compared.
-// HD2_MTMOVE_ROUNDS: scenarios (default 30,000; HD2_MTMOVE_QUICK: 10,000); the kit's HD2_INTERFACE_* switches.
+// HD2_MTMOVE_ROUNDS: scenarios (default 27,000; HD2_MTMOVE_QUICK: 10,000); the kit's HD2_INTERFACE_* switches.
 #include <windows.h>
 
 #include <algorithm>
@@ -93,7 +97,10 @@ C_MeleeTrackerMovement &Mv() { return g_mv[g_side]; }
 alignas(16) uint8_t g_tracker[2][0x800];                // [0] the original's layout, [1] the port's C_MeleeTracker
 alignas(16) uint8_t g_ai[2][0x100];                     // the controllers (the original's layout on both)
 alignas(16) uint8_t g_target[2][0x800];                 // the target actors
-void *g_aiVt[2][0x40], *g_targetVt[2][0x80];
+void *g_aiVt[2][0x40], *g_targetVt[2][0x80], *g_trackerVt[2][0x80];
+// The volumes the collision queries answer with (their flags and types the scenario's).
+constexpr int HITVOLS = 4;
+alignas(16) S_CollisionVolume g_hitVol[HITVOLS];
 alignas(16) uint8_t g_origGame[0x100], g_portGame[0x2000];
 uint8_t g_camera[0x10], g_team[0x10], g_sound[0x10], g_player[0x10];
 void *g_cameraVt[0x40], *g_soundVt[0x40];
@@ -105,10 +112,11 @@ const uint32_t O_FRAME = 0x20, O_POS = 0x30, O_DIR = 0x40, O_STATS = 0x4A0, O_AI
 uint32_t TrackerOff(int side, uint32_t orig, uint32_t port) { return side ? port : orig; }
 void *Tracker(int side) { return g_tracker[side]; }
 
-// ---- the frames (the arena): 0 the tracker's model, 1..3 the collision dummies, 4 "anim2", 5.. the bones ----
+// ---- the frames (the arena): 0 the tracker's model, 1..3 the collision dummies, 4 "anim2", 5..12 the bones, 13 and
+// 14 two sectors (Update's) ----
 const char *const FRAME_NAMES[] = {"model", "col dummy1", "col dummy2", "col dummy", "anim2", "d", "w", "f", "c", "h",
-                                   "p", "t", "l"};
-constexpr int NFRAMES = 13;
+                                   "p", "t", "l", "sector1", "sector2"};
+constexpr int NFRAMES = 15, SECTOR1 = 13;
 I3D_frame *Model() { return FrameAt(0); }
 
 // ---- the model's stages and the animation sets (part 80's) ----
@@ -149,6 +157,9 @@ std::string PartName(const void *p)
     const int s = SetIndex(p);
     if (s >= 0)
         return "set" + std::to_string(s);
+    for (int i = 0; i < HITVOLS; ++i)
+        if (p == &g_hitVol[i])
+            return "hit" + std::to_string(i);
     for (int side = 0; side < 2; ++side) {
         if (p == &g_mv[side])
             return "movement";
@@ -243,9 +254,22 @@ void __stdcall M_AdvanceStages(void *f, const int *times)
 }
 
 // ---- the world's answers ----
+// The collision queries' answers: a scripted stream each scenario, taken in call order on both sides.
+constexpr int ANSWERS = 64;
+struct S_Answer {
+    bool hit;
+    int vol;                                            // g_hitVol
+    float frac;                                         // where along the ray / the move it stops
+    S_vector normal;
+    int count;                                          // MoveSpheres: the contacts
+    float posW;                                         // MoveSpheres: the end's w
+    bool bend;                                          // MoveSpheres: changes the move it was given
+    float lift;                                         // MoveSpheres: ends this much higher (a step climbed)
+};
 struct S_World {
     alignas(16) uint8_t mv[sizeof(C_MeleeTrackerMovement)];
     bool volumes;                                       // the movement's volumes allocated
+    int volumeGap;                                      // one slot left empty (-1: none)
     S_Stages stages;
     bool frames[NFRAMES];                               // FindChildFrame finds it
     bool dummy[NFRAMES];                                // of the dummy type
@@ -263,8 +287,15 @@ struct S_World {
     int material[0x60];                                 // the footstep groups (the materials' +0x24 word)
     uint32_t matWord[0x60];                             // their +0x20 word
     std::vector<uint8_t> frames0;                       // the arena's frames (made once: both sides the same)
+    uint32_t matCount;                                  // g_materialCount
+    uint32_t hitFlags[HITVOLS], hitType[HITVOLS];
+    S_Answer answers[ANSWERS];
+    float iterations;                                   // g_moveIterations
 };
 S_World g_w;
+int g_answerAt;
+bool g_queryStream;                                     // the sphere test answers from the stream (81b's operations)
+const S_Answer &NextAnswer() { return g_w.answers[g_answerAt++ % ANSWERS]; }
 int g_soundHandle;
 std::vector<uint8_t> g_materialTable;
 
@@ -298,6 +329,17 @@ S_CollisionVolume *F_SphereTest(const S_vector &from, const S_vector &dir, float
                                 uint32_t types, uint32_t flags)
 {
     Log("SphereTest %s %s %s %x %x", VecText(from).c_str(), VecText(dir).c_str(), FloatText(radius).c_str(), types, flags);
+    if (g_queryStream) {
+        const S_Answer &a = NextAnswer();
+        Log("-> %s %s", a.hit ? Name(&g_hitVol[a.vol]).c_str() : "none", FloatText(a.frac).c_str());
+        if (!a.hit)
+            return nullptr;
+        if (hit)
+            *hit = S_vector(from.x + dir.x * a.frac, from.y + dir.y * a.frac, from.z + dir.z * a.frac);
+        if (normal)
+            *normal = a.normal;
+        return &g_hitVol[a.vol];
+    }
     if (!g_w.sphereHit)
         return nullptr;
     if (hit)
@@ -305,6 +347,59 @@ S_CollisionVolume *F_SphereTest(const S_vector &from, const S_vector &dir, float
     if (normal)
         *normal = S_vector(0.0f, 1.0f, 0.0f);
     return reinterpret_cast<S_CollisionVolume *>(g_camera);   // (any volume: only its being there is read)
+}
+S_CollisionVolume *F_RayTest(const S_vector &from, const S_vector &dir, S_vector *hit, S_vector *normal, uint32_t types,
+                             uint32_t flags)
+{
+    const S_Answer &a = NextAnswer();
+    Log("RayTest %s %s %x %x -> %s %s", VecText(from).c_str(), VecText(dir).c_str(), types, flags,
+        a.hit ? Name(&g_hitVol[a.vol]).c_str() : "none", FloatText(a.frac).c_str());
+    if (!a.hit)
+        return nullptr;
+    if (hit)
+        *hit = S_vector(from.x + dir.x * a.frac, from.y + dir.y * a.frac, from.z + dir.z * a.frac);
+    if (normal)
+        *normal = a.normal;
+    return &g_hitVol[a.vol];
+}
+// The body sweep: its request logged (the spheres' and the move's w are stack words in the original's), then a
+// scripted end and contacts.
+S_CollisionVolume *F_MoveSpheres(S_MoveContacts &c, float iterations)
+{
+    std::string s = "MoveSpheresStepping it " + FloatText(iterations) + " n " + std::to_string(c.sphereCount);
+    for (uint32_t i = 0; i < c.sphereCount && i < MOVE_CONTACTS_MAX; ++i)
+        s += " | " + FloatText(c.radii[i]) + " " + VecText(S_vector(c.spheres[i].x, c.spheres[i].y, c.spheres[i].z));
+    s += " | move " + VecText(S_vector(c.move.x, c.move.y, c.move.z)) + " ex " + Hex(c.excludeFlags) + " " +
+         Hex(c.excludeTypes) + " | pos " + VecText(S_vector(c.pos.x, c.pos.y, c.pos.z)) + " n0 " +
+         VecText(S_vector(c.normals[0].x, c.normals[0].y, c.normals[0].z)) + " count " + std::to_string(c.count);
+    const S_Answer &a = NextAnswer();
+    s += " -> " + (a.hit ? Name(&g_hitVol[a.vol]) : std::string("none")) + " " + std::to_string(a.count) + " " +
+         FloatText(a.frac) + (a.bend ? " bend" : "") + (a.lift != 0.0f ? " lift " + FloatText(a.lift) : std::string());
+    Log("%s", s.c_str());
+    c.count = a.count;
+    for (int k = 0; k < a.count; ++k) {
+        const S_vector n = k ? NextAnswer().normal : a.normal;
+        c.normals[k] = {n.x, n.y, n.z, 0.0f};
+        c.volumes[k] = &g_hitVol[(a.vol + k) % HITVOLS];
+        c.sphere[k] = k & 1;
+    }
+    c.pos = {c.spheres[0].x + c.move.x * a.frac, c.spheres[0].y + (a.lift != 0.0f ? a.lift : c.move.y * a.frac),
+             c.spheres[0].z + c.move.z * a.frac, a.posW};
+    if (a.bend)                                         // (Move reads its own copy of the move, not this one)
+        c.move.y = c.move.y * 0.5f - 0.25f;
+    return a.hit ? &g_hitVol[a.vol] : nullptr;
+}
+void F_IgnoreVolumes(S_CollisionVolume **v, uint32_t count, int unknown)
+{
+    const int at = int(reinterpret_cast<uint8_t *>(v) - reinterpret_cast<uint8_t *>(&Mv()));
+    Log("SetIgnoredVolumes +%x %s %s %u %d", at, Name(v[0]).c_str(), Name(v[1]).c_str(), count, unknown);
+}
+void F_IgnoreVolume(S_CollisionVolume *v, int unknown) { Log("SetIgnoredVolume %s %d", Name(v).c_str(), unknown); }
+void F_DebugLine(const float *from, const float *to, uint32_t color, uint32_t color2)
+{
+    // (The end's w: a stack word in the original's.)
+    Log("DebugLine %s %s %s %x %x", VecText(S_vector(from[0], from[1], from[2])).c_str(), FloatText(from[3]).c_str(),
+        VecText(S_vector(to[0], to[1], to[2])).c_str(), color, color2);
 }
 std::string RequestText(const S_SoundRequest &r)
 {
@@ -333,6 +428,31 @@ S_CollisionVolume *TC O_SphereTest(void *, const S_vector *from, const S_vector 
                                    uint32_t types, uint32_t flags)
 {
     return F_SphereTest(*from, *dir, radius, hit, normal, types, flags);
+}
+S_CollisionVolume *TC O_RayTest(void *, const S_vector *from, const S_vector *dir, S_vector *hit, S_vector *normal, uint32_t types,
+                                uint32_t flags)
+{
+    return F_RayTest(*from, *dir, hit, normal, types, flags);
+}
+S_CollisionVolume *TC O_MoveSpheres(void *, S_MoveContacts *c) { return F_MoveSpheres(*c, *OriginalAt<float *>(0x008441e4)); }
+void TC O_IgnoreVolumes(void *, S_CollisionVolume **v, uint32_t count, int unknown) { F_IgnoreVolumes(v, count, unknown); }
+void TC O_IgnoreVolume(void *, S_CollisionVolume *v, int unknown) { F_IgnoreVolume(v, unknown); }
+void __attribute__((fastcall)) O_DebugLine(const float *from, const float *to, uint32_t color, uint32_t color2)
+{
+    F_DebugLine(from, to, color, color2);
+}
+// The original's Move with its stack zeroed first: it reads stack words it never wrote (the slope bundle's normal,
+// the spheres' w); the port takes them as 0 (the normal: the slope-slide's "moving" path off).
+__attribute__((noinline)) void ZeroStack()
+{
+    uint8_t buf[0x2000];
+    std::memset(buf, 0, sizeof buf);
+    asm volatile("" : : "r"(buf) : "memory");
+}
+void TC O_MoveZeroed(void *self, int timeDelta)
+{
+    ZeroStack();
+    OriginalAt<void(TC *)(void *, int)>(0x005c3420)(self, timeDelta);
 }
 void *__cdecl O_GetSoundModule() { return g_sound; }
 int TC O_Play(void *, const S_SoundRequest *r) { return F_Play(*r); }
@@ -373,8 +493,10 @@ void __stdcall SC_UpdateFrameSector(void *, void *frame, const S_vector &pos)
 }
 void *__stdcall SC_GetSector(void *, const S_vector &pos)
 {
-    Log("scene GetSector %s", VecText(pos).c_str());
-    return nullptr;
+    // (The two sectors split by x; none far out in z.)
+    void *s = std::fabs(pos.z) > 4.0f ? nullptr : FrameAt(pos.x < 0.0f ? SECTOR1 : SECTOR1 + 1);
+    Log("scene GetSector %s -> %s", VecText(pos).c_str(), Name(s).c_str());
+    return s;
 }
 int g_mouse[2];
 // The animation cache's Get (both sides; part 80's): a fake set by its file name.
@@ -424,27 +546,20 @@ void RotateAboutY(S_vector &v, float angle)
 void C_CollisionWorld::AddVolume(S_CollisionVolume *v) { H::F_AddVolume(v); }
 void C_CollisionWorld::RemoveVolume(S_CollisionVolume *v) { H::F_RemoveVolume(v); }
 void C_CollisionWorld::MoveVolume(S_CollisionVolume *v) { H::F_MoveVolume(v); }
-void C_CollisionWorld::SetIgnoredVolume(S_CollisionVolume *v, int unknown) { H::Log("SetIgnoredVolume %s %d", H::Name(v).c_str(), unknown); }
-void C_CollisionWorld::SetIgnoredVolumes(S_CollisionVolume **v, uint32_t count, int unknown)
-{
-    H::Log("SetIgnoredVolumes %u %d", count, unknown);
-}
-S_CollisionVolume *C_CollisionWorld::MoveSpheresStepping(S_MoveContacts &) const
-{
-    H::Log("MoveSpheresStepping");
-    return nullptr;
-}
+void C_CollisionWorld::SetIgnoredVolume(S_CollisionVolume *v, int unknown) { H::F_IgnoreVolume(v, unknown); }
+void C_CollisionWorld::SetIgnoredVolumes(S_CollisionVolume **v, uint32_t count, int unknown) { H::F_IgnoreVolumes(v, count, unknown); }
+S_CollisionVolume *C_CollisionWorld::MoveSpheresStepping(S_MoveContacts &c) const { return H::F_MoveSpheres(c, g_moveIterations); }
 S_CollisionVolume *CollisionSphereTest(const S_vector &from, const S_vector &dir, float radius, S_vector *hit, S_vector *normal,
                                        uint32_t types, uint32_t flags)
 {
     return H::F_SphereTest(from, dir, radius, hit, normal, types, flags);
 }
-S_CollisionVolume *CollisionRayTest(const S_vector &from, const S_vector &dir, S_vector *, S_vector *, uint32_t types, uint32_t flags)
+S_CollisionVolume *CollisionRayTest(const S_vector &from, const S_vector &dir, S_vector *hit, S_vector *normal, uint32_t types,
+                                    uint32_t flags)
 {
-    H::Log("RayTest %s %s %x %x", H::VecText(from).c_str(), H::VecText(dir).c_str(), types, flags);
-    return nullptr;
+    return H::F_RayTest(from, dir, hit, normal, types, flags);
 }
-void DrawDebugLine(const float *, const float *, uint32_t, uint32_t) {}
+void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2) { H::F_DebugLine(from, to, color, color2); }
 C_SoundModule *GetSoundModule() { return reinterpret_cast<C_SoundModule *>(H::g_sound); }
 int C_SoundModule::Play(const S_SoundRequest &r) { return H::F_Play(r); }
 void C_SoundModule::Stop(int *slot) { H::F_Stop(slot); }
@@ -646,6 +761,32 @@ void RandomMixer(C_MeleeTrackerAnimMixer &x)
     x.m_slideTime = I(0, 500);
     x.m_slideStepTime = I(0, 79);
     x.m_stageFinished = uint8_t(P(0.3));
+    // The last move (Move's root motion): still, tiny (1e-16 squared), straight down, or any.
+    const float w = F(-1, 1);
+    if (P(0.25))
+        x.m_move = {0.0f, 0.0f, 0.0f, w};
+    else if (P(0.1))
+        x.m_move = {Fp({0.0f, 5e-9f, 1e-8f}), Fp({0.0f, -7e-9f}), Fp({0.0f, 5e-9f, -1.2e-8f}), w};
+    else if (P(0.15))
+        x.m_move = {0.0f, F(-0.5f, 0.2f), 0.0f, w};
+    else
+        x.m_move = {F(-0.4f, 0.4f), P(0.4) ? 0.0f : F(-0.4f, 0.3f), F(-0.4f, 0.4f), w};
+}
+// A contact's or a ray's surface normal: up, at the floor tests' edges, with a short horizontal part, or any.
+S_vector RandomNormal()
+{
+    if (P(0.25))
+        return S_vector(0.0f, 1.0f, 0.0f);
+    if (P(0.25)) {
+        const float y = Fp({0.707f, std::nextafter(0.707f, 1.0f), 0.5f, 0.95f, 0.55f, 0.0f, -0.3f});
+        const float h = std::sqrt(std::max(0.0f, 1.0f - y * y)), a = F(0, 6.2831853f);
+        return S_vector(h * std::cos(a), y, h * std::sin(a));
+    }
+    if (P(0.1))
+        return S_vector(Fp({0.0f, 1e-5f, -2e-5f}), F(-1, 1), Fp({0.0f, -1e-5f, 3e-5f}));
+    const S_vector n(F(-1, 1), F(-1, 1), F(-1, 1));
+    const float l = std::sqrt(n.x * n.x + n.y * n.y + n.z * n.z);
+    return l > 1e-3f ? S_vector(n.x / l, n.y / l, n.z / l) : S_vector(0.0f, 1.0f, 0.0f);
 }
 void SetFrames();
 void RandomWorld()
@@ -666,9 +807,9 @@ void RandomWorld()
         m.m_sphereRadius[i] = F(0.05f, 0.4f);
     }
     m.m_material = P(0.2) ? -1 : I(0, 0x5F);
-    m.m_1f4 = U32();
-    m.m_1f8 = F(-3, 3);
-    m.m_1fc = F(0, 1);
+    m.m_1f4 = P(0.5) ? uint32_t(I(0, 300)) : P(0.3) ? uint32_t(I(9000, 12000)) : U32();
+    m.m_1f8 = P(0.4) ? -10000.1f : F(-3, 3);
+    m.m_1fc = P(0.2) ? Fp({0.0f, 0.9f, 1.0f}) : F(0, 1);
     m.m_200 = F(0, 2);
     m.m_210 = RandomDir();
     m.m_220 = RandomDir();
@@ -678,14 +819,14 @@ void RandomWorld()
     m.m_234 = U32() & 0xFF;
     m.m_238 = U32() & 0xFF;
     m.m_23c = U32() & 0xFF;
-    m.m_240 = F(0, 2);
+    m.m_240 = P(0.5) ? 0 : I(-1, 6);
     m.m_speed = P(0.4) ? 1.0f : F(0, 2);
     m.m_speedTarget = P(0.3) ? m.m_speed : P(0.4) ? 1.0f : F(0, 2);
-    m.m_airSteps = P(0.6) ? 0.0f : float(I(1, 6));
-    m.m_250 = F(-2, 2);
-    m.m_254 = F(-2, 2);
-    m.m_258 = F(-2, 2);
-    m.m_25c = P(0.5) ? MELEE_TRACKER_MOVE_NO_TIME : I(0, 900);
+    m.m_airSteps = P(0.5) ? 0 : I(1, 8);
+    m.m_250 = P(0.3) ? 0.0f : P(0.15) ? Fp({9.81f, 19.62f}) : F(0, 25);   // (the fall speed)
+    m.m_254 = P(0.3) ? 0.0f : F(0, 85);                 // (its 85 ms step phase)
+    m.m_258 = P(0.4) ? -10000.1f : F(-2, 2);
+    m.m_25c = P(0.5) ? MELEE_TRACKER_MOVE_NO_TIME : P(0.3) ? I(0, 1) : I(0, 900);
     m.m_260 = P(0.5);
     m.m_264 = U32() & 0xFF;
     m.m_bitePending = P(0.3);
@@ -722,7 +863,7 @@ void RandomWorld()
     m.m_36c = uint8_t(P(0.4));
     m.m_370 = P(0.5) ? 0 : P(0.2) ? Ip({1, -1}) : I(-100, 600);
     m.m_374 = P(0.7) ? 0 : I(1, 2);
-    m.m_378 = P(0.5) ? MELEE_TRACKER_MOVE_NO_TIME : I(0, 5000);
+    m.m_378 = P(0.5) ? MELEE_TRACKER_MOVE_NO_TIME : P(0.2) ? I(-5, 1) : I(0, 5000);
     for (int &h : m.m_soundHandle)
         h = P(0.5) ? -1 : I(0, 50);
     m.m_388 = P(0.3) ? 0 : I(0, 300);
@@ -743,6 +884,7 @@ void RandomWorld()
     m.m_400 = FrameAt(12);
     m.m_groundFrame = FrameAt(Ip({6, 5}));             // (Init finds its own: "d" 5, "w" 6)
     g_w.volumes = P(0.85);
+    g_w.volumeGap = P(0.85) ? -1 : I(0, 4);             // (Move's and its helpers' tests of the first slot)
     for (int i = 0; i < STAGES; ++i) {
         g_w.stages.anim[i] = P(0.3) ? -1 : I(0, SETS - 1);
         g_w.stages.weight[i] = P(0.2) ? 0.0f : F(0, 1);
@@ -789,7 +931,7 @@ void RandomWorld()
     g_w.hasAi = true;                                   // (the original reads the controller unchecked)
     g_w.aiMode = Ip({1, 4, 5, 7, 0});
     g_w.hasTarget = P(0.6);
-    g_w.targetDistance = P(0.1) ? 3.4028235e+38f : P(0.1) ? Fp({1.8f, 2.1f}) : F(0, 5);
+    g_w.targetDistance = P(0.1) ? 3.4028235e+38f : P(0.1) ? Fp({1.8f, 2.1f, 1.65f}) : F(0, 5);
     for (S_MeleeTrackerAnim &a : g_w.anims) {
         a.anim = P(0.15) ? nullptr : SetAt(I(0, SETS - 1));
         a.blendTime = P(0.2) ? 0 : I(0, 600);
@@ -800,6 +942,22 @@ void RandomWorld()
     g_w.cooldown = P(0.7) ? 0 : I(1, 3);
     g_w.role = Pick({7u, 1u, 2u});
     g_w.sphereHit = P(0.5);
+    g_w.matCount = P(0.8) ? 0x60 : uint32_t(I(0x20, 0x5F));
+    for (int i = 0; i < HITVOLS; ++i) {
+        g_w.hitFlags[i] = (uint32_t(I(0, 0x5F)) << 24) | (P(0.5) ? 0x40u : 0u) | (U32() & 0x3Fu);
+        g_w.hitType[i] = (P(0.5) ? 0x100u : 0u) | (U32() & 0x80002u);
+    }
+    for (S_Answer &a : g_w.answers) {
+        a.hit = P(0.6);
+        a.vol = I(0, HITVOLS - 1);
+        a.frac = P(0.3) ? Fp({0.0f, 0.5f, 1.0f}) : F(0, 1);
+        a.normal = RandomNormal();
+        a.count = a.hit ? I(1, 3) : P(0.15) ? I(1, 2) : 0;
+        a.posW = F(-1, 1);
+        a.bend = P(0.1);
+        a.lift = P(0.2) ? Fp({0.2f, 0.25f, 0.5f, 0.8f, 1.5f}) : 0.0f;
+    }
+    g_w.iterations = P(0.5) ? 10.0f : F(1, 10);
     for (int i = 0; i < 0x60; ++i) {
         g_w.material[i] = P(0.3) ? -1 : I(0, 40);
         g_w.matWord[i] = P(0.3) ? uint32_t(-1) : U32() & 0x3F;
@@ -821,12 +979,36 @@ void SetFrames()
         const S_vector4 boxMin = {lo, F(-0.4f, 0.0f), F(-0.4f, 0.0f), 0.0f}, boxMax = {hi, F(0.0f, 0.4f), F(0.0f, 0.4f), 0.0f};
         std::memcpy(g_arena.frames[i] + 0x120, &boxMin, sizeof boxMin);
         std::memcpy(g_arena.frames[i] + 0x130, &boxMax, sizeof boxMax);
+        if (i >= SECTOR1)
+            f->m_type = FRAME_SECTOR;
+    }
+    // The model: in a sector or not; its world position at the tracker's (Update's 1e-4 test), its forward unit,
+    // nearly vertical or short (Move's pitch test).
+    I3D_frame *model = Model();
+    model->m_parent = P(0.6) ? FrameAt(SECTOR1 + I(0, 1)) : P(0.5) ? nullptr : FrameAt(5);
+    S_matrix &wm = model->m_worldMatrix;
+    if (P(0.35)) {
+        const float tiny = P(0.5) ? 0.0f : Fp({0.005f, 0.01f, 0.02f});
+        wm.m[3][0] = g_w.pos.x + tiny;
+        wm.m[3][1] = g_w.pos.y;
+        wm.m[3][2] = g_w.pos.z;
+    }
+    if (P(0.3))
+        wm.m[3][3] = F(-1, 1);
+    if (P(0.4)) {
+        static const float rows[][3] = {{0, 0, 1}, {0.6f, 0, 0.8f}, {0, 0.005f, 1}, {0.6f, 0.02f, 0.8f}, {0, 1e-5f, 0},
+                                        {0, -1e-5f, 0}, {1e-5f, 0, 0}, {0, 0, -1e-5f}, {0, 0, 0}, {0, 2, 0}};
+        const auto &r = rows[I(0, 9)];
+        wm.m[2][0] = r[0];
+        wm.m[2][1] = r[1];
+        wm.m[2][2] = r[2];
     }
 }
 void PutTracker(int side)
 {
     uint8_t *t = g_tracker[side];
     std::memset(t, 0, sizeof g_tracker[side]);
+    Put(t, 0, static_cast<void *>(g_trackerVt[side]));   // (Update's Hit)
     Put(t, TrackerOff(side, O_FRAME, P_FRAME), Model());
     Put(t, TrackerOff(side, O_POS, P_POS), g_w.pos);
     Put(t, TrackerOff(side, O_DIR, P_DIR), g_w.dir);
@@ -872,6 +1054,10 @@ void SetWorld(int side)
             v->radius = 0.1f * float(i + 1);
             seed = seed * 31 + 7;
             (i < 2 ? m.m_volumeA[i] : m.m_volumeB[i - 2]) = v;
+            if (i == g_w.volumeGap) {
+                _aligned_free(v);
+                (i < 2 ? m.m_volumeA[i] : m.m_volumeB[i - 2]) = nullptr;
+            }
         }
     }
     g_st = g_w.stages;
@@ -898,11 +1084,23 @@ void SetWorld(int side)
     std::memcpy(g_arena.frames, g_w.frames0.data(), g_w.frames0.size());
     g_soundHandle = 100;
     std::srand(1234);
+    g_materialCount = g_w.matCount;
+    *OriginalAt<uint32_t *>(0x0097b9b8) = g_w.matCount;
+    g_moveIterations = g_w.iterations;
+    *OriginalAt<float *>(0x008441e4) = g_w.iterations;
+    for (int i = 0; i < HITVOLS; ++i) {
+        g_hitVol[i] = S_CollisionVolume();
+        g_hitVol[i].flags = g_w.hitFlags[i];
+        g_hitVol[i].type = g_w.hitType[i];
+    }
+    g_answerAt = 0;
+    g_queryStream = false;
 }
 
 // The movement, its volumes, the tracker's position and direction, the model's stages and sets after an operation.
 // (The original's stack words left out: the mixer's move w, the net velocity's w.)
 bool g_loaded;
+bool g_moveRan;                                         // a Move ran: the position's w may be a stack word's
 std::string Snap(int side)
 {
     C_MeleeTrackerMovement &m = g_mv[side];
@@ -914,6 +1112,10 @@ std::string Snap(int side)
     std::memset(b + 0x3DC, 0, 4);                       // the net velocity's w (SetNetPosition stores a stack word)
     for (uint32_t at : {0x1ACu, 0x1BCu, 0x1CCu, 0x17Cu, 0x21Cu, 0x22Cu})   // the spheres' w (UpdateSpheres), Init's w
         std::memset(b + at, 0, 4);
+    if (g_moveRan)   // the w words copied from the tracker's position or direction (a stack word's after Move): the
+                     // net positions', the facing's, the move direction's, the mixer's add-move and slide
+        for (uint32_t at : {0x39Cu, 0x3ACu, 0x3BCu, 0x18Cu, 0x17Cu, 0x11Cu, 0x13Cu, 0x14Cu})
+            std::memset(b + at, 0, 4);
     if (g_loaded)                                       // the loaded vectors' w (LoadGame's stack copies)
         for (uint32_t at : {0x17Cu, 0x18Cu, 0x21Cu, 0x22Cu, 0x39Cu, 0x3ACu, 0x3BCu, 0x10Cu + 0x10, 0x12Cu + 0x10, 0x13Cu + 0x10})
             std::memset(b + at, 0, 4);
@@ -926,7 +1128,9 @@ std::string Snap(int side)
     for (S_CollisionVolume *v : m.m_volumeB)
         s += " | " + VolumeText(v);
     const uint8_t *t = g_tracker[side];
-    const S_vector4 pos = At<S_vector4>(t, TrackerOff(side, O_POS, P_POS));
+    S_vector4 pos = At<S_vector4>(t, TrackerOff(side, O_POS, P_POS));
+    if (g_moveRan)
+        pos.w = 0.0f;
     S_vector4 dir = At<S_vector4>(t, TrackerOff(side, O_DIR, P_DIR));
     dir.w = 0.0f;                                       // (TurnToFacing stores a stack word there)
     s += " | pos " + VecText(S_vector(pos.x, pos.y, pos.z)) + " " + FloatText(pos.w) + " dir " + VecText(S_vector(dir.x, dir.y, dir.z)) +
@@ -939,6 +1143,7 @@ std::string Snap(int side)
     for (const S_FakeSet &set : g_sets)
         s += " " + std::to_string(set.refCount) + "/" + std::to_string(set.playMode);
     s += " | cooldown " + std::to_string(side ? g_meleeTrackerBarkTurnCooldown : *OriginalAt<int *>(0x008ac5b8));
+    s += " | iterations " + FloatText(side ? g_moveIterations : *OriginalAt<float *>(0x008441e4));
     for (int i = 0; i < NFRAMES; ++i) {
         const I3D_frame *f = FrameAt(i);
         s += " | f" + std::to_string(i) + " " + Hex(f->m_frameFlags) + " " + VecText(f->m_localMatrix(3));
@@ -951,17 +1156,77 @@ enum {
     OP_BIND, OP_INIT, OP_RESET, OP_FREE, OP_OPTIMIZED, OP_OPT_CONTROLLER, OP_SET_MODE, OP_SUB_A, OP_SUB_B, OP_SEQ_A,
     OP_SEQ_B, OP_SEQ_C, OP_PUSH, OP_POP_FRONT, OP_POP_BACK, OP_NET_POS, OP_CLEAR_NET, OP_WORLD_DIR, OP_FACING, OP_TURN_TO,
     OP_TURN_DIR, OP_UPDATE_ANIM, OP_EVENTS, OP_APPLY_NET, OP_CHECK_GROUND, OP_BITE, OP_SAVE, OP_LOAD, OP_LOAD_OWN,
-    OP_SPHERES, OP_STEP, OP_BUILD, OP_ATTACK, OP_SOUND, OP_BARK, OP_CLASS, OP_ONE_SHOT, OP_LUNGE, W_ANSWERS, OPS
+    OP_SPHERES, OP_STEP, OP_BUILD, OP_ATTACK, OP_SOUND, OP_BARK, OP_CLASS, OP_ONE_SHOT, OP_LUNGE,
+    // (81b's)
+    OP_UPDATE, OP_MOVE, OP_CONTACT, OP_ALIGN, OP_SLOPE, OP_GROUNDED, OP_VOLMAT, OP_SLIDE_STEP, OP_GRAVITY, W_ANSWERS, OPS
 };
 struct S_Op {
     int kind, a, b, t;
     float v[4];
     int mouse[2];
+    // (SlopeSlide's and IsGrounded's inputs)
+    S_MoveContacts c;
+    float normal[4], ground[4], move[4];
+    bool moving;
+    int hitVol;
 };
+// SlopeSlide's and IsGrounded's inputs: contacts as a body sweep leaves them, the surface normal, the ground
+// sphere and the move near the slope tests' edges.
+void RandomContacts(S_Op &op)
+{
+    S_MoveContacts &c = op.c;
+    c = S_MoveContacts();
+    c.count = P(0.2) ? 0 : I(1, 3);
+    for (int k = 0; k < c.count; ++k) {
+        const S_vector n = RandomNormal();
+        c.normals[k] = {P(0.03) ? INFINITY : n.x, n.y, n.z, F(-1, 1)};
+        c.volumes[k] = &g_hitVol[I(0, HITVOLS - 1)];
+        c.sphere[k] = I(0, 1);
+    }
+    c.sphereCount = uint32_t(I(1, 2));
+    const S_vector base(F(-3, 3), F(-1, 2), F(-3, 3));
+    c.spheres[0] = {base.x, base.y + (P(0.8) ? F(-1, 1) : Fp({1.0f, -1.0f, 1.5f})), base.z, F(-1, 1)};
+    c.pos = {base.x + F(-0.3f, 0.3f), base.y, base.z + F(-0.3f, 0.3f), F(-1, 1)};
+    c.move = {P(0.1) ? Fp({0.0f, 1e-5f}) : F(-0.3f, 0.3f), F(-0.3f, 0.1f), P(0.1) ? 0.0f : F(-0.3f, 0.3f), F(-1, 1)};
+    const S_vector n = RandomNormal();
+    op.normal[0] = n.x;
+    op.normal[1] = n.y;
+    op.normal[2] = n.z;
+    op.normal[3] = F(-1, 1);
+    op.ground[0] = c.pos.x + F(-0.2f, 0.2f);
+    op.ground[1] = c.pos.y - (P(0.7) ? F(0, 0.3f) : F(-0.3f, 0.3f));
+    op.ground[2] = c.pos.z + F(-0.2f, 0.2f);
+    op.ground[3] = F(-1, 1);
+    op.move[0] = P(0.2) ? Fp({0.0f, 1e-5f}) : F(-0.2f, 0.2f);
+    op.move[1] = F(-0.2f, 0.0f);
+    op.move[2] = P(0.2) ? 0.0f : F(-0.2f, 0.2f);
+    op.move[3] = F(-1, 1);
+    op.moving = P(0.75);
+    op.hitVol = P(0.85) ? I(0, HITVOLS - 1) : -1;
+    if (P(0.5)) {
+        // A slope it slides on: hit and moving, the normal tilted along the move, the end above the ground by about
+        // 0.2 m/s, the move's horizontal speed about 1 m/s (the vertical / horizontal test).
+        op.b |= 1;
+        op.moving = true;
+        op.hitVol = I(0, HITVOLS - 1);
+        const float seconds = float(std::max(op.t, 1)) * 0.001f;
+        const float a = F(0, 6.2831853f), speed = P(0.2) ? 0.0f : F(0.2f, 1.6f) * seconds;
+        op.move[0] = std::cos(a) * speed;
+        op.move[2] = std::sin(a) * speed;
+        c.move = {op.move[0] * Fp({1.0f, -1.0f, 0.3f}), F(-0.1f, 0.0f), op.move[2], F(-1, 1)};
+        const float ny = Fp({0.55f, 0.6f, 0.8f, 0.95f, 0.98f, 0.3f, 0.5f, 0.7f, -0.1f}), h = std::sqrt(1.0f - ny * ny);
+        const float b = P(0.7) ? a : F(0, 6.2831853f);
+        op.normal[0] = std::cos(b) * h;
+        op.normal[1] = ny;
+        op.normal[2] = std::sin(b) * h;
+        c.spheres[0].y = c.pos.y + F(-0.5f, 0.5f);
+        op.ground[1] = c.pos.y - F(0.05f, 2.0f) * 0.2f * seconds;
+    }
+}
 S_Op RandomOp()
 {
     S_Op op{};
-    op.kind = I(0, OPS - 1);
+    op.kind = P(0.3) ? I(OP_UPDATE, OP_GRAVITY) : I(0, OPS - 1);
     op.a = P(0.2) ? Ip({-1, 0, 5, 6, 7, 0x17, 0x7FFFFFFF}) : I(-1, 0x18);
     op.b = P(0.3) ? Ip({0, 1, -1, 3}) : I(-5, 300);
     op.t = P(0.2) ? Ip({0, 1, 10, 100}) : I(0, 300);    // (a time step: the original reads some unsigned)
@@ -1015,6 +1280,10 @@ S_Op RandomOp()
     }
     op.mouse[0] = I(-30, 30);
     op.mouse[1] = I(-30, 30);
+    if ((op.kind == OP_SLIDE_STEP || op.kind == OP_GRAVITY) && P(0.4))
+        op.t = Ip({85, 86, 170, 171, 255, 1000, 100000, -5});   // (the 85 ms steps' edges)
+    if (op.kind == OP_SLOPE || op.kind == OP_GROUNDED)
+        RandomContacts(op);
     return op;
 }
 std::string g_ownSave[2];
@@ -1195,6 +1464,104 @@ void Run(int side, const S_Op &op)
         Log("result %s", FloatText(side ? m.GetLungeRange() : OriginalAt<T>(0x005c8b10)(x)).c_str());
         break;
     }
+    case OP_UPDATE:
+        // (The original's Move, called from its Update, with its stack zeroed first: the call patched.)
+        g_moveRan = g_queryStream = true;
+        g_mouse[0] = op.mouse[0];
+        g_mouse[1] = op.mouse[1];
+        if (side)
+            m.Update(op.t);
+        else {
+            ZeroStack();
+            OriginalAt<T_VI>(0x005c8b30)(x, op.t);
+        }
+        g_queryStream = false;
+        break;
+    case OP_MOVE:
+        g_moveRan = g_queryStream = true;
+        side ? m.Move(op.t) : O_MoveZeroed(x, op.t);
+        g_queryStream = false;
+        break;
+    case OP_CONTACT: {
+        g_moveRan = g_queryStream = true;
+        S_CollisionVolume *hit = op.a & 1 ? &g_hitVol[(op.a >> 1) & 3] : nullptr;
+        const int grounded = op.b & 1;
+        float move[4] = {v[0] * 0.2f, v[1] * 0.2f, v[2] * 0.2f, v[3]};
+        if ((op.a & 0x18) == 0)
+            move[0] = move[1] = move[2] = 0.0f;
+        using T = void(TC *)(void *, void *, int, int, float *);
+        if (side)
+            m.ContactResponse(hit, char(grounded), op.t, move);
+        else {
+            ZeroStack();
+            OriginalAt<T>(0x005c2260)(x, hit, grounded, op.t, move);
+        }
+        g_queryStream = false;
+        break;
+    }
+    case OP_ALIGN:
+        g_queryStream = true;
+        if (side)
+            m.AlignToSlope(op.t);
+        else {
+            ZeroStack();
+            OriginalAt<T_VI>(0x005c26d0)(x, op.t);
+        }
+        g_queryStream = false;
+        break;
+    case OP_SLOPE: {
+        // (The original's takes the normal, the grounded and moving bytes and the hit in one bundle.)
+        S_MoveContacts c = op.c;
+        S_CollisionVolume *hit = op.hitVol >= 0 ? &g_hitVol[op.hitVol] : nullptr;
+        if (op.b & 1) {                                 // (the slide's preconditions: not falling, no slope blend yet)
+            m.m_1f8 = -10000.1f;
+            m.m_250 = 0.0f;
+            if (m.m_364 > 4)
+                m.m_364 = op.a & 3;
+        }
+        if (side)
+            m.SlopeSlide(&c, op.normal, hit, op.moving, op.ground, op.move, op.t);
+        else {
+            struct {
+                float normal[4];
+                uint8_t grounded, moving, pad[2];
+                S_CollisionVolume *hit;
+            } bundle = {{op.normal[0], op.normal[1], op.normal[2], op.normal[3]}, 1, uint8_t(op.moving), {0, 0}, hit};
+            using T = void(TC *)(void *, S_MoveContacts *, void *, const float *, const float *, int);
+            ZeroStack();
+            OriginalAt<T>(0x005c43d0)(x, &c, &bundle, op.ground, op.move, op.t);
+        }
+        Log("pos %s", VecText(S_vector(c.pos.x, c.pos.y, c.pos.z)).c_str());   // (its w: a stack word on some paths)
+        break;
+    }
+    case OP_GROUNDED: {
+        using T = bool(__attribute__((fastcall)) *)(const void *);
+        Log("result %d", int(side ? IsGrounded(op.c) : OriginalAt<T>(0x005c6380)(&op.c)));
+        break;
+    }
+    case OP_VOLMAT: {
+        const S_CollisionVolume *vol = op.a & 4 ? nullptr : &g_hitVol[op.a & 3];
+        using T = int(__attribute__((fastcall)) *)(const void *);
+        Log("result %d", side ? VolumeMaterial(vol) : OriginalAt<T>(0x005c6360)(vol));
+        break;
+    }
+    case OP_SLIDE_STEP: {
+        // (From the operation's numbers: both sides the same.)
+        static const float edges[] = {0.0f, 85.0f, 84.9f};
+        float velocity = v[0] * 5.0f, phase = (op.a & 3) == 3 ? v[1] * 60.0f : edges[op.a & 3];
+        using T = void(__attribute__((fastcall)) *)(int, float *, float *);
+        side ? MeleeTrackerSlideStep(op.t, &velocity, &phase) : OriginalAt<T>(0x005c6250)(op.t, &velocity, &phase);
+        Log("result %s %s", FloatText(velocity).c_str(), FloatText(phase).c_str());
+        break;
+    }
+    case OP_GRAVITY: {
+        static const float edges[] = {0.0f, 85.0f, 84.9f};
+        const float velocity = v[0] * 5.0f, phase = (op.a & 3) == 3 ? v[1] * 60.0f : edges[op.a & 3];
+        using T = float(__attribute__((fastcall)) *)(int, float, float);
+        Log("result %s", FloatText(side ? MeleeTrackerGravityDistance(op.t, velocity, phase)
+                                        : OriginalAt<T>(0x005c62c0)(op.t, velocity, phase)).c_str());
+        break;
+    }
     case OP_SAVE:
     case OP_LOAD:
     case OP_LOAD_OWN: {
@@ -1365,6 +1732,7 @@ void TestScenarios()
         g_nextFile = 1;
         g_ownSave[side].clear();
         g_loaded = false;
+        g_moveRan = false;
         SetWorld(side);
         for (size_t i = 0; i < ops.size(); ++i) {
             const S_Op &op = ops[i];
@@ -1431,6 +1799,11 @@ void SetUp()
     g_aiVt[1][Slot(&C_MeleeTrackerController::DistanceToTarget) / 4] = reinterpret_cast<void *>(V_Distance);
     g_targetVt[0][0xD4 / 4] = reinterpret_cast<void *>(V_Hit);
     g_targetVt[1][Slot(&C_Actor::Hit) / 4] = reinterpret_cast<void *>(V_Hit);
+    for (int side = 0; side < 2; ++side)
+        for (void *&s : g_trackerVt[side])
+            s = reinterpret_cast<void *>(V_Other);
+    g_trackerVt[0][0xD4 / 4] = reinterpret_cast<void *>(V_Hit);
+    g_trackerVt[1][Slot(&C_Actor::Hit) / 4] = reinterpret_cast<void *>(V_Hit);
     for (void *&s : g_cameraVt)
         s = reinterpret_cast<void *>(V_Other);
     g_cameraVt[0x48 / 4] = reinterpret_cast<void *>(O_SetViewDir);
@@ -1451,6 +1824,11 @@ void SetUp()
         {0x006ef9b0, reinterpret_cast<const void *>(O_RemoveVolume)},
         {0x006efbc0, reinterpret_cast<const void *>(O_MoveVolume)},
         {0x00718900, reinterpret_cast<const void *>(O_SphereTest)},
+        {0x00718770, reinterpret_cast<const void *>(O_RayTest)},
+        {0x0071bec0, reinterpret_cast<const void *>(O_MoveSpheres)},
+        {0x006efee0, reinterpret_cast<const void *>(O_IgnoreVolumes)},
+        {0x006efe40, reinterpret_cast<const void *>(O_IgnoreVolume)},
+        {0x0071fad0, reinterpret_cast<const void *>(O_DebugLine)},
         {0x004336c0, reinterpret_cast<const void *>(O_GetSoundModule)},
         {0x006987d0, reinterpret_cast<const void *>(O_GetGame)},
         {0x0069a620, reinterpret_cast<const void *>(O_GetCameraModule)},
@@ -1469,6 +1847,17 @@ void SetUp()
     };
     for (const auto &r : redirects)
         RedirectOriginal(r.at, r.to);
+    // Update's call of Move: to the stack-zeroing one.
+    uint8_t *call = OriginalAt<uint8_t *>(0x005c8b82);
+    if (call[0] != 0xE8) {
+        std::printf("mtmove_diff: Update's call of Move not found\n");
+        std::exit(2);
+    }
+    DWORD old;
+    VirtualProtect(call, 5, PAGE_EXECUTE_READWRITE, &old);
+    const int32_t rel = int32_t(reinterpret_cast<uintptr_t>(&O_MoveZeroed) - (reinterpret_cast<uintptr_t>(call) + 5));
+    std::memcpy(call + 1, &rel, 4);
+    VirtualProtect(call, 5, old, &old);
     g_log.clear();
 }
 
@@ -1484,7 +1873,7 @@ int main()
     ++checks;   // (the bark-turn cooldown's starting value, before any scenario sets it)
     CHECK(*OriginalAt<int *>(0x008ac5b8) == g_meleeTrackerBarkTurnCooldown, "bark cooldown %d / %d",
           *OriginalAt<int *>(0x008ac5b8), g_meleeTrackerBarkTurnCooldown);
-    int rounds = std::getenv("HD2_MTMOVE_QUICK") ? 10000 : 30000;
+    int rounds = std::getenv("HD2_MTMOVE_QUICK") ? 10000 : 27000;
     if (const char *r = std::getenv("HD2_MTMOVE_ROUNDS"))
         rounds = std::atoi(r);
     g_case = "MeleeTrackerMovement";

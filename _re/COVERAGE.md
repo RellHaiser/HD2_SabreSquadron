@@ -5317,3 +5317,60 @@ particles and the surface marks. Files are served from memory.
   matrices had w 0 (the footstep's w unchecked) until the mutation run showed it; the volume frees were not logged;
   BuildSequence's sub-mode branches ran twice in 10,000 scenarios before the bias; a Python edit through a bash
   heredoc collapsed a backslash; run_suites.py's mtmove entry slipped into part 80's commit.
+
+## Human part 81b (the meleeTracker's movement: Update, Move and their helpers, `melee_tracker_movement.cpp`, 2026-11-22)
+
+- **The build:** part 81a's `melee_tracker/mtmove_diff.cpp` (suite `human.mtmove`), extended: the original's Update,
+  Move, ContactResponse, AlignToSlope, SlopeSlide (its bundle of normal, flags and hit built by the test), IsGrounded,
+  VolumeMaterial, SlideStep and GravityDistance called in place. New fakes on both sides: CollisionRayTest, the sphere
+  test and the body sweep (MoveSpheresStepping: its whole request logged, then a scripted end, contacts and hit; now
+  and then a climbed step or a changed move) answer from one scripted stream per scenario, taken in call order;
+  Set/ClearIgnoredVolume(s), the debug trajectory line, the tracker's Hit (a tracker vtable), two sectors for the
+  scene's GetSector; the materials' count and g_moveIterations set on both sides and compared.
+- **The original's stack words:** Move reads stack it never wrote (the slope bundle's normal: the "moving" flag; the
+  sweep spheres' w, which can reach the position's w). The test zeroes the stack before the original's Move (Update's
+  call of it patched to a zeroing wrapper); the port takes them as 0 (as before: the slope-slide's moving path stays
+  off). After a Move the tracker's position w and the w words copied from it (the net positions', the facing's, the
+  move direction's, the mixer's add-move and slide) are not compared.
+- **The tests:** 27,000 scenarios (lowered from 30,000 for the 40 s budget; about 38 s): 81a's operations plus Update,
+  Move, ContactResponse, AlignToSlope, SlopeSlide, IsGrounded, VolumeMaterial, SlideStep and GravityDistance, with the
+  mixer's move still, tiny, straight down or any; the fall speed, its phase, the landing fields, the timers biased to
+  their tests' edges; the model's world position at the tracker's or a hair off, its forward unit, nearly vertical or
+  short; contact normals at the floor tests' edges (0.707, 0.95, 0.55, 0.5). Every line of the range runs but one
+  (Move's second `goto` to the end: the standing ray test only finds ground after zeroing the fall speed).
+- **Port bugs found and fixed (on main):**
+  - GravityDistance was a misreading of the decompile ("dimensional quirks"): the original sums the velocity times
+    the time of each 85 ms step, the velocity gaining 9.81 / 3 at each; the port added the velocity itself at each step.
+  - Move: the step climb's retry, when it hit nothing, wrote its result into the end position (the original: into
+    the move, which ContactResponse then slides the body by); its tests read the sweep's move (the original: its own
+    copy); the sweep's iterations were 4 near the target and 3 farther (the other way round); standing still across
+    set the whole position from the tracker (the original only x and z, keeping the contact's height); the move's
+    squared length summed x, y, z (the original z, x, y) and the frame's forward x, y, z (y, z, x); a NaN pitch
+    snapped to -1 (the original +1) and a NaN |dir.y| left a sphere out; the ground flag was taken again after
+    ContactResponse (the original keeps the one before); the move's w was 0 (the mixer's).
+  - Update: the frame, put at the simulated position for the spheres, stayed there (the original puts it back where
+    it was, with its sector, afterwards); the frame distance summed x, y, z (z, y, x); the damage step read the time
+    signed (unsigned); the second volumes' w was the spheres' (the position's).
+  - The counters at +0x240 and +0x24C were floats; the original's are integers (DEC, INC, CMP): GetLungeRange is 0
+    after more than 5 airborne steps (the port: after 1), the sphere-sweep counter decremented as a float.
+  - SlopeSlide: the "fully slid" test was ny < 0.55 (<=), the ease threshold the float 0.17 (the double), the normal's
+    up part read alone (the original's (z + x) * 0 + y: an infinite x or z is no floor), and the dot's terms summed in
+    the other order; NaN cases (the height difference, the fall speed, the normal, the ease direction, the blend) took
+    the other branch.
+  - AlignToSlope: the second normalisation and the no-ground one summed x, y, z (the original x, z, y); the direction's
+    w was kept (the original's is the position's); a NaN step or tilt took the other branch.
+  - ContactResponse: a NaN drop or move took the other branch.
+  - IsGrounded read the normal's y alone (the original's (x + z) * 0 + y) and its count signed.
+  - SafeLength compared the float (the original its bits as an int: a negative NaN is 0); NormalizeDir's NaN went to
+    the axis snap (the original normalises it).
+- **Not compared:** the stack words above; Move's slope-slide "moving" path (its normal is a stack word in the
+  original's: the port keeps it off); the debug line's end w; SlopeSlide's end w on the paths where the original takes
+  a stack word.
+- **The original's weaknesses (kept):** Move's slope bundle normal and the sweep spheres' w are never written; IsGrounded
+  reads every contact's volume unchecked (a null volume with a wall normal faults); Update moves the frame to the
+  simulated position and back every frame the two differ.
+- **Mutations:** 916 mutants, 41 not building, 782 of 875 killed, 93 equivalent or out of reach (mutate_mtmove2.py).
+- **Harness lessons (my mistakes):** 81a's GetLungeRange test passed only because the counter's random values were
+  float bits (1..6 as floats: huge integers), hiding the integer counter; random calls inside the operation (SlideStep's
+  phase) made the sides differ; the sweep fake never climbed, so the step-climb retry did not run until it could lift
+  the end; a heredoc patch with escaped quotes broke (written to a file instead).

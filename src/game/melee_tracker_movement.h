@@ -109,6 +109,7 @@ public:
 
     // The move of the last UpdateMove (m).
     const S_vector &GetMove() const { return *reinterpret_cast<const S_vector *>(&m_move); }
+    const S_vector4 &GetMove4() const { return m_move; }   // (with its w: the scratch word Move carries)
     I3D_model *GetModel() const { return m_model; }
     // Reads and clears the "a stage finished this update" flag (the movement polls it at +0x15C).
     bool TakeStageFinished() { const bool v = m_stageFinished != 0; m_stageFinished = 0; return v; }
@@ -218,9 +219,8 @@ public:
     void SetFacing(const float *dir);                   // 0x005c1e60
     // The target animation speed the mode eases to.
     void SetAnimSpeed(float speed) { m_speedTarget = speed; }   // 0x005c4b50
-    // How far the tracker lunges at a target: 4.5 m, none while airborne. (The original compares
-    // the float counter's bits with 5, which is the same for its values 0, 1, 2, ...)
-    float GetLungeRange() const { return m_airSteps > 0.0f ? 0.0f : 4.5f; }   // 0x005c8b10
+    // How far the tracker lunges at a target: 4.5 m, none after more than 5 Move steps airborne.
+    float GetLungeRange() const { return m_airSteps > 5 ? 0.0f : 4.5f; }   // 0x005c8b10
     // Removes the collision volumes and stops the looped sounds (on death / cleanup).
     void FreeVolumesAndSounds();                        // 0x005c83a0
 
@@ -304,10 +304,10 @@ public:
     uint32_t m_234 = 0;                                  // +0x234
     uint32_t m_238 = 0;                                  // +0x238
     uint32_t m_23c = 0;                                  // +0x23C
-    float m_240 = 0.0f;                                  // +0x240
+    int32_t m_240 = 0;                                   // +0x240 Move steps keeping both spheres in the sweep (5 after an airborne contact)
     float m_speed = 1.0f;                                // +0x244 the animation-speed weight (eased to m_speedTarget)
     float m_speedTarget = 1.0f;                          // +0x248
-    float m_airSteps = 0.0f;                             // +0x24C Move steps without ground contact (0 grounded)
+    int32_t m_airSteps = 0;                              // +0x24C Move steps without ground contact (0 grounded)
     float m_250 = 0.0f;                                  // +0x250
     float m_254 = 0.0f;                                  // +0x254
     float m_258 = 0.0f;                                  // +0x258
