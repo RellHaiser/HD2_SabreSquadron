@@ -5156,3 +5156,37 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the shipped files checked for short chunks first (none) before damaged generated
   ones were blamed on the port; a damaged-size generator hung both sides (a header smaller than 6 bytes seeks back): taken
   out; my edit scripts' heredocs collapsed backslashes once more (the Edit tool for those lines).
+
+## Human part 78b (the campaign's flow, queries, progress and missions, `campaign.cpp` lines 1-80, 109-113, 282-307, 321-413, 466-530, 564-575, 619-633, 645-676, 801-869 and 980-1439, 2026-11-21)
+
+- **The build:** part 78a's (`campaign/campaign_diff.cpp`, the "Flow" case; suite `human.campaign`).
+- **The world:** the files of 78a's scenarios loaded, then a progress file built from their trees (mostly as the game
+  leaves it: the children before a cursor walked through, those after it not started; also random cursors, a few out
+  of range, chunks missing or of other ids, an objective too many, the older one-campaign layout, an unknown chunk);
+  the play mode's single mission and the session type; a multiplayer map on each side (the port's C_MpMap, the
+  original's 0x48-byte block: names, ints, objectives, items, presets).
+- **The tests:** 2,000 flow scenarios (and 78a's file ones, now 2,000: 193,775 checks, about 28 s): the flow
+  (AdvanceToMission, NextStep, PreviousScreen, GetCurrentMission), every query with arguments in and out of range,
+  SetCurrentIndex (negative too), SetupSingleMission, SetupMultiplayerMission, SaveGame (compared byte by byte, then
+  the next chunk), LoadGame (where it leaves the reader), the containers' Next, Prev, GetCurrent, Reset, GetCursorState,
+  GetChild, the per-type queries (the original's copies per type), the missions' DeactivateObjectives, CreateObjective,
+  Clear; the trees compared after each (now with the multiplayer mission's map name, presets, ints, items and its
+  objectives' fields). Every line of the part's ranges but two (443 of 445): GetMpObjective (not called in this file);
+  78a's ranges still 375 of 376.
+- **Port bug found and fixed (on main):** NextStep, PreviousScreen, AdvanceToMission and GetCurrentMission compared the
+  current campaign signed; the original's compare is unsigned, so a negative one (SetCurrentIndex, a progress file)
+  returns at once where the port read before the vector.
+- **Original's weaknesses (not fixed):** Prev on a container at cursor 0 without children (where Next leaves an empty
+  one) reads child -1, and one with a cursor past its end (a damaged progress file) reads past the children: both
+  crash or read heap bytes; NextStep in single-mission play past the mission's end, and PreviousScreen stepping back
+  across from its first screen, loop for ever (the set-up's end node and the play keep the game from both); the
+  multiplayer mission's CreateObjective leaves the objective's team, texts and type unset (the port zeroes them);
+  SetupMultiplayerMission's items get a stack word as their fourth; GetObjectiveStatus with campaign 0 reads the word
+  before the vector (the port's earlier fix returns -1; not generated).
+- **Mutations:** 674 mutants, 111 not building, 491 of 563 killed, 72 equivalent or out of reach
+  (mutate_campaign_b.py).
+- **Harness lessons (my mistakes):** the original's function statics register with its CRT's atexit, which crashed
+  until redirected; the first Prev guard skipped Prev on any tree with a walked-through empty container, so stepping
+  back into a first child went untested (now a dry run of the exact path); random progress cursors made such trees
+  common (now mostly the game's); the multiplayer mission's own fields were not compared at first; the first mutation
+  run used mutants generated before the unsigned fix (nine did not apply).

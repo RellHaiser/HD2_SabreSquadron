@@ -990,7 +990,7 @@ bool C_Campaign::AdvanceToMission()                     // 0x006b8d40
         m_singleMission.Reset();
         return true;
     }
-    if (m_current >= GetCount())
+    if (unsigned(m_current) >= unsigned(GetCount()))   // (the original's compare: unsigned)
         return false;
     C_CampaignRoot *root = m_campaigns[m_current];
     if (!root)
@@ -1012,7 +1012,7 @@ bool C_Campaign::AdvanceToMission()                     // 0x006b8d40
 
 C_CampaignNode *C_Campaign::NextStep()                  // 0x006b8dc0
 {
-    if (m_current >= GetCount())
+    if (unsigned(m_current) >= unsigned(GetCount()))   // (the original's compare: unsigned)
         return nullptr;
     C_CampaignContainer *flow = GetFlowNode();
     for (;;) {
@@ -1034,7 +1034,7 @@ C_CampaignNode *C_Campaign::NextStep()                  // 0x006b8dc0
 
 C_CampaignNode *C_Campaign::PreviousScreen()            // 0x006b8e40
 {
-    if (m_current >= GetCount())
+    if (unsigned(m_current) >= unsigned(GetCount()))   // (the original's compare: unsigned)
         return nullptr;
     C_CampaignContainer *flow = GetFlowNode();
     C_CampaignNode *current = flow->GetCurrent();
@@ -1069,7 +1069,7 @@ C_MissionDef *C_Campaign::GetCurrentMission()           // 0x006b94b0
         return &m_singleMission;
     if (g_mpSettings->sessionType != 0)
         return &m_mpMission;
-    if (m_current >= GetCount())
+    if (unsigned(m_current) >= unsigned(GetCount()))   // (the original's compare: unsigned)
         return nullptr;
     C_CampaignRoot *root = m_campaigns[m_current];
     C_CampaignNode *node = root->GetChild(root->m_cursor);
