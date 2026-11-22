@@ -1,7 +1,7 @@
 // The campaign tree (see campaign.h).
 //
-// (The original's chunk loops keep the last chunk id when a header cannot be read; here a
-// failed header reads as no chunk. Only damaged files differ.)
+// (As the original's, each chunk loop keeps one id, so a header that cannot be read leaves the
+// last one read, and goes on while the size left is not 0, negative too: HasMore.)
 #include "game/campaign.h"
 
 #include <cstdio>
@@ -141,8 +141,8 @@ bool C_CampaignVideo::LoadDefinition(C_chunk &chunk)    // 0x006ba850
 
 bool C_CampaignVideo::Load(C_chunk &chunk)              // 0x006bce50
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         switch (id) {
         case CHUNK_VIDEO_FILE:
@@ -176,8 +176,8 @@ C_CampaignScreen::~C_CampaignScreen() = default;        // 0x006b9ef0
 bool C_CampaignScreen::LoadDefinition(C_chunk &chunk)   // 0x006bab50
 {
     bool ok = ReadValue(chunk, m_kind) && ReadValue(chunk, m_unknown15) && ReadValue(chunk, m_backAcross);
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_DEF_SCREEN_ITEM) {
             // (A short chunk still adds an item.)
@@ -196,8 +196,8 @@ bool C_CampaignScreen::LoadDefinition(C_chunk &chunk)   // 0x006bab50
 
 bool C_CampaignScreen::Load(C_chunk &chunk)             // 0x006bd330
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         switch (id) {
         case CHUNK_SCREEN_KIND:
@@ -255,8 +255,8 @@ bool S_MissionObjective::LoadDefinition(C_chunk &chunk) // 0x006bae20
 
 bool S_MissionObjective::Load(C_chunk &chunk)           // 0x006bd810
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_OBJECTIVE_ID)
             ReadValue(chunk, m_id);
@@ -281,8 +281,8 @@ bool S_MissionObjective::Save(C_chunk &chunk)           // 0x006bd620
 
 bool S_MissionObjective::LoadProgress(C_chunk &chunk)   // 0x006beff0
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_OBJECTIVE_STATUS)
             ReadValue(chunk, status);
@@ -413,8 +413,8 @@ int C_CampaignContainer::GetCurrentIndexOfType(E_CampaignNodeType type) const   
 
 bool C_CampaignContainer::LoadChildren(C_chunk &chunk)  // 0x006bc8c0
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         C_CampaignNode *child = nullptr;
         switch (id) {
@@ -505,8 +505,8 @@ bool C_CampaignContainer::SaveChildrenProgress(C_chunk &chunk)   // 0x006be990
 
 bool C_CampaignContainer::LoadCursorProgress(C_chunk &chunk)
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_NODE_CURSOR)
             ReadValue(chunk, m_cursor);
@@ -541,8 +541,8 @@ bool C_CampaignRoot::LoadDefinition(C_chunk &chunk)     // 0x006bb3c0
 
 bool C_CampaignRoot::Load(C_chunk &chunk)               // 0x006be6f0
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_NODE_CHILDREN)
             LoadChildren(chunk);
@@ -591,8 +591,8 @@ bool C_CampaignOperation::LoadDefinition(C_chunk &chunk)   // 0x006bb1b0
 
 bool C_CampaignOperation::Load(C_chunk &chunk)          // 0x006be280
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_NODE_CHILDREN) {
             LoadChildren(chunk);
@@ -706,8 +706,8 @@ bool C_MissionDef::LoadChildrenDefinition(C_chunk *chunk, C_MissionDef *mission)
 {
     if (!chunk || !mission)
         return false;
-    while (chunk->RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk->HasMore()) {
         chunk->Descend(id);
         switch (id) {
         case CHUNK_DEF_OBJECTIVE: {
@@ -744,8 +744,8 @@ bool C_MissionDef::LoadChildrenDefinition(C_chunk *chunk, C_MissionDef *mission)
 
 bool C_MissionDef::Load(C_chunk &chunk)                 // 0x006bdcb0
 {
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         switch (id) {
         case CHUNK_NODE_CHILDREN:
@@ -802,8 +802,8 @@ bool C_MissionDef::Save(C_chunk &chunk)                 // 0x006bda60
 bool C_MissionDef::LoadProgress(C_chunk &chunk)         // 0x006bf440
 {
     int objective = 0;
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         if (id == CHUNK_NODE_CURSOR) {
             ReadValue(chunk, m_cursor);
@@ -886,6 +886,10 @@ void C_Campaign::Clear()                                // 0x006b8c60
 bool C_Campaign::LoadFiles()                            // 0x006bb860
 {
     C_chunk chunk;
+    // (As the original's: one chunk id for every file, a header that cannot be read leaving the
+    // last one; a file without the version chunk read as definitions when its first chunk is the
+    // root.)
+    uint16_t id = 0xFFFF;
     for (int index = 0;; ++index) {
         char path[256];
         std::snprintf(path, sizeof(path), "%s\\Gamedata%02d.gdt", CAMPAIGN_DIRECTORY, index);
@@ -893,17 +897,16 @@ bool C_Campaign::LoadFiles()                            // 0x006bb860
         if (!chunk.Open(path, false))
             break;
         auto *root = new C_CampaignRoot();
-        uint16_t id = 0xFFFF;
         bool current = false;
-        bool ok = chunk.Descend(id) && id == CHUNK_DEF_FILE_VERSION;
-        if (ok) {
+        chunk.Descend(id);
+        if (id == CHUNK_DEF_FILE_VERSION) {
             int version = 0;
             chunk.Read(version);
             chunk.Ascend();
             current = version == m_version;
-            ok = chunk.Descend(id) && id == CHUNK_DEF_FILE_ROOT;
+            chunk.Descend(id);
         }
-        if (!ok) {
+        if (id != CHUNK_DEF_FILE_ROOT) {
             // Fix: the original leaked the root of a file it did not recognize.
             delete root;
             continue;
@@ -926,8 +929,8 @@ bool C_Campaign::LoadRootDefinition(C_chunk *chunk, C_CampaignRoot *root)   // 0
 {
     if (!chunk || !root)
         return false;
-    while (chunk->RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk->HasMore()) {
         chunk->Descend(id);
         if (id == CHUNK_DEF_OPERATION) {
             auto *operation = new C_CampaignOperation();
@@ -952,8 +955,8 @@ bool C_Campaign::LoadOperationDefinition(C_chunk *chunk, C_CampaignOperation *op
 {
     if (!chunk || !operation)
         return false;
-    while (chunk->RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk->HasMore()) {
         chunk->Descend(id);
         if (id == CHUNK_DEF_MISSION) {
             auto *mission = new C_MissionDef();
@@ -1374,8 +1377,8 @@ bool C_Campaign::SetupMultiplayerMission()              // 0x006b8a20
 bool C_Campaign::LoadGame(C_chunk &chunk)               // 0x006bff30
 {
     m_singleMissionNumber = -1;
-    while (chunk.RemainingSize() > 0) {
-        uint16_t id = 0xFFFF;
+    uint16_t id = 0xFFFF;
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         switch (id) {
         case CHUNK_CAMPAIGN_CURRENT:

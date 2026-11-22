@@ -5125,3 +5125,34 @@ particles and the surface marks. Files are served from memory.
   GetSquadCommander; shapes named by address got the allocator's reused addresses mixed up; files short of ids made
   both sides read past the file (the original's id then a stack word) or loop for ever: left out; a change to the
   source after part 77a's mutation file was made broke five of its entries: regenerated and rerun.
+
+## Human part 78a (the campaign files, `campaign.cpp`: the nodes' formats, LoadFiles, Clear, 2026-11-21)
+
+- **The build:** `campaign/build_campaign.bat`, `campaign_diff.cpp` (campaign.cpp compiled into it), the chunks real on
+  both sides over data files in memory; suite `human.campaign` (needs the game data: HD2_UNPACKED, default
+  `H:\HD2_Unpacked`).
+- **The world:** the shipped `GameData\Gamedata00.gdt` and `01` (both well formed: every item and texts chunk 16 bytes,
+  every string ended), and files the scenario builds: the complete format (roots, operations, missions, objectives,
+  videos, screens with items and diary texts, plays, unknown chunks, missing ones) and the definition format (another
+  version: the parsers' fixed parts, strings of another id, roots too short for their header), files the loading stops
+  at (no version chunk, no root), an empty file after a loaded one, a root without its version chunk.
+- **The tests:** 4,000 scenarios: both sides' C_Campaign (the original's laid out as C_GameProfile's constructor inlines
+  it: its vtable, the multiplayer map's mission by its constructor, the single mission), LoadFiles, Clear, every
+  campaign's Save and SaveProgress (followed by the next chunk, compared byte by byte), destroyed; the trees compared
+  node by node after each operation. Every line of the part's ranges but one (375 of 376): SaveChildren's `continue` for
+  a node of another type (the loaders make only the five child types).
+- **Results:** 151,309 checks, 0 failures; a full run about 23 s.
+- **Port bugs found and fixed (on main; port mistakes):** every chunk loop of campaign.cpp (the 15 loaders) reset its
+  chunk id each time round and stopped once the size left was not positive; the original's keep one id (a header that
+  cannot be read leaves the last one) and go on while the size left is not 0 (HasMore), as in team.cpp (part 77b);
+  LoadFiles kept an id per file and needed the version chunk: the original keeps one for every file (an empty file after
+  a loaded one is read as a root, the last id still 1) and reads a root that comes first as definitions. The port's note
+  that only damaged files differ is gone.
+- **Original's weaknesses (not fixed: damaged files only):** a short screen item keeps the previous item's bytes (a
+  stack word for the first; the port zeroes them); the shared string reader does not end its buffer, so a string of no
+  bytes shows the string read before; chunk sizes past their container or into a sibling read strings of no bytes or
+  loop for ever.
+- **Mutations:** 424 mutants, 64 not building, 291 of 360 killed, 69 equivalent or out of reach (mutate_campaign.py).
+- **Harness lessons (my mistakes):** the shipped files checked for short chunks first (none) before damaged generated
+  ones were blamed on the port; a damaged-size generator hung both sides (a header smaller than 6 bytes seeks back): taken
+  out; my edit scripts' heredocs collapsed backslashes once more (the Edit tool for those lines).
