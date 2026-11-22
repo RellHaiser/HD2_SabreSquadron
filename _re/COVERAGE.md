@@ -5434,3 +5434,59 @@ particles and the surface marks. Files are served from memory.
   heredoc patches collapsed `\n` (fixed with the editor); the decompile misread HeadLook's and HitDamage's sums and the
   turn's NaN sign: the asm settled them; the first mutation run showed the missing exact-distance, spare-capacity,
   look-around and tied-bone cases (added, the run repeated).
+
+## Human part 82b (the meleeTracker actor's controller choice, save / load and mission life cycle, `melee_tracker.cpp`, 2026-11-22)
+
+- **The build:** part 82a's `melee_tracker/mt_diff.cpp` (suite `human.mt`), with `mt_life.inc`: the life scenarios. The
+  controllers are real on both sides (the port's from `melee_tracker_ai.cpp`, the original's its own code), their bytes
+  compared after each operation in the original's layout (pointers by name). The chunks are real on both sides (each
+  side's C_chunk) over files in memory (the dta functions faked alike). Faked with the same loggers: C_Actor's members
+  (Activate, Deactivate, SetFrame, CopyFrom, SaveGame, LoadGame, the destructor's base); the movement's Bind,
+  FreeVolumesAndSounds, Reset, SaveGame and LoadGame (the original's through its vtable); the model cache's OpenInto;
+  the effects' FadeInModel; the driver's joint override set and item (Add, Remove, Release) and the model's
+  SetJointOverrides; the sight module's AddObserver, AddTarget and SetTargetState; the sound module's AddListener; the
+  actors module's actors, GetHuman (a slot answering none now and then) and GetActor (net ids 200 + i); the camera's
+  SetViewDir; the game's checkpoints; the tracker's own ReloadModel slot. The shared animation table (0x008AC5C0) is
+  set alike on both sides and compared after each operation.
+- **The tests:** 25,000 life scenarios of up to 8 operations (1.27 million checks, about 20 s; the suite runs them
+  after part 82a's 60,000): SetController (every mode, and an unknown one), SaveGame (the controller, the movement's and
+  the actor's answers; the sightings with and without a source; the seen list), LoadGame of the side's own save (whole,
+  cut at ten steps, at any byte, right after a leaf's header; the top chunk wrong, the state chunk wrong, the never-saved
+  leaf 7 in place of 8, an empty file, the top header alone), WriteProperties, ReadProperties (whole and short), SetFrame
+  (the actor's answer), CopyFrom, StartMission (server and client), StopMission, RestartMission, ReloadModel, SetupFrame
+  (every bone there or one missing, a frame with and without a script, server, local and client, the players among the
+  actors), and the destructor now and then as the last. The saved files compared whole (the sightings' source pointers
+  as markers), the reader's position and chunk depth after each load, the depth after each save.
+  Every line of those functions runs but LoadAnimTable (StartMission's when the table is empty: it inlines the original
+  animation cache's internals), the constructor and the creator, and the port's own GetFullAI / GetScriptedAI.
+- **Port bugs found and fixed (on main):**
+  - LoadGame's opening: a wrong state chunk ascended twice (the original once: 0x385 stays open), and a missing state
+    chunk header ascended (the original returns at once).
+  - LoadGame's leaf loop: each chunk read into its own id, the loop ended by a failed header read and by the remaining
+    size (the original: one id for every chunk, so a failed read keeps the last and its case runs again; the loops run
+    until the reader is exactly at the chunk's end); the leaves read straight into the members (the original reads each
+    into a local kept across the loop and copies it: a short leaf copies what the local last held).
+  - LoadGame's sightings: allocated with time 0 (the original stamps timeGetTime, kept when the entry is short).
+  - LoadGame's controller: a chunk other than 0 or a leaf other than 1 in it was left differently (the original ascends
+    once, leaving what it entered open).
+  - SetupFrame: each player slot asked for once (the original asks three times: to test, for the type and role, to add).
+- **Not compared:** the old controller after SetController, StopMission and RestartMission free it; the tracker after
+  its destructor (g++ drops the dead stores); the sightings ReleaseSightings returns to each side's pool; the start
+  position's and the velocity's w (stack words in the original's).
+- **The original's weaknesses (kept, unless noted the port's fixes):** SetController's unknown mode calls through a
+  null controller (fixed), and LoadGame recreates the controller from the saved mode unchecked (fixed: the load fails);
+  SaveGame saves the controller's mode unchecked (a crash without one); StopMission detaches the controller unchecked
+  (fixed); LoadGame copies a stack word into the w of the start position, look point and look target (fixed: the w
+  kept), reads an id leaf's stack word when the file ends in the sightings or the seen list, maps the never-saved leaf
+  7 to the look return, and loops on a short file until the seeks past its end reach the chunk's end; SetupFrame skips
+  the whole setup (no controller, no sight or sound registration) for a model missing one bone (kept), reads the role
+  of whatever actor a player slot holds (fixed: humans only), leaves the look target's and the velocity's w unset
+  (zeroed); the destructor frees only the three lists' arrays (the sightings and the controller go at StopMission).
+- **Mutations:** 439 mutants, 40 not building, 361 of 399 killed, 38 equivalent or out of reach (mutate_mt2.py).
+- **Harness lessons (my mistakes):** the saved files went through Log's 600-byte buffer, so only a save's first ~290
+  bytes were compared (now pushed whole); a missing Ascend that Close made good was invisible until the depth was
+  logged; the load's cuts fell at ten fixed steps only (now any byte and right after a leaf's header); m_538 was always
+  0 and the sight id 0 rare; the wrong-chunk loads first failed on the opening's ascends, which the asm settled; two
+  probes applied by hand to the source (restored, the diff checked); calling the port's virtuals unqualified,
+  missing fakes (the frame's Tick, _aligned_malloc, the camera, ~C_Actor) and uninitialised original allocations
+  crashed early runs.

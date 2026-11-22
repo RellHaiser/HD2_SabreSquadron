@@ -157,6 +157,9 @@ void *g_overrideItems[1] = {g_overrideItem};
 // The sound module, the game.
 uint8_t g_sound[0x10], g_origGame[0x100], g_portGame[0x2000];
 void *g_soundVt[0x40];
+// The camera module (the player's controller sets its view direction).
+uint8_t g_cameraObj[0x10];
+void *g_cameraVt[0x40];
 // The controls' values.
 float g_valuesHeld[0x40], g_valuesPressed[0x40];
 
@@ -166,6 +169,7 @@ const char *const FRAME_NAMES[] = {"model", "head", "neck", "h0", "h1", "h2", "h
 constexpr int NFRAMES = 14, HUMAN_FRAME = 3, ZONE_FRAME = 7;
 I3D_frame *Model() { return FrameAt(0); }
 
+std::string LifeName(const void *p);
 std::string PartName(const void *p)
 {
     for (int side = 0; side < 2; ++side) {
@@ -193,6 +197,9 @@ std::string PartName(const void *p)
         return "held";
     if (p == g_valuesPressed)
         return "pressed";
+    const std::string life = LifeName(p);
+    if (!life.empty())
+        return life;
     const int f = FrameIndex(p);
     if (f >= 0 && f < NFRAMES)
         return FRAME_NAMES[f];
@@ -342,9 +349,10 @@ int TC T_GetKind(void *self)
     return -1;
 }
 // The actors module.
+int g_nullSlot = -1;                                    // (part 82b's: a slot answered with none)
 void *F_GetHuman(int id)
 {
-    void *h = id >= 0 && id < HUMANS ? Human(g_side, id) : nullptr;
+    void *h = id >= 0 && id < HUMANS && id != g_nullSlot ? Human(g_side, id) : nullptr;
     Log("actors GetHuman %d -> %s", id, Name(h).c_str());
     return h;
 }
@@ -380,7 +388,13 @@ float F_RandFloat()
     return r;
 }
 float __cdecl O_RandFloat() { return F_RandFloat(); }
-void *__cdecl O_AlignedMalloc(size_t size, size_t align) { return _aligned_malloc(size, align); }
+// (Zeroed: the original's controllers leave fields unset (the player's and the remote's owner) that it then reads.)
+void *__cdecl O_AlignedMalloc(size_t size, size_t align)
+{
+    void *p = _aligned_malloc(size, align);
+    std::memset(p, 0, size);
+    return p;
+}
 void __cdecl O_AlignedFree(void *p) { _aligned_free(p); }
 // The head's joint override set (COM: the same on both sides).
 void __stdcall OV_Clear(void *self) { Log("%s Clear", Name(self).c_str()); }
@@ -390,6 +404,8 @@ void __stdcall OV_SetDir(void *self, const S_vector &dir, float roll)
 }
 void __stdcall OV_Other(void *self) { Log("%s other slot", Name(self).c_str()); }
 void __stdcall M_Tick(void *f, int time) { Log("%s Tick %d", Name(f).c_str(), time); }
+void TC O_CamSetViewDir(void *, const S_vector4 *dir) { Log("camera SetViewDir %s", VecText(S_vector(dir->x, dir->y, dir->z)).c_str()); }
+void *TC O_GetCameraModule(void *) { return g_cameraObj; }
 
 }  // namespace H
 
@@ -511,7 +527,7 @@ void RandomWorld()
     g_w.lastFrameTime = P(0.2) ? 0 : I(1, 100);
     g_w.c55c = P(0.5) ? I(900, 1100) : I(-1000, 2000);
     g_w.sightObserverId = P(0.3) ? -1 : I(0, 9);
-    g_w.sightId = P(0.3) ? -1 : I(0, 9);
+    g_w.sightId = P(0.3) ? -1 : P(0.2) ? 0 : I(1, 9);
     g_w.soundListener = P(0.3) ? -1 : I(0, 9);
     g_w.velocity = RandomPos();
     g_w.lastPos = P(0.3) ? g_w.pos : RandomPos();
@@ -723,6 +739,7 @@ void FreeLists(int side)
     }
 }
 
+bool g_lifeMasks;                                       // part 82b's scenarios: the stack words it leaves
 // The tracker's fields after an operation (the pointers by name; the lists by their entries).
 std::string Snap(int side)
 {
@@ -751,7 +768,8 @@ std::string Snap(int side)
             continue;
         }
         // (The w of the look point and target: the original's are stack words where it sets them.)
-        const bool w = n == "m_lookPoint" || n == "m_lookTarget";
+        // (Part 82b's: the start position's w (LoadGame's stack copy) and the velocity's (SetupFrame's).)
+        const bool w = n == "m_lookPoint" || n == "m_lookTarget" || (g_lifeMasks && (n == "m_startPos" || n == "m_velocity"));
         s += " | " + n;
         for (uint32_t k = 0; k < f.size; k += 4) {
             if (w && k == 12)
@@ -985,10 +1003,18 @@ void TestScenarios()
     ShowLogs(g_runs[0].log, g_runs[1].log);
 }
 
+}  // namespace H
+#include "mt_life.inc"
+namespace H {
+
 void SetUp()
 {
     g_partName = PartName;
     g_frameVt[0x20 / 4] = reinterpret_cast<void *>(M_Tick);
+    for (void *&s : g_cameraVt)
+        s = reinterpret_cast<void *>(V_Other);
+    g_cameraVt[0x48 / 4] = reinterpret_cast<void *>(O_CamSetViewDir);
+    Put(g_cameraObj, 0, static_cast<void *>(g_cameraVt));
     for (int side = 0; side < 2; ++side) {
         for (void *&s : g_aiVt[side])
             s = reinterpret_cast<void *>(V_Other);
@@ -1065,6 +1091,7 @@ void SetUp()
         {0x005d5c70, reinterpret_cast<const void *>(O_PrintText)},
         {0x006c7600, reinterpret_cast<const void *>(O_GetValues)},
         {0x007e5302, reinterpret_cast<const void *>(O_RandFloat)},
+        {0x0069a620, reinterpret_cast<const void *>(O_GetCameraModule)},
         {0x007e53c2, reinterpret_cast<const void *>(O_AlignedMalloc)},   // (the sighting pool's growth)
         {0x007e559c, reinterpret_cast<const void *>(O_AlignedFree)},
     };
@@ -1086,6 +1113,7 @@ void SetUp()
         *slot = const_cast<void *>(i.to);
         VirtualProtect(slot, 4, old, &old);
     }
+    SetUpLife();
     g_log.clear();
 }
 
@@ -1104,6 +1132,13 @@ int main()
     g_case = "MeleeTracker";
     for (g_round = 0; g_round < rounds; ++g_round)
         TestScenarios();
+    // Part 82b's: the life cycle.
+    int lifeRounds = std::getenv("HD2_MT_QUICK") ? 8000 : 25000;
+    if (const char *r = std::getenv("HD2_MT_LIFE_ROUNDS"))
+        lifeRounds = std::atoi(r);
+    g_case = "MeleeTracker life";
+    for (g_round = 0; g_round < lifeRounds; ++g_round)
+        TestLife();
     std::printf("mt_diff: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }

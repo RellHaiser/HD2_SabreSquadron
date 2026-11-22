@@ -619,14 +619,6 @@ void PushSighting(C_MeleeTracker *tracker, S_MeleeTrackerSighting *sighting)
     PushBack(tracker->m_sightingsBegin, tracker->m_sightingsEnd, tracker->m_sightingsCap, sighting);
 }
 
-// A flag the save stores as a 4-byte int 0 / 1 (the byte zero-extended).
-bool ReadFlag(C_chunk &chunk)
-{
-    int value = 0;
-    chunk.Read(value);
-    return value != 0;
-}
-
 // An int leaf (an actor id, -1 none; or the controller mode): reads it and leaves the leaf
 // (0x0053b1d0).
 int ReadIntLeaf(C_chunk &chunk)
@@ -644,58 +636,73 @@ bool C_MeleeTracker::LoadGame(C_chunk &chunk)           // 0x005d3a50
     uint16_t id;
     if (!chunk.IsOpen() || !chunk.Descend(id))
         return false;
-    if (id != 0x385 || !chunk.Descend(id)) {
+    if (id != 0x385) {
         chunk.Ascend();
         return false;
     }
+    // (As the original: no header for the state chunk returns at once (0x385 left open), another
+    // chunk there is left, 0x385 again left open.)
+    if (!chunk.Descend(id))
+        return false;
     if (id != 0x2a9) {
-        chunk.Ascend();
         chunk.Ascend();
         return false;
     }
 
-    uint16_t sub;
-    while (chunk.RemainingSize() > 0 && chunk.Descend(sub)) {
-        switch (sub) {
-        case 0:
+    // (As the original: one id for every chunk entered below, so a failed header read keeps the last
+    // one (0x2A9 at first) and its case runs again; the loops run until the reader is exactly at the
+    // chunk's end, past it they go on reading.)
+    // (Each leaf is read into its own local, kept across the loop, and then copied, as the
+    // original's: a short leaf copies what that local last held, the bytes it read over it; a stack
+    // word before the first read, 0 here.)
+    S_vector startPos(0.0f, 0.0f, 0.0f), lookPoint(0.0f, 0.0f, 0.0f), lookTarget(0.0f, 0.0f, 0.0f);
+    float rot[4] = {}, headYaw = 0.0f, lookSpeed = 0.0f;
+    int headTurning = 0, lookActive = 0, return7 = 0, return8 = 0, reached = 0, rateMode = 0, state = 0, param = 0,
+        timer = 0, repeats = 0, optimized = 0, scan = 0;
+    // Fix (1, 5, 0xc): the vectors keep their w; the original copied its local's 4th word, a stack
+    // word, into the w of m_startPos / m_lookPoint / m_lookTarget.
+    auto copyXYZ = [](S_vector4 &to, const S_vector &from) {
+        to.x = from.x;
+        to.y = from.y;
+        to.z = from.z;
+    };
+    while (chunk.HasMore()) {
+        chunk.Descend(id);
+        switch (id) {
+        case 0:                                         // (straight into the stats, as the original)
             chunk.Read(&m_stats, 0x10);
             chunk.Read(&m_startStats, 0x10);
             break;
-        // Fix (1, 5, 0xc): the vectors are read as xyz; the original stored an uninitialised 4th
-        // word into the w of m_startPos / m_lookPoint / m_lookTarget.
-        case 1: chunk.Read(&m_startPos, 0xc); break;
-        case 2: {
-            float rot[4] = {};
-            chunk.Read(rot, 0x10);
-            m_startRot = S_quat::FromFile(rot);
-            break;
-        }
-        case 3: m_headTurning = ReadFlag(chunk); break;
-        case 4: m_lookActive = ReadFlag(chunk); break;
-        case 5: chunk.Read(&m_lookPoint, 0xc); break;
-        case 6: chunk.Read(m_headYaw); break;
-        case 7:                                         // (never saved; the original maps it to m_lookReturn too)
-        case 8: m_lookReturn = ReadFlag(chunk); break;
-        case 9: m_lookReached = ReadFlag(chunk); break;
-        case 0xa: chunk.Read(m_lookSpeed); break;
-        case 0xb: chunk.Read(m_lookRateMode); break;
-        case 0xc: chunk.Read(&m_lookTarget, 0xc); break;
-        case 0xd: chunk.Read(m_lookState); break;
-        case 0xe: chunk.Read(m_lookParam); break;
-        case 0xf: chunk.Read(m_lookTimer); break;
-        case 0x10: chunk.Read(m_lookRepeats); break;
-        case 0x11: m_optimized = ReadFlag(chunk); break;
-        case 0x12: chunk.Read(m_55c); break;
+        case 1: chunk.Read(&startPos, 0xc); copyXYZ(m_startPos, startPos); break;
+        case 2: chunk.Read(rot, 0x10); m_startRot = S_quat::FromFile(rot); break;
+        case 3: chunk.Read(headTurning); m_headTurning = headTurning != 0; break;
+        case 4: chunk.Read(lookActive); m_lookActive = lookActive != 0; break;
+        case 5: chunk.Read(&lookPoint, 0xc); copyXYZ(m_lookPoint, lookPoint); break;
+        case 6: chunk.Read(headYaw); m_headYaw = headYaw; break;
+        // (Never saved; the original maps it to m_lookReturn too, through a local of its own.)
+        case 7: chunk.Read(return7); m_lookReturn = return7 != 0; break;
+        case 8: chunk.Read(return8); m_lookReturn = return8 != 0; break;
+        case 9: chunk.Read(reached); m_lookReached = reached != 0; break;
+        case 0xa: chunk.Read(lookSpeed); m_lookSpeed = lookSpeed; break;
+        case 0xb: chunk.Read(rateMode); m_lookRateMode = rateMode; break;
+        case 0xc: chunk.Read(&lookTarget, 0xc); copyXYZ(m_lookTarget, lookTarget); break;
+        case 0xd: chunk.Read(state); m_lookState = state; break;
+        case 0xe: chunk.Read(param); m_lookParam = param; break;
+        case 0xf: chunk.Read(timer); m_lookTimer = timer; break;
+        case 0x10: chunk.Read(repeats); m_lookRepeats = repeats; break;
+        case 0x11: chunk.Read(optimized); m_optimized = optimized != 0; break;
+        case 0x12: chunk.Read(scan); m_55c = scan; break;
         case 0x13: {
             // The sightings: a fresh one per entry, overwritten whole by its raw 0x20 (so the
             // allocation arguments do not matter), then its source re-resolved from the id leaf.
-            uint16_t entry;
-            while (chunk.RemainingSize() > 0 && chunk.Descend(entry)) {
+            while (chunk.HasMore()) {
+                chunk.Descend(id);
+                // (Stamped with timeGetTime, as the original's: kept when the entry is too short to read.)
                 S_MeleeTrackerSighting *sighting =
-                    AllocMeleeTrackerSighting(0xe, S_vector4{}, nullptr, 0);
+                    AllocMeleeTrackerSighting(0xe, S_vector4{}, nullptr, timeGetTime());
                 chunk.Read(sighting, 0x20);
                 chunk.Ascend();
-                chunk.Descend(entry);
+                chunk.Descend(id);
                 const int sourceId = ReadIntLeaf(chunk);
                 sighting->source = sourceId == -1 ? nullptr : g_actorsModule.GetActor(sourceId);
                 PushSighting(this, sighting);
@@ -704,9 +711,8 @@ bool C_MeleeTracker::LoadGame(C_chunk &chunk)           // 0x005d3a50
         }
         case 0x14: {
             // The seen-enemy list (entries that were null are dropped).
-            uint16_t entry;
-            while (chunk.RemainingSize() > 0) {
-                chunk.Descend(entry);
+            while (chunk.HasMore()) {
+                chunk.Descend(id);
                 const int actorId = ReadIntLeaf(chunk);
                 if (actorId != -1)
                     PushSeenEnemy(this, g_actorsModule.GetActor(actorId));
@@ -725,19 +731,18 @@ bool C_MeleeTracker::LoadGame(C_chunk &chunk)           // 0x005d3a50
         return false;
     }
     // The AI controller: recreate it from the saved mode, then let it load its own state.
+    // (As the original: a chunk other than 0, or a leaf other than 1 in it, ascends once (the
+    // chunks it entered stay open); a controller that fails to load ascends twice.)
+    // (The id unchecked after the descents: a failed one keeps the last id read.)
     bool ok = false;
-    if (chunk.Descend(id)) {
-        if (id == 0 && chunk.Descend(id)) {
-            if (id == 1) {
-                SetController(ReadIntLeaf(chunk));
-                ok = m_ai != nullptr && m_ai->LoadGame(chunk);
-            } else {
-                chunk.Ascend();
-            }
-        }
+    chunk.Descend(id);
+    if (id == 0 && (chunk.Descend(id), id == 1)) {
+        SetController(ReadIntLeaf(chunk));
+        // (Fix: an unknown mode leaves no controller; the original calls through the null.)
+        ok = m_ai != nullptr && m_ai->LoadGame(chunk);
         chunk.Ascend();                                 // 0
     }
-    chunk.Ascend();                                     // 0x385
+    chunk.Ascend();                                     // 0x385 (or the chunk entered)
     if (!ok)
         return false;
 
@@ -994,15 +999,16 @@ void C_MeleeTracker::SetupFrame()                       // 0x005d4db0
 
     // The players, for the hearing scan.
     m_playersEnd = m_playersBegin;
+    // (The slot is asked for again for each use, as the original does.)
     for (int i = 0; i < g_actorsModule.GetActorCount(); ++i) {
-        C_Actor *actor = g_actorsModule.GetHuman(i);
+        if (!g_actorsModule.GetHuman(i))
+            continue;
         // Fix: a removed actor GetHuman falls back to need not be a human (the original reads its
         // role regardless).
-        if (!actor || actor->GetType() != ACTOR_HUMAN)
+        C_Actor *actor = g_actorsModule.GetHuman(i);
+        if (actor->GetType() != ACTOR_HUMAN || static_cast<C_Human *>(actor)->GetRole() != HUMAN_ROLE_PLAYER)
             continue;
-        C_Human *human = static_cast<C_Human *>(actor);
-        if (human->GetRole() == HUMAN_ROLE_PLAYER)
-            PushBack(m_playersBegin, m_playersEnd, m_playersCap, human);
+        PushBack(m_playersBegin, m_playersEnd, m_playersCap, static_cast<C_Human *>(g_actorsModule.GetHuman(i)));
     }
     m_55c = -1000;                                      // the first sound scan in a second
     g_sightModule.SetTargetState(m_sightId, SIGHT_TARGET_ALIVE);
