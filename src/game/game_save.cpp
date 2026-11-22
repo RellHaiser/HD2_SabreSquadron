@@ -271,7 +271,9 @@ bool C_game::LoadGame(C_chunk &chunk)               // 0x0069d290 (DS 0x006de1c0
         return false;
     }
     m_paused = false;
-    while (chunk.RemainingSize() > 0) {
+    // (Until the reader is exactly at the chunk's end, as the original: past it, it goes on reading. A failed
+    // header read keeps the last id.)
+    while (chunk.HasMore()) {
         chunk.Descend(id);
         switch (id) {
         case CHUNK_GAME_VERSION: {

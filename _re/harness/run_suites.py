@@ -283,6 +283,8 @@ SUITES = [
       tree_copy="team/team_diff.exe"),
     T("human.campaign", "campaign/build_campaign.bat", TMP + r"\campaign_diff.exe", needs=("mingw", "original_exe", "data"),
       tree_copy="campaign/campaign_diff.exe"),
+    T("human.game_save", "game_save/build_game_save.bat", TMP + r"\game_save_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="game_save/game_save_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

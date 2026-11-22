@@ -5190,3 +5190,37 @@ particles and the surface marks. Files are served from memory.
   back into a first child went untested (now a dry run of the exact path); random progress cursors made such trees
   common (now mostly the game's); the multiplayer mission's own fields were not compared at first; the first mutation
   run used mutants generated before the unsigned fix (nine did not apply).
+
+## Human part 79 (the game's saves, loads and restarts, `game_save.cpp`, 2026-11-22)
+
+- **The build:** `game_save/game_save_diff.cpp` (suite `human.game_save`): game_save.cpp compiled in, the original's
+  five functions called in place; what they reach faked on both sides with the same loggers (the checkpoints, the
+  interface, the first person view and the quick messages: resets, saves writing a marked chunk, loads reading one; the
+  modules, the timed events, the mission and its objectives, the campaign, the profile, the network game's players, the
+  actors module's actors and spawn points, the mission squad, the application, the speech sets' delays, the stains, the
+  music, the texts and messages); the chunks real on both sides. The original's three calls into its copy protection
+  (CALL [0x00a59000]) are patched out.
+- **The world:** the game's fields (state, mode, clocks, switches, saves used, pending spawns, the mission's name), the
+  static state record, the role, the difficulty, the mission and its objectives' statuses, the current campaign and
+  mission number, the shared lives and the players, actors by id, the squad's soldiers deployed or not.
+- **The tests:** 60,000 scenarios of up to 12 operations (3.5 million checks, about 12 s): CanQuickSave, RestartMission
+  (new round or not), SaveGame (the file compared byte by byte, then the next chunk), LoadGame of generated files
+  (chunks in any order, missing or doubled, versions and mission names that differ, long names, short and long state
+  records, unknown ids, a child chunk running past its parent, another top chunk, an empty file), LoadGame of the
+  side's own last save, LoadSavedGame, the chunk not open, the world, the role and the state changed between them; the
+  game's fields, the static record, the players' lives and the speech delays compared after each. Every line of
+  game_save.cpp runs (224 of 224).
+- **Port bug found and fixed (on main):** LoadGame's loop ran while `RemainingSize() > 0`; the original's (as
+  `HasMore()`) runs until the reader is exactly at the chunk's end, so after a child chunk running past its parent it
+  reads on (the next chunks, then the last id's handler again at the file's end). The harness fails 758 times on the
+  old loop.
+- **Original's weaknesses (not fixed, not tested):** a short version, saves-used or signal pistol chunk leaves the
+  original comparing or storing stack words (the version and the pistol uninitialized, the saves used the 0x29A
+  header's first bytes; the port keeps 0 / the old count); a mission name with no terminator in the bytes read (or an
+  empty name chunk) makes both compare uninitialized buffer bytes; a mission progress chunk without a mission calls
+  through null in both; RestartMission frees only the pending spawns' records (the port's earlier fix frees their state
+  and stats too: not observed here).
+- **Mutations:** 430 mutants, 60 not building, 350 of 370 killed, 20 equivalent or out of reach (mutate_game_save.py).
+- **Harness lessons (my mistakes):** the role change first drew from the shared generator, so the two sides ran with
+  different roles; the players' lives were compared only up to the player count, so a loop running one slot past it
+  survived (now every slot, one always spare).
