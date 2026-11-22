@@ -5374,3 +5374,63 @@ particles and the surface marks. Files are served from memory.
   float bits (1..6 as floats: huge integers), hiding the integer counter; random calls inside the operation (SlideStep's
   phase) made the sides differ; the sweep fake never climbed, so the step-climb retry did not run until it could lift
   the end; a heredoc patch with escaped quotes broke (written to a file instead).
+
+## Human part 82a (the meleeTracker actor's sensing and per-frame code, `melee_tracker.cpp`, 2026-11-22)
+
+- **The build:** `melee_tracker/mt_diff.cpp` (suite `human.mt`, the interface kit): the tracker's source compiled in,
+  `melee_tracker_ai.cpp` linked (SetController's variants, not called here; its Disable through the linker's --wrap
+  to the test's logger), the paths part 82b tests stubbed (`mt_stubs.inc`: a call ends the run). Each side has its
+  tracker: the original's a block in its layout, the port's a C_MeleeTracker block (its C_Actor packs the vectors:
+  every field elsewhere, set and compared by name through the offsetof table). Faked on both sides with the same
+  loggers: the movement's members (part 81's), the controller (a block in the original's layout, which the port's
+  class has: its virtuals by slot, each side's), the humans (blocks in each side's layout: type, frame, position,
+  health, role, their locomotion's ScaleStanceVolumes, GetMoveSpeedClass), the sight module's targets (each side's
+  vtable; the original's vector at 0x0089b298) and Remove(Observer|Target), the actors module's GetHuman, the sound
+  module's RemoveListener, the controls' GetValues, the game's debug print, the head's joint override set (COM, shared),
+  the frames (the kit's arena; the model's frame data naming the side's tracker); RandFloat, timeGetTime,
+  QueryPerformanceCounter / MicrosecondsNow (the original's import slots) and rand alike; the sighting pool's
+  _aligned_malloc the test's; the copy protection's check made to pass (HitDamage cuts a cracked copy's damage).
+- **The tests:** 60,000 scenarios of up to 12 operations (1.5 million checks, about 22 s): SetOptimized, TestSight,
+  ResetAI, OnSightEvent (spotted and lost, human and other kinds, in and out of range), Update, Tick (the fall-out
+  height, the player-driven controller, the bite target's stance volumes, the look-around request by animation),
+  TrackVelocity, HeadLook (the three turn-rate curves and the others, turning and starting, the return, the ~56 degree
+  clamp; forwards unit, short or any), SetLookBehaviour, UpdateLookBehaviour (states 6 and 8, every repeat count),
+  HitDamage (the seven bones), Hit (server and client, a kill, -1, a wound below an eighth), UnknownD0, OnSoundHeard
+  (every sound chapter, refreshed and new sightings, the bullet-hit threshold), HearPlayers (the list empty, with spare
+  room, and filled); whole-number positions now and then (distances exactly the sight or hearing range), equally near
+  bones;
+  the answers (the sequence's animation, the controller's target, the humans' pace) changed between them. The
+  tracker's fields (the lists by their entries), the controller's weights and the frames' flags compared after each.
+  Every line of those functions runs but HitDamage's skip of a missing bone (the port's fix: the harness always has
+  them).
+- **Port bugs found and fixed (on main):**
+  - HeadLook: the facing and the head's direction were normalised by LS3D's Normalize (the original's inline sums y, z,
+    x); the fixed turn rate was 0.0028f (the original's constant is one float above: 0x3B378035); the growing rate's
+    constants were the floats 0.002 and 0.006 (the original's doubles: 0.002f and 0.0060000002849847078) and its
+    logarithm rounded to float before the product (the x87's FYL2X is not rounded by the float precision); the clamp's
+    limit was 0.9707963f (the original's 0.97079635f, 0x3F78861C); a NaN angle took the step and a NaN turn turned
+    (the original takes the angle and counts it as no turn).
+  - UpdateLookBehaviour: the facing normalised by LS3D's Normalize (y, z, x); the 1/11 step 0.0909091f (the
+    original's 0.09090909f, one float below).
+  - Tick: the controller's target asked once (the original asks twice: to test, then to use).
+  - HitDamage: the bones' matrices brought up to date in the zones' order (the original's in the movement's); the
+    squared distances summed x, y, z (the original's z, y, x, the last zone's x, y, z: equally near bones picked
+    another zone).
+  - OnSoundHeard: the distance was S_vector's Magnitude (the original sums y, z, x and takes the length as below).
+  - SafeLength (OnSightEvent's, OnSoundHeard's) compared the float (the original its bits as an int: a negative NaN
+    is 0) and took a NaN's length as 1 (the original's root).
+  - HearPlayers: each player slot asked for once (the original asks three times: to test, for the role, to add).
+- **Not compared:** the look point's and target's w (stack words where the original sets them); the pooled sightings'
+  identity (each side's pool); SetController and the controllers' own code (part 37, and 82b); the mission life
+  cycle, save and load (82b).
+- **The original's weaknesses (kept, unless noted the port's fixes):** OnSightEvent reads a target past the sight list
+  or in a free slot unchecked; Update, Tick, TestSight, ResetAI, Hit and UnknownD0 call the controller unchecked; the
+  head look crashes without the head override set (a model without the bones); OnSoundHeard reads the listener frame's
+  actor and its controller unchecked; HearPlayers reads the role of whatever actor a player slot holds; HitDamage reads
+  every bone unchecked; the copy protection cuts a cracked copy's bite damage to a tenth (dropped).
+- **Mutations:** 721 mutants, 58 not building, 625 of 663 killed, 38 equivalent or out of reach (mutate_mt1.py).
+- **Harness lessons (my mistakes):** calling the port's virtuals on its block dispatched through the test's vtable
+  (qualified calls now); the frames' Tick slot and the sighting pool's _aligned_malloc were missing (crashes); two
+  heredoc patches collapsed `\n` (fixed with the editor); the decompile misread HeadLook's and HitDamage's sums and the
+  turn's NaN sign: the asm settled them; the first mutation run showed the missing exact-distance, spare-capacity,
+  look-around and tied-bone cases (added, the run repeated).

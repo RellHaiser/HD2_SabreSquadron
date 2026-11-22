@@ -51,11 +51,35 @@ namespace {
 // Length from a squared magnitude, clamped the way the engine's inlined helper does.
 float SafeLength(float sq)
 {
-    if (sq < 1e-08f)
+    // (The original compares the float's bits as an int: negatives, -0 and a negative NaN are 0.)
+    int32_t bits;
+    std::memcpy(&bits, &sq, sizeof bits);
+    if (bits < 0x322BCC77)                              // 1e-8f
         return 0.0f;
-    if (std::fabs(sq - 1.0f) >= 1e-08f)
+    if (!(std::fabs(sq - 1.0f) < 1e-08f))              // (a NaN: its root)
         return std::sqrt(sq);
     return 1.0f;
+}
+
+// Normalizes a direction with the square summed y, z, x (the original's inlined copy here),
+// snapping to the nearest axis when it is too short.
+void NormalizeYZX(S_vector &v)
+{
+    const float sq = (v.y * v.y + v.z * v.z) + v.x * v.x;
+    if (std::fabs(sq - 1.0f) < 1e-08f)
+        return;
+    if (!(sq < 1e-08f)) {
+        const float inv = 1.0f / std::sqrt(sq);
+        v.x *= inv;
+        v.y *= inv;
+        v.z *= inv;
+    } else if (v.x != 0.0f) {
+        v.x = v.x < 0.0f ? -1.0f : 1.0f;
+    } else if (v.z == 0.0f) {
+        v.y = v.y < 0.0f ? -1.0f : 1.0f;
+    } else {
+        v.z = v.z < 0.0f ? -1.0f : 1.0f;
+    }
 }
 
 // Appends to one of the tracker's pointer lists (begin / end / capacity), growing it as the
@@ -241,14 +265,13 @@ void C_MeleeTracker::Tick(int timeDelta)                // 0x005d5620 (DS 0x005e
     m_movement.BuildSequence();
     m_movement.StepAnimation(timeDelta);
     UpdateLookBehaviour(timeDelta);
-    // While biting, the target's stance volumes are enlarged around the body's move step.
-    C_Actor *target = m_ai ? m_ai->GetTarget() : nullptr;
-    if (target)
-        static_cast<C_Human *>(target)->GetMovement()->m_locomotion.ScaleStanceVolumes(true);
+    // While biting, the target's stance volumes are enlarged around the body's move step. (The
+    // original asks the controller for the target twice: once to test, once to use.)
+    if (m_ai && m_ai->GetTarget())
+        static_cast<C_Human *>(m_ai->GetTarget())->GetMovement()->m_locomotion.ScaleStanceVolumes(true);
     m_movement.Update(timeDelta);
-    target = m_ai ? m_ai->GetTarget() : nullptr;
-    if (target)
-        static_cast<C_Human *>(target)->GetMovement()->m_locomotion.ScaleStanceVolumes(false);
+    if (m_ai && m_ai->GetTarget())
+        static_cast<C_Human *>(m_ai->GetTarget())->GetMovement()->m_locomotion.ScaleStanceVolumes(false);
     // The look-around: a livelier one while the body plays animations 7..12.
     const S_vector4 none = {0.0f, 0.0f, 0.0f, 0.0f};
     if (m_movement.m_364 < 7 || m_movement.m_364 > 12)
@@ -279,6 +302,17 @@ void C_MeleeTracker::TrackVelocity(int timeDelta)       // 0x005d64e0
     m_lastFrameTime = timeDelta;
 }
 
+namespace {
+// The head's turn rate growing with the angle left: ln(x) * 0.002 + 0.006, the constants the
+// original's doubles (0.002f and 0.0060000002849847078), each operation rounded to float.
+float LogRate(float x)
+{
+    // (The logarithm is the x87's FYL2X, which the float precision does not round: kept in double.)
+    const float scaled = static_cast<float>(std::log(static_cast<double>(x)) * 0.0020000000949949026);
+    return static_cast<float>(static_cast<double>(scaled) + 0.006000000284984708);
+}
+}  // namespace
+
 void C_MeleeTracker::HeadLook(int frameTime)            // 0x005d7a10
 {
     // Fix: a tracker whose frame setup gave up has no head override (the original crashes on
@@ -295,7 +329,7 @@ void C_MeleeTracker::HeadLook(int frameTime)            // 0x005d7a10
     toParent.Inverse(parentRot);
 
     S_vector forward = GetFrame()->GetMatrix()(2);     // the tracker's facing
-    forward.Normalize();
+    NormalizeYZX(forward);
     const S_vector &headPos = m_headFrame->GetWorldPos();
     if (m_lookReturn) {
         // Turning back: toward a point 10 m straight ahead. (The original also stores an
@@ -313,7 +347,7 @@ void C_MeleeTracker::HeadLook(int frameTime)            // 0x005d7a10
     } else {
         // A new turn starts from where the head points now.
         S_vector headDir = m_headFrame->GetMatrix()(2);
-        headDir.Normalize();
+        NormalizeYZX(headDir);
         m_headYaw = 0.0f;
         const float headXZ[2] = {headDir.x, headDir.z};
         delta = AngleBetween2D(headXZ, toPoint);
@@ -324,7 +358,7 @@ void C_MeleeTracker::HeadLook(int frameTime)            // 0x005d7a10
     float rate;
     switch (m_lookRateMode) {
     case 0:
-        rate = 0.0028f;
+        rate = 0.0028000001f;                           // (the original's: 0x3B378035, one above 0.0028f)
         break;
     case 1: {
         float x = size;
@@ -332,23 +366,24 @@ void C_MeleeTracker::HeadLook(int frameTime)            // 0x005d7a10
             x = 0.1f;
         else if (x > 3.1415927f)
             x = 3.1415927f;
-        rate = std::log(x) * 0.002f + 0.006f;
+        rate = LogRate(x);
         break;
     }
     case 2:
-        rate = std::log(size < 0.1f ? 0.1f : size) * 0.002f + 0.006f;
+        rate = LogRate(size < 0.1f ? 0.1f : size);
         break;
     default:
         rate = 0.002f;
         break;
     }
     const float step = (delta > 0.0f ? 1.0f : -1.0f) * (rate * m_lookSpeed) * static_cast<float>(frameTime);
-    float turn = size <= std::fabs(step) ? delta : step;
+    float turn = size > std::fabs(step) ? step : delta;   // (a NaN angle: the angle)
     // No further than pi/2 - 0.6 rad (~56 degrees) either side.
-    if (turn * m_headYaw >= 0.0f && std::fabs(turn + m_headYaw) > 0.9707963f)
+    if (turn * m_headYaw >= 0.0f && std::fabs(turn + m_headYaw) > 0.97079635f)
         turn = 0.0f;
 
-    if (std::fabs(turn) <= 0.003f && m_lookReturn) {
+    // (A NaN turn counts as none.)
+    if (!(std::fabs(turn) > 0.003f) && m_lookReturn) {
         // Back straight ahead: the bone follows the animation again.
         m_lookActive = false;
         m_headTurning = false;
@@ -356,7 +391,7 @@ void C_MeleeTracker::HeadLook(int frameTime)            // 0x005d7a10
         m_headOverrides->GetItem(0)->Clear();
         return;
     }
-    if (std::fabs(turn) <= 0.003f)
+    if (!(std::fabs(turn) > 0.003f))
         m_lookReached = true;
     else
         m_headYaw += turn;
@@ -467,8 +502,9 @@ void C_MeleeTracker::UpdateLookBehaviour(int timeDelta) // 0x005d82b0
                 m_lookTimer = -1;
                 const S_matrix &world = GetFrame()->GetMatrix();
                 S_vector dir = world(2);
-                dir.Normalize();
-                float angle = static_cast<float>(std::rand() % 10) * 0.0909091f + 0.22f;
+                NormalizeYZX(dir);
+                // (The original's 1/11: 0x3DBA2E8C, 0.09090909f.)
+                float angle = static_cast<float>(std::rand() % 10) * 0.09090909f + 0.22f;
                 if (std::rand() % 2 != 0)
                     angle = -angle;
                 RotateAboutY(dir, angle);
@@ -1073,26 +1109,35 @@ bool C_MeleeTracker::ReadProperties(C_chunk &chunk)     // 0x005d6630
 
 float C_MeleeTracker::HitDamage(const S_vector &pos, float amount) const   // 0x005d73b0 (DS 0x005f2490)
 {
-    // The nearest bone wins (the first of equally near ones).
+    // The bones' positions (their matrices brought up to date in the movement's order), then the
+    // nearest bone wins (the first of equally near ones, in the order c, f, d, h, p, t, l).
+    const I3D_frame *const bones[] = {m_movement.m_3e8, m_movement.m_bodyFrame, m_movement.m_3f0, m_movement.m_3f4,
+                                      m_movement.m_3f8, m_movement.m_3fc, m_movement.m_400};
+    S_vector at[7];
+    for (int i = 0; i < 7; ++i)
+        if (bones[i])                                   // Fix: a model without the bone (the original crashes)
+            at[i] = bones[i]->GetWorldPos();
     const struct {
-        const I3D_frame *bone;
+        int bone;
         float factor;
     } zones[] = {
-        {m_movement.m_3f0, 0.65f},                      // "c"
-        {m_movement.m_3e8, 2.0f},                       // "f"
-        {m_movement.m_bodyFrame, 1.5f},                 // "d"
-        {m_movement.m_3f4, 0.2f},                       // "h"
-        {m_movement.m_3f8, 0.2f},                       // "p"
-        {m_movement.m_3fc, 0.2f},                       // "t"
-        {m_movement.m_400, 0.2f},                       // "l"
+        {2, 0.65f},                                     // "c"
+        {0, 2.0f},                                      // "f"
+        {1, 1.5f},                                      // "d"
+        {3, 0.2f},                                      // "h"
+        {4, 0.2f},                                      // "p"
+        {5, 0.2f},                                      // "t"
+        {6, 0.2f},                                      // "l"
     };
     float best = 0.0f;
     float factor = 0.0f;
     bool found = false;
     for (const auto &zone : zones) {
-        if (!zone.bone)                                 // Fix: a model without the bone (the original crashes)
+        if (!bones[zone.bone])
             continue;
-        const float sq = (pos - zone.bone->GetWorldPos()).Square();
+        // (The squared distance summed z, y, x; the last zone's ("l", through S_vector's helpers) x, y, z.)
+        const float dx = pos.x - at[zone.bone].x, dy = pos.y - at[zone.bone].y, dz = pos.z - at[zone.bone].z;
+        const float sq = zone.bone == 6 ? (dx * dx + dy * dy) + dz * dz : (dz * dz + dy * dy) + dx * dx;
         if (!found || sq < best) {
             best = sq;
             factor = zone.factor;
@@ -1187,7 +1232,9 @@ void __stdcall C_MeleeTracker::OnSoundHeard(const S_HeardSound *sound)   // 0x00
     const E_HumanRole role = static_cast<C_Human *>(source)->GetRole();
     if (role == HUMAN_ROLE_ENEMY || role == HUMAN_ROLE_NEUTRAL)
         return;
-    const float distance = (sound->pos - tracker->GetFrame()->GetWorldPos()).Magnitude();
+    const S_vector &listenerPos = tracker->GetFrame()->GetWorldPos();
+    const float dx = sound->pos.x - listenerPos.x, dy = sound->pos.y - listenerPos.y, dz = sound->pos.z - listenerPos.z;
+    const float distance = SafeLength((dy * dy + dz * dz) + dx * dx);   // (the original's sum order)
     if (distance > static_cast<float>(tracker->m_stats.hearRange))
         return;
 
@@ -1268,14 +1315,16 @@ void C_MeleeTracker::HearPlayers()                      // 0x005d7760
     const float rangeSq = static_cast<float>(m_stats.hearRange * m_stats.hearRange);
     // The list from the frame setup; filled from the player slots when it is empty.
     if (m_playersBegin == m_playersEnd) {
+        // (The slot is asked for again for each use, as the original does.)
         for (int i = 0; i < C_ActorsModule::PLAYER_SLOTS; ++i) {
-            C_Actor *actor = g_actorsModule.GetHuman(i);
-            // Fix: as in SetupFrame, a non-human removed actor is skipped.
-            if (!actor || actor->GetType() != ACTOR_HUMAN)
+            if (!g_actorsModule.GetHuman(i))
                 continue;
-            C_Human *human = static_cast<C_Human *>(actor);
-            if (human->GetRole() == HUMAN_ROLE_PLAYER)
-                PushBack(m_playersBegin, m_playersEnd, m_playersCap, human);
+            // Fix: as in SetupFrame, a non-human removed actor is skipped (the original reads
+            // its role regardless).
+            C_Actor *actor = g_actorsModule.GetHuman(i);
+            if (actor->GetType() != ACTOR_HUMAN || static_cast<C_Human *>(actor)->GetRole() != HUMAN_ROLE_PLAYER)
+                continue;
+            PushBack(m_playersBegin, m_playersEnd, m_playersCap, static_cast<C_Human *>(g_actorsModule.GetHuman(i)));
         }
     }
     const S_vector4 &own = GetPosition4();
