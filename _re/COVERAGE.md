@@ -5224,3 +5224,36 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the role change first drew from the shared generator, so the two sides ran with
   different roles; the players' lives were compared only up to the player count, so a loop running one slot past it
   survived (now every slot, one always spare).
+
+## Human part 80 (the meleeTracker's animation mixer, `melee_tracker_anim_mixer.cpp`, 2026-11-22)
+
+- **The build:** `melee_tracker/mtmix_diff.cpp` (suite `human.mtmix`, the interface kit): the mixer's source compiled
+  in, the original's 17 functions called in place on a mixer of the same bytes (its layout is the original's). One fake
+  model (the kit's frame: eight stages' animation, weight, time, flags and activity; FindChildFrame, SetCallback, Tick,
+  SetAnimation .. AdvanceStages logged), a note frame "a" whose model's frame data names each side's tracker (the
+  original reaches the mixer as the actor + 0xA0), fake animation sets, the animation cache's Get on both sides
+  (0x0041fc10 redirected); the chunks real on both sides over files in memory. MixerBlendProgress is the original's on
+  both sides (part 7 tested the port's).
+- **The tests:** 60,000 scenarios of up to 14 operations (2.3 million checks, about 20 s): Init (now and then another
+  model), Reset, UpdateStages (a time step or none, started or not, the gates), UpdateMove, PlayStages, SetAddMove,
+  SetSlide (short, axis and unit offsets), the track getters and setters, TakeSoundEvents, GetBlendProgress, the note
+  keys through NoteHook and OnNote, SaveGame (the file byte for byte, inside another chunk or not, the chunk closed),
+  LoadGame of the side's own save or of generated files (sub-chunks in any order, missing, doubled, unknown, the stage
+  chunks' six kinds, missing animation files, longer chunks, another top chunk, an empty file); the stages changed
+  between them. The mixer's bytes, the model's stages, the sets' references and the note frame's callback compared
+  after each. Every line runs (356 of 356).
+- **Port bugs found and fixed (on main):**
+  - ResetTracks cleared each track's events; the original clears only their count.
+  - LoadGame's loop ran while bytes remained (and stopped on a failed header read); the original's runs until the
+    reader is exactly at the chunk's end, a failed read keeping the last id (as part 79's).
+  - LoadGame read only stage kind 2 as a time; the original reads kinds 2 to 5 so (3 to 5 are never written).
+  - SetSlide summed the offset's square z, y, x; the original x, y, z (the step's velocity differed in its last bits).
+  - LoadGame's comment called a missing animation file a crash in the original; it plays nothing, as the port.
+- **Not compared:** the move's w (ResetTracks and UpdateMove store a stack word) and the vectors' w after a load (the
+  original's stack copy); short chunks (the original keeps stack words); a fourth event in a track (the port's cap);
+  times beyond 2^24 ms (the original's x87 code converts them exactly where the port rounds them to float: junk a save
+  of the game's never holds).
+- **Mutations:** 705 mutants, 49 not building, 621 of 656 killed, 35 equivalent or out of reach (mutate_mtmix.py).
+- **Harness lessons (my mistakes):** the first load files filled every field with random words (float bits as times:
+  billion-ms times that only differ by the conversion above); a Python edit script through a bash heredoc collapsed a
+  backslash again.

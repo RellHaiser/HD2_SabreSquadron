@@ -44,7 +44,7 @@ void C_MeleeTrackerAnimMixer::ResetTracks()
         track.current = -1;
         track.time = -1;
         track.hold = 0;
-        track.events[0] = track.events[1] = track.events[2] = 0;
+        // (The events themselves are left: only their count is cleared.)
         track.eventCount = 0;
         track.length = 0;
         track.reversed = 0;
@@ -313,7 +313,7 @@ void C_MeleeTrackerAnimMixer::SetSlide(const float *offset, int duration)
         m_slideVelocity.z = m_slideVelocity.z >= 0.0f ? 1.0f : -1.0f;
     }
     // Scale to the length moved per step.
-    float magSq = offset[2] * offset[2] + offset[1] * offset[1] + offset[0] * offset[0];
+    float magSq = offset[0] * offset[0] + offset[1] * offset[1] + offset[2] * offset[2];
     float mag;
     int32_t magSqBits;  // the SDK's test on the float's bits (below 1e-8, or negative)
     std::memcpy(&magSqBits, &magSq, sizeof magSqBits);
@@ -496,7 +496,10 @@ bool C_MeleeTrackerAnimMixer::LoadGame(C_chunk &chunk)
         v.z = value.z;
         // Quirk kept: w is left unchanged (the original reads 12 bytes and keeps a stack value).
     };
-    while (!chunk.AtEnd() && chunk.Descend(id)) {
+    // (Until the reader is exactly at the chunk's end, as the original: past it, it goes on reading. A failed
+    // header read keeps the last id.)
+    while (chunk.HasMore()) {
+        chunk.Descend(id);
         switch (id) {
         case 0:
             chunk.Read(&m_tracks, sizeof(m_tracks));
@@ -558,9 +561,8 @@ bool C_MeleeTrackerAnimMixer::LoadGame(C_chunk &chunk)
                     } else {
                         I3D_animation_set *anim = nullptr;
                         g_animationCache.Get(name, &anim);
+                        // (A file no longer found leaves the stage empty.)
                         m_model->SetAnimation(anim, stage, 1.0f, 0);
-                        // Fix: a file no longer found leaves the stage empty (the original calls
-                        // through null).
                         if (anim)
                             anim->Release();
                     }
@@ -568,7 +570,8 @@ bool C_MeleeTrackerAnimMixer::LoadGame(C_chunk &chunk)
                     float weight = 0.0f;
                     chunk.Read(weight);
                     m_model->SetAnimWeight(stage, weight);
-                } else if (kind == 2) {
+                } else {
+                    // (Kinds 3 to 5, never written, are read as times too.)
                     int time = 0;
                     chunk.Read(time);
                     m_model->SetAnimTime(stage, time);
