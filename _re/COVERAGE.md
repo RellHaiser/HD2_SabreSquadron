@@ -5257,3 +5257,63 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the first load files filled every field with random words (float bits as times:
   billion-ms times that only differ by the conversion above); a Python edit script through a bash heredoc collapsed a
   backslash again.
+
+## Human part 81a (the meleeTracker's movement without Update and Move, `melee_tracker_movement.cpp`, 2026-11-22)
+
+- **The build:** `melee_tracker/mtmove_diff.cpp` (suite `human.mtmove`, the interface kit): the movement's source
+  compiled in, part 80's mixer linked, the original's functions called in place on a movement of the same bytes.
+  Each side has its own tracker block (the original's offsets and the port's), AI controller and target with
+  vtables; fakes for the collision world (Add/Remove/MoveVolume, the sphere test), the sound module (Play logs the
+  whole request, Stop), the game, the camera's SetViewDir, the scene's sectors, the graph's mouse, the player
+  controller's MouseLook, the team, the animation cache's Get, _aligned_malloc/_aligned_free (the port's free
+  through the test's too); the chunks real on both sides over files in memory; the original's fastcall helpers
+  (AngleBetween2D, RotateAboutY/X, MeleeTrackerAnimClass) forwarded.
+- **The tests:** 30,000 scenarios of up to 14 operations (1.24 million checks, about 37 s): Bind, Init, Reset,
+  FreeVolumesAndSounds, SetOptimized(Controller), SetMode / SetSubModeA / B, the sequence getters, the queue's push
+  and pops, SetNetPosition and ClearNetBit (tiny, whole-number and big steps), SetWorldDir (near the frame's
+  forward), SetFacing (the facing itself, one component changed), TurnToFacing and TurnDir (angles near 1e-4),
+  UpdateAnimation, HandleAnimEvents (footsteps, the lie-down slide with short directions), ApplyNetInterp,
+  CheckGround, Bite, UpdateSpheres, StepAnimation, BuildSequence (biased toward the sub-mode transitions),
+  CheckAttackSequence, PlayAnimSound, BarkTurn (the original's takes the tracker), MeleeTrackerAnimClass /
+  OneShot, GetLungeRange, SaveGame (the file byte for byte) and LoadGame (its own save, generated files: sub-chunks
+  in any order, missing, doubled, unknown, another top chunk, an empty file); the controller's answers changed
+  between them. The movement's bytes, the volumes, the tracker's position and direction, the model's stages, the
+  sets, the cooldown and the frames compared after each. Every line in range runs but one (879 of 880: the
+  negative-rand branch).
+- **Port bugs found and fixed (on main):**
+  - SetNetPosition: the frame distance and the interpolation distance were summed x, y, z (the original z, y, x),
+    the direction normalised x, y, z; the steps were computed in double from a distance over a fixed 1e-5 (the
+    original divides by the last net step's length, 1e-5 only when it did not move, each operation rounded to
+    float, and __ftol keeps the low word beyond 2^31); the velocity was the direction times the distance (the
+    original: times that divisor); the frame test was <= 2 (a NaN differs: the original's is !(> 2)); the frame's
+    position took w = 1 (the original copies the matrix's row 3 whole).
+  - Init's net position took w = 1 (the matrix's row 3 whole, as above).
+  - SaveGame / LoadGame's sub-chunks 0x27 and 0x28 were sound handles; they are the net clock m_388 and its length
+    m_38c.
+  - LoadGame: a wrong top chunk did not ascend; its loop stopped on a failed header read (the original's runs until
+    the reader is exactly at the chunk's end, keeping the last id); 0x24, 0x2C, 0x2F stored the word's low byte (the
+    original: != 0); the end added the volumes back and showed the frame, returning the mixer's result (the
+    original moves the volumes, leaves the frame, ignores that result and returns true).
+  - HandleAnimEvents: the footstep's w was 1 (the matrix's row 3 w); the slide's x and z offsets were 0 (the
+    original multiplies the direction by 0: -0 for a negative one).
+  - PlayAnimSound's class 2 sound went into the second handle; the original keeps it in the third.
+  - TurnToFacing / TurnDir tested the angle against the float 1e-4 (the original's double).
+  - Bite: a NaN distance or exactly 2.1 differed (the original's !(<= 2.1)), and the air counter was compared as a
+    float (the original tests its bits: -0 counts as airborne).
+  - StepAnimation turned the near attack into the far one only when the first id was 6 (the original also after
+    the advance read the next one) and not for a NaN distance.
+- **Not compared:** the original's stack words (the volumes' w, TurnDir's w, the mixer move's w, the net
+  velocity's w, the loaded vectors' w); short sub-chunks; StepAnimation outside the animation table (both read past
+  it); SetMode(5) when the queue never empties (both loop forever); a missing controller, anim2, body or ground frame
+  (the original reads them unchecked).
+- **The original's weaknesses (kept, the port shares them unless noted):** death (SetMode(5)) removes and frees its
+  volume slots unchecked, a second death removing null (the port skips empty slots: a fix); its queue loop never
+  ends when QueuePopBack's quirk leaves the read index out of 0..4; a sequence BuildSequence makes can lead
+  StepAnimation past its table (a 0x17 read after a skipped one, an entry without an animation: anims[-1]); the
+  controller, anim2, body and ground frames are read unchecked; negative time steps are read unsigned in places.
+- **Mutations:** 1,747 mutants, 86 not building, 1,504 of 1,661 killed, 157 equivalent or out of reach
+  (mutate_mtmove1.py).
+- **Harness lessons (my mistakes):** the dummies' boxes were left empty (every sphere radius 0) and the frames'
+  matrices had w 0 (the footstep's w unchecked) until the mutation run showed it; the volume frees were not logged;
+  BuildSequence's sub-mode branches ran twice in 10,000 scenarios before the bias; a Python edit through a bash
+  heredoc collapsed a backslash; run_suites.py's mtmove entry slipped into part 80's commit.

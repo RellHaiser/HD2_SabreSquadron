@@ -112,6 +112,26 @@ void NormalizeDir(S_vector &v)
     }
 }
 
+// NormalizeDir with the square summed z, y, x (the original's other inlined copy).
+void NormalizeDirZYX(S_vector &v)
+{
+    const float sq = v.z * v.z + v.y * v.y + v.x * v.x;
+    if (std::fabs(sq - 1.0f) < 1e-08f)
+        return;
+    if (sq >= 1e-08f) {
+        const float inv = 1.0f / std::sqrt(sq);
+        v.x *= inv;
+        v.y *= inv;
+        v.z *= inv;
+    } else if (v.x != 0.0f) {
+        v.x = v.x >= 0.0f ? 1.0f : -1.0f;
+    } else if (v.z == 0.0f) {
+        v.y = v.y >= 0.0f ? 1.0f : -1.0f;
+    } else {
+        v.z = v.z >= 0.0f ? 1.0f : -1.0f;
+    }
+}
+
 // The length of a vector whose square is `sq`, treating tiny values as 0 and near-unit as 1 (the
 // original's inlined pattern).
 float SafeLength(float sq)
@@ -203,8 +223,7 @@ void C_MeleeTrackerMovement::Init()
 
     // The meleeTracker's current world position seeds the networked position.
     const S_matrix &m = MeleeTrackerMatrix(m_meleeTracker->GetFrame());
-    const S_vector &worldPos = m(3);
-    m_netPos = {worldPos.x, worldPos.y, worldPos.z, 1.0f};
+    m_netPos = {m.m[3][0], m.m[3][1], m.m[3][2], m.m[3][3]};   // (the matrix's row 3 whole)
     m_prevNetPos = m_netPos;
     SetNetPosition(&m_netPos.x);
     m_meleeTracker->SetPosition4(m_netPos);
@@ -351,6 +370,7 @@ void C_MeleeTrackerMovement::SetMode(int mode, int priority)
         while (m_35c != -1)
             QueuePopFront();
         CheckGround();
+        // Fix: empty slots are skipped (the original removes and frees them unchecked: a second death removes null).
         for (int i = 0; i < 2; ++i)
             DeleteMeleeTrackerVolume(m_volumeA[i]);
         m_mode = 5;
@@ -458,35 +478,44 @@ void C_MeleeTrackerMovement::SetNetPosition(const float *pos)
     m_prevNetPos = {m_netPos.x, m_netPos.y, m_netPos.z, m_netPos.w};
 
     // How far the frame is from the last net position; a big jump snaps the reference instead of
-    // interpolating.
+    // interpolating. (The original sums this square and the two below z, y, x.)
     const S_vector fromFrame(m_netPos.x - m_prevFramePos.x, m_netPos.y - m_prevFramePos.y,
                              m_netPos.z - m_prevFramePos.z);
     const float frameDist =
-        SafeLength(fromFrame.x * fromFrame.x + fromFrame.y * fromFrame.y + fromFrame.z * fromFrame.z);
-    if (std::fabs(moved - frameDist) <= 2.0f) {
-        const S_vector &framePos = MeleeTrackerMatrix(m_meleeTracker->GetFrame())(3);
-        m_prevFramePos = {framePos.x, framePos.y, framePos.z, 1.0f};
+        SafeLength(fromFrame.z * fromFrame.z + fromFrame.y * fromFrame.y + fromFrame.x * fromFrame.x);
+    if (!(std::fabs(moved - frameDist) > 2.0f)) {
+        // (The frame's world matrix row 3 whole, its w too.)
+        const S_matrix &m = MeleeTrackerMatrix(m_meleeTracker->GetFrame());
+        m_prevFramePos = {m.m[3][0], m.m[3][1], m.m[3][2], m.m[3][3]};
     } else {
         m_prevFramePos = {m_netPos.x, m_netPos.y, m_netPos.z, m_netPos.w};
     }
 
     // The interpolation direction.
     S_vector dir(m_netPos.x - m_prevFramePos.x, m_netPos.y - m_prevFramePos.y, m_netPos.z - m_prevFramePos.z);
-    NormalizeDir(dir);
+    NormalizeDirZYX(dir);
 
     if (m_3e0 != 0) {
         const S_vector toPos(m_netPos.x - m_prevFramePos.x, m_netPos.y - m_prevFramePos.y,
                              m_netPos.z - m_prevFramePos.z);
-        const double distance = SafeLength(toPos.x * toPos.x + toPos.y * toPos.y + toPos.z * toPos.z);
-        m_38c = static_cast<int>((distance / 1e-05) * 100.0 + 1.0);
+        const float distance = SafeLength(toPos.z * toPos.z + toPos.y * toPos.y + toPos.x * toPos.x);
+        // The steps (of 10 ms) to cover it at the speed of the last net step (1e-5 when it did not move); each
+        // operation rounded to float, as the original's x87 code.
+        // (The original's 1e-5 is the float's value: 0x3EE4F8B580000000.)
+        const double divisor = static_cast<double>(moved != 0.0f ? moved : 1e-05f);
+        // (Quotients and products of two floats: rounded from double, the same as the x87 code's one rounding.)
+        const float steps = static_cast<float>(static_cast<double>(distance) / divisor);
+        const float scaled = static_cast<float>(static_cast<double>(steps) * 100.0);
+        // (__ftol: the 64-bit integer's low word beyond 2^31, a step tiny but not 0.)
+        m_38c = static_cast<int>(static_cast<int64_t>(scaled + 1.0f));
         if (m_38c > 0xA6) {
             m_38c = 0xA6;
             m_netVelocity = {m_netPos.x - m_prevFramePos.x, m_netPos.y - m_prevFramePos.y,
                              m_netPos.z - m_prevFramePos.z, m_netVelocity.w};
             return;
         }
-        const float speed = static_cast<float>(distance);
-        m_netVelocity = {dir.x * speed, dir.y * speed, dir.z * speed, m_netVelocity.w};
+        m_netVelocity = {static_cast<float>(dir.x * divisor), static_cast<float>(dir.y * divisor),
+                         static_cast<float>(dir.z * divisor), m_netVelocity.w};
         return;
     }
     m_38c = -1;
@@ -531,7 +560,7 @@ bool C_MeleeTrackerMovement::TurnToFacing(int timeDelta, int /*flag*/)
     const float facingXZ[2] = {m_facing.x, m_facing.z};
     const float forwardXZ[2] = {forward.x, forward.z};
     const float angle = AngleBetween2D(facingXZ, forwardXZ);
-    if (std::fabs(angle) < 0.0001f)
+    if (std::fabs(angle) < 0.0001)                      // (a double, as the original's)
         return true;
 
     float rate;
@@ -563,7 +592,7 @@ void C_MeleeTrackerMovement::TurnDir(float *dir)
     const float a[2] = {dir[0], dir[2]};                // {x, z} pairs
     const float b[2] = {current.x, current.z};
     const float angle = AngleBetween2D(a, b);
-    if (std::fabs(angle) < 0.0001f)
+    if (std::fabs(angle) < 0.0001)                      // (a double, as the original's)
         return;
 
     float rate;
@@ -658,9 +687,9 @@ void C_MeleeTrackerMovement::HandleAnimEvents()
                 const int footstep =
                     m_material >= 0 ? reinterpret_cast<const int *>(&g_materials[m_material])[9] : -1;
                 if (m_material >= 0 && footstep >= 0) {
-                    const S_vector &pos = MeleeTrackerMatrix(m_meleeTracker->GetFrame())(3);
-                    request.pos = pos;
-                    request.posW = 1.0f;  // (matrix row 3 w)
+                    const S_matrix &m = MeleeTrackerMatrix(m_meleeTracker->GetFrame());
+                    request.pos = m(3);
+                    request.posW = m.m[3][3];   // (the matrix's row 3 whole)
                     request.flags = 0;
                     request.attachTo = nullptr;
                     request.source = nullptr;
@@ -683,9 +712,10 @@ void C_MeleeTrackerMovement::HandleAnimEvents()
                         offset[1] = 14.0f;
                         offset[2] = dir.z * 0.8f;
                     } else {
-                        offset[0] = 0.0f;
+                        // (Times 0, as the original's: a negative direction gives -0.)
+                        offset[0] = dir.x * 0.0f;
                         offset[1] = 12.0f;
-                        offset[2] = 0.0f;
+                        offset[2] = dir.z * 0.0f;
                     }
                     offset[3] = dir.w;
                     m_mixer.SetSlide(offset, 1000);
@@ -763,7 +793,11 @@ void C_MeleeTrackerMovement::Bite()
     C_Actor *target = AiTarget(m_meleeTracker);
     if (!target || (m_364 != 5 && m_364 != 6))
         return;
-    if (AiTargetDistance(m_meleeTracker) >= 2.1f || m_airSteps != 0.0f)   // within 2.1 m of the target
+    // Within 2.1 m of the target (exactly 2.1 bites; a NaN does not) and on the ground (the original tests the
+    // counter's bits: -0 counts as airborne).
+    uint32_t airBits;
+    std::memcpy(&airBits, &m_airSteps, sizeof airBits);
+    if (!(AiTargetDistance(m_meleeTracker) <= 2.1f) || airBits != 0)
         return;
     if (IsServer()) {
         // Dropped: the copy protection makes a cracked copy bite for ten times the damage
@@ -824,8 +858,8 @@ bool C_MeleeTrackerMovement::SaveGame(C_chunk &chunk)
     chunk.WriteChunk(0x24, static_cast<int>(m_36c));
     chunk.WriteChunk(0x25, m_374);
     chunk.WriteChunk(0x26, m_378);
-    chunk.WriteChunk(0x27, m_soundHandle[0]);
-    chunk.WriteChunk(0x28, m_soundHandle[1]);
+    chunk.WriteChunk(0x27, m_388);
+    chunk.WriteChunk(0x28, m_38c);
     chunk.WriteChunk(0x29, &m_prevNetPos, 3 * sizeof(float));
     chunk.WriteChunk(0x2A, &m_prevFramePos, 3 * sizeof(float));
     chunk.WriteChunk(0x2B, &m_netPos, 3 * sizeof(float));
@@ -843,8 +877,10 @@ bool C_MeleeTrackerMovement::LoadGame(C_chunk &chunk)
     uint16_t id;
     if (!chunk.IsOpen() || !chunk.Descend(id))
         return false;
-    if (id != 0x2F59)
+    if (id != 0x2F59) {
+        chunk.Ascend();
         return false;
+    }
     for (int i = 0; i < 2; ++i)
         if (m_volumeA[i])
             g_collisionWorld.RemoveVolume(m_volumeA[i]);
@@ -859,7 +895,10 @@ bool C_MeleeTrackerMovement::LoadGame(C_chunk &chunk)
         v.y = value.y;
         v.z = value.z;
     };
-    while (!chunk.AtEnd() && chunk.Descend(id)) {
+    // (Until the reader is exactly at the chunk's end, as the original: past it, it goes on reading. A failed
+    // header read keeps the last id.)
+    while (chunk.HasMore()) {
+        chunk.Descend(id);
         switch (id) {
         case 0: chunk.Read(m_168); break;
         case 1: readVec3(m_moveDir); break;
@@ -898,25 +937,27 @@ bool C_MeleeTrackerMovement::LoadGame(C_chunk &chunk)
         case 0x21: chunk.Read(m_360); break;
         case 0x22: chunk.Read(m_364); break;
         case 0x23: chunk.Read(m_368); break;
-        case 0x24: { int v = 0; chunk.Read(v); m_36c = static_cast<uint8_t>(v); break; }
+        case 0x24: { int v = 0; chunk.Read(v); m_36c = v != 0; break; }
         case 0x25: chunk.Read(m_374); break;
         case 0x26: chunk.Read(m_378); break;
-        case 0x27: chunk.Read(m_soundHandle[0]); break;
-        case 0x28: chunk.Read(m_soundHandle[1]); break;
+        case 0x27: chunk.Read(m_388); break;
+        case 0x28: chunk.Read(m_38c); break;
         case 0x29: readVec3(m_prevNetPos); break;
         case 0x2A: readVec3(m_prevFramePos); break;
         case 0x2B: readVec3(m_netPos); break;
-        case 0x2C: { int v = 0; chunk.Read(v); m_3c0 = static_cast<uint8_t>(v); break; }
+        case 0x2C: { int v = 0; chunk.Read(v); m_3c0 = v != 0; break; }
         case 0x2D: readVec3(m_netVelocity); break;
         case 0x2E: chunk.Read(m_3e0); break;
-        case 0x2F: { int v = 0; chunk.Read(v); m_3e4 = static_cast<uint8_t>(v); break; }
+        case 0x2F: { int v = 0; chunk.Read(v); m_3e4 = v != 0; break; }
         case 0x30: chunk.Read(m_airSteps); break;
         default: break;
         }
         chunk.Ascend();
     }
     chunk.Ascend();
-    m_meleeTracker->GetFrame()->SetOn(true);
+    // The mixer's chunk next (its result not read), then the volumes moved to the spheres. (The original moves
+    // them: the ones removed above stay out of the world; the frame's on-flag is not touched.)
+    m_mixer.LoadGame(chunk);
     UpdateSpheres();
     if (m_meleeTracker->IsAlive()) {
         for (int i = 0; i < 2; ++i) {
@@ -925,7 +966,7 @@ bool C_MeleeTrackerMovement::LoadGame(C_chunk &chunk)
             m_volumeA[i]->center = S_vector(m_spherePos[i].x, m_spherePos[i].y, m_spherePos[i].z);
             m_volumeA[i]->centerW = m_spherePos[i].w;
             m_volumeA[i]->radius = m_sphereRadius[i] * 1.65f;
-            g_collisionWorld.AddVolume(m_volumeA[i]);
+            g_collisionWorld.MoveVolume(m_volumeA[i]);
         }
     }
     for (int i = 0; i < 3; ++i) {
@@ -934,9 +975,9 @@ bool C_MeleeTrackerMovement::LoadGame(C_chunk &chunk)
         m_volumeB[i]->center = S_vector(m_spherePos[i].x, m_spherePos[i].y + 0.22f, m_spherePos[i].z);
         m_volumeB[i]->centerW = m_spherePos[i].w;
         m_volumeB[i]->radius = m_sphereRadius[i] * 2.5f;
-        g_collisionWorld.AddVolume(m_volumeB[i]);
+        g_collisionWorld.MoveVolume(m_volumeB[i]);
     }
-    return m_mixer.LoadGame(chunk);
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -1627,10 +1668,12 @@ void C_MeleeTrackerMovement::StepAnimation(int /*unused*/)
             return;
         }
         id = seq.anims[seq.readIndex];
-    } else if (id == 6 &&
-               AiTargetDistance(m_meleeTracker) >= 1.8f) {
-        id = 5;
     }
+    // The near attack (6) turns into the far one beyond 1.8 m (a NaN distance too), the next id the advance read
+    // included, as the original's. (That id is not checked for 0x17 again: two in a row read one entry past the
+    // table, in both.)
+    if (id == 6 && !(AiTargetDistance(m_meleeTracker) < 1.8f))
+        id = 5;
 
     const S_MeleeTrackerAnim &entry = g_meleeTrackerAnims[id];
     int blendTime = entry.blendTime;
@@ -1952,7 +1995,8 @@ void C_MeleeTrackerMovement::PlayAnimSound(int animId)
         if (m_animFrame)
             ResetAnimFrame(m_animFrame);
         m_moveDir = {0.0f, 0.0f, 0.0f, m_moveDir.w};
-        m_soundHandle[1] = mouthSound(5, 5);
+        // (Kept in the third slot, as the original's.)
+        m_soundHandle[2] = mouthSound(5, 5);
         return;
     case 4:
         if (m_370 < 1) {
