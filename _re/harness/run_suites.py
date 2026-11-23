@@ -293,6 +293,8 @@ SUITES = [
       tree_copy="melee_tracker/mt_diff.exe"),
     T("script.compiler", "script/build_sc.bat", TMP + r"\sc_diff.exe", needs=("mingw", "original_exe", "data"),
       tree_copy="script/sc_diff.exe"),
+    T("script.interpreter", "script/build_vm.bat", TMP + r"\vm_diff.exe", needs=("mingw", "original_exe", "data"),
+      tree_copy="script/vm_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

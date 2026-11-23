@@ -5543,3 +5543,45 @@ particles and the surface marks. Files are served from memory.
   the random-atom expressions drove the original into undefined behaviour whose damage showed in later cases (a
   grammar now); the mutated tokens' line scan made the mutation generator quadratic (25 ms a mutant); a mutation list
   generated past the file's end was nearly run stale (stopped, regenerated).
+
+## Script part 2 (the mission script interpreter: `script.cpp`'s execution, `script_vm.cpp`'s script-level commands, Evaluate / ToString, 2026-11-22)
+
+- **The build:** `script/vm_diff.cpp` (suite `script.interpreter`, data needed; `sc_shared.inc` holds what it shares
+  with `sc_diff.cpp`): the port's `script.cpp`, `script_vm.cpp`, `script_functions.cpp` and the compiler against the
+  original's, each program compiled by both (compared as in part 1), then run side by side: ticks of random lengths
+  and the events (SendSignal, OnDeath, OnUse, OnHit, OnAlarm, OnAlarmDone, OnGlobalAlarm, OnCutscene, OnCutsceneDone,
+  OnActionDone, Stop, Restart, OnExit; the mission's start, the restart flag, the role switched between them). After
+  each: the script's flags, signals, delay, start point, call stack, instruction pointer, running / finished, the
+  Whenever timer and entries, the handlers, every number and string, the 256 save-game values with a sentinel word on
+  each side, the results of OnAlarmDone / OnCutscene / OnCutsceneDone and of every real command each side ran. Faked
+  alike: the game commands (each answer, Advance and true, waiting or Advance and false, drawn from a sequence both
+  sides read in the same order; the original's through a vtable whose ExecuteCommand slot is the fake's) and the
+  game functions (values from that sequence; the original's CallFunction redirected, its real one called through a
+  trampoline for _SignalReceived, _RandomInt and _LoadGameValue); rand seeded alike per action. Run for real: the flow
+  (If / Else, blocks, GoTo, Gosub / Return, Delay, the handlers and Whenevers), Evaluate and ToString, SetWhenever,
+  SetWheneverTime, Disable*, EnableSignal, SaveGameValue, EndScript and SendSignal on a global script, the debug
+  commands, _SignalReceived, _RandomInt, _LoadGameValue. The rest of the game the interpreter reaches is link stubs
+  (`vm_stubs.s`, written by `gen_vm_stubs.py`; a call ends the test: none happens). Not compared: the profiling time.
+- **The tests:** every game script (5,347, 200 steps each); 20,000 random programs from a grammar (variables,
+  expressions of one precedence class per level with parentheses, NOT, the functions, the save values in and out of
+  range, If / Else, blocks with Whenevers inside, labels, GoTo, Gosub, Return, Delay, the script-level commands, game
+  commands, handlers of every kind) of 200 steps; three crafted programs run on ticks alone (Gosub past its depth of
+  100, the save values' bounds, string and frame operands, a string joined by a dropped operator). About 4.6 million
+  steps in 2 min 20 s (quick: 18 s). Every line in this part's reach runs; not reached: FRM_SetAnimationDelayed's wait,
+  the actor paths (Stop, SendSignal and EndScript on an AI human or meleeTracker), NotifyFrameHit, ScriptAssign, a
+  frame's SendSignal (the frame commands are faked: the frames stay null), and Evaluate's <= / >= cases (dropped by
+  the compiler).
+- **Port bugs found:** none (0 failures from the first run).
+- **The original's weaknesses (kept unless noted):** Evaluate divides unchecked: a zero divisor faults (the port
+  answers 0), and INT_MIN / -1 faults in both; an expression whose operators the compiler dropped altogether
+  ("a <= b") has children and no operator list, and Evaluate and ToString read the null list and fault (the port skips
+  the operand). The test steps over these faults in the original (counted: none in the game scripts). Also seen: a
+  binary '-' never compiles ("c - c" fails: read as a sign), and a quoted name in SetWheneverTime names only a
+  Whenever declared with the quotes; every grouping of mixed precedence uses a freed node (part 1), so those programs
+  are not run.
+- **Mutations:** 632 mutants, 56 not building, 495 of 576 killed, 81 out of this part's reach or equivalent
+  (mutate_sc2.py).
+- **Harness lessons (my mistakes):** the first build crashed in the original's compiler (the role left a client's
+  before the first compile); the first programs compiled one time in two (binary minus, quoted Whenever names); a
+  heredoc edit failed its own assertion and applied nothing; the first comparison left ExecuteCommand's results out
+  (12 mutants survived until they were logged).
