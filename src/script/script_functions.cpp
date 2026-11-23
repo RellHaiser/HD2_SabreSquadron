@@ -25,12 +25,6 @@ float Distance(const I3D_frame *a, const I3D_frame *b)
 
 float DistanceSquared(const S_vector &a, const S_vector &b) { return (a - b).Square(); }
 
-// Living, controllable player (not unconscious, not in a vehicle).
-bool IsActivePlayer(const C_Human *human)
-{
-    return human->IsAlive() && human->IsInPlay() && !human->IsSpectating();
-}
-
 } // namespace
 
 int C_Script::CallFunction(int function, const int * /*argTypes*/, const int *args)
@@ -221,7 +215,8 @@ int C_Script::CallFunction(int function, const int * /*argTypes*/, const int *ar
 
     case SFUNC_IS_TEAM_MEMBER_DEAD: {
         C_Team *team = g_teamManager.GetPlayerTeam();
-        return team->GetAliveCount() != team->GetMemberCount();
+        const int members = team->GetMemberCount();        // (asked first, as the original)
+        return team->GetAliveCount() != members;
     }
 
     case SFUNC_MP_ALL_TEAM_MEMBERS_ARE_IN_RANGE: {

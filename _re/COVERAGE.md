@@ -5585,3 +5585,64 @@ particles and the surface marks. Files are served from memory.
   before the first compile); the first programs compiled one time in two (binary minus, quoted Whenever names); a
   heredoc edit failed its own assertion and applied nothing; the first comparison left ExecuteCommand's results out
   (12 mutants survived until they were logged).
+
+## Script part 3 (the interpreter's game commands and functions: `script_vm.cpp` past the script-level commands, `script_functions.cpp`'s game functions, 2026-11-23)
+
+- **The build:** `script/cmd_diff.cpp` (suite `script.commands`, data needed): one program with frame, number and string
+  variables compiled on both sides; then each case builds the same fake world on each side and runs one command
+  (C_Script::ExecuteCommand, the original's 0x00416e10) or one function (CallFunction, 0x0041e3f0) on each. The world:
+  24 engine frames of every type the commands tell apart, in a hierarchy (a human model's holsters, hand and pack among
+  them), turned and placed at random, visuals with meshes, dummies with boxes; the scene (an active camera, the primary
+  sector), the driver; actors on about half the frames (humans with health, role, body frame and movement; doors with
+  their key, motion and lock; radios, switches, photo, explosive and document places, static weapons, pikes and TS
+  explosions with their states; animations, trains, cars with their vehicle, melee trackers with their controller,
+  items, Junkers, wire cuts, air attacks, barrels), the actors module's list (32 player slots, then the rest), mines
+  among the temporary actors; the teams, formations with their shapes, the checkpoints of both networks by name, the
+  interface's hints, the player profile with its debriefing, the play mode, the script module's cutscene flags, the
+  Junkers and decorators globals, the role (single player, dedicated or listen server), the mission's time (mostly
+  started). Half the frames lie near the origin, and some under a dummy near its box's faces, so the boxes and ranges
+  hold bodies and players; the box commands get a dummy often. Every call into the game or the
+  engine goes to one logger on both sides (`cmd_calls.s` / `cmd_calls.inc`, written by `gen_cmd_calls.py`: the port's
+  link stubs, the original's patched functions by address and calling convention, the engine's vtable slots from
+  i3d.h, the game's virtual slots per side from member pointers and the headers) and is answered alike: from the world
+  (a frame by name, children, the members, the list, the formation of a leader, the same shift entry of a mesh) or from
+  a sequence both sides draw in the same order. Compared after each case: the answer, the script's flags, signals,
+  delay, wait, ip, running / finished and every variable, every frame (reference count, flags, position, rotation,
+  scale, parent), the actors (type, position, direction, health, the animation's hold, the train's run), the Junkers'
+  interceptors, the game's flags, the hints, the cutscene flags, the shift entries, and the whole call log with every
+  argument (strings, vectors, matrices by value; objects by name; the explosion, the sound request and the debris
+  parameters by their fields; an animation set with its play mode).
+- **The tests:** 200,000 cases (quick: 30,000, about 20 s), a quarter of them functions; 221 commands and 33 functions. Every
+  line of the game commands and functions runs but the part-2 commands; not reached: none.
+- **Port bugs found and fixed:** CSC_FadeIn/OutFromColor divided by 255 (the original multiplies by 1/255: a rounding
+  apart); WEATHER_SetDir normalized with the square summed x, y, z (the original's inline copy: (z² + y²) + x²);
+  FRM_CreatePhysicalObject and FRM_TeleportNearFrame took a direction with the inline sum where the original calls
+  I3D_frame::GetWorldDir's own copy ((y² + z²) + x²); HUMAN_KillAllInBox's three random numbers drawn right to left (one
+  constructor call: g++'s order; the original's x first); FRM_TeleportNearFrame asked for the sector at the target's
+  position (the original's at the moved frame's, the same place in the engine, not in every case); SetActorState of a
+  wire cut skipped the frame's direction when the state was 0 (the original takes it first: the world matrix is
+  computed either way); and the calls made in another order or skipped: CSC_GetPlayerNum asked the index's sign before
+  the alive count, FORMATION_AddMember looked the leader's formation up before checking the member, _IsTeamMemberDead
+  asked the alive count before the member count. The unused IsActivePlayer helper was removed.
+- **The original's weaknesses (kept unless noted):** FRM_CreateParticle sends a null frame's name (a crash; the port
+  checks it, as before); CSC_SetCameraFOV uses a missing active camera, CSC_DuplicateHuman a frame the driver could not
+  create, _ItemInRange, _FrameInRange, _CameraInRange, _GetDistToActivePlayer and the MP functions a script without a
+  frame, _PlayerInBox a null box (crashes in both); SetPosition / SetDirection copy a fourth word from past the vector
+  they get (a stack leftover; the port writes 1 and 0; not compared); FRM_CreatePhysicalObject leaves the debris parameters'
+  first two vectors, the velocity's w, the context and the flag at +0x41 as the stack had them (Setup reads +0x20 on;
+  the port writes zeros; the flag at +0x41 grows the resting volume, not compared). The test changes such inputs (counted).
+- **Mutations:** 1,207 mutants, 153 not building; 1,017 of the 1,054 building killed, 37 survived
+  (`mutate_sc3.py`'s docstring): float ties (the box's min / max, the strict insides, the ranges, the weather's
+  clamps), equivalent ones (Clamp255's 0, a ninth box corner, a holster without children, PrintfNumber's buffer, the
+  switch's default, no null actor past the player slots), the commands' bad variable indices (the compiler writes only
+  valid ones), and two rare ones (corner 0 left out of a transformed box; a one-letter track on a train). The first
+  quick run left 158; the test then logged the structures passed by address, put bodies and players in the boxes and
+  ranges, set the mission's time (Advance moves the script only then: the commands that advance it themselves went
+  unchecked before), seeded the cameras' range, the hints and the HUD flags, and drew numbers past the weather's clamps.
+- **Harness lessons (my mistakes):** the FPU was left at its 53-bit default (the original's x87 sums rounded otherwise;
+  the game runs at 24); frames created mid-case grew the frames vector and moved the short names m_name points into;
+  CanPlayerRespawn is a member in the original (callee pops: the stack shifted, a crash two calls later); my first
+  argument-order fix drew them in the wrong order (I read g++'s order as the original's); a fake DuplicateModel copied
+  no children until the names were stable; two edits through Bash heredocs lost their backslashes again (a third failed its assert); the first test world never
+  started the mission, so no command's Advance was compared, and never put a human inside a box or a range (the
+  mutation run showed both).

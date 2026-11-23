@@ -250,10 +250,13 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         break;
 
     case OP_FORMATION_AddMember: {
+        // (The member checked before the leader's formation is looked up, as the original.)
         C_Human *member = humanArg(0);
+        if (!member)
+            break;
         C_Human *leader = humanArg(1);
         C_Formation *formation = leader ? g_teamManager.GetFormation(leader, false) : nullptr;
-        if (member && formation) {
+        if (formation) {
             g_teamManager.RemoveFromFormation(member);
             formation->AddMember(member);
         }
@@ -329,7 +332,11 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
             I3D_frame *body = human->GetBodyFrame();
             if (!StrictlyInside(body->GetWorldPos(), min, max))
                 continue;
-            const S_vector dir((RandFloat() - 0.5f) * 2.0f, RandFloat() * 2.0f + 3.0f, (RandFloat() - 0.5f) * 2.0f);
+            // (x drawn first, then y, then z, as the original: in one constructor call g++ draws them right to left.)
+            const float dx = (RandFloat() - 0.5f) * 2.0f;
+            const float dy = RandFloat() * 2.0f + 3.0f;
+            const float dz = (RandFloat() - 0.5f) * 2.0f;
+            const S_vector dir(dx, dy, dz);
             human->Hit(HIT_EXPLOSION, -1.0f, body->GetWorldPos(), dir, nullptr, 0);
         }
         break;
@@ -408,13 +415,13 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         case ACTOR_JUNKERS88:
             static_cast<C_Junkers88 *>(actor)->SetState(state);
             break;
-        case ACTOR_WIRE_CUT:
-            if (state) {
-                // Cut along the frame's facing direction.
-                const S_vector dir = actor->GetFrame()->GetWorldDir();
+        case ACTOR_WIRE_CUT: {
+            // Cut along the frame's facing direction (taken before the state is tested, as the original).
+            const S_vector dir = actor->GetFrame()->GetWorldDir();
+            if (state)
                 static_cast<C_WireCut *>(actor)->Cut(dir, true);
-            }
             break;
+        }
         case ACTOR_TS_EXPLOSION:
             static_cast<C_TSExplosion *>(actor)->Trigger(1);
             break;
@@ -713,8 +720,9 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
             g_scriptModule.RememberFrame(moving, SCRIPT_FRAME_LINK | SCRIPT_FRAME_LINKED);
             moving->LinkTo(target, I3DLINK_KEEP_WORLD);
         } else {
+            // (The sector at the moved frame's position, now the target's: the original reads `moving`.)
             I3D_scene *scene = GetGame()->GetScene();
-            I3D_frame *sector = scene->GetSector(target->GetWorldPos() + S_vector(0, 0.5f, 0));
+            I3D_frame *sector = scene->GetSector(moving->GetWorldPos() + S_vector(0, 0.5f, 0));
             if (!sector)
                 sector = scene->GetPrimarySector();
             g_scriptModule.RememberFrame(moving, SCRIPT_FRAME_LINK);
@@ -722,7 +730,8 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         }
         if (C_Actor *actor = GetFrameActor(moving)) {
             actor->SetPosition(target->GetWorldPos());
-            actor->SetDirection(target->GetWorldDir());
+            // (I3D_frame::GetWorldDir's own copy, 0x0041d200: the square summed (y² + z²) + x².)
+            actor->SetDirection(target->GetMatrix()(2).NormalizedGame());
             if (actor->GetType() == ACTOR_HUMAN)
                 static_cast<C_Human *>(actor)->GetMovement()->ResetToFrame();
         }
@@ -752,7 +761,9 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         if (!frame)
             break;
         const float weight = static_cast<float>(numberArg(1));
-        C_Debris *debris = g_temporaryActors.CreateDebris(frame, frame->GetWorldPos(), frame->GetWorldDir());
+        // (The direction from I3D_frame::GetWorldDir's own copy, 0x0041d200: the square summed (y² + z²) + x².)
+        const S_vector dir = frame->GetMatrix()(2).NormalizedGame();
+        C_Debris *debris = g_temporaryActors.CreateDebris(frame, frame->GetWorldPos(), dir);
         if (debris->GetFrame()) {
             debris->GetFrame()->SetOn(true);
             debris->GetFrame()->Update();
@@ -1135,8 +1146,9 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
 
     case OP_CSC_FadeInFromColor:
     case OP_CSC_FadeOutToColor: {
-        const S_vector color(Clamp255(numberArg(1)) / 255.0f, Clamp255(numberArg(2)) / 255.0f,
-                             Clamp255(numberArg(3)) / 255.0f);
+        // (Times 1/255, as the original: a division rounds differently.)
+        const S_vector color(Clamp255(numberArg(1)) * (1.0f / 255.0f), Clamp255(numberArg(2)) * (1.0f / 255.0f),
+                             Clamp255(numberArg(3)) * (1.0f / 255.0f));
         GetGEffects()->Fade(numberArg(0), cmd.opcode == OP_CSC_FadeInFromColor ? FADE_IN : FADE_OUT, &color);
         break;
     }
@@ -1167,7 +1179,7 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         int index = numberArg(0);
         C_Human *found = nullptr;
         C_Team *team = g_teamManager.GetPlayerTeam();
-        if (index >= 0 && index < team->GetAliveCount()) {
+        if (index < team->GetAliveCount() && index >= 0) {   // (the count asked first, as the original)
             for (int i = 0; i < team->GetMemberCount(); ++i) {
                 C_Human *member = team->GetMember(i);
                 if (member->IsDead())
@@ -1390,8 +1402,9 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
     }
 
     case OP_WEATHER_SetDir: {
+        // (The square summed (z² + y²) + x², as the original's inline copy.)
         const S_vector dir = S_vector(static_cast<float>(numberArg(0)), static_cast<float>(numberArg(1)),
-                                      static_cast<float>(numberArg(2))).Normalized();
+                                      static_cast<float>(numberArg(2))).NormalizedGame();
         if (C_BitStream *out = BeginScriptNetMessage(SCRIPT_MSG_WEATHER_DIR, true)) {
             out->WriteBits(FloatBits(dir.x), 32);
             out->WriteBits(FloatBits(dir.y), 32);
