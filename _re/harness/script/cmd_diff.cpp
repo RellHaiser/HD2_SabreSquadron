@@ -9,8 +9,12 @@
 // virtual ones through a vtable per side (the port's slots from member pointers, the original's from the headers).
 // Each call is answered alike on both sides (a sequence both draw in the same order, or the world: a frame found by
 // name, children). MinGW; build_cmd.bat; runs cmd_diff.exe ("cmd_diff: N checks, 0 failures").
-// Env: HD2_CMD_CASES (cases, default 200,000; HD2_CMD_QUICK: 30,000), HD2_CMD_ONLY (one opcode's name), HD2_CMD_SHOW
-// (every case's logs printed), HD2_CMD_SEED; sc_diff's HD2_SC_DATA / HD2_UNPACKED, HD2_SC_FIRST_CHANCE.
+// Script part 4: half the cases run an actor script's command instead (C_HumanScript::ExecuteCommand, the original's
+// 0x00421c00, on one of the world's humans with its controller, work and vehicle; C_MeleeTrackerScript's, 0x00421970, on a
+// tracker with its controller); the constructors are compared once.
+// Env: HD2_CMD_CASES (cases, default 200,000; HD2_CMD_QUICK: 30,000), HD2_CMD_ONLY (one opcode's name), HD2_CMD_ACTORS
+// (the actor scripts' cases only), HD2_CMD_SHOW (every case's logs printed), HD2_CMD_DUMP (a failing case's logs),
+// HD2_CMD_SEED; sc_diff's HD2_SC_DATA / HD2_UNPACKED, HD2_SC_FIRST_CHANCE.
 #define HARNESS_NAME "cmd_diff"
 #include "sc_shared.inc"
 
@@ -41,13 +45,28 @@ extern "C" unsigned int __cdecl _controlfp(unsigned int value, unsigned int mask
 #include "game/junkers88.h"
 #include "game/melee_tracker.h"
 #include "game/melee_tracker_ai.h"
+#include "game/bike.h"
+#include "game/human_body.h"
+#include "game/human_controller.h"
 #include "game/profile.h"
 #include "game/team.h"
 #include "game/train.h"
 #include "ls3d/i3d.h"
+#include "script/actor_scripts.h"
 #include "script/script_module.h"
 #undef protected
 #undef private
+
+// (The port's own helpers of melee_tracker.cpp, which the test does not link: the full AI and the scripted variant.)
+C_MeleeTrackerAI *C_MeleeTracker::GetFullAI() const
+{
+    return m_ai && (m_ai->GetMode() == 4 || m_ai->GetMode() == 5) ? static_cast<C_MeleeTrackerAI *>(m_ai) : nullptr;
+}
+C_MeleeTrackerScriptedAI *C_MeleeTracker::GetScriptedAI() const
+{
+    return m_ai && m_ai->GetMode() == 5 ? static_cast<C_MeleeTrackerScriptedAI *>(m_ai) : nullptr;
+}
+static_assert(offsetof(S_HumanCommand, category) == 4 && offsetof(S_HumanCommand, param2) == 0x10, "the original's layout");
 
 struct S_CallDef {
     const char *name;
@@ -121,6 +140,8 @@ void SetUpVirtuals()
         {"C_GEffectsModule::SwitchFaceTexture", 0xAC, PortSlot(&G::SwitchFaceTexture), "ps", 'b'},
         {"C_GEffectsModule::SetCameraAnimation", 0xB0, PortSlot(&G::SetCameraAnimation), "ps", 'v'},
         {"C_GEffectsModule::SetCloudsOn", 0xB8, PortSlot(&G::SetCloudsOn), "b", 'v'},
+        {"C_GEffectsModule::DressUniform", 0xA8, PortSlot(&G::DressUniform), "pi", 'b'},
+        {"C_MeleeTrackerController::SetAlarm", 0x38, PortSlot(&C_MeleeTrackerController::SetAlarm), "i", 'v'},
         {"C_Actor::Hit", 0xD4, PortSlot(&C_Actor::Hit), "ifvvpi", 'v'},
         {"C_Formation::AddMember", 0x08, PortSlot(&C_Formation::AddMember), "p", 'b'},
     };
@@ -207,11 +228,13 @@ struct S_World {
         std::string name;
         uint8_t *movement = nullptr;                    // (a human's)
         uint8_t *vehicle = nullptr;                     // (a car's: inside it)
+        uint8_t *controller = nullptr;                  // (a human's)
     };
     std::vector<S_Actor> actors;
     std::vector<int> humans;                            // (indices into actors: the player team's members)
     std::vector<uint8_t *> list;                        // the actors module's (GetActor, GetActorById)
     uint8_t *playerTeam = nullptr, *coopTeam = nullptr, *junkers88 = nullptr, *decorators = nullptr;
+    uint8_t *tracker = nullptr, *trackerAI = nullptr;   // (the melee tracker script's: on no frame; its controller)
 };
 S_World g_world[2];
 S_World &W() { return g_world[g_side]; }
@@ -405,7 +428,7 @@ const int ACTOR_KINDS[] = {ACTOR_HUMAN, ACTOR_HUMAN, ACTOR_HUMAN, ACTOR_HUMAN, A
                            ACTOR_SUPPLY_BOX, ACTOR_ITEM, ACTOR_SWITCH, ACTOR_TRAIN, ACTOR_STATIC_WEAPON,
                            ACTOR_EXPLOSIVE_PLACE, ACTOR_DOCUMENT_PLACE, ACTOR_ANIMATION, ACTOR_PIKE,
                            ACTOR_FOWL_GENERATOR, ACTOR_MELEE_TRACKER, ACTOR_JUNKERS88, ACTOR_WIRE_CUT, ACTOR_AIR_ATTACK,
-                           ACTOR_TS_EXPLOSION, ACTOR_CAR, ACTOR_CAR, ACTOR_BARREL, ACTOR_PHOTO_PLACE};
+                           ACTOR_TS_EXPLOSION, ACTOR_CAR, ACTOR_CAR, ACTOR_BARREL, ACTOR_PHOTO_PLACE, ACTOR_BIKE};
 constexpr int ACTOR_KIND_COUNT = int(sizeof ACTOR_KINDS / sizeof *ACTOR_KINDS);
 // A kind's block: the bigger of the port's class and the original's (0x25C0 a car, 0x300 for the rest read here).
 size_t ActorBytes(int type = 0)
@@ -417,7 +440,7 @@ size_t ActorBytes(int type = 0)
     case ACTOR_MELEE_TRACKER: return std::max(sizeof(C_MeleeTracker), size_t(0x540)) + 0x40;
     default:
         return std::max({sizeof(C_Door), sizeof(C_Train), sizeof(C_AnimationActor), sizeof(C_Actor), sizeof(C_StaticWeapon),
-                         sizeof(C_DocumentPlace), sizeof(C_Pike), sizeof(C_Radio), sizeof(C_Switch), size_t(0x300)}) +
+                         sizeof(C_DocumentPlace), sizeof(C_Pike), sizeof(C_Radio), sizeof(C_Switch), sizeof(C_Bike), size_t(0x300)}) +
                0x40;
     }
 }
@@ -483,17 +506,37 @@ void BuildActors(int side)
                 static const int dummies[] = {5, 12, 15, 19};
                 body = w.frames[dummies[WI(0, 3)]].bytes;
             }
+            // Its controller (the original's +0xB0: its type +0x48, the current checkpoint +0xA4, the circumvention
+            // flag +0x11C), its work (+0xA4: the body's +0x0C).
+            static const int controllerTypes[] = {HUMAN_CONTROLLER_PLAYER, HUMAN_CONTROLLER_SQUAD, HUMAN_CONTROLLER_ENEMY,
+                                                  HUMAN_CONTROLLER_AI, HUMAN_CONTROLLER_AI, HUMAN_CONTROLLER_AI,
+                                                  HUMAN_CONTROLLER_NEUTRAL, HUMAN_CONTROLLER_REMOTE, HUMAN_CONTROLLER_SNIPER};
+            const int controllerType = controllerTypes[WI(0, 8)];
+            act.controller = Block(std::max(sizeof(C_ScriptedController), size_t(0x200)) + 0x40);
+            Name(act.controller, "controller of " + act.name);
+            uint8_t *work = Block(0x100);
+            Name(work, "work of " + act.name);
+            const int point = WI(-1, CHECKPOINT_NAME_COUNT - 1);
+            const uint8_t *current = point < 0 ? nullptr : w.points[0] + 0x24 * point;
             if (side) {
                 *reinterpret_cast<int *>(a + 0xEC) = health;
                 *reinterpret_cast<int *>(a + 0x19C) = role;
                 *reinterpret_cast<uint8_t **>(a + 0x98 + 8) = act.movement;
                 *reinterpret_cast<uint8_t **>(a + 0x260) = body;
+                *reinterpret_cast<uint8_t **>(a + 0xB0) = act.controller;
+                *reinterpret_cast<uint8_t **>(a + 0xA4) = work;
+                *reinterpret_cast<int *>(act.controller + 0x48) = controllerType;
+                *reinterpret_cast<const uint8_t **>(act.controller + 0xA4) = current;
             } else {
                 C_Human *h = reinterpret_cast<C_Human *>(a);
                 h->m_stats[STAT_HEALTH] = health;
                 h->m_role = E_HumanRole(role);
                 h->m_body.movement = reinterpret_cast<C_HumanMovement *>(act.movement);
                 h->m_bodyFrame = AsFrame(body);
+                h->m_controller = reinterpret_cast<C_HumanController *>(act.controller);
+                h->m_body.work = reinterpret_cast<C_HumanWork *>(work);
+                h->m_controller->m_type = E_HumanController(controllerType);
+                h->m_controller->m_currentCheckpoint = reinterpret_cast<S_Checkpoint *>(const_cast<uint8_t *>(current));
             }
             w.humans.push_back(int(w.actors.size()));
             break;
@@ -549,6 +592,60 @@ void BuildActors(int side)
                 std::memcpy(a + (side ? s.orig : s.port), &value, size_t(s.bytes));
             }
         w.actors.push_back(act);
+    }
+    // The network ids (the original's +0x10), the humans' vehicles (+0x160, a car, a static weapon or another actor; the
+    // seat +0x164).
+    for (size_t i = 0; i < w.actors.size(); ++i) {
+        uint8_t *a = w.actors[i].bytes;
+        const int id = 100 + int(i);
+        if (side)
+            *reinterpret_cast<int *>(a + 0x10) = id;
+        else
+            reinterpret_cast<C_Actor *>(a)->m_netId = id;
+    }
+    for (int h : w.humans) {
+        uint8_t *a = w.actors[h].bytes;
+        uint8_t *vehicle = nullptr;
+        if (WI(0, 1)) {
+            std::vector<uint8_t *> rides;
+            for (const W_Actor &x : w.actors)
+                if (x.type == ACTOR_CAR || x.type == ACTOR_STATIC_WEAPON || (x.type != ACTOR_HUMAN && !WI(0, 3)))
+                    rides.push_back(x.bytes);
+            if (!rides.empty())
+                vehicle = rides[WI(0, int(rides.size()) - 1)];
+        }
+        const int seat = WI(0, 2) ? 0 : WI(-1, 3);
+        if (side) {
+            *reinterpret_cast<uint8_t **>(a + 0x160) = vehicle;
+            *reinterpret_cast<int *>(a + 0x164) = seat;
+        } else {
+            reinterpret_cast<C_Human *>(a)->m_vehicle = reinterpret_cast<C_Actor *>(vehicle);
+            reinterpret_cast<C_Human *>(a)->m_seat = seat;
+        }
+    }
+    // The melee tracker script's tracker (on no frame) and its controller (the original's +0x534; the mode +0x14: the
+    // full AI's 4 and 5 mostly, the others the port skips).
+    {
+        static void **controllerVtables[2];
+        if (!controllerVtables[side])
+            controllerVtables[side] = GameVtable("C_MeleeTrackerController", VirtualSlots("C_MeleeTrackerController::", side != 0));
+        w.tracker = Block(ActorBytes(ACTOR_MELEE_TRACKER));
+        *reinterpret_cast<void ***>(w.tracker) = vtables[side];
+        Name(w.tracker, "the script's tracker");
+        w.trackerAI = Block(std::max(sizeof(C_MeleeTrackerScriptedAI), size_t(0x100)) + 0x40);
+        *reinterpret_cast<void ***>(w.trackerAI) = controllerVtables[side];
+        Name(w.trackerAI, "the script's tracker's controller");
+        static const int modes[] = {4, 5, 5, 4, 5, 1, 2, 3};
+        const int mode = modes[WI(0, 7)];
+        if (side) {
+            *reinterpret_cast<int *>(w.tracker + 0x18) = ACTOR_MELEE_TRACKER;
+            *reinterpret_cast<uint8_t **>(w.tracker + 0x534) = w.trackerAI;
+            *reinterpret_cast<int *>(w.trackerAI + 0x14) = mode;
+        } else {
+            reinterpret_cast<C_Actor *>(w.tracker)->m_type = ACTOR_MELEE_TRACKER;
+            reinterpret_cast<C_MeleeTracker *>(w.tracker)->m_ai = reinterpret_cast<C_MeleeTrackerController *>(w.trackerAI);
+            reinterpret_cast<C_MeleeTrackerController *>(w.trackerAI)->m_mode = mode;
+        }
     }
     // The actors module's list: the player slots first (every other human, then empty), then the other actors and the
     // rest of the humans (the original's vector at +0x0C: first +0x10, last +0x14, end +0x18).
@@ -717,8 +814,12 @@ void BuildWorld(int side, uint32_t seed)
     Name(w.roads, "roads");
     for (uint8_t *&points : w.points) {
         points = Block(0x24 * CHECKPOINT_NAME_COUNT);
-        for (int i = 0; i < CHECKPOINT_NAME_COUNT; ++i)
+        for (int i = 0; i < CHECKPOINT_NAME_COUNT; ++i) {
             *reinterpret_cast<S_vector *>(points + 0x24 * i) = S_vector(WF(), WF(), WF());
+            static const uint16_t flags[] = {0, 0, 0x100, 0x101, 0x001, 0x200, 0x300};
+            *reinterpret_cast<uint16_t *>(points + 0x24 * i + 0x14) = flags[WI(0, 6)];
+            Name(points + 0x24 * i, F("point %d of %s", i, &points == &w.points[0] ? "walks" : "roads"));
+        }
     }
     // The game's fields: the scene, the checkpoints, the interface, the mission's time (mostly started: the commands
     // that advance the script do so only then) (the original's offsets; the port's members).
@@ -792,6 +893,24 @@ void SetGameField(uint32_t off, uint32_t value)
     std::memcpy(game + off, &value, 4);
 }
 
+// A human's controller's type (the original's +0xB0, then +0x48; 0 without one).
+int ControllerType(const uint8_t *human)
+{
+    const uint8_t *c = g_side ? *reinterpret_cast<uint8_t *const *>(human + 0xB0)
+                              : reinterpret_cast<const uint8_t *>(reinterpret_cast<const C_Human *>(human)->m_controller);
+    if (!c)
+        return 0;
+    return g_side ? *reinterpret_cast<const int *>(c + 0x48) : int(reinterpret_cast<const C_HumanController *>(c)->m_type);
+}
+void SetControllerType(uint8_t *human, int type)
+{
+    uint8_t *c = g_side ? *reinterpret_cast<uint8_t **>(human + 0xB0)
+                        : reinterpret_cast<uint8_t *>(reinterpret_cast<C_Human *>(human)->m_controller);
+    if (g_side)
+        *reinterpret_cast<int *>(c + 0x48) = type;
+    else
+        reinterpret_cast<C_HumanController *>(c)->m_type = E_HumanController(type);
+}
 // ---- the logger ----
 std::vector<std::string> g_log[2];
 int g_calls[2];
@@ -861,6 +980,12 @@ std::string ArgText(char kind, uint32_t w)
         return s;
     }
     case 'v': case 'V': return VectorText(w, 3);
+    case 'h': return F("%d", int(w & 0xFFFF));
+    case 'o': return "out";                             // (a vector the callee fills: the answer's)
+    case 'c': {                                         // (S_HumanCommand: category, type, the two parameters)
+        const int *c = reinterpret_cast<const int *>(w);
+        return F("command {%d %d %d %d}", c[1], c[2], c[3], c[4]);
+    }
     case 'q': return VectorText(w, 4);
     case 'm': return VectorText(w, 16);
     default: return F("%08x", w);
@@ -1067,6 +1192,41 @@ void SetUpAnswers()
     g_answers["BeginScriptNetMessage"] = [ptr](const std::vector<uint32_t> &) {
         return NextFake() % 4 ? ptr(W().bitstream) : 0u;
     };
+    // Part 4: the checkpoints near a point or reachable from one (0..4 of the named ones; the out vector in each side's
+    // layout: the original's MSVC 6 vector first +4, last +8, end +0xC, its buffer freed by its operator delete).
+    auto points = [](const std::vector<uint32_t> &a) -> uint32_t {
+        std::vector<uint16_t> found(NextFake() % 5);
+        for (uint16_t &p : found)
+            p = uint16_t(NextFake() % CHECKPOINT_NAME_COUNT);
+        uint8_t *out = reinterpret_cast<uint8_t *>(a[3]);
+        if (g_side) {
+            uint8_t *buf = static_cast<uint8_t *>(O_New(2 * found.size() + 2));   // (its operator new's)
+            if (!found.empty())
+                std::memcpy(buf, found.data(), 2 * found.size());
+            *reinterpret_cast<uint8_t **>(out + 4) = buf;
+            *reinterpret_cast<uint8_t **>(out + 8) = buf + 2 * found.size();
+            *reinterpret_cast<uint8_t **>(out + 0xC) = buf + 2 * found.size();
+        } else {
+            reinterpret_cast<std::vector<uint16_t> *>(out)->assign(found.begin(), found.end());
+        }
+        return NextFake() % 4 ? 1u : 0u;
+    };
+    g_answers["C_CheckpointNetwork::GetNeighbours"] = points;
+    g_answers["C_CheckpointNetwork::GetReachable"] = points;
+    g_answers["C_CheckpointNetwork::FindNearest"] = [](const std::vector<uint32_t> &) {
+        return NextFake() % 4 ? NextFake() % CHECKPOINT_NAME_COUNT : uint32_t(CHECKPOINT_NONE);
+    };
+    // A human's checkpoint by name (0xFFFF missing, as the original's AX), its controller's type (0 without one).
+    g_answers["C_Human::FindCheckpoint"] = [](const std::vector<uint32_t> &a) {
+        const char *name = reinterpret_cast<const char *>(a[1]);
+        for (int i = 0; i < CHECKPOINT_NAME_COUNT; ++i)
+            if (name && std::strcmp(name, CHECKPOINT_NAMES[i]) == 0)
+                return uint32_t(i);
+        return uint32_t(CHECKPOINT_NONE);
+    };
+    g_answers["C_Human::GetControllerType"] = [](const std::vector<uint32_t> &a) {
+        return uint32_t(ControllerType(reinterpret_cast<uint8_t *>(a[0])));
+    };
 }
 uint32_t DefaultAnswer(char ret)
 {
@@ -1126,6 +1286,9 @@ uint64_t Call(uint32_t index, uint32_t *regs)
     const int count = int(std::strlen(kinds));
     const int fixed = std::strchr(kinds, '.') ? int(std::strchr(kinds, '.') - kinds) : count;
     S_Decoded d = Decode(conv, fixed, regs);
+    // (C_CheckpointNetwork::Get reads AX alone: the original pushes a word whose upper half is a leftover.)
+    if (key == "C_CheckpointNetwork::Get" && d.words.size() > 1)
+        d.words[1] &= 0xFFFF;
     std::string line = key + "(";
     for (int i = 0; i < fixed; ++i)
         line += (i ? ", " : "") + ArgText(kinds[i], d.words[i]);
@@ -1238,7 +1401,13 @@ int __cdecl O_Rand() { return std::rand(); }
 // ---- the script on each side: one program's variables ----
 constexpr int FRAMES = 8, NUMBERS = 12, STRINGS = 6, FILLER = 40;
 uint8_t *g_block;                                       // the original's
-C_Script *g_script;                                     // the port's
+C_Script *g_script;                                     // the port's (the case's kind of the three)
+C_Script *g_scripts[3];                                 // the port's plain, human and melee tracker scripts
+uint32_t g_baseVtable;                                  // (the original block's C_Script vtable)
+// Part 4: the actor scripts' ExecuteCommand (the original's C_HumanScript / C_MeleeTrackerScript, vtables 0x0080f714 /
+// 0x0080f70c, the actor at +0x10C).
+constexpr uint32_t O_HUMAN_EXECUTE = 0x00421c00, O_TRACKER_EXECUTE = 0x00421970;
+constexpr uint32_t O_HUMAN_VTABLE = 0x0080f714, O_TRACKER_VTABLE = 0x0080f70c;
 using T_Exec = bool(TC *)(void *, const void *);
 using T_Call = int(TC *)(void *, int, const int *, const int *);
 constexpr uint32_t O_CALL_FUNCTION = 0x0041e3f0;
@@ -1262,14 +1431,20 @@ void CompileProgram()
     g_block = static_cast<uint8_t *>(std::calloc(1, 0x200));
     OriginalAt<T_Ctor>(0x0041dcb0)(g_block, nullptr, 1);
     const bool ro = OriginalAt<T_Compile>(0x0042c850)(OriginalAt<void *>(0x008993f0), path.c_str(), g_block);
-    g_script = new C_Script(nullptr, true);
-    const bool rp = g_scriptCompiler.Compile(path.c_str(), g_script);
-    if (!ro || !rp || OrigVec(g_block, 0x8C, 4).size() != FRAMES || g_script->m_frames.size() != FRAMES ||
-        OrigVec(g_block, 0x9C, 8).size() < NUMBERS || g_script->m_numbers.size() < NUMBERS ||
-        OrigVec(g_block, 0xAC, 4).size() != STRINGS || g_script->m_strings.size() != STRINGS) {
-        std::printf("cmd_diff: the variables' program did not compile alike (%d %d)\n", int(ro), int(rp));
-        std::exit(2);
+    g_baseVtable = At<uint32_t>(g_block, 0);
+    g_scripts[0] = new C_Script(nullptr, true);
+    g_scripts[1] = new C_HumanScript(nullptr, nullptr);
+    g_scripts[2] = new C_MeleeTrackerScript(nullptr, nullptr);
+    for (C_Script *t : g_scripts) {
+        const bool rp = g_scriptCompiler.Compile(path.c_str(), t);
+        if (!ro || !rp || OrigVec(g_block, 0x8C, 4).size() != FRAMES || t->m_frames.size() != FRAMES ||
+            OrigVec(g_block, 0x9C, 8).size() < NUMBERS || t->m_numbers.size() < NUMBERS ||
+            OrigVec(g_block, 0xAC, 4).size() != STRINGS || t->m_strings.size() != STRINGS) {
+            std::printf("cmd_diff: the variables' program did not compile alike (%d %d)\n", int(ro), int(rp));
+            std::exit(2);
+        }
     }
+    g_script = g_scripts[0];
 }
 uint32_t *OrigFrames() { return reinterpret_cast<uint32_t *>(At<uint32_t>(g_block, 0x8C + 4)); }
 int32_t *OrigNumbers() { return reinterpret_cast<int32_t *>(At<uint32_t>(g_block, 0x9C + 4)); }
@@ -1293,6 +1468,10 @@ struct S_Case {
     bool noCamera = false;                              // (the scene without an active camera: _CameraInRange only)
     bool hudHidden = false, panelHidden = false;        // (the script's flags: a script camera hid them)
     int ip;
+    int kind = 0;                                       // part 4: 0 the plain script, 1 a human's, 2 a melee tracker's
+    uint32_t actorPick = 0;                             // (which human: the world's, one in 8 none)
+    bool actorFlag = false;                             // (the actor scripts' delayed suspend under way)
+    int delay = 0;                                      // (the script's delay left: some commands clear it)
 };
 int RandomNumber()
 {
@@ -1302,6 +1481,8 @@ int RandomNumber()
     return P(0.4) ? I(0, 1) : P(0.6) ? values[I(0, 19)] : I(-3, 40);
 }
 std::vector<int> g_opcodes;
+std::vector<int> g_humanOpcodes, g_trackerOpcodes;      // (part 4: the actor scripts' own ranges)
+bool g_actorsOnly;
 std::vector<const S_ScriptFunctionDef *> g_functions;
 std::map<int, int> g_functionCases;
 bool g_functionsOnly;
@@ -1317,8 +1498,21 @@ S_Case RandomCase()
 {
     S_Case c;
     c.opcode = g_opcodes[I(0, int(g_opcodes.size()) - 1)];
+    // Part 4: half the cases (HD2_CMD_ACTORS: all) run an actor script's command, mostly one of its own: a human's
+    // (HUMAN_*, the frames' AI modes) or a melee tracker's (MELEE_TRACKER_*); the rest fall to the base or are skipped.
+    const bool actor = !g_functionsOnly && (!g_humanOpcodes.empty() || !g_trackerOpcodes.empty()) && (g_actorsOnly || P(0.5));
+    if (actor) {
+        c.kind = g_trackerOpcodes.empty() || (!g_humanOpcodes.empty() && P(0.75)) ? 1 : 2;
+        const std::vector<int> &own = c.kind == 1 ? g_humanOpcodes : g_trackerOpcodes;
+        if (own.empty() || P(0.08))
+            c.opcode = g_opcodes[I(0, int(g_opcodes.size()) - 1)];
+        else
+            c.opcode = own[I(0, int(own.size()) - 1)];
+        c.actorPick = U32();
+        c.actorFlag = P(0.3);
+    }
     // A quarter of the cases call a function (the expressions' built-ins) instead.
-    if (!g_functions.empty() && (g_functionsOnly || P(0.25))) {
+    if (!actor && !g_functions.empty() && (g_functionsOnly || P(0.25))) {
         const S_ScriptFunctionDef &def = *g_functions[I(0, int(g_functions.size()) - 1)];
         c.function = def.id;
         for (int i = 0; i < 4; ++i)
@@ -1336,6 +1530,7 @@ S_Case RandomCase()
         s = I(0, STRING_VALUE_COUNT - 1);
     c.myFrame = P(0.2) ? -1 : I(0, WORLD_FRAMES - 1);
     c.ip = I(1, FILLER - 2);
+    c.delay = P(0.5) ? 0 : I(1, 5000);
     c.signals = P(0.5) ? 0 : U32() & U32();
     c.noCamera = c.function == SFUNC_CAMERA_IN_RANGE && P(0.3);
     c.hudHidden = P(0.3);
@@ -1411,9 +1606,12 @@ std::vector<std::string> GameState()
         // (x, y, z: the original's SetPosition / SetDirection copy a fourth word from past the vector they are given, a
         // stack leftover; the port writes 1 and 0.)
         s += " pos " + VectorText(reinterpret_cast<uint32_t>(pos), 3) + " dir " + VectorText(reinterpret_cast<uint32_t>(dir), 3);
-        if (x.type == ACTOR_HUMAN)
-            s += F(" health %d", g_side ? *reinterpret_cast<const int *>(a + 0xEC)
-                                        : reinterpret_cast<const C_Human *>(a)->m_stats[STAT_HEALTH]);
+        if (x.type == ACTOR_HUMAN) {
+            const int *stats = g_side ? reinterpret_cast<const int *>(a + 0xEC) : reinterpret_cast<const C_Human *>(a)->m_stats;
+            s += F(" health %d sight %d hear %d", stats[STAT_HEALTH], stats[STAT_SIGHT_RANGE], stats[STAT_HEARING_RANGE]);
+            s += F(" circumvention %d", int(g_side ? x.controller[0x11C]
+                                                   : reinterpret_cast<const C_AIController *>(x.controller)->m_ignoreCircumvention));
+        }
         if (x.type == ACTOR_ANIMATION)
             s += F(" held %d", int(g_side ? a[0xB8] : reinterpret_cast<const C_AnimationActor *>(a)->m_animationHeld));
         if (x.type == ACTOR_TRAIN)
@@ -1477,6 +1675,105 @@ std::vector<std::string> PortScriptState()
     return out;
 }
 
+// The actor of an actor script's case: the world's tracker, or one of its humans (one in 8 cases none).
+uint8_t *ScriptActor(const S_Case &c)
+{
+    S_World &w = W();
+    if (c.kind == 2)
+        return w.tracker;
+    if (w.humans.empty() || c.actorPick % 8 == 0)
+        return nullptr;
+    return w.actors[w.humans[(c.actorPick >> 3) % w.humans.size()]].bytes;
+}
+// Inputs the original misbehaves on, changed (counted): a melee tracker command with a controller other than the full
+// AI's (modes 4 and 5; HafHaf: the scripted one's, 5) calls the full AI's functions on it (the port skips it); a
+// human's Drive / DriveNearPlayer stopping the car drives through a player's or a remote controller (the port only
+// through an AI's).
+int g_originalWeaknesses;
+void AvoidOriginalWeaknesses(const S_Case &c)
+{
+    S_World &w = W();
+    if (c.kind == 2 && c.opcode >= OP_MELEE_TRACKER_SetOptimized && c.opcode <= OP_MELEE_TRACKER_SETAIMODE_Defensive) {
+        int &mode = g_side ? *reinterpret_cast<int *>(w.trackerAI + 0x14)
+                           : reinterpret_cast<C_MeleeTrackerController *>(w.trackerAI)->m_mode;
+        if ((mode != 4 && mode != 5) || (c.opcode == OP_MELEE_TRACKER_HafHaf && mode != 5)) {
+            mode = c.opcode == OP_MELEE_TRACKER_HafHaf || (c.actorPick & 1) ? 5 : 4;
+            g_originalWeaknesses += g_side;
+        }
+    }
+    if (c.kind == 1 && (c.opcode == OP_HUMAN_Drive || c.opcode == OP_HUMAN_DriveNearPlayer))
+        if (uint8_t *h = ScriptActor(c)) {
+            const int type = ControllerType(h);
+            if (type == HUMAN_CONTROLLER_PLAYER || type == HUMAN_CONTROLLER_REMOTE) {
+                SetControllerType(h, HUMAN_CONTROLLER_AI);
+                g_originalWeaknesses += g_side;
+            }
+        }
+}
+// Rare inputs made common (part 4), after the world is built (alike on both sides): HUMAN_MoveToFrame / MoveFromFrame's
+// target (the root frame snd_b) at the human's own root frame's place, or a unit or a tiny step (2^-15 m: exact in
+// floats there) along x or z from it (the direction's unit and near-zero rules); HUMAN_Bike's bike (the actor of the
+// frame its first string names turned into a bike).
+void BiasWorld(S_Case &c)
+{
+    S_World &w = W();
+    const uint32_t r = c.actorPick >> 16;
+    if (c.kind == 1 && (c.opcode == OP_HUMAN_MoveToFrame || c.opcode == OP_HUMAN_MoveFromFrame) && r % 3 == 0) {
+        uint8_t *h = ScriptActor(c);
+        I3D_frame *hf = !h ? nullptr : g_side ? *reinterpret_cast<I3D_frame **>(h + 0x20) : reinterpret_cast<C_Actor *>(h)->m_frame;
+        if (hf && !hf->m_parent && AsFrame(w.frames[14].bytes) != hf) {
+            static const float steps[][3] = {{0, 0, 0}, {1, 0, 0}, {1.0f / 32768, 0, 0}, {0, 0, 1.0f / 32768}, {0, 0, -1.0f / 32768},
+                                             {-1.0f / 32768, 0, 0}};
+            const float *step = steps[(r / 3) % 6];
+            S_matrix &m = AsFrame(w.frames[14].bytes)->m_localMatrix;
+            for (int i = 0; i < 3; ++i)
+                m.m[3][i] = hf->m_localMatrix.m[3][i] + step[i];
+            AsFrame(w.frames[14].bytes)->m_frameFlags &= ~0x20u;
+            c.frames[c.args[0]] = 14;
+        }
+    }
+    // (HUMAN_Drive / DriveNearPlayer: the human in a car's driver seat, mostly; BoardVehicle: the frame its first string
+    // names holds a car, a static weapon or a Junkers 88, mostly.)
+    if (c.kind == 1 && (c.opcode == OP_HUMAN_Drive || c.opcode == OP_HUMAN_DriveNearPlayer) && r % 4 != 0)
+        if (uint8_t *h = ScriptActor(c))
+            for (const W_Actor &x : w.actors)
+                if (x.type == ACTOR_CAR) {
+                    const int seat = r % 4 == 3 ? 1 : 0;
+                    if (g_side) {
+                        *reinterpret_cast<uint8_t **>(h + 0x160) = x.bytes;
+                        *reinterpret_cast<int *>(h + 0x164) = seat;
+                    } else {
+                        reinterpret_cast<C_Human *>(h)->m_vehicle = reinterpret_cast<C_Actor *>(x.bytes);
+                        reinterpret_cast<C_Human *>(h)->m_seat = seat;
+                    }
+                    break;
+                }
+    if (c.kind == 1 && c.opcode == OP_HUMAN_BoardVehicle && r % 4 != 0) {
+        uint8_t *f = FindByName(STRING_VALUES[c.strings[c.args[0]]]);
+        S_FrameData *data = f ? AsFrame(f)->m_data : nullptr;
+        if (data && data->actor) {
+            static const int rides[] = {ACTOR_CAR, ACTOR_STATIC_WEAPON, ACTOR_JUNKERS88, ACTOR_BIKE};
+            uint8_t *a = reinterpret_cast<uint8_t *>(data->actor);
+            if (g_side)
+                *reinterpret_cast<int *>(a + 0x18) = rides[(r / 4) % 4];
+            else
+                reinterpret_cast<C_Actor *>(a)->m_type = E_ActorType(rides[(r / 4) % 4]);
+        }
+    }
+    if (c.kind == 1 && c.opcode == OP_HUMAN_Bike && r % 5 < 3) {
+        uint8_t *f = FindByName(STRING_VALUES[c.strings[c.args[0]]]);
+        S_FrameData *data = f ? AsFrame(f)->m_data : nullptr;
+        if (data && data->actor) {
+            uint8_t *a = reinterpret_cast<uint8_t *>(data->actor);
+            if (g_side)
+                *reinterpret_cast<int *>(a + 0x18) = ACTOR_BIKE;
+            else
+                reinterpret_cast<C_Actor *>(a)->m_type = ACTOR_BIKE;
+        }
+        if (r % 5 == 0)
+            c.strings[c.args[1]] = 0;                   // (the point's name empty: get on only)
+    }
+}
 // Gives the side's script the case's variables (over the world just built).
 void SetVariables(const S_Case &c)
 {
@@ -1500,11 +1797,20 @@ void SetVariables(const S_Case &c)
         std::memset(g_block + 4, 0, 7);
         g_block[7] = c.hudHidden;
         g_block[8] = c.panelHidden;
-        *reinterpret_cast<int *>(g_block + 0x18) = 0;
+        *reinterpret_cast<int *>(g_block + 0x18) = c.delay;
         *reinterpret_cast<uint32_t *>(g_block + 0x10) = c.signals;
+        *reinterpret_cast<uint32_t *>(g_block) = c.kind == 1 ? O_HUMAN_VTABLE : c.kind == 2 ? O_TRACKER_VTABLE : g_baseVtable;
+        *reinterpret_cast<uint8_t **>(g_block + 0x10C) = c.kind ? ScriptActor(c) : nullptr;
+        g_block[0x108] = c.actorFlag;
         Name(g_block, "script");
     } else {
+        g_script = g_scripts[c.kind];
         C_Script &t = *g_script;
+        if (c.kind == 1)
+            static_cast<C_HumanScript &>(t).m_human = reinterpret_cast<C_Human *>(ScriptActor(c));
+        else if (c.kind == 2)
+            static_cast<C_MeleeTrackerScript &>(t).m_meleeTracker = reinterpret_cast<C_MeleeTracker *>(ScriptActor(c));
+        t.m_actorFlag = c.actorFlag;
         for (int i = 0; i < FRAMES; ++i)
             t.m_frames[i] = reinterpret_cast<I3D_frame *>(frame(c.frames[i]));
         for (int i = 0; i < NUMBERS; ++i)
@@ -1521,7 +1827,7 @@ void SetVariables(const S_Case &c)
         t.m_hudHiddenByScript = t.m_hudPanelHiddenByScript = t.m_inCutsceneHandler = t.m_unknown00A = false;
         t.m_hudHiddenByScript = c.hudHidden;
         t.m_hudPanelHiddenByScript = c.panelHidden;
-        t.m_delay = 0;
+        t.m_delay = c.delay;
         t.m_pendingSignals = c.signals;
         Name(g_script, "script");
     }
@@ -1537,6 +1843,34 @@ void ClearVariables()
     g_script->m_frame = nullptr;
     *reinterpret_cast<uint32_t *>(g_block + 0x28) = 0;
     g_script->m_waitAnimModel = nullptr;
+    *reinterpret_cast<uint32_t *>(g_block + 0x10C) = 0;
+    static_cast<C_HumanScript *>(g_scripts[1])->m_human = nullptr;
+    static_cast<C_MeleeTrackerScript *>(g_scripts[2])->m_meleeTracker = nullptr;
+}
+
+// The actor scripts' constructors (the original's 0x00421bc0 / 0x00421930, no frame): the actor (+0x10C), the global
+// flag (+0x20) and the actor flag (+0x108), set over a block of 0xFF bytes.
+void CompareConstructors()
+{
+    using T_ActorCtor = void *(TC *)(void *, void *, void *);
+    uint8_t *actor = reinterpret_cast<uint8_t *>(0x12345678);
+    for (int kind = 1; kind <= 2; ++kind) {
+        uint8_t *o = static_cast<uint8_t *>(std::malloc(0x200));
+        std::memset(o, 0xFF, 0x200);
+        OriginalAt<T_ActorCtor>(kind == 1 ? 0x00421bc0 : 0x00421930)(o, nullptr, actor);
+        alignas(16) uint8_t buf[sizeof(C_HumanScript) + sizeof(C_MeleeTrackerScript)];
+        std::memset(buf, 0xFF, sizeof buf);
+        C_Script *p = kind == 1 ? static_cast<C_Script *>(new (buf) C_HumanScript(nullptr, reinterpret_cast<C_Human *>(actor)))
+                                : static_cast<C_Script *>(new (buf) C_MeleeTrackerScript(nullptr, reinterpret_cast<C_MeleeTracker *>(actor)));
+        const uint8_t *pActor = kind == 1 ? reinterpret_cast<uint8_t *>(static_cast<C_HumanScript *>(p)->m_human)
+                                          : reinterpret_cast<uint8_t *>(static_cast<C_MeleeTrackerScript *>(p)->m_meleeTracker);
+        S_Result r;
+        r.orig.push_back(F("actor %08x global %d flag %d vtable %08x", At<uint32_t>(o, 0x10C), int(o[0x20]), int(o[0x108]), At<uint32_t>(o, 0)));
+        r.port.push_back(F("actor %08x global %d flag %d vtable %08x", reinterpret_cast<uint32_t>(pActor), int(p->m_global),
+                           int(p->m_actorFlag), kind == 1 ? O_HUMAN_VTABLE : O_TRACKER_VTABLE));
+        Compare(kind == 1 ? "the human script's constructor" : "the melee tracker script's constructor", r);
+        p->~C_Script();
+    }
 }
 
 // ---- one case on both sides ----
@@ -1550,8 +1884,9 @@ void RunCase(const S_Case &c)
         ++g_functionCases[c.function];
     else
         ++g_opcodeCases[c.opcode];
+    static const char *const KINDS[] = {"", " (human script)", " (melee tracker script)"};
     g_current = c.function >= 0 ? F("case %d: function %s", g_cases, FunctionName(c.function))
-                                : F("case %d: %s", g_cases, OpName(c.opcode).c_str());
+                                : F("case %d: %s%s", g_cases, OpName(c.opcode).c_str(), KINDS[c.kind]);
     const uint32_t worldSeed = U32(), fakeBase = U32(), randSeed = U32();
     S_Result r;
     int answers[2];
@@ -1559,7 +1894,10 @@ void RunCase(const S_Case &c)
         BuildWorld(side, worldSeed);
         if (c.noCamera)
             *reinterpret_cast<uint8_t **>(W().scene + 0x15C) = nullptr;
-        SetVariables(c);
+        AvoidOriginalWeaknesses(c);
+        S_Case biased = c;
+        BiasWorld(biased);
+        SetVariables(biased);
         g_fakeBase = fakeBase;
         g_fakeCount = 0;
         g_log[side].clear();
@@ -1570,12 +1908,12 @@ void RunCase(const S_Case &c)
                                  : g_script->CallFunction(c.function, c.types, c.args);
         } else if (side) {
             const int cmd[2] = {c.opcode, reinterpret_cast<int>(c.args)};
-            answers[side] = OriginalAt<T_Exec>(O_EXECUTE)(g_block, cmd);
+            answers[side] = OriginalAt<T_Exec>(c.kind == 1 ? O_HUMAN_EXECUTE : c.kind == 2 ? O_TRACKER_EXECUTE : O_EXECUTE)(g_block, cmd);
         } else {
             S_ScriptCommand cmd;
             cmd.opcode = c.opcode;
             cmd.args = const_cast<int *>(c.args);
-            answers[side] = g_script->C_Script::ExecuteCommand(cmd);
+            answers[side] = c.kind ? g_script->ExecuteCommand(cmd) : g_script->C_Script::ExecuteCommand(cmd);
             cmd.args = nullptr;
         }
         g_case = "";
@@ -1658,6 +1996,18 @@ void SetUpCmd()
         std::printf("cmd_diff: no opcode to test\n");
         std::exit(2);
     }
+    // Part 4: the actor scripts' own commands (the melee tracker's 13..27, the human's 28..248).
+    for (int op : g_opcodes) {
+        if (op >= OP_MELEE_TRACKER_SetOptimized && op <= OP_MELEE_TRACKER_SETAIMODE_Defensive)
+            g_trackerOpcodes.push_back(op);
+        else if (op >= OP_HUMAN_CreateItemInStore && op <= OP_HUMAN_SETEVENTS)
+            g_humanOpcodes.push_back(op);
+    }
+    g_actorsOnly = std::getenv("HD2_CMD_ACTORS") != nullptr;
+    if (g_actorsOnly && (g_functionsOnly || (g_humanOpcodes.empty() && g_trackerOpcodes.empty()))) {
+        std::printf("cmd_diff: HD2_CMD_ACTORS: no actor script command to test\n");
+        std::exit(2);
+    }
 }
 
 }  // namespace H
@@ -1693,10 +2043,11 @@ int main()
     SetUpCmd();
     SetMission("AFRICA1");
     CompileProgram();
+    CompareConstructors();
     for (int n = 0; n < cases; ++n)
         RunCase(RandomCase());
-    std::printf("cmd_diff: %d cases over %d opcodes and %d functions (%d inputs the original crashes on changed), %d calls "
-                "logged, %d checks, %d failures\n", g_cases, int(g_opcodeCases.size()), int(g_functionCases.size()),
-                g_originalCrashes, g_calls[0], checks, failures);
+    std::printf("cmd_diff: %d cases over %d opcodes and %d functions (%d inputs the original crashes on changed, %d it "
+                "misbehaves on), %d calls logged, %d checks, %d failures\n", g_cases, int(g_opcodeCases.size()),
+                int(g_functionCases.size()), g_originalCrashes, g_originalWeaknesses, g_calls[0], checks, failures);
     return failures != 0;
 }

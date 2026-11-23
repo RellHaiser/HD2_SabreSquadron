@@ -13,7 +13,9 @@ header comments or Ghidra, its calling convention there, the answer's kind).
 
 Argument kinds: i int (and enums, unsigned), b bool (the low byte), f float, s a string (char *), p a pointer (logged
 as the object it names), v a vector (S_vector &: 3 floats), m a matrix (S_matrix &: 16 floats), q a quaternion
-(S_quat &), r a raw word, . the rest of a variadic call. Answers: v none, i int, b bool, p pointer, f float (ST0)."""
+(S_quat &), r a raw word, h an unsigned short (the low half), o a vector the callee fills (std::vector<unsigned short> *),
+c a human command (S_HumanCommand &: its fields), . the rest of a variadic call; an S_vector by value is three f. Answers:
+v none, i int, b bool, p pointer, f float (ST0)."""
 import os
 import re
 import subprocess
@@ -156,6 +158,67 @@ ORIG = {
     'C_WireCut::IsCut() const': ("0x005e24c0", "thiscall", "b"),
     # (RandFloat: an import of the engine's on the original's side; its thunk is patched.)
     'RandFloat': ("0x007e5302", "cdecl", "f"),
+    # Script part 4: the actor scripts' (actor_scripts.cpp; C_HumanScript / C_MeleeTrackerScript::ExecuteCommand).
+    'C_HumanWork::SetWorkingFrame(I3D_frame*, bool)': ("0x0077fb70", "thiscall", "v"),
+    'C_AIController::Drive(int, float, int)': ("0x00577a60", "thiscall", "v"),
+    'C_Bike::Drive(int, float, I3D_frame*)': ("0x005d8f60", "thiscall", "v"),
+    'C_MeleeTrackerAI::MoveTo(unsigned short)': ("0x005cf700", "thiscall", "v"),
+    'C_MeleeTrackerAI::Attack(I3D_frame*)': ("0x005cf7c0", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetModeRun()': ("0x005cf820", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetModeWalk()': ("0x005cf830", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetModeLie()': ("0x005cf840", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetModeStand()': ("0x005cf850", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetAggressive()': ("0x005cf890", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetDefensive()': ("0x005cf8a0", "thiscall", "v"),
+    'C_MeleeTrackerAI::Suspend(bool)': ("0x005cf930", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetOptimized(bool)': ("0x005cf950", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetSightRange(int)': ("0x005cf980", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetHearRange(int)': ("0x005cf990", "thiscall", "v"),
+    'C_MeleeTrackerAI::SetOwner(I3D_frame*)': ("0x005cf9b0", "thiscall", "v"),
+    'C_MeleeTrackerScriptedAI::SetBarking(bool)': ("0x005cfbb0", "thiscall", "i"),
+    'C_CheckpointNetwork::GetReachable(S_Checkpoint const*, float, std::vector<unsigned short, std::allocator<unsigned short> >*)':
+        ("0x00520860", "thiscall", "b"),
+    'C_CheckpointNetwork::GetNeighbours(int, float, std::vector<unsigned short, std::allocator<unsigned short> >*)':
+        ("0x00520830", "thiscall", "b"),
+    'C_CheckpointNetwork::FindNearest(S_vector, float, float) const': ("0x0051d780", "thiscall", "i"),
+    'C_Human::FindCheckpoint(char const*) const': ("0x005af210", "thiscall", "i"),
+    'C_Human::IssueCommand(S_HumanCommand const&)': ("0x005a45b0", "thiscall", "v"),
+    'C_Human::SetControllerAIMode(int)': ("0x005a5ca0", "thiscall", "v"),
+    'C_Human::CreateItemInStore(int, int)': ("0x005af760", "thiscall", "v"),
+    'C_Human::SetAlarm(bool)': ("0x005af190", "thiscall", "v"),
+    'C_Human::MoveTo(int, int)': ("0x005af1d0", "thiscall", "v"),
+    'C_Human::AttackMoveTo(int, int)': ("0x005af1b0", "thiscall", "v"),
+    'C_Human::AttackActor(C_Actor*, int, bool, int)': ("0x005af230", "thiscall", "v"),
+    'C_Human::AttackFrame(I3D_frame*, int, bool, int)': ("0x005af250", "thiscall", "v"),
+    'C_Human::MoveToAlarm(int)': ("0x005af6e0", "thiscall", "v"),
+    'C_Human::Reload()': ("0x005af4f0", "thiscall", "v"),
+    'C_Human::StopAction()': ("0x005af430", "thiscall", "v"),
+    'C_Human::SetAnimation(char const*, int, int, bool)': ("0x005af780", "thiscall", "v"),
+    'C_Human::TurnAt(I3D_frame*)': ("0x005af660", "thiscall", "v"),
+    'C_Human::LookAround(int)': ("0x005af6a0", "thiscall", "v"),
+    'C_Human::SetWaitForPlayer(bool, float, float, bool)': ("0x005af5e0", "thiscall", "v"),
+    'C_Human::SetSniper(bool, float)': ("0x005af700", "thiscall", "v"),
+    'C_Human::SetMoveModeRun()': ("0x005af270", "thiscall", "v"),
+    'C_Human::SetMoveModeWalk()': ("0x005af290", "thiscall", "v"),
+    'C_Human::SetMoveModeSilence()': ("0x005af2b0", "thiscall", "v"),
+    'C_Human::SetMoveModeGuard()': ("0x005af2d0", "thiscall", "v"),
+    'C_Human::SetMoveModeLie()': ("0x005af2f0", "thiscall", "v"),
+    'C_Human::SetMoveModeCrouch()': ("0x005af310", "thiscall", "v"),
+    'C_Human::SetMoveModeStand()': ("0x005af330", "thiscall", "v"),
+    'C_Human::SetMoveModeStandFast()': ("0x005af350", "thiscall", "v"),
+    'C_Human::SetAIMode(int)': ("0x005af3f0", "thiscall", "v"),
+    'C_Human::TakeWeapon()': ("0x005af4b0", "thiscall", "v"),
+    'C_Human::HolsterWeapon()': ("0x005af4d0", "thiscall", "v"),
+    'C_Human::RaiseWeapon()': ("0x005af740", "thiscall", "v"),
+    'C_Human::LowerWeapon()': ("0x005af750", "thiscall", "v"),
+    'C_Human::PickObject(I3D_frame*, bool)': ("0x005af470", "thiscall", "v"),
+    'C_Human::DropObject()': ("0x005af490", "thiscall", "v"),
+    'C_Human::PlayActivity(int)': ("0x005af510", "thiscall", "i"),
+    'C_Human::PlayActivity(int, I3D_frame*)': ("0x005af530", "thiscall", "i"),
+    'C_Human::ActivityTurk()': ("0x005af390", "thiscall", "v"),
+    'C_Human::Sit(I3D_frame*)': ("0x005af370", "thiscall", "v"),
+    'C_Human::EnableEvents()': ("0x005af3d0", "thiscall", "v"),
+    'C_Human::DisableEvents()': ("0x005af3b0", "thiscall", "v"),
 }
 
 
@@ -173,6 +236,14 @@ def kind(t):
         return "v"
     if t == "S_matrix const&":
         return "m"
+    if t == "S_vector":
+        return "fff"                                    # (by value: three words)
+    if t.startswith("std::vector<unsigned short"):
+        return "o"                                      # (a vector the callee fills: each side's layout)
+    if t == "S_HumanCommand const&":
+        return "c"                                      # (logged by its fields)
+    if t == "unsigned short":
+        return "h"                                      # (the low half: the upper one is the caller's leftover)
     if t == "S_quat const&":
         return "q"
     if t.endswith("*") or t.endswith("&") or "(" in t:

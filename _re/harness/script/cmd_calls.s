@@ -117,794 +117,1200 @@ __ZN11C_BitStream9WriteBitsEji:
 	pushl	$0
 	jmp	_CmdCallEntry
 
+# C_HumanWork::SetWorkingFrame(I3D_frame*, bool)
+	.globl	__ZN11C_HumanWork15SetWorkingFrameEP9I3D_frameb
+__ZN11C_HumanWork15SetWorkingFrameEP9I3D_frameb:
+	pushl	$13
+	pushl	$0
+	jmp	_CmdCallEntry
+
 # C_Interface::SetTimer(int)
 	.globl	__ZN11C_Interface8SetTimerEi
 __ZN11C_Interface8SetTimerEi:
-	pushl	$13
+	pushl	$14
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ItemActor::TeleportTo(I3D_frame*)
 	.globl	__ZN11C_ItemActor10TeleportToEP9I3D_frame
 __ZN11C_ItemActor10TeleportToEP9I3D_frame:
-	pushl	$14
+	pushl	$15
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Junkers88::SetState(int)
 	.globl	__ZN11C_Junkers888SetStateEi
 __ZN11C_Junkers888SetStateEi:
-	pushl	$15
+	pushl	$16
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_SupplyBox::SetEnabled(bool)
 	.globl	__ZN11C_SupplyBox10SetEnabledEb
 __ZN11C_SupplyBox10SetEnabledEb:
-	pushl	$16
+	pushl	$17
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # S_Explosion::Execute()
 	.globl	__ZN11S_Explosion7ExecuteEv
 __ZN11S_Explosion7ExecuteEv:
-	pushl	$17
+	pushl	$18
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Debriefing::AddText(int)
 	.globl	__ZN12C_Debriefing7AddTextEi
 __ZN12C_Debriefing7AddTextEi:
-	pushl	$18
+	pushl	$19
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Decorators::SetOn(bool)
 	.globl	__ZN12C_Decorators5SetOnEb
 __ZN12C_Decorators5SetOnEb:
-	pushl	$19
+	pushl	$20
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_GameProfile::IsLanguage(char const*)
 	.globl	__ZN13C_GameProfile10IsLanguageEPKc
 __ZN13C_GameProfile10IsLanguageEPKc:
-	pushl	$20
+	pushl	$21
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_GameProfile::GetObjectiveStatus(int, int, int, int)
 	.globl	__ZN13C_GameProfile18GetObjectiveStatusEiiii
 __ZN13C_GameProfile18GetObjectiveStatusEiiii:
-	pushl	$21
+	pushl	$22
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_SoundModule::CrossfadeMusic(int, int, int)
 	.globl	__ZN13C_SoundModule14CrossfadeMusicEiii
 __ZN13C_SoundModule14CrossfadeMusicEiii:
-	pushl	$22
+	pushl	$23
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_SoundModule::GetDubbingSampleSize(int)
 	.globl	__ZN13C_SoundModule20GetDubbingSampleSizeEi
 __ZN13C_SoundModule20GetDubbingSampleSizeEi:
-	pushl	$23
+	pushl	$24
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_SoundModule::Play(S_SoundRequest const&)
 	.globl	__ZN13C_SoundModule4PlayERK14S_SoundRequest
 __ZN13C_SoundModule4PlayERK14S_SoundRequest:
-	pushl	$24
+	pushl	$25
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_SoundModule::PlayMusic(int)
 	.globl	__ZN13C_SoundModule9PlayMusicEi
 __ZN13C_SoundModule9PlayMusicEi:
-	pushl	$25
+	pushl	$26
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TSExplosion::Trigger(int)
 	.globl	__ZN13C_TSExplosion7TriggerEi
 __ZN13C_TSExplosion7TriggerEi:
-	pushl	$26
+	pushl	$27
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TeamManager::GetFormation(C_Human*, bool)
 	.globl	__ZN13C_TeamManager12GetFormationEP7C_Humanb
 __ZN13C_TeamManager12GetFormationEP7C_Humanb:
-	pushl	$27
+	pushl	$28
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TeamManager::DestroyFormation(C_Formation*)
 	.globl	__ZN13C_TeamManager16DestroyFormationEP11C_Formation
 __ZN13C_TeamManager16DestroyFormationEP11C_Formation:
-	pushl	$28
+	pushl	$29
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TeamManager::RemoveFromFormation(C_Human*)
 	.globl	__ZN13C_TeamManager19RemoveFromFormationEP7C_Human
 __ZN13C_TeamManager19RemoveFromFormationEP7C_Human:
-	pushl	$29
+	pushl	$30
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TrackModule::CreatePlayer(char const*, I3D_frame*, I3D_frame*)
 	.globl	__ZN13C_TrackModule12CreatePlayerEPKcP9I3D_frameS3_
 __ZN13C_TrackModule12CreatePlayerEPKcP9I3D_frameS3_:
-	pushl	$30
+	pushl	$31
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_AIController::Drive(int, float, int)
+	.globl	__ZN14C_AIController5DriveEifi
+__ZN14C_AIController5DriveEifi:
+	pushl	$32
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_CameraModule::IsGameCamera(I3D_frame*)
 	.globl	__ZN14C_CameraModule12IsGameCameraEP9I3D_frame
 __ZN14C_CameraModule12IsGameCameraEP9I3D_frame:
-	pushl	$31
+	pushl	$33
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_CameraModule::GetState()
 	.globl	__ZN14C_CameraModule8GetStateEv
 __ZN14C_CameraModule8GetStateEv:
-	pushl	$32
+	pushl	$34
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_CameraModule::SetTarget(I3D_frame*, int)
 	.globl	__ZN14C_CameraModule9SetTargetEP9I3D_framei
 __ZN14C_CameraModule9SetTargetEP9I3D_framei:
-	pushl	$33
+	pushl	$35
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_MeleeTracker::SetOptimized(bool)
 	.globl	__ZN14C_MeleeTracker12SetOptimizedEb
 __ZN14C_MeleeTracker12SetOptimizedEb:
-	pushl	$34
+	pushl	$36
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_MeleeTracker::ResetAI()
 	.globl	__ZN14C_MeleeTracker7ResetAIEv
 __ZN14C_MeleeTracker7ResetAIEv:
-	pushl	$35
+	pushl	$37
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::EndCutscene()
 	.globl	__ZN14C_ScriptModule11EndCutsceneEv
 __ZN14C_ScriptModule11EndCutsceneEv:
-	pushl	$36
+	pushl	$38
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::RotateFrame(I3D_frame*, int, int, int)
 	.globl	__ZN14C_ScriptModule11RotateFrameEP9I3D_frameiii
 __ZN14C_ScriptModule11RotateFrameEP9I3D_frameiii:
-	pushl	$37
+	pushl	$39
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::RunCutscene(int)
 	.globl	__ZN14C_ScriptModule11RunCutsceneEi
 __ZN14C_ScriptModule11RunCutsceneEi:
-	pushl	$38
+	pushl	$40
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::AssignScript(I3D_frame*, char const*)
 	.globl	__ZN14C_ScriptModule12AssignScriptEP9I3D_framePKc
 __ZN14C_ScriptModule12AssignScriptEP9I3D_framePKc:
-	pushl	$39
+	pushl	$41
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::RestoreFrame(I3D_frame*)
 	.globl	__ZN14C_ScriptModule12RestoreFrameEP9I3D_frame
 __ZN14C_ScriptModule12RestoreFrameEP9I3D_frame:
-	pushl	$40
+	pushl	$42
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::AddPauseSound(char const*)
 	.globl	__ZN14C_ScriptModule13AddPauseSoundEPKc
 __ZN14C_ScriptModule13AddPauseSoundEPKc:
-	pushl	$41
+	pushl	$43
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::RememberFrame(I3D_frame*, unsigned int)
 	.globl	__ZN14C_ScriptModule13RememberFrameEP9I3D_framej
 __ZN14C_ScriptModule13RememberFrameEP9I3D_framej:
-	pushl	$42
+	pushl	$44
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::RegisterDuplicate(I3D_frame*)
 	.globl	__ZN14C_ScriptModule17RegisterDuplicateEP9I3D_frame
 __ZN14C_ScriptModule17RegisterDuplicateEP9I3D_frame:
-	pushl	$43
+	pushl	$45
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::RegisterSoundFrame(I3D_frame*)
 	.globl	__ZN14C_ScriptModule18RegisterSoundFrameEP9I3D_frame
 __ZN14C_ScriptModule18RegisterSoundFrameEP9I3D_frame:
-	pushl	$44
+	pushl	$46
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::UnregisterDuplicate(I3D_frame*)
 	.globl	__ZN14C_ScriptModule19UnregisterDuplicateEP9I3D_frame
 __ZN14C_ScriptModule19UnregisterDuplicateEP9I3D_frame:
-	pushl	$45
+	pushl	$47
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::RegisterAnimatedModel(I3D_frame*)
 	.globl	__ZN14C_ScriptModule21RegisterAnimatedModelEP9I3D_frame
 __ZN14C_ScriptModule21RegisterAnimatedModelEP9I3D_frame:
-	pushl	$46
+	pushl	$48
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ScriptModule::UnregisterAnimatedModel(I3D_frame*)
 	.globl	__ZN14C_ScriptModule23UnregisterAnimatedModelEP9I3D_frame
 __ZN14C_ScriptModule23UnregisterAnimatedModelEP9I3D_frame:
-	pushl	$47
+	pushl	$49
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_StaticWeapon::SetState(int)
 	.globl	__ZN14C_StaticWeapon8SetStateEi
 __ZN14C_StaticWeapon8SetStateEi:
-	pushl	$48
+	pushl	$50
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TShiftModule::GetEntry(I3D_mesh const*)
 	.globl	__ZN14C_TShiftModule8GetEntryEPK8I3D_mesh
 __ZN14C_TShiftModule8GetEntryEPK8I3D_mesh:
-	pushl	$49
+	pushl	$51
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_DocumentPlace::SetState(int)
 	.globl	__ZN15C_DocumentPlace8SetStateEi
 __ZN15C_DocumentPlace8SetStateEi:
-	pushl	$50
+	pushl	$52
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_FowlGenerator::Start(bool, int)
 	.globl	__ZN15C_FowlGenerator5StartEbi
 __ZN15C_FowlGenerator5StartEbi:
-	pushl	$51
+	pushl	$53
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_HumanMovement::ResetToFrame()
 	.globl	__ZN15C_HumanMovement12ResetToFrameEv
 __ZN15C_HumanMovement12ResetToFrameEv:
-	pushl	$52
+	pushl	$54
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_PlayerProfile::GetDiary()
 	.globl	__ZN15C_PlayerProfile8GetDiaryEv
 __ZN15C_PlayerProfile8GetDiaryEv:
-	pushl	$53
+	pushl	$55
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ResourceCache<I3D_animation_set>::Get(char const*, I3D_animation_set**, void ( fastcall*)(char const*, void*), void*)
 	.globl	__ZN15C_ResourceCacheI17I3D_animation_setE3GetEPKcPPS0_PU8fastcallFvS3_PvES6_
 __ZN15C_ResourceCacheI17I3D_animation_setE3GetEPKcPPS0_PU8fastcallFvS3_PvES6_:
-	pushl	$54
+	pushl	$56
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_AnimationActor::Stop(bool)
 	.globl	__ZN16C_AnimationActor4StopEb
 __ZN16C_AnimationActor4StopEb:
-	pushl	$55
+	pushl	$57
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ExplosivePlace::SetState(int)
 	.globl	__ZN16C_ExplosivePlace8SetStateEi
 __ZN16C_ExplosivePlace8SetStateEi:
-	pushl	$56
+	pushl	$58
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_FormationShape::SetType(E_FormationType)
 	.globl	__ZN16C_FormationShape7SetTypeE15E_FormationType
 __ZN16C_FormationShape7SetTypeE15E_FormationType:
-	pushl	$57
+	pushl	$59
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_FormationShape::SetScale(S_vector const&)
 	.globl	__ZN16C_FormationShape8SetScaleERK8S_vector
 __ZN16C_FormationShape8SetScaleERK8S_vector:
-	pushl	$58
+	pushl	$60
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetModeLie()
+	.globl	__ZN16C_MeleeTrackerAI10SetModeLieEv
+__ZN16C_MeleeTrackerAI10SetModeLieEv:
+	pushl	$61
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetModeRun()
+	.globl	__ZN16C_MeleeTrackerAI10SetModeRunEv
+__ZN16C_MeleeTrackerAI10SetModeRunEv:
+	pushl	$62
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetModeWalk()
+	.globl	__ZN16C_MeleeTrackerAI11SetModeWalkEv
+__ZN16C_MeleeTrackerAI11SetModeWalkEv:
+	pushl	$63
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetDefensive()
+	.globl	__ZN16C_MeleeTrackerAI12SetDefensiveEv
+__ZN16C_MeleeTrackerAI12SetDefensiveEv:
+	pushl	$64
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetHearRange(int)
+	.globl	__ZN16C_MeleeTrackerAI12SetHearRangeEi
+__ZN16C_MeleeTrackerAI12SetHearRangeEi:
+	pushl	$65
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetModeStand()
+	.globl	__ZN16C_MeleeTrackerAI12SetModeStandEv
+__ZN16C_MeleeTrackerAI12SetModeStandEv:
+	pushl	$66
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetOptimized(bool)
+	.globl	__ZN16C_MeleeTrackerAI12SetOptimizedEb
+__ZN16C_MeleeTrackerAI12SetOptimizedEb:
+	pushl	$67
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetAggressive()
+	.globl	__ZN16C_MeleeTrackerAI13SetAggressiveEv
+__ZN16C_MeleeTrackerAI13SetAggressiveEv:
+	pushl	$68
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetSightRange(int)
+	.globl	__ZN16C_MeleeTrackerAI13SetSightRangeEi
+__ZN16C_MeleeTrackerAI13SetSightRangeEi:
+	pushl	$69
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::Attack(I3D_frame*)
+	.globl	__ZN16C_MeleeTrackerAI6AttackEP9I3D_frame
+__ZN16C_MeleeTrackerAI6AttackEP9I3D_frame:
+	pushl	$70
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::MoveTo(unsigned short)
+	.globl	__ZN16C_MeleeTrackerAI6MoveToEt
+__ZN16C_MeleeTrackerAI6MoveToEt:
+	pushl	$71
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::Suspend(bool)
+	.globl	__ZN16C_MeleeTrackerAI7SuspendEb
+__ZN16C_MeleeTrackerAI7SuspendEb:
+	pushl	$72
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerAI::SetOwner(I3D_frame*)
+	.globl	__ZN16C_MeleeTrackerAI8SetOwnerEP9I3D_frame
+__ZN16C_MeleeTrackerAI8SetOwnerEP9I3D_frame:
+	pushl	$73
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ParticlesModule::Create(int, S_matrix const&, I3D_frame*, bool, bool)
 	.globl	__ZN17C_ParticlesModule6CreateEiRK8S_matrixP9I3D_framebb
 __ZN17C_ParticlesModule6CreateEiRK8S_matrixP9I3D_framebb:
-	pushl	$59
+	pushl	$74
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ParticlesModule::Finish(int)
 	.globl	__ZN17C_ParticlesModule6FinishEi
 __ZN17C_ParticlesModule6FinishEi:
-	pushl	$60
+	pushl	$75
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ParticlesModule::Destroy(int)
 	.globl	__ZN17C_ParticlesModule7DestroyEi
 __ZN17C_ParticlesModule7DestroyEi:
-	pushl	$61
+	pushl	$76
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_CheckpointNetwork::GetReachable(S_Checkpoint const*, float, std::vector<unsigned short, std::allocator<unsigned short> >*)
+	.globl	__ZN19C_CheckpointNetwork12GetReachableEPK12S_CheckpointfPSt6vectorItSaItEE
+__ZN19C_CheckpointNetwork12GetReachableEPK12S_CheckpointfPSt6vectorItSaItEE:
+	pushl	$77
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_CheckpointNetwork::GetNeighbours(int, float, std::vector<unsigned short, std::allocator<unsigned short> >*)
+	.globl	__ZN19C_CheckpointNetwork13GetNeighboursEifPSt6vectorItSaItEE
+__ZN19C_CheckpointNetwork13GetNeighboursEifPSt6vectorItSaItEE:
+	pushl	$78
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_CheckpointNetwork::Get(int)
 	.globl	__ZN19C_CheckpointNetwork3GetEi
 __ZN19C_CheckpointNetwork3GetEi:
-	pushl	$62
+	pushl	$79
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_CheckpointNetwork::Join(char const*, char const*)
 	.globl	__ZN19C_CheckpointNetwork4JoinEPKcS1_
 __ZN19C_CheckpointNetwork4JoinEPKcS1_:
-	pushl	$63
+	pushl	$80
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_CheckpointNetwork::Separate(char const*, char const*)
 	.globl	__ZN19C_CheckpointNetwork8SeparateEPKcS1_
 __ZN19C_CheckpointNetwork8SeparateEPKcS1_:
-	pushl	$64
+	pushl	$81
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TemporaryActorsList::CreateDebris(I3D_frame*, S_vector const&, S_vector const&)
 	.globl	__ZN21C_TemporaryActorsList12CreateDebrisEP9I3D_frameRK8S_vectorS4_
 __ZN21C_TemporaryActorsList12CreateDebrisEP9I3D_frameRK8S_vectorS4_:
-	pushl	$65
+	pushl	$82
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_MeleeTrackerMovement::SetOptimizedController(bool)
 	.globl	__ZN22C_MeleeTrackerMovement22SetOptimizedControllerEb
 __ZN22C_MeleeTrackerMovement22SetOptimizedControllerEb:
-	pushl	$66
+	pushl	$83
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_MeleeTrackerScriptedAI::SetBarking(bool)
+	.globl	__ZN24C_MeleeTrackerScriptedAI10SetBarkingEb
+__ZN24C_MeleeTrackerScriptedAI10SetBarkingEb:
+	pushl	$84
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Car::SendFuel()
 	.globl	__ZN5C_Car8SendFuelEv
 __ZN5C_Car8SendFuelEv:
-	pushl	$67
+	pushl	$85
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Bike::Drive(int, float, I3D_frame*)
+	.globl	__ZN6C_Bike5DriveEifP9I3D_frame
+__ZN6C_Bike5DriveEifP9I3D_frame:
+	pushl	$86
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Door::Lock(int)
 	.globl	__ZN6C_Door4LockEi
 __ZN6C_Door4LockEi:
-	pushl	$68
+	pushl	$87
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Door::Unlock(int)
 	.globl	__ZN6C_Door6UnlockEi
 __ZN6C_Door6UnlockEi:
-	pushl	$69
+	pushl	$88
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Door::SetState(int, bool, bool, int)
 	.globl	__ZN6C_Door8SetStateEibbi
 __ZN6C_Door8SetStateEibbi:
-	pushl	$70
+	pushl	$89
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Item::GetFrame(int)
 	.globl	__ZN6C_Item8GetFrameEi
 __ZN6C_Item8GetFrameEi:
-	pushl	$71
+	pushl	$90
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Pike::SetState(int)
 	.globl	__ZN6C_Pike8SetStateEi
 __ZN6C_Pike8SetStateEi:
-	pushl	$72
+	pushl	$91
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Team::SetNPCMember(C_Human*, bool)
 	.globl	__ZN6C_Team12SetNPCMemberEP7C_Humanb
 __ZN6C_Team12SetNPCMemberEP7C_Humanb:
-	pushl	$73
+	pushl	$92
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Team::ReturnControl()
 	.globl	__ZN6C_Team13ReturnControlEv
 __ZN6C_Team13ReturnControlEv:
-	pushl	$74
+	pushl	$93
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_game::RestoreMusic(bool)
 	.globl	__ZN6C_game12RestoreMusicEb
 __ZN6C_game12RestoreMusicEb:
-	pushl	$75
+	pushl	$94
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_game::GetCameraModule()
 	.globl	__ZN6C_game15GetCameraModuleEv
 __ZN6C_game15GetCameraModuleEv:
-	pushl	$76
+	pushl	$95
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_game::ShowBinocularsView(bool)
 	.globl	__ZN6C_game18ShowBinocularsViewEb
 __ZN6C_game18ShowBinocularsViewEb:
-	pushl	$77
+	pushl	$96
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_game::ShowFirstPersonView(bool)
 	.globl	__ZN6C_game19ShowFirstPersonViewEb
 __ZN6C_game19ShowFirstPersonViewEb:
-	pushl	$78
+	pushl	$97
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_game::Print(char const*, ...)
 	.globl	__ZN6C_game5PrintEPKcz
 __ZN6C_game5PrintEPKcz:
-	pushl	$79
+	pushl	$98
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_game::PlayAvi(char const*)
 	.globl	__ZN6C_game7PlayAviEPKc
 __ZN6C_game7PlayAviEPKc:
-	pushl	$80
+	pushl	$99
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Diary::AddText(int)
 	.globl	__ZN7C_Diary7AddTextEi
 __ZN7C_Diary7AddTextEi:
-	pushl	$81
+	pushl	$100
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::DropObject()
+	.globl	__ZN7C_Human10DropObjectEv
+__ZN7C_Human10DropObjectEv:
+	pushl	$101
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::LookAround(int)
+	.globl	__ZN7C_Human10LookAroundEi
+__ZN7C_Human10LookAroundEi:
+	pushl	$102
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::PickObject(I3D_frame*, bool)
+	.globl	__ZN7C_Human10PickObjectEP9I3D_frameb
+__ZN7C_Human10PickObjectEP9I3D_frameb:
+	pushl	$103
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::SetTexture(char const*)
 	.globl	__ZN7C_Human10SetTextureEPKc
 __ZN7C_Human10SetTextureEPKc:
-	pushl	$82
+	pushl	$104
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::StopAction()
+	.globl	__ZN7C_Human10StopActionEv
+__ZN7C_Human10StopActionEv:
+	pushl	$105
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::TakeWeapon()
+	.globl	__ZN7C_Human10TakeWeaponEv
+__ZN7C_Human10TakeWeaponEv:
+	pushl	$106
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::AttackActor(C_Actor*, int, bool, int)
+	.globl	__ZN7C_Human11AttackActorEP7C_Actoribi
+__ZN7C_Human11AttackActorEP7C_Actoribi:
+	pushl	$107
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::AttackFrame(I3D_frame*, int, bool, int)
+	.globl	__ZN7C_Human11AttackFrameEP9I3D_frameibi
+__ZN7C_Human11AttackFrameEP9I3D_frameibi:
+	pushl	$108
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::LowerWeapon()
+	.globl	__ZN7C_Human11LowerWeaponEv
+__ZN7C_Human11LowerWeaponEv:
+	pushl	$109
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::MoveToAlarm(int)
+	.globl	__ZN7C_Human11MoveToAlarmEi
+__ZN7C_Human11MoveToAlarmEi:
+	pushl	$110
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::RaiseWeapon()
+	.globl	__ZN7C_Human11RaiseWeaponEv
+__ZN7C_Human11RaiseWeaponEv:
+	pushl	$111
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::ActivityTurk()
+	.globl	__ZN7C_Human12ActivityTurkEv
+__ZN7C_Human12ActivityTurkEv:
+	pushl	$112
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::AttackMoveTo(int, int)
+	.globl	__ZN7C_Human12AttackMoveToEii
+__ZN7C_Human12AttackMoveToEii:
+	pushl	$113
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::EnableEvents()
+	.globl	__ZN7C_Human12EnableEventsEv
+__ZN7C_Human12EnableEventsEv:
+	pushl	$114
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::IssueCommand(S_HumanCommand const&)
+	.globl	__ZN7C_Human12IssueCommandERK14S_HumanCommand
+__ZN7C_Human12IssueCommandERK14S_HumanCommand:
+	pushl	$115
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::PlayActivity(int)
+	.globl	__ZN7C_Human12PlayActivityEi
+__ZN7C_Human12PlayActivityEi:
+	pushl	$116
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::PlayActivity(int, I3D_frame*)
+	.globl	__ZN7C_Human12PlayActivityEiP9I3D_frame
+__ZN7C_Human12PlayActivityEiP9I3D_frame:
+	pushl	$117
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::SetAlarmType(unsigned int, bool)
 	.globl	__ZN7C_Human12SetAlarmTypeEjb
 __ZN7C_Human12SetAlarmTypeEjb:
-	pushl	$83
+	pushl	$118
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetAnimation(char const*, int, int, bool)
+	.globl	__ZN7C_Human12SetAnimationEPKciib
+__ZN7C_Human12SetAnimationEPKciib:
+	pushl	$119
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::DisableEvents()
+	.globl	__ZN7C_Human13DisableEventsEv
+__ZN7C_Human13DisableEventsEv:
+	pushl	$120
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::HolsterWeapon()
+	.globl	__ZN7C_Human13HolsterWeaponEv
+__ZN7C_Human13HolsterWeaponEv:
+	pushl	$121
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::SetAIOptimized(int)
 	.globl	__ZN7C_Human14SetAIOptimizedEi
 __ZN7C_Human14SetAIOptimizedEi:
-	pushl	$84
+	pushl	$122
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetMoveModeLie()
+	.globl	__ZN7C_Human14SetMoveModeLieEv
+__ZN7C_Human14SetMoveModeLieEv:
+	pushl	$123
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetMoveModeRun()
+	.globl	__ZN7C_Human14SetMoveModeRunEv
+__ZN7C_Human14SetMoveModeRunEv:
+	pushl	$124
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetMoveModeWalk()
+	.globl	__ZN7C_Human15SetMoveModeWalkEv
+__ZN7C_Human15SetMoveModeWalkEv:
+	pushl	$125
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::SetHealthPercent(int)
 	.globl	__ZN7C_Human16SetHealthPercentEi
 __ZN7C_Human16SetHealthPercentEi:
-	pushl	$85
+	pushl	$126
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetMoveModeGuard()
+	.globl	__ZN7C_Human16SetMoveModeGuardEv
+__ZN7C_Human16SetMoveModeGuardEv:
+	pushl	$127
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetMoveModeStand()
+	.globl	__ZN7C_Human16SetMoveModeStandEv
+__ZN7C_Human16SetMoveModeStandEv:
+	pushl	$128
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetWaitForPlayer(bool, float, float, bool)
+	.globl	__ZN7C_Human16SetWaitForPlayerEbffb
+__ZN7C_Human16SetWaitForPlayerEbffb:
+	pushl	$129
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::CreateItemInStore(int, int)
+	.globl	__ZN7C_Human17CreateItemInStoreEii
+__ZN7C_Human17CreateItemInStoreEii:
+	pushl	$130
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetMoveModeCrouch()
+	.globl	__ZN7C_Human17SetMoveModeCrouchEv
+__ZN7C_Human17SetMoveModeCrouchEv:
+	pushl	$131
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetMoveModeSilence()
+	.globl	__ZN7C_Human18SetMoveModeSilenceEv
+__ZN7C_Human18SetMoveModeSilenceEv:
+	pushl	$132
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetControllerAIMode(int)
+	.globl	__ZN7C_Human19SetControllerAIModeEi
+__ZN7C_Human19SetControllerAIModeEi:
+	pushl	$133
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::RemoveItemsFromStore(int)
 	.globl	__ZN7C_Human20RemoveItemsFromStoreEi
 __ZN7C_Human20RemoveItemsFromStoreEi:
-	pushl	$86
+	pushl	$134
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetMoveModeStandFast()
+	.globl	__ZN7C_Human20SetMoveModeStandFastEv
+__ZN7C_Human20SetMoveModeStandFastEv:
+	pushl	$135
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::Sit(I3D_frame*)
+	.globl	__ZN7C_Human3SitEP9I3D_frame
+__ZN7C_Human3SitEP9I3D_frame:
+	pushl	$136
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::MoveTo(int, int)
+	.globl	__ZN7C_Human6MoveToEii
+__ZN7C_Human6MoveToEii:
+	pushl	$137
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::Reload()
+	.globl	__ZN7C_Human6ReloadEv
+__ZN7C_Human6ReloadEv:
+	pushl	$138
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::TurnAt(I3D_frame*)
+	.globl	__ZN7C_Human6TurnAtEP9I3D_frame
+__ZN7C_Human6TurnAtEP9I3D_frame:
+	pushl	$139
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::ResetAI()
 	.globl	__ZN7C_Human7ResetAIEv
 __ZN7C_Human7ResetAIEv:
-	pushl	$87
+	pushl	$140
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::Suspend(bool)
 	.globl	__ZN7C_Human7SuspendEb
 __ZN7C_Human7SuspendEb:
-	pushl	$88
+	pushl	$141
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetAlarm(bool)
+	.globl	__ZN7C_Human8SetAlarmEb
+__ZN7C_Human8SetAlarmEb:
+	pushl	$142
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetAIMode(int)
+	.globl	__ZN7C_Human9SetAIModeEi
+__ZN7C_Human9SetAIModeEi:
+	pushl	$143
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::SetSniper(bool, float)
+	.globl	__ZN7C_Human9SetSniperEbf
+__ZN7C_Human9SetSniperEbf:
+	pushl	$144
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Radio::SetState(int)
 	.globl	__ZN7C_Radio8SetStateEi
 __ZN7C_Radio8SetStateEi:
-	pushl	$89
+	pushl	$145
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Train::FollowTrack(char const*)
 	.globl	__ZN7C_Train11FollowTrackEPKc
 __ZN7C_Train11FollowTrackEPKc:
-	pushl	$90
+	pushl	$146
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Train::Start()
 	.globl	__ZN7C_Train5StartEv
 __ZN7C_Train5StartEv:
-	pushl	$91
+	pushl	$147
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Debris::Setup(S_RigidBodyParams const&, bool)
 	.globl	__ZN8C_Debris5SetupERK17S_RigidBodyParamsb
 __ZN8C_Debris5SetupERK17S_RigidBodyParamsb:
-	pushl	$92
+	pushl	$148
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Switch::SetState(int)
 	.globl	__ZN8C_Switch8SetStateEi
 __ZN8C_Switch8SetStateEi:
-	pushl	$93
+	pushl	$149
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Vehicle::Reset(unsigned char)
 	.globl	__ZN9C_Vehicle5ResetEh
 __ZN9C_Vehicle5ResetEh:
-	pushl	$94
+	pushl	$150
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Vehicle::Restart(float, bool)
 	.globl	__ZN9C_Vehicle7RestartEfb
 __ZN9C_Vehicle7RestartEfb:
-	pushl	$95
+	pushl	$151
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Vehicle::SetFuel(float)
 	.globl	__ZN9C_Vehicle7SetFuelEf
 __ZN9C_Vehicle7SetFuelEf:
-	pushl	$96
+	pushl	$152
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Vehicle::SetEngine(bool, bool)
 	.globl	__ZN9C_Vehicle9SetEngineEbb
 __ZN9C_Vehicle9SetEngineEbb:
-	pushl	$97
+	pushl	$153
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_WireCut::Cut(S_vector const&, bool)
 	.globl	__ZN9C_WireCut3CutERK8S_vectorb
 __ZN9C_WireCut3CutERK8S_vectorb:
-	pushl	$98
+	pushl	$154
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TeamBase::GetAliveCount() const
 	.globl	__ZNK10C_TeamBase13GetAliveCountEv
 __ZNK10C_TeamBase13GetAliveCountEv:
-	pushl	$99
+	pushl	$155
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TeamBase::GetMemberCount() const
 	.globl	__ZNK10C_TeamBase14GetMemberCountEv
 __ZNK10C_TeamBase14GetMemberCountEv:
-	pushl	$100
+	pushl	$156
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TeamBase::GetMember(int) const
 	.globl	__ZNK10C_TeamBase9GetMemberEi
 __ZNK10C_TeamBase9GetMemberEi:
-	pushl	$101
+	pushl	$157
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_GameProfile::GetDifficulty() const
 	.globl	__ZNK13C_GameProfile13GetDifficultyEv
 __ZNK13C_GameProfile13GetDifficultyEv:
-	pushl	$102
+	pushl	$158
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_GameProfile::IsCooperativeGame() const
 	.globl	__ZNK13C_GameProfile17IsCooperativeGameEv
 __ZNK13C_GameProfile17IsCooperativeGameEv:
-	pushl	$103
+	pushl	$159
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ActorsModule::GetActorById(int) const
 	.globl	__ZNK14C_ActorsModule12GetActorByIdEi
 __ZNK14C_ActorsModule12GetActorByIdEi:
-	pushl	$104
+	pushl	$160
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_ActorsModule::GetActor(int) const
 	.globl	__ZNK14C_ActorsModule8GetActorEi
 __ZNK14C_ActorsModule8GetActorEi:
-	pushl	$105
+	pushl	$161
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TShiftModule::HasFrame(I3D_frame const*) const
 	.globl	__ZNK14C_TShiftModule8HasFrameEPK9I3D_frame
 __ZNK14C_TShiftModule8HasFrameEPK9I3D_frame:
-	pushl	$106
+	pushl	$162
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_CheckpointNetwork::FindNearest(S_vector, float, float) const
+	.globl	__ZNK19C_CheckpointNetwork11FindNearestE8S_vectorff
+__ZNK19C_CheckpointNetwork11FindNearestE8S_vectorff:
+	pushl	$163
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_CheckpointNetwork::Find(char const*) const
 	.globl	__ZNK19C_CheckpointNetwork4FindEPKc
 __ZNK19C_CheckpointNetwork4FindEPKc:
-	pushl	$107
+	pushl	$164
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_TemporaryActorsList::IsItemInRange(int, S_vector const&, int) const
 	.globl	__ZNK21C_TemporaryActorsList13IsItemInRangeEiRK8S_vectori
 __ZNK21C_TemporaryActorsList13IsItemInRangeEiRK8S_vectori:
-	pushl	$108
+	pushl	$165
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_LightMapGroupsModule::FindGroup(char const*) const
 	.globl	__ZNK22C_LightMapGroupsModule9FindGroupEPKc
 __ZNK22C_LightMapGroupsModule9FindGroupEPKc:
-	pushl	$109
+	pushl	$166
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Car::IsDestroyed() const
 	.globl	__ZNK5C_Car11IsDestroyedEv
 __ZNK5C_Car11IsDestroyedEv:
-	pushl	$110
+	pushl	$167
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Team::GetActivePlayer() const
 	.globl	__ZNK6C_Team15GetActivePlayerEv
 __ZNK6C_Team15GetActivePlayerEv:
-	pushl	$111
+	pushl	$168
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Team::HasItem(int) const
 	.globl	__ZNK6C_Team7HasItemEi
 __ZNK6C_Team7HasItemEi:
-	pushl	$112
+	pushl	$169
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_game::IsBinocularsView() const
 	.globl	__ZNK6C_game16IsBinocularsViewEv
 __ZNK6C_game16IsBinocularsViewEv:
-	pushl	$113
+	pushl	$170
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_game::IsFirstPersonView() const
 	.globl	__ZNK6C_game17IsFirstPersonViewEv
 __ZNK6C_game17IsFirstPersonViewEv:
-	pushl	$114
+	pushl	$171
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::SeesFriend() const
 	.globl	__ZNK7C_Human10SeesFriendEv
 __ZNK7C_Human10SeesFriendEv:
-	pushl	$115
+	pushl	$172
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::GetAlarmType() const
 	.globl	__ZNK7C_Human12GetAlarmTypeEv
 __ZNK7C_Human12GetAlarmTypeEv:
-	pushl	$116
+	pushl	$173
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::IsSpectating() const
 	.globl	__ZNK7C_Human12IsSpectatingEv
 __ZNK7C_Human12IsSpectatingEv:
-	pushl	$117
+	pushl	$174
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::IsUnconscious() const
 	.globl	__ZNK7C_Human13IsUnconsciousEv
 __ZNK7C_Human13IsUnconsciousEv:
-	pushl	$118
+	pushl	$175
+	pushl	$0
+	jmp	_CmdCallEntry
+
+# C_Human::FindCheckpoint(char const*) const
+	.globl	__ZNK7C_Human14FindCheckpointEPKc
+__ZNK7C_Human14FindCheckpointEPKc:
+	pushl	$176
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::GetHealthPercent() const
 	.globl	__ZNK7C_Human16GetHealthPercentEv
 __ZNK7C_Human16GetHealthPercentEv:
-	pushl	$119
+	pushl	$177
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::GetControllerType() const
 	.globl	__ZNK7C_Human17GetControllerTypeEv
 __ZNK7C_Human17GetControllerTypeEv:
-	pushl	$120
+	pushl	$178
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::GetTeam(bool) const
 	.globl	__ZNK7C_Human7GetTeamEb
 __ZNK7C_Human7GetTeamEb:
-	pushl	$121
+	pushl	$179
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::FindItem(int, int*) const
 	.globl	__ZNK7C_Human8FindItemEiPi
 __ZNK7C_Human8FindItemEiPi:
-	pushl	$122
+	pushl	$180
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::IsInPlay() const
 	.globl	__ZNK7C_Human8IsInPlayEv
 __ZNK7C_Human8IsInPlayEv:
-	pushl	$123
+	pushl	$181
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_Human::SeesEnemy() const
 	.globl	__ZNK7C_Human9SeesEnemyEv
 __ZNK7C_Human9SeesEnemyEv:
-	pushl	$124
+	pushl	$182
 	pushl	$0
 	jmp	_CmdCallEntry
 
 # C_WireCut::IsCut() const
 	.globl	__ZNK9C_WireCut5IsCutEv
 __ZNK9C_WireCut5IsCutEv:
-	pushl	$125
+	pushl	$183
 	pushl	$0
 	jmp	_CmdCallEntry
 

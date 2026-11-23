@@ -5646,3 +5646,44 @@ particles and the surface marks. Files are served from memory.
   no children until the names were stable; two edits through Bash heredocs lost their backslashes again (a third failed its assert); the first test world never
   started the mission, so no command's Advance was compared, and never put a human inside a box or a range (the
   mutation run showed both).
+
+## Script part 4 (the actor scripts: `actor_scripts.cpp`, C_HumanScript and C_MeleeTrackerScript, 2026-11-23)
+
+- **The build:** part 3's `script/cmd_diff.cpp` (suite `script.commands`): half its cases run an actor script's command
+  instead, on the port's C_HumanScript / C_MeleeTrackerScript (compiled from the same program) and on the original's
+  ExecuteCommand (0x00421c00 / 0x00421970, the actor at +0x10C, the class's vtable put on the block); HD2_CMD_ACTORS runs
+  only those. The world adds what they read: every human gets a controller (its type, its current checkpoint, the
+  circumvention flag), its work, a vehicle and a seat (cars, static weapons, other actors, none); every actor a network
+  id; bikes among the actors; a melee tracker on no frame with its controller (its mode: the full AI's 4 and 5 mostly,
+  others) for the tracker script. The new calls (the human's commands, the melee tracker AI's, the AI controller's and the
+  bike's Drive, the checkpoint lookups) are logged like part 3's: the human commands by their fields, GetNeighbours /
+  GetReachable fill each side's own vector layout (the original's MSVC 6 vector through its operator new), FindNearest's
+  vector by value as three floats, Get's checkpoint by its low half (the original reads AX alone and pushes a leftover
+  upper half), FindCheckpoint by name. The compared state adds each human's sight and hearing ranges and its controller's
+  circumvention flag (inline writes). The constructors (0x00421bc0 / 0x00421930) are compared once: the actor, the global
+  flag, the actor flag.
+- **The tests:** 200,000 cases (half of them the actor scripts'; HD2_CMD_ACTORS alone: 200,000, 0 failures). Most of an
+  actor script's commands are its own (the human's 28..248, the tracker's 13..27), some fall to the base or are skipped.
+  Biased for the rare paths: MoveToFrame / MoveFromFrame's target at the human's own place or a unit or 2^-15 m step from
+  it (the direction's unit and near-zero rules), HUMAN_Bike's frame turned into a bike and its point empty, the drives'
+  human in a car's driver seat, BoardVehicle's frame turned into a vehicle, the script's delay seeded. Every line of
+  `actor_scripts.cpp` runs (253 of 253); not reached: the GetKind inlines of `actor_scripts.h`.
+- **Port bugs found and fixed:** HUMAN_Move / AttackMove compared FindCheckpoint's answer with -1 (it answers 0xFFFF for
+  a missing checkpoint, as the original's AX: the port moved to checkpoint 0xFFFF instead of skipping the command);
+  HUMAN_Investigate and ACTIVITY_Phone / Read / Point played the activity without a frame when the frame was null (the
+  original passes the null to PlayActivityAt; DrinkBottle and Eat do choose by the frame, as before); MoveToFrame /
+  MoveFromFrame normalized the direction with the square summed x, y, z (the original's inline copy: (x² + z²) + y², the
+  goal a float's last bit apart).
+- **The original's weaknesses (kept):** the melee tracker commands call the full AI's functions on whatever controller the
+  tracker has (HafHaf the scripted one's): the port skips them for the others, as before; HUMAN_Drive / DriveNearPlayer
+  stopping the car drive through a player's or a remote controller too (the port only through an AI's). The test changes
+  such inputs (counted).
+- **Mutations:** 365 mutants (`mutate_sc4.py`), 34 not building; 318 of the 331 building killed, 13 survived: equivalent
+  ones (the direction's unit test, the near-zero signs, the constructors' actor flag the port's base already clears,
+  LookAround's 0, the skipped switch's value), rare ones (a square of exactly 1.5 or 1e-8, two players exactly as far) and
+  an unreachable string index. The first run left 25: the test then compared the constructors, seeded the delay, put the
+  drives' human in a car and BoardVehicle's frame on a vehicle often, and gave the checkpoints other flags.
+- **Harness lessons (my mistakes):** the call table's answers had to come from the world (the controller's type, a
+  checkpoint by name) where part 3 had drawn them; the original's checkpoint words carry a leftover upper half (logged as
+  the low half); a Python heredoc lost backslashes again (twice); C: filled up during the mutation run (the test compiles
+  failed with only warnings shown): the runs' temp files now go to T:.

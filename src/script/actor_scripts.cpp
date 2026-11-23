@@ -1,5 +1,6 @@
 #include "script/actor_scripts.h"
 
+#include <cmath>
 #include <cstdlib>
 #include <vector>
 
@@ -45,6 +46,27 @@ enum : int {
     AI_MODE_DEFENSIVE = 0x200,
     AI_MODE_ZOMBIE = 0x400,
 };
+
+// S_vector::Normalized() as HUMAN_MoveToFrame / MoveFromFrame's inline copies compile it: the square summed
+// (x² + z²) + y², the same rules otherwise.
+S_vector NormalizedXzy(const S_vector &v)
+{
+    const float sq = (v.x * v.x + v.z * v.z) + v.y * v.y;
+    if (std::fabs(sq - 1.0f) < 1e-8f)
+        return v;
+    if (sq >= 1e-8f) {
+        const float k = 1.0f / std::sqrt(sq);
+        return S_vector(v.x * k, v.y * k, v.z * k);
+    }
+    S_vector out(v);
+    if (v.x != 0.0f)
+        out.x = v.x >= 0.0f ? 1.0f : -1.0f;
+    else if (v.z != 0.0f)
+        out.z = v.z >= 0.0f ? 1.0f : -1.0f;
+    else
+        out.y = v.y >= 0.0f ? 1.0f : -1.0f;
+    return out;
+}
 
 C_TeamBase *GetPlayerTeamForMode()
 {
@@ -98,9 +120,13 @@ bool C_HumanScript::ExecuteCommand(const S_ScriptCommand &cmd)
     auto boolArg = [&](int i) { return NumberVar(cmd.Arg(i)) != 0; };
     auto frame = [&](int i) { return FrameVar(cmd.Arg(i)); };
     auto string = [&](int i) -> const char * { return StringVar(cmd.Arg(i)); };
-    // Starts an activity and waits for it.
-    auto activity = [&](int id, I3D_frame *target = nullptr) {
-        m_delay = target ? human->PlayActivity(id, target) : human->PlayActivity(id);
+    // Starts an activity and waits for it; activityAt with its frame (null too: the original passes it on).
+    auto activity = [&](int id) {
+        m_delay = human->PlayActivity(id);
+        return true;
+    };
+    auto activityAt = [&](int id, I3D_frame *target) {
+        m_delay = human->PlayActivity(id, target);
         return true;
     };
 
@@ -117,7 +143,7 @@ bool C_HumanScript::ExecuteCommand(const S_ScriptCommand &cmd)
     case OP_HUMAN_AttackMove: {
         const C_str name = StringVar(cmd.Arg(0));
         const int checkpoint = human->FindCheckpoint(name);
-        if (checkpoint == -1) {
+        if (checkpoint == CHECKPOINT_NONE) {
             // "(MO) E_IT_MOVE : checkpoint '%s'not found!!!" (not reported)
             Advance();
         } else if (cmd.opcode == OP_HUMAN_Move) {
@@ -201,7 +227,7 @@ bool C_HumanScript::ExecuteCommand(const S_ScriptCommand &cmd)
     }
 
     case OP_HUMAN_Investigate:
-        return activity(ACTIVITY_INVESTIGATE, frame(0));
+        return activityAt(ACTIVITY_INVESTIGATE, frame(0));
 
     case OP_HUMAN_SetIgnoreCircumventionFlag:
         if (human->GetControllerType() == HUMAN_CONTROLLER_AI)
@@ -233,11 +259,11 @@ bool C_HumanScript::ExecuteCommand(const S_ScriptCommand &cmd)
         S_vector goal;
         if (cmd.opcode == OP_HUMAN_MoveToFrame) {
             // `distance` metres from the frame, on the human's side.
-            const S_vector dir = (human->GetFrame()->GetWorldPos() - target->GetWorldPos()).Normalized();
+            const S_vector dir = NormalizedXzy(human->GetFrame()->GetWorldPos() - target->GetWorldPos());
             goal = target->GetWorldPos() + dir * distance;
         } else {
             // `distance` metres further away from the frame.
-            const S_vector dir = (human->GetFrame()->GetWorldPos() - target->GetWorldPos()).Normalized();
+            const S_vector dir = NormalizedXzy(human->GetFrame()->GetWorldPos() - target->GetWorldPos());
             goal = human->GetPosition() + dir * distance;
         }
         const int checkpoint = GetGame()->GetCheckpoints()->FindNearest(goal, 5.0f, -1.0f);
@@ -427,15 +453,15 @@ bool C_HumanScript::ExecuteCommand(const S_ScriptCommand &cmd)
     case OP_HUMAN_ACTIVITY_Telegraph:
         return activity(boolArg(0) ? ACTIVITY_TELEGRAPH : ACTIVITY_STOP);
     case OP_HUMAN_ACTIVITY_Phone:
-        return boolArg(0) ? activity(ACTIVITY_PHONE, frame(1)) : activity(ACTIVITY_STOP);
+        return boolArg(0) ? activityAt(ACTIVITY_PHONE, frame(1)) : activity(ACTIVITY_STOP);
     case OP_HUMAN_ACTIVITY_Read:
-        return boolArg(0) ? activity(ACTIVITY_READ, frame(1)) : activity(ACTIVITY_STOP);
+        return boolArg(0) ? activityAt(ACTIVITY_READ, frame(1)) : activity(ACTIVITY_STOP);
     case OP_HUMAN_ACTIVITY_DrinkBottle:
-        return frame(0) ? activity(ACTIVITY_DRINK_BOTTLE_AT, frame(0)) : activity(ACTIVITY_DRINK_BOTTLE);
+        return frame(0) ? activityAt(ACTIVITY_DRINK_BOTTLE_AT, frame(0)) : activity(ACTIVITY_DRINK_BOTTLE);
     case OP_HUMAN_ACTIVITY_Eat:
         if (!boolArg(0))
             return activity(ACTIVITY_STOP);
-        return activity(ACTIVITY_EAT, frame(1));
+        return frame(1) ? activityAt(ACTIVITY_EAT, frame(1)) : activity(ACTIVITY_EAT);
     case OP_HUMAN_ACTIVITY_Turk:
         human->ActivityTurk();
         break;
@@ -447,7 +473,7 @@ bool C_HumanScript::ExecuteCommand(const S_ScriptCommand &cmd)
         human->Sit(frame(0));
         break;
     case OP_HUMAN_ACTIVITY_Point:
-        return activity(ACTIVITY_POINT, frame(0));
+        return activityAt(ACTIVITY_POINT, frame(0));
     case OP_HUMAN_ACTIVITY_BinocularsEnd:
         m_delay = 0;
         human->PlayActivity(ACTIVITY_BINOCULARS_END);
