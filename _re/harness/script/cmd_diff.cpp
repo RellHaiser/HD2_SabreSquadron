@@ -12,6 +12,8 @@
 // Script part 4: half the cases run an actor script's command instead (C_HumanScript::ExecuteCommand, the original's
 // 0x00421c00, on one of the world's humans with its controller, work and vehicle; C_MeleeTrackerScript's, 0x00421970, on a
 // tracker with its controller); the constructors are compared once.
+// Script part 5: one case in 12 makes a script on a world frame (C_Script's constructor 0x0041dcb0 and destructor
+// 0x0041df20 with the frame's data) and runs nothing, Stop, SendSignal or NotifyFrameHit on it.
 // Env: HD2_CMD_CASES (cases, default 200,000; HD2_CMD_QUICK: 30,000), HD2_CMD_ONLY (one opcode's name), HD2_CMD_ACTORS
 // (the actor scripts' cases only), HD2_CMD_SHOW (every case's logs printed), HD2_CMD_DUMP (a failing case's logs),
 // HD2_CMD_SEED; sc_diff's HD2_SC_DATA / HD2_UNPACKED, HD2_SC_FIRST_CHANCE.
@@ -99,6 +101,7 @@ uint32_t g_gameRole = GAME_ROLE_LOCAL;
 // The word behind the port's g_playMode reference (its link stub).
 extern uint8_t **g_playModeStorage asm("_g_playMode");
 bool g_scriptModuleRestarting;
+extern const void *const g_noPhysicsObject;             // (sc_globals.cpp: the port's "no physics object")
 
 namespace H {
 
@@ -169,6 +172,7 @@ std::string OpName(int opcode)
 
 // ---- the sides, the fake answers ----
 int g_side;                                             // 0 the port, 1 the original
+void *g_frameScript[2];                                 // (part 5: each side's script of a frame case: "this" in the logs)
 const char *const SIDE_NAMES[2] = {"port", "original"};
 uint32_t g_fakeBase;
 int g_fakeCount;
@@ -1017,6 +1021,14 @@ uint8_t *FindChild(I3D_frame *parent, const char *name)
 void SetUpAnswers()
 {
     auto ptr = [](const void *p) { return reinterpret_cast<uint32_t>(p); };
+    // Part 5: SetFrameData attaches the data as the game's does (a copy, or over the frame's own).
+    g_answers["SetFrameData"] = [](const std::vector<uint32_t> &a) {
+        I3D_frame *f = reinterpret_cast<I3D_frame *>(a[0]);
+        if (!f->m_data)
+            f->m_data = reinterpret_cast<S_FrameData *>(Block(0x20));
+        std::memcpy(f->m_data, reinterpret_cast<const void *>(a[1]), 0x20);
+        return 0u;
+    };
     g_answers["I3D_frame::Release"] = [](const std::vector<uint32_t> &a) {
         I3D_frame *f = reinterpret_cast<I3D_frame *>(a[0]);
         return uint32_t(--f->m_refCount);
@@ -1310,6 +1322,17 @@ uint64_t Call(uint32_t index, uint32_t *regs)
             line += words(r, 0, 0x10) + F(" %08x", *reinterpret_cast<const uint32_t *>(r + 0x10)) + ptr(r, 0x14) +
                     ptr(r, 0x18) + F(" %d %d", *reinterpret_cast<const int *>(r + 0x1C), *reinterpret_cast<const int *>(r + 0x20)) +
                     ptr(r, 0x24) + words(r, 0x28, 0x30) + F(" %d", *reinterpret_cast<const int *>(r + 0x30)) + words(r, 0x34, 0x40);
+        } else if (key == "SetFrameData" && d.words[1]) {   // part 5: the script's frame data
+            const S_FrameData *fd = reinterpret_cast<const S_FrameData *>(d.words[1]);
+            const uint32_t none = g_side ? *OriginalAt<const uint32_t *>(0x00832cdc)
+                                         : reinterpret_cast<uint32_t>(g_noPhysicsObject);
+            const uint32_t physics = reinterpret_cast<uint32_t>(fd->physicsObject);
+            // (+0x1C not: C_Script's constructor (0x0041dcb0) leaves it as its stack had it; the port's is 0.)
+            line += F(" {actor %s script %s physics %s %08x %08x %s %s}", NameOf(reinterpret_cast<uint32_t>(fd->actor)).c_str(),
+                      fd->script == g_frameScript[g_side] ? "this" : fd->script ? "other" : "null",
+                      physics == none ? "none" : NameOf(physics).c_str(), fd->unknown08, fd->unknown0C,
+                      NameOf(reinterpret_cast<uint32_t>(fd->versionMaster)).c_str(),
+                      NameOf(reinterpret_cast<uint32_t>(fd->versionKeeper)).c_str());
         } else if (key == "C_Debris::Setup" && d.words[1]) // velocity, weight, friction, callback, the moving flag
             // (Setup reads +0x20 on; the original leaves the first two vectors, the velocity's w, the context and +0x41
             // as the stack had them.)
@@ -1472,6 +1495,12 @@ struct S_Case {
     uint32_t actorPick = 0;                             // (which human: the world's, one in 8 none)
     bool actorFlag = false;                             // (the actor scripts' delayed suspend under way)
     int delay = 0;                                      // (the script's delay left: some commands clear it)
+    // Part 5 (kind 3): a script made on a world frame (myFrame), an event, the script destroyed.
+    int frameEvent = 0;                                 // 0 nothing, 1 Stop, 2 SendSignal, 3 NotifyFrameHit
+    int dataMode = 0;                                   // the frame's data: 0 the world's, 1 none, 2 one without an actor
+    bool global = false;
+    bool running = false;
+    int handlerSignal = -1, handlerLabel = 0, signal = 0, onHit = -1;
 };
 int RandomNumber()
 {
@@ -1498,6 +1527,22 @@ S_Case RandomCase()
 {
     S_Case c;
     c.opcode = g_opcodes[I(0, int(g_opcodes.size()) - 1)];
+    // Part 5: one case in 12 makes a script on a frame (the humans' and the models' often).
+    if (!g_actorsOnly && !g_functionsOnly && P(1.0 / 12)) {
+        c.kind = 3;
+        c.frameEvent = I(0, 3);
+        c.myFrame = P(0.08) ? -1 : P(0.5) ? I(0, WORLD_FRAMES - 1) : P(0.5) ? 2 : 10;
+        c.dataMode = P(0.6) ? 0 : I(1, 2);
+        c.global = P(0.1);
+        c.running = P(0.5);
+        c.ip = I(0, 30);
+        c.onHit = P(0.5) ? -1 : I(0, 30);
+        c.signal = P(0.8) ? I(0, 3) : I(-2, 40);
+        c.handlerSignal = P(0.25) ? -1 : P(0.8) ? c.signal : I(0, 3);
+        c.handlerLabel = I(0, 30);
+        c.actorPick = U32();
+        return c;
+    }
     // Part 4: half the cases (HD2_CMD_ACTORS: all) run an actor script's command, mostly one of its own: a human's
     // (HUMAN_*, the frames' AI modes) or a melee tracker's (MELEE_TRACKER_*); the rest fall to the base or are skipped.
     const bool actor = !g_functionsOnly && (!g_humanOpcodes.empty() || !g_trackerOpcodes.empty()) && (g_actorsOnly || P(0.5));
@@ -1877,9 +1922,143 @@ void CompareConstructors()
 int g_cases, g_steps;
 std::map<int, int> g_opcodeCases;
 bool g_show;
+
+// ---- part 5: a script made on a frame (C_Script's constructor and destructor with a frame, Stop and SendSignal with
+// the frame's actor, NotifyFrameHit) ----
+// The world's frame as it was built (an actor's frames have data), or without its data, or with data and no actor;
+// a human there gets its controller type from the world (GetControllerType's answer). Compared: the frame's data after
+// the constructor, the event and the destructor (its script: this one, another, none), the script's state, the frames'
+// references, and every call (SetFrameData's data logged by its fields).
+const char *const FRAME_EVENTS[] = {"nothing", "Stop", "SendSignal", "NotifyFrameHit"};
+int g_frameCases, g_frameEvents[4];
+std::string DataText(const uint8_t *frame)
+{
+    if (!frame)
+        return "no frame";
+    const S_FrameData *d = AsFrame(const_cast<uint8_t *>(frame))->m_data;
+    if (!d)
+        return "no data";
+    return F("data actor %s script %s", NameOf(reinterpret_cast<uint32_t>(d->actor)).c_str(),
+             d->script == g_frameScript[g_side] ? "this" : d->script ? "other" : "null");
+}
+void RunFrameScriptCase(const S_Case &c)
+{
+    using T_ScriptCtor = void *(TC *)(void *, void *, bool);
+    using T_AddHandler = bool(TC *)(void *, int, int);
+    using T_ScriptInt = void(TC *)(void *, int);
+    using T_NotifyHit = void(__stdcall *)(void *);
+    ++g_frameCases;
+    ++g_frameEvents[c.frameEvent];
+    g_current = F("case %d: a script on a frame, %s", g_cases, FRAME_EVENTS[c.frameEvent]);
+    const uint32_t worldSeed = U32(), fakeBase = U32(), randSeed = U32();
+    S_Result r;
+    for (int side = 1; side >= 0; --side) {
+        g_side = side;
+        BuildWorld(side, worldSeed);
+        uint8_t *frame = c.myFrame >= 0 ? W().frames[size_t(c.myFrame)].bytes : nullptr;
+        if (frame && c.dataMode == 1)
+            AsFrame(frame)->m_data = nullptr;
+        else if (frame && c.dataMode == 2 && !AsFrame(frame)->m_data)
+            AsFrame(frame)->m_data = reinterpret_cast<S_FrameData *>(Block(0x20));
+        g_fakeBase = fakeBase;
+        g_fakeCount = 0;
+        g_log[side].clear();
+        std::srand(randSeed);
+        std::vector<std::string> &out = side ? r.orig : r.port;
+        g_case = SIDE_NAMES[side];
+        uint8_t *block = nullptr;
+        C_Script *script = nullptr;
+        if (side) {
+            block = static_cast<uint8_t *>(std::calloc(1, 0x200));
+            g_frameScript[side] = block;
+            OriginalAt<T_ScriptCtor>(0x0041dcb0)(block, frame, c.global);
+        } else {
+            script = static_cast<C_Script *>(::operator new(sizeof(C_Script)));
+            g_frameScript[side] = script;
+            new (script) C_Script(AsFrame(frame), c.global);
+        }
+        out.push_back("made: " + DataText(frame));
+        // Its state for the event: running or not at an instruction, the OnHit handler, a signal's handler.
+        if (side) {
+            block[0x104] = c.running;
+            std::memcpy(block + 0xD8, &c.ip, 4);
+            std::memcpy(block + 0xE4, &c.onHit, 4);
+            if (c.handlerSignal >= 0)
+                OriginalAt<T_AddHandler>(0x00415fe0)(block, c.handlerSignal, c.handlerLabel);
+        } else {
+            script->m_running = c.running;
+            script->m_ip = c.ip;
+            script->m_onHit = c.onHit;
+            if (c.handlerSignal >= 0)
+                script->AddSignalHandler(c.handlerSignal, c.handlerLabel);
+        }
+        switch (c.frameEvent) {
+        case 1:
+            if (side)
+                OriginalAt<T_Void>(0x00416db0)(block);
+            else
+                script->Stop();
+            break;
+        case 2:
+            if (side)
+                OriginalAt<T_ScriptInt>(0x00416610)(block, c.signal);
+            else
+                script->SendSignal(c.signal);
+            break;
+        case 3:
+            if (side)
+                OriginalAt<T_NotifyHit>(0x00427700)(frame);
+            else
+                NotifyFrameHit(AsFrame(frame));
+            break;
+        default:
+            break;
+        }
+        if (side)
+            out.push_back(F("script finished %d ip %d running %d delay %d signals %08x", int(block[0xD4]),
+                            At<int>(block, 0xD8), int(block[0x104]), At<int>(block, 0x18), At<uint32_t>(block, 0x10)));
+        else
+            out.push_back(F("script finished %d ip %d running %d delay %d signals %08x", int(script->m_finished),
+                            script->m_ip, int(script->m_running), script->m_delay, script->m_pendingSignals));
+        out.push_back("event: " + DataText(frame));
+        if (side) {
+            OriginalAt<T_Void>(0x0041df20)(block);
+            std::free(block);
+        } else {
+            script->~C_Script();
+            ::operator delete(script);
+        }
+        out.push_back("destroyed: " + DataText(frame));
+        g_case = "";
+        for (const std::string &s : FrameStates())
+            out.push_back(s);
+        for (const std::string &s : g_log[side])
+            out.push_back("call " + s);
+    }
+    if (g_show) {
+        std::printf("%s\n", g_current.c_str());
+        for (const std::string &s : r.port)
+            std::printf("  %s\n", s.c_str());
+    }
+    if (!Compare(g_current + F(" (frame %d, data %d, global %d)", c.myFrame, c.dataMode, int(c.global)), r) &&
+        std::getenv("HD2_CMD_DUMP")) {
+        for (int side = 1; side >= 0; --side) {
+            std::printf("  -- %s\n", SIDE_NAMES[side]);
+            for (const std::string &s : side ? r.orig : r.port)
+                std::printf("    %s\n", s.c_str());
+        }
+    }
+    FreeWorld(0);
+    FreeWorld(1);
+}
+
 void RunCase(const S_Case &c)
 {
     ++g_cases;
+    if (c.kind == 3) {
+        RunFrameScriptCase(c);
+        return;
+    }
     if (c.function >= 0)
         ++g_functionCases[c.function];
     else
@@ -2049,5 +2228,7 @@ int main()
     std::printf("cmd_diff: %d cases over %d opcodes and %d functions (%d inputs the original crashes on changed, %d it "
                 "misbehaves on), %d calls logged, %d checks, %d failures\n", g_cases, int(g_opcodeCases.size()),
                 int(g_functionCases.size()), g_originalCrashes, g_originalWeaknesses, g_calls[0], checks, failures);
+    std::printf("cmd_diff: part 5: %d scripts made on a frame (events: nothing %d, Stop %d, SendSignal %d, NotifyFrameHit %d)\n",
+                g_frameCases, g_frameEvents[0], g_frameEvents[1], g_frameEvents[2], g_frameEvents[3]);
     return failures != 0;
 }

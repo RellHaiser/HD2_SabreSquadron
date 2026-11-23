@@ -118,9 +118,17 @@ bool C_chunk::ReadString(char *buffer, int bufferSize)
         size = bufferSize - 1;
     if (size < 0)
         size = 0;
-    const bool ok = Read(buffer, size);
-    buffer[ok ? size : 0] = '\0';
-    return ok;
+    if (!m_open || m_writing) {
+        buffer[0] = '\0';
+        return false;
+    }
+    // A file cut short inside the chunk: the original (0x00415d00) keeps the bytes it got (its buffer is not
+    // terminated past them; here the string ends there).
+    int got = dtaRead(m_handle, buffer, size);
+    if (got < 0)
+        got = 0;
+    buffer[got] = '\0';
+    return got == size;
 }
 
 int C_chunk::ReadSizedString(char *buffer, int bufferSize)

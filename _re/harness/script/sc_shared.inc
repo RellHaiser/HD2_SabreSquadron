@@ -128,6 +128,7 @@ bool FileText(const std::string &name, std::string &out)
 struct S_Open {
     std::string text;
     size_t at = 0;
+    std::string writeKey;                               // (a file opened for writing: kept in g_overrides when closed)
 };
 std::map<int, S_Open> g_open;
 int g_nextHandle = 1;
@@ -155,12 +156,51 @@ int FileRead(int h, void *data, int size)
 bool FileClose(int h)
 {
     g_opened.push_back("(close)");
+    auto it = g_open.find(h);
+    if (it != g_open.end() && !it->second.writeKey.empty())
+        g_overrides[it->second.writeKey] = it->second.text;
     return g_open.erase(h) != 0;
+}
+// Writing (vm_diff's saved games): an empty file in memory, kept under its name when closed.
+int FileOpenWrite(const char *name)
+{
+    g_opened.push_back(std::string("(write) ") + name);
+    S_Open o;
+    o.writeKey = Lower(name);
+    g_open[g_nextHandle] = o;
+    return g_nextHandle++;
+}
+int FileSeek(int h, int offset, int origin)
+{
+    auto it = g_open.find(h);
+    if (it == g_open.end())
+        return -1;
+    S_Open &o = it->second;
+    const long long base = origin == 0 ? 0 : origin == 1 ? (long long)o.at : (long long)o.text.size();
+    if (base + offset < 0)
+        return -1;
+    o.at = size_t(base + offset);
+    return int(o.at);
+}
+int FileWrite(int h, const void *data, int size)
+{
+    auto it = g_open.find(h);
+    if (it == g_open.end() || it->second.writeKey.empty())
+        return -1;
+    S_Open &o = it->second;
+    if (o.at + size_t(size) > o.text.size())
+        o.text.resize(o.at + size_t(size));
+    std::memcpy(&o.text[o.at], data, size_t(size));
+    o.at += size_t(size);
+    return size;
 }
 
 int __stdcall O_dtaOpen(const char *name, int) { return FileOpen(name); }
 int __stdcall O_dtaRead(int h, void *data, int size) { return FileRead(h, data, size); }
 int __stdcall O_dtaClose(int h) { return FileClose(h); }
+int __stdcall O_dtaOpenWrite(const char *name, int) { return FileOpenWrite(name); }
+int __stdcall O_dtaSeek(int h, int offset, int origin) { return FileSeek(h, offset, origin); }
+int __stdcall O_dtaWrite(int h, const void *data, int size) { return FileWrite(h, data, size); }
 // The original's frees are held until its script is dumped: its GroupRange deletes a node the new group still points to
 // (a use after free), and a block reused by a later allocation would make the dump depend on the heap. Held, the node
 // stays as it was deleted.

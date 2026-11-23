@@ -9,6 +9,11 @@
 // sides draw in the same order); the script-level ones run for real. Programs: a few crafted ones (ticks only), random
 // programs from a grammar, every game script. The game the interpreter reaches is link stubs (vm_stubs.s). MinGW;
 // build_vm.bat; runs vm_diff.exe ("vm_diff: N checks, 0 failures").
+// Script part 5: three more actions: FRM_SetAnimationDelayed's wait set up (a fake animated model; the ticks run it),
+// SaveGame (each side's chunk file in memory, compared byte for byte) and LoadGame (the same bytes on both sides: the
+// original's last save or a file made for the script, its chunks in any order, broken or short); each side's fake
+// frames, scene and items (C_Item::GetFrame faked alike), every call on them compared; a crafted program with a command
+// made null; the fakes compared again after the scripts are freed.
 // Env: as sc_diff (HD2_SC_DATA / HD2_UNPACKED, HD2_SC_ONLY, HD2_SC_DUMP, HD2_SC_SEED, HD2_SC_FIRST_CHANCE), and
 // HD2_VM_QUICK (fewer programs and steps), HD2_VM_NO_CORPUS (the random programs alone), HD2_VM_STEPS (steps per
 // program), HD2_VM_PROGRAMS (random programs), HD2_VM_SHOW (a random program's number: its text printed and its steps),
@@ -16,8 +21,14 @@
 #define HARNESS_NAME "vm_diff"
 #include "sc_shared.inc"
 
+#include "common/chunk.h"
+#define private public                                  // (part 5: the items module's lists set directly)
+#include "game/items_module.h"
+#undef private
 #include "game/world.h"
 #include "script/script_module.h"
+
+#include <utility>
 
 namespace H {
 
@@ -117,6 +128,9 @@ int TC O_CallFunction(void *self, int function, const int *types, const int *arg
     return FakeFunction();
 }
 int __cdecl O_Rand() { return std::rand(); }
+// Part 5: the script's kind on both sides (the original's vtable +4; the port's override).
+int g_scriptKind = SCRIPT_KIND_GENERIC;
+int TC O_GetKind(void *) { return g_scriptKind; }
 
 }  // namespace H
 
@@ -124,6 +138,7 @@ int __cdecl O_Rand() { return std::rand(); }
 class C_TestScript : public C_Script {
 public:
     C_TestScript() : C_Script(nullptr, true) {}
+    int GetKind() const override { return H::g_scriptKind; }
     bool ExecuteCommand(const S_ScriptCommand &cmd) override
     {
         if (H::RealCommand(cmd.opcode)) {
@@ -152,6 +167,10 @@ int __attribute__((thiscall)) __wrap__ZN8C_Script12CallFunctionEiPKiS1_(C_Script
     ++H::g_fakeFunctions;
     return H::FakeFunction();
 }
+// Part 5: the port's side of the files written (sc_shared.inc's, as the original's).
+int RW_DATA_CALL dtaOpenWrite(const char *name, int) { return H::FileOpenWrite(name); }
+int RW_DATA_CALL dtaSeek(int h, int offset, int origin) { return H::FileSeek(h, offset, origin); }
+int RW_DATA_CALL dtaWrite(int h, const void *data, int size) { return H::FileWrite(h, data, size); }
 // The link stubs (vm_stubs.s) report a call to anything else and end the test.
 void VmUnexpected(const char *what)
 {
@@ -215,6 +234,220 @@ LONG WINAPI OnDivide(EXCEPTION_POINTERS *e)
     return EXCEPTION_CONTINUE_EXECUTION;
 }
 
+// ---- part 5: the fake frames (the animated model FRM_SetAnimationDelayed waits on, the frames a load finds) ----
+// One set per side, alike: a frame's block (its vtable at 0, its reference count +0xE4, its name +0xE8; its data
+// null) and the harness's own words past it: the animation's time +0x100 and end +0x104, its animation set +0x108 (a
+// block whose +4 points back to the frame). Every call is logged on its side and compared.
+// (The first SCENE_FRAMES are the scene's (FindFrame's); the rest are items' frames, found only through the items.)
+constexpr int FAKE_FRAMES = 10, SCENE_FRAMES = 6;
+const char *const FAKE_FRAME_NAMES[FAKE_FRAMES] = {"door_1", "Box.lid", "anim_a", "anim_b", "lift", "LIFT",
+                                                   "item_a", "item_b", "Item_A", "lift"};
+uint8_t *g_fakeFrames[2][FAKE_FRAMES];                  // [0] the original's, [1] the port's
+uint8_t *g_fakeScene[2];
+std::string g_frameLog[2];
+int FakeSide() { return std::strcmp(g_case, "original") == 0 ? 0 : 1; }
+int &AnimTime(uint8_t *f) { return *reinterpret_cast<int *>(f + 0x100); }
+int &AnimEnd(uint8_t *f) { return *reinterpret_cast<int *>(f + 0x104); }
+int16_t &RefCount(uint8_t *f) { return *reinterpret_cast<int16_t *>(f + 0xE4); }
+const char *FrameName(const void *f) { return *reinterpret_cast<const char *const *>(static_cast<const uint8_t *>(f) + 0xE8); }
+std::string FakeFrameName(uint32_t p)
+{
+    if (!p)
+        return "null";
+    for (int s = 0; s < 2; ++s)
+        for (uint8_t *f : g_fakeFrames[s])
+            if (reinterpret_cast<uint32_t>(f) == p)
+                return FrameName(f);
+    return "?";
+}
+uint32_t __stdcall FF_Release(uint8_t *f)
+{
+    g_frameLog[FakeSide()] += F(" release %s", FrameName(f));
+    return uint32_t(--RefCount(f));
+}
+void __stdcall FF_Tick(uint8_t *f, int dt)
+{
+    g_frameLog[FakeSide()] += F(" tick %s %d", FrameName(f), dt);
+    AnimTime(f) += dt;
+}
+void *__stdcall FF_GetAnimation(uint8_t *f, int stage)
+{
+    g_frameLog[FakeSide()] += F(" animation %s %d", FrameName(f), stage);
+    return *reinterpret_cast<void **>(f + 0x108);
+}
+int __stdcall FF_GetAnimTime(uint8_t *f, int stage)
+{
+    g_frameLog[FakeSide()] += F(" time %s %d", FrameName(f), stage);
+    return AnimTime(f);
+}
+int __stdcall FA_GetEndTime(uint8_t *a)
+{
+    uint8_t *f = *reinterpret_cast<uint8_t **>(a + 4);
+    g_frameLog[FakeSide()] += F(" end %s", FrameName(f));
+    return AnimEnd(f);
+}
+void *__stdcall FS_FindFrame(uint8_t *, const char *name, uint32_t mask)
+{
+    const int side = FakeSide();
+    g_frameLog[side] += F(" find \"%s\" %x", name, mask);
+    for (int k = 0; k < SCENE_FRAMES; ++k)
+        if (std::strcmp(FrameName(g_fakeFrames[side][k]), name) == 0)
+            return g_fakeFrames[side][k];
+    return nullptr;
+}
+// The items (part 5: LoadGame's frames not in the scene): a fake item is a block whose +4 holds its frame (one of the
+// items' fake frames, or none); C_Item::GetFrame on both sides answers it, logged. Each side's items module: the
+// original's placements (0x0098b808, count 0x0098b810; 0x30 bytes each, the item first) and its respawning items (the
+// MSVC 6 vector at 0x0098b818); the port's g_itemsModule (sc_globals.cpp's raw storage, zeros: its members set).
+static_assert(sizeof(C_ItemsModule) <= 0x1000, "sc_globals.cpp's g_itemsModule storage");
+uint8_t *g_fakeItems[2][4];
+std::string ItemName(const uint8_t *item)
+{
+    for (int s = 0; s < 2; ++s)
+        for (int k = 0; k < 4; ++k)
+            if (g_fakeItems[s][k] == item)
+                return F("item %d", k);
+    return "?";
+}
+I3D_frame *FakeItemFrame(const uint8_t *item, int index)
+{
+    g_frameLog[FakeSide()] += F(" item frame %s %d", ItemName(item).c_str(), index);
+    return *reinterpret_cast<I3D_frame *const *>(item + 4);
+}
+I3D_frame *TC O_ItemGetFrame(uint8_t *item, int index) { return FakeItemFrame(item, index); }
+void SetUpFakeItems()
+{
+    for (int s = 0; s < 2; ++s)
+        for (int k = 0; k < 4; ++k) {
+            g_fakeItems[s][k] = static_cast<uint8_t *>(_aligned_malloc(0x20, 16));
+            std::memset(g_fakeItems[s][k], 0, 0x20);
+        }
+    RedirectOriginal(0x007d3f00, reinterpret_cast<const void *>(&O_ItemGetFrame));
+}
+// Before a load, sometimes: placements (some without an item, some items without a frame) and respawning items, alike.
+std::vector<uint8_t *> g_itemBlocks;
+int g_itemLoads;
+void SetItems(bool on)
+{
+    for (uint8_t *b : g_itemBlocks)
+        _aligned_free(b);
+    g_itemBlocks.clear();
+    int placements = 0, respawning = 0;
+    int placementItems[4] = {}, respawningItems[4] = {};
+    if (on) {
+        ++g_itemLoads;
+        // Each item its frame (an item's frame, a scene frame's name twin, or none), the same on both sides.
+        for (int k = 0; k < 4; ++k) {
+            const int f = P(0.15) ? -1 : I(SCENE_FRAMES, FAKE_FRAMES - 1);
+            for (int s = 0; s < 2; ++s) {
+                uint8_t *frame = f < 0 ? nullptr : g_fakeFrames[s][f];
+                std::memcpy(g_fakeItems[s][k] + 4, &frame, 4);
+            }
+        }
+        placements = I(0, 4);
+        for (int i = 0; i < placements; ++i)
+            placementItems[i] = P(0.2) ? -1 : I(0, 3);
+        respawning = I(0, 4);
+        for (int i = 0; i < respawning; ++i)
+            respawningItems[i] = I(0, 3);
+    }
+    for (int s = 0; s < 2; ++s) {
+        uint8_t *list = nullptr, *items = nullptr;
+        if (placements) {
+            list = static_cast<uint8_t *>(_aligned_malloc(0x30 * placements, 16));
+            std::memset(list, 0, size_t(0x30 * placements));
+            g_itemBlocks.push_back(list);
+            for (int i = 0; i < placements; ++i) {
+                uint8_t *item = placementItems[i] < 0 ? nullptr : g_fakeItems[s][placementItems[i]];
+                std::memcpy(list + 0x30 * i, &item, 4);
+            }
+        }
+        if (respawning) {
+            items = static_cast<uint8_t *>(_aligned_malloc(4 * respawning, 16));
+            g_itemBlocks.push_back(items);
+            for (int i = 0; i < respawning; ++i) {
+                uint8_t *item = g_fakeItems[s][respawningItems[i]];
+                std::memcpy(items + 4 * i, &item, 4);
+            }
+        }
+        uint8_t *const end = items ? items + 4 * respawning : nullptr;
+        if (s == 0) {
+            *OriginalAt<uint8_t **>(0x0098b808) = list;
+            *OriginalAt<int *>(0x0098b810) = placements;
+            *OriginalAt<uint8_t **>(0x0098b81c) = items;
+            *OriginalAt<uint8_t **>(0x0098b820) = end;
+            *OriginalAt<uint8_t **>(0x0098b824) = end;
+        } else {
+            g_itemsModule.m_placements = reinterpret_cast<S_ItemPlacement *>(list);
+            g_itemsModule.m_placementCount = placements;
+            g_itemsModule.m_respawningItems.assign(reinterpret_cast<C_Item **>(items),
+                                                   reinterpret_cast<C_Item **>(end));
+        }
+    }
+}
+// Any other slot ends the test (its arguments unknown).
+template <int N> void __stdcall FakeTrap()
+{
+    std::printf("vm_diff: a fake frame's slot 0x%02X called [%s]\n", N * 4, g_current.c_str());
+    std::exit(3);
+}
+template <int... N> void FillTraps(void **vt, std::integer_sequence<int, N...>)
+{
+    ((vt[N] = reinterpret_cast<void *>(&FakeTrap<N>)), ...);
+}
+void **FakeVtable()
+{
+    void **vt = new void *[0x40];
+    FillTraps(vt, std::make_integer_sequence<int, 0x40>());
+    return vt;
+}
+void SetUpFakeFrames()
+{
+    void **frameVt = FakeVtable(), **animVt = FakeVtable(), **sceneVt = FakeVtable();
+    frameVt[0x00 / 4] = reinterpret_cast<void *>(&FF_Release);
+    frameVt[0x20 / 4] = reinterpret_cast<void *>(&FF_Tick);
+    frameVt[0x88 / 4] = reinterpret_cast<void *>(&FF_GetAnimation);
+    frameVt[0xA0 / 4] = reinterpret_cast<void *>(&FF_GetAnimTime);
+    animVt[0x08 / 4] = reinterpret_cast<void *>(&FA_GetEndTime);
+    sceneVt[0x7C / 4] = reinterpret_cast<void *>(&FS_FindFrame);
+    for (int s = 0; s < 2; ++s) {
+        for (int k = 0; k < FAKE_FRAMES; ++k) {
+            uint8_t *f = static_cast<uint8_t *>(_aligned_malloc(0x200, 16));
+            std::memset(f, 0, 0x200);
+            *reinterpret_cast<void ***>(f) = frameVt;
+            *reinterpret_cast<const char **>(f + 0xE8) = FAKE_FRAME_NAMES[k];
+            uint8_t *a = static_cast<uint8_t *>(_aligned_malloc(0x20, 16));
+            std::memset(a, 0, 0x20);
+            *reinterpret_cast<void ***>(a) = animVt;
+            *reinterpret_cast<uint8_t **>(a + 4) = f;
+            *reinterpret_cast<uint8_t **>(f + 0x108) = a;
+            g_fakeFrames[s][k] = f;
+        }
+        g_fakeScene[s] = static_cast<uint8_t *>(_aligned_malloc(0x40, 16));
+        std::memset(g_fakeScene[s], 0, 0x40);
+        *reinterpret_cast<void ***>(g_fakeScene[s]) = sceneVt;
+    }
+    std::memcpy(g_origGame + 0x18, &g_fakeScene[0], 4);
+    reinterpret_cast<C_game *>(g_portGameBuf)->m_scene = reinterpret_cast<I3D_scene *>(g_fakeScene[1]);
+}
+void ResetFakeFrames()
+{
+    for (int s = 0; s < 2; ++s)
+        for (uint8_t *f : g_fakeFrames[s]) {
+            RefCount(f) = 1;
+            AnimTime(f) = 0;
+            AnimEnd(f) = 0;
+        }
+}
+// The fakes' state on one side, for the comparison.
+std::string FakeState(int side)
+{
+    std::string s = "fakes";
+    for (uint8_t *f : g_fakeFrames[side])
+        s += F(" %s %d %d %d", FrameName(f), int(RefCount(f)), AnimTime(f), AnimEnd(f));
+    return s;
+}
+
 // ---- the state compared ----
 std::vector<std::string> OrigState(const uint8_t *b)
 {
@@ -223,9 +456,15 @@ std::vector<std::string> OrigState(const uint8_t *b)
     for (uint32_t off = 4; off <= 0xA; ++off)
         flags += F(" %d", int(b[off]));
     out.push_back(flags);
-    out.push_back(F("signals %08x disabled %08x delay %d start %d global %d wait %d %d", At<uint32_t>(b, 0x10),
+    out.push_back(F("signals %08x disabled %08x delay %d start %d global %d wait %d %s", At<uint32_t>(b, 0x10),
                     At<uint32_t>(b, 0x14), At<int>(b, 0x18), At<int>(b, 0x1C), int(b[0x20]), At<int>(b, 0x24),
-                    int(At<uint32_t>(b, 0x28) != 0)));
+                    FakeFrameName(At<uint32_t>(b, 0x28)).c_str()));
+    std::string frames = "frame variables";
+    for (uint32_t q : OrigVec(b, 0x8C, 4))
+        frames += " " + FakeFrameName(At<uint32_t>(reinterpret_cast<void *>(q), 0));
+    out.push_back(frames);
+    out.push_back(FakeState(0));
+    out.push_back("frame calls" + g_frameLog[0]);
     std::string calls = "calls";
     for (uint32_t q : OrigVec(b, 0xBC, 4))
         calls += F(" %d", At<int>(reinterpret_cast<void *>(q), 0));
@@ -259,9 +498,15 @@ std::vector<std::string> PortState(const C_Script &t)
     out.push_back(F("flags %d %d %d %d %d %d %d", int(t.m_signalsDisabled), int(t.m_alarmsDisabled),
                     int(t.m_wheneversDisabled), int(t.m_hudHiddenByScript), int(t.m_hudPanelHiddenByScript),
                     int(t.m_inCutsceneHandler), int(t.m_unknown00A)));
-    out.push_back(F("signals %08x disabled %08x delay %d start %d global %d wait %d %d", t.m_pendingSignals,
+    out.push_back(F("signals %08x disabled %08x delay %d start %d global %d wait %d %s", t.m_pendingSignals,
                     t.m_disabledSignals, t.m_delay, t.m_startPoint, int(t.m_global), t.m_waitAnimLabel,
-                    int(t.m_waitAnimModel != nullptr)));
+                    FakeFrameName(reinterpret_cast<uint32_t>(t.m_waitAnimModel)).c_str()));
+    std::string frames = "frame variables";
+    for (const I3D_frame *f : t.m_frames)
+        frames += " " + FakeFrameName(reinterpret_cast<uint32_t>(f));
+    out.push_back(frames);
+    out.push_back(FakeState(1));
+    out.push_back("frame calls" + g_frameLog[1]);
     std::string calls = "calls";
     for (int c : t.m_callStack)
         calls += F(" %d", c);
@@ -290,11 +535,12 @@ std::vector<std::string> PortState(const C_Script &t)
 // ---- the actions ----
 enum E_Action {
     A_TICK, A_SIGNAL, A_DEATH, A_USE, A_HIT, A_ALARM, A_ALARM_DONE, A_GLOBAL_ALARM, A_CUTSCENE, A_CUTSCENE_DONE,
-    A_ACTION_DONE, A_STOP, A_RESTART, A_EXIT, A_MISSION, A_RESTARTING, A_ROLE, A_COUNT
+    A_ACTION_DONE, A_STOP, A_RESTART, A_EXIT, A_MISSION, A_RESTARTING, A_ROLE, A_WAIT, A_SAVE, A_LOAD, A_COUNT
 };
 const char *const ACTION_NAMES[A_COUNT] = {"Tick", "SendSignal", "OnDeath", "OnUse", "OnHit", "OnAlarm", "OnAlarmDone",
                                            "OnGlobalAlarm", "OnCutscene", "OnCutsceneDone", "OnActionDone", "Stop",
-                                           "Restart", "OnExit", "mission", "restarting", "role"};
+                                           "Restart", "OnExit", "mission", "restarting", "role", "wait", "SaveGame",
+                                           "LoadGame"};
 int g_actionCounts[A_COUNT];
 struct S_Action {
     E_Action kind;
@@ -303,6 +549,11 @@ struct S_Action {
 bool g_ticksOnly;                                       // (the crafted programs: nothing interrupts them)
 S_Action RandomAction(int ip)
 {
+    // Part 5: FRM_SetAnimationDelayed's wait set up (then ticks), the saved games.
+    if (!g_ticksOnly && P(0.12)) {
+        const int k = I(0, 9);
+        return {k < 5 ? A_WAIT : k < 7 ? A_SAVE : A_LOAD, 0};
+    }
     const int r = g_ticksOnly ? 0 : I(0, 99);
     if (r < 55) {
         static const int lengths[] = {0, 1, 16, 33, 100, 250, 499, 500, 501, 999, 1000, 1001, 1500, 3000};
@@ -336,6 +587,272 @@ void SetRestarting(bool on)
     *OriginalAt<uint8_t *>(O_RESTARTING) = on;
     g_scriptModuleRestarting = on;
 }
+
+// (The results of OnAlarmDone, OnCutscene and OnCutsceneDone are compared too, and part 5's saves and loads: recorded
+// here.)
+std::string g_origResult, g_portResult;
+
+// ---- part 5: FRM_SetAnimationDelayed's wait, set up alike on both sides ----
+// The label: mostly the instruction pointer's (the command waiting), sometimes another (the wait dropped) or none; the
+// model: an animated one mostly; its time and end on both sides' fakes.
+int g_waits, g_waitsAtIp;
+void SetWait(uint8_t *b, C_TestScript &s)
+{
+    const int ip = s.m_ip;
+    const int label = P(0.75) ? ip : P(0.3) ? -1 : I(0, ip + 2);
+    const int m = P(0.85) ? I(2, 3) : I(0, FAKE_FRAMES - 1);
+    static const int ends[] = {0, 1, 100, 500, 1000, 3000};
+    const int end = ends[I(0, 5)];
+    const int time = P(0.3) ? end + I(-2, 1) : I(0, std::max(end, 1));
+    for (int side = 0; side < 2; ++side) {
+        AnimTime(g_fakeFrames[side][m]) = time;
+        AnimEnd(g_fakeFrames[side][m]) = end;
+    }
+    const uint32_t model = label == -1 ? 0 : reinterpret_cast<uint32_t>(g_fakeFrames[0][m]);
+    std::memcpy(b + 0x24, &label, 4);
+    std::memcpy(b + 0x28, &model, 4);
+    s.m_waitAnimLabel = label;
+    s.m_waitAnimModel = label == -1 ? nullptr : reinterpret_cast<I3D_model *>(g_fakeFrames[1][m]);
+    ++g_waits;
+    if (label == ip)
+        ++g_waitsAtIp;
+}
+
+// ---- part 5: the saved games (C_Script::SaveGame / LoadGame) ----
+// A save: each side's chunk file in memory ("o_save.sav", "p_save.sav"), the script's chunk inside one of the test's
+// (as C_ScriptModule's own chunk holds it); compared: the result, the chunk's place after, the file's bytes. A load: the
+// same bytes on both sides (the original's last save, or a file made here: the script's chunks in any order, some
+// repeated, missing, unknown, short or long, broken), its chunk descended into first; compared: the result, the place
+// after, then the script's whole state (and the fakes' calls: FindFrame, Release).
+using T_ChunkOpen = bool(TC *)(void *, const char *, bool);
+using T_ChunkVoid = bool(TC *)(void *);
+using T_ChunkBegin = bool(TC *)(void *, uint16_t);
+using T_ChunkAscend = bool(TC *)(void *, uint32_t *);
+using T_ChunkDescend = bool(TC *)(void *, uint16_t *);
+using T_ScriptChunk = bool(TC *)(void *, void *);
+constexpr uint32_t O_SAVE_GAME = 0x004147d0, O_LOAD_GAME = 0x00414e30, O_CHUNK_OPEN = 0x00405620,
+                   O_CHUNK_CLOSE = 0x00405750, O_CHUNK_BEGIN = 0x00405820, O_CHUNK_ASCEND = 0x00405890,
+                   O_CHUNK_DESCEND = 0x00415c90;
+constexpr uint16_t SCRIPT_TEST_CHUNK = 0x4444;
+static_assert(sizeof(C_chunk) == 0x414, "C_chunk layout (the handle +4, the depth +0x410)");
+std::string g_lastSave;                                 // the original's last save (a later load reads it)
+int g_saves, g_loads, g_loadsOfSaves, g_madeFiles;
+std::string Hex(const std::string &s)
+{
+    std::string h;
+    for (unsigned char c : s)
+        h += F("%02x", c);
+    return h;
+}
+// (The same layout on both sides: open +0, the handle +4, the depth +0x410.)
+std::string ChunkPlace(const void *c)
+{
+    const bool open = At<uint8_t>(c, 0) != 0;
+    return F("open %d at %d depth %d", int(open), open ? FileSeek(At<int>(c, 4), 0, 1) : -1, At<int>(c, 0x410));
+}
+std::string SaveOrig(uint8_t *b)
+{
+    alignas(16) uint8_t c[0x500] = {};
+    OriginalAt<T_ChunkOpen>(O_CHUNK_OPEN)(c, "o_save.sav", true);
+    OriginalAt<T_ChunkBegin>(O_CHUNK_BEGIN)(c, SCRIPT_TEST_CHUNK);
+    const bool r = OriginalAt<T_ScriptChunk>(O_SAVE_GAME)(b, c);
+    const std::string place = ChunkPlace(c);
+    OriginalAt<T_ChunkAscend>(O_CHUNK_ASCEND)(c, nullptr);
+    OriginalAt<T_ChunkVoid>(O_CHUNK_CLOSE)(c);
+    g_lastSave = g_overrides["o_save.sav"];
+    return F("save %d %s file %s", int(r), place.c_str(), Hex(g_lastSave).c_str());
+}
+std::string SavePort(C_TestScript &s)
+{
+    C_chunk c;
+    c.Open("p_save.sav", true);
+    c.Begin(SCRIPT_TEST_CHUNK);
+    const bool r = s.SaveGame(c);
+    const std::string place = ChunkPlace(&c);
+    c.Ascend();
+    c.Close();
+    return F("save %d %s file %s", int(r), place.c_str(), Hex(g_overrides["p_save.sav"]).c_str());
+}
+std::string LoadOrig(uint8_t *b)
+{
+    alignas(16) uint8_t c[0x500] = {};
+    const bool open = OriginalAt<T_ChunkOpen>(O_CHUNK_OPEN)(c, "load.sav", false);
+    uint16_t id = 0;
+    const bool in = OriginalAt<T_ChunkDescend>(O_CHUNK_DESCEND)(c, &id);
+    const bool r = OriginalAt<T_ScriptChunk>(O_LOAD_GAME)(b, c);
+    const std::string place = ChunkPlace(c);
+    OriginalAt<T_ChunkAscend>(O_CHUNK_ASCEND)(c, nullptr);
+    OriginalAt<T_ChunkVoid>(O_CHUNK_CLOSE)(c);
+    return F("load open %d in %d %04x result %d %s", int(open), int(in), id, int(r), place.c_str());
+}
+std::string LoadPort(C_TestScript &s)
+{
+    C_chunk c;
+    const bool open = c.Open("load.sav", false);
+    uint16_t id = 0;
+    const bool in = c.Descend(id);
+    const bool r = s.LoadGame(c);
+    const std::string place = ChunkPlace(&c);
+    c.Ascend();
+    c.Close();
+    return F("load open %d in %d %04x result %d %s", int(open), int(in), id, int(r), place.c_str());
+}
+// Before a save, sometimes: frames put in empty frame variables on both sides (each side its own fakes, the same ones),
+// with a reference each (as FRM_* commands leave them).
+void AssignFrames(uint8_t *b, C_TestScript &s)
+{
+    const std::vector<uint32_t> slots = OrigVec(b, 0x8C, 4);
+    for (size_t i = 0; i < slots.size() && i < s.m_frames.size(); ++i) {
+        if (At<uint32_t>(reinterpret_cast<void *>(slots[i]), 0) || s.m_frames[i] || P(0.4))
+            continue;
+        const int k = I(0, FAKE_FRAMES - 1);
+        const uint32_t f = reinterpret_cast<uint32_t>(g_fakeFrames[0][k]);
+        std::memcpy(reinterpret_cast<void *>(slots[i]), &f, 4);
+        ++RefCount(g_fakeFrames[0][k]);
+        s.m_frames[i] = reinterpret_cast<I3D_frame *>(g_fakeFrames[1][k]);
+        ++RefCount(g_fakeFrames[1][k]);
+    }
+}
+// A load file made for the script (its numbers, frames and whenevers counted from the port's, alike).
+const char *RandomFrameName()
+{
+    static const char *const names[] = {"door_1", "Box.lid", "anim_a", "anim_b", "lift", "LIFT", "", "nosuch", "door_",
+                                        "item_a", "item_b", "Item_A", "item_", "x", "d"};
+    return names[I(0, 14)];
+}
+void WriteInt(C_chunk &c, int v) { c.Write(v); }
+void WriteRawHeader(C_chunk &c, uint16_t id, uint32_t size)
+{
+    c.Write(id);
+    c.Write(size);
+}
+std::string MakeLoadFile(const C_TestScript &s)
+{
+    ++g_madeFiles;
+    C_chunk c;
+    c.Open("make.sav", true);
+    c.Begin(SCRIPT_TEST_CHUNK);
+    static const uint16_t known[] = {1000, 0x4B0, 0x514, 0x578, 0x5DC, 0x640, 0x6A4, 0x708, 0x76C, 0x7D0,
+                                     0x834, 0x898, 0x8FC, 0x960, 0x9C4, 0xA28, 0xA8C, 0xAF0, 0xB54};
+    std::vector<uint16_t> ids;
+    for (uint16_t id : known)
+        if (P(0.8))
+            ids.push_back(id);
+    for (int n = P(0.3) ? I(1, 2) : 0; n > 0 && !ids.empty(); --n)
+        ids.push_back(ids[size_t(I(0, int(ids.size()) - 1))]);
+    if (P(0.05)) {
+        static const uint16_t unknown[] = {0, 999, 0x992, 0x4444, 0xFFFF};
+        ids.push_back(unknown[I(0, 4)]);
+    }
+    for (size_t i = ids.size(); i > 1; --i)
+        std::swap(ids[i - 1], ids[size_t(I(0, int(i) - 1))]);
+    const int count = s.CommandCount();
+    int variables = 0;
+    for (const S_ScriptNumber &n : s.m_numbers)
+        variables += !n.isConstant;
+    const auto jitter = [](int n) { return std::max(0, n + (P(0.1) ? I(-2, 1) : 0)); };
+    bool broken = false;
+    for (const uint16_t id : ids) {
+        c.Begin(id);
+        switch (id) {
+        case 1000:
+            WriteInt(c, P(0.9) ? I(0, std::max(count - 1, 0)) : P(0.5) ? -1 : count + I(0, 3));
+            break;
+        case 0x4B0:
+            WriteInt(c, I(0, 1500));
+            break;
+        case 0x514:
+            WriteInt(c, P(0.5) ? 0 : I(-50, 3000));
+            break;
+        case 0x578: case 0x5DC:
+            WriteInt(c, P(0.5) ? 0 : int(U32() & (P(0.5) ? 0x7F : 0xFFFFFFFF)));
+            break;
+        case 0x640: case 0x6A4: case 0x708: case 0x76C: case 0x7D0: case 0x834: case 0x898: case 0xAF0: case 0xB54: {
+            const uint8_t v = uint8_t(I(0, 1));
+            c.Write(v);
+            if (P(0.05))
+                c.Write(v);                             // (a byte too many)
+            break;
+        }
+        case 0x8FC:
+            for (int n = jitter(variables); n > 0; --n)
+                WriteInt(c, P(0.7) ? I(-5, 100) : int(U32()));
+            break;
+        case 0x960:
+            // (Never fewer names than variables: the original would read the next chunk's payload as a name, without
+            // a terminator: its stale stack again.)
+            for (int n = int(s.m_frames.size()) + (P(0.1) ? I(0, 2) : 0); n > 0; --n) {
+                if (P(0.04)) {
+                    WriteRawHeader(c, 0x992, 0x7FFF);  // (broken: past its parent; the file's next bytes its name)
+                    broken = true;
+                    continue;
+                }
+                // (Always with its terminator: the original copies the bytes into its stack without one, see
+                // COVERAGE.md; a header shorter than a header reads a negative size into it.)
+                const char *name = RandomFrameName();
+                c.Begin(P(0.97) ? uint16_t(0x992) : uint16_t(0x993));
+                c.Write(name, int(std::strlen(name)) + 1);
+                c.Ascend();
+            }
+            break;
+        case 0x9C4: {
+            if (P(0.05))
+                break;                                  // (empty: the count's read fails, its first value stays)
+            const int depth = P(0.03) ? I(100, 300) : I(0, 4);
+            WriteInt(c, depth + (P(0.1) ? I(-1, 2) : 0));
+            for (int k = 0; k < depth; ++k)
+                WriteInt(c, I(0, std::max(count - 1, 0)));
+            break;
+        }
+        case 0xA28: {
+            WriteInt(c, P(0.8) ? I(0, std::max(count - 1, 0)) : -1);
+            const char *name = RandomFrameName();
+            const int length = int(std::strlen(name)) + 1;
+            // (Its length the text's or 0: a shorter one leaves the original's buffer unterminated, a longer one past
+            // the chunk leaves it unread (its stale stack either way), and one past the buffer is skipped onto its
+            // stack.)
+            const uint16_t stored = uint16_t(P(0.95) ? length : 0);
+            c.Write(stored);
+            c.Write(name, length);
+            break;
+        }
+        case 0xA8C:
+            for (int n = jitter(int(s.m_whenevers.size())); n > 0; --n) {
+                WriteInt(c, I(0, 3000));
+                WriteInt(c, I(0, 3000));
+                c.Write(uint8_t(I(0, 1)));
+            }
+            break;
+        default:
+            for (int n = I(0, 6); n > 0; --n)
+                c.Write(uint8_t(U32()));
+            break;
+        }
+        c.Ascend();
+    }
+    // Stray bytes at the script's chunk's end, sometimes (fewer than a header: the loop's "bytes left" test).
+    for (int n = P(0.04) ? I(1, 5) : 0; n > 0; --n)
+        c.Write(uint8_t(U32()));
+    c.Ascend();
+    // (After a broken name, always: with no bytes left the original's name would be its stale stack.)
+    if (broken || P(0.5)) {
+        c.Begin(0x7777);
+        WriteInt(c, 0x12345678);
+        c.Ascend();
+    }
+    c.Close();
+    std::string f = g_overrides["make.sav"];
+    // A file cut short (not one with names: the cut string would be read from the stale stack, as above; nor with the
+    // instruction pointer, the timer, the delay or the signals: the original reads each into a stack word it then
+    // stores, read or not).
+    bool cuttable = true;
+    for (const uint16_t id : {uint16_t(0x960), uint16_t(0xA28), uint16_t(1000), uint16_t(0x4B0), uint16_t(0x514),
+                              uint16_t(0x578), uint16_t(0x5DC)})
+        cuttable = cuttable && std::find(ids.begin(), ids.end(), id) == ids.end();
+    if (P(cuttable ? 0.3 : 0.0))
+        f.resize(size_t(I(0, int(f.size()))));
+    return f;
+}
 void ApplyOrig(uint8_t *b, const S_Action &a)
 {
     switch (a.kind) {
@@ -353,11 +870,11 @@ void ApplyOrig(uint8_t *b, const S_Action &a)
     case A_STOP: OriginalAt<T_Bool>(O_STOP)(b); break;
     case A_RESTART: OriginalAt<T_Bool>(O_RESTART)(b); break;
     case A_EXIT: OriginalAt<T_Bool>(O_ON_EXIT)(b); break;
+    case A_SAVE: g_origResult = SaveOrig(b); break;
+    case A_LOAD: g_origResult = LoadOrig(b); break;
     default: break;
     }
 }
-// (The results of OnAlarmDone, OnCutscene and OnCutsceneDone are compared too: recorded here.)
-std::string g_origResult, g_portResult;
 void ApplyOrigWithResult(uint8_t *b, const S_Action &a)
 {
     g_origResult.clear();
@@ -388,12 +905,15 @@ void ApplyPort(C_TestScript &s, const S_Action &a)
     case A_STOP: s.Stop(); break;
     case A_RESTART: s.Restart(); break;
     case A_EXIT: s.OnExit(); break;
+    case A_SAVE: g_portResult = SavePort(s); break;
+    case A_LOAD: g_portResult = LoadPort(s); break;
     default: break;
     }
 }
 
 // ---- one program on both sides ----
 int g_programs, g_notCompiling, g_compileFailures, g_skippedFreed, g_skippedOverrun, g_steps, g_dumpAll;
+int g_nullCommand = -1;                                 // (part 5: the command made null after the compile, -1 none)
 bool g_showSteps;
 // Compiles `path` on both sides (compared as sc_diff does), then runs `steps` random actions, comparing after each.
 void RunProgram(const std::string &path, int steps)
@@ -438,6 +958,21 @@ void RunProgram(const std::string &path, int steps)
     } else {
         std::memcpy(g_origVtable, *reinterpret_cast<uint32_t **>(block), sizeof g_origVtable);
         g_origVtable[0] = reinterpret_cast<uint32_t>(&O_ExecuteCommand);
+        // Part 5: the script's kind (GetKind, vtable +4: the saved games' actor chunks), mostly a plain script's.
+        g_scriptKind = P(0.6) ? SCRIPT_KIND_GENERIC : P(0.5) ? SCRIPT_KIND_HUMAN : SCRIPT_KIND_MELEE_TRACKER;
+        g_origVtable[1] = reinterpret_cast<uint32_t>(&O_GetKind);
+        ResetFakeFrames();
+        g_lastSave.clear();
+        // Part 5: a null command (Tick's check; the compiler never leaves one): the crafted program's, on both sides.
+        const std::vector<uint32_t> origCommands = OrigVec(block, 0x5C, 4);
+        S_ScriptCommand *nulledPort = nullptr;
+        uint32_t nulledOrig = 0;
+        if (g_nullCommand >= 0 && g_nullCommand < int(origCommands.size()) && g_nullCommand < script->CommandCount()) {
+            nulledPort = script->m_commands[size_t(g_nullCommand)];
+            script->m_commands[size_t(g_nullCommand)] = nullptr;
+            std::memcpy(&nulledOrig, reinterpret_cast<void *>(origCommands[size_t(g_nullCommand)]), 4);
+            std::memset(reinterpret_cast<void *>(origCommands[size_t(g_nullCommand)]), 0, 4);
+        }
         *reinterpret_cast<uint32_t **>(block) = g_origVtable;
         // A fresh start: the save-game values cleared, the mission started, a server, then Restart.
         std::memset(OriginalAt<int *>(O_SAVE_VALUES), 0, SAVE_GAME_VALUES * sizeof(int));
@@ -463,6 +998,21 @@ void RunProgram(const std::string &path, int steps)
                 SetRestarting(a.value != 0);
             else if (a.kind == A_ROLE)
                 SetRole(uint32_t(a.value));
+            else if (a.kind == A_WAIT)
+                SetWait(block, *script);
+            else if (a.kind == A_SAVE) {
+                ++g_saves;
+                if (P(0.5))
+                    AssignFrames(block, *script);
+            } else if (a.kind == A_LOAD) {
+                ++g_loads;
+                const bool own = !g_lastSave.empty() && P(0.4);
+                g_loadsOfSaves += own;
+                g_overrides["load.sav"] = own ? g_lastSave : MakeLoadFile(*script);
+                SetItems(P(0.5));
+            }
+            g_frameLog[0].clear();
+            g_frameLog[1].clear();
             g_fakeBase = U32();
             const unsigned randSeed = U32();
             g_origExec = "exec";
@@ -485,21 +1035,37 @@ void RunProgram(const std::string &path, int steps)
             st.port.insert(st.port.begin(), g_portResult);
             st.orig.push_back(g_origExec);
             st.port.push_back(g_portExec);
-            if (!Compare(path + F(" step %d (%s %d)", step, ACTION_NAMES[a.kind], a.value), st))
+            if (!Compare(path + F(" step %d (%s %d)", step, ACTION_NAMES[a.kind], a.value), st)) {
+                if (g_dump)
+                    std::printf("  [%s]%s\n", g_current.c_str(),
+                                a.kind == A_LOAD ? (" file " + Hex(g_overrides["load.sav"])).c_str() : "");
                 break;                                  // (the rest would follow from the first difference)
+            }
         }
         g_armDivide = false;
         SetRole(GAME_ROLE_LOCAL);
         SetRestarting(false);
         SetMissionStarted(true);
+        if (nulledPort) {                               // (the nulled command back, for the frees)
+            script->m_commands[size_t(g_nullCommand)] = nulledPort;
+            std::memcpy(reinterpret_cast<void *>(origCommands[size_t(g_nullCommand)]), &nulledOrig, 4);
+        }
     }
     // Freed on both sides (the original's vtable back first: its destructor is not called, Clear frees the program).
+    // (Part 5: the frames the variables held released by each side's free, compared after.)
+    g_frameLog[0].clear();
+    g_frameLog[1].clear();
+    g_case = "port";
     delete script;
     g_case = "original";
     OriginalAt<T_Void>(0x0041e140)(block);
     ReleaseHeldFrees();
     std::free(block);
     g_case = "";
+    S_Result freed;
+    freed.orig = {FakeState(0), "frame calls" + g_frameLog[0]};
+    freed.port = {FakeState(1), "frame calls" + g_frameLog[1]};
+    Compare(path + " (freed)", freed);
 }
 
 // ---- random programs from a grammar ----
@@ -699,9 +1265,18 @@ void SetUpVm()
     g_origCallFunction = reinterpret_cast<T_Call>(tramp);
     RedirectOriginal(O_CALL_FUNCTION, reinterpret_cast<const void *>(&O_CallFunction));
     RedirectOriginal(O_RAND, reinterpret_cast<const void *>(&O_Rand));
+    // Part 5: the saved games' files (written in memory), the fake frames and scene.
+    RedirectOriginal(0x007e53aa, reinterpret_cast<const void *>(&O_dtaOpenWrite));
+    RedirectOriginal(0x007e5398, reinterpret_cast<const void *>(&O_dtaSeek));
+    RedirectOriginal(0x007e5392, reinterpret_cast<const void *>(&O_dtaWrite));
+    SetUpFakeFrames();
+    SetUpFakeItems();
 }
 
 }  // namespace H
+
+// Part 5: the port's C_Item::GetFrame: the fake item's frame (vm_diff's fake items alone reach it).
+I3D_frame *C_Item::GetFrame(int index) { return H::FakeItemFrame(reinterpret_cast<const uint8_t *>(this), index); }
 
 int main()
 {
@@ -769,13 +1344,17 @@ int main()
             // A string or frame operand in a number's expression (0), and a string joined by a dropped operator.
             "Integer a = 3;\r\nInteger b = 4;\r\nString s = \"q\";\r\nFrame f;\r\nlabel L0:\r\na = s;\r\nb = f + 1;\r\n"
             "If (s)\r\n{\r\n\ta = 9;\r\n}\r\ns = a <= b;\r\ns = \"x\" + a <= \"y\";\r\nDelay(100);\r\ngoto L0;\r\n",
+            // Part 5: its third command (a = a + 1) made null after the compile (see RunProgram).
+            "Integer a;\r\nlabel L0:\r\na = a + 1;\r\nDelay(10);\r\ngoto L0;\r\n",
         };
         const std::string path = "Scripts\\AFRICA1\\vm_c.scr";
         for (const char *text : crafted) {
             g_overrides[Lower(path)] = text;
             g_current = path + " (crafted)";
             g_ticksOnly = true;
+            g_nullCommand = text == crafted[4] ? 2 : -1;
             RunProgram(path, 600);
+            g_nullCommand = -1;
             g_ticksOnly = false;
         }
         g_overrides.clear();
@@ -816,6 +1395,8 @@ int main()
     std::printf("\nvm_diff: commands %d real, %d faked; functions %d real, %d faked; %d divisions the original faulted in, %d null operator "
                 "lists\n", g_realCommands, g_fakeCommands, g_realFunctions, g_fakeFunctions, g_divideFaults,
                 g_nullOperatorFaults);
+    std::printf("vm_diff: %d waits set (%d at the instruction pointer), %d saves, %d loads (%d of a save, %d made files, %d "
+                "with items)\n", g_waits, g_waitsAtIp, g_saves, g_loads, g_loadsOfSaves, g_madeFiles, g_itemLoads);
     std::printf("vm_diff: %d programs (%d not compiling in either, %d differing compiles, %d skipped: the original freed an expression node, %d: it "
                 "wrote past a block), %d steps, %d checks, %d failures\n",
                 g_programs, g_notCompiling, g_compileFailures, g_skippedFreed, g_skippedOverrun, g_steps, checks, failures);

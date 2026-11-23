@@ -30,7 +30,7 @@ SRC = os.path.normpath(os.path.join(HERE, "..", "..", "..", "src"))
 # itself (not logged).
 ORIG = {
     'GetGEffects()': ("0x00486510", "stdcall", "p"),
-    'SetFrameData(I3D_frame*, S_FrameData const&)': ("0x006e9ea0", "cdecl", "v"),
+    'SetFrameData(I3D_frame*, S_FrameData const&)': ("0x006e9ea0", "fastcall", "v"),   # (ECX the frame, EDX the data)
     'GetSoundModule()': ("0x004336c0", "stdcall", "p"),
     'EnableSpawnZone(char const*, int)': ("0x0069f320", "stdcall", "b"),
     # (A C_NetGame member there, its `this` unused: RET 4, the stdcall shape.)

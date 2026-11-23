@@ -1,5 +1,6 @@
 @echo off
-rem Script part 2: the mission script interpreter against the original executable's (vm_diff.cpp), MinGW; runs
+rem Script parts 2 and 5: the mission script interpreter (and its wait, saved games) against the original executable's
+rem (vm_diff.cpp), MinGW; runs
 rem vm_diff.exe ("vm_diff: N checks, 0 failures"). The game the interpreter reaches is link stubs (vm_stubs.s, from
 rem gen_vm_stubs.py: rerun it when the link reports an undefined reference). The intermediates go to %TEMP%.
 set PATH=C:\nim-2.2.6\dist\mingw32\bin;%PATH%

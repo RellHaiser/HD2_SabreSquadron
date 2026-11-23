@@ -714,16 +714,6 @@ __ZN6C_Door8SetStateEibbi:
 __ZN6C_Door8SetStateEibbi_name:
 	.asciz	"C_Door::SetState(int, bool, bool, int)"
 
-# C_Item::GetFrame(int)
-	.text
-	.globl	__ZN6C_Item8GetFrameEi
-__ZN6C_Item8GetFrameEi:
-	pushl	$__ZN6C_Item8GetFrameEi_name
-	call	_VmUnexpected
-	.section .rdata,"dr"
-__ZN6C_Item8GetFrameEi_name:
-	.asciz	"C_Item::GetFrame(int)"
-
 # C_Pike::SetState(int)
 	.text
 	.globl	__ZN6C_Pike8SetStateEi
@@ -1313,27 +1303,6 @@ __ZNK9C_WireCut5IsCutEv:
 	.section .rdata,"dr"
 __ZNK9C_WireCut5IsCutEv_name:
 	.asciz	"C_WireCut::IsCut() const"
-
-# _dtaOpenWrite@8
-	.bss
-	.align	16
-	.globl	_dtaOpenWrite@8
-_dtaOpenWrite@8:
-	.space	65536
-
-# _dtaSeek@12
-	.bss
-	.align	16
-	.globl	_dtaSeek@12
-_dtaSeek@12:
-	.space	65536
-
-# _dtaWrite@12
-	.bss
-	.align	16
-	.globl	_dtaWrite@12
-_dtaWrite@12:
-	.space	65536
 
 # _g_actorsModule
 	.bss

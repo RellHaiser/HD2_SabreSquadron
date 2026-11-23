@@ -4,7 +4,7 @@
 const S_CallDef CALLS[] = {
     {"RandFloat", 0x007e5302, "cdecl", "cdecl", "", 'f', -1},
     {"GetGEffects()", 0x00486510, "stdcall", "cdecl", "", 'p', -1},
-    {"SetFrameData(I3D_frame*, S_FrameData const&)", 0x006e9ea0, "cdecl", "cdecl", "pp", 'v', -1},
+    {"SetFrameData(I3D_frame*, S_FrameData const&)", 0x006e9ea0, "fastcall", "cdecl", "pp", 'v', -1},
     {"GetSoundModule()", 0x004336c0, "stdcall", "cdecl", "", 'p', -1},
     {"EnableSpawnZone(char const*, int)", 0x0069f320, "stdcall", "cdecl", "si", 'b', -1},
     {"CanPlayerRespawn(int)", 0x00730970, "stdcall", "cdecl", "i", 'b', -1},

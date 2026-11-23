@@ -180,9 +180,10 @@ void C_Script::Clear()
         }
     }
     m_commands.clear();
-    for (I3D_frame *f : m_frames) {
-        if (f)
-            f->Release();
+    // (Released last to first, as the original's lists are all emptied.)
+    for (size_t i = m_frames.size(); i-- > 0;) {
+        if (m_frames[i])
+            m_frames[i]->Release();
     }
     m_frames.clear();
 }
@@ -253,9 +254,10 @@ void C_Script::Tick(int timeDelta)
             const int time = m_waitAnimModel->GetAnimTime(0) + timeDelta;
             if (time < anim->GetEndTime())
                 goto waiting;
-            // Stop right before the end so the last pose stays.
+            // Stop right before the end so the last pose stays (the original asks for the animation, then the time).
+            I3D_animation_set *ending = m_waitAnimModel->GetAnimation(0);
             const int now = m_waitAnimModel->GetAnimTime(0);
-            m_waitAnimModel->Tick(m_waitAnimModel->GetAnimation(0)->GetEndTime() - now - 1);
+            m_waitAnimModel->Tick(ending->GetEndTime() - now - 1);
             Advance();
         } else {
             m_waitAnimModel = nullptr;
@@ -683,18 +685,24 @@ bool C_Script::LoadGame(C_chunk &chunk)
         case CHUNK_HUD_PANEL_HIDDEN: chunk.Read(m_hudPanelHiddenByScript); break;
         case CHUNK_FINISHED: chunk.Read(m_finished); break;
 
-        case CHUNK_NUMBERS:
+        case CHUNK_NUMBERS: {
+            // One value read into for all of them (the original's): a variable the chunk has no value left for gets
+            // the last one read (0 before the first).
+            int value = 0;
             for (S_ScriptNumber &n : m_numbers) {
-                if (!n.isConstant)
-                    chunk.Read(n.value);
+                if (!n.isConstant) {
+                    chunk.Read(value);
+                    n.value = value;
+                }
             }
             break;
+        }
 
         case CHUNK_FRAMES:
             for (I3D_frame *&frame : m_frames) {
                 uint16_t sub;
                 if (!chunk.Descend(sub))
-                    continue;                           // "Broken chunk '%d'."
+                    return false;                       // "Broken chunk '%d'." (the load ends there, nothing ascended)
                 char name[1000];
                 chunk.ReadString(name, sizeof(name));
                 chunk.Ascend();

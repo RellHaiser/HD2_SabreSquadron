@@ -5687,3 +5687,55 @@ particles and the surface marks. Files are served from memory.
   checkpoint by name) where part 3 had drawn them; the original's checkpoint words carry a leftover upper half (logged as
   the low half); a Python heredoc lost backslashes again (twice); C: filled up during the mutation run (the test compiles
   failed with only warnings shown): the runs' temp files now go to T:.
+
+## Script part 5 (the rest of `script.cpp`: FRM_SetAnimationDelayed's wait, C_Script's saved games, scripts made on frames, 2026-11-23)
+
+- **The build:** part 2's `script/vm_diff.cpp` (suite `script.interpreter`) and part 3's `script/cmd_diff.cpp` (suite
+  `script.commands`), extended.
+  - vm_diff's programs get three more actions: the wait set up alike on both sides (the label mostly the instruction
+    pointer's, a fake animated model with its time and end; the ticks then run it), SaveGame (each side's chunk file in
+    memory, sc_shared.inc's files now writable: the result, the chunk's place after and the bytes compared) and
+    LoadGame (the same bytes on both sides: the original's last save, or a file made for the script with its chunks in
+    any order, repeated, missing, unknown, short or long, a broken name, a file cut short). Each side has its own fake
+    frames and scene (FindFrame), fake items in the placements and the respawning list (C_Item::GetFrame faked on both
+    sides) and a script kind (GetKind: the human's and the melee tracker's chunks); every call on them is logged and
+    compared, with the frame variables, the references and the animation times. A crafted program runs with a command
+    made null after its compile (Tick's check).
+  - cmd_diff gets a case kind (one case in 12): a script made on a world frame (with the world's data, without data,
+    with data and no actor; global or not), then nothing, Stop, SendSignal or NotifyFrameHit, then destroyed; compared:
+    the frame's data after each (its script: this one, another, none), the script's state, the frames' references and
+    the calls (SetFrameData's data by its fields; its call table entry was cdecl, the original's is fastcall: fixed).
+- **The tests:** vm_diff full: the crafted programs, 20,000 random ones and the 5,347 game scripts (quick: 3,000 random
+  ones, 60 steps each; about 25 s); cmd_diff: 200,000 cases (quick 30,000, about 2,600 of them scripts on frames).
+  Every line of `script.cpp` now runs (both suites together); not reached: ReadString's closed-chunk guard
+  (`chunk.cpp`).
+- **Port bugs found and fixed:**
+  - LoadGame's frame names: a name sub-chunk that cannot be entered ended the original's load (false, "Broken chunk",
+    nothing ascended); the port skipped it and went on.
+  - LoadGame's numbers: the original reads every number variable through one value (0 before the first): a variable
+    the chunk has no value left for gets the last one read; the port left it as it was.
+  - C_chunk::ReadString (`chunk.cpp`, every reader of a chunk's remaining string): a chunk cut short by the file's end
+    kept the bytes read in the original (0x00415d00); the port's string was empty.
+  - Tick's wait asked the model for its time before the animation (the original: the animation first); no effect with
+    the engine's getters, now in the original's order.
+  - Clear released the frame variables first to last; the original empties every list last to first (the frames'
+    releases are the engine's calls, so their order shows).
+- **The original's weaknesses (not tested, the port's behaviour kept):** its frame-name reader copies the chunk's bytes
+  into a stack buffer without a terminator: a name without one, a chunk shorter than its name, the next chunk's bytes
+  read as a name (more frame variables than names) or a broken name at the file's end leave it reading its stale stack;
+  ReadSizedString's text shorter or longer than its length (or past the chunk) does the same, and one longer than the
+  buffer (0x400) is skipped by reading the rest onto its stack; a name chunk shorter than a header reads a negative size.
+  LoadGame reads the instruction pointer, the timer, the delay and the two signal masks into a stack word it stores
+  whether the read worked or not: a file cut short there gives them its stale stack (the port keeps their values). The
+  made files avoid these. C_Script's constructor leaves the frame data's last word (+0x1C) as its stack had it (the
+  port's is 0; nothing reads it).
+- **Mutations:** 266 mutants (`mutate_sc5.py`: script.cpp's part-5 lines and ReadString), 27 not building; 214 of the
+  239 building killed (vm_diff first, the survivors on cmd_diff). The first runs left 31: the tests then compared the
+  fakes after the scripts are freed (the releases' order: a port difference, above), gave the harness's
+  g_noPhysicsObject a value, wrote one-letter names, an empty call stack chunk and stray bytes at the chunk's end.
+  Survivors: equivalent ones (FreeArgs' frees, an empty name set on an empty C_str, the destructor's last store, a
+  larger name buffer) and ReadString's lines a script's load cannot tell (its 999-byte limit, the negative size the
+  files avoid, a closed chunk, a failed read, the terminator after names that carry one, its unused result).
+- **Harness lessons (my mistakes):** the first build crashed in the test itself (SetFrameData decoded as cdecl: part 3
+  never reached it); I started one build with a trailing `&` (it failed at once); the corpus run (the game scripts)
+  found the broken-name bug the quick random runs missed, so mutation baselines run with the corpus.
