@@ -188,7 +188,7 @@ bool C_ScriptExpression::AddToken(const char *text)
                     // numeric literal, truncated like the original __ftol
                     token.kind = STOK_OPERAND;
                     token.type = SCRIPT_TYPE_INTEGER;
-                    token.value = script->AddNumber(static_cast<int>(number));
+                    token.value = script->AddNumber(static_cast<int>(static_cast<int64_t>(number)));
 
                     // A '-' at the start or after '(' / another operator is a sign:
                     // fold it into the literal (the '-' token itself stays).

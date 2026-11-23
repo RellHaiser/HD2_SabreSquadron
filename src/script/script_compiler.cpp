@@ -160,7 +160,9 @@ void C_ScriptCompiler::Reset()
 // reader, which starts at the beginning of the source. A directive was therefore
 // only honoured with nothing but other directives before it, and in practice only
 // the first one worked, since inserting text left that reader behind. Scripts keep
-// their include at the top, where both read the same file name.
+// their include at the top, where both read the same file name. The word "#include"
+// elsewhere (in a comment or a string) is blanked, as the original blanked every one.
+// (The original also searched for ever from a "#include" that ends the file.)
 void C_ScriptCompiler::Preprocess()
 {
     static const char DIRECTIVE[] = "#include";
@@ -168,14 +170,20 @@ void C_ScriptCompiler::Preprocess()
 
     int includes = 0;
     std::size_t pos = 0;
+    // (As the original: the word and the character after it are blanked; for a directive,
+    // the name's length plus one more from that character on too, wherever the name is.)
+    const auto blank = [this](std::size_t from, std::size_t count) {
+        if (from < m_source.size())
+            m_source.replace(from, std::min(count, m_source.size() - from), std::min(count, m_source.size() - from), ' ');
+    };
     while ((pos = m_source.find(DIRECTIVE, pos)) != std::string::npos) {
         // Only whitespace may precede the directive on its line, so one behind
-        // "//" or inside a string literal is left alone.
+        // "//" or inside a string literal is only blanked.
         std::size_t lineStart = pos;
         while (lineStart > 0 && (m_source[lineStart - 1] == ' ' || m_source[lineStart - 1] == '\t'))
             --lineStart;
         if (lineStart > 0 && m_source[lineStart - 1] != '\r' && m_source[lineStart - 1] != '\n') {
-            pos += directiveLength;
+            blank(pos, directiveLength + 1);
             continue;
         }
 
@@ -183,20 +191,27 @@ void C_ScriptCompiler::Preprocess()
         std::size_t end = pos + directiveLength;
         while (end < m_source.size() && (m_source[end] == ' ' || m_source[end] == '\t'))
             ++end;
+        // (As the original: the name is a string token, to the next quote or the line's end,
+        // and counts if it ends with a quote; `""`, or a lone `"` at the end of the line, is an
+        // empty name, whose file is not found.)
         std::string fileName;
-        if (end < m_source.size() && m_source[end] == '"') {
-            const std::size_t close = m_source.find_first_of("\"\r\n", end + 1);
-            if (close != std::string::npos && m_source[close] == '"') {
+        std::size_t nameLength = 0;                         // the name's token, its quotes too
+        // (A quote right after the word is blanked with it: no name, as the original.)
+        if (end > pos + directiveLength && end < m_source.size() && m_source[end] == '"') {
+            std::size_t close = m_source.find_first_of("\"\r\n", end + 1);
+            if (close == std::string::npos)
+                close = m_source.size();
+            if (close < m_source.size() && m_source[close] == '"') {
                 fileName = m_source.substr(end + 1, close - end - 1);
-                end = close + 1;
+                nameLength = close - end + 1;
+            } else if (close == end + 1) {
+                nameLength = 1;
             }
         }
-        if (fileName.empty()) {
-            // Not a valid directive: only the keyword is removed.
-            m_source.replace(pos, directiveLength, directiveLength, ' ');
-            continue;
-        }
-        m_source.erase(pos, end - pos);
+        blank(pos, directiveLength + 1);
+        if (nameLength == 0)
+            continue;                                       // not a valid directive
+        blank(pos + directiveLength, nameLength + 1);
         // Included text is scanned too, so nested includes work.
         if (++includes <= SCRIPT_MAX_INCLUDES)
             InsertInclude(pos, fileName.c_str());
@@ -213,8 +228,14 @@ bool C_ScriptCompiler::InsertInclude(std::size_t pos, const char *fileName)
         if (!ReadScriptFile(path, text))
             return false;
     }
-    // Text after a NUL byte would never be read.
-    text.resize(std::strlen(text.c_str()));
+    // (As the original: it copies the file as a C string but puts the rest of the script
+    // after all the bytes it read, so a NUL byte in an include file ends the script there.)
+    const std::size_t length = std::strlen(text.c_str());
+    if (length < text.size()) {
+        m_source.resize(pos);
+        m_source += text.substr(0, length);
+        return true;
+    }
     m_source.insert(pos, text);
     return true;
 }
@@ -295,7 +316,8 @@ void C_ScriptCompiler::JoinOperator()
     if (first == '\0' || m_token[1] != '\0' || !std::strchr("=<>!", first))
         return;
 
-    // Rewinding also rewinds the line counter (the original counted those lines twice).
+    // Rewinding also rewinds the line counter (the original counted those lines twice;
+    // nothing reads the counter).
     const char *const cursor = m_cursor;
     const int line = m_line;
     NextToken();
@@ -364,22 +386,88 @@ int C_ScriptCompiler::FindLabel(const char *name) const
 }
 
 // Original behaviour: ParseLiteral copied a literal with sprintf(buffer, literal) and
-// the expression parser with C_fstr(literal). MSVC's printf prints the character after
-// a '%' that starts no conversion ("%%" -> "%", "%B" -> "B") and drops a '%' at the
-// end ("%%nudazed1%" -> "%nudazed1", shipped). Real conversions ("%d") read missing
-// arguments in the original; they do not occur in shipped scripts and are treated
-// like any other character here.
+// the expression parser with C_fstr(literal), both through MSVC6's printf (_output,
+// 0x007ebcaa) with no arguments. Its state machine, as far as it needs none: "%%" is "%";
+// flags, width, precision and size letters are dropped; a character its table classes
+// as a conversion but that has none ("%B", shipped: "%B_engvtabore.I3D" is
+// "_engvtabore.I3D") prints only the padding of its width ("%5B" five spaces); any other
+// character after the '%' is printed; a '%' at the end is dropped ("%%nudazed1%" ->
+// "%nudazed1", shipped). Real conversions ("%d", "%s"...) and a '*' read missing
+// arguments in the original; none occurs in shipped scripts, and here they print only
+// their padding.
 C_str ScriptStringLiteral(const char *text, std::size_t length)
 {
+    // MSVC6's __lookuptable (0x00817938): for ' '..'x' the class in the low nibble; by
+    // class * 8 + state, the next state in the high nibble.
+    static const unsigned char LOOKUP[] = {
+        0x06, 0x00, 0x00, 0x06, 0x00, 0x01, 0x00, 0x00, 0x10, 0x00, 0x03, 0x06, 0x00, 0x06, 0x02, 0x10,
+        0x04, 0x45, 0x45, 0x45, 0x05, 0x05, 0x05, 0x05, 0x05, 0x35, 0x30, 0x00, 0x50, 0x00, 0x00, 0x00,
+        0x00, 0x20, 0x28, 0x38, 0x50, 0x58, 0x07, 0x08, 0x00, 0x37, 0x30, 0x30, 0x57, 0x50, 0x07, 0x00,
+        0x00, 0x20, 0x20, 0x08, 0x00, 0x00, 0x00, 0x00, 0x08, 0x60, 0x68, 0x60, 0x60, 0x60, 0x60, 0x00,
+        0x00, 0x70, 0x70, 0x78, 0x78, 0x78, 0x78, 0x08, 0x07, 0x08, 0x00, 0x00, 0x07, 0x00, 0x08, 0x08,
+        0x08, 0x00, 0x00, 0x08, 0x00, 0x08, 0x00, 0x07, 0x08,
+    };
+    enum { ST_NORMAL, ST_PERCENT, ST_FLAG, ST_WIDTH, ST_DOT, ST_PRECIS, ST_SIZE, ST_TYPE };
+    enum { FL_LEFT = 0x04, FL_LEADZERO = 0x08 };
+
     std::string out;
     out.reserve(length);
-    for (std::size_t i = 0; i < length; ++i) {
-        if (text[i] == '%' && ++i == length)
+    int state = ST_NORMAL;
+    int flags = 0;
+    int width = 0;
+    for (std::size_t i = 0; i < length && text[i] != '\0'; ++i) {
+        const char ch = text[i];
+        const int cls = ch < ' ' || ch > 'x' ? 0 : LOOKUP[ch - ' '] & 0xF;
+        state = LOOKUP[cls * 8 + state] >> 4;
+        switch (state) {
+        case ST_NORMAL:
+            out += ch;
             break;
-        out += text[i];
+        case ST_PERCENT:
+            flags = 0;
+            width = 0;
+            break;
+        case ST_FLAG:
+            if (ch == '-')
+                flags |= FL_LEFT;
+            else if (ch == '0')
+                flags |= FL_LEADZERO;
+            break;
+        case ST_WIDTH:
+            if (ch != '*')
+                width = width * 10 + (ch - '0');
+            break;
+        case ST_SIZE:
+            // "I" is a size only as "I64"; otherwise it is printed.
+            if (ch == 'I') {
+                if (i + 2 < length && text[i + 1] == '6' && text[i + 2] == '4') {
+                    i += 2;
+                } else {
+                    state = ST_NORMAL;
+                    out += ch;
+                }
+            }
+            break;
+        case ST_TYPE:
+            // No text: only the padding (spaces, or zeros with '0' and not '-').
+            if (width > 0)
+                out.append(static_cast<std::size_t>(width), (flags & FL_LEADZERO) && !(flags & FL_LEFT) ? '0' : ' ');
+            break;
+        default:                                        // ST_DOT, ST_PRECIS: the precision is not used
+            break;
+        }
     }
     return C_str(out.c_str(), out.size());
 }
+
+namespace {
+// A token as the original keeps a name: C_fstr(token), formatted like a literal (only a
+// name with a '%' changes: "%" is "").
+C_str FormattedName(const char *token)
+{
+    return ScriptStringLiteral(token, std::strlen(token));
+}
+}  // namespace
 
 int C_ScriptCompiler::ParseLiteral(int opcode, int argIndex, const char *token)
 {
@@ -393,7 +481,8 @@ int C_ScriptCompiler::ParseLiteral(int opcode, int argIndex, const char *token)
             token = m_token;
         }
         char *end = nullptr;
-        int value = static_cast<int>(std::strtod(token, &end));
+        // (Truncated through 64 bits as the original's __ftol: out of range the low word.)
+        int value = static_cast<int>(static_cast<int64_t>(std::strtod(token, &end)));
         if (end < token + std::strlen(token)) {
             if (!_stricmp(token, "true"))
                 value = 1;
@@ -610,9 +699,10 @@ bool C_ScriptCompiler::ParseJump(int opcode)
     } else if (m_labels[label].index == -1) {
         target = -1 - label;
     } else {
-        // (The original also appended a duplicate of the label here, which
-        // changed nothing.)
+        // (As the original: a duplicate of the defined label is appended. It changes
+        // nothing: lookups find the latest, with the same index.)
         target = m_labels[label].index;
+        m_labels.push_back(S_ScriptLabel{m_token, target});
     }
     Emit(opcode, &target);
     return Expect(";");
@@ -671,10 +761,11 @@ bool C_ScriptCompiler::ParseStartPoint()
 bool C_ScriptCompiler::ParseWhenever()
 {
     NextToken();
-    const C_str name = m_token;
+    // (As the original: the name kept formatted, looked up as written.)
+    const C_str name = FormattedName(m_token);
     int type = 0;
     int index = -1;
-    if (FindVariable(name, &type, &index) && type == SCRIPT_TYPE_WHENEVER && index >= 0)
+    if (FindVariable(m_token, &type, &index) && type == SCRIPT_TYPE_WHENEVER && index >= 0)
         return false;                                       // name already used by a Whenever
 
     Expect("(");                                            // not checked, as in the original
@@ -710,7 +801,7 @@ bool C_ScriptCompiler::ParseSetWhenever(int opcode)
     if (!Expect("("))
         return false;
     NextToken();
-    const C_str name = m_token;
+    const C_str name = FormattedName(m_token);              // (looked up and kept formatted, as the original)
     const int entry = FindVariableEntry(name);
     if (!Expect(","))
         return false;
@@ -740,7 +831,7 @@ bool C_ScriptCompiler::ParseHandlerNumber(int *number)
     Expect("(");                                            // not checked, as in the original
     NextToken();
     char *end = nullptr;
-    *number = static_cast<int>(std::strtod(m_token, &end));
+    *number = static_cast<int>(static_cast<int64_t>(std::strtod(m_token, &end)));   // (__ftol)
     if (end < m_token + std::strlen(m_token))
         return false;
     return Expect(")");

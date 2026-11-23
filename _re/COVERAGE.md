@@ -5490,3 +5490,56 @@ particles and the surface marks. Files are served from memory.
   probes applied by hand to the source (restored, the diff checked); calling the port's virtuals unqualified,
   missing fakes (the frame's Tick, _aligned_malloc, the camera, ~C_Actor) and uninitialised original allocations
   crashed early runs.
+
+## Script part 1 (the mission script compiler, `script_compiler.cpp` and the expression parser, 2026-11-22)
+
+- **The build:** `script/sc_diff.cpp` (suite `script.compiler`, data needed): the port's `script_compiler.cpp`,
+  `script_expression.cpp`, `script_tables*.cpp` and `script.cpp` (its building members) against the original's
+  compiler (0x0042c850 on its global 0x008993f0, its constructor run first) compiling into a C_Script block of the
+  original's (its constructor 0x0041dcb0). Faked alike: the dta functions (the unpacked data, or a copy in memory),
+  GetGame's mission name (the original's C_str at +0x6A), the original's operator new / delete (frees held until its
+  script is dumped: its GroupRange deletes a node the tree keeps; 16 guard bytes after each block, checked when freed).
+  The compiled scripts are written out as text and compared: the result, the start point, the handlers, every command
+  with its arguments, the numbers, strings, frames, whenevers, the signal / cutscene handler lists, the expression
+  trees (walked together: a node the original freed is marked and not compared below), the compiler's last token,
+  variables, labels and open blocks, and the files opened and closed in order. Not compared: the compiler's two line
+  counters (+0x408, +0x40C), written and never read.
+- **The tests:** every game script (5,347 under `SCRIPTS`; 5,304 compile, 43 fail in both) and 12 mutated copies of
+  each (a token deleted, replaced from a vocabulary of tokens and whole statements, inserted, duplicated, swapped, the
+  file cut; not on an include line); 30,000 random expressions from a grammar (every operator, mixed precedence,
+  parentheses, NOT, a sign, the built-in functions with right and wrong arguments) in an If, an assignment and a
+  Whenever; crafted files (a missing file, includes found in `Scripts\include` or missing, include forms both read
+  alike, an include file with a NUL byte, start points, Else and handlers with and without blocks, a label defined
+  twice, a control character, a script compiled over another); the string literals' printf formatting against the
+  original's sprintf (every byte after a '%', 100,000 random strings of flags, widths, sizes and characters). About
+  200,000 checks in 25 s. Every line of the compiler and the parser runs but the destructor (the global's), a null
+  command in CheckProgram (never stored), a constant in the number table (the compiler adds none) and the client-only
+  paths (AddCommand answers -1: the original crashes there). Cases where the original wrote past a block (21 of the
+  mutated copies; guard bytes after each of its blocks) are reported and not compared; none is a shipped script.
+- **Port bugs found and fixed (on main):**
+  - String literals: "%B" kept the B (the original's printf drops a character its table classes as a conversion: the
+    shipped `"%B_engvtabore.I3D"` in BURMA2's CUTHLIDKA2.scr loads `_engvtabore.I3D`); the literal formatting is now
+    MSVC6's state machine (its lookup table 0x00817938): flags, widths and sizes dropped, a width's padding printed.
+  - Whenever and SetWhenever names: kept as written (the original keeps and looks them up formatted, C_fstr(token)).
+  - Numbers out of the int range: INT_MIN (the original's __ftol keeps the low word).
+  - GoTo / Gosub to a defined label: the label list lacked the duplicate the original appends.
+  - Includes: `#include ""` or a lone quote left the quotes in the source (the original's directive is any string
+    token); the name was erased exactly (the original blanks the token's length plus one from the character after
+    the word, wherever the name is: two spaces before it leave the name's end behind); "#include" elsewhere was kept
+    (the original blanks every one, and the character after it); `#include"x"` included (the original's blanking eats
+    the quote); a NUL byte in an include file was dropped with the rest of it (the original's script ends there).
+- **The original's weaknesses (kept unless noted):** a client's compile crashes at the first '}' (AddCommand answers
+  -1, the block's begin is read at -1: the port checks); a token of 1,024 characters or more overruns the compiler
+  (the port truncates it); a script ending in "#include" hangs the preprocessor; only the first include of a file
+  is honoured, and only when nothing but other directives precede it (the port honours each one at a line's start);
+  GroupRange deletes the node its new group keeps (use after free: the port keeps it; no shipped script groups
+  operators of mixed precedence without parentheses, so none reaches it); at a level with two operators more than
+  operands it writes past its list (undefined; one more, "x == -1", is modelled: the last operand dropped), and with
+  none at all through a null list; an expression ended by an unknown token at the end of the file moves the cursor
+  before the start (the port checks); `<=` and `>=` are dropped from expressions (kept).
+- **Mutations:** 1,032 mutants, 102 not building, 831 of 930 killed, 99 equivalent or out of reach (mutate_sc1.py).
+- **Harness lessons (my mistakes):** heredoc edits collapsed backslashes twice (one probe applied nothing); the first
+  mutations included the include lines and "%d" (the port's include handling and missing arguments: not comparable);
+  the random-atom expressions drove the original into undefined behaviour whose damage showed in later cases (a
+  grammar now); the mutated tokens' line scan made the mutation generator quadratic (25 ms a mutant); a mutation list
+  generated past the file's end was nearly run stale (stopped, regenerated).
