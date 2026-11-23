@@ -8,7 +8,8 @@ the answer's kind) and the engine's virtual slots (src/ls3d/i3d.h: every I3DMETH
 call alike (__stdcall, `this` on the stack).
 
 Run it when build_cmd.bat's link reports an undefined reference (the port's symbols changed): python gen_cmd_calls.py,
-then build_cmd.bat. A function the table below does not know stops it: add it (the original's address from the port's
+then build_cmd.bat. Script parts 6 and 7 (mod_diff.cpp, the script module): python gen_cmd_calls.py mod writes
+mod_calls.s and mod_calls.inc from build_mod.bat's link. A function the table below does not know stops it: add it (the original's address from the port's
 header comments or Ghidra, its calling convention there, the answer's kind).
 
 Argument kinds: i int (and enums, unsigned), b bool (the low byte), f float, s a string (char *), p a pointer (logged
@@ -219,7 +220,36 @@ ORIG = {
     'C_Human::Sit(I3D_frame*)': ("0x005af370", "thiscall", "v"),
     'C_Human::EnableEvents()': ("0x005af3d0", "thiscall", "v"),
     'C_Human::DisableEvents()': ("0x005af3b0", "thiscall", "v"),
+    # Script parts 6 and 7: the script module's (script_module.cpp, script_module_save.cpp; mod_diff.cpp).
+    'ResetSpeechSlots()': ("0x0071e680", "cdecl", "v"),
+    'AttachModelUpdateHook(I3D_frame*)': ("0x007764d0", "fastcall", "v"),
+    'DetachModelUpdateHook(I3D_frame*)': ("0x00776520", "fastcall", "v"),
+    'C_BitStream::ReadString(char*, int)': ("0x0073d470", "thiscall", "v"),
+    'C_BitStream::ReadBits(int)': ("0x0073d3d0", "thiscall", "i"),
+    'C_Interface::OpenCommandMap(bool)': ("0x0049f410", "thiscall", "v"),
+    'C_HumanVisual::RemoveShadow()': ("0x007590c0", "thiscall", "v"),
+    'C_ActorsModule::SetActorActive(C_Actor*, bool)': ("0x00475ec0", "thiscall", "v"),
+    # (A static member: the port's cdecl, the original's __fastcall: ECX the dubbing, EDX the frame.)
+    'C_HumanMovement::PlayDubbing(int, I3D_frame*, C_Human*, float, float)': ("0x00786a70", "fastcall", "v"),
+    'C_HumanMovement::UpdateModelNames()': ("0x00786b30", "thiscall", "v"),
+    'C_QuickMessages::SetSubtitle(int)': ("0x0048f080", "thiscall", "v"),
+    'C_QuickMessages::ShowSubtitles(bool)': ("0x0048ee50", "thiscall", "v"),
+    'C_ResourceCache<I3D_model>::OpenInto(I3D_model*, char const*, unsigned int, void*, void*, int)':
+        ("0x004290a0", "thiscall", "i"),
+    'C_AnimationActor::SetCollisionsOn(bool)': ("0x005b54c0", "thiscall", "v"),
+    'C_LightMapGroupsModule::SetFrameLightmap(I3D_frame*, int)': ("0x0048d270", "thiscall", "v"),
+    'C_LightMapGroupsModule::SetGroupLightmap(S_LightmapGroup const*, int)': ("0x0048d4e0", "thiscall", "v"),
+    'C_Team::UpdateCameraTarget()': ("0x0045dac0", "thiscall", "v"),
+    'C_game::AddAnimatedModel(I3D_frame*)': ("0x0069a5b0", "thiscall", "v"),
+    'C_game::RemoveAnimatedModel(I3D_frame*)': ("0x0069a630", "thiscall", "v"),
+    'C_Human::SetScripted(bool)': ("0x005a3df0", "thiscall", "v"),
+    'C_NetGame::CreateMessage(int, int)': ("0x0072c280", "thiscall", "p"),
+    'C_NetGame::SendNetMessage(C_BitStream*)': ("0x0072c360", "thiscall", "v"),
+    'C_CommandPanel::IsOpen() const': ("0x004b6180", "thiscall", "b"),
+    'C_Human::IsAISuspended() const': ("0x005a5d30", "thiscall", "b"),
 }
+# Static members (mangled like members: no `this`, the port's cdecl).
+STATIC_MEMBERS = {'C_HumanMovement::PlayDubbing(int, I3D_frame*, C_Human*, float, float)'}
 
 
 def kind(t):
@@ -329,15 +359,24 @@ def engine_slots():
     return slots, bases
 
 
+# The tests: prefix -> (build script, executable, what the generated files' first line calls the calls).
+TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged calls"),
+         "mod": ("build_mod.bat", "mod_diff", "the script module test's logged calls")}
+
+
 def main():
     env = dict(os.environ, PATH=MINGW + os.pathsep + os.environ["PATH"])
-    bat = open(os.path.join(HERE, "build_cmd.bat"), encoding="latin-1").read()
-    m = re.search(r"^g\+\+ (.*cmd_diff\.exe.*)$", bat, re.M)
+    prefix = sys.argv[1] if len(sys.argv) > 1 else "cmd"
+    if prefix not in TESTS:
+        sys.exit("gen_cmd_calls: the test is cmd or mod")
+    bat_name, exe, what = TESTS[prefix]
+    bat = open(os.path.join(HERE, bat_name), encoding="latin-1").read()
+    m = re.search(r"^g\+\+ (.*%s\.exe.*)$" % exe, bat, re.M)
     if not m:
-        sys.exit("gen_cmd_calls: no g++ line in build_cmd.bat")
-    line = m.group(1).replace("%SRC%", r"..\..\..\src").replace(" cmd_calls.s", "")
+        sys.exit("gen_cmd_calls: no g++ line in " + bat_name)
+    line = m.group(1).replace("%SRC%", r"..\..\..\src").replace(" %s_calls.s" % prefix, "")
     tmp = os.environ.get("TEMP", HERE)
-    probe = '-o "%s"' % os.path.join(tmp, "cmd_probe.exe")
+    probe = '-o "%s"' % os.path.join(tmp, prefix + "_probe.exe")
     line = re.sub(r'-o "[^"]*"', lambda _: probe, line)
     line = line.replace(" 2>&1", "") + " -Wl,--no-demangle"
     p = subprocess.run("g++ " + line, cwd=HERE, env=env, shell=True, capture_output=True, text=True)
@@ -364,7 +403,7 @@ def main():
             unknown.append(key)
             continue
         ks = "".join(kind(t) for t in params(key) if t != "void")
-        member = name.startswith("__ZN")
+        member = name.startswith("__ZN") and key not in STATIC_MEMBERS
         stdcall = re.search(r"@(\d+)$", name)
         if "." in ks:
             conv = "cdecl_this" if member else "cdecl"
@@ -377,11 +416,12 @@ def main():
         calls.append((name, key, ORIG[key], ks, conv))
     if unknown:
         sys.exit("gen_cmd_calls: not in the table (add them to ORIG):\n  " + "\n  ".join(unknown))
-    # A call reached only through the original's side (none on the port's: a vtable slot, RandFloat's import).
+    # A call reached only through the original's side (none on the port's: a vtable slot, RandFloat's import). (Not
+    # the rest of the table: a function the port links in this test, the script module's in mod's, runs on both sides.)
     known = {c[1] for c in calls}
-    extra = [k for k in ORIG if k not in known and ORIG[k][0]]
+    extra = [k for k in ORIG if k not in known and ORIG[k][0] and (ORIG[k][1].startswith("vt+") or k == "RandFloat")]
 
-    s = ["# cmd_calls.s: GENERATED by gen_cmd_calls.py (the game command test's logged calls); do not edit by hand.", "",
+    s = ["# %s_calls.s: GENERATED by gen_cmd_calls.py (%s); do not edit by hand." % (prefix, what), "",
          "\t.text", "\t.globl\t_CmdCallEntry",
          "# [ESP] side (0 the port, 1 the original), [ESP+4] the call's index, [ESP+8] the return address, then the",
          "# arguments. CmdCall (C++) gets the saved registers (PUSHAD's block) and sets g_cmdPop (the bytes the callee",
@@ -392,7 +432,7 @@ def main():
          "\tmovl\t%eax, _g_cmdSaveEax", "\tmovl\t8(%esp), %eax", "\tmovl\t%eax, _g_cmdSaveRet",
          "\taddl\t$12, %esp", "\taddl\t_g_cmdPop, %esp", "\tpushl\t_g_cmdSaveRet", "\tmovl\t_g_cmdSaveEax, %eax",
          "\tret", ""]
-    inc = ["// cmd_calls.inc: GENERATED by gen_cmd_calls.py (the game command test's logged calls); do not edit by hand.",
+    inc = ["// %s_calls.inc: GENERATED by gen_cmd_calls.py (%s); do not edit by hand." % (prefix, what),
            "// name, the original's address (0: none), its convention, the port's convention, argument kinds, answer kind;",
            "// the original's vtable offset (-1: called directly).",
            "const S_CallDef CALLS[] = {"]
@@ -426,8 +466,8 @@ def main():
     for cls in sorted(bases):
         inc.append('    {"%s", "%s"},' % (cls, bases[cls]))
     inc.append("};")
-    open(os.path.join(HERE, "cmd_calls.s"), "w", newline="\r\n").write("\n".join(s) + "\n")
-    open(os.path.join(HERE, "cmd_calls.inc"), "w", newline="\r\n").write("\n".join(inc) + "\n")
+    open(os.path.join(HERE, prefix + "_calls.s"), "w", newline="\r\n").write("\n".join(s) + "\n")
+    open(os.path.join(HERE, prefix + "_calls.inc"), "w", newline="\r\n").write("\n".join(inc) + "\n")
     print("gen_cmd_calls: %d calls (%d the original's alone), %d variables, %d engine slots" %
           (len(all_calls), len(extra), len(variables), len(slots)))
 

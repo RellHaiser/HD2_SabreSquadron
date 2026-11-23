@@ -17,7 +17,11 @@
 // Env: HD2_CMD_CASES (cases, default 200,000; HD2_CMD_QUICK: 30,000), HD2_CMD_ONLY (one opcode's name), HD2_CMD_ACTORS
 // (the actor scripts' cases only), HD2_CMD_SHOW (every case's logs printed), HD2_CMD_DUMP (a failing case's logs),
 // HD2_CMD_SEED; sc_diff's HD2_SC_DATA / HD2_UNPACKED, HD2_SC_FIRST_CHANCE.
+// (Script parts 6 and 7: mod_diff.cpp includes this file for its world and logger, with its own HARNESS_NAME, call
+// table (CMD_CALLS_INC) and main (CMD_DIFF_NO_MAIN).)
+#ifndef HARNESS_NAME
 #define HARNESS_NAME "cmd_diff"
+#endif
 #include "sc_shared.inc"
 
 #include <set>
@@ -87,7 +91,10 @@ struct S_SlotDef {
     const char *kinds;
     char ret;
 };
-#include "cmd_calls.inc"
+#ifndef CMD_CALLS_INC
+#define CMD_CALLS_INC "cmd_calls.inc"
+#endif
+#include CMD_CALLS_INC
 
 extern "C" {
 int g_cmdPop, g_cmdFloat;
@@ -1257,6 +1264,8 @@ uint32_t DefaultAnswer(char ret)
 
 bool g_failedCall;
 std::string g_failText;
+std::set<std::string> g_extraQuiet;                     // (mod_diff: calls one side inlines, answered unlogged)
+std::set<std::string> g_outStrings;                     // (mod_diff: calls whose string arguments the answer writes)
 uint64_t Call(uint32_t index, uint32_t *regs)
 {
     const char *name, *kinds, *conv;
@@ -1302,8 +1311,9 @@ uint64_t Call(uint32_t index, uint32_t *regs)
     if (key == "C_CheckpointNetwork::Get" && d.words.size() > 1)
         d.words[1] &= 0xFFFF;
     std::string line = key + "(";
+    const bool outString = g_outStrings.count(key) != 0;
     for (int i = 0; i < fixed; ++i)
-        line += (i ? ", " : "") + ArgText(kinds[i], d.words[i]);
+        line += (i ? ", " : "") + (outString && kinds[i] == 's' ? std::string("out") : ArgText(kinds[i], d.words[i]));
     line += ")";
     // Structures passed by address: their contents (the original's layouts, the headers' comments).
     {
@@ -1350,11 +1360,15 @@ uint64_t Call(uint32_t index, uint32_t *regs)
         line += " -> " + ArgText('f', answer);
     } else if (ret != 'v')
         line += " -> " + ArgText(ret == 'p' ? 'p' : 'i', answer);
+    if (outString)                                      // (the strings the answer wrote)
+        for (int i = 0; i < fixed; ++i)
+            if (kinds[i] == 's')
+                line += " -> " + ArgText('s', d.words[i]);
     g_cmdPop = d.pop;
     // (The game's plain getters answer unlogged: the original fetches some twice where the port keeps the first.)
     static const std::set<std::string> quiet = {"C_game::GetCameraModule", "GetGEffects", "GetSoundModule",
                                                 "GetLightMapGroups", "C_TShiftModule::GetEntry"};
-    if (!quiet.count(key))
+    if (!quiet.count(key) && !g_extraQuiet.count(key))
         g_log[g_side].push_back(line);
     ++g_calls[g_side];
     return answer;
@@ -2191,6 +2205,7 @@ void SetUpCmd()
 
 }  // namespace H
 
+#ifndef CMD_DIFF_NO_MAIN
 int main()
 {
     using namespace H;
@@ -2232,3 +2247,4 @@ int main()
                 g_frameCases, g_frameEvents[0], g_frameEvents[1], g_frameEvents[2], g_frameEvents[3]);
     return failures != 0;
 }
+#endif

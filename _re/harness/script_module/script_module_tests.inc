@@ -282,7 +282,7 @@ void TestLoad()
     frames += Sized("parent");
     // A sound off: no deferred start.
     frames += Sized("quiet") + Bytes(0x10u) + std::string(1, '\0') + Bytes(0.0f) + Bytes(0.0f) + Bytes(0.0f) + Bytes(1.0f) + Bytes(5);
-    // The model: own animation (stopped), one by the cache (running), one not found, again one stopped.
+    // The model: own animation (stopped), one by the cache (running), one not found (still stopped: saved inactive), again one stopped.
     frames += Sized("model") + Bytes(8u) + std::string(1, '\1') + Bytes(4);
     frames += Bytes(2) + Bytes(100) + Sized("own.i3d") + std::string(1, '\0') + std::string(1, '\0');
     frames += Bytes(3) + Bytes(200) + Sized("walk.i3d") + std::string(1, '\1') + std::string(1, '\1');
@@ -310,7 +310,7 @@ void TestLoad()
         "anim model null 0 1 0\nanim model null 1 1 0\nanim model null 2 1 0\nanim model null 3 1 0\nanim model null 4 1 0\nanim model null 5 1 0\nanim model null 6 1 0\n"
         "time model 2 100\ntick model 1\nstop model 2\n"
         "cache walk.i3d\nanim model walk.i3d 3 1 0\nanim release walk.i3d\ntime model 3 200\ntick model 1\nregister model\nupdate model\n"
-        "cache missing.i3d\n"
+        "cache missing.i3d\nstop model 4\n"
         "cache run.i3d\nanim model run.i3d 5 1 0\nanim release run.i3d\ntime model 5 400\ntick model 1\nregister model\nupdate model\nstop model 5\n"
         "assign driveronly a.bin\nload script driveronly SAVED\n";
     CHECK(log == want);

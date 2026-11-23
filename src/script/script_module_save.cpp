@@ -61,6 +61,15 @@ uint32_t FloatBits(float f)
     return bits;
 }
 
+// A float weather value the original copies through the x87 FPU (FLD / FSTP: ReadState's speed to height and
+// direction, the speed and size messages): a signalling NaN comes out quiet.
+uint32_t ThroughFpu(uint32_t bits)
+{
+    if ((bits & 0x7F800000u) == 0x7F800000u && (bits & 0x007FFFFFu) != 0)
+        bits |= 0x00400000u;
+    return bits;
+}
+
 const char *FileNameOf(const char *path)
 {
     const char *slash = std::strrchr(path, '\\');
@@ -132,16 +141,17 @@ void LoadModelAnimations(C_chunk &chunk, I3D_model *model, C_ScriptModule *modul
             model->SetAnimTime(stage, time);
             model->Tick(1);
         } else {
+            // (A file the cache does not give: no animation; an inactive stage is still stopped below.)
             I3D_animation_set *anim = nullptr;
-            if (g_animationCache.Get(name, &anim) != I3D_OK)
-                continue;
-            anim->SetPlayMode(loop ? I3DANIM_LOOP : I3DANIM_PLAY_ONCE);
-            model->SetAnimation(anim, stage, 1.0f, 0);
-            anim->Release();
-            model->SetAnimTime(stage, time);
-            model->Tick(1);
-            module->RegisterAnimatedModel(model);
-            model->Update();
+            if (g_animationCache.Get(name, &anim) == I3D_OK) {
+                anim->SetPlayMode(loop ? I3DANIM_LOOP : I3DANIM_PLAY_ONCE);
+                model->SetAnimation(anim, stage, 1.0f, 0);
+                anim->Release();
+                model->SetAnimTime(stage, time);
+                model->Tick(1);
+                module->RegisterAnimatedModel(model);
+                model->Update();
+            }
         }
         if (!active)
             model->StopAnimation(stage);
@@ -473,7 +483,7 @@ void C_ScriptModule::WriteState(C_BitStream *msg)
             msg->WriteBits(scene->GetWeather(param), 32);
         msg->WriteBits(scene->GetWeather(WEATHER_MODE), 1);
     }
-    OutputDebugStringA(C_fstr("ScriptModule : send state for %d sounds ", static_cast<int>(m_soundFrames.size())));
+    OutputDebugStringA(C_fstr("ScriptModule : send state for %d sounds \n", static_cast<int>(m_soundFrames.size())));
     msg->WriteBits(static_cast<uint32_t>(m_soundFrames.size()), 16);
     for (size_t i = m_soundFrames.size(); i-- > 0;) {
         I3D_frame *frame = m_soundFrames[i];
@@ -493,8 +503,12 @@ void C_ScriptModule::ReadState(C_BitStream *msg)
         return;
     scene->SetWeather(WEATHER_ON, weatherOn != 0);
     if (weatherOn != 0) {
-        for (int param = 1; param < WEATHER_MODE; ++param)
-            scene->SetWeather(param, msg->ReadBits(32));
+        for (int param = 1; param < WEATHER_MODE; ++param) {
+            const uint32_t value = msg->ReadBits(32);
+            // (The floats: speed to height and the direction.)
+            const bool isFloat = (param >= WEATHER_SPEED && param <= WEATHER_HEIGHT) || param >= WEATHER_DIR_X;
+            scene->SetWeather(param, isFloat ? ThroughFpu(value) : value);
+        }
         scene->SetWeather(WEATHER_MODE, msg->ReadBits(1));
     }
     int count = static_cast<int16_t>(msg->ReadBits(16));
@@ -642,7 +656,7 @@ void C_ScriptModule::HandleClientMessage(int type, C_BitStream *msg)
                           : type == SCRIPT_MSG_WEATHER_COLOR_IN ? WEATHER_COLOR_IN
                                                                 : WEATHER_COLOR_OUT;
         if (game->GetScene())
-            game->GetScene()->SetWeather(param, value);
+            game->GetScene()->SetWeather(param, param == WEATHER_SPEED ? ThroughFpu(value) : value);
         break;
     }
     case SCRIPT_MSG_THUNDERSTORM:
@@ -652,8 +666,8 @@ void C_ScriptModule::HandleClientMessage(int type, C_BitStream *msg)
         const uint32_t length = msg->ReadBits(32);
         const uint32_t width = msg->ReadBits(32);
         if (game->GetScene()) {
-            game->GetScene()->SetWeather(WEATHER_LENGTH, length);
-            game->GetScene()->SetWeather(WEATHER_WIDTH, width);
+            game->GetScene()->SetWeather(WEATHER_LENGTH, ThroughFpu(length));
+            game->GetScene()->SetWeather(WEATHER_WIDTH, ThroughFpu(width));
         }
         break;
     }

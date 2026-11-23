@@ -660,7 +660,7 @@ std::string SaveOrig(uint8_t *b)
     OriginalAt<T_ChunkAscend>(O_CHUNK_ASCEND)(c, nullptr);
     OriginalAt<T_ChunkVoid>(O_CHUNK_CLOSE)(c);
     g_lastSave = g_overrides["o_save.sav"];
-    return F("save %d %s file %s", int(r), place.c_str(), Hex(g_lastSave).c_str());
+    return F("save %d %s file ", int(r), place.c_str()) + Hex(g_lastSave);   // (not through F: its 1,200 characters cut the file)
 }
 std::string SavePort(C_TestScript &s)
 {
@@ -671,7 +671,7 @@ std::string SavePort(C_TestScript &s)
     const std::string place = ChunkPlace(&c);
     c.Ascend();
     c.Close();
-    return F("save %d %s file %s", int(r), place.c_str(), Hex(g_overrides["p_save.sav"]).c_str());
+    return F("save %d %s file ", int(r), place.c_str()) + Hex(g_overrides["p_save.sav"]);   // (not through F: its 1,200 characters cut the file)
 }
 std::string LoadOrig(uint8_t *b)
 {

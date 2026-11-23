@@ -5739,3 +5739,78 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the first build crashed in the test itself (SetFrameData decoded as cdecl: part 3
   never reached it); I started one build with a trailing `&` (it failed at once); the corpus run (the game scripts)
   found the broken-name bug the quick random runs missed, so mutation baselines run with the corpus.
+
+## Script part 6 (the script module's saved games, a joining client's state and the clients' messages: `script_module_save.cpp`, 2026-11-23)
+
+- **The build:** `script/build_mod.bat` (`mod_diff.cpp`, suite `script.module`), new. It includes `cmd_diff.cpp` for
+  its world, fakes and call logger (its main and call table switched off by macros); the module's own calls go through
+  `mod_calls.s` / `mod_calls.inc` (`gen_cmd_calls.py mod`: the generator now takes the test's name and redirects the
+  original's functions only where the port does not link them). `script_module.cpp`, `script_module_save.cpp`,
+  `module.cpp` and `resource_cache.cpp` are linked: the module's own functions and the animation cache run on both sides
+  (the original's LoadGame inlines the cache's Get). The original's module and animation cache are constructed by hand
+  (their static initialisers never ran; the cache's std::_Lockit critical section is set up first, as the original's CRT
+  never started).
+  - Each case builds the world, then gives each side's module the same state: scripts compiled on world frames (the
+    original's in blocks of its operator new), pause sounds, rotations and remembered frames (the original's in blocks of
+    its _aligned_malloc, redirected to the CRT's), sound frames, saved values, the cutscene flags, lightmap groups, the
+    models' file names, the humans' movements and actors of chosen kinds on the models.
+    - The lightmap groups use the original's layout on both sides: the port's FindGroup is answered by the same search,
+      unlogged, as the original inlines it.
+    - The movements are blocks large enough for both layouts: the shadow frame at the original's +0xA9C and in the
+      port's member.
+  - Then it runs one operation and compares: the answer, the module's lists and fields, the pending sounds, the frames,
+    the animation sets' reference counts, the chunk file and every call.
+- **The tests:**
+  - SaveGame.
+  - LoadGame on the original's last save or on a made file, its chunks in any order: values, pause sounds, rotations
+    (their sub-chunks in any order or missing), weather, the fake cutscene flag, an unknown chunk, remembered frames
+    with every part (names not found, parents, sounds, animations by the model's own file or the cache's) and scripts
+    (the original's saved ones: as saved, on another frame or a gone one, a file that does not compile, a sub-chunk
+    missing or swapped). Half the module's scripts run a program with handlers (OnExit, OnGlobalAlarm, the cutscenes')
+    that write saved values.
+  - WriteState.
+  - ReadState and OnMessage: every message type, with the ReadBits and ReadString answers from the case (names,
+    signalling NaNs); now and then no message at all. The debug texts both sides print (OutputDebugStringA's exception,
+    caught) are compared as calls.
+  - 20,000 cases, about 21 s (quick: 4,000, 4 s).
+- **Coverage:** every line but one: LoadModelAnimations' check for a frame that is not a model. A load reaches it only
+  after calling SetAnimation through another frame type's vtable; the game's own saves never ask for it.
+- **Port bugs found and fixed:**
+  - LoadModelAnimations: when the animation cache did not give a file, the port skipped the whole entry; the original
+    still stops the stage when it was saved inactive. (The `script_module` unit test expected the old skip: its
+    TestLoad now wants the stop.)
+  - ReadState and the speed and size messages: the original copies the float weather values through the FPU (ReadState's
+    speed to height and the direction, the messages' speed, length and width), so a signalling NaN arrives quiet; the
+    port passed the bits as read.
+  - WriteState's debug text lacked the original's newline.
+- **The original's weaknesses (not tested, the port's behaviour kept):**
+  - A rotation chunk without its quaternion sets the frame's rotation from the stack's leftovers (the port's from its
+    own).
+  - An unknown sub-chunk in a rotation chunk is not ascended past: its data are read as the next header (a made file hung
+    the original).
+  - A weather chunk shorter than its 10 values leaves the rest of the original's from its stack (the port's are 0).
+  - A script compiled without the server's role (a pure client's AssignScript): the original's AddCommand adds nothing,
+    and a brace block's end then reads the command before the first: a crash. (The cases compile as the server; a
+    load is always the server's, as in the game.)
+  - ReadState's sound count is signed: a negative one counts down through 2^32 on both sides.
+  - The velocity and volume of a remembered frame that is not a sound are its allocation's leftovers on both sides (not
+    compared; the port's volume is 0).
+- **Harness decisions:**
+  - When its vector grows, the original's animation cache copies its entries with an inline AddRef and releases the
+    old copies: the sets' Release calls are not logged; their final counts are compared.
+  - AssignScript's GetControllerType (the original reads it inline) is answered unlogged.
+- **Mutations:** 578 mutants (`mutate_sc6.py`), 83 not building; 477 of the 495 building killed. The first run left 62
+  (see the lessons below); the 18 left: the values a failed read leaves (the files are never cut short), the name
+  buffers a byte larger, leaks, a pop_back the clear after covers, and the port's stop at a short chunk header (the
+  original goes on with the last chunk's id; not tested).
+- **Harness lessons (my mistakes):**
+  - The saved files were compared through F(), whose 1,200 characters cut most of each file off: 62 mutants survived the
+    first run, among them every changed chunk id of SaveGame. vm_diff's part 5 save comparison had the same flaw
+    (fixed; it still passes).
+  - The original's compiler crashed in a few cases: I chased a frame, the global flag and the frees before seeing the
+    case's role was set before the compile (a client's role: no commands added).
+  - The build script runs the full test after building: development builds now set HD2_MOD_CASES=0.
+  - The heredoc backslashes again (build_mod.bat).
+  - A module state the game cannot make: a sound bit on a camera. The original's call through the camera's vtable slot
+    unbalanced its stack and crashed it.
+  - `sed -i` on the new test left it with LF line endings (set back to CRLF).
