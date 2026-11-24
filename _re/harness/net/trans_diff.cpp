@@ -626,11 +626,12 @@ S_Wire RandomWire()
             w.address = s.address;
             w.port = s.port;
         }
-        // A bit changed in a checksummed word (Unseal refuses it). (Not in the last bytes past the whole words: the
-        // checksum does not cover them, and a packet header there can take any size: see the notes.)
+        // A bit changed where the checksum sees it (Unseal refuses it): the low three bytes of a whole word. (Not the
+        // words' top bytes: the checksum is the sum's low 24 bits, so a change there passes; nor the last bytes past
+        // the whole words, which it does not cover: a packet header there can take any size; see the notes.)
         const int words = (static_cast<int>(w.bytes.size()) - 3) / 4;
         if (P(0.1) && words > 0)
-            w.bytes[static_cast<size_t>(I(3, 3 + words * 4 - 1))] ^= static_cast<uint8_t>(1 << I(0, 7));
+            w.bytes[static_cast<size_t>(3 + 4 * I(0, words - 1) + I(0, 2))] ^= static_cast<uint8_t>(1 << I(0, 7));
         return w;
     }
     // Anything, sealed (a fragment or not); at least 8 bytes (part 4a: a shorter one can fault both programs).
