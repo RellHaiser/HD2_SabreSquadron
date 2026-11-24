@@ -5,7 +5,10 @@
 
 // ---- the fakes (both sides; g_side says whose call it is; the real ones outside the calls compared) ----
 bool g_sockFaking;
-#define PASS(dll, type, ...)                                                                                           if (!g_sockFaking)                                                                                                     return reinterpret_cast<type>(reinterpret_cast<void *>(GetProcAddress(LoadLibraryA(dll), __func__ + 5)))(__VA_ARGS__)
+// (Outside the compared calls: the real function, by the fake's name less its "Fake_".)
+#define PASS(dll, type, ...)                                                                                          \
+    if (!g_sockFaking)                                                                                                \
+    return reinterpret_cast<type>(reinterpret_cast<void *>(GetProcAddress(LoadLibraryA(dll), __func__ + 5)))(__VA_ARGS__)
 int g_side;                       // 0 the port, 1 the original
 int g_recvClockStep;              // ms the clock (the includer's g_now) moves on at each datagram recvfrom gives
 std::vector<std::string> g_log[2];

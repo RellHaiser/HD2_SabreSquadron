@@ -6249,7 +6249,12 @@ came from. From this part on the network code is compared with the original exec
     of a packet list (type 1) to a connection's id crashes the game, the port too. Together with part 4a's short
     datagrams, the protocol needs bounds checks: a fix for a branch. The test sends no such datagram: random ones are
     never packet lists, and changed bits go only into checksummed words.
-  - A datagram's last 1 to 3 bytes (past its whole words) are not checksummed: a change there passes Unseal.
+  - A datagram's last 1 to 3 bytes (past its whole words) are not checksummed, and the checksum is the sum's low 24
+    bits, so a change in any word's top byte passes too: a quarter of single-bit changes go unseen (the test changes
+    only bits the checksum sees; it first changed any, and the fix branch's guard then dropped what the original
+    parsed as garbage).
+  - Branch `net-robust-datagrams` (2026-11-24) drops the datagrams behind the remote faults of parts 4a and 4b and a
+    message of fragments past the socket's 32 KB buffer (a heap overflow); its `net.robust` test sends them.
   - The constructor leaves the thread's fields, the times and the session as the memory was (Add before Start copies
     that session); the test zeroes them.
   - Start forgets the connections without deleting them.
