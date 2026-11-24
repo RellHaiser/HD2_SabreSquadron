@@ -6004,3 +6004,44 @@ particles and the surface marks. Files are served from memory.
   __fastcall writing through EDX (found when its result stayed uninitialised). The rounding hunt went through
   precision modes first; the constants' bytes (Ghidra shows them rounded) were the answer. ProductToFloat's first
   version took the remainder from std::fma: MinGW's runs on the x87 (at 24 bits in the test), so it was wrong.
+
+## Camera part 4 (the views and the special modes: `camera_module.cpp`'s SelectView, SetSpecialMode, RestartMission, LoadGame, 2026-11-24)
+
+- **The build:** `script/cam_diff.cpp` (suite `camera.module`) extended once more; SelectView, SetSpecialMode, RestartMission
+  and LoadGame called on both modules. The original's SetSpecialMode is one function taking its two arguments as raw
+  words; the port's four overloads are called with what its callers pass (a frame, an int, a float's bits, a vector and
+  a word), the original with the same words. Each case also gives both sides part 3's state (LoadGame updates), the
+  game's role (the original's 0x00982100; the port's `g_gameRole`; set back after the case), the seat's camera dummy
+  (GetSeatCamera), a car's seats (the original's array at +0x1038, 0x40 bytes each; the port's std::vector, its seats
+  g++'s size: the port's C_Car layout under g++ is not the original's) with the seat's camera keeper or none, the car's
+  camera offset, the Junkers' gun field of view, the player without movement now and then, the sector the player is in
+  (none, the primary one, another) with user properties ("nointerier", "interierclose", either case, both, none), the
+  frame the wildcard FindChildFrame finds ("camera3RD*", "cameraFPV*"), the spectators' cameras ("spectator",
+  "spectator<n>").
+  - Compared as in part 3; the wanted place's w (+0x1C), the original's uninitialised local in SelectView, is left out.
+- **The tests:** SelectView on foot (outdoors, indoors, "interierclose", under water, first person, the binoculars, a
+  client's), in every kind of seat (a weapon seat in the Junkers by an AI-held gunner or not, first person or third, a
+  passenger in a car with its own camera keeper or not, armed, first person only), without a camera dummy, with the
+  debug camera on or no game camera; a new camera dummy (the old one's soldier no longer faded) or the same; the blend
+  reset. SetSpecialMode in every mode and past them (the debug camera with the spectators', the explosion's radius
+  with the scripted view, the spectators counted and picked at random, the mouse look, under water, the kicks at their
+  limits, aiming, the next spectator wrapping, the scripted view held and let go), each role. RestartMission (a
+  client's or not, the player in the Junkers or not) and LoadGame. 40,000 cases with parts 1 to 3 (HD2_CAM_PART=4:
+  part 4's only; quick 8,000, about 10 s).
+- **Coverage:** every line of part 4's functions.
+- **Port bugs found:** none.
+- **The original's weaknesses (kept):** the explosion mode reads the game camera unchecked (the test gives it one);
+  modes 1, 5 and 6 read their vector unchecked; SelectView reads the camera dummy it chose unchecked only where it
+  cannot be null. Under water (mode 4) the original stores any overload's word as the water level; the port's callers
+  all use the float overload, which passes the same bits (the test uses only that one there).
+- **Harness decisions:** mode 4 only through the float overload; mode 9 only through the frame overload (the
+  original stores the word as the scripted view's frame); modes 1, 5 and 6 with a vector.
+- **Mutations:** 257 mutants (`mutate_cam4.py`), 20 not building; 219 of the 237 building killed. The 18 left:
+  equivalent ones (SelectView's unused argument, the blend's sign, the frame overload's unused number, the kicks'
+  redundant tests near 1 and under 1e-7), SaveGame's answer (part 1's), and the spectator pick's constant (a narrow
+  band). The first run's gaps (the explosion at 2.4 to 2.5 radii with the scripted view, exactly at the radius, a
+  kick just past 0.25) are now in the cases: the explosion is placed at set multiples of the radius from a game
+  camera moved to (1, 2, 3).
+- **Harness lessons (my mistakes):** the seats were first written at the original's offsets on both sides; g++ lays
+  out the port's C_Car differently (the seat vector at +0xFC4, 0x3C-byte seats), so the port side now writes its own
+  members.

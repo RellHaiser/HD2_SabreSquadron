@@ -1,4 +1,4 @@
-// Camera parts 1 to 3: the camera module's core (game/camera_module.cpp, C_CameraModule: the original's 0x0089afb0, vtable
+// Camera parts 1 to 4: the camera module's core (game/camera_module.cpp, C_CameraModule: the original's 0x0089afb0, vtable
 // 0x0080fdd0) and the vehicles' camera dummies' keeper (C_CameraFrameKeeper) against the original executable's.
 // cmd_diff.cpp's world, fakes and call logger are included (CMD_DIFF_NO_MAIN); the module's own calls are logged
 // through cam_calls.s / cam_calls.inc (gen_cmd_calls.py cam). The module's layout is the original's (the port's
@@ -16,8 +16,11 @@
 // with the mouse (a made IGraph), the controls' look values, the active player's vehicle and seat (the seat virtuals),
 // the head under water, the aiming sway (0x00839268 / g_cameraAimSway), ray tests and dynamic volumes; the directions'
 // w words the original writes from uninitialised locals are left out of its comparisons.
+// Part 4: SelectView (on foot, in each kind of seat; the sectors' properties), SetSpecialMode (the original's one
+// function with its two raw words; the port's overloads), RestartMission and LoadGame, with the game's role
+// (0x00982100 / g_gameRole), the seats' camera dummies, the spectators' cameras.
 // MinGW; build_cam.bat; runs cam_diff.exe ("cam_diff: N checks, 0 failures"). Env: HD2_CAM_CASES (default 40,000;
-// HD2_CAM_QUICK 8,000), HD2_CAM_OP (one operation's name), HD2_CAM_PART (1, 2 or 3: that part's operations only),
+// HD2_CAM_QUICK 8,000), HD2_CAM_OP (one operation's name), HD2_CAM_PART (1 to 4: that part's operations only),
 // HD2_CAM_SEED, HD2_CAM_SHOW, HD2_CAM_DUMP, HD2_CAM_TRACE.
 #define HARNESS_NAME "cam_diff"
 #define CMD_CALLS_INC "cam_calls.inc"
@@ -32,6 +35,8 @@
 #include "game/camera_module.h"
 #include "game/first_person_view.h"
 #include "game/submarine.h"
+#include "game/car.h"
+#include "game/junkers88.h"
 #undef protected
 #undef private
 
@@ -150,6 +155,9 @@ constexpr uint32_t O_FX_ZOOM = 0x00462750, O_FX_IS_TACTICAL = 0x00462770, O_FX_M
 constexpr uint32_t O_UPDATE = 0x00469300, O_UPDATE_CAR = 0x0046ada0, O_UPDATE_SCRIPTED = 0x0046b550,
                    O_UPDATE_DEBUG = 0x0046beb0, O_PLACE = 0x00468130, O_MOVE_CAMERA = 0x00466970,
                    O_AIM_SWAY = 0x00839268;
+// Part 4: the views and the special modes (SetSpecialMode: one function, its two arguments raw words); the game's role.
+constexpr uint32_t O_SELECT_VIEW = 0x0046c370, O_SPECIAL_MODE = 0x0046cb20, O_RESTART = 0x00464e10,
+                   O_LOAD_GAME = 0x00464e70, O_GAME_ROLE = 0x00982100;
 uint8_t *OCam() { return OriginalAt<uint8_t *>(O_CAM); }
 uint8_t *PCam() { return reinterpret_cast<uint8_t *>(&g_cameraModule); }
 uint8_t *Cam() { return g_side ? OCam() : PCam(); }
@@ -208,7 +216,9 @@ enum E_Op {
     OP_FX_REMOVE, OP_FX_SET_MODE, OP_FX_RESET_HUMANS, OP_FX_TRANSPARENCY, OP_FX_UPDATE_HUMAN, OP_FX_UPDATE_HUMANS,
     OP_FX_UPDATE_TACTICAL, OP_FX_MOVE,
     // Part 3: the update.
-    OP_UPDATE, OP_UPDATE_CAR, OP_UPDATE_SCRIPTED, OP_UPDATE_DEBUG, OP_PLACE, OP_MOVE_CAMERA, OP_COUNT
+    OP_UPDATE, OP_UPDATE_CAR, OP_UPDATE_SCRIPTED, OP_UPDATE_DEBUG, OP_PLACE, OP_MOVE_CAMERA,
+    // Part 4: the views and the special modes.
+    OP_SELECT_VIEW, OP_SPECIAL_MODE, OP_RESTART, OP_LOAD_GAME, OP_COUNT
 };
 const char *const OP_NAMES[OP_COUNT] = {"StartMission", "StopMission", "SaveGame", "LoadSettings", "ResetUnknown2AC",
                                         "GetCameraPos", "GetCameraDir", "SetBlendTime", "SetTarget", "GetViewDistance",
@@ -219,12 +229,14 @@ const char *const OP_NAMES[OP_COUNT] = {"StartMission", "StopMission", "SaveGame
                                         "ResetHumans", "GetTransparency", "UpdateHuman", "UpdateHumans", "UpdateTactical",
                                         "Move",
                                         "Update", "UpdateCarCamera", "UpdateScriptedView", "UpdateDebugCamera",
-                                        "PlaceCamera", "MoveCamera"};
+                                        "PlaceCamera", "MoveCamera",
+                                        "SelectView", "SetSpecialMode", "RestartMission", "LoadGame"};
 const int OP_WEIGHTS[OP_COUNT] = {12, 12, 2, 12, 2, 8, 8, 8, 5, 3, 5, 4, 5, 4, 8, 4, 4, 30,
                                   2, 2, 2, 10, 6, 12, 14, 6, 14, 5, 8, 12, 10, 40, 12,
-                                  60, 25, 15, 15, 35, 35};
+                                  60, 25, 15, 15, 35, 35,
+                                  70, 90, 12, 12};
 bool IsFxOp(int op) { return op >= OP_FX_ZOOM && op < OP_UPDATE; }
-int OpPart(int op) { return op >= OP_UPDATE ? 3 : IsFxOp(op) ? 2 : 1; }
+int OpPart(int op) { return op >= OP_SELECT_VIEW ? 4 : op >= OP_UPDATE ? 3 : IsFxOp(op) ? 2 : 1; }
 
 // A frame of the world by index (-1: null; -2: a camera the case made, CreateFrame's).
 struct S_CamCase {
@@ -285,10 +297,28 @@ struct S_CamCase {
     float aimSway = 0.005f;
     bool waterNear = false;                             // the water level the camera dummy's height less waterDelta
     float waterDelta = 0;
+    // Part 4: the seat's camera dummy (GetSeatCamera: a frame's index, -1 none), the car's seat camera (C_Car's seats
+    // +0x1038, the camera +0x34) and offset, the Junkers' gun field of view (+0x328), the frame the wildcard
+    // FindChildFrame finds (-1 none), the sector the player is in (0 none, 1 the primary, 2 another) and its user
+    // properties, the player without movement (the scene's sector), the spectators' cameras, the game's role; the special
+    // mode's overload (0 a frame, 1 an int, 2 a float, 3 a vector and a word) and its words.
+    int seatCamera = -1;
+    bool carSeatCam = false;
+    S_vector cameraOffset = {};
+    float gunFov = 0;
+    int childFrame = -1, sectorKind = 0, props = 0, spectators = 0;
+    bool noMovement = false;
+    uint32_t role = 7;
+    int specialKind = 0;
+    uint32_t word1 = 0, word2 = 0;
+    float explosionMult = -1;                           // (the explosion at this many radii from the game camera)
 };
 int g_camCases, g_opCases[OP_COUNT], g_onlyOp = -1, g_onlyPart;
 const S_CamCase *g_cur;                                 // (part 3's answers)
 int g_speedCalls;                                       // (the debug speed action's calls this side)
+uint32_t g_origRole;                                    // (the original's role outside part 4: as loaded)
+bool g_explosionSet;                                    // (part 4: the explosion's point, placed from the camera)
+S_vector4 g_explosion;
 uint8_t *g_igraph[2], *g_dynamic[2];                    // (each side's IGraph; a dynamic volume, its frame the case's)
 uint8_t *g_player[2];                                   // the case's active player on each side
 int g_groundHit;                                        // CollisionSphereTest's answer (the keeper's ground)
@@ -332,6 +362,15 @@ uint8_t *FramePtr(int index)
     if (index < 0)
         return nullptr;
     return W().frames[size_t(index)].bytes;
+}
+
+// Part 4: a sector's user properties (SelectView looks for "nointerier" and "interierclose", either case).
+const char *PropsText(int i)
+{
+    static const char *const props[] = {nullptr, "", "nointerier", "NOINTERIER", "interierclose", "INTERIERCLOSE",
+                                        "a nointerier; b interierclose", "NoInterier InterierClose",
+                                        "INTERIERCLOSE NOINTERIER"};
+    return props[i % 9];
 }
 
 // ---- the settings file ----
@@ -484,13 +523,34 @@ void SetCamState(const S_CamCase &c)
     reinterpret_cast<S_CollisionVolume *>(g_dynamic[g_side])->flags = COLLISION_FLAG_DYNAMIC;
     reinterpret_cast<S_CollisionVolume *>(g_dynamic[g_side])->frame =
         AsFrame(c.flag ? At<uint8_t *>(cam, 0x248) : FramePtr(c.frame));
-    if (OpPart(c.op) == 3) {
+    if (OpPart(c.op) >= 3) {
         if (uint8_t *h = g_player[g_side]) {
             uint8_t *vehicle = nullptr;
             if (c.playerVehicle >= 0 && !W().actors.empty()) {
-                vehicle = Block(0x1000);
+                vehicle = Block(std::max({size_t(0x1100), sizeof(C_Car), sizeof(C_Junkers88)}) + 0x40);
                 Name(vehicle, F("vehicle %d", c.playerVehicle));
                 *reinterpret_cast<void **>(vehicle) = *reinterpret_cast<void **>(W().actors[0].bytes);
+                // (Part 4: a car's seats (the original's array at +0x1038, 0x40 bytes each; the port's std::vector, its
+                // seats g++'s size), room for the seats -1 .. 9; the seat's camera (keeper) now and then. The Junkers'
+                // gun field of view.)
+                const size_t size = g_side ? 0x40 : sizeof(S_VehicleSeat);
+                const size_t at = g_side ? 0x34 : offsetof(S_VehicleSeat, camera);
+                uint8_t *seats = Block(size * 12) + size;
+                Name(seats - size, "seats");
+                if (c.carSeatCam) {
+                    uint8_t *cam = FramePtr(c.seatCamera >= 0 ? c.seatCamera : 5);
+                    std::memcpy(seats + int(size) * c.seat + at, &cam, 4);
+                }
+                uint8_t *end = seats + size * 10;
+                uint8_t *vec = g_side ? vehicle + 0x1038
+                                      : reinterpret_cast<uint8_t *>(&reinterpret_cast<C_Car *>(vehicle)->m_vehicle.m_seats);
+                std::memcpy(vec, &seats, 4);
+                std::memcpy(vec + 4, &end, 4);
+                std::memcpy(vec + 8, &end, 4);
+                if (g_side)
+                    PutF(vehicle, 0x328, c.gunFov);
+                else
+                    reinterpret_cast<C_Junkers88 *>(vehicle)->m_gunFov = c.gunFov;
             }
             if (g_side) {
                 if (vehicle)
@@ -503,7 +563,35 @@ void SetCamState(const S_CamCase &c)
                 reinterpret_cast<C_Human *>(h)->m_vehicle = reinterpret_cast<C_Actor *>(vehicle);
                 reinterpret_cast<C_Human *>(h)->m_seat = c.seat;
             }
+            // (Part 4: the player without movement: the sector the scene's.)
+            if (OpPart(c.op) == 4 && c.noMovement) {
+                if (g_side)
+                    *reinterpret_cast<uint8_t **>(h + 0xA0) = nullptr;
+                else
+                    reinterpret_cast<C_Human *>(h)->m_body.movement = nullptr;
+            }
         }
+    }
+    // Part 4: the game's role (both sides'; set back after the case), the primary sector's properties.
+    if (OpPart(c.op) == 4) {
+        if (g_side)
+            *OriginalAt<uint32_t *>(O_GAME_ROLE) = c.role;
+        else
+            g_gameRole = c.role;
+        if (c.sectorKind == 1)
+            *reinterpret_cast<const char **>(FramePtr(9) + 0xF0) = PropsText(c.props);
+    }
+    // The explosion at a set number of radii (the scripted view's 2.5 among them) from the game camera, moved to
+    // (1, 2, 3): the distances exact.
+    g_explosionSet = false;
+    if (OpPart(c.op) == 4 && c.explosionMult >= 0.0f && c.ptrs[0] >= 0) {
+        I3D_frame *camera = AsFrame(FramePtr(c.ptrs[0]));
+        camera->m_localMatrix.m[3][0] = 1.0f;
+        camera->m_localMatrix.m[3][1] = 2.0f;
+        camera->m_localMatrix.m[3][2] = 3.0f;
+        camera->m_frameFlags &= ~FRMFLAGS_WMATRIX_VALID;
+        g_explosion = {1.0f + float(c.word2) * c.explosionMult, 2.0f, 3.0f, 0.0f};
+        g_explosionSet = true;
     }
     if (c.waterNear) {
         if (uint8_t *dummy = At<uint8_t *>(cam, 0x248))
@@ -540,8 +628,9 @@ std::vector<std::string> CamState()
                 continue;
             }
             // (Part 3: the directions' and places' w the original writes from uninitialised locals (RotateByMatrix's,
-            // the slerped look's, the shake's): not read.)
-            if (g_cur && OpPart(g_cur->op) == 3 && (w == 0x2C || w == 0x3C || w == 0x4C || w == 0x6C || w == 0x7C)) {
+            // the slerped look's, the shake's): not read. Part 4: SelectView's wanted place's too.)
+            if (g_cur && OpPart(g_cur->op) >= 3 &&
+                (w == 0x2C || w == 0x3C || w == 0x4C || w == 0x6C || w == 0x7C || (OpPart(g_cur->op) == 4 && w == 0x1C))) {
                 line += " -";
                 continue;
             }
@@ -918,6 +1007,58 @@ void RunUpdateCall(const S_CamCase &c)
     }
 }
 
+// ---- part 4: the views and the special modes ----
+std::string RunViewOp(const S_CamCase &c)
+{
+    const bool o = g_side != 0;
+    C_CameraModule &m = g_cameraModule;
+    switch (c.op) {
+    case OP_SELECT_VIEW:
+        if (o)
+            OCall<void>(O_SELECT_VIEW, 0);
+        else
+            m.SelectView(0);
+        return "";
+    case OP_RESTART:
+        if (o)
+            OCall<void>(O_RESTART, c.flag);
+        else
+            m.RestartMission(c.flag);
+        return "";
+    case OP_LOAD_GAME: {
+        C_chunk chunk;                                  // (not read by either)
+        return BoolText(o ? OCall<bool>(O_LOAD_GAME, static_cast<void *>(&chunk)) : m.LoadGame(chunk));
+    }
+    case OP_SPECIAL_MODE: {
+        // The original's one function takes the two words; the port's overloads what its callers pass.
+        alignas(16) S_vector4 v = g_explosionSet ? g_explosion : c.vector;
+        uint32_t w1 = c.word1, w2 = c.word2;
+        if (c.specialKind == 0 && c.frame >= -1)
+            w2 = reinterpret_cast<uint32_t>(FramePtr(c.frame));
+        if (c.specialKind == 3)
+            w1 = c.word1 ? reinterpret_cast<uint32_t>(&v) : 0u;
+        if (o) {
+            OCall<void>(O_SPECIAL_MODE, c.number, w1, w2);
+        } else {
+            switch (c.specialKind) {
+            case 0: m.SetSpecialMode(c.number, w1 != 0, AsFrame(reinterpret_cast<uint8_t *>(w2))); break;
+            case 1: m.SetSpecialMode(c.number, w1 != 0, int(w2)); break;
+            case 2: {
+                float f;
+                std::memcpy(&f, &w2, 4);
+                m.SetSpecialMode(c.number, w1 != 0, f);
+                break;
+            }
+            default: m.SetSpecialMode(c.number, reinterpret_cast<const S_vector4 *>(w1), w2); break;
+            }
+        }
+        return F("mode %d kind %d words %08x %08x", c.number, c.specialKind, c.word1, c.word2);
+    }
+    default:
+        return "";
+    }
+}
+
 std::string RunOp(const S_CamCase &c)
 {
     const bool o = g_side != 0;
@@ -1023,7 +1164,7 @@ std::string RunOp(const S_CamCase &c)
     case OP_KEEPER:
         return RunKeeper(c);
     default:
-        return IsFxOp(c.op) ? RunFxOp(c) : RunUpdateOp(c);
+        return IsFxOp(c.op) ? RunFxOp(c) : OpPart(c.op) == 4 ? RunViewOp(c) : RunUpdateOp(c);
     }
 }
 
@@ -1262,6 +1403,106 @@ void RandomUpdate(S_CamCase &c)
     }
 }
 
+// Part 4's fields: part 3's (LoadGame updates; the views read the player's vehicle and seat), the seat's camera, the
+// sectors, the spectators, the role, the special mode's arguments.
+void RandomView(S_CamCase &c)
+{
+    RandomUpdate(c);
+    static const int children[] = {1, 11, 8, 12, 16, 18, 19, 20};
+    c.seatCamera = I(0, 5) ? children[I(0, 7)] : I(0, 1) ? AnyFrame() : -1;
+    c.carSeatCam = I(0, 1) != 0;
+    c.cameraOffset = {CF(), CF(), CF()};
+    c.gunFov = I(0, 1) ? 1.04719758f : CF();
+    c.childFrame = I(0, 2) ? children[I(0, 7)] : -1;
+    c.sectorKind = I(0, 3);
+    c.props = I(0, 8);
+    c.noMovement = I(0, 4) == 0;
+    c.role = std::vector<uint32_t>{7, 7, 7, 2, 2, 1, 3, 0}[size_t(I(0, 7))];
+    c.spectators = I(0, 2) ? I(0, 4) : 0;
+    c.flag = I(0, 1) != 0;
+    // (The views from the vehicle seats: the Junkers' and a car's more often.)
+    if (c.playerVehicle >= 0 && I(0, 2) == 0)
+        c.playerVehicle = I(0, 1) ? ACTOR_JUNKERS88 : ACTOR_CAR;
+    // The update after LoadGame reads the game camera, the turret's arm (the seat's camera dummy's parent in view 8) and
+    // the camera dummy (the car, view 2 under water) unchecked: the game has them.
+    c.ptrs[0] = I(0, 15) || c.op == OP_LOAD_GAME || c.op == OP_RESTART ? CameraFrame() : -1;
+    if (c.op == OP_LOAD_GAME || c.op == OP_RESTART) {
+        c.seatCamera = children[I(0, 7)];
+        c.ptrs[2] = children[I(0, 7)];
+        c.childFrame = I(0, 2) ? children[I(0, 7)] : -1;
+    }
+    if (c.op != OP_SPECIAL_MODE)
+        return;
+    // SetSpecialMode: its mode (and some past its range), the overload its callers use for it, the words.
+    c.number = I(0, 15) ? I(0, 9) : I(-1, 11);
+    switch (c.number) {
+    case 1:                                             // (the explosion: a point, a radius in metres; the game
+        c.ptrs[0] = CameraFrame();                      //  camera read unchecked)
+        c.specialKind = 3;
+        break;
+    case 5:                                             // (the kicks: a vector)
+    case 6:
+        c.specialKind = 3;
+        break;
+    case 4:                                             // (under water: the level, the float overload's bits; the
+        c.specialKind = 2;                              //  original stores any overload's word, the port only that)
+        break;
+    case 9:                                             // (the scripted view: a frame)
+        c.specialKind = 0;
+        break;
+    default:
+        c.specialKind = I(0, 3);
+        break;
+    }
+    c.word1 = uint32_t(I(0, 1));
+    if (c.specialKind == 3 && (c.number == 1 || c.number == 5 || c.number == 6))
+        c.word1 = 1;                                    // (read unchecked)
+    switch (c.specialKind) {
+    case 0:
+        c.frame = I(0, 3) ? AnyFrame() : -1;
+        if (c.number == 9 && I(0, 3) == 0)
+            c.frame = -1;
+        break;
+    case 1:
+        c.word2 = I(0, 2) ? uint32_t(I(0, 1)) : U32();
+        break;
+    case 2: {
+        const float f = I(0, 3) ? CF() : 0.0f;
+        std::memcpy(&c.word2, &f, 4);
+        if (I(0, 7) == 0)
+            c.word2 = 0x80000000u;                      // (-0: its bits not 0)
+        break;
+    }
+    default:
+        c.word2 = I(0, 2) ? uint32_t(I(0, 30)) : I(0, 1) ? U32() : 0u;
+        break;
+    }
+    // The explosion: a small radius, at a set number of radii from the game camera now and then (exactly at it, the
+    // scripted view's 2.5, between 2.4 and 2.5, a little inside or out).
+    if (c.number == 1 && I(0, 1)) {
+        c.word2 = uint32_t(I(1, 8));
+        c.explosionMult = std::vector<float>{1.0f, 2.5f, 2.45f, 0.5f, 3.0f, 0.875f, 1.125f}[size_t(I(0, 6))];
+    }
+    // The kicks: small vectors, the offsets around their limits (0.25, 1 m; 0.255 just past) and the 1e-8 square.
+    if (c.number == 5 || c.number == 6) {
+        static const float parts[] = {0.0f, 0.1f, -0.1f, 0.25f, -0.25f, 0.5f, 1.0f, -1.0f, 0.125f, 1e-5f, 0.255f, -0.255f};
+        c.vector = {parts[I(0, 11)], parts[I(0, 11)], parts[I(0, 11)], CF()};
+        if (I(0, 2) == 0)
+            c.vector = {I(0, 1) ? 0.255f : -0.258f, 0.0f, 0.0f, 0.0f};
+        const uint32_t o = c.number == 5 ? 0x80 : 0x90;
+        if (I(0, 1))
+            for (uint32_t i = 0; i < 3; ++i)
+                PutF(c.image, o + 4 * i, I(0, 1) ? 0.0f : parts[I(0, 9)]);
+        c.image[0x290] = uint8_t(I(0, 3) == 0);
+    }
+    // The spectators' toggles and the debug camera's.
+    if (c.number == 0 || c.number == 2 || c.number == 8) {
+        c.image[0x26E] = uint8_t(I(0, 1));
+        c.image[0x26D] = uint8_t(I(0, 1));
+        PutI(c.image, 0x274, I(-1, 5));
+    }
+}
+
 S_CamCase RandomCamCase()
 {
     S_CamCase c;
@@ -1425,6 +1666,8 @@ S_CamCase RandomCamCase()
         RandomFx(c);
     else if (OpPart(c.op) == 3)
         RandomUpdate(c);
+    else if (OpPart(c.op) == 4)
+        RandomView(c);
     return c;
 }
 
@@ -1493,6 +1736,9 @@ void RunCamCase(S_CamCase c)
     ReleaseHeldFrees();
     FreeWorld(0);
     FreeWorld(1);
+    // (Part 4 set the game's role: back to the other parts'.)
+    g_gameRole = GAME_ROLE_LOCAL;
+    *OriginalAt<uint32_t *>(O_GAME_ROLE) = g_origRole;
 }
 
 LONG WINAPI DebugText(EXCEPTION_POINTERS *e)
@@ -1547,7 +1793,7 @@ void SetUpCam()
                 *hit = S_vector(pos.x + move.x * f, pos.y + move.y * f, pos.z + move.z * f);
             // (Part 3: a dynamic volume now and then, its frame the camera dummy's or another.)
             const uint32_t kind = NextFake() % 3;
-            if (kind == 2 && OpPart(g_cur->op) == 3)
+            if (kind == 2 && OpPart(g_cur->op) >= 3)
                 return reinterpret_cast<uint32_t>(g_dynamic[g_side]);
             return reinterpret_cast<uint32_t>(kind ? water : volume);
         }
@@ -1647,6 +1893,55 @@ void SetUpCam()
     };
     g_answers["C_Actor::GetSeatFlags"] = [](const std::vector<uint32_t> &) { return g_cur->seatFlags; };
     g_answers["C_Actor::IsSeatFirstPersonOnly"] = [](const std::vector<uint32_t> &) { return uint32_t(g_cur->fpvOnly); };
+    // Part 4: the seat's camera dummy, the car's camera offset, the wildcard child frames ("camera3RD*", "cameraFPV*"),
+    // the player's sector (the body's or the scene's), the spectators' cameras ("spectator", "spectator<n>").
+    g_origRole = *OriginalAt<uint32_t *>(O_GAME_ROLE);
+    g_answers["C_Actor::GetSeatCamera"] = [](const std::vector<uint32_t> &) {
+        return reinterpret_cast<uint32_t>(FramePtr(g_cur->seatCamera));
+    };
+    g_answers["C_Vehicle::GetCameraOffset"] = [](const std::vector<uint32_t> &a) {
+        if (S_vector *out = reinterpret_cast<S_vector *>(a[1]))
+            *out = g_cur->cameraOffset;
+        return 0u;
+    };
+    auto findChild = g_answers["I3D_frame::FindChildFrame"];
+    g_answers["I3D_frame::FindChildFrame"] = [findChild](const std::vector<uint32_t> &a) {
+        const char *name = reinterpret_cast<const char *>(a[1]);
+        if (g_cur && OpPart(g_cur->op) == 4 && name && std::strchr(name, '*'))
+            return reinterpret_cast<uint32_t>(FramePtr(g_cur->childFrame));
+        return findChild(a);
+    };
+    static auto part4Sector = []() -> uint32_t {
+        switch (g_cur->sectorKind) {
+        case 1: return reinterpret_cast<uint32_t>(FramePtr(9));
+        case 2:
+        case 3: {
+            uint8_t *s = Block(0x200);
+            Name(s, "player sector");
+            *reinterpret_cast<const char **>(s + 0xF0) = PropsText(g_cur->props);
+            return reinterpret_cast<uint32_t>(s);
+        }
+        default: return 0u;
+        }
+    };
+    g_answers["S_HumanBody::GetSector"] = [](const std::vector<uint32_t> &) {
+        return g_cur && OpPart(g_cur->op) == 4 ? part4Sector() : 0u;
+    };
+    auto sceneSector = g_answers["I3D_scene::GetSector"];
+    g_answers["I3D_scene::GetSector"] = [sceneSector](const std::vector<uint32_t> &a) {
+        return g_cur && OpPart(g_cur->op) == 4 ? part4Sector() : sceneSector(a);
+    };
+    auto sceneFind = g_answers["I3D_scene::FindFrame"];
+    g_answers["I3D_scene::FindFrame"] = [sceneFind](const std::vector<uint32_t> &a) {
+        const char *name = reinterpret_cast<const char *>(a[1]);
+        if (g_cur && OpPart(g_cur->op) == 4 && name && std::strncmp(name, "spectator", 9) == 0) {
+            if (!name[9])
+                return g_cur->spectators ? reinterpret_cast<uint32_t>(FramePtr(13)) : 0u;
+            const int n = std::atoi(name + 9);
+            return n >= 0 && n < g_cur->spectators ? reinterpret_cast<uint32_t>(FramePtr(n % 2 ? 13 : 4)) : 0u;
+        }
+        return sceneFind(a);
+    };
     if (const char *part = std::getenv("HD2_CAM_PART"))
         g_onlyPart = std::atoi(part);
     if (const char *op = std::getenv("HD2_CAM_OP"))
