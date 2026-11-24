@@ -111,6 +111,8 @@ SUITES = [
     T("net.sock", "net/build_sock.bat", TMP + r"\sock_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 4b: the connections and the transport against the original executable, net/trans_diff.cpp.)
     T("net.trans", "net/build_trans.bat", TMP + r"\trans_diff.exe", needs=("mingw", "original_exe")),
+    # (Branch net-robust-datagrams: the datagrams that crash the original, dropped; net/robust_test.cpp.)
+    T("net.robust", "net/build_robust.bat", TMP + r"\robust_test.exe", summary=r"robust: (\d+) checks, (\d+) failures"),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",

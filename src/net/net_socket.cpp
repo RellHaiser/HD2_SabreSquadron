@@ -171,12 +171,23 @@ void C_NetSocket::Receive(uint8_t **data, int *size, uint32_t *address, uint32_t
     ReceiveRaw(data, size, address, port);
     if (!*data)
         return;
+    // (Branch net-robust-datagrams: the original reads the byte after the seal even past a datagram of 3 bytes or
+    // fewer, and takes a fragment's data as the bytes after its 8 even in one of fewer: a negative size copied. Such
+    // datagrams are dropped.)
+    if (*size < 4) {
+        *data = nullptr;
+        return;
+    }
     const int sealed = *size - 3;
     *size = sealed;
     if (Unseal(*data, sealed)) {
         *data += 3;
         if (static_cast<int8_t>(**data) >= 0)
             return;
+        if (*size < 5) {
+            *data = nullptr;
+            return;
+        }
         // A fragment: kept until its message is whole.
         S_NetFragment fragment = {};
         fragment.data = g_netPool.AllocBuffer(static_cast<size_t>(*size));
@@ -234,6 +245,19 @@ bool C_NetSocket::Reassemble(uint8_t **data, int *size)
     int first, count;
     if (!FindComplete(&first, &count))
         return false;
+    // (Branch net-robust-datagrams: the original joins the fragments into its 0x8000-byte buffer whatever their total;
+    // up to 128 of 500 bytes, or a few big ones, run past it. A message that would not fit is dropped.)
+    int needed = 0;
+    for (int n = 0; n < count; ++n)
+        needed += m_fragments[static_cast<size_t>(first + n)].size;
+    if (needed > kBufferSize) {
+        for (int n = count; n != 0; --n) {
+            S_NetFragment &fragment = m_fragments[static_cast<size_t>(first)];
+            g_netPool.FreeBuffer(fragment.data, fragment.size);
+            m_fragments.erase(m_fragments.begin() + first);
+        }
+        return false;
+    }
     int total = 0;
     for (int n = count; n != 0; --n) {
         S_NetFragment &fragment = m_fragments[static_cast<size_t>(first)];
