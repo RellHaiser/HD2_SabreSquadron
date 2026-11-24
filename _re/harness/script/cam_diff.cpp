@@ -1,4 +1,4 @@
-// Camera parts 1 and 2: the camera module's core (game/camera_module.cpp, C_CameraModule: the original's 0x0089afb0, vtable
+// Camera parts 1 to 3: the camera module's core (game/camera_module.cpp, C_CameraModule: the original's 0x0089afb0, vtable
 // 0x0080fdd0) and the vehicles' camera dummies' keeper (C_CameraFrameKeeper) against the original executable's.
 // cmd_diff.cpp's world, fakes and call logger are included (CMD_DIFF_NO_MAIN); the module's own calls are logged
 // through cam_calls.s / cam_calls.inc (gen_cmd_calls.py cam). The module's layout is the original's (the port's
@@ -12,8 +12,12 @@
 // Part 2: the command map's tactical camera (C_CameraHumanEffects): every function (the private ones called directly),
 // with the faded humans' vector in each side's layout, the player team's known enemies and members, the collision
 // queries hitting now and then (a plain volume or a water surface's), the scene's sector the primary one or another.
+// Part 3: the update (Update on each of its paths, the car's, the scripted and the debug cameras, PlaceCamera, MoveCamera)
+// with the mouse (a made IGraph), the controls' look values, the active player's vehicle and seat (the seat virtuals),
+// the head under water, the aiming sway (0x00839268 / g_cameraAimSway), ray tests and dynamic volumes; the directions'
+// w words the original writes from uninitialised locals are left out of its comparisons.
 // MinGW; build_cam.bat; runs cam_diff.exe ("cam_diff: N checks, 0 failures"). Env: HD2_CAM_CASES (default 40,000;
-// HD2_CAM_QUICK 8,000), HD2_CAM_OP (one operation's name), HD2_CAM_PART (1 or 2: that part's operations only),
+// HD2_CAM_QUICK 8,000), HD2_CAM_OP (one operation's name), HD2_CAM_PART (1, 2 or 3: that part's operations only),
 // HD2_CAM_SEED, HD2_CAM_SHOW, HD2_CAM_DUMP, HD2_CAM_TRACE.
 #define HARNESS_NAME "cam_diff"
 #define CMD_CALLS_INC "cam_calls.inc"
@@ -142,6 +146,10 @@ constexpr uint32_t O_FX_ZOOM = 0x00462750, O_FX_IS_TACTICAL = 0x00462770, O_FX_M
                    O_FX_SET_TACTICAL = 0x00462ae0, O_FX_REMOVE = 0x00463040, O_FX_SET_MODE = 0x004632c0,
                    O_FX_RESET_HUMANS = 0x00463620, O_FX_TRANSPARENCY = 0x00463690, O_FX_UPDATE_HUMAN = 0x00463780,
                    O_FX_UPDATE_HUMANS = 0x00463890, O_FX_UPDATE_TACTICAL = 0x00463ba0, O_FX_MOVE = 0x00464b80;
+// Part 3: the update (thiscall on the module, the time step).
+constexpr uint32_t O_UPDATE = 0x00469300, O_UPDATE_CAR = 0x0046ada0, O_UPDATE_SCRIPTED = 0x0046b550,
+                   O_UPDATE_DEBUG = 0x0046beb0, O_PLACE = 0x00468130, O_MOVE_CAMERA = 0x00466970,
+                   O_AIM_SWAY = 0x00839268;
 uint8_t *OCam() { return OriginalAt<uint8_t *>(O_CAM); }
 uint8_t *PCam() { return reinterpret_cast<uint8_t *>(&g_cameraModule); }
 uint8_t *Cam() { return g_side ? OCam() : PCam(); }
@@ -198,7 +206,9 @@ enum E_Op {
     // Part 2: the human effects.
     OP_FX_ZOOM, OP_FX_IS_TACTICAL, OP_FX_MOTION, OP_FX_START_FLIGHT, OP_FX_LOOK_POINT, OP_FX_LOOK_AT, OP_FX_SET_TACTICAL,
     OP_FX_REMOVE, OP_FX_SET_MODE, OP_FX_RESET_HUMANS, OP_FX_TRANSPARENCY, OP_FX_UPDATE_HUMAN, OP_FX_UPDATE_HUMANS,
-    OP_FX_UPDATE_TACTICAL, OP_FX_MOVE, OP_COUNT
+    OP_FX_UPDATE_TACTICAL, OP_FX_MOVE,
+    // Part 3: the update.
+    OP_UPDATE, OP_UPDATE_CAR, OP_UPDATE_SCRIPTED, OP_UPDATE_DEBUG, OP_PLACE, OP_MOVE_CAMERA, OP_COUNT
 };
 const char *const OP_NAMES[OP_COUNT] = {"StartMission", "StopMission", "SaveGame", "LoadSettings", "ResetUnknown2AC",
                                         "GetCameraPos", "GetCameraDir", "SetBlendTime", "SetTarget", "GetViewDistance",
@@ -207,10 +217,14 @@ const char *const OP_NAMES[OP_COUNT] = {"StartMission", "StopMission", "SaveGame
                                         "SetTacticalZoom", "IsTactical", "SetTacticalMotion", "StartFlight",
                                         "UpdateLookPoint", "LookAt", "SetTactical", "Remove", "SetTacticalMode",
                                         "ResetHumans", "GetTransparency", "UpdateHuman", "UpdateHumans", "UpdateTactical",
-                                        "Move"};
+                                        "Move",
+                                        "Update", "UpdateCarCamera", "UpdateScriptedView", "UpdateDebugCamera",
+                                        "PlaceCamera", "MoveCamera"};
 const int OP_WEIGHTS[OP_COUNT] = {12, 12, 2, 12, 2, 8, 8, 8, 5, 3, 5, 4, 5, 4, 8, 4, 4, 30,
-                                  2, 2, 2, 10, 6, 12, 14, 6, 14, 5, 8, 12, 10, 40, 12};
-bool IsFxOp(int op) { return op >= OP_FX_ZOOM; }
+                                  2, 2, 2, 10, 6, 12, 14, 6, 14, 5, 8, 12, 10, 40, 12,
+                                  60, 25, 15, 15, 35, 35};
+bool IsFxOp(int op) { return op >= OP_FX_ZOOM && op < OP_UPDATE; }
+int OpPart(int op) { return op >= OP_UPDATE ? 3 : IsFxOp(op) ? 2 : 1; }
 
 // A frame of the world by index (-1: null; -2: a camera the case made, CreateFrame's).
 struct S_CamCase {
@@ -257,12 +271,29 @@ struct S_CamCase {
     bool hasPoint = false;
     float motionX = 0, motionY = 0;
     S_vector viewDir = {0, 0, 1};
+    // Part 3: the mouse (IGraph's), the inverted mouse, the controls' look and debug speed values (the speed: the first
+    // and the second call's), the camera dummy's roll (PoseGetRoll), the selected member (a human's index, -1 none),
+    // the player's vehicle (-1 none; else a made actor of that type) and seat, its flags, first person only, the
+    // player's head under water and the surface, the aiming sway.
+    int mouseX = 0, mouseY = 0;
+    uint32_t buttons = 0;
+    bool invertMouse = false;
+    float lookX = 0, lookY = 0, speed1 = 0, speed2 = 0, roll = 0, surface = 0;
+    int selected = -1, playerVehicle = -1, seat = 0;
+    uint32_t seatFlags = 0;
+    bool fpvOnly = false, headUnder = false;
+    float aimSway = 0.005f;
+    bool waterNear = false;                             // the water level the camera dummy's height less waterDelta
+    float waterDelta = 0;
 };
 int g_camCases, g_opCases[OP_COUNT], g_onlyOp = -1, g_onlyPart;
+const S_CamCase *g_cur;                                 // (part 3's answers)
+int g_speedCalls;                                       // (the debug speed action's calls this side)
+uint8_t *g_igraph[2], *g_dynamic[2];                    // (each side's IGraph; a dynamic volume, its frame the case's)
 uint8_t *g_player[2];                                   // the case's active player on each side
 int g_groundHit;                                        // CollisionSphereTest's answer (the keeper's ground)
 bool g_fxCollisions;                                    // part 2: the collision queries hit now and then
-S_vector g_viewDir;                                     // C_Human::GetViewDir's answer
+S_vector4 g_viewDir;                                    // C_Human::GetViewDir's answer (read as an S_vector4)
 uint8_t *HumanAt(int index)
 {
     if (index < 0 || W().humans.empty())
@@ -439,8 +470,49 @@ void SetCamState(const S_CamCase &c)
         for (uint8_t *r : records)
             v.push_back(reinterpret_cast<S_EnemyRecord *>(r));
     }
-    g_viewDir = c.viewDir;
-    g_fxCollisions = IsFxOp(c.op);
+    g_viewDir = {c.viewDir.x, c.viewDir.y, c.viewDir.z, 0.5f};
+    g_fxCollisions = OpPart(c.op) >= 2;
+    // Part 3: the screen's mouse, the player's vehicle and seat, the aiming sway; a dynamic volume (its frame the camera
+    // dummy or another: PlaceCamera drops hits on the dummy's own model).
+    g_cur = &c;
+    g_speedCalls = 0;
+    g_igraph[g_side] = Block(0x200);
+    Name(g_igraph[g_side], "igraph");
+    *reinterpret_cast<void ***>(g_igraph[g_side]) = EngineVtable("IGraph");
+    g_dynamic[g_side] = Block(0x60);
+    Name(g_dynamic[g_side], "dynamic volume");
+    reinterpret_cast<S_CollisionVolume *>(g_dynamic[g_side])->flags = COLLISION_FLAG_DYNAMIC;
+    reinterpret_cast<S_CollisionVolume *>(g_dynamic[g_side])->frame =
+        AsFrame(c.flag ? At<uint8_t *>(cam, 0x248) : FramePtr(c.frame));
+    if (OpPart(c.op) == 3) {
+        if (uint8_t *h = g_player[g_side]) {
+            uint8_t *vehicle = nullptr;
+            if (c.playerVehicle >= 0 && !W().actors.empty()) {
+                vehicle = Block(0x1000);
+                Name(vehicle, F("vehicle %d", c.playerVehicle));
+                *reinterpret_cast<void **>(vehicle) = *reinterpret_cast<void **>(W().actors[0].bytes);
+            }
+            if (g_side) {
+                if (vehicle)
+                    *reinterpret_cast<int *>(vehicle + 0x18) = c.playerVehicle;
+                *reinterpret_cast<uint8_t **>(h + 0x160) = vehicle;
+                PutI(h, 0x164, c.seat);
+            } else {
+                if (vehicle)
+                    reinterpret_cast<C_Actor *>(vehicle)->m_type = E_ActorType(c.playerVehicle);
+                reinterpret_cast<C_Human *>(h)->m_vehicle = reinterpret_cast<C_Actor *>(vehicle);
+                reinterpret_cast<C_Human *>(h)->m_seat = c.seat;
+            }
+        }
+    }
+    if (c.waterNear) {
+        if (uint8_t *dummy = At<uint8_t *>(cam, 0x248))
+            PutF(cam, 0x27C, AsFrame(dummy)->GetMatrix().m[3][1] - c.waterDelta);
+    }
+    if (g_side)
+        *OriginalAt<float *>(O_AIM_SWAY) = c.aimSway;
+    else
+        g_cameraAimSway = c.aimSway;
 }
 
 std::string WordText(const uint8_t *base, uint32_t o, bool isFloat, bool isPointer)
@@ -467,6 +539,12 @@ std::vector<std::string> CamState()
                                                                                          : F(" %08x?", p);
                 continue;
             }
+            // (Part 3: the directions' and places' w the original writes from uninitialised locals (RotateByMatrix's,
+            // the slerped look's, the shake's): not read.)
+            if (g_cur && OpPart(g_cur->op) == 3 && (w == 0x2C || w == 0x3C || w == 0x4C || w == 0x6C || w == 0x7C)) {
+                line += " -";
+                continue;
+            }
             line += " " + WordText(cam, w, IsCamFloat(w),
                                    std::find(std::begin(CAM_POINTERS), std::end(CAM_POINTERS), w) != std::end(CAM_POINTERS));
         }
@@ -488,6 +566,7 @@ std::vector<std::string> CamState()
         humans += " " + NameOf(*reinterpret_cast<const uint32_t *>(p)) + " " +
                   FloatText(*reinterpret_cast<const float *>(p + 4));
     out.push_back(humans);
+    out.push_back("aim sway " + FloatText(g_side ? *OriginalAt<float *>(O_AIM_SWAY) : g_cameraAimSway));
     return out;
 }
 
@@ -779,6 +858,66 @@ std::string RunFxOp(const S_CamCase &c)
     }
 }
 
+// ---- part 3: the update ----
+void RunUpdateCall(const S_CamCase &c);
+std::string RunUpdateOp(const S_CamCase &c)
+{
+    const bool o = g_side != 0;
+    C_CameraModule &m = g_cameraModule;
+    // (Both sides read these unchecked: the game camera in the update's paths that use it, the camera dummy in the
+    // car's, the turret's arm (the dummy's parent) in view 8.)
+    if (c.op == OP_UPDATE_CAR && (!g_player[g_side] || c.playerVehicle < 0 || W().actors.empty()))
+        return "no player in a vehicle";
+    RunUpdateCall(c);
+    // (The inputs, for a failure's report.)
+    return F("step %d sway ", c.number) + FloatText(c.aimSway);
+}
+void RunUpdateCall(const S_CamCase &c)
+{
+    const bool o = g_side != 0;
+    C_CameraModule &m = g_cameraModule;
+    switch (c.op) {
+    case OP_UPDATE:
+        if (o)
+            OCall<void>(O_UPDATE, c.number);
+        else
+            m.Update(c.number);
+        return;
+    case OP_UPDATE_CAR:
+        if (o)
+            OCall<void>(O_UPDATE_CAR, c.number);
+        else
+            m.UpdateCarCamera(c.number);
+        return;
+    case OP_UPDATE_SCRIPTED:
+        if (o)
+            OCall<void>(O_UPDATE_SCRIPTED, c.number);
+        else
+            m.UpdateScriptedView(c.number);
+        return;
+    case OP_UPDATE_DEBUG:
+        if (o)
+            OCall<void>(O_UPDATE_DEBUG, c.number);
+        else
+            m.UpdateDebugCamera(c.number);
+        return;
+    case OP_PLACE:
+        if (o)
+            OCall<void>(O_PLACE, c.number);
+        else
+            m.PlaceCamera(c.number);
+        return;
+    case OP_MOVE_CAMERA:
+        if (o)
+            OCall<void>(O_MOVE_CAMERA, c.number);
+        else
+            m.MoveCamera(c.number);
+        return;
+    default:
+        return;
+    }
+}
+
 std::string RunOp(const S_CamCase &c)
 {
     const bool o = g_side != 0;
@@ -884,7 +1023,7 @@ std::string RunOp(const S_CamCase &c)
     case OP_KEEPER:
         return RunKeeper(c);
     default:
-        return RunFxOp(c);
+        return IsFxOp(c.op) ? RunFxOp(c) : RunUpdateOp(c);
     }
 }
 
@@ -996,6 +1135,133 @@ void RandomFx(S_CamCase &c)
     }
 }
 
+// Part 3's fields: the paths the update takes, the mouse, the controls, the player's vehicle and seat.
+void RandomUpdate(S_CamCase &c)
+{
+    static const int steps[] = {0, 1, 10, 16, 33, 50, 100, 250, -16};
+    // (And the steps whose sway product a double rounds twice: the rates' midpoints.)
+    static const int ties[] = {55, 75, 110, 150, 220, 300, 440, 600, 325, 425};
+    c.number = I(0, 3) ? steps[I(0, 8)] : I(0, 1) ? ties[I(0, 9)] : I(-50, 600);
+    // The update's path: the debug camera, the spectators' (returns), the scripted view, the car, the main one.
+    if (c.op == OP_UPDATE) {
+        const int path = I(0, 9);
+        c.image[0x26D] = path == 0;
+        c.image[0x26E] = path == 1 || (path == 0 && I(0, 1));
+        c.image[0x2B0] = path == 2 || (path == 0 && I(0, 1));
+    }
+    if (c.op == OP_UPDATE_SCRIPTED || (c.op == OP_UPDATE && c.image[0x2B0]))
+        c.ptrs[6] = I(0, 5) ? AnyFrame() : -1;
+    // The game camera (the update's paths read it unchecked: the game has one).
+    if (c.op != OP_PLACE && c.op != OP_MOVE_CAMERA && c.op != OP_UPDATE_SCRIPTED)
+        c.ptrs[0] = CameraFrame();
+    else if (I(0, 7))
+        c.ptrs[0] = CameraFrame();
+    // The view: mostly those the update treats apart.
+    if (I(0, 1))
+        PutI(c.image, 0x260, std::vector<int>{1, 2, 7, 8, 9, 10}[size_t(I(0, 5))]);
+    // The camera dummy: mostly one with a parent (the turret's arm in view 8; the car reads it unchecked).
+    static const int children[] = {1, 11, 8, 12, 16, 18, 19, 20};
+    c.ptrs[2] = I(0, 2) ? children[I(0, 7)] : I(0, 1) ? AnyFrame() : -1;
+    const int view = At<int>(c.image, 0x260);
+    // (View 2 reads it unchecked with the head under water.)
+    if (view == 8 || view == 2 || c.op == OP_UPDATE_CAR || I(0, 3) == 0)
+        c.ptrs[2] = children[I(0, 7)];
+    c.ownedCamera = I(0, 1) != 0;
+    c.player = I(0, 5) ? I(0, 20) : -1;
+    if (c.op == OP_UPDATE_CAR && c.player < 0)
+        c.player = I(0, 20);
+    // The player's vehicle: a car mostly (the car's camera), another kind, none.
+    static const int kinds[] = {ACTOR_CAR, ACTOR_CAR, ACTOR_CAR, ACTOR_SUBMARINE, ACTOR_STATIC_WEAPON, ACTOR_JUNKERS88,
+                                ACTOR_BIKE};
+    c.playerVehicle = I(0, 2) ? kinds[I(0, 6)] : -1;
+    if (c.op == OP_UPDATE_CAR)
+        c.playerVehicle = I(0, 5) ? ACTOR_CAR : kinds[I(0, 6)];
+    // (The car's camera reads the camera dummy unchecked: a car's seat has one.)
+    if (c.playerVehicle == ACTOR_CAR)
+        c.ptrs[2] = children[I(0, 7)];
+    c.seat = I(0, 3) ? I(0, 3) : I(-1, 8);
+    static const uint32_t flags[] = {0, SEAT_FLAG_WEAPON, SEAT_FLAG_HIDDEN, SEAT_FLAG_ARMED, SEAT_FLAG_HIDDEN | SEAT_FLAG_ARMED,
+                                     SEAT_FLAG_CONTROLS | SEAT_FLAG_SIT, SEAT_FLAG_WEAPON | SEAT_FLAG_ARMED};
+    c.seatFlags = I(0, 5) ? flags[I(0, 6)] : uint32_t(I(0, 0x7FF));
+    c.fpvOnly = I(0, 2) == 0;
+    c.selected = I(0, 2) ? -1 : I(0, 1) ? c.player : I(0, 20);
+    // The mouse, the controls.
+    static const int deltas[] = {0, 0, 1, -1, 5, -5, 40, -40, 200};
+    c.mouseX = deltas[I(0, 8)];
+    c.mouseY = deltas[I(0, 8)];
+    c.buttons = uint32_t(I(0, 3) ? I(0, 3) : I(0, 255));
+    c.invertMouse = I(0, 3) == 0;
+    static const float looks[] = {0.0f, 0.0f, 0.25f, -0.25f, 1.0f, -1.0f, 0.05f, 0.6f, -0.6f};
+    c.lookX = I(0, 3) ? looks[I(0, 8)] : CF();
+    c.lookY = I(0, 3) ? looks[I(0, 8)] : CF();
+    static const float speeds[] = {0.0f, 0.0f, 1.0f, -1.0f, 0.5f};
+    c.speed1 = speeds[I(0, 4)];
+    c.speed2 = speeds[I(0, 4)];
+    c.roll = I(0, 2) ? 0.0f : CF();
+    c.headUnder = I(0, 2) == 0;
+    c.surface = CF();
+    static const float sways[] = {0.005f, 0.0015f, 0.008f, 0.002f, 0.0016f, 0.0079f};
+    c.aimSway = sways[I(0, 5)];
+    // The module's view and settings near their edges now and then: the water level around the dummy, the blend.
+    c.image[0x26F] = uint8_t(I(0, 3) != 0);           // (the mouse look mostly on)
+    if (I(0, 2) == 0)
+        PutI(c.image, 0x280, 0);
+    if (I(0, 2) == 0)
+        PutI(c.image, 0x284, 0);
+    if (I(0, 1))
+        PutF(c.image, 0x27C, float(I(-4, 4)) * 0.5f);
+    // The directions unit now and then.
+    if (I(0, 1)) {
+        const S_vector d = UnitChoice();
+        PutF(c.image, 0x20, d.x);
+        PutF(c.image, 0x24, d.y);
+        PutF(c.image, 0x28, d.z);
+    }
+    if (I(0, 1)) {
+        const S_vector d = UnitChoice();
+        PutF(c.image, 0x40, d.x);
+        PutF(c.image, 0x44, d.y);
+        PutF(c.image, 0x48, d.z);
+    }
+    c.flag = I(0, 2) == 0;                              // (the dynamic volume's frame the camera dummy)
+    // The water's surface around the camera dummy (view 2 keeps the camera out of the band around it), the aim time
+    // near its 5 s limit.
+    if (I(0, 2) == 0) {
+        static const float deltas[] = {0.0f, 0.05f, 0.1f, 0.2f, -0.05f, -0.15f, 1.0f, -1.0f};
+        c.waterNear = true;
+        c.waterDelta = deltas[I(0, 7)];
+    }
+    if (I(0, 3) == 0)
+        PutI(c.image, 0x294, I(4700, 5000));
+    // The shake's and the blend's times at their edges: 1 ms, the step, a ms either side.
+    if (I(0, 3) == 0)
+        PutI(c.image, 0x284, std::vector<int>{1, c.number, c.number + 1, c.number - 1}[size_t(I(0, 3))]);
+    if (I(0, 3) == 0)
+        PutI(c.image, 0x280, std::vector<int>{1, c.number, c.number + 1, -1}[size_t(I(0, 3))]);
+    // The car's look just inside its limits, a small look over them; the debug camera's elevation near its 85 degrees.
+    if (I(0, 3) == 0) {
+        static const float yaws[] = {0.5215f, -0.5215f, 0.4330f, -0.4330f, 0.5f, -0.4f};
+        PutF(c.image, 0x2BC, yaws[I(0, 5)]);
+        PutF(c.image, 0x2B8, yaws[I(0, 5)]);
+        static const float small[] = {0.001f, -0.001f, 0.0025f, -0.0025f, 0.004f};
+        c.lookX = small[I(0, 4)];
+        c.lookY = small[I(0, 4)];
+    }
+    if (c.op == OP_UPDATE_DEBUG && I(0, 2) == 0) {
+        const float e = std::vector<float>{1.482f, -1.482f, 1.4835f, -1.479f}[size_t(I(0, 3))];
+        PutF(c.image, 0x20, 0.0f);
+        PutF(c.image, 0x24, std::sin(e));
+        PutF(c.image, 0x28, std::cos(e));
+    }
+    // PlaceCamera's water band under the surface (0.1 m plus the radius, a millimetre or so either side).
+    if (I(0, 4) == 0) {
+        c.image[0x270] = 1;
+        const float radius = At<float>(c.image, 0xE0 + 0x20 * uint32_t(At<int>(c.image, 0x260)) + 0x0C);
+        c.waterNear = true;
+        c.waterDelta = -(0.1f + radius) + std::vector<float>{-0.005f, 0.005f, -0.012f}[size_t(I(0, 2))];
+    }
+}
+
 S_CamCase RandomCamCase()
 {
     S_CamCase c;
@@ -1011,7 +1277,7 @@ S_CamCase RandomCamCase()
             int r = I(0, total - 1);
             while (r >= OP_WEIGHTS[c.op])
                 r -= OP_WEIGHTS[c.op++];
-        } while (g_onlyPart && (g_onlyPart == 2) != IsFxOp(c.op));
+        } while (g_onlyPart && OpPart(c.op) != g_onlyPart);
     }
     // The module's bytes: noise, then each field a value of its kind.
     for (uint8_t &b : c.image)
@@ -1157,6 +1423,8 @@ S_CamCase RandomCamCase()
     }
     if (IsFxOp(c.op))
         RandomFx(c);
+    else if (OpPart(c.op) == 3)
+        RandomUpdate(c);
     return c;
 }
 
@@ -1237,6 +1505,9 @@ LONG WINAPI DebugText(EXCEPTION_POINTERS *e)
                                                        size_t(r->ExceptionInformation[0])));
     return EXCEPTION_CONTINUE_EXECUTION;
 }
+// The original's PoseGetRoll is __fastcall (the matrix in ECX, the roll written through EDX; the port's returns it):
+// answered with the case's roll on both sides, unlogged.
+void __fastcall O_PoseGetRoll(const void *, float *roll) { *roll = g_cur->roll; }
 void *__cdecl O_AlignedMalloc(size_t size, size_t align) { return _aligned_malloc(size, align); }
 void __cdecl O_AlignedFree(void *p) { _aligned_free(p); }
 void SetUpCam()
@@ -1274,7 +1545,11 @@ void SetUpCam()
             const float f = parts[r - 2];
             if (S_vector *hit = reinterpret_cast<S_vector *>(a[3]))
                 *hit = S_vector(pos.x + move.x * f, pos.y + move.y * f, pos.z + move.z * f);
-            return reinterpret_cast<uint32_t>(NextFake() % 2 ? water : volume);
+            // (Part 3: a dynamic volume now and then, its frame the camera dummy's or another.)
+            const uint32_t kind = NextFake() % 3;
+            if (kind == 2 && OpPart(g_cur->op) == 3)
+                return reinterpret_cast<uint32_t>(g_dynamic[g_side]);
+            return reinterpret_cast<uint32_t>(kind ? water : volume);
         }
         if (!g_groundHit)
             return 0u;
@@ -1300,8 +1575,10 @@ void SetUpCam()
     // The squared distances: GetTransparency's edges among them.
     g_answers["SegmentDistance2"] = [](const std::vector<uint32_t> &) {
         static const float values[] = {0.0f, 0.4f, 2.4f, 1.0f, 0.5f, 10.0f, -1.0f, 2.5f, 0.39999998f, 2.4000003f, 1.4f,
-                                       0.405f, 2.405f, 0.40000004f};
-        const float f = values[NextFake() % 14];
+                                       0.405f, 2.405f, 0.40000004f,
+                                       // (MoveCamera's fade: 0.2 and 1.2.)
+                                       0.2f, 1.2f, 0.205f, 1.205f, 0.25f, 0.19999999f};
+        const float f = values[NextFake() % 20];
         uint32_t w;
         std::memcpy(&w, &f, 4);
         return w;
@@ -1313,6 +1590,63 @@ void SetUpCam()
         return NextFake() % 2 ? *reinterpret_cast<const uint32_t *>(a[0] + 0x1F8) : reinterpret_cast<uint32_t>(other);
     };
     g_answers["C_Human::GetViewDir"] = [](const std::vector<uint32_t> &) { return reinterpret_cast<uint32_t>(&g_viewDir); };
+    // Part 3: the mouse, the options' inverted mouse, the selected member, the controls, the dummy's roll, the head under
+    // water, the ray test, the seats.
+    g_answers["GetIGraph"] = [](const std::vector<uint32_t> &) { return reinterpret_cast<uint32_t>(g_igraph[g_side]); };
+    g_extraQuiet.insert("GetIGraph");
+    g_answers["IGraph::GetMouseDeltaX"] = [](const std::vector<uint32_t> &) { return uint32_t(g_cur->mouseX); };
+    g_answers["IGraph::GetMouseDeltaY"] = [](const std::vector<uint32_t> &) { return uint32_t(g_cur->mouseY); };
+    g_answers["IGraph::GetMouseButtons"] = [](const std::vector<uint32_t> &) { return g_cur->buttons; };
+    g_answers["C_GameProfile::GetDetailSettings"] = [](const std::vector<uint32_t> &) {
+        static uint8_t options[0x40];
+        Name(options, "options");
+        options[0x39] = g_cur->invertMouse;
+        return reinterpret_cast<uint32_t>(options);
+    };
+    g_answers["C_Team::GetSelectedMember"] = [](const std::vector<uint32_t> &) {
+        return reinterpret_cast<uint32_t>(HumanAt(g_cur->selected));
+    };
+    auto floatWord = [](float f) {
+        uint32_t w;
+        std::memcpy(&w, &f, 4);
+        return w;
+    };
+    g_answers["C_Controls::GetValue"] = [floatWord](const std::vector<uint32_t> &a) {
+        switch (a[1]) {
+        case 0x34: return floatWord(g_cur->lookX);
+        case 0x35: return floatWord(g_cur->lookY);
+        case 0x36: return floatWord(g_speedCalls++ ? g_cur->speed2 : g_cur->speed1);
+        default: return floatWord(0.0f);
+        }
+    };
+    g_answers["PoseGetRoll"] = [floatWord](const std::vector<uint32_t> &) { return floatWord(g_cur->roll); };
+    g_extraQuiet.insert("PoseGetRoll");
+    RedirectOriginal(0x007a36c0, reinterpret_cast<const void *>(&O_PoseGetRoll));
+    g_answers["C_HumanMovement::GetHeadWater"] = [](const std::vector<uint32_t> &a) {
+        if (bool *under = reinterpret_cast<bool *>(a[1]))
+            *under = g_cur->headUnder;
+        if (float *surface = reinterpret_cast<float *>(a[2]))
+            *surface = g_cur->surface;
+        return uint32_t(g_cur->headUnder);
+    };
+    g_answers["C_CollisionWorld::RayTest"] = [](const std::vector<uint32_t> &a) {
+        const uint32_t r = NextFake() % 5;
+        if (r < 2)
+            return 0u;
+        static const float parts[] = {0.0f, 0.5f, 1.0f};
+        const S_vector &pos = *reinterpret_cast<const S_vector *>(a[1]);
+        const S_vector &dir = *reinterpret_cast<const S_vector *>(a[2]);
+        const float f = parts[r - 2];
+        if (S_vector *hit = reinterpret_cast<S_vector *>(a[3]))
+            *hit = S_vector(pos.x + dir.x * f, pos.y + dir.y * f, pos.z + dir.z * f);
+        if (S_vector *normal = reinterpret_cast<S_vector *>(a[4]))
+            *normal = std::vector<S_vector>{{0, 1, 0}, {1, 0, 0}, {0, 0, -1}, {0.6f, 0, 0.8f}}[NextFake() % 4];
+        static uint8_t ray[0x60];
+        Name(ray, "ray volume");
+        return reinterpret_cast<uint32_t>(NextFake() % 3 ? ray : g_dynamic[g_side]);
+    };
+    g_answers["C_Actor::GetSeatFlags"] = [](const std::vector<uint32_t> &) { return g_cur->seatFlags; };
+    g_answers["C_Actor::IsSeatFirstPersonOnly"] = [](const std::vector<uint32_t> &) { return uint32_t(g_cur->fpvOnly); };
     if (const char *part = std::getenv("HD2_CAM_PART"))
         g_onlyPart = std::atoi(part);
     if (const char *op = std::getenv("HD2_CAM_OP"))

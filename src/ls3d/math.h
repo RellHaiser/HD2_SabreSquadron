@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 
 #ifndef LS3D_API
 #define LS3D_API __declspec(dllimport)
@@ -102,6 +103,20 @@ struct S_vector {                                       // (its copy: 0x006fb7a0
     LS3D_API S_vector __stdcall operator*(const S_matrix &m) const;
     LS3D_API S_vector &__stdcall operator*=(const S_matrix &m);
 };
+
+// AngleTo's answer as the FPU holds it: its acos is FPATAN's, which the engine's single precision does
+// not round, so code that computes on with it before storing it (the camera's turn ratios divide by
+// it) sees more than a float's bits. The same LS3DF function, its ST0 read as a double.
+inline double AngleToUnrounded(const S_vector &a, const S_vector &b)
+{
+    using T_Float = float (__stdcall S_vector::*)(const S_vector &) const;
+    using T_Double = double (__stdcall S_vector::*)(const S_vector &) const;
+    const T_Float f = &S_vector::AngleTo;
+    static_assert(sizeof(T_Float) == sizeof(T_Double), "member pointers alike");
+    T_Double d;
+    std::memcpy(&d, &f, sizeof d);                      // (no cast: -Wcast-function-type)
+    return (a.*d)(b);
+}
 
 inline S_vector operator*(float s, const S_vector &v) { return v * s; }
 

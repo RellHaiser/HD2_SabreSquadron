@@ -326,6 +326,7 @@ enum : int {
 };
 
 extern C_CameraModule g_cameraModule;                   // 0x0089afb0 (static init 0x00464dc0)
+extern float g_cameraAimSway;                           // 0x00839268 (MoveCamera's aiming sway)
 C_CameraModule *GetCameraModule();                      // 0x00464e90 (&g_cameraModule)
 // The module's human effects (its +0xC, 0x0089afbc: the effects module reads it directly).
 extern C_CameraHumanEffects *&g_cameraHumanEffects;

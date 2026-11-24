@@ -153,6 +153,11 @@ void SetUpVirtuals()
         {"C_GEffectsModule::DressUniform", 0xA8, PortSlot(&G::DressUniform), "pi", 'b'},
         {"C_MeleeTrackerController::SetAlarm", 0x38, PortSlot(&C_MeleeTrackerController::SetAlarm), "i", 'v'},
         {"C_Actor::Hit", 0xD4, PortSlot(&C_Actor::Hit), "ifvvpi", 'v'},
+        // (The camera test's: the seats.)
+        {"C_Actor::GetSeatFlags", 0x8C, PortSlot(&C_Actor::GetSeatFlags), "i", 'i'},
+        {"C_Actor::GetSeatCamera", 0x90, PortSlot(&C_Actor::GetSeatCamera), "i", 'p'},
+        {"C_Actor::ShowSeatView", 0xC4, PortSlot(&C_Actor::ShowSeatView), "ib", 'v'},
+        {"C_Actor::IsSeatFirstPersonOnly", 0xCC, PortSlot(&C_Actor::IsSeatFirstPersonOnly), "i", 'b'},
         {"C_Formation::AddMember", 0x08, PortSlot(&C_Formation::AddMember), "p", 'b'},
     };
 }

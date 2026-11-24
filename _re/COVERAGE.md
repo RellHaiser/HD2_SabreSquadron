@@ -5953,3 +5953,54 @@ particles and the surface marks. Files are served from memory.
   and SelectView (part 4).
 - **Harness lessons (my mistakes):** none new. The first run's edges (34 to 35 m, the distances just past 0.4 and
   2.4, the click timer at exactly 0) were added after the mutation run.
+
+## Camera part 3 (the camera's update: `camera_module.cpp`'s Update, the car's, the scripted and the debug cameras, PlaceCamera, MoveCamera, 2026-11-24)
+
+- **The build:** `script/cam_diff.cpp` (suite `camera.module`) extended again; Update, UpdateCarCamera,
+  UpdateScriptedView, UpdateDebugCamera, PlaceCamera and MoveCamera (with UpdateShake, TurnToTarget and
+  PlaceTurretCamera, inline in the original's MoveCamera) called on both modules with the case's time step. Each case
+  also gives both sides the mouse's deltas and buttons (a made IGraph), the options' inverted mouse, the controls' look
+  and debug speed values, the selected member, the active player's vehicle (a car mostly, another kind, none: a made
+  actor with the world's actor vtable) and seat, the seat's flags and first-person-only answer (the seat virtuals are new
+  in `cmd_diff.cpp`'s table: GetSeatFlags, GetSeatCamera, ShowSeatView, IsSeatFirstPersonOnly), the head under water
+  and its surface, the camera dummy's roll, the aiming sway (the original's 0x00839268; the port's `g_cameraAimSway`,
+  out of its anonymous namespace for the test), the water level near the dummy's height now and then.
+  - Answered: CollisionSphereTest hits part of the way now and then (a plain volume, a water surface's, a dynamic one
+    whose frame is the camera dummy or another), C_CollisionWorld::RayTest likewise with a normal, the scene's GetSector.
+  - The original's PoseGetRoll is __fastcall with the roll written through EDX (the port's returns it): the original's
+    is replaced by a stand-in writing the case's roll; the call is not logged.
+  - Compared as in parts 1 and 2, plus the aiming sway; the directions' and places' w the original writes from
+    uninitialised locals (+0x2C, +0x3C, +0x4C, +0x6C, +0x7C) are left out in part 3's cases.
+- **The tests:** Update on every path (the debug camera, the spectators', the scripted view, the car, the main one:
+  first person under and over the water's band, the mouse's yaw and pitch at the view's limits, the camera dummy's own
+  direction, the listener's sector every 500 ms, the offsets shrinking, the aim time at its 5 s limit), the car's camera
+  (every seat kind, the look limits, the heading's and elevation's wraps), the scripted view (the shake running out),
+  the debug camera (the buttons, the speed steps at both ends), PlaceCamera (near +z, the plain and the swept
+  placement, the turret's arm, hits on the dummy's own model, under water, the blend both ways, the cut) and
+  MoveCamera (the target, the aiming sway with the breath held or not, the turret's view, the soldier fading).
+  40,000 cases with parts 1 and 2 (HD2_CAM_PART=3: part 3's only; quick 8,000, about 10 s).
+- **Coverage:** every line of part 3's functions.
+- **Port bugs found and fixed:**
+  - The aiming sway's rates are the original's doubles 5.000000237e-06 and 4.000000190e-06 per ms (0x0080fef0,
+    0x0080fee0), not 5e-06 and 4e-06: the sway was a bit off now and then. The original rounds the step times the rate
+    once to single precision; the port's double product does too in the game (x87 at 24 bits), but rounds twice where
+    doubles keep 53 bits (the SSE harness): `ProductToFloat` breaks those midpoints with the exact remainder.
+  - PlaceCamera and TurnToTarget divide by AngleTo's answer as the FPU holds it: its FPATAN is not rounded to single
+    precision. The port rounded it to a float first, so the turn's slerp fraction, and the camera's direction, was a
+    bit off now and then. `AngleToUnrounded` (src/ls3d/math.h) reads the same LS3DF function's ST0 as a double.
+- **The original's weaknesses (kept):** UpdateCarCamera reads the active player and his vehicle unchecked (Update only
+  calls it with both); the update's paths read the game camera unchecked, the car's and view 2's under water the camera
+  dummy, view 8 the dummy's parent (the turret's arm). The test does not pass those nulls.
+- **Harness decisions:** the debug speed action's two calls answered in order (the first, the second); PoseGetRoll's
+  matrix not checked (the camera dummy's matrix is compared through the frames).
+- **Mutations:** 987 mutants (`mutate_cam3.py`), 71 not building; 843 of the 916 building killed. The 73 left: clamps whose
+  equality sets the same value, the side axis' zero y, LS3DF's Slerp flag, the server's `#else`, float equalities
+  never reached (angles exactly pi, aside exactly 0.08), narrow bands (an offset's delay ending 1 ms after the step,
+  aside between 0.08 and 0.081) and ProductToFloat's split (only midpoint steps reach it; the helper was checked
+  against exact arithmetic for every step within 200 s apart from the test). The first run's 89 found the gaps the
+  cases now cover (the fade's 0.2 and 1.2 edges, 1 ms shake and blend times, the look limits' last hundredths, the
+  water band under the surface, the sway's midpoint steps).
+- **Harness lessons (my mistakes):** part 1's call table had PoseGetRoll as a cdecl float answer; the original's is
+  __fastcall writing through EDX (found when its result stayed uninitialised). The rounding hunt went through
+  precision modes first; the constants' bytes (Ghidra shows them rounded) were the answer. ProductToFloat's first
+  version took the remainder from std::fma: MinGW's runs on the x87 (at 24 bits in the test), so it was wrong.

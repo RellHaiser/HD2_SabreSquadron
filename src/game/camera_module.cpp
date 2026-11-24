@@ -1341,7 +1341,7 @@ void C_CameraModule::PlaceCamera(int timeDelta)
 
     // Turned towards the wanted direction (16 degree-ish units per second; 6 in view 7 after the
     // first frame). Near +z the turn is done 0.5 radians aside (the quaternions' blind spot).
-    const double aside = std::fabs(S_vector(m_wantedDir.x, 0.0f, m_wantedDir.z).AngleTo(S_vector(0.0f, 0.0f, 1.0f)));
+    const double aside = std::fabs(AngleToUnrounded(S_vector(m_wantedDir.x, 0.0f, m_wantedDir.z), S_vector(0.0f, 0.0f, 1.0f)));
     if (aside < 0.08) {
         S_quat q;
         q.Make(S_vector(0.0f, 1.0f, 0.0f), 0.5f);
@@ -1354,15 +1354,16 @@ void C_CameraModule::PlaceCamera(int timeDelta)
     wanted.Normalize();
     S_quat to;
     to.SetDir(wanted, 0.0f);
-    const float turn = dir.AngleTo(wanted);
+    // (The angle unrounded: the original divides by it as the FPU holds it.)
+    const double turn = AngleToUnrounded(dir, wanted);
     if (m_view != 7)
         m_turnSpeed = 16.0f;
     const float t = static_cast<float>(timeDelta);
     const float step = t * m_turnSpeed * 0.0031415930f;
     m_turnSpeed = 6.0f;
     float ratio = 0.0f;
-    if (turn != 0.0f) {
-        ratio = step / turn;
+    if (turn != 0.0) {
+        ratio = static_cast<float>(static_cast<double>(step) / turn);
         if (ratio > 1.0f)
             ratio = 1.0f;
     }
@@ -1527,11 +1528,35 @@ void C_CameraModule::PlaceCamera(int timeDelta)
     }
 }
 
+// The aiming sway's size (0x00839268): shrinks to 0.0015 while the soldier holds his breath,
+// grows back to 0.008 otherwise; 0.002 in view mode 2 (by the doubles 5.000000237e-06 and
+// 4.000000190e-06 per ms: 0x0080fef0, 0x0080fee0). (Not file-local: the camera test sets it.)
+float g_cameraAimSway = 0.005f;
+
 namespace {
 
-// The aiming sway's size (0x00839268): shrinks to 0.0015 while the soldier holds his breath,
-// grows back to 0.008 otherwise; 0.002 in view mode 2.
-float g_aimSway = 0.005f;
+// a * b rounded once to a float, as the x87 at single precision rounds a product of an int and a
+// double. (At single precision, the game's FPU mode, the double product already is that. Where
+// doubles keep 53 bits it can round twice: when it lands on a midpoint between two floats, the
+// exact product's remainder (Dekker's split, not std::fma: MinGW's runs on the x87) picks the side.)
+float ProductToFloat(double a, double b)
+{
+    const double p = a * b;
+    float f = static_cast<float>(p);
+    if (static_cast<double>(f) == p)
+        return f;
+    const float other = std::nextafter(f, p > static_cast<double>(f) ? HUGE_VALF : -HUGE_VALF);
+    if (p != (static_cast<double>(f) + static_cast<double>(other)) * 0.5)
+        return f;
+    const double split = 134217729.0;                   // 2^27 + 1
+    const double ac = a * split, bc = b * split;
+    const double aHi = ac - (ac - a), aLo = a - aHi;
+    const double bHi = bc - (bc - b), bLo = b - bHi;
+    const double e = ((aHi * bHi - p) + aHi * bLo + aLo * bHi) + aLo * bLo;
+    if (e != 0.0)
+        f = (e > 0.0) == (other > f) ? other : f;
+    return f;
+}
 
 // An offset in the game camera's space, turned into the world's.
 S_vector Turned(const S_vector4 &offset, I3D_frame *camera)
@@ -1602,19 +1627,19 @@ void C_CameraModule::MoveCamera(int timeDelta)
             float amplitude = 0.006f;
             if (C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer()) {
                 if (player->GetPlayerViewMode() == 2) {
-                    g_aimSway = 0.002f;
+                    g_cameraAimSway = 0.002f;
                 } else if (player->IsPlayerHoldingBreath()) {
-                    if (g_aimSway > 0.0015f) {
-                        g_aimSway = static_cast<float>(g_aimSway - static_cast<float>(static_cast<double>(timeDelta) * 5e-06));
-                        if (g_aimSway < 0.0015f)
-                            g_aimSway = 0.0015f;
+                    if (g_cameraAimSway > 0.0015f) {
+                        g_cameraAimSway = g_cameraAimSway - ProductToFloat(timeDelta, 5.000000237487257e-06);
+                        if (g_cameraAimSway < 0.0015f)
+                            g_cameraAimSway = 0.0015f;
                     }
-                } else if (g_aimSway < 0.008f) {
-                    g_aimSway = static_cast<float>(static_cast<double>(timeDelta) * 4e-06) + g_aimSway;
-                    if (g_aimSway > 0.008f)
-                        g_aimSway = 0.008f;
+                } else if (g_cameraAimSway < 0.008f) {
+                    g_cameraAimSway = ProductToFloat(timeDelta, 4.000000189989805e-06) + g_cameraAimSway;
+                    if (g_cameraAimSway > 0.008f)
+                        g_cameraAimSway = 0.008f;
                 }
-                amplitude = (2.0f - player->GetStatFactor(4)) * g_aimSway;
+                amplitude = (2.0f - player->GetStatFactor(4)) * g_cameraAimSway;
             }
             const double time = static_cast<double>(m_time);
             const float swayUp = static_cast<float>(
@@ -1698,8 +1723,8 @@ void C_CameraModule::TurnToTarget(int timeDelta)
     S_quat a, b;
     a.SetDir(view, 0.0f);
     b.SetDir(way, 0.0f);
-    const float angle = view.AngleTo(way);
-    float ratio = static_cast<float>(timeDelta) * m_targetSpeed * 0.001f / angle;
+    const double angle = AngleToUnrounded(view, way);   // (unrounded: as PlaceCamera's turn)
+    float ratio = static_cast<float>(static_cast<double>(static_cast<float>(timeDelta) * m_targetSpeed * 0.001f) / angle);
     if (ratio > 1.0f) {
         ratio = 1.0f;
         m_targetSpeed = -1.0f;
