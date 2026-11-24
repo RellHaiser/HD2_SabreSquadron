@@ -223,6 +223,7 @@ public:
 
 private:
     friend C_CameraHumanEffects *&CameraHumanEffectsRef();
+    friend class C_CameraFrameKeeper;                   // (its Update sets m_turnSpeed)
     // Reads tables\gamecam.set into the views' settings (as many whole records as the chunk
     // holds, up to the 11); +0x2AC from view 1's distance.
     void LoadSettings();                                // 0x004656d0
@@ -283,7 +284,10 @@ private:
     I3D_sector *m_listenerSector = nullptr;             // +0x24C
     int m_listenerTime = 0;                             // +0x250 ms to the listener sector's next look
     float m_distance = 0.0f;                            // +0x254 the camera's distance now (eases)
-    float m_turnSpeed = 0.0f;                           // +0x258 the turn's (16; 6 in view 7 after a frame)
+    // +0x258 the turn's (16; 6 in view 7 after a frame). The active soldier's vehicle's keeper sets
+    // it every frame (its Update: 3; a car: (its speed + 2.5) * 0.3, a submarine: its speed / 40, at
+    // least 0.03; 1000 after a Restore): what the passenger's view (7) turns at.
+    float m_turnSpeed = 0.0f;
     S_CollisionVolume *m_hit = nullptr;                 // +0x25C what the camera is held off by
     int m_view = 1;                                     // +0x260 its settings' index
     S_CameraSettings *m_viewSettings = &m_settings[1];  // +0x264
@@ -371,9 +375,6 @@ private:
     S_vector4 m_worldPos;                           // +0x30 its own
     I3D_frame *m_frame;                             // +0x40
     C_Actor *m_owner;                               // +0x44
-    bool m_cut = false;                             // +0x48 the next Update's blend speed 1000
+    bool m_cut = false;                             // +0x48 the next Update's turn speed 1000
     uint8_t m_unknown49[7];                         // +0x49
 };
-// The game camera's blend speed the active soldier's vehicle's keeper sets (3; a car: (its speed
-// + 2.5) * 0.3, a submarine: its speed / 40, at least 0.03; 1000 after a Restore). Not read.
-extern float g_vehicleCameraSpeed;                  // 0x0089b208

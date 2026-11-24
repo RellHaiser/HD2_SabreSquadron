@@ -1000,7 +1000,7 @@ void KeeperTest(S_CameraResults &r)
     // --- updated: over the parent, on the ground; looking down ---
     {
         C_CameraFrameKeeper *k = KpNew(owner, dummy);
-        g_vehicleCameraSpeed = 77.0f;
+        g_cameraModule.m_turnSpeed = 77.0f;
         g_cmHit = false;
         g_cmSpheres.clear();
         g_gfLog.clear();
@@ -1009,7 +1009,7 @@ void KeeperTest(S_CameraResults &r)
                                          "setdir camera3RD 0.00000 -1.00000 0.00000 0.000000", "update camera3RD"}));
         WM(r.kpUpdate, g_cmSpheres.size() == 1 && g_cmSpheres[0].from == S_vector(10.0f, 1.0f, 20.0f) &&
                            g_cmSpheres[0].dir == S_vector(0.0f, 2.5f, 0.0f) && g_cmSpheres[0].radius == 0.3f &&
-                           g_cmSpheres[0].types == 0xFFFFFFFFu && g_cmSpheres[0].flags == 0 && g_vehicleCameraSpeed == 77.0f);
+                           g_cmSpheres[0].types == 0xFFFFFFFFu && g_cmSpheres[0].flags == 0 && g_cameraModule.m_turnSpeed == 77.0f);
         g_cmHit = true;
         g_sphereHookHit = S_vector(-5.0f, 0.75f, -5.0f);
         dummy->m_localMatrix(3) = S_vector(0.0f, 2.5f, -4.0f);
@@ -1024,19 +1024,19 @@ void KeeperTest(S_CameraResults &r)
         player->vehicle = owner;
         g_gfActive = player;
         g_gfLog.clear();
-        WM(r.kpPlayer, k->Update(5) && g_vehicleCameraSpeed == 3.0f);
+        WM(r.kpPlayer, k->Update(5) && g_cameraModule.m_turnSpeed == 3.0f);
         player->vehicle = nullptr;
-        g_vehicleCameraSpeed = 77.0f;
-        WM(r.kpPlayer, k->Update(5) && g_vehicleCameraSpeed == 77.0f);
+        g_cameraModule.m_turnSpeed = 77.0f;
+        WM(r.kpPlayer, k->Update(5) && g_cameraModule.m_turnSpeed == 77.0f);
         // After a restore: 1000 once.
         player->vehicle = owner;
         k->m_cut = true;
-        WM(r.kpPlayer, k->Update(5) && g_vehicleCameraSpeed == 1000.0f && !k->m_cut);
-        WM(r.kpPlayer, k->Update(5) && g_vehicleCameraSpeed == 3.0f);
+        WM(r.kpPlayer, k->Update(5) && g_cameraModule.m_turnSpeed == 1000.0f && !k->m_cut);
+        WM(r.kpPlayer, k->Update(5) && g_cameraModule.m_turnSpeed == 3.0f);
         g_gfActive = nullptr;
         k->m_cut = true;
-        g_vehicleCameraSpeed = 77.0f;
-        WM(r.kpPlayer, k->Update(5) && g_vehicleCameraSpeed == 77.0f && !k->m_cut);
+        g_cameraModule.m_turnSpeed = 77.0f;
+        WM(r.kpPlayer, k->Update(5) && g_cameraModule.m_turnSpeed == 77.0f && !k->m_cut);
         player->vehicle = nullptr;
         dummy->m_localMatrix(3) = S_vector(0.0f, 2.5f, -4.0f);
     }
@@ -1063,14 +1063,14 @@ void KeeperTest(S_CameraResults &r)
         g_gfLog.clear();
         WM(r.kpCar, k->Update(5) && GfVecIs(g_gfLog, {"setpos camera3RD 10.0000 3.5000 20.0000",
                                                       KpSetDir("camera3RD", x, 0.0f, z, 0.0f), "update camera3RD"}));
-        WM(r.kpCar, g_vehicleCameraSpeed == (5.0f + 2.5f) * 0.3f);
+        WM(r.kpCar, g_cameraModule.m_turnSpeed == (5.0f + 2.5f) * 0.3f);
         // A short heading: the unit axis.
         car->m_direction = {0.0f, 0.3f, 0.0f, 0.0f};
         car->m_vehicle.m_velocity = {0.0f, 0.5f, -1e-5f, 0.0f};
         car->m_vehicle.m_speed = -2.0f;
         g_gfLog.clear();
         WM(r.kpCar, k->Update(5) && g_gfLog.size() == 3 && g_gfLog[1] == KpSetDir("camera3RD", 0.0f, 0.0f, -1.0f, 0.0f) &&
-                        g_vehicleCameraSpeed == (-2.0f + 2.5f) * 0.3f);
+                        g_cameraModule.m_turnSpeed == (-2.0f + 2.5f) * 0.3f);
         car->m_direction = {0.0f, 0.3f, 0.0f, 0.0f};
         car->m_vehicle.m_velocity = {0.0f, 0.5f, 0.0f, 0.0f};
         g_gfLog.clear();
@@ -1156,7 +1156,7 @@ void KeeperTest(S_CameraResults &r)
                                                             KpSetDir("camera3RD", 0.0f, 0.0f, 2.5f, roll),
                                                             "update camera3RD"}));
         WM(r.kpSubmarine, dummy->m_localMatrix(3) == S_vector(10.0f, 2.5f - 0.5f * 0.4f, 20.0f) &&
-                              (dummy->m_frameFlags & FRMFLAGS_CHANGED) && g_vehicleCameraSpeed == std::fabs(2.5f * 0.025f));
+                              (dummy->m_frameFlags & FRMFLAGS_CHANGED) && g_cameraModule.m_turnSpeed == std::fabs(2.5f * 0.025f));
         // Slow: at least 0.03; the time's roll.
         sub->m_speed = -0.8f;
         sub->m_bob = -1.0f;
@@ -1168,10 +1168,10 @@ void KeeperTest(S_CameraResults &r)
         const bool kp = k->Update(5);
         WM(r.kpSubmarine, kp && g_gfLog.size() == 3 &&
                               g_gfLog[1] == KpSetDir("camera3RD", 0.0f * k2, 0.0f, k2, roll2) &&   // (x -0)
-                              g_vehicleCameraSpeed == 0.03f && dummy->m_localMatrix(3) == S_vector(10.0f, 2.9f, 20.0f));
+                              g_cameraModule.m_turnSpeed == 0.03f && dummy->m_localMatrix(3) == S_vector(10.0f, 2.9f, 20.0f));
         sub->m_speed = 0.7f;                            // 1.2 * 0.025 = 0.03
         g_gfLog.clear();
-        WM(r.kpSubmarine, k->Update(5) && g_vehicleCameraSpeed == std::fabs(1.2f * 0.025f));
+        WM(r.kpSubmarine, k->Update(5) && g_cameraModule.m_turnSpeed == std::fabs(1.2f * 0.025f));
         // Diving along the view (y 0.3): the dive left out of the test, not turned.
         dummy->m_localMatrix.m[2][1] = 0.3f;
         dummy->m_localMatrix.m[2][2] = 0.9539392f;

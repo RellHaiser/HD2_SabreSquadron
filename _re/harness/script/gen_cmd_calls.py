@@ -249,9 +249,35 @@ ORIG = {
     'C_Human::IsAISuspended() const': ("0x005a5d30", "thiscall", "b"),
     # (Script part 7: LS3DF's; the original's import thunk is patched.)
     'GetIGraph': ("0x007e530e", "cdecl", "p"),
+    # (Camera parts: the camera module's calls.)
+    'PoseGetRoll(S_matrix const&)': ("0x007a36c0", "cdecl", "f"),
+    'SegmentDistance2(S_vector const&, S_vector const&, S_vector const&, float*)': ("0x00581210", "fastcall", "f"),
+    'CollisionSphereTest(S_vector const&, S_vector const&, float, S_vector*, S_vector*, unsigned int, unsigned int)':
+        ("0x00718900", "stdcall", "p"),
+    'CollisionSlideSphere(S_vector const&, S_vector const&, float, S_vector&, S_vector*, unsigned int, unsigned int)':
+        ("0x00718930", "stdcall", "p"),
+    'C_Controls::GetValue(int, bool)': ("0x006c76a0", "thiscall", "f"),
+    'S_HumanBody::RemoveCollision(bool)': ("0x005ac1c0", "thiscall", "v"),
+    'S_HumanBody::RestoreCollision(bool)': ("0x005ac1b0", "thiscall", "v"),
+    'S_HumanBody::GetSector() const': ("0x005ac4c0", "thiscall", "p"),
+    'C_GameProfile::GetDetailSettings()': ("0x006b6a60", "thiscall", "p"),
+    'C_HumanMovement::SetCameraUnderWater(bool)': ("0x00786b20", "fastcall", "v"),
+    'C_HumanMovement::GetHeadWater(bool*, float*) const': ("0x00786510", "thiscall", "b"),
+    'C_FirstPersonView::Show(bool)': ("0x00491fd0", "thiscall", "v"),
+    'C_Human::SetUnknown94(float)': ("0x005a9760", "thiscall", "v"),
+    'C_Human::GetViewDir() const': ("0x005a80e0", "thiscall", "p"),
+    'C_Human::GetStatFactor(int) const': ("0x005a6530", "thiscall", "f"),
+    'C_Human::IsLocalPlayer() const': ("0x005a0890", "thiscall", "b"),
+    'C_Human::GetPlayerViewMode() const': ("0x005a8170", "thiscall", "i"),
+    'C_Human::IsPlayerHoldingBreath() const': ("0x005a6430", "thiscall", "b"),
+    'C_CollisionWorld::RayTest(S_vector const&, S_vector const&, S_vector*, S_vector*, unsigned int, unsigned int) const':
+        ("0x006f8060", "thiscall", "p"),
+    'C_Team::GetSelectedMember() const': ("0x0045d160", "thiscall", "p"),
+    'C_Vehicle::GetCameraOffset(S_vector*) const': ("0x004f3630", "thiscall", "v"),
 }
 # Static members (mangled like members: no `this`, the port's cdecl).
-STATIC_MEMBERS = {'C_HumanMovement::PlayDubbing(int, I3D_frame*, C_Human*, float, float)'}
+STATIC_MEMBERS = {'C_HumanMovement::PlayDubbing(int, I3D_frame*, C_Human*, float, float)',
+                  'C_HumanMovement::SetCameraUnderWater(bool)'}
 
 
 def kind(t):
@@ -365,14 +391,15 @@ def engine_slots():
 
 # The tests: prefix -> (build script, executable, what the generated files' first line calls the calls).
 TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged calls"),
-         "mod": ("build_mod.bat", "mod_diff", "the script module test's logged calls")}
+         "mod": ("build_mod.bat", "mod_diff", "the script module test's logged calls"),
+         "cam": ("build_cam.bat", "cam_diff", "the camera module test's logged calls")}
 
 
 def main():
     env = dict(os.environ, PATH=MINGW + os.pathsep + os.environ["PATH"])
     prefix = sys.argv[1] if len(sys.argv) > 1 else "cmd"
     if prefix not in TESTS:
-        sys.exit("gen_cmd_calls: the test is cmd or mod")
+        sys.exit("gen_cmd_calls: the test is cmd, mod or cam")
     bat_name, exe, what = TESTS[prefix]
     bat = open(os.path.join(HERE, bat_name), encoding="latin-1").read()
     m = re.search(r"^g\+\+ (.*%s\.exe.*)$" % exe, bat, re.M)

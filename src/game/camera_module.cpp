@@ -28,7 +28,6 @@
 #include "ls3d/igraph.h"
 
 C_CameraModule g_cameraModule(MODULE_CAMERA, "CameraModule");   // 0x0089afb0 (static init 0x00464dc0)
-float g_vehicleCameraSpeed;                             // 0x0089b208
 
 C_CameraHumanEffects *&CameraHumanEffectsRef()
 {
@@ -434,7 +433,7 @@ bool C_CameraFrameKeeper::Update(int)
         pos.y += m_localPos.y;
     m_frame->SetPos(pos);
 
-    // The vehicle's motion: where to look and the camera's blend speed.
+    // The vehicle's motion: where to look and the camera's turn speed.
     S_vector dir(0.0f, 0.0f, 0.0f);
     float roll = 0.0f;
     float speed = 3.0f;
@@ -464,8 +463,9 @@ bool C_CameraFrameKeeper::Update(int)
         speed = 1000.0f;
         m_cut = false;
     }
+    // (The original's global 0x0089b208 is the module's turn speed, +0x258.)
     if (player && player->GetVehicle() == m_owner)
-        g_vehicleCameraSpeed = speed;
+        g_cameraModule.m_turnSpeed = speed;
 
     // Turned to look down along the motion unless it already does. (Quirk kept: the test compares
     // the dummy's y with +0.3 where the direction set has -0.3 before its normalization, so it is

@@ -5875,3 +5875,48 @@ particles and the surface marks. Files are served from memory.
   - To show the controller's script being cleared, I first gave the controllers one of the module's scripts: a freed
     script's address came back to a new one on one side only, and RestartMission failed now and then. The controllers
     now start with a block that is never freed.
+
+## Camera part 1 (the camera module's core and the vehicles' camera keeper: `camera_module.cpp`, 2026-11-23)
+
+- **The build:** `script/cam_diff.cpp` (suite `camera.module`), over `cmd_diff.cpp`'s world, fakes and call logger as
+  `mod_diff.cpp`; the module's calls logged through `cam_calls.s` / `cam_calls.inc` (`gen_cmd_calls.py cam`). The
+  original's module (0x0089afb0) is constructed by its own constructor (0x00464ef0) in a world of its own. The module's
+  layout is the original's (every field's offset checked), so each case gives both modules the same bytes, the pointers
+  each side's world frames (the game camera, the scene's camera, the camera dummy, the sector, a volume, the target, the
+  scripted view), the human effects' fields and cameras, the game's FOV, clips, time, pause and input flags, its
+  first-person view's flags, the scene's active camera and a fixed active player (unlogged: the original asks for it
+  twice where the port asks once).
+  - LS3DF's math the module uses (the quaternions, AngleTo, RotateByMatrix, `*=`) is LS3DF's own on both sides; the
+    debug texts are logged on both (the original's dbgPrintf thunk redirected); the original's file seeks and writes
+    go to the test's files as the reads do.
+  - Compared: the answer, the module's bytes (+0x10 on; its name and number), the human effects' bytes, the frames and
+    their matrices, the keeper's bytes after each step, and every call.
+- **The tests:** StartMission (a server, a client, the scene without a camera, the settings file the game's, made or
+  missing), StopMission (tactical: the debug camera on so that SelectView returns; a camera dummy in a human's model),
+  SaveGame, LoadSettings (made files: short, versions other than 2, bytes past the version, records cut anywhere),
+  ResetUnknown2AC, GetCameraPos / GetCameraDir (every index, no scene camera), SetBlendTime, SetTarget,
+  GetViewDistance, the fields of view, SetViewDir, IsGameCamera, the getters and GetCameraModule; the keeper: its
+  constructor, Update, Restore (its parent moved between) and destructor on a car, a submarine, another actor or none,
+  the player riding it or not, the ground hit or not, its dummy looking straight up or down, lined up with its vehicle
+  (its view's y exactly 0.3) or nearly, the vehicle barely moving. 40,000 cases, about 54 s (quick: 8,000, 11 s).
+- **Coverage:** every line of part 1's functions but the static module's and its human effects' destructors (never run
+  in the test). RestartMission and LoadGame wait for part 4 (they run SelectView and Update).
+- **Port bug found and fixed:** the keeper's "vehicle camera speed" (the original's 0x0089b208) is no global: it is the
+  module's own turn speed (0x0089afb0 + 0x258). The active soldier's vehicle's keeper sets it every frame, and the
+  passenger's view (7) turns at it; the port wrote an unread global, so that view always turned at 6. The keeper now
+  sets the module's field (`vehicle_setup/camera_test.inc` checks it there).
+- **The original's weaknesses (not tested):** the keeper's constructor and Restore read the dummy's parent unchecked (a
+  dummy at the root crashes both sides; the game's always have one).
+- **Harness decisions:** the debug camera on in the tactical StopMission cases (SetTactical(false) then runs SelectView,
+  part 4's); the active player unlogged; GetGame's first-person view always there (the game always has one).
+- **Mutations:** 366 mutants (`mutate_cam1.py`), 39 not building; 273 of the 327 building killed. The 54 left: the
+  layout's static_asserts, the static destructor, RestartMission and LoadGame (part 4), NormalizeSummed's equivalent
+  edges, LoadSettings' version start value and closing calls, a submarine speed of exactly 0.03.
+- **Harness lessons (my mistakes):**
+  - The first build ended with `_exit` (the static modules' destructors would release freed frames): the coverage
+    counts were never written. The port's human effects now get back a camera that is safe to release, and the test
+    returns normally.
+  - The original's dtaSeek was not redirected to the test's files: its seeks did nothing, and LoadSettings agreed only
+    on well-formed files. A made file with bytes past the version showed it.
+  - The port's game fields, actor direction and submarine fields were first written at the original's offsets: the
+    port's g++ layout has them elsewhere. They are written through the port's members now.

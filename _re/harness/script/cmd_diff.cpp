@@ -1428,7 +1428,32 @@ S_vector __stdcall S_vector::operator*(const S_matrix &m) const
     mul(this, r, m);
     return S_vector(r[0], r[1], r[2]);
 }
-extern "C" I3D_driver *I3DGetDriver() { return reinterpret_cast<I3D_driver *>(H::W().driver); }
+// (Before any world, a static object's constructor may ask for the driver: camera_module.cpp's makes a camera. A
+// driver of its own then, whose CreateFrame gives a frame that is never used.)
+namespace H {
+uint32_t __stdcall StaticFrameRelease(void *) { return 1; }
+void *__stdcall StaticCreateFrame(void *, int)
+{
+    static void *vtable[0x80];
+    alignas(16) static uint8_t frame[0x600];
+    for (void *&slot : vtable)
+        slot = reinterpret_cast<void *>(&StaticFrameRelease);
+    *reinterpret_cast<void ***>(frame) = vtable;
+    return frame;
+}
+uint8_t *StaticDriver()
+{
+    static void *vtable[0x80];
+    static uint8_t driver[0x40];
+    vtable[0x54 / 4] = reinterpret_cast<void *>(&StaticCreateFrame);
+    *reinterpret_cast<void ***>(driver) = vtable;
+    return driver;
+}
+}  // namespace H
+extern "C" I3D_driver *I3DGetDriver()
+{
+    return reinterpret_cast<I3D_driver *>(H::W().driver ? H::W().driver : H::StaticDriver());
+}
 
 namespace H {
 
