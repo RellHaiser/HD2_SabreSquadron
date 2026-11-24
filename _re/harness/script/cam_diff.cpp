@@ -1,4 +1,4 @@
-// Camera part 1: the camera module's core (game/camera_module.cpp, C_CameraModule: the original's 0x0089afb0, vtable
+// Camera parts 1 and 2: the camera module's core (game/camera_module.cpp, C_CameraModule: the original's 0x0089afb0, vtable
 // 0x0080fdd0) and the vehicles' camera dummies' keeper (C_CameraFrameKeeper) against the original executable's.
 // cmd_diff.cpp's world, fakes and call logger are included (CMD_DIFF_NO_MAIN); the module's own calls are logged
 // through cam_calls.s / cam_calls.inc (gen_cmd_calls.py cam). The module's layout is the original's (the port's
@@ -9,8 +9,12 @@
 // ResetUnknown2AC, GetCameraPos / GetCameraDir, SetBlendTime, SetTarget, GetViewDistance, the fields of view,
 // SetViewDir, IsGameCamera, the plain getters; the keeper's constructor, Restore, Update and destructor (on a car, a
 // submarine, another actor or none).
+// Part 2: the command map's tactical camera (C_CameraHumanEffects): every function (the private ones called directly),
+// with the faded humans' vector in each side's layout, the player team's known enemies and members, the collision
+// queries hitting now and then (a plain volume or a water surface's), the scene's sector the primary one or another.
 // MinGW; build_cam.bat; runs cam_diff.exe ("cam_diff: N checks, 0 failures"). Env: HD2_CAM_CASES (default 40,000;
-// HD2_CAM_QUICK 8,000), HD2_CAM_OP (one operation's name), HD2_CAM_SEED, HD2_CAM_SHOW, HD2_CAM_DUMP, HD2_CAM_TRACE.
+// HD2_CAM_QUICK 8,000), HD2_CAM_OP (one operation's name), HD2_CAM_PART (1 or 2: that part's operations only),
+// HD2_CAM_SEED, HD2_CAM_SHOW, HD2_CAM_DUMP, HD2_CAM_TRACE.
 #define HARNESS_NAME "cam_diff"
 #define CMD_CALLS_INC "cam_calls.inc"
 #define CMD_DIFF_NO_MAIN
@@ -132,6 +136,12 @@ constexpr uint32_t O_START = 0x00465160, O_STOP = 0x00465610, O_SAVE = 0x00464e6
                    O_LOAD_SETTINGS = 0x004656d0, O_RESET_2AC = 0x00465a00, O_GET_MODULE = 0x00464e90;
 constexpr uint32_t O_KEEPER_CTOR = 0x00465f00, O_KEEPER_DTOR = 0x00466000, O_KEEPER_RESTORE = 0x00466010,
                    O_KEEPER_UPDATE = 0x00466110;
+// The human effects (thiscall on the module's +0x0C).
+constexpr uint32_t O_FX_ZOOM = 0x00462750, O_FX_IS_TACTICAL = 0x00462770, O_FX_MOTION = 0x004633a0,
+                   O_FX_START_FLIGHT = 0x00462350, O_FX_LOOK_POINT = 0x004630e0, O_FX_LOOK_AT = 0x00462780,
+                   O_FX_SET_TACTICAL = 0x00462ae0, O_FX_REMOVE = 0x00463040, O_FX_SET_MODE = 0x004632c0,
+                   O_FX_RESET_HUMANS = 0x00463620, O_FX_TRANSPARENCY = 0x00463690, O_FX_UPDATE_HUMAN = 0x00463780,
+                   O_FX_UPDATE_HUMANS = 0x00463890, O_FX_UPDATE_TACTICAL = 0x00463ba0, O_FX_MOVE = 0x00464b80;
 uint8_t *OCam() { return OriginalAt<uint8_t *>(O_CAM); }
 uint8_t *PCam() { return reinterpret_cast<uint8_t *>(&g_cameraModule); }
 uint8_t *Cam() { return g_side ? OCam() : PCam(); }
@@ -184,13 +194,23 @@ bool IsFxFloat(uint32_t o) { return o < 0x44 || (o >= 0x50 && o < 0x80); }
 enum E_Op {
     OP_START, OP_STOP, OP_SAVE, OP_LOAD_SETTINGS, OP_RESET_2AC, OP_GET_POS, OP_GET_DIR, OP_BLEND, OP_TARGET,
     OP_VIEW_DISTANCE, OP_SET_NEAR_FOV, OP_GET_NEAR_FOV, OP_SET_FOV, OP_GET_FOV, OP_SET_VIEW_DIR, OP_IS_GAME_CAMERA,
-    OP_GETTERS, OP_KEEPER, OP_COUNT
+    OP_GETTERS, OP_KEEPER,
+    // Part 2: the human effects.
+    OP_FX_ZOOM, OP_FX_IS_TACTICAL, OP_FX_MOTION, OP_FX_START_FLIGHT, OP_FX_LOOK_POINT, OP_FX_LOOK_AT, OP_FX_SET_TACTICAL,
+    OP_FX_REMOVE, OP_FX_SET_MODE, OP_FX_RESET_HUMANS, OP_FX_TRANSPARENCY, OP_FX_UPDATE_HUMAN, OP_FX_UPDATE_HUMANS,
+    OP_FX_UPDATE_TACTICAL, OP_FX_MOVE, OP_COUNT
 };
 const char *const OP_NAMES[OP_COUNT] = {"StartMission", "StopMission", "SaveGame", "LoadSettings", "ResetUnknown2AC",
                                         "GetCameraPos", "GetCameraDir", "SetBlendTime", "SetTarget", "GetViewDistance",
                                         "SetNearSectorFov", "GetNearSectorFov", "SetFov", "GetFov", "SetViewDir",
-                                        "IsGameCamera", "Getters", "Keeper"};
-const int OP_WEIGHTS[OP_COUNT] = {12, 12, 2, 12, 2, 8, 8, 8, 5, 3, 5, 4, 5, 4, 8, 4, 4, 30};
+                                        "IsGameCamera", "Getters", "Keeper",
+                                        "SetTacticalZoom", "IsTactical", "SetTacticalMotion", "StartFlight",
+                                        "UpdateLookPoint", "LookAt", "SetTactical", "Remove", "SetTacticalMode",
+                                        "ResetHumans", "GetTransparency", "UpdateHuman", "UpdateHumans", "UpdateTactical",
+                                        "Move"};
+const int OP_WEIGHTS[OP_COUNT] = {12, 12, 2, 12, 2, 8, 8, 8, 5, 3, 5, 4, 5, 4, 8, 4, 4, 30,
+                                  2, 2, 2, 10, 6, 12, 14, 6, 14, 5, 8, 12, 10, 40, 12};
+bool IsFxOp(int op) { return op >= OP_FX_ZOOM; }
 
 // A frame of the world by index (-1: null; -2: a camera the case made, CreateFrame's).
 struct S_CamCase {
@@ -227,10 +247,28 @@ struct S_CamCase {
     bool deleteKeeper = true;
     S_vector4 direction = {}, velocity = {};
     float speed = 0, bob = 0;
+    // Part 2: the faded humans (a world human's index, its transparency), the player team's known enemies (humans'
+    // indices), the human argument (-1 null), its vehicle's kind (-2 the world's; -1 none; else a made actor of that
+    // type), the mode's point (none: null), the motion, the humans' view direction (GetViewDir), the collision queries
+    // answered (part 2's operations).
+    std::vector<std::pair<int, float>> faded;
+    std::vector<int> enemies;
+    int human = -1, vehicleType = -2;
+    bool hasPoint = false;
+    float motionX = 0, motionY = 0;
+    S_vector viewDir = {0, 0, 1};
 };
-int g_camCases, g_opCases[OP_COUNT], g_onlyOp = -1;
+int g_camCases, g_opCases[OP_COUNT], g_onlyOp = -1, g_onlyPart;
 uint8_t *g_player[2];                                   // the case's active player on each side
 int g_groundHit;                                        // CollisionSphereTest's answer (the keeper's ground)
+bool g_fxCollisions;                                    // part 2: the collision queries hit now and then
+S_vector g_viewDir;                                     // C_Human::GetViewDir's answer
+uint8_t *HumanAt(int index)
+{
+    if (index < 0 || W().humans.empty())
+        return nullptr;
+    return W().actors[size_t(W().humans[size_t(index) % W().humans.size()])].bytes;
+}
 
 float CF()
 {
@@ -353,6 +391,56 @@ void SetCamState(const S_CamCase &c)
         reinterpret_cast<C_FirstPersonView *>(fpv)->m_binoculars = c.binocularsShown;
     }
     *reinterpret_cast<uint8_t **>(W().scene + 0x15C) = FramePtr(c.activeCamera);
+    // The faded humans (+0x8C: the original's MSVC 6 vector first +0x8C, last +0x90, end +0x94, room enough never to
+    // grow; the port's std::vector).
+    const size_t room = 64;
+    if (g_side) {
+        uint8_t *buf = Block(8 * room);
+        uint8_t *p = buf;
+        for (const auto &e : c.faded) {
+            uint8_t *h = HumanAt(e.first);
+            std::memcpy(p, &h, 4);
+            std::memcpy(p + 4, &e.second, 4);
+            p += 8;
+        }
+        uint8_t *end = buf + 8 * room;
+        std::memcpy(fx + 0x8C, &buf, 4);
+        std::memcpy(fx + 0x90, &p, 4);
+        std::memcpy(fx + 0x94, &end, 4);
+    } else {
+        auto &v = reinterpret_cast<C_CameraHumanEffects *>(fx)->m_humans;
+        v.clear();
+        v.reserve(room);
+        for (const auto &e : c.faded)
+            v.push_back({reinterpret_cast<C_Human *>(HumanAt(e.first)), e.second});
+    }
+    // The player team's known enemies (the original's records vector first +0x3C, last +0x40; the port's at +0x38).
+    std::vector<uint8_t *> records;
+    for (int e : c.enemies) {
+        uint8_t *h = HumanAt(e);
+        if (!h)
+            continue;                                   // (a world without humans)
+        uint8_t *r = Block(0x10);
+        std::memcpy(r, &h, 4);
+        records.push_back(r);
+    }
+    if (g_side) {
+        uint8_t *team = W().playerTeam;
+        uint8_t *buf = Block(4 * (records.size() + 1));
+        if (!records.empty())
+            std::memcpy(buf, records.data(), 4 * records.size());
+        uint8_t *last = buf + 4 * records.size();
+        std::memcpy(team + 0x3C, &buf, 4);
+        std::memcpy(team + 0x40, &last, 4);
+        std::memcpy(team + 0x44, &last, 4);
+    } else {
+        auto &v = g_teamManager.GetPlayerTeam()->m_enemyRecords.m_records;
+        v.clear();
+        for (uint8_t *r : records)
+            v.push_back(reinterpret_cast<S_EnemyRecord *>(r));
+    }
+    g_viewDir = c.viewDir;
+    g_fxCollisions = IsFxOp(c.op);
 }
 
 std::string WordText(const uint8_t *base, uint32_t o, bool isFloat, bool isPointer)
@@ -388,13 +476,18 @@ std::vector<std::string> CamState()
     for (uint32_t o = 0; o < 0x88; o += 0x10) {
         std::string line = F("effects +%02x", o);
         for (uint32_t w = o; w < o + 0x10 && w < 0x88; w += 4)
-            line += " " + WordText(fx, w, IsFxFloat(w),
+            // (The point's and the position's w: the original's uninitialised locals; not read.)
+            line += w == 0x0C || w == 0x2C ? std::string(" -") : " " + WordText(fx, w, IsFxFloat(w),
                                    std::find(std::begin(FX_POINTERS), std::end(FX_POINTERS), w) != std::end(FX_POINTERS));
         out.push_back(line);
     }
-    // The faded humans (empty in part 1).
+    // The faded humans.
     const uint32_t first = At<uint32_t>(fx, 0x8C), last = At<uint32_t>(fx, 0x90);
-    out.push_back(F("effects humans %d", int((last - first) / 8)));
+    std::string humans = F("effects humans %d:", int((last - first) / 8));
+    for (uint32_t p = first; p < last; p += 8)
+        humans += " " + NameOf(*reinterpret_cast<const uint32_t *>(p)) + " " +
+                  FloatText(*reinterpret_cast<const float *>(p + 4));
+    out.push_back(humans);
     return out;
 }
 
@@ -556,6 +649,136 @@ std::string RunKeeper(const S_CamCase &c)
     return out;
 }
 
+// ---- part 2: the human effects ----
+template <class R, class... A> R FCall(uint32_t addr, A... a)
+{
+    using T = R(TC *)(void *, A...);
+    return OriginalAt<T>(addr)(Effects(), a...);
+}
+// The human argument's vehicle: the world's, none or a made actor of the case's type.
+void SetHumanVehicle(uint8_t *h, int type)
+{
+    if (!h || type == -2)
+        return;
+    uint8_t *vehicle = nullptr;
+    if (type >= 0) {
+        vehicle = Block(0x1000);
+        Name(vehicle, F("vehicle %d", type));
+        if (g_side)
+            *reinterpret_cast<int *>(vehicle + 0x18) = type;
+        else
+            reinterpret_cast<C_Actor *>(vehicle)->m_type = E_ActorType(type);
+    }
+    if (g_side)
+        *reinterpret_cast<uint8_t **>(h + 0x160) = vehicle;
+    else
+        reinterpret_cast<C_Human *>(h)->m_vehicle = reinterpret_cast<C_Actor *>(vehicle);
+}
+std::string RunFxOp(const S_CamCase &c)
+{
+    const bool o = g_side != 0;
+    C_CameraHumanEffects &e = *reinterpret_cast<C_CameraHumanEffects *>(Effects());
+    uint8_t *h = HumanAt(c.human);
+    void *hv = h;
+    C_Human *hp = reinterpret_cast<C_Human *>(h);
+    // (Both sides read these unchecked: a world without humans, a null game camera.)
+    if ((c.op == OP_FX_TRANSPARENCY || c.op == OP_FX_UPDATE_HUMAN) && !h)
+        return "no human";
+    if (c.op == OP_FX_SET_TACTICAL && c.flag && !Effects()[0x48] && !g_player[g_side])
+        return "no player";
+    if (c.op == OP_FX_LOOK_AT && !h && !At<uint32_t>(Effects(), 0x84))
+        return "no game camera";
+    switch (c.op) {
+    case OP_FX_ZOOM:
+        if (o)
+            FCall<void>(O_FX_ZOOM, c.value);
+        else
+            e.SetTacticalZoom(c.value);
+        return "";
+    case OP_FX_IS_TACTICAL:
+        return BoolText(o ? FCall<bool>(O_FX_IS_TACTICAL) : e.IsTactical());
+    case OP_FX_MOTION:
+        if (o)
+            FCall<void>(O_FX_MOTION, c.motionX, c.motionY);
+        else
+            e.SetTacticalMotion(c.motionX, c.motionY);
+        return "";
+    case OP_FX_START_FLIGHT:
+        if (o)
+            FCall<void>(O_FX_START_FLIGHT);
+        else
+            e.StartFlight();
+        return "";
+    case OP_FX_LOOK_POINT:
+        if (o)
+            FCall<void>(O_FX_LOOK_POINT);
+        else
+            e.UpdateLookPoint();
+        return "";
+    case OP_FX_LOOK_AT:
+        SetHumanVehicle(h, c.vehicleType);
+        if (o)
+            FCall<void>(O_FX_LOOK_AT, hv);
+        else
+            e.LookAt(hp);
+        return "";
+    case OP_FX_SET_TACTICAL:
+        if (o)
+            FCall<void>(O_FX_SET_TACTICAL, c.flag);
+        else
+            e.SetTactical(c.flag);
+        return "";
+    case OP_FX_REMOVE:
+        if (o)
+            FCall<void>(O_FX_REMOVE, hv);
+        else
+            e.Remove(hp);
+        return "";
+    case OP_FX_SET_MODE: {
+        alignas(16) S_vector4 point = c.vector;
+        const S_vector4 *pp = c.hasPoint ? &point : nullptr;
+        if (o)
+            FCall<void>(O_FX_SET_MODE, c.number, static_cast<const void *>(pp));
+        else
+            e.SetTacticalMode(c.number, pp);
+        return "";
+    }
+    case OP_FX_RESET_HUMANS:
+        if (o)
+            FCall<void>(O_FX_RESET_HUMANS, c.flag);
+        else
+            e.ResetHumans(c.flag);
+        return "";
+    case OP_FX_TRANSPARENCY:
+        return FloatText(o ? FCall<float>(O_FX_TRANSPARENCY, hv) : e.GetTransparency(hp));
+    case OP_FX_UPDATE_HUMAN:
+        if (o)
+            FCall<void>(O_FX_UPDATE_HUMAN, hv);
+        else
+            e.UpdateHuman(hp);
+        return "";
+    case OP_FX_UPDATE_HUMANS:
+        if (o)
+            FCall<void>(O_FX_UPDATE_HUMANS, c.number);
+        else
+            e.UpdateHumans(c.number);
+        return "";
+    case OP_FX_UPDATE_TACTICAL:
+        if (o)
+            FCall<void>(O_FX_UPDATE_TACTICAL, c.number);
+        else
+            e.UpdateTactical(c.number);
+        return "";
+    case OP_FX_MOVE: {
+        const S_vector move(c.vector.x, c.vector.y, c.vector.z);
+        void *r = o ? FCall<void *>(O_FX_MOVE, static_cast<const void *>(&move)) : static_cast<void *>(e.Move(move));
+        return NameOf(reinterpret_cast<uint32_t>(r));
+    }
+    default:
+        return "?";
+    }
+}
+
 std::string RunOp(const S_CamCase &c)
 {
     const bool o = g_side != 0;
@@ -661,7 +884,115 @@ std::string RunOp(const S_CamCase &c)
     case OP_KEEPER:
         return RunKeeper(c);
     default:
-        return "?";
+        return RunFxOp(c);
+    }
+}
+
+// Part 2's fields: the effects' state, the faded humans, the enemies, the arguments.
+S_vector UnitChoice()
+{
+    static const S_vector units[] = {{0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0.6f, 0, 0.8f}, {0, 0.6f, -0.8f},
+                                     {0.1f, 0.3f, 0.9486833f}, {-0.48f, 0.6f, 0.64f}};
+    return units[I(0, 7)];
+}
+void PutQuat(uint8_t *p, uint32_t o)
+{
+    static const float quats[][4] = {{1, 0, 0, 0}, {0.70710677f, 0, 0.70710677f, 0}, {0, 0, 1, 0}, {0.5f, 0.5f, 0.5f, 0.5f},
+                                     {0.8f, 0, -0.6f, 0}, {-0.70710677f, 0, 0.70710677f, 0}, {-0.6f, 0, 0, 0.8f}};
+    if (I(0, 3) == 0)
+        return;                                         // (the noise CF() gave)
+    std::memcpy(p + o, quats[I(0, 6)], 16);
+}
+void RandomFx(S_CamCase &c)
+{
+    c.fx[0x48] = uint8_t(I(0, 1));
+    c.fx[0x49] = uint8_t(I(0, 1));
+    PutI(c.fx, 0x44, I(0, 2) ? 0 : I(0, 3) ? I(1, 600) : I(-50, 0));
+    PutI(c.fx, 0x4C, I(0, 7) ? I(0, 12) : I(-1, 14));
+    PutF(c.fx, 0x40, I(0, 2) ? float(I(1, 16)) * 0.25f : CF());
+    PutQuat(c.fx, 0x50);
+    PutQuat(c.fx, 0x60);
+    // The flight: its distance mostly positive, its time near the drag's 300 ms now and then.
+    PutF(c.fx, 0x78, I(0, 3) ? std::fabs(CF()) : CF());
+    static const float times[] = {299.5f, 300.0f, 300.5f, 0.0f};
+    PutF(c.fx, 0x7C, I(0, 1) ? times[I(0, 3)] : CF() * 100.0f);
+    if (I(0, 1)) {
+        // The camera at small integers, the point an axis' length away (the flight's lengths exact).
+        const float px = float(I(-5, 5)), py = float(I(-5, 5)), pz = float(I(-5, 5));
+        static const float lengths[] = {0.5f, 1.0f, 2.0f, 4.0f, 5.0f, 6.0f, 30.0f, 35.0f, 40.0f, 34.5f, 2e-4f, 5e-5f};
+        const float l = lengths[I(0, 11)];
+        // (The flight's distance three or one and a half times the way left now and then: its thirds' edges.)
+        if (I(0, 2) == 0)
+            PutF(c.fx, 0x78, l * (I(0, 2) == 0 ? 3.0000002f : I(0, 1) ? 3.0f : 1.5f));
+        // (Now and then the way's square 0.99999994 in the flight's order: the summed length's 1e-8 edge.)
+        if (I(0, 7) == 0) {
+            for (uint32_t o = 0x00; o < 0x0C; o += 4)
+                PutF(c.fx, o + 0x20, 0.0f);
+            PutF(c.fx, 0x00, 0.001f);
+            PutF(c.fx, 0x04, 0.0f);
+            PutF(c.fx, 0x08, 0.99999946f);
+        }
+        const int axis = I(0, 2);
+        const float d = I(0, 1) ? l : -l;
+        PutF(c.fx, 0x20, px);
+        PutF(c.fx, 0x24, py);
+        PutF(c.fx, 0x28, pz);
+        PutF(c.fx, 0x00, px + (axis == 0 ? d : 0.0f));
+        PutF(c.fx, 0x04, py + (axis == 1 ? d : 0.0f));
+        PutF(c.fx, 0x08, pz + (axis == 2 ? d : 0.0f));
+    }
+    c.fxPtrs[1] = I(0, 7) ? CameraFrame() : -1;
+    // The faded humans and the known enemies.
+    static const float fades[] = {0.0f, 0.5f, 1.0f, 0.25f};
+    for (int n = I(0, 3) ? I(0, 4) : 0; n > 0; --n)
+        c.faded.push_back({I(0, 20), I(0, 4) ? fades[I(0, 3)] : CF()});
+    for (int n = I(0, 1) ? I(0, 4) : 0; n > 0; --n)
+        c.enemies.push_back(I(0, 20));
+    c.human = I(0, 7) ? I(0, 20) : -1;
+    if (!c.faded.empty() && I(0, 1))
+        c.human = c.faded[size_t(I(0, int(c.faded.size()) - 1))].first;
+    c.vehicleType = I(0, 1) ? -2 : I(0, 4) ? std::vector<int>{ACTOR_CAR, ACTOR_SUBMARINE, ACTOR_STATIC_WEAPON,
+                                                              ACTOR_JUNKERS88, ACTOR_HUMAN, ACTOR_BIKE}[size_t(I(0, 5))]
+                                            : -1;
+    c.hasPoint = I(0, 3) != 0;
+    c.motionX = I(0, 3) ? float(I(-4, 4)) * 0.25f : CF();
+    c.motionY = I(0, 3) ? float(I(-4, 4)) * 0.25f : CF();
+    PutF(c.fx, 0x34, c.motionX);
+    PutF(c.fx, 0x38, c.motionY);
+    if (I(0, 1)) {
+        c.motionX = CF();
+        c.motionY = CF();
+    }
+    c.viewDir = UnitChoice();
+    switch (c.op) {
+    case OP_FX_SET_MODE:
+        c.number = I(0, 2) == 0 ? TACTICAL_DRAG : I(0, 7) ? I(0, 12) : I(-1, 14);
+        if (I(0, 2) == 0)
+            PutI(c.fx, 0x4C, TACTICAL_FLY);
+        break;
+    case OP_FX_SET_TACTICAL:
+        // (Off: SelectView(0), part 4's; the debug camera on returns from it at once. On: the active player there.)
+        c.image[0x26D] = 1;
+        c.player = I(0, 20);
+        break;
+    case OP_FX_UPDATE_TACTICAL:
+    case OP_FX_UPDATE_HUMANS:
+        c.number = I(0, 3) ? I(0, 100) : I(-20, 1000);
+        // (The double click's time running out exactly, or 1 ms short.)
+        if (I(0, 3) == 0)
+            PutI(c.fx, 0x44, c.number + I(0, 1));
+        break;
+    case OP_FX_TRANSPARENCY:
+    case OP_FX_UPDATE_HUMAN:
+        if (c.human < 0)
+            c.human = I(0, 20);
+        break;
+    case OP_FX_MOVE:
+        if (I(0, 1))
+            c.vector = {float(I(-4, 4)) * 0.5f, float(I(-4, 4)) * 0.5f, float(I(-4, 4)) * 0.5f, 0.0f};
+        break;
+    default:
+        break;
     }
 }
 
@@ -674,9 +1005,13 @@ S_CamCase RandomCamCase()
     if (g_onlyOp >= 0) {
         c.op = g_onlyOp;
     } else {
-        int r = I(0, total - 1);
-        while (r >= OP_WEIGHTS[c.op])
-            r -= OP_WEIGHTS[c.op++];
+        // (HD2_CAM_PART: one part's operations only.)
+        do {
+            c.op = 0;
+            int r = I(0, total - 1);
+            while (r >= OP_WEIGHTS[c.op])
+                r -= OP_WEIGHTS[c.op++];
+        } while (g_onlyPart && (g_onlyPart == 2) != IsFxOp(c.op));
     }
     // The module's bytes: noise, then each field a value of its kind.
     for (uint8_t &b : c.image)
@@ -820,6 +1155,8 @@ S_CamCase RandomCamCase()
     default:
         break;
     }
+    if (IsFxOp(c.op))
+        RandomFx(c);
     return c;
 }
 
@@ -921,15 +1258,63 @@ void SetUpCam()
     g_answers["C_Team::GetActivePlayer"] = [](const std::vector<uint32_t> &) { return reinterpret_cast<uint32_t>(g_player[g_side]); };
     g_extraQuiet.insert("C_Team::GetActivePlayer");
     // The sphere test: a hit (a volume; the hit point's y the case's) or none.
+    // Part 2: a hit now and then, part of the way along the move (a volume, or a water surface's).
+    static uint8_t volume[0x40], water[0x40];
+    Name(volume, "volume");
+    Name(water, "water");
+    reinterpret_cast<S_CollisionVolume *>(water)->flags = COLLISION_FLAG_WATER;
     g_answers["CollisionSphereTest"] = [](const std::vector<uint32_t> &a) {
+        if (g_fxCollisions) {
+            const uint32_t r = NextFake() % 6;
+            if (r < 2)
+                return 0u;
+            static const float parts[] = {0.0f, 0.25f, 0.5f, 1.0f};
+            const S_vector &pos = *reinterpret_cast<const S_vector *>(a[0]);
+            const S_vector &move = *reinterpret_cast<const S_vector *>(a[1]);
+            const float f = parts[r - 2];
+            if (S_vector *hit = reinterpret_cast<S_vector *>(a[3]))
+                *hit = S_vector(pos.x + move.x * f, pos.y + move.y * f, pos.z + move.z * f);
+            return reinterpret_cast<uint32_t>(NextFake() % 2 ? water : volume);
+        }
         if (!g_groundHit)
             return 0u;
         if (S_vector *hit = reinterpret_cast<S_vector *>(a[3]))
             *hit = S_vector(0.5f, float(g_groundHit) * 0.25f, -0.5f);
-        static uint8_t volume[0x40];
-        Name(volume, "volume");
         return reinterpret_cast<uint32_t>(volume);
     };
+    g_answers["CollisionSlideSphere"] = [](const std::vector<uint32_t> &a) {
+        const uint32_t r = NextFake() % 7;
+        const S_vector &pos = *reinterpret_cast<const S_vector *>(a[0]);
+        const S_vector &move = *reinterpret_cast<const S_vector *>(a[1]);
+        S_vector &end = *reinterpret_cast<S_vector *>(a[3]);
+        if (r < 3) {
+            end = S_vector(pos.x + move.x, pos.y + move.y, pos.z + move.z);
+            return 0u;
+        }
+        static const float parts[] = {0.0f, 0.25f, 0.5f, 1.0f};
+        const float f = parts[r - 3];
+        // (Slid sideways a little.)
+        end = S_vector(pos.x + move.x * f + 0.125f, pos.y + move.y * f, pos.z + move.z * f);
+        return reinterpret_cast<uint32_t>(NextFake() % 2 ? water : volume);
+    };
+    // The squared distances: GetTransparency's edges among them.
+    g_answers["SegmentDistance2"] = [](const std::vector<uint32_t> &) {
+        static const float values[] = {0.0f, 0.4f, 2.4f, 1.0f, 0.5f, 10.0f, -1.0f, 2.5f, 0.39999998f, 2.4000003f, 1.4f,
+                                       0.405f, 2.405f, 0.40000004f};
+        const float f = values[NextFake() % 14];
+        uint32_t w;
+        std::memcpy(&w, &f, 4);
+        return w;
+    };
+    // The scene's sector at a point: the primary one or another.
+    g_answers["I3D_scene::GetSector"] = [](const std::vector<uint32_t> &a) {
+        static uint8_t other[0x40];
+        Name(other, "other sector");
+        return NextFake() % 2 ? *reinterpret_cast<const uint32_t *>(a[0] + 0x1F8) : reinterpret_cast<uint32_t>(other);
+    };
+    g_answers["C_Human::GetViewDir"] = [](const std::vector<uint32_t> &) { return reinterpret_cast<uint32_t>(&g_viewDir); };
+    if (const char *part = std::getenv("HD2_CAM_PART"))
+        g_onlyPart = std::atoi(part);
     if (const char *op = std::getenv("HD2_CAM_OP"))
         for (int i = 0; i < OP_COUNT; ++i)
             if (Lower(op) == Lower(OP_NAMES[i]))

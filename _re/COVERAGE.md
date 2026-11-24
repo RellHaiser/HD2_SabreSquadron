@@ -5920,3 +5920,36 @@ particles and the surface marks. Files are served from memory.
     on well-formed files. A made file with bytes past the version showed it.
   - The port's game fields, actor direction and submarine fields were first written at the original's offsets: the
     port's g++ layout has them elsewhere. They are written through the port's members now.
+
+## Camera part 2 (the command map's tactical camera: `camera_module.cpp`'s C_CameraHumanEffects, 2026-11-24)
+
+- **The build:** part 1's `script/cam_diff.cpp` (suite `camera.module`) extended; the human effects' functions are
+  called on the module's own object (+0x0C) on both sides, the private ones directly. Each case also gives both sides
+  the faded humans (the original's MSVC 6 vector first +0x8C, last +0x90, end +0x94, room enough never to grow; the
+  port's std::vector), the player team's known enemies (the original's records first +0x3C, last +0x40; the port's
+  vector at +0x38), the human argument's vehicle (the world's, none, or a made car, submarine, static weapon,
+  Junkers, human or bike), the humans' view direction (GetViewDir), the effects' quaternions unit now and then.
+  - Answered: CollisionSphereTest and CollisionSlideSphere hit now and then part of the way along the move (a plain
+    volume or a water surface's; the slide's end a little aside), SegmentDistance2 among values on and around
+    GetTransparency's 0.4 and 2.4 edges, the scene's GetSector the primary sector or another.
+  - Compared as in part 1, the faded humans listed with their transparency.
+- **The tests:** SetTacticalZoom, IsTactical, SetTacticalMotion, StartFlight (the camera at small integers and the
+  point an axis' length away: 1, 5, 34.5, 35 m and around; tiny ways), UpdateLookPoint, LookAt (a human in each kind
+  of vehicle, none: the game camera's), SetTactical on and off, Remove, SetTacticalMode (every mode from every mode,
+  the flight's 300 ms drag edge, double clicks), ResetHumans, GetTransparency, UpdateHuman, UpdateHumans,
+  UpdateTactical (every mode; the double click's time running out exactly; the flight's thirds' edges), Move.
+  40,000 cases with part 1's (HD2_CAM_PART=2: part 2's only; quick 8,000, about 11 s).
+- **Coverage:** every line of part 2's functions but the static human effects' destructor (never run in the test).
+- **Port bugs found:** none.
+- **The original's weaknesses (kept):** StartFlight, LookAt, UpdateTactical and Move write the point's and the camera
+  position's w (+0x0C, +0x2C) from uninitialised locals (never read; the port keeps its own values, and the test
+  leaves those two words out). GetTransparency, UpdateHuman and SetTactical(on) read the human / the active player
+  unchecked (both sides crash on null; the test does not pass one).
+- **Harness decisions:** SetTactical(off)'s SelectView(0) is part 4's: those cases have the debug camera on, so it
+  returns at once.
+- **Mutations:** 441 mutants (`mutate_cam2.py`), 36 not building; 388 of the 405 building killed. The 17 left:
+  equivalent ones (the same float, sqrt(1), SetDir's whole quaternion, ResetHumans(true), the transparency's edges,
+  LS3DF's Slerp ignoring its flag), equalities the cases never reach (the 89-degree limit, a square 6e-8 short of 1),
+  and SelectView (part 4).
+- **Harness lessons (my mistakes):** none new. The first run's edges (34 to 35 m, the distances just past 0.4 and
+  2.4, the click timer at exactly 0) were added after the mutation run.
