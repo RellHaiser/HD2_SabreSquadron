@@ -105,6 +105,8 @@ SUITES = [
     T("net.bits", "net/build_bits.bat", TMP + r"\bits_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 2: the replicated values against the original executable, net/track_diff.cpp.)
     T("net.track", "net/build_track.bat", TMP + r"\track_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 3: the packets, pools, channels and messages against the original executable, net/chan_diff.cpp.)
+    T("net.chan", "net/build_chan.bat", TMP + r"\chan_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",

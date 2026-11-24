@@ -6139,3 +6139,40 @@ came from. From this part on the network code is compared with the original exec
   direction track's EndRead leaves it undefined (a mutant deleting the base Read's copy survived). A Python heredoc
   turned a `\n` into a newline in the C++ (the known Bash hazard), and a local named `far` hit windows.h's macro (the
   known one).
+
+## Net part 3 (the transport's packets, pools, channels and messages, `net/net_channel.cpp`, 2026-11-24)
+
+- **The build:** `net/build_chan.bat` (`net/chan_diff.cpp`, suite `net.chan`): net_channel.cpp and bitstream.cpp
+  against the original's. Each program keeps its own pool (the port's g_netPool; the original's at 0x00983150, built by
+  its constructor, its static initialiser never having run). Their packets and buffers are paired as they first appear
+  (the free lists walked in order, the calls' results), so every later pointer is checked against its partner; a
+  buffer over 1000 bytes (malloc'ed, freed: its address can come back) only for null or not. The channels are made by
+  the original's constructors in buffers of its layout; their std::lists are MSVC6's, walked node by node. The
+  original's operator new / delete, malloc / free and clock (0x00748dc0) are the test's; both programs' allocations
+  are zeroed (a new packet's sequence number is never set, and Clear leaves it). The port's free is wrapped
+  (`--wrap=free`) and both sides' deletes recorded for the destructors.
+- **The tests:** rounds of up to 60 random calls on a plain, reliable or ordered channel (numbers near the 23-bit wrap
+  now and then): packets from the pool (data of up to 1000 bytes, exactly 1000, bigger, none), Send, PopOutgoing,
+  Receive (numbers near the newest or the last delivered, behind them, repeats of those held, across the wrap),
+  PopReceived, WriteAck, ReadAck (near the last acknowledged, or anything), Resend (the clock moved on by up to 8 s; the
+  resend time changed), Acknowledge, AddRef and Release (to the pool at the last), the packets' Write and Read (from
+  where a packet was written), FreeData / Clear / FreePacket, the pool's buffers (past its 16: it grows; back in any
+  order; none), UnwrapSequence at the edges of its thirds, the header's Write and Read, the packet list (packets added,
+  written, read back from the pool, popped, the rest released by the destructor), the ping (a reply or not; a round
+  trip of 0 read as 1), the destructors (a reference-counted object released below one, a packet with its data, a pool
+  of its own grown and destroyed). After each call the channel, every packet the test holds, both pools' free lists
+  and locks and the streams are compared. 30,000 rounds, about 60 million checks, 23 s (HD2_CHAN_QUICK: 8,000).
+- **Coverage:** every line of net_channel.cpp and of net_channel.h's bodies.
+- **Port bugs found:** none.
+- **The original's weaknesses (kept):**
+  - The plain and reliable channels' destructors forget the packets received (and the reliable one's held out of
+    order) without releasing them: they never go back to the pool.
+  - A packet's Read takes a pool buffer without giving back one it had; its sequence number is never cleared.
+- **Mutations:** 240 mutants (`net/mutations/mutate_net3.py`), 20 not building; 210 of the 220 building killed. The 10
+  left: the pool destructor's DeleteCriticalSection and its clearing of an object about to vanish (unobservable),
+  three equivalent. The first run left 19: the locks were not checked.
+- **Harness lessons (my mistakes):** the stream's write starts mixed acknowledgements with packets, so a packet "read"
+  from an acknowledgement took a random size of up to 32 KB, and writing it back overran the test's buffer into its
+  globals (the failure showed as a crash while printing the trace). The messages' room check asked for more than the
+  buffer held, so they never ran until the coverage showed it. The delete recorder first grew a vector, whose own
+  delete it recorded (a recursion).
