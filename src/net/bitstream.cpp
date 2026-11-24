@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstring>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 
 #include "ls3d/math.h"
@@ -107,7 +108,8 @@ bool C_GrowingBitStream::Reserve(uint32_t bits)
         return true;
 
     if (!m_data) {
-        m_capacityBits = bits + 32 > 800 ? bits + 32 : 800;
+        // 800 bits, or the request and a word when it is more (as the original: a request of 769 to 800 bits gets 800).
+        m_capacityBits = bits > 800 ? bits + 32 : 800;
         // The original always allocates 100 bytes here even when the requested
         // capacity is larger; the buffer is sized to the capacity instead.
         m_data = static_cast<uint32_t *>(std::malloc((m_capacityBits + 31) / 32 * 4));
@@ -156,14 +158,17 @@ namespace {
 static_assert(offsetof(S_NetQuantization, bits) == 0x50, "S_NetQuantization layout");
 static_assert(offsetof(S_NetQuantization, scale) == 0x60, "S_NetQuantization layout");
 
+// __ftol: the 64-bit conversion's low word (NaN, infinities: 0; out of the int's range: wrapped).
 uint32_t Quantize(const S_NetQuantization &q, int i, float value)
 {
-    return static_cast<uint32_t>(static_cast<int>((value - q.offset[i]) * q.scale[i]));
+    return static_cast<uint32_t>(static_cast<int64_t>((value - q.offset[i]) * q.scale[i]));
 }
 
+// The original loads the read bits as an int (FILD: exact) and divides in the game's single precision: one rounding
+// (a float conversion first would round twice past 24 bits).
 float Dequantize(const S_NetQuantization &q, int i, uint32_t raw)
 {
-    return static_cast<float>(static_cast<int>(raw)) / q.scale[i] + q.offset[i];
+    return static_cast<float>(static_cast<double>(static_cast<int>(raw)) / q.scale[i]) + q.offset[i];
 }
 
 } // namespace
@@ -174,9 +179,10 @@ bool C_NetMessage::WriteQuantized(const float *values, const S_NetQuantization *
     if (mask & 1)
         WriteBits(Quantize(q, 0, values[0]), q.bits[0]);
     if (mask & 2) {
-        // y carries a presence bit: values in its dead zone are not sent
-        const float y = values[1] >= q.min[1] ? values[1] : q.min[1];
-        if (std::fabs(y) <= q.deadZone[1]) {
+        // y carries a presence bit: values in its dead zone are not sent (as the original's x87 compares: a NaN y is
+        // kept, then not sent)
+        const float y = values[1] < q.min[1] ? q.min[1] : values[1];
+        if (!(q.deadZone[1] < std::fabs(y))) {
             WriteBits(0, 1);
         } else {
             WriteBits(1, 1);
@@ -217,20 +223,25 @@ void S_NetQuantization::Setup(const S_vector4 &span, const S_vector4 &from, cons
         deadZone[i] = steps[i];
     }
     unknown70 = unknown;
-    // (The original works the logarithms out with FYL2X, in the game's float precision: as here, an
-    // exact power of two can come out just below its exponent, e.g. 8192 gives 13 bits, not 14;
-    // _re/harness/net_quantization checks it.)
-    const float ln2 = std::log(2.0f);
-    for (int i = 0; i < 3; ++i)
-        bits[i] = static_cast<int>(std::floor(std::log(spans[i] / steps[i]) / ln2) + 1.0f);
+    // The original works the logarithms out with FYL2X, which the game's single precision does not round (ln 2 kept as
+    // a double), then divides in single precision: an exact power of two gives its exponent (8192: 14 bits). The
+    // quotient rounded to float as the division does, floor and + 1 in double, __ftol.
+    const double ln2 = std::log(2.0);
+    for (int i = 0; i < 3; ++i) {
+        const float ratio = spans[i] / steps[i];
+        const float log2 = static_cast<float>(std::log(static_cast<double>(ratio)) / ln2);
+        bits[i] = static_cast<int>(static_cast<int64_t>(std::floor(static_cast<double>(log2)) + 1.0));
+    }
     for (int i = 0; i < 3; ++i)
         scale[i] = static_cast<float>(static_cast<double>(bits[i] > 0 ? BitMask(bits[i]) : 0u) / spans[i]);
 }
 
 bool S_NetQuantization::Contains(const float *v) const
 {
-    return offset[0] <= v[0] && v[0] <= range40[0] + offset[0] && offset[1] <= v[1] && v[1] <= range40[1] + offset[1] &&
-           offset[2] <= v[2] && v[2] <= range40[2] + offset[2];
+    // As the original's x87 compares: each test fails only on "below" / "above", so a NaN x or y passes; z's last test
+    // fails on a NaN too.
+    return !(v[0] < offset[0]) && !(range40[0] + offset[0] < v[0]) && !(v[1] < offset[1]) &&
+           !(range40[1] + offset[1] < v[1]) && !(v[2] < offset[2]) && v[2] <= range40[2] + offset[2];
 }
 
 bool S_NetQuantization::WithinSteps(const float *v) const
@@ -250,9 +261,27 @@ void C_NetMessage::ReadPosition(S_vector &pos)
     pos = S_vector(v[0], v[1], v[2]);
 }
 
+// The original's FPATAN, FSIN, FCOS and asin keep more than a float's bits until stored: each angle and sine is its
+// double rounded to float, and the products (cos x cos) round once, as the x87 multiplies them.
+namespace {
+
+float Heading(const S_vector &v) { return static_cast<float>(std::atan2(static_cast<double>(v.z), static_cast<double>(v.x))); }
+float Pitch(const S_vector &v) { return static_cast<float>(std::asin(static_cast<double>(v.y))); }
+float Cos(float a) { return static_cast<float>(std::cos(static_cast<double>(a))); }
+float Sin(float a) { return static_cast<float>(std::sin(static_cast<double>(a))); }
+// (heading, pitch) back to a unit vector.
+S_vector FromAngles(float heading, float pitch)
+{
+    const double cosPitch = std::cos(static_cast<double>(pitch));
+    return S_vector(static_cast<float>(std::cos(static_cast<double>(heading)) * cosPitch), Sin(pitch),
+                    static_cast<float>(std::sin(static_cast<double>(heading)) * cosPitch));
+}
+
+} // namespace
+
 void C_NetMessage::WriteDirection(const S_vector &dir, int playerIndex)
 {
-    const float heading[3] = {std::atan2(dir.z, dir.x), 0.0f, 0.0f};   // (the result reads all three)
+    const float heading[3] = {Heading(dir), 0.0f, 0.0f};   // (the result reads all three)
     WriteQuantized(heading, GetRecipient(playerIndex), 1);
 }
 
@@ -260,12 +289,12 @@ void C_NetMessage::ReadDirection(S_vector &dir, int playerIndex)
 {
     float v[3];
     ReadQuantized(v, GetRecipient(playerIndex), 1);
-    dir = S_vector(std::cos(v[0]), 0.0f, std::sin(v[0]));
+    dir = S_vector(Cos(v[0]), 0.0f, Sin(v[0]));
 }
 
 void C_NetMessage::WriteDirection3D(const S_vector &dir, int playerIndex)
 {
-    const float angles[3] = {std::atan2(dir.z, dir.x), std::asin(dir.y), 0.0f};   // heading, pitch
+    const float angles[3] = {Heading(dir), Pitch(dir), 0.0f};   // heading, pitch
     WriteQuantized(angles, GetRecipient(playerIndex), 3);
 }
 
@@ -273,13 +302,12 @@ void C_NetMessage::ReadDirection3D(S_vector &dir, int playerIndex)
 {
     float v[3];
     ReadQuantized(v, GetRecipient(playerIndex), 3);
-    const float cosPitch = std::cos(v[1]);
-    dir = S_vector(std::cos(v[0]) * cosPitch, std::sin(v[1]), std::sin(v[0]) * cosPitch);
+    dir = FromAngles(v[0], v[1]);
 }
 
 void C_NetMessage::WriteAxisAngle(const S_vector &axis, float angle, int playerIndex)
 {
-    const float v[3] = {std::atan2(axis.z, axis.x), std::asin(axis.y), angle};   // heading, pitch, angle
+    const float v[3] = {Heading(axis), Pitch(axis), angle};   // heading, pitch, angle
     WriteQuantized(v, GetRecipient(playerIndex), 7);
 }
 
@@ -287,7 +315,6 @@ void C_NetMessage::ReadAxisAngle(S_vector &axis, float &angle, int playerIndex)
 {
     float v[3];
     ReadQuantized(v, GetRecipient(playerIndex), 7);
-    const float cosPitch = std::cos(v[1]);
-    axis = S_vector(std::cos(v[0]) * cosPitch, std::sin(v[1]), std::sin(v[0]) * cosPitch);
+    axis = FromAngles(v[0], v[1]);
     angle = v[2];
 }

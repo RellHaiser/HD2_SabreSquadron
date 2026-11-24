@@ -6045,3 +6045,56 @@ particles and the surface marks. Files are served from memory.
 - **Harness lessons (my mistakes):** the seats were first written at the original's offsets on both sides; g++ lays
   out the port's C_Car differently (the seat vector at +0xFC4, 0x3C-byte seats), so the port side now writes its own
   members.
+
+## Net part 1 (the bit streams and the messages' encodings, `net/bitstream.cpp`, 2026-11-24)
+
+The network code's older suites (net.replication, net.session, net.messages, net.commands, net.game, net.console,
+net.firewall, net.gamespy) run about 90 % of its lines, but they check expectations written from the decompile the port
+came from. From this part on the network code is compared with the original executable.
+
+- **The build:** `net/build_bits.bat` (`net/bits_diff.cpp`, suite `net.bits`): bitstream.cpp alone against the
+  original's functions, called on objects in the original's layout (its constructors run on them). The original's
+  malloc, realloc and free are redirected, the port's wrapped (`--wrap`); both log their calls and fill new memory
+  alike, each block with 64 bytes of slack. One player table is set in both programs' globals (0x00982dec, 0x00982df0).
+  The original's packet Write and Read (0x00745fa0, 0x00746050, its pool's AllocBuffer faked) stand in for
+  WriteRawBytes and ReadRawBytes, which the original has only inline there; WritePosition and ReadPosition likewise
+  against WriteQuantized and ReadQuantized with GetSender(-1).
+- **The tests:** rounds of up to 30 random calls on a pair of streams: a fixed buffer's (constructed with it, or by
+  default and attached) or a growing message (with its sender and recipient by pointer or index; now and then attached
+  to a buffer it does not own). After each call the fields, the buffer, the results and the allocations are compared.
+  WriteBits (0 to 32 bits, values out of range too), ReadBits, WriteString (high characters too), ReadString (sizes 1
+  to 48), SetBitPosition and ResetPosition with ByteSize and IsValid, Reserve (either class; the first block's edges at
+  768 to 900 bits; growth by doubling or by the request), the packets' raw bytes at any bit position, Setup (spans and
+  steps at exact powers of two and a float either side; past 32 bits and below 1, compared too), WriteQuantized and
+  ReadQuantized (any mask; values at the dead zone, the minimum and the range's ends, NaN, out of range), Contains and
+  WithinSteps, the three direction encodings both ways (axis-aligned, vertical and zero directions too), GetSender and
+  GetRecipient, the destructor. 200,000 rounds, about 9 million checks, 10 s (HD2_BITS_QUICK: 40,000).
+- **Coverage:** every line of bitstream.cpp.
+- **Port bugs found and fixed:**
+  - Setup's bits: the port worked the logarithms out in float, so a span an exact power of two times its step came
+    out one bit short (8192 steps: 13 bits, not the original's 14), its scale half the original's. The original's FYL2X
+    is not rounded by the game's single precision; only the quotient is. `net_quantization`'s model had the same
+    mistake (its test was changed with it).
+  - ReadQuantized: a value of more than 24 bits was rounded to float before the division (the original divides the
+    exact integer once).
+  - The direction encodings: the angles, sines and cosines were rounded to float before use, and the 3-D ones
+    multiplied rounded cosines; the original keeps the x87's precision until it stores them.
+  - WriteQuantized: a NaN y was replaced by the minimum and sent; the original keeps it and sends it as absent.
+  - Contains: a NaN x or y failed; the original's compares pass it.
+  - Reserve: a first request of 769 to 800 bits gave a capacity of the request plus 32; the original's is 800.
+- **The original's weaknesses (kept):**
+  - A growing stream's first block is 100 bytes whatever the capacity: a first request over 800 bits overflows it.
+    The port sizes the block to the capacity; this was already the port's, and the test allows that difference.
+  - Reserve reallocates capacity / 8 bytes: a capacity that is not a multiple of 32 (after a request bigger than the
+    capacity) lets the last word's write run up to 3 bytes past the block. The port is the same.
+  - Setup reads its mask from outside the table (0x00816388) for a component under 1 bit or over 32: the data next to
+    it. The port uses none or all ones; no quantisation of the game's gets there. Not compared.
+  - WriteString writes each character sign-extended: a high character sets stray bits past the stream's end (later
+    writes clear them; never read back). The port masks it; the test compares the bits up to the end.
+  - ReadString with a size under 1 would read one character and write before the buffer; every caller passes a size.
+- **Mutations:** 233 mutants (`net/mutations/mutate_net1.py`), 22 not building; 193 of the 211 building killed. The
+  18 left are equivalent: array sizes one larger, the static_asserts, a clamp at its own value, BitMask(0) for none,
+  GetSender(-2) for -1.
+- **Harness lessons (my mistakes):** the first runs compared Setup against the port's model of the x87, which an
+  earlier part had written from the decompile; only the original settled it. The allocation logger first allocated
+  through the wrapped malloc itself (its map), logging its own blocks.

@@ -1,6 +1,8 @@
 // S_NetQuantization::Setup (net/bitstream.cpp, 0x0073dbb0) against the formula worked out apart:
-// bits = floor(ln(span / step) / ln 2) + 1 with each step rounded to float as the x87 does in the
-// game's 24-bit precision (the logarithms from double), scale = the bits' mask / span (float).
+// bits = floor(ln(span / step) / ln 2) + 1, the logarithm unrounded (FYL2X: the game's 24-bit precision does not
+// round it; ln 2 a double) and only the quotient rounded to float (FDIV), scale = the bits' mask / span (float).
+// Net part 1 (net/bits_diff.cpp) compares Setup with the original's: an exact power of two gives its exponent
+// (8192: 14 bits). This test's first model rounded the logarithms to float too, and the port followed it.
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -24,11 +26,9 @@ void Check(const S_vector4 &span, const S_vector4 &from, const S_vector4 &step, 
               q.range40[i] == spans[i];
     for (int i = 0; i < 3; ++i) {
         const float ratio = spans[i] / steps[i];
-        // The x87's way in 24-bit precision: ln 2 and ln(ratio) (FYL2X) rounded to float, their
-        // quotient rounded to float, then floor + 1.
-        const float ln2 = static_cast<float>(std::log(2.0));
-        const float lnRatio = static_cast<float>(std::log(static_cast<double>(ratio)));
-        const float quotient = lnRatio / ln2;
+        // The x87's way in 24-bit precision: ln(ratio) (FYL2X) and ln 2 unrounded, their quotient
+        // rounded to float, then floor + 1.
+        const float quotient = static_cast<float>(std::log(static_cast<double>(ratio)) / std::log(2.0));
         const int bits = static_cast<int>(std::floor(quotient)) + 1;
         const uint32_t mask = bits >= 32 ? 0xFFFFFFFFu : (1u << bits) - 1u;
         const float scale = static_cast<float>(static_cast<double>(mask) / spans[i]);

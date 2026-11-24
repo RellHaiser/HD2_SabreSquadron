@@ -101,6 +101,8 @@ SUITES = [
     T("net.console", "net/build_console.bat", TMP + r"\console_test.exe", tree_copy="net/console_test.exe"),
     T("net.firewall", "net/build_firewall.bat", TMP + r"\firewall_test.exe", tree_copy="net/firewall_test.exe"),
     T("net.gamespy", "net/build_gamespy.bat", TMP + r"\gamespy_test.exe", tree_copy="net/gamespy_test.exe"),
+    # (Net part 1: the bit streams against the original executable, net/bits_diff.cpp.)
+    T("net.bits", "net/build_bits.bat", TMP + r"\bits_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",
