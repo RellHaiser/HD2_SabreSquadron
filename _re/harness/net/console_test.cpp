@@ -294,7 +294,7 @@ void TestTokens()
     const char *c = "  \t>hello -x -7 - \"two words\"  12x  MAXclients zzz";
     CHECK(ReadConsoleToken(&c, word, &value, nullptr) == 0 && std::strcmp(word, "hello") == 0 && value == -7);
     CHECK(ReadConsoleToken(&c, word, &value, nullptr) == 0 && std::strcmp(word, "x") == 0);
-    CHECK(ReadConsoleToken(&c, word, &value, nullptr) == 1 && value == 7);       // ('-' before a digit skipped)
+    CHECK(ReadConsoleToken(&c, word, &value, nullptr) == 1 && value == -7);      // ('-' before a digit kept: the sign)
     CHECK(ReadConsoleToken(&c, word, &value, nullptr) == 1 && std::strcmp(word, "-") == 0 && value == 0);
     CHECK(ReadConsoleToken(&c, word, &value, nullptr) == 0 && std::strcmp(word, "two words") == 0);
     CHECK(ReadConsoleToken(&c, word, &value, nullptr) == 1 && value == 12);
@@ -348,7 +348,7 @@ void TestRules()
         int field, value, stored;
     } rules[] = {{"maxclients", 0, 33, 32},   {"maxclients", 0, 32, 32},  {"maxclients", 0, 7, 7},
                  {"pointlimit", 1, 12345, 12345}, {"roundlimit", 2, 100, 99},  {"roundlimit", 2, 99, 99},
-                 {"roundlimit", 2, 0, 1},     {"roundlimit", 2, 1, 1},    {"roundcount", 3, -5, 5},
+                 {"roundlimit", 2, 0, 1},     {"roundlimit", 2, 1, 1},    {"roundcount", 3, -5, -5},
                  {"warmup", 4, 5941, 5940},   {"warmup", 4, 5940, 5940},  {"warmup", 4, 0, 1},
                  {"respawntime", 5, 5941, 5940}, {"respawntime", 5, 5940, 5940}, {"respawntime", 5, 2, 3},
                  {"respawntime", 5, 3, 3},    {"spawnprotection", 10, 16, 15}, {"spawnprotection", 10, 15, 15},
@@ -386,8 +386,9 @@ void TestRules()
     g_mp.pointLimit = 77;
     CHECK(Run("pointlimit 5") && g_mp.pointLimit == 77 && g_log.empty());
     g_gameRole = GAME_ROLE_SERVER;
-    CHECK(Run("pointlimit") && All() == "print pointlimit  0|" && g_mp.pointLimit == 77);
-    CHECK(Run("maxping 9 pointlimit") && All() == "print pointlimit  9|");
+    // (No number: the rule's own value, as the original.)
+    CHECK(Run("pointlimit") && All() == "print pointlimit  77|" && g_mp.pointLimit == 77);
+    CHECK(Run("maxping 9 pointlimit") && All() == "print pointlimit  77|");
 }
 
 void TestMaps()

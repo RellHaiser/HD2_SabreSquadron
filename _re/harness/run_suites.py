@@ -111,6 +111,8 @@ SUITES = [
     T("net.sock", "net/build_sock.bat", TMP + r"\sock_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 4b: the connections and the transport against the original executable, net/trans_diff.cpp.)
     T("net.trans", "net/build_trans.bat", TMP + r"\trans_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 5: the console's command processor against the original executable, net/cons_diff.cpp.)
+    T("net.cons", "net/build_cons.bat", TMP + r"\cons_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",

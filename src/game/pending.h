@@ -52,7 +52,7 @@ private:
     int m_mode = 0;                                 // +0x20C
     bool m_shown = false;                           // +0x210
 };
-// The next word of a console command line (quotes allowed; spaces, tabs, '>' and a '-' before a letter or digit
+// The next word of a console command line (quotes allowed; spaces, tabs, '>' and a '-' before a letter
 // skipped; `*cursor` moves past it): 3 at the end; 2 a keyword of `keywords` (any case; null: none looked for; its id
 // in *value), 1 a number (in *value), 0 another word.
 int ReadConsoleToken(const char **cursor, char *out, int *value, char *keywords);   // 0x007445d0

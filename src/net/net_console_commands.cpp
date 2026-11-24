@@ -217,8 +217,10 @@ static const bool g_keywordsMade = [] {
 
 int ReadConsoleToken(const char **cursor, char *out, int *value, char *keywords)
 {
+    // (A '-' before a letter is a switch's mark, skipped; before a digit it is a number's sign: the original's test is
+    // isalpha, 0x007e69c3.)
     while (**cursor == ' ' || **cursor == '\t' || **cursor == '>' ||
-           (**cursor == '-' && std::isalnum(static_cast<unsigned char>((*cursor)[1]))))
+           (**cursor == '-' && std::isalpha(static_cast<unsigned char>((*cursor)[1]))))
         ++*cursor;
     if (**cursor == 0)
         return TOKEN_END;
@@ -288,7 +290,7 @@ bool C_CommandProcessor::Execute(const char *command)
 #endif
     const bool local = (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL;
     char word[WORD_SIZE];
-    // (Fix: 0 until a number is read; the original printed an uninitialised value for a rule without one.)
+    // (0 until a number or a rule's value is read: every use reads one first, as in the original.)
     int value = 0;
     for (;;) {
         int keyword;
@@ -572,6 +574,8 @@ bool C_CommandProcessor::Execute(const char *command)
                 break;
             // A rule: its value (a server's: within limits, told to the clients); without one the last value shown.
             if (ReadConsoleToken(&command, word, &value, nullptr) != TOKEN_NUMBER) {
+                // The rule's current value (kept in `value` for the keywords after it, as the original).
+                value = (&settings->maxClients)[keyword];
                 Print(C_fstr("%s  %d", g_votableCommands[keyword], value).c_str());
                 break;
             }

@@ -6271,3 +6271,57 @@ came from. From this part on the network code is compared with the original exec
   in its uninitialised CRT heap; my direct HandleDatagram first forced type 1 on other bodies, and my changed copies
   first flipped the unchecked last bytes: both made garbage packet sizes that crash both programs. Again a Python
   heredoc turned a C++ `\n` into a newline.
+
+## Net part 5 (the console's command processor, `net/net_console_commands.cpp`, 2026-11-24)
+
+- **The build:** `net/build_cons.bat` (`net/cons_diff.cpp`, suite `net.cons`): net_console_commands.cpp (with
+  game_state.cpp and c_str.cpp) against the original's ReadConsoleToken, Execute, ExecuteFile, the command processor's
+  constructor and destructor and the console state's (C_ConsoleState) constructor, Start, ShowBanner and Update. What
+  they reach is the test's on both sides, each faked in the program's own layout:
+  - the profile's multiplayer settings (the original's a buffer of its layout pointed at by 0x008aea30: its maps
+    vector MSVC6's, its map names' C_str at +1; the port's raw storage);
+  - the set-up (its game type; GetCurrentMaps' groups for listmaps), the maps (AddMap takes a C_str in the original,
+    RemoveMap a char *);
+  - the game app (PrintMessage, PostCommand, SendGameMessage; its state's SetState and SetPendingState: a vtable of
+    loggers on the original's side, an override on the port's), the console (AddLine, PopCommand), the texts ("T<id>",
+    the original's made by its own C_fstr), the net game (0x0097d070: its players one array both read, LockPlayers
+    answering the original's vector; FindPlayerByName, KickPlayer, KickPlayerByName, the vote's Start, Vote, CountYes,
+    PostVote, IsPlayerAdmin, Host, Connect), the game (StartNextRound, ChangeMap, the mission's objectives at +0xA8 /
+    +0x34), IGraph (SetFlags, GetHWND, InitMouse: one fake vtable) and ShowWindow (the port's renamed by
+    `-include cons_fakes.h`, the original's import slot);
+  - the original's malloc / free / new / delete and its fopen / fscanf / fclose (msvcrt's: "exec" reads real files).
+  Every fake logs its call alike; the logs, the result, the settings (all their fields, the passwords' texts, the
+  server entry's bytes), the set-up's game type and the net limits are compared after every command line.
+- **The tests:** 30,000 rounds, each a random world (the role: local, server, client, dedicated, none; the settings,
+  rules, maps, passwords; the players; the objectives; the answers of AddMap, RemoveMap, FindPlayerByName,
+  IsPlayerAdmin, Vote; a game or none) and up to 6 command lines of random keywords (every one, any case, unknown
+  words), values (signed numbers, quoted words, keywords, addresses), separators (spaces, tabs, '>', '-', '-->'), and
+  "exec" of a file of such lines (CRLF or LF, a last line with or without its newline, a missing file); now and then
+  the console state made (with a command or none) and started, its banner shown, updated (the console's typed
+  commands, its own first command, the state asking to host or join, a dedicated server or not), or the command
+  processor made and destroyed. About 480,000 checks, 17 s (HD2_CONS_QUICK: 6,000 rounds).
+- **Coverage:** every line of net_console_commands.cpp.
+- **Port bugs found and fixed:**
+  - ReadConsoleToken skipped a '-' before a digit, so every negative value typed in the console lost its sign
+    ("respawntime -7" set 7 where the original clamps -7 to 3). The original's test there is isalpha (0x007e69c3,
+    named isalnum in the database: its mask 0x103 is the letters'); the header's comment said so too.
+  - A rule given without a number showed `value` as it was (0, or a number read earlier in the line); the original
+    loads the rule's own value into it first and shows that (the port's "Fix" comment had taken it for an
+    uninitialised read). The old unit test (net.console) expected both mistakes and was changed with them.
+- **The original's weaknesses (kept; the port's Fixes noted where it has them):**
+  - mapname gives the word to C_fstr as its format ('%' in a map name; the port's Fix passes it as text).
+  - adminlogin and svcmd copy at most 0x80 bytes without ending the copy: a longer text reads on past it (the port's
+    Fix ends it; the test compares the first 127 characters).
+  - "exec" reads lines with an unbounded %[^\n] (the port's Fix: 99 characters; the test's lines are shorter).
+  - listobjectives reads the game's mission without checking there is a game: with none both programs fault (the test
+    gives a game to every line, file or typed command that has it).
+  - The console state's constructor copies its command unbounded (the port's Fix cuts it) and leaves its mode as the
+    memory was (the test zeroes it).
+- **Mutations:** 431 mutants (`net/mutations/mutate_net5.py`), 31 not building; 399 of the 400 building killed. The
+  one left gives the keyword table a row more (equivalent).
+- **Harness lessons (my mistakes):** I first took the original's rule display for an uninitialised read (the port's
+  comment said so) and zeroed the stack under its call; the asm showed the rule's value. My SendGameMessage fake freed
+  the chat line at once, but Execute prints it to the console after: both printed freed memory. My `listobjectives`
+  guard first looked only at the command line, not at the "exec" files and the console state's commands. The
+  database's name "isalnum" for 0x007e69c3 hid the port bug until the original's answer for '2' was printed. Python
+  heredocs with C++ `\n` again (twice): Edit or a script file written by Write from now on.
