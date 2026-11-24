@@ -166,7 +166,8 @@ private:
     void BackupSaveGameValues();                                   // 0x00428c80
     void RestoreSaveGameValues();                                  // 0x00428ca0
     void RestoreAnimatedModel(I3D_model *model);
-    void SetLetterboxViewport();
+    // The 16:9 band of a width x height screen (Update: the screen's; RunCutscene: the scene's viewport's).
+    void SetLetterboxViewport(int width, int height);
     bool LoadRotation(C_chunk &chunk);                             // (from LoadGame)
     void LoadRememberedFrames(C_chunk &chunk);
     bool LoadScript(C_chunk &chunk);

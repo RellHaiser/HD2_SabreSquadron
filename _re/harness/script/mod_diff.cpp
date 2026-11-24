@@ -8,8 +8,12 @@
 // the frames, the chunk file written, and every call each side made.
 // Part 6: SaveGame, LoadGame (the original's last save, cut short or not, or a file made for the world: chunks in any
 // order, unknown, short), WriteState, ReadState, OnMessage (every client message type).
-// MinGW; build_mod.bat; runs mod_diff.exe ("mod_diff: N checks, 0 failures"). Env: HD2_MOD_CASES (default 20,000;
-// HD2_MOD_QUICK 4,000), HD2_MOD_OP (one operation's name), HD2_MOD_SEED, HD2_MOD_SHOW, HD2_MOD_DUMP.
+// Part 7: every other function of the module (the frames it remembers, registers and turns, Update, Tick, the script
+// list, the mission's start, stop and restart, AssignScript, the pause sounds, the cutscenes, the saved values, the net
+// messages), with its other state (started, the cutscene's camera, animated models, duplicates, the script list,
+// pending sounds, the frames' owner models, the screen and the scene's viewport).
+// MinGW; build_mod.bat; runs mod_diff.exe ("mod_diff: N checks, 0 failures"). Env: HD2_MOD_CASES (default 40,000;
+// HD2_MOD_QUICK 8,000), HD2_MOD_OP (one operation's name), HD2_MOD_SEED, HD2_MOD_SHOW, HD2_MOD_DUMP.
 #define HARNESS_NAME "mod_diff"
 #define CMD_CALLS_INC "mod_calls.inc"
 #define CMD_DIFF_NO_MAIN
@@ -19,8 +23,7 @@
 
 #include "common/chunk.h"
 
-// ---- LS3DF.dll's math the module uses (the original's calls go there too; operator*= is LS3DF's operator* copied
-// back: the DLL does not export the assigning one) ----
+// ---- LS3DF.dll's math the module uses (the original's calls go there too) ----
 S_matrix __stdcall RotateXMatrix(float angle)
 {
     using T = void *(__stdcall *)(S_matrix *, float);
@@ -47,11 +50,9 @@ S_matrix __stdcall RotateZMatrix(float angle)
 }
 S_matrix &__stdcall S_matrix::operator*=(const S_matrix &b)
 {
-    using T = void *(__stdcall *)(const S_matrix *, S_matrix *, const S_matrix &);
-    static const T f = reinterpret_cast<T>(reinterpret_cast<void *>(Ls3df("??DS_matrix@@QBG?AU0@ABU0@@Z")));
-    S_matrix r;
-    f(this, &r, b);
-    *this = r;
+    using T = S_matrix *(__stdcall *)(S_matrix *, const S_matrix &);
+    static const T f = reinterpret_cast<T>(reinterpret_cast<void *>(Ls3df("??XS_matrix@@QAGAAU0@ABU0@@Z")));
+    f(this, b);
     return *this;
 }
 S_vector __stdcall S_matrix::GetScale() const
@@ -74,6 +75,19 @@ namespace H {
 constexpr uint32_t O_MODULE = 0x00868b18, O_MODULE_CTOR = 0x004245c0, O_PENDING_SOUNDS = 0x008693d0;
 constexpr uint32_t O_MOD_SAVE = 0x00424970, O_MOD_LOAD = 0x004257b0, O_WRITE_STATE = 0x0042aff0,
                    O_READ_STATE = 0x0042b330, O_ON_MESSAGE = 0x00424590;
+// Part 7's (all __thiscall but the net messages' __fastcall ones).
+constexpr uint32_t O_REMEMBER = 0x00423670, O_RESTORE_FRAME = 0x00423b40, O_REGISTER_SOUND = 0x00423980,
+                   O_REGISTER_ANIMATED = 0x00424260, O_UNREGISTER_ANIMATED = 0x00424310,
+                   O_REGISTER_DUPLICATE = 0x00424420, O_UNREGISTER_DUPLICATE = 0x00424490, O_ROTATE = 0x004274a0,
+                   O_UPDATE = 0x00428b30, O_TICK = 0x00428490, O_LOAD_SCRIPT_LIST = 0x00428600, O_START = 0x004270d0,
+                   O_STOP = 0x00427b80, O_RESTART = 0x00424900, O_FREE = 0x004285d0, O_ASSIGN = 0x00427730,
+                   O_ALARM = 0x00428b00, O_ADD_PAUSE = 0x00428d10, O_SET_PAUSED = 0x00428f00,
+                   O_RUN_CUTSCENE = 0x00423c70, O_END_CUTSCENE = 0x00423eb0, O_WRITE_VALUES = 0x00427010,
+                   O_READ_VALUES = 0x00427050, O_BEGIN_MESSAGE = 0x00424540, O_SEND_MESSAGE = 0x00424580;
+// g_scriptModuleRestarting; C_str's operator=(const char *) and destructor; the copy protection's call (RunCutscene:
+// a pointer in the .dogui section).
+constexpr uint32_t O_RESTARTING = 0x008693e0, O_STR_ASSIGN = 0x00405180, O_STR_DTOR = 0x00405160,
+                   O_PROTECTION_CALL = 0x00a59000;
 constexpr uint32_t O_CHUNK_OPEN = 0x00405620, O_CHUNK_CLOSE = 0x00405750, O_CHUNK_BEGIN = 0x00405820,
                    O_CHUNK_ASCEND = 0x00405890, O_CHUNK_DESCEND = 0x00415c90;
 // The module's fields (the original's offsets).
@@ -108,8 +122,25 @@ void FreeOrigVec(uint8_t *base, uint32_t off)
 }
 
 // ---- one case ----
-enum E_Op { OP_SAVE, OP_LOAD, OP_WRITE_STATE, OP_READ_STATE, OP_MESSAGE, OP_COUNT };
-const char *const OP_NAMES[] = {"SaveGame", "LoadGame", "WriteState", "ReadState", "OnMessage"};
+enum E_Op {
+    OP_SAVE, OP_LOAD, OP_WRITE_STATE, OP_READ_STATE, OP_MESSAGE,
+    // Part 7 (script_module.cpp).
+    OP_REMEMBER, OP_RESTORE_FRAME, OP_REGISTER_SOUND, OP_REGISTER_ANIMATED, OP_UNREGISTER_ANIMATED,
+    OP_REGISTER_DUPLICATE, OP_UNREGISTER_DUPLICATE, OP_ROTATE, OP_UPDATE, OP_TICK, OP_LOAD_SCRIPT_LIST, OP_START,
+    OP_STOP, OP_RESTART, OP_FREE, OP_ASSIGN, OP_ALARM, OP_ADD_PAUSE, OP_SET_PAUSED, OP_RUN_CUTSCENE, OP_END_CUTSCENE,
+    OP_WRITE_VALUES, OP_READ_VALUES, OP_BEGIN_MESSAGE, OP_SEND_MESSAGE, OP_COUNT
+};
+const char *const OP_NAMES[] = {"SaveGame", "LoadGame", "WriteState", "ReadState", "OnMessage", "RememberFrame",
+                                "RestoreFrame", "RegisterSoundFrame", "RegisterAnimatedModel", "UnregisterAnimatedModel",
+                                "RegisterDuplicate", "UnregisterDuplicate", "RotateFrame", "Update", "Tick",
+                                "LoadScriptList", "StartMission", "StopMission", "RestartMission", "FreeMissionData",
+                                "AssignScript", "BroadcastGlobalAlarm", "AddPauseSound", "SetPauseSoundsPaused",
+                                "RunCutscene", "EndCutscene", "WriteSaveGameValues", "ReadSaveGameValues",
+                                "BeginScriptNetMessage", "SendScriptNetMessage"};
+static_assert(sizeof OP_NAMES / sizeof *OP_NAMES == OP_COUNT, "a name for each operation");
+// (The case's weights: part 6's, then part 7's.)
+const int OP_WEIGHTS[] = {30, 35, 10, 10, 15, 8, 8, 4, 6, 6, 5, 5, 8, 10, 12, 8, 12, 25, 10, 6, 15, 4, 5, 4, 10, 15, 4, 5, 3, 3};
+static_assert(sizeof OP_WEIGHTS / sizeof *OP_WEIGHTS == OP_COUNT, "a weight for each operation");
 struct S_Remembered {
     int frame;
     bool parent;                                        // (the frame's own parent, referenced; else none)
@@ -128,6 +159,8 @@ struct S_ModScript {
     int ip, delay;
     bool running;
     bool handlers = false;                              // (mod_x.scr: OnExit, OnGlobalAlarm, the cutscenes' handlers)
+    // Part 7: its camera hid the HUD, the HUD panel (EndCutscene shows them); in its cutscene handler (Tick).
+    bool hud = false, panel = false, inHandler = false;
 };
 struct S_ModCase {
     int op;
@@ -146,6 +179,28 @@ struct S_ModCase {
     std::string file;                                   // LoadGame's
     std::vector<uint32_t> bits;                         // ReadBits' answers, in order (then the default ones)
     std::vector<std::string> texts;                     // ReadString's
+    // Part 7: the module's other state.
+    bool started = false, mapOpen = false;
+    int inputDelay = 0, camera = -1, cutsceneNumber = 0;    // (camera: the cutscene's, a world frame; -1 none)
+    float aspect = 0.0f, fov = 0.0f;
+    std::vector<std::pair<int, bool>> animated;         // (a model, started in a cutscene)
+    std::vector<int> duplicates;
+    std::vector<std::pair<std::string, std::string>> assignments;
+    std::vector<std::pair<int, int>> valuesAtStart;
+    std::vector<std::pair<int, int>> pending;           // (a sound frame or -1: a null entry, its start)
+    std::vector<int> owners;                            // each world frame's owner model (a frame index; -1 none)
+    int screen[2] = {800, 600};                         // IGraph's ScrnX, ScrnY
+    int viewport[4] = {0, 0, 800, 600};                 // the scene's (+0x244)
+    float gameFov = 1.0f;                               // the game's cutscene FOV (+0xBC)
+    bool inputEnabled = true;                           // the game's (+0x6E)
+    bool controllersScripted = false;                   // the humans' scripted controllers hold the module's first script
+    // The operation's arguments.
+    int frame = 0, axis = 0, angle = 0, speed = 0, time = 0, number = 0;
+    uint32_t what = 0;
+    bool flag = false, nullName = false;
+    std::string name;
+    int listKind = 0;                                   // LoadScriptList's file: 0 made, 1 the game's, 2 none
+    std::string list, valuesFile;
 };
 
 // Names a message or a load names (the world's frames, some not).
@@ -354,6 +409,15 @@ std::vector<std::string> g_textQueue[2];
 size_t g_bitAt[2], g_textAt[2];
 std::vector<uint8_t *> g_animSets[2];                   // (the case's animation sets: their counts compared)
 uint8_t *g_forcedHuman[2];                              // (a human the case put on a model: often the active player)
+uint8_t *g_igraph[2];                                   // (part 7: GetIGraph's, the engine's vtable)
+int g_screen[2];                                        // (its ScrnX, ScrnY)
+
+// An original C_str (its operator=: a rep of the original's operator new) in `slot` (zeroed).
+void OrigStrAssign(void *slot, const char *text)
+{
+    using T = void *(TC *)(void *, const char *);
+    OriginalAt<T>(O_STR_ASSIGN)(slot, text);
+}
 
 // ---- each side's module ----
 // The module's own program (its handlers write saved values, which the cases compare): mod_x.scr.
@@ -378,6 +442,9 @@ void *NewScript(int frameIndex, const S_ModScript &s)
         *reinterpret_cast<int *>(b + 0xD8) = s.ip;
         b[0x104] = s.running;
         *reinterpret_cast<int *>(b + 0x18) = s.delay;
+        b[7] = s.hud;
+        b[8] = s.panel;
+        b[9] = s.inHandler;
         return b;                                       // (not named: a script made later may take its address)
     }
     C_Script *t = new C_Script(AsFrame(frame), false);
@@ -385,6 +452,9 @@ void *NewScript(int frameIndex, const S_ModScript &s)
     t->m_ip = s.ip;
     t->m_running = s.running;
     t->m_delay = s.delay;
+    t->m_hudHiddenByScript = s.hud;
+    t->m_hudPanelHiddenByScript = s.panel;
+    t->m_inCutsceneHandler = s.inHandler;
     return t;
 }
 // The lightmap groups (each side's fake module, the original's layout: a vector of groups at +0x0C, each group's name
@@ -478,15 +548,11 @@ void BuildModule(const S_ModCase &c)
         SetOrigVec(m, M_ROTATIONS, rotations);
         SetOrigVec(m, M_REMEMBERED, remembered);
         SetOrigVec(m, M_SOUND_FRAMES, sounds);
-        SetOrigVec(m, M_ANIMATED, {});
-        SetOrigVec(m, M_ANIMATED_IN_CUTSCENE, {}, 1);
-        SetOrigVec(m, M_DUPLICATES, {});
         std::memset(m + M_VALUES, 0, 0x400);
         for (const auto &v : c.values)
             *reinterpret_cast<int *>(m + M_VALUES + 4 * v.first) = v.second;
         m[M_FAKE] = c.fake;
         m[M_CUTSCENE_RUNNING] = c.cutscene;
-        SetOrigVec(OriginalAt<uint8_t *>(O_PENDING_SOUNDS), 0, {});
     } else {
         C_ScriptModule &m = g_scriptModule;
         for (uint32_t s : scripts)
@@ -565,6 +631,117 @@ void BuildModule(const S_ModCase &c)
             if (ai)
                 *reinterpret_cast<void ***>(ai) = controllerVtables[g_side];
         }
+
+    // Part 7: the humans' scripted controllers' script (AssignScript clears an AI human's when its file fails): a block
+    // standing for an earlier script (not one of the module's: a freed one's address may come back to a new script on
+    // one side only).
+    if (c.controllersScripted) {
+        uint8_t *earlier = Block(0x20);
+        Name(earlier, "earlier script");
+        for (const W_Actor &x : w.actors)
+            if (x.type == ACTOR_HUMAN && x.controller) {
+                if (g_side)
+                    *reinterpret_cast<uint8_t **>(x.controller + 0x1AC) = earlier;
+                else
+                    reinterpret_cast<C_ScriptedController *>(x.controller)->m_script = reinterpret_cast<C_Script *>(earlier);
+            }
+    }
+    // Part 7: the frames' owner models (a model's own frames and the ones another model linked into it).
+    for (size_t i = 0; i < c.owners.size(); ++i)
+        AsFrame(frame(int(i)))->m_ownerModel = c.owners[i] < 0 ? nullptr : AsFrame(frame(c.owners[i]));
+    // The screen (IGraph's), the scene's viewport, the game's cutscene FOV and player input.
+    g_igraph[g_side] = Block(0x40);
+    *reinterpret_cast<void ***>(g_igraph[g_side]) = EngineVtable("IGraph");
+    Name(g_igraph[g_side], "igraph");
+    g_screen[0] = c.screen[0];
+    g_screen[1] = c.screen[1];
+    std::memcpy(w.scene + 0x244, c.viewport, 16);
+    if (g_side) {
+        g_origGame[0x6E] = c.inputEnabled;
+        std::memcpy(g_origGame + 0xBC, &c.gameFov, 4);
+    } else {
+        C_game *g = reinterpret_cast<C_game *>(g_portGameBuf);
+        g->m_playerInputEnabled = c.inputEnabled;
+        g->m_fov = c.gameFov;
+    }
+    // The module's references: its animated models, its duplicates and the cutscene's camera each hold one.
+    std::vector<uint32_t> animated, inCutscene, duplicates, pending;
+    for (const auto &a : c.animated) {
+        ++AsFrame(frame(a.first))->m_refCount;
+        animated.push_back(reinterpret_cast<uint32_t>(frame(a.first)));
+        inCutscene.push_back(a.second);
+    }
+    for (int d : c.duplicates) {
+        ++AsFrame(frame(d))->m_refCount;
+        duplicates.push_back(reinterpret_cast<uint32_t>(frame(d)));
+    }
+    I3D_frame *camera = c.camera < 0 ? nullptr : AsFrame(frame(c.camera));
+    if (camera)
+        ++camera->m_refCount;
+    // The sounds waiting to start (null entries among them).
+    for (const auto &p : c.pending) {
+        uint8_t *s = nullptr;
+        if (p.first >= 0) {
+            s = static_cast<uint8_t *>(g_side ? O_New(8) : static_cast<void *>(new S_PendingSound));
+            *reinterpret_cast<int *>(s) = p.second;
+            *reinterpret_cast<uint8_t **>(s + 4) = frame(p.first);
+            ++AsFrame(frame(p.first))->m_refCount;
+        }
+        pending.push_back(reinterpret_cast<uint32_t>(s));
+    }
+    if (g_side) {
+        uint8_t *m = OMod();
+        m[M_STARTED] = c.started;
+        m[M_MAP_OPEN] = c.mapOpen;
+        *reinterpret_cast<int *>(m + M_INPUT_DELAY) = c.inputDelay;
+        *reinterpret_cast<I3D_frame **>(m + M_CAMERA) = camera;
+        std::memcpy(m + M_ASPECT, &c.aspect, 4);
+        std::memcpy(m + M_FOV, &c.fov, 4);
+        *reinterpret_cast<int *>(m + M_CUTSCENE) = c.cutsceneNumber;
+        std::memset(m + M_VALUES_AT_START, 0, 0x400);
+        for (const auto &v : c.valuesAtStart)
+            *reinterpret_cast<int *>(m + M_VALUES_AT_START + 4 * v.first) = v.second;
+        SetOrigVec(m, M_ANIMATED, animated);
+        SetOrigVec(m, M_ANIMATED_IN_CUTSCENE, inCutscene, 1);
+        SetOrigVec(m, M_DUPLICATES, duplicates);
+        // The script list: pairs of C_str (8 bytes each).
+        std::vector<uint32_t> words;
+        for (size_t i = 0; i < 2 * c.assignments.size(); ++i)
+            words.push_back(0);
+        SetOrigVec(m, M_ASSIGNMENTS, words);
+        uint8_t *first = At<uint8_t *>(m, M_ASSIGNMENTS + 4);
+        for (size_t i = 0; i < c.assignments.size(); ++i) {
+            OrigStrAssign(first + 8 * i, c.assignments[i].first.c_str());
+            OrigStrAssign(first + 8 * i + 4, c.assignments[i].second.c_str());
+        }
+        // (Its end: SetOrigVec made a vector of words.)
+        *reinterpret_cast<uint8_t **>(m + M_ASSIGNMENTS + 8) = first + 8 * c.assignments.size();
+        SetOrigVec(OriginalAt<uint8_t *>(O_PENDING_SOUNDS), 0, pending);
+        *OriginalAt<uint8_t *>(O_RESTARTING) = 0;
+    } else {
+        C_ScriptModule &m = g_scriptModule;
+        m.m_started = c.started;
+        m.m_commandMapWasOpen = c.mapOpen;
+        m.m_inputDelay = c.inputDelay;
+        m.m_cutsceneCamera = static_cast<I3D_camera *>(camera);
+        m.m_savedAspectRatio = c.aspect;
+        m.m_savedFOV = c.fov;
+        m.m_cutscene = c.cutsceneNumber;
+        std::memset(m.m_saveGameValuesAtStart, 0, sizeof m.m_saveGameValuesAtStart);
+        for (const auto &v : c.valuesAtStart)
+            m.m_saveGameValuesAtStart[v.first] = v.second;
+        for (size_t i = 0; i < animated.size(); ++i) {
+            m.m_animatedModels.push_back(reinterpret_cast<I3D_frame *>(animated[i]));
+            m.m_animatedInCutscene.push_back(inCutscene[i] != 0);
+        }
+        for (uint32_t d : duplicates)
+            m.m_duplicates.push_back(reinterpret_cast<I3D_frame *>(d));
+        for (const auto &a : c.assignments)
+            m.m_assignments.push_back({C_str(a.first.c_str()), C_str(a.second.c_str())});
+        for (uint32_t p : pending)
+            g_pendingSounds.push_back(reinterpret_cast<S_PendingSound *>(p));
+        g_scriptModuleRestarting = false;
+    }
 }
 
 std::string RemText(const S_RememberedFrame *r)
@@ -593,6 +770,26 @@ std::string ValuesText(const int *v)
 std::vector<std::string> ModState()
 {
     std::vector<std::string> out;
+    // The world's humans' scripted controllers' script (AssignScript sets an AI human's): the module's script by its
+    // place in the list, null or another.
+    {
+        std::vector<uint32_t> scripts;
+        if (g_side)
+            for (uint32_t q : OrigVec(OMod(), M_SCRIPTS, 4))
+                scripts.push_back(At<uint32_t>(reinterpret_cast<void *>(q), 0));
+        else
+            for (const C_Script *t : g_scriptModule.m_scripts)
+                scripts.push_back(reinterpret_cast<uint32_t>(t));
+        for (const W_Actor &x : W().actors) {
+            if (x.type != ACTOR_HUMAN || !x.controller)
+                continue;
+            const uint32_t s = g_side ? At<uint32_t>(x.controller, 0x1AC)
+                                      : reinterpret_cast<uint32_t>(reinterpret_cast<const C_ScriptedController *>(x.controller)->m_script);
+            const auto it = std::find(scripts.begin(), scripts.end(), s);
+            out.push_back(x.name + " controller's script " +
+                          (!s ? std::string("null") : it != scripts.end() ? F("%d", int(it - scripts.begin())) : NameOf(s)));
+        }
+    }
     auto names = [](const char *what, const std::vector<uint32_t> &items) {
         std::string s = what;
         for (uint32_t p : items)
@@ -614,9 +811,10 @@ std::vector<std::string> ModState()
             const uint32_t vt = b ? At<uint32_t>(b, 0) : 0;
             const char *kind = vt == O_HUMAN_VTABLE ? "human" : vt == O_TRACKER_VTABLE ? "melee tracker" : "plain";
             out.push_back(!b ? std::string("script null")
-                             : F("script %s on %s file %s ip %d running %d delay %d finished %d", kind,
+                             : F("script %s on %s file %s ip %d running %d delay %d finished %d hud %d %d handler %d", kind,
                                  NameOf(At<uint32_t>(b, 0x100)).c_str(), OrigStr(At<uint32_t>(b, 0xCC)).c_str(),
-                                 At<int>(b, 0xD8), int(b[0x104]), At<int>(b, 0x18), int(b[0xD4])));
+                                 At<int>(b, 0xD8), int(b[0x104]), At<int>(b, 0x18), int(b[0xD4]), int(b[7]), int(b[8]),
+                                 int(b[9])));
         }
         auto words = [&](uint32_t off) {
             std::vector<uint32_t> v;
@@ -637,8 +835,16 @@ std::vector<std::string> ModState()
             out.push_back(RemText(reinterpret_cast<const S_RememberedFrame *>(r)));
         for (uint32_t q : OrigVec(OriginalAt<uint8_t *>(O_PENDING_SOUNDS), 0, 4)) {
             const uint32_t p = At<uint32_t>(reinterpret_cast<void *>(q), 0);
-            out.push_back(F("pending %d %s", At<int>(reinterpret_cast<void *>(p), 0), NameOf(At<uint32_t>(reinterpret_cast<void *>(p), 4)).c_str()));
+            out.push_back(!p ? std::string("pending null")
+                             : F("pending %d %s", At<int>(reinterpret_cast<void *>(p), 0), NameOf(At<uint32_t>(reinterpret_cast<void *>(p), 4)).c_str()));
         }
+        for (uint32_t q : OrigVec(m, M_ASSIGNMENTS, 8))
+            out.push_back("assignment " + OrigStr(At<uint32_t>(reinterpret_cast<void *>(q), 0)) + " " +
+                          OrigStr(At<uint32_t>(reinterpret_cast<void *>(q), 4)));
+        float fov;
+        std::memcpy(&fov, g_origGame + 0xBC, 4);
+        out.push_back(F("game input %d restarting %d fov ", int(g_origGame[0x6E]), int(*OriginalAt<uint8_t *>(O_RESTARTING))) +
+                      FloatText(fov));
     } else {
         const C_ScriptModule &m = g_scriptModule;
         out.push_back(F("module delay %d started %d map %d cutscene %d fake %d camera %s number %d", m.m_inputDelay,
@@ -649,12 +855,13 @@ std::vector<std::string> ModState()
         out.push_back("at start " + ValuesText(m.m_saveGameValuesAtStart));
         for (const C_Script *t : m.m_scripts)
             out.push_back(!t ? std::string("script null")
-                             : F("script %s on %s file %s ip %d running %d delay %d finished %d",
+                             : F("script %s on %s file %s ip %d running %d delay %d finished %d hud %d %d handler %d",
                                  dynamic_cast<const C_HumanScript *>(t)          ? "human"
                                  : dynamic_cast<const C_MeleeTrackerScript *>(t) ? "melee tracker"
                                                                                  : "plain",
                                  NameOf(reinterpret_cast<uint32_t>(t->m_frame)).c_str(),
-                                 PortStr(t->m_fileName).c_str(), t->m_ip, int(t->m_running), t->m_delay, int(t->m_finished)));
+                                 PortStr(t->m_fileName).c_str(), t->m_ip, int(t->m_running), t->m_delay, int(t->m_finished),
+                                 int(t->m_hudHiddenByScript), int(t->m_hudPanelHiddenByScript), int(t->m_inCutsceneHandler)));
         auto words = [](const std::vector<I3D_frame *> &v) {
             std::vector<uint32_t> out;
             for (I3D_frame *f : v)
@@ -673,7 +880,13 @@ std::vector<std::string> ModState()
         for (const S_RememberedFrame *r : m.m_rememberedFrames)
             out.push_back(RemText(r));
         for (const S_PendingSound *p : g_pendingSounds)
-            out.push_back(F("pending %d %s", p->start, NameOf(reinterpret_cast<uint32_t>(p->sound)).c_str()));
+            out.push_back(!p ? std::string("pending null")
+                             : F("pending %d %s", p->start, NameOf(reinterpret_cast<uint32_t>(p->sound)).c_str()));
+        for (const auto &a : m.m_assignments)
+            out.push_back("assignment " + PortStr(a.frameName) + " " + PortStr(a.scriptName));
+        const C_game *g = reinterpret_cast<const C_game *>(g_portGameBuf);
+        out.push_back(F("game input %d restarting %d fov ", int(g->m_playerInputEnabled), int(g_scriptModuleRestarting)) +
+                      FloatText(g->m_fov));
     }
     return out;
 }
@@ -690,8 +903,11 @@ void ResetModule()
         for (uint32_t off : {M_ROTATIONS, M_REMEMBERED})
             for (uint32_t q : OrigVec(m, off, 4))
                 _aligned_free(reinterpret_cast<void *>(At<uint32_t>(reinterpret_cast<void *>(q), 0)));
+        for (uint32_t q : OrigVec(m, M_ASSIGNMENTS, 8))
+            for (uint32_t half : {0u, 4u})
+                OriginalAt<T_Void>(O_STR_DTOR)(reinterpret_cast<void *>(q + half));
         for (uint32_t off : {M_SCRIPTS, M_PAUSE_SOUNDS, M_ROTATIONS, M_REMEMBERED, M_SOUND_FRAMES, M_ANIMATED,
-                             M_ANIMATED_IN_CUTSCENE, M_DUPLICATES})
+                             M_ANIMATED_IN_CUTSCENE, M_DUPLICATES, M_ASSIGNMENTS})
             FreeOrigVec(m, off);
         uint8_t *pending = OriginalAt<uint8_t *>(O_PENDING_SOUNDS);
         for (uint32_t q : OrigVec(pending, 0, 4))
@@ -713,6 +929,7 @@ void ResetModule()
         m.m_animatedModels.clear();
         m.m_animatedInCutscene.clear();
         m.m_duplicates.clear();
+        m.m_assignments.clear();
         for (S_PendingSound *p : g_pendingSounds)
             delete p;
         g_pendingSounds.clear();
@@ -808,10 +1025,47 @@ void SetUpModAnswers()
     g_answers["I3D_animation_set::Release"] = [](const std::vector<uint32_t> &a) {
         return uint32_t(--*reinterpret_cast<int *>(a[0] + 4));
     };
+    // Part 7: the screen (GetIGraph unlogged, as the other plain getters: the original's RunCutscene asks it for the
+    // window handle in its copy protection, which the port leaves out; that GetHWND unlogged too).
+    g_answers["GetIGraph"] = [](const std::vector<uint32_t> &) { return reinterpret_cast<uint32_t>(g_igraph[g_side]); };
+    g_extraQuiet.insert("GetIGraph");
+    g_extraQuiet.insert("IGraph::GetHWND");
+    g_answers["IGraph::ScrnX"] = [](const std::vector<uint32_t> &) { return uint32_t(g_screen[0]); };
+    g_answers["IGraph::ScrnY"] = [](const std::vector<uint32_t> &) { return uint32_t(g_screen[1]); };
+    // A message to send: mostly one (the world's bit stream).
+    g_answers["C_NetGame::CreateMessage"] = [](const std::vector<uint32_t> &) {
+        return NextFake() % 4 ? reinterpret_cast<uint32_t>(W().bitstream) : 0u;
+    };
+    // EnumFrames: the callback on each of the frame's descendants in the type mask (depth first), listed first (the
+    // callback relinks some). (Logged here without the callback: each side's own function.)
+    g_extraQuiet.insert("I3D_frame::EnumFrames");
+    g_answers["I3D_frame::EnumFrames"] = [](const std::vector<uint32_t> &a) {
+        using T_Enum = uint32_t(__stdcall *)(I3D_frame *, void *);
+        I3D_frame *root = reinterpret_cast<I3D_frame *>(a[0]);
+        const T_Enum callback = reinterpret_cast<T_Enum>(a[1]);
+        g_log[g_side].push_back(F("I3D_frame::EnumFrames(%s, context %s, types %08x, mask %s)", NameOf(a[0]).c_str(),
+                                  NameOf(a[2]).c_str(), a[3], ArgText('s', a[4]).c_str()));
+        std::vector<I3D_frame *> found;
+        std::function<void(I3D_frame *)> walk = [&](I3D_frame *f) {
+            for (I3D_frame *c = f->m_firstChild; c; c = c->m_nextSibling) {
+                if (a[3] & (1u << c->m_type))
+                    found.push_back(c);
+                walk(c);
+            }
+        };
+        walk(root);
+        for (I3D_frame *f : found)
+            if (callback(f, reinterpret_cast<void *>(a[2])))
+                break;
+        return 0u;
+    };
 }
+// The original's copy protection's call (RunCutscene; the window handle in, a word out): nothing.
+uint32_t __stdcall O_Protection(uint32_t) { return 0; }
 // The animation caches: the port's g_animationCache, the original's at 0x008aed28 (constructed here: its static
 // initialiser never ran), one search directory each; emptied after each case (before the world's blocks go).
 constexpr uint32_t O_ANIMATION_CACHE = 0x008aed28, O_CACHE_CTOR = 0x006d5850, O_ANIMATION_CACHE_CLEAR = 0x006d9890;
+constexpr uint32_t O_MODEL_CACHE = 0x008aeda0, O_MODEL_CACHE_CTOR = 0x006d51e0, O_MODEL_CACHE_CLEAR = 0x006d77e0;
 void SetUpCaches()
 {
     // (Its maps' std::_Lockit: the lock's critical section (0x0098bca8) set up here, its state (0x0098bcc0) 2 = ready:
@@ -830,14 +1084,32 @@ void SetUpCaches()
     reinterpret_cast<T_AddDir>(vt[0x18 / 4])(OriginalAt<void *>(O_ANIMATION_CACHE), "anims");
     g_current = "the port's cache's directory";
     g_animationCache.AddDir("anims");
+    // Part 7: the model cache (StopMission reloads a model through its OpenInto on both sides), one directory.
+    g_current = "the original's model cache";
+    OriginalAt<T_Void>(O_MODEL_CACHE_CTOR)(OriginalAt<void *>(O_MODEL_CACHE));
+    *OriginalAt<uint32_t *>(O_MODEL_CACHE + 0x34) = 256;
+    // (Its entries' vector (+0x14: first +0x18, last +0x1C, end +0x20) with room for 256: grown, it copies its entries
+    // with an inline AddRef and releases the old copies, a Release the port's does not make.)
+    {
+        uint8_t *buf = static_cast<uint8_t *>(O_New(8 * 256));
+        *OriginalAt<uint8_t **>(O_MODEL_CACHE + 0x18) = buf;
+        *OriginalAt<uint8_t **>(O_MODEL_CACHE + 0x1C) = buf;
+        *OriginalAt<uint8_t **>(O_MODEL_CACHE + 0x20) = buf + 8 * 256;
+    }
+    void **mvt = *OriginalAt<void ***>(O_MODEL_CACHE);
+    reinterpret_cast<T_AddDir>(mvt[0x18 / 4])(OriginalAt<void *>(O_MODEL_CACHE), "models");
+    g_modelCache.AddDir("models");
     g_current = "";
 }
 void ClearCache()
 {
-    if (g_side)
+    if (g_side) {
         OriginalAt<T_Void>(O_ANIMATION_CACHE_CLEAR)(OriginalAt<void *>(O_ANIMATION_CACHE));
-    else
+        OriginalAt<T_Void>(O_MODEL_CACHE_CLEAR)(OriginalAt<void *>(O_MODEL_CACHE));
+    } else {
         g_animationCache.Clear();
+        g_modelCache.Clear();
+    }
 }
 
 // ---- the operations ----
@@ -861,6 +1133,160 @@ std::string ChunkPlace(const void *c)
     const bool open = At<uint8_t>(c, 0) != 0;
     return F("open %d at %d depth %d", int(open), open ? FileSeek(At<int>(c, 4), 0, 1) : -1, At<int>(c, 0x410));
 }
+// Part 7's operations (script_module.cpp).
+using T_OpVoid = void(TC *)(void *);
+using T_OpInt = void(TC *)(void *, int);
+using T_OpFrame = void(TC *)(void *, void *);
+using T_OpFrameBool = bool(TC *)(void *, void *);
+using T_OpRemember = void(TC *)(void *, void *, uint32_t);
+using T_OpRotate = void(TC *)(void *, void *, int, int, int);
+using T_OpAssign = bool(TC *)(void *, void *, const char *);
+using T_OpName = void(TC *)(void *, const char *);
+using T_OpBegin = void *(__attribute__((fastcall)) *)(int, int);
+using T_OpSend = void(__attribute__((fastcall)) *)(void *);
+std::string RunOp7(const S_ModCase &c)
+{
+    uint8_t *m = OMod();
+    uint8_t *fb = W().frames[size_t(c.frame)].bytes;
+    I3D_frame *f = AsFrame(fb);
+    C_ScriptModule &p = g_scriptModule;
+    const bool o = g_side != 0;
+    const char *name = c.nullName ? nullptr : c.name.c_str();
+    auto frameBool = [&](uint32_t orig, bool (C_ScriptModule::*port)(I3D_frame *)) {
+        return F("%s %d", OP_NAMES[c.op], int(o ? OriginalAt<T_OpFrameBool>(orig)(m, fb) : (p.*port)(f)));
+    };
+    auto intOp = [&](uint32_t orig, void (C_ScriptModule::*port)(int), int v) {
+        if (o)
+            OriginalAt<T_OpInt>(orig)(m, v);
+        else
+            (p.*port)(v);
+        return F("%s %d", OP_NAMES[c.op], v);
+    };
+    auto boolOp = [&](uint32_t orig, void (C_ScriptModule::*port)(bool)) {
+        if (o)
+            OriginalAt<T_OpInt>(orig)(m, int(c.flag));
+        else
+            (p.*port)(c.flag);
+        return F("%s %d", OP_NAMES[c.op], int(c.flag));
+    };
+    switch (c.op) {
+    case OP_REMEMBER:
+        if (o)
+            OriginalAt<T_OpRemember>(O_REMEMBER)(m, fb, c.what);
+        else
+            p.RememberFrame(f, c.what);
+        return F("RememberFrame %02x", c.what);
+    case OP_RESTORE_FRAME:
+        if (o)
+            OriginalAt<T_OpFrame>(O_RESTORE_FRAME)(m, fb);
+        else
+            p.RestoreFrame(f);
+        return "RestoreFrame";
+    case OP_REGISTER_SOUND:
+        if (o)
+            OriginalAt<T_OpFrame>(O_REGISTER_SOUND)(m, fb);
+        else
+            p.RegisterSoundFrame(f);
+        return "RegisterSoundFrame";
+    case OP_REGISTER_ANIMATED: return frameBool(O_REGISTER_ANIMATED, &C_ScriptModule::RegisterAnimatedModel);
+    case OP_UNREGISTER_ANIMATED: return frameBool(O_UNREGISTER_ANIMATED, &C_ScriptModule::UnregisterAnimatedModel);
+    case OP_REGISTER_DUPLICATE: return frameBool(O_REGISTER_DUPLICATE, &C_ScriptModule::RegisterDuplicate);
+    case OP_UNREGISTER_DUPLICATE: return frameBool(O_UNREGISTER_DUPLICATE, &C_ScriptModule::UnregisterDuplicate);
+    case OP_ROTATE:
+        if (o)
+            OriginalAt<T_OpRotate>(O_ROTATE)(m, fb, c.axis, c.angle, c.speed);
+        else
+            p.RotateFrame(f, c.axis, c.angle, c.speed);
+        return F("RotateFrame %d %d %d", c.axis, c.angle, c.speed);
+    case OP_UPDATE: return intOp(O_UPDATE, &C_ScriptModule::Update, c.time);
+    case OP_TICK: return intOp(O_TICK, &C_ScriptModule::Tick, c.time);
+    case OP_LOAD_SCRIPT_LIST: return boolOp(O_LOAD_SCRIPT_LIST, &C_ScriptModule::LoadScriptList);
+    case OP_START: return boolOp(O_START, &C_ScriptModule::StartMission);
+    case OP_STOP: return boolOp(O_STOP, &C_ScriptModule::StopMission);
+    case OP_RESTART: return boolOp(O_RESTART, &C_ScriptModule::RestartMission);
+    case OP_FREE: return boolOp(O_FREE, &C_ScriptModule::FreeMissionData);
+    case OP_ASSIGN:
+        return F("AssignScript %d", int(o ? OriginalAt<T_OpAssign>(O_ASSIGN)(m, fb, name) : p.AssignScript(f, name)));
+    case OP_ALARM:
+        if (o)
+            OriginalAt<T_OpVoid>(O_ALARM)(m);
+        else
+            p.BroadcastGlobalAlarm();
+        return "BroadcastGlobalAlarm";
+    case OP_ADD_PAUSE:
+        if (o)
+            OriginalAt<T_OpName>(O_ADD_PAUSE)(m, name);
+        else
+            p.AddPauseSound(name);
+        return "AddPauseSound";
+    case OP_SET_PAUSED: return boolOp(O_SET_PAUSED, &C_ScriptModule::SetPauseSoundsPaused);
+    case OP_RUN_CUTSCENE: return intOp(O_RUN_CUTSCENE, &C_ScriptModule::RunCutscene, c.number);
+    case OP_END_CUTSCENE:
+        if (o)
+            OriginalAt<T_OpVoid>(O_END_CUTSCENE)(m);
+        else
+            p.EndCutscene();
+        return "EndCutscene";
+    case OP_WRITE_VALUES: {
+        if (o) {
+            alignas(16) uint8_t ch[0x500] = {};
+            OriginalAt<T_ChunkOpen>(O_CHUNK_OPEN)(ch, "o_vals.sav", true);
+            OriginalAt<T_ChunkBegin>(O_CHUNK_BEGIN)(ch, 0x1004);
+            const bool r = OriginalAt<T_ModChunk>(O_WRITE_VALUES)(m, ch);
+            const std::string place = ChunkPlace(ch);
+            OriginalAt<T_ChunkAscend>(O_CHUNK_ASCEND)(ch, nullptr);
+            OriginalAt<T_ChunkVoid>(O_CHUNK_CLOSE)(ch);
+            return F("WriteSaveGameValues %d %s file ", int(r), place.c_str()) + Hex(g_overrides["o_vals.sav"]);
+        }
+        C_chunk ch;
+        ch.Open("p_vals.sav", true);
+        ch.Begin(0x1004);
+        const bool r = p.WriteSaveGameValues(ch);
+        const std::string place = ChunkPlace(&ch);
+        ch.Ascend();
+        ch.Close();
+        return F("WriteSaveGameValues %d %s file ", int(r), place.c_str()) + Hex(g_overrides["p_vals.sav"]);
+    }
+    case OP_READ_VALUES: {
+        g_overrides["mod_vals.sav"] = c.valuesFile;
+        if (o) {
+            alignas(16) uint8_t ch[0x500] = {};
+            const bool open = OriginalAt<T_ChunkOpen>(O_CHUNK_OPEN)(ch, "mod_vals.sav", false);
+            uint16_t id = 0;
+            const bool in = OriginalAt<T_ChunkDescend>(O_CHUNK_DESCEND)(ch, &id);
+            const bool r = OriginalAt<T_ModChunk>(O_READ_VALUES)(m, ch);
+            const std::string place = ChunkPlace(ch);
+            OriginalAt<T_ChunkAscend>(O_CHUNK_ASCEND)(ch, nullptr);
+            OriginalAt<T_ChunkVoid>(O_CHUNK_CLOSE)(ch);
+            return F("ReadSaveGameValues open %d in %d %04x result %d %s", int(open), int(in), id, int(r), place.c_str());
+        }
+        C_chunk ch;
+        const bool open = ch.Open("mod_vals.sav", false);
+        uint16_t id = 0;
+        const bool in = ch.Descend(id);
+        const bool r = p.ReadSaveGameValues(ch);
+        const std::string place = ChunkPlace(&ch);
+        ch.Ascend();
+        ch.Close();
+        return F("ReadSaveGameValues open %d in %d %04x result %d %s", int(open), int(in), id, int(r), place.c_str());
+    }
+    case OP_BEGIN_MESSAGE: {
+        void *msg = o ? OriginalAt<T_OpBegin>(O_BEGIN_MESSAGE)(c.number, int(c.flag)) : BeginScriptNetMessage(c.number, c.flag);
+        return F("BeginScriptNetMessage %d %d -> %s", c.number, int(c.flag), NameOf(reinterpret_cast<uint32_t>(msg)).c_str());
+    }
+    case OP_SEND_MESSAGE: {
+        void *msg = c.flag ? static_cast<void *>(W().bitstream) : nullptr;
+        if (o)
+            OriginalAt<T_OpSend>(O_SEND_MESSAGE)(msg);
+        else
+            SendScriptNetMessage(static_cast<C_BitStream *>(msg));
+        return "SendScriptNetMessage";
+    }
+    default:
+        return "?";
+    }
+}
+
 std::string RunOp(const S_ModCase &c)
 {
     uint8_t *m = OMod();
@@ -927,27 +1353,149 @@ std::string RunOp(const S_ModCase &c)
         return F("message %d", int(g_side ? OriginalAt<T_ModOnMessage>(O_ON_MESSAGE)(m, ms)
                                           : g_scriptModule.OnMessage(static_cast<C_BitStream *>(ms))));
     default:
-        return "?";
+        return RunOp7(c);
     }
 }
 
 int g_onlyOp = -1;
+// Part 7: the module's other state and the operation's arguments.
+template <class F> void RandomPart7(S_ModCase &c, F anyFrame)
+{
+    const int op = c.op;
+    // (AssignScript reads each script's frame unchecked when it looks for the frame's: no null entries where it runs, on
+    // both sides.)
+    if (op == OP_ASSIGN || op == OP_START || op == OP_RESTART)
+        c.scripts.erase(std::remove_if(c.scripts.begin(), c.scripts.end(), [](const S_ModScript &s) { return s.frame < 0; }),
+                        c.scripts.end());
+    const bool mission = op == OP_START || op == OP_STOP || op == OP_RESTART || op == OP_FREE || op == OP_TICK;
+    c.started = P(mission ? 0.7 : 0.5);
+    c.mapOpen = P(0.3);
+    c.inputDelay = P(0.5) ? 0 : P(0.2) ? 1 : P(0.6) ? I(1, 600) : I(-50, 2000);
+    c.controllersScripted = P(0.5);
+    c.cutsceneNumber = I(0, 2);
+    c.aspect = float(I(100, 200)) * 0.01f;
+    c.fov = float(I(30, 120)) * 0.017453292f;
+    if (op == OP_END_CUTSCENE || op == OP_STOP || op == OP_FREE || op == OP_RESTART)
+        c.cutscene = P(0.7);
+    else if (op == OP_RUN_CUTSCENE)
+        c.cutscene = P(0.2);
+    // (A running cutscene's camera always: EndCutscene uses it unchecked on both sides; a camera's slots.)
+    c.camera = c.cutscene || P(0.3) ? (P(0.5) ? 4 : 13) : -1;
+    auto unique = [&](std::vector<int> &out, int n, auto pick) {
+        for (; n > 0; --n) {
+            const int f = pick();
+            if (std::find(out.begin(), out.end(), f) == out.end())
+                out.push_back(f);
+        }
+    };
+    auto modelOrAny = [&] { return P(0.6) ? (P(0.5) ? 2 : 10) : anyFrame(); };
+    std::vector<int> animated;
+    unique(animated, P(0.4) ? 0 : I(1, 3), modelOrAny);
+    for (int a : animated)
+        c.animated.push_back({a, P(0.5)});
+    unique(c.duplicates, P(0.5) ? 0 : I(1, 3), modelOrAny);
+    static const char *const scriptNames[] = {"cmd_x", "mod_x", "mod_x.scr", "MOD_X.SCR", "cmd_x.Scr", "none", ""};
+    for (int n = P(0.5) ? 0 : I(1, 3); n > 0; --n)
+        c.assignments.push_back({RandomName(), scriptNames[I(0, 6)]});
+    for (int n = P(0.5) ? 0 : I(1, 6); n > 0; --n)
+        c.valuesAtStart.push_back({I(0, 255), P(0.5) ? I(1, 3) : I(-100, 100000)});
+    for (int n = P(0.6) ? 0 : I(1, 3); n > 0; --n)
+        c.pending.push_back({P(0.15) ? -1 : (P(0.5) ? 3 : 14), I(0, 5000)});
+    // The owner models: a model's own frames, a frame another model linked in, none.
+    c.owners.assign(WORLD_FRAMES, -1);
+    for (int f : {1, 11, 8, 16, 18, 19, 20, 21, 22})
+        c.owners[size_t(f)] = P(0.5) ? 2 : P(0.3) ? 10 : -1;
+    for (int f : {12, 17})
+        c.owners[size_t(f)] = P(0.5) ? 10 : P(0.3) ? 2 : -1;
+    static const int screens[][2] = {{640, 480}, {800, 600}, {1024, 768}, {1280, 720}, {1600, 1200}, {1366, 768}, {333, 777}};
+    const int s = I(0, 6);
+    c.screen[0] = screens[s][0];
+    c.screen[1] = screens[s][1];
+    c.viewport[1] = P(0.5) ? 0 : I(0, 200);
+    c.viewport[2] = P(0.7) ? c.screen[0] : I(0, 2000);
+    c.viewport[3] = P(0.7) ? c.screen[1] : I(0, 2000);
+    c.gameFov = float(I(20, 120)) * 0.017453292f;
+    c.inputEnabled = P(0.5);
+
+    // The arguments.
+    c.frame = anyFrame();
+    if (op == OP_RESTORE_FRAME && !c.remembered.empty() && P(0.6))
+        c.frame = c.remembered[size_t(I(0, int(c.remembered.size()) - 1))].frame;
+    if (op == OP_REMEMBER && !c.remembered.empty() && P(0.4))
+        c.frame = c.remembered[size_t(I(0, int(c.remembered.size()) - 1))].frame;
+    if (op == OP_REGISTER_SOUND && !c.soundFrames.empty() && P(0.4))
+        c.frame = c.soundFrames[size_t(I(0, int(c.soundFrames.size()) - 1))];
+    if ((op == OP_REGISTER_ANIMATED || op == OP_UNREGISTER_ANIMATED) && P(0.7))
+        c.frame = !c.animated.empty() && P(0.6) ? c.animated[size_t(I(0, int(c.animated.size()) - 1))].first : modelOrAny();
+    if ((op == OP_REGISTER_DUPLICATE || op == OP_UNREGISTER_DUPLICATE) && P(0.7))
+        c.frame = !c.duplicates.empty() && P(0.6) ? c.duplicates[size_t(I(0, int(c.duplicates.size()) - 1))] : modelOrAny();
+    if (op == OP_ROTATE && !c.rotations.empty() && P(0.4))
+        c.frame = c.rotations[size_t(I(0, int(c.rotations.size()) - 1))].frame;
+    c.what = P(0.8) ? U32() & 0x3F : U32();
+    c.axis = P(0.9) ? I(0, 2) : I(-1, 4);
+    c.angle = I(-720, 720);
+    c.speed = P(0.9) ? I(-360, 720) : I(-100000, 100000);
+    c.time = P(0.8) ? I(0, 200) : I(-100, 5000);
+    // (The edges: the input delay running out exactly (to 0 or 1); a rotation landing exactly on its angle (1000 ms at
+    // its own speed: 1000 * 0.001f is 1.0f) or starting at 0.)
+    if (op == OP_TICK && c.inputDelay > 0 && P(0.3))
+        c.time = c.inputDelay - I(0, 1);
+    if (op == OP_UPDATE && !c.rotations.empty() && P(0.3)) {
+        S_Rotation &r = c.rotations[size_t(I(0, int(c.rotations.size()) - 1))];
+        if (P(0.3))
+            r.angle = 0.0f;
+        else {
+            r.speed = r.angle;
+            c.time = 1000;
+        }
+    }
+    c.number = op == OP_BEGIN_MESSAGE ? I(0, 600) : I(0, 2);
+    c.flag = P(op == OP_START || op == OP_STOP || op == OP_FREE ? 0.8 : 0.5);
+    if (op == OP_ASSIGN) {
+        c.name = scriptNames[I(0, 6)];
+        c.nullName = P(0.05);
+    } else
+        c.name = RandomName();
+    // LoadScriptList's file: made (frame and script names in turn), the game's, none. (Never an entry without its
+    // script: the original's C_chunk 0x00415d00 then assigns its buffer's leftovers, the last name it read.)
+    c.listKind = P(0.7) ? 0 : P(0.5) ? 1 : 2;
+    if (c.listKind == 0) {
+        std::string d;
+        for (int n = I(0, 5); n > 0; --n) {
+            const std::string frameName = P(0.85) ? FRAME_NAMES[I(0, WORLD_FRAMES - 1)] : P(0.5) ? "nothing" : std::string(size_t(I(100, 990)), 'x');
+            d += Chunk(1, frameName + std::string(1, '\0'));
+            d += Chunk(1, std::string(scriptNames[I(0, 6)]) + std::string(1, '\0'));
+        }
+        c.list = Chunk(0, d);
+    }
+    // ReadSaveGameValues' file: its 256 values, or fewer, or more.
+    {
+        std::string d;
+        const int count = P(0.7) ? 256 : I(0, 300);
+        for (int i = 0; i < count; ++i)
+            d += Word(uint32_t(P(0.8) ? 0 : I(-5, 100)));
+        c.valuesFile = Chunk(0x1004, d);
+    }
+}
 S_ModCase RandomModCase()
 {
     S_ModCase c;
-    static const int weights[] = {30, 35, 10, 10, 15};
     if (g_onlyOp >= 0)
         c.op = g_onlyOp;
     else {
-        int r = I(0, 99);
+        int total = 0;
+        for (int w : OP_WEIGHTS)
+            total += w;
+        int r = I(0, total - 1);
         c.op = 0;
-        while (r >= weights[c.op])
-            r -= weights[c.op++];
+        while (r >= OP_WEIGHTS[c.op])
+            r -= OP_WEIGHTS[c.op++];
     }
     static const uint32_t roles[] = {GAME_ROLE_LOCAL, GAME_ROLE_SERVER, GAME_ROLE_CLIENT, GAME_ROLE_SERVER | GAME_ROLE_CLIENT, 0};
     c.role = roles[P(0.6) ? 0 : I(1, 4)];
-    // (A load as the server: a client's compile crashes the original's compiler on a brace block, AssignScript's.)
-    if (c.op == OP_LOAD && !(c.role & GAME_ROLE_SERVER))
+    // (A load, a mission's start and AssignScript as the server: a client's compile crashes the original's compiler on
+    // a brace block, AssignScript's. The game compiles only there.)
+    if ((c.op == OP_LOAD || c.op == OP_START || c.op == OP_ASSIGN) && !(c.role & GAME_ROLE_SERVER))
         c.role |= GAME_ROLE_SERVER;
     auto anyFrame = [] { return P(0.3) ? (P(0.5) ? 3 : 14) : P(0.3) ? (P(0.5) ? 2 : 10) : I(0, WORLD_FRAMES - 1); };
     for (int n = I(0, 3); n > 0; --n)
@@ -986,7 +1534,7 @@ S_ModCase RandomModCase()
         c.remembered.push_back(r);
     }
     for (int n = P(0.3) ? 0 : I(1, 3); n > 0; --n)
-        c.scripts.push_back({P(0.1) ? -1 : anyFrame(), I(0, 30), P(0.5) ? 0 : I(1, 5000), P(0.5), P(0.5)});
+        c.scripts.push_back({P(0.1) ? -1 : anyFrame(), I(0, 30), P(0.5) ? 0 : I(1, 5000), P(0.5), P(0.5), P(0.2), P(0.2), P(0.3)});
     for (int n = P(0.5) ? 0 : I(1, 6); n > 0; --n)
         c.values.push_back({I(0, 255), P(0.5) ? I(1, 3) : I(-100, 100000)});
     c.fake = P(0.3);
@@ -1042,6 +1590,8 @@ S_ModCase RandomModCase()
         c.texts[0] = P(0.7) ? c.groups[size_t(I(0, int(c.groups.size()) - 1))] : std::string("GROUP1");
     // (Now and then no message at all.)
     c.nullMessage = (c.op == OP_WRITE_STATE || c.op == OP_READ_STATE || c.op == OP_MESSAGE) && P(0.03);
+    if (c.op >= OP_REMEMBER)
+        RandomPart7(c, anyFrame);
     return c;
 }
 
@@ -1057,6 +1607,16 @@ void RunModCase(const S_ModCase &c)
     if (trace)
         std::printf("%s\n", g_current.c_str());
     const uint32_t worldSeed = U32(), fakeBase = U32(), randSeed = U32();
+    // The script lists (LoadScriptList; StartMission's): the case's, the game's own or none.
+    for (const char *file : {"missions\\AFRICA1\\Scripts.dta", "missions\\AFRICA1\\mpscripts.dta"}) {
+        const std::string key = Lower(file);
+        g_overrides.erase(key);
+        g_cache.erase(key);
+        if (c.listKind == 0)
+            g_overrides[key] = c.list;
+        else if (c.listKind == 2)
+            g_cache[key] = std::string("\x01missing", 8);
+    }
     S_Result r;
     for (int side = 1; side >= 0; --side) {
         g_side = side;
@@ -1083,6 +1643,9 @@ void RunModCase(const S_ModCase &c)
             out.push_back(s);
         for (const std::string &s : FrameStates())
             out.push_back(s);
+        // (The local matrices' rotation rows too: a rotation turns them in place, Update's.)
+        for (const S_FakeFrame &fr : W().frames)
+            out.push_back("matrix " + fr.name + " " + VectorText(reinterpret_cast<uint32_t>(&AsFrame(fr.bytes)->m_localMatrix.m[0][0]), 12));
         for (const uint8_t *anim : g_animSets[side])
             out.push_back(F("%s refs %d mode %d", NameOf(reinterpret_cast<uint32_t>(anim)).c_str(), At<int>(anim, 4), At<int>(anim, 8)));
         for (const std::string &s : g_log[side])
@@ -1133,6 +1696,7 @@ void SetUpMod()
     RedirectOriginal(0x007e5392, reinterpret_cast<const void *>(&O_dtaWrite));
     RedirectOriginal(0x007e53c2, reinterpret_cast<const void *>(&O_AlignedMalloc));
     RedirectOriginal(0x007e559c, reinterpret_cast<const void *>(&O_AlignedFree));
+    *OriginalAt<uint32_t *>(O_PROTECTION_CALL) = reinterpret_cast<uint32_t>(&O_Protection);
     // The original's module (its static initialiser never ran).
     using T_ModuleCtor = void *(TC *)(void *, int, const char *);
     OriginalAt<T_ModuleCtor>(O_MODULE_CTOR)(OMod(), MODULE_SCRIPT, "Script");
@@ -1178,7 +1742,7 @@ int main()
     if (const char *s = std::getenv("HD2_MOD_SEED"))
         g_seed = uint32_t(std::strtoul(s, nullptr, 10)) | 1;
     g_show = std::getenv("HD2_MOD_SHOW") != nullptr;
-    int cases = std::getenv("HD2_MOD_QUICK") ? 4000 : 20000;
+    int cases = std::getenv("HD2_MOD_QUICK") ? 8000 : 40000;
     if (const char *s = std::getenv("HD2_MOD_CASES"))
         cases = std::atoi(s);
     new (&reinterpret_cast<C_game *>(g_portGameBuf)->m_missionName) C_str();
@@ -1188,9 +1752,11 @@ int main()
     CompileProgram();
     for (int n = 0; n < cases; ++n)
         RunModCase(RandomModCase());
-    std::printf("mod_diff: %d cases (SaveGame %d, LoadGame %d: %d of the original's saves, %d made files; WriteState %d, "
-                "ReadState %d, OnMessage %d), %d calls logged, %d checks, %d failures\n",
-                g_modCases, g_opCases[OP_SAVE], g_opCases[OP_LOAD], g_loadsOfSaves, g_madeFiles, g_opCases[OP_WRITE_STATE],
-                g_opCases[OP_READ_STATE], g_opCases[OP_MESSAGE], g_calls[0], checks, failures);
+    std::string ops;
+    for (int i = 0; i < OP_COUNT; ++i)
+        ops += F("%s%s %d", i ? ", " : "", OP_NAMES[i], g_opCases[i]);
+    std::printf("mod_diff: %d cases (%s; LoadGame: %d of the original's saves, %d made files), %d calls logged, %d checks, "
+                "%d failures\n",
+                g_modCases, ops.c_str(), g_loadsOfSaves, g_madeFiles, g_calls[0], checks, failures);
     return failures != 0;
 }

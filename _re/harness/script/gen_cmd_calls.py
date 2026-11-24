@@ -247,6 +247,8 @@ ORIG = {
     'C_NetGame::SendNetMessage(C_BitStream*)': ("0x0072c360", "thiscall", "v"),
     'C_CommandPanel::IsOpen() const': ("0x004b6180", "thiscall", "b"),
     'C_Human::IsAISuspended() const': ("0x005a5d30", "thiscall", "b"),
+    # (Script part 7: LS3DF's; the original's import thunk is patched.)
+    'GetIGraph': ("0x007e530e", "cdecl", "p"),
 }
 # Static members (mangled like members: no `this`, the port's cdecl).
 STATIC_MEMBERS = {'C_HumanMovement::PlayDubbing(int, I3D_frame*, C_Human*, float, float)'}
@@ -303,8 +305,10 @@ def params(plain):
 
 
 def engine_slots():
-    """Every I3DMETHOD of i3d.h: (class, base, offset, name, kinds, answer)."""
+    """Every I3DMETHOD of i3d.h and of igraph.h's IGraph: (class, base, offset, name, kinds, answer)."""
     text = open(os.path.join(SRC, "ls3d", "i3d.h"), encoding="latin-1").read()
+    graph = open(os.path.join(SRC, "ls3d", "igraph.h"), encoding="latin-1").read()
+    text += "\n" + graph[graph.index("class IGraph {"):graph.index("\n};", graph.index("class IGraph {")) + 3]
     slots, bases = [], {}
     cls = None
     lines = text.split("\n")

@@ -5814,3 +5814,64 @@ particles and the surface marks. Files are served from memory.
   - A module state the game cannot make: a sound bit on a camera. The original's call through the camera's vtable slot
     unbalanced its stack and crashed it.
   - `sed -i` on the new test left it with LF line endings (set back to CRLF).
+
+## Script part 7 (the script module's other functions: `script_module.cpp`, 2026-11-23)
+
+- **The build:** part 6's `mod_diff.cpp` (suite `script.module`) extended. `gen_cmd_calls.py` now reads `igraph.h`'s
+  IGraph slots too, and GetIGraph is a logged call (the original's import thunk 0x007e530e patched). The original's
+  model cache (0x008aeda0, its initialiser 0x006d51e0) is constructed by hand like part 6's animation cache, with one
+  directory on both sides: StopMission reloads a model through its OpenInto, which both sides run.
+  - Each case also gives both modules: started, the input delay, the command map flag, the cutscene's camera
+    (referenced), its saved aspect and FOV, the cutscene number, the animated models with their cutscene flags, the
+    duplicates, the script list (the original's C_str pairs made by its own operator=), the values at the start, the
+    pending sounds (null entries among them), the frames' owner models, the screen (IGraph's ScrnX, ScrnY), the
+    scene's viewport, the game's cutscene FOV and input flag, and the scripts' HUD and cutscene-handler flags.
+  - EnumFrames is answered by calling the callback (each side's own) on the frame's descendants, so StopMission's
+    model reload detaches and relinks real children.
+  - Compared as well as part 6's: the frames' local matrices (a rotation turns them in place), the script list, the
+    game's two fields and g_scriptModuleRestarting.
+- **The tests:** every function of the file: RememberFrame, RestoreFrame, RegisterSoundFrame, (Un)RegisterAnimatedModel,
+  (Un)RegisterDuplicate, RotateFrame, Update, Tick, LoadScriptList (a made list, the game's AFRICA1 list, none),
+  Start/Stop/Restart/FreeMissionData, AssignScript (with and without `.scr`, other cases, empty, null, missing files),
+  BroadcastGlobalAlarm, AddPauseSound, SetPauseSoundsPaused, RunCutscene, EndCutscene, Write/ReadSaveGameValues (short
+  and long chunks), BeginScriptNetMessage and SendScriptNetMessage. 40,000 cases (part 6's operations about a third of
+  them), about 48 s (quick: 8,000, 11 s).
+- **Coverage:** every line but two: the module's destructor (a static object: the test never runs it), and
+  RestoreAnimatedModel's first loop over the relinked frames (the call before always empties the list; the original's
+  inlined copy has the same loop). `script_tables_lookup.cpp`: every line covered by `script.compiler`
+  (GetScriptFunctionArgCount only there: the module's scripts call no functions).
+- **Port bugs found and fixed:**
+  - RunCutscene sized the 16:9 band by the screen (IGraph); the original's inlined copy reads the scene's viewport
+    (its right and bottom, +0x24C / +0x250). Update's copy does ask IGraph, as the port did.
+  - StopMission freed the rotations and restored the remembered frames first to last; the original goes last to first
+    (each frame's calls and Release in that order) and skips null entries.
+  - EndCutscene asks IGraph for the height before the width (the port's order was the compiler's).
+- **The original's weaknesses (not tested, the port's behaviour kept):**
+  - LoadScriptList: an entry without its script chunk gets the original's stack buffer's leftovers (the last name it
+    read) and the list's chunk is left there; names of 999 characters or more are read unterminated.
+  - AssignScript writes the path with sprintf into a 0x100 buffer: a long script name overflows it (the port
+    truncates).
+  - AssignScript (and so StartMission) reads each script's frame unchecked when it looks for the frame's: a null entry
+    crashes both sides (not in the cases where it runs).
+  - RunCutscene's band from the viewport: a cutscene started while one runs narrows the band again (kept: it is the
+    original's).
+  - RunCutscene's copy protection (the window handle passed through a pointer in the `.dogui` section) is left out of
+    the port; the test stubs it.
+- **Harness decisions:** GetIGraph and the protection's GetHWND unlogged (plain getters / the protection);
+  EnumFrames logged without its callback (each side's own function); the original's model cache's entry vector made
+  large enough never to grow (grown, it copies its entries with an inline AddRef and releases the old copies, as part
+  6's animation cache).
+- **Mutations:** 540 mutants (`mutate_sc7.py`), 42 not building; 468 of the 498 building killed. The first run left 39:
+  the humans' scripted controllers' script was not compared (AssignScript gives an AI human's controller the new
+  script and clears it when the file fails), and the rotation's and the input delay's exact edges never came up. The
+  30 left: frees, the name buffers' sizes, code the test never runs (a static constructor, a dedicated-server line),
+  LoadScriptList's loop test and closing calls, two clears covering each other, a new parent the test's model reload
+  cannot change, and RestartMission's flag and client calls (no-ops in this file).
+- **Harness lessons (my mistakes):**
+  - The first mutation run failed at once: I wrote the mutant list outside the mutations folder, and the list finds
+    the repository from its own place.
+  - The frames' dump compared position, quaternion and scale only: Update's turned matrices were not compared until I
+    looked at a case's output.
+  - To show the controller's script being cleared, I first gave the controllers one of the module's scripts: a freed
+    script's address came back to a new one on one side only, and RestartMission failed now and then. The controllers
+    now start with a block that is never freed.

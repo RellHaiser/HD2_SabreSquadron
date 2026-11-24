@@ -431,13 +431,15 @@ void C_ScriptModule::StopMission(bool server)
         if (r->what & SCRIPT_FRAME_ANIMATION)
             RestoreAnimatedModel(static_cast<I3D_model *>(r->frame));
     }
-    for (S_FrameRotation *r : m_rotations) {
-        delete r;
-    }
+    // (Both freed last to first, as the original: each frame's Release and the restored frames' calls in its order.)
+    for (size_t i = m_rotations.size(); i-- > 0;)
+        delete m_rotations[i];
     m_rotations.clear();
-    for (S_RememberedFrame *r : m_rememberedFrames) {
-        r->Restore();
-        delete r;
+    for (size_t i = m_rememberedFrames.size(); i-- > 0;) {
+        if (S_RememberedFrame *r = m_rememberedFrames[i]) {
+            r->Restore();
+            delete r;
+        }
     }
     m_rememberedFrames.clear();
 
@@ -534,15 +536,15 @@ void C_ScriptModule::Update(int timeDelta)
         m_rotations[i] = m_rotations.back();
         m_rotations.pop_back();
     }
-    if (m_cutsceneRunning)
-        SetLetterboxViewport();
+    if (m_cutsceneRunning) {
+        const int width = GetIGraph()->ScrnX();
+        SetLetterboxViewport(width, GetIGraph()->ScrnY());
+    }
 }
 
-void C_ScriptModule::SetLetterboxViewport()
+void C_ScriptModule::SetLetterboxViewport(int width, int height)
 {
     // 16:9 band in the middle of the screen.
-    const int width = GetIGraph()->ScrnX();
-    const int height = GetIGraph()->ScrnY();
     const float bandHeight = width * 0.0625f * 9.0f;
     const float top = (height - bandHeight) * 0.5f;
     GetGame()->GetScene()->SetViewport(0, static_cast<int>(top), width, static_cast<int>(height - top));
@@ -673,7 +675,9 @@ void C_ScriptModule::RunCutscene(int cutscene)          // 0x00423c70 (DS 0x0044
     // (A copy-protection check of the original was here.)
 
     GetGame()->SetPlayerInputEnabled(false);
-    SetLetterboxViewport();
+    // (The band of the scene's current viewport, its right and bottom: not the screen's, as Update's.)
+    const int *viewport = scene->GetViewportRect();
+    SetLetterboxViewport(viewport[2], viewport[3]);
     I3D_camera *camera = scene->GetActiveCamera();
     m_savedAspectRatio = camera->GetAspectRatio();
     m_savedFOV = camera->GetFOV();
@@ -717,7 +721,8 @@ void C_ScriptModule::EndCutscene()                      // 0x00423eb0 (DS 0x0044
 
     if (GetGame()) {
         m_inputDelay = 500;
-        GetGame()->GetScene()->SetViewport(0, 0, GetIGraph()->ScrnX(), GetIGraph()->ScrnY());
+        const int height = GetIGraph()->ScrnY();                // (the original asks for the height first)
+        GetGame()->GetScene()->SetViewport(0, 0, GetIGraph()->ScrnX(), height);
         GetGame()->GetScene()->GetActiveCamera()->SetAspectRatio(4.0f / 3.0f);
     }
     GetGEffects()->Fade(0, FADE_OUT, nullptr);
