@@ -109,6 +109,8 @@ SUITES = [
     T("net.chan", "net/build_chan.bat", TMP + r"\chan_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 4a: the UDP socket against the original executable, its system calls faked, net/sock_diff.cpp.)
     T("net.sock", "net/build_sock.bat", TMP + r"\sock_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 4b: the connections and the transport against the original executable, net/trans_diff.cpp.)
+    T("net.trans", "net/build_trans.bat", TMP + r"\trans_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",

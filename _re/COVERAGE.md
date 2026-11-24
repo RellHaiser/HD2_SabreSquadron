@@ -6218,3 +6218,51 @@ came from. From this part on the network code is compared with the original exec
   (made before its events) shifted the events' numbers; threads and events are counted apart now. A random datagram
   under 8 bytes crashed both programs before I understood the fragment test. Twice more a Python heredoc turned the
   C++ `\n` into newlines (the known Bash hazard: Edit for such text).
+
+## Net part 4b (the transport's connections and their manager, `net/net_transport.cpp`, 2026-11-24)
+
+- **The build:** `net/build_trans.bat` (`net/trans_diff.cpp`, suite `net.trans`): net_transport.cpp with the socket,
+  channels and bit streams against the original's. Part 4a's fakes of the system calls, now shared
+  (`net/sock_fakes.inc`, with a stop after some selects for the receive thread and a clock that moves on at each
+  datagram received). Each transport talks to itself: what its socket sent (logged at sendto) comes back through
+  recvfrom to the connection of the id in its header. The original's transport is built by its constructor in a
+  buffer of its layout (its connection vector MSVC6's); its connections by theirs; its pool and send stream
+  (0x009830e8), whose static constructors never ran, are built before the rounds; its malloc, realloc, free, new and
+  delete are the test's.
+- **The tests:** rounds of up to 60 random calls: Start (any port; over a started transport) and Stop, connections made
+  (ids up to 255, repeated; the port known or not; the transport's session changed) and added, removed, deleted with
+  DeleteConnections, found by id and by address, Lock / Unlock, Send (any channel, kind, up to 1500 bytes: fragments),
+  Resend of a packet still to go, Receive (the data given back to the pool), SendPing, PingIfDue (at its 2 s),
+  Flush and Gather (forced or not), SetResendTime (under 10, 10 to 700, over), ResendAll / AcknowledgeAll (the clock
+  moved on), Tick (at its 500 ms), FlushAll, the socket's queued datagrams sent, ReceiveAll (up to 4 datagrams: as
+  sent, a bit changed in a checksummed word, from another address, anything sealed or not; select's error now and
+  then), the receive thread (its loop, or its entry as CreateThread was given it), HandleDatagram on a datagram's
+  body (packets, a ping, an echo). After each call the transports (their connections in order, fields, locks),
+  every connection (its fields, lock, its three channels' numbers and list lengths), the sockets' queues and numbers,
+  the send stream's bytes, the pools' free counts and the call logs (sendto's bytes, the game's packet callback's
+  calls) are compared. 40,000 rounds, about 15 million checks, 12 s (HD2_TRANS_QUICK: 10,000).
+- **Coverage:** every line of net_transport.cpp.
+- **Port bugs found:** none.
+- **The original's weaknesses (kept):**
+  - A packet's 16-bit size is read sign-extended: a datagram claiming a packet of 32 KB or more makes the receiver
+    take a 1000-byte pool buffer and copy about 4 GB into it; sizes past the datagram's end read past it. Any sender
+    of a packet list (type 1) to a connection's id crashes the game, the port too. Together with part 4a's short
+    datagrams, the protocol needs bounds checks: a fix for a branch. The test sends no such datagram: random ones are
+    never packet lists, and changed bits go only into checksummed words.
+  - A datagram's last 1 to 3 bytes (past its whole words) are not checksummed: a change there passes Unseal.
+  - The constructor leaves the thread's fields, the times and the session as the memory was (Add before Start copies
+    that session); the test zeroes them.
+  - Start forgets the connections without deleting them.
+- **Harness decisions:** Start's calls are compared in any order (part 4a: the socket's Open makes its events before
+  the thread in the port). Resend only of a packet a channel still holds (the game never calls it).
+- **Mutations:** 245 mutants (`net/mutations/mutate_net4b.py`), 19 not building; 219 of the 226 building
+  killed. The first run left 9: Receive's null for none (the test had set it null itself), ReceiveAll's flush between
+  datagrams (the clock never moved within a call) and the locks' Enter (now the lock word and owner are checked too)
+  were not seen. The 7 left: the destructors' DeleteCriticalSection (54, 271 del); a Leave without its Enter in
+  ResendAll and FindByAddress (238, 322 del: today's Windows ignores leaving a section the thread does not own, one
+  thread cannot tell); Receive's clearing of a packet's size before releasing it (87 del, num: nothing reads it before
+  Clear does the same); Remove's move of the last into its place when it is the only one (381 cmp: the same).
+- **Harness lessons (my mistakes):** the original's realloc was not redirected, so the send stream's growth crashed
+  in its uninitialised CRT heap; my direct HandleDatagram first forced type 1 on other bodies, and my changed copies
+  first flipped the unchecked last bytes: both made garbage packet sizes that crash both programs. Again a Python
+  heredoc turned a C++ `\n` into a newline.
