@@ -6176,3 +6176,45 @@ came from. From this part on the network code is compared with the original exec
   globals (the failure showed as a crash while printing the trace). The messages' room check asked for more than the
   buffer held, so they never ran until the coverage showed it. The delete recorder first grew a vector, whose own
   delete it recorded (a recursion).
+
+## Net part 4a (the transport's UDP socket, `net/net_socket.cpp`, 2026-11-24)
+
+- **The build:** `net/build_sock.bat` (`net/sock_diff.cpp`, suite `net.sock`): net_socket.cpp, net_channel.cpp and
+  bitstream.cpp against the original's. No real socket or thread: every file is built with `-include sock_fakes.h`,
+  which renames the port's Winsock and thread calls (WSAStartup, socket, bind, sendto, recvfrom, select,
+  gethostname, gethostbyname, closesocket, WSACleanup, CreateThread, CreateEventA, SetEvent, ResetEvent,
+  WaitForSingleObject, CloseHandle, SetThreadPriority) to the test's fakes; the original's import table slots holding
+  those functions are pointed at the same fakes. The fakes log every call (compared) and answer from a script both
+  sides read alike (select's answer, recvfrom's datagrams, the host); outside the compared calls they pass through to
+  the real functions (the loader's). The original's socket is built by its constructor in a buffer of its layout (its
+  fragment vector and lists MSVC6's); each program keeps its own pool (part 3); queued buffers are compared by bytes.
+- **The tests:** rounds of up to 50 random calls: Seal / Unseal (sizes 0 to 600, other keys, a bit changed, another
+  size), Send (whole under 500 bytes; fragments of 500 from 500, 501, 1000, up to 3000), FlushDelayed (the clock moved
+  on or not; the last fragment's time at the clock's edges), SendQueued, SendThread (its waits answered until it is
+  told to stop), the thread's entry as CreateThread was given it, QueueSend and SendRaw alone, Receive (nothing, an
+  error, recvfrom's 0 or -1, a datagram the sockets sent: as sent, a bit changed, cut short; anything, sealed or not,
+  a fragment or not; fragments in any order, repeated, expired after 20 s), TakeCounters, GetLocalAddress (the lookup
+  failing at each step), Open (any port or -1; over an open socket) and Close. After each call the sockets (their
+  buffers, fragments, delayed and queued datagrams, counters, thread fields, local address), the pools' free counts,
+  g_netLastFragmentTime, the locks and the call logs are compared. 20,000 rounds, about 7 million checks, 20 s
+  (HD2_SOCK_QUICK: 5,000).
+- **Coverage:** every line of net_socket.cpp.
+- **Port bug found and fixed:** LookupLocalAddress called WSACleanup after any lookup on a closed socket; the original
+  only when a host was found (a failed lookup leaves its WSAStartup counted).
+- **The original's weaknesses (kept):**
+  - A datagram under 8 bytes whose fourth byte has the high bit (for one under 4 bytes: the buffer's old byte) passes
+    Unseal as a fragment (under 7 bytes no word is checksummed) and its data's size comes out negative: the copy
+    faults. Anyone who can send the game a UDP datagram can crash it, the port too. The test does not send such
+    datagrams. A fix belongs on a branch.
+  - The constructor leaves the byte counters, the thread's fields, the sockaddr and the local name past its first
+    byte as the memory was (the test zeroes them; the port's start at 0): TakeCounters' first answer, and SendRaw
+    before Open, use that memory.
+  - Open starts the send thread before making the events it waits on (the port makes them first; the test compares
+    Open's calls in any order).
+  - Expired fragments and queued datagrams at destruction are not given back to the pool.
+- **Mutations:** 277 mutants (`net/mutations/mutate_net4a.py`), 19 not building; 249 of the 258 building killed, the 9
+  left equivalent or unobservable.
+- **Harness lessons (my mistakes):** the fakes first numbered every handle from one counter, so the original's thread
+  (made before its events) shifted the events' numbers; threads and events are counted apart now. A random datagram
+  under 8 bytes crashed both programs before I understood the fragment test. Twice more a Python heredoc turned the
+  C++ `\n` into newlines (the known Bash hazard: Edit for such text).

@@ -340,16 +340,18 @@ void C_NetSocket::LookupLocalAddress()
     if (m_socket == static_cast<uintptr_t>(-1))
         WSAStartup(0x202, &data);
     char name[80];
-    if (gethostname(name, sizeof name) != -1) {
-        if (hostent *host = gethostbyname(name)) {
-            if (host->h_addr_list[0]) {
-                in_addr address;
-                std::memcpy(&address, host->h_addr_list[0], sizeof address);
-                std::strcpy(m_localName, inet_ntoa(address));
-                m_localAddress = ntohl(address.s_addr);
-            }
-        }
+    if (gethostname(name, sizeof name) == -1)
+        return;
+    hostent *host = gethostbyname(name);
+    if (!host)
+        return;
+    if (host->h_addr_list[0]) {
+        in_addr address;
+        std::memcpy(&address, host->h_addr_list[0], sizeof address);
+        std::strcpy(m_localName, inet_ntoa(address));
+        m_localAddress = ntohl(address.s_addr);
     }
+    // (As the original: cleaned up only when a host was found; a failed lookup leaves its WSAStartup counted.)
     if (m_socket == static_cast<uintptr_t>(-1))
         WSACleanup();
 }
