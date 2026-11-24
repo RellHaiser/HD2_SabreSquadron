@@ -266,7 +266,7 @@ void C_NetMessage::ReadPosition(S_vector &pos)
 namespace {
 
 float Heading(const S_vector &v) { return static_cast<float>(std::atan2(static_cast<double>(v.z), static_cast<double>(v.x))); }
-float Pitch(const S_vector &v) { return static_cast<float>(std::asin(static_cast<double>(v.y))); }
+float Pitch(const S_vector &v) { return GameAsin(v.y); }
 float Cos(float a) { return static_cast<float>(std::cos(static_cast<double>(a))); }
 float Sin(float a) { return static_cast<float>(std::sin(static_cast<double>(a))); }
 // (heading, pitch) back to a unit vector.

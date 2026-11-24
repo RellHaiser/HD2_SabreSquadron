@@ -118,6 +118,17 @@ inline double AngleToUnrounded(const S_vector &a, const S_vector &b)
     return (a.*d)(b);
 }
 
+// The game's asin of a float, as its CRT's (_CIasin, 0x007e66c0) works it out in the engine's single precision:
+// atan2(x, sqrt((1 + x)(1 - x))) with the sum, difference, product and root each rounded to float (PC_24 rounds
+// them), FPATAN not; the result rounded to float as stored. (Net part 2: the direction tracks' pitch.)
+inline float GameAsin(float x)
+{
+    const float a = 1.0f + x;
+    const float b = 1.0f - x;
+    const float root = std::sqrt(a * b);
+    return static_cast<float>(std::atan2(static_cast<double>(x), static_cast<double>(root)));
+}
+
 inline S_vector operator*(float s, const S_vector &v) { return v * s; }
 
 struct S_vector4 {

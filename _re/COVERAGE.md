@@ -6098,3 +6098,44 @@ came from. From this part on the network code is compared with the original exec
 - **Harness lessons (my mistakes):** the first runs compared Setup against the port's model of the x87, which an
   earlier part had written from the decompile; only the original settled it. The allocation logger first allocated
   through the wrapped malloc itself (its map), logging its own blocks.
+
+## Net part 2 (the replicated values, `net/net_track.cpp`, 2026-11-24)
+
+- **The build:** `net/build_track.bat` (`net/track_diff.cpp`, suite `net.track`): net_track.cpp and bitstream.cpp
+  against the original's. Each round builds a pair of tracks (the track, the position track or the direction track;
+  the original's by its constructor in a buffer of its layout, the port's layout checked to be the same) and a pair of
+  messages over the test's buffers. The calls go through the original's vtable slots. The test's quantisations are
+  shared; the direction tracks' are each program's globals (0x00982f10, 0x00982e90, 0x00982e10), compared after the
+  first construction. The globals (the update period 0x00982f90, the server side 0x00982f94) are set on both sides.
+- **The tests:** rounds of up to 40 random calls: SetFlags (the rate flags, any bits), SetLag, SetValue, SetNetValue,
+  SetRate (zero, tiny, at 1e-16, Magnitude's floor, a unit, any), the getters and Refresh, GetAngle, Update (0 s, the
+  tick, long), Write (delta or not; the last sent near the value: within its steps, its delta range, anywhere, or a
+  step whose derived rate is about the 0.1 cut-off; the server side's net value), Read (from where an earlier Write
+  began, or any bits), Reset, the quantisations (null ones kept), the server side switched, SetDirection (vertical,
+  axis-aligned, any), SetAngle, the direction track's EndWrite and EndRead alone. Fields no call sets are written on
+  both sides now and then: the snap distance (past half the angles' span, or at the distance itself), the raw flags
+  (the direction track's moving target), the direction track's angles (turns of exactly 0.001, distances of exactly
+  1e-8, 0.8, 0.785 and half the span). After every call the tracks' bytes, the messages and the globals are compared.
+  100,000 rounds, about 4.5 million checks (HD2_TRACK_QUICK: 50,000).
+- **Coverage:** every line of net_track.cpp but EndRead's tiny-rate branch (lines 350-355): the speed is over 8 there,
+  so the square is over 64 (the original's dead code too).
+- **Port bugs found and fixed:**
+  - SetDirection's pitch: the port's asin was a correct one; the original's is its CRT's `_CIasin`, which works it out
+    as atan2(x, sqrt((1 + x)(1 - x))) with the sum, difference, product and root rounded to float in the game's
+    precision. Now `GameAsin` in `ls3d/math.h`, also used by part 1's direction encodings (their pitch quantised, so
+    part 1 did not see it).
+  - SetDirection's yaw and Update's direction: the angles, sines and cosines were rounded to float before use and the
+    products multiplied rounded cosines (as part 1's encodings).
+- **The original's weaknesses (kept):**
+  - The constructors leave the vectors' w, +0x1C and the direction track's turn sign as the memory was: EndRead's first
+    sign of "unchanged" then compares an uninitialised turn sign. The port's are 0 (not compared at construction).
+  - The direction track's Reset drops its quantisations (its constructor sets them after); Update, Write and Read then
+    read through null. The game resets them only in the constructor (the test does not update one after a Reset).
+  - Update's step and EndRead's rate leave their w as an uninitialised local (not compared there).
+- **Mutations:** 472 mutants (`net/mutations/mutate_net2.py`), 46 not building; 374 of the 426 building killed. The 52
+  left: 15 in the unreachable branch, 34 equivalent, 3 narrow (exact squares of quantised values; no float squaring to
+  Magnitude's floor). The first run left 72: the exact edges above and the rate's w after a base Read were missing.
+- **Harness lessons (my mistakes):** the comparison first left out the rate's w on every track, though only the
+  direction track's EndRead leaves it undefined (a mutant deleting the base Read's copy survived). A Python heredoc
+  turned a `\n` into a newline in the C++ (the known Bash hazard), and a local named `far` hit windows.h's macro (the
+  known one).

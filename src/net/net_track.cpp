@@ -287,8 +287,9 @@ void C_NetDirTrack::Reset()
 void C_NetDirTrack::SetDirection(const S_vector4 &dir, float angle)
 {
     m_previous = m_current;
-    m_current.x = std::atan2(dir.z, dir.x);
-    m_current.y = std::asin(dir.y);
+    // (FPATAN unrounded until stored; the CRT's asin in single precision.)
+    m_current.x = static_cast<float>(std::atan2(static_cast<double>(dir.z), static_cast<double>(dir.x)));
+    m_current.y = GameAsin(dir.y);
     m_current.z = angle;
     m_net = m_current;
     m_target = m_current;
@@ -400,8 +401,9 @@ void C_NetDirTrack::Update(float seconds)
         Wrap(m_current.x), Wrap(m_current.y), Wrap(m_current.z);
         Wrap(m_current.x), Wrap(m_current.y), Wrap(m_current.z);
     }
-    const float cosPitch = std::cos(m_current.y);
-    m_direction.x = std::cos(m_current.x) * cosPitch;
-    m_direction.z = std::sin(m_current.x) * cosPitch;
-    m_direction.y = std::sin(m_current.y);
+    // The x87's FCOS and FSIN unrounded, each product rounded once.
+    const double cosPitch = std::cos(static_cast<double>(m_current.y));
+    m_direction.x = static_cast<float>(std::cos(static_cast<double>(m_current.x)) * cosPitch);
+    m_direction.z = static_cast<float>(std::sin(static_cast<double>(m_current.x)) * cosPitch);
+    m_direction.y = static_cast<float>(std::sin(static_cast<double>(m_current.y)));
 }
