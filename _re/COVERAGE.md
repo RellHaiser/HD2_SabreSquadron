@@ -6468,3 +6468,57 @@ came from. From this part on the network code is compared with the original exec
   is set), the 9-bit ids (-2 reads as 510) and the objects the read makes; the view cone reads every object's property
   0 before the data check (I checked only the objects with data); my end-of-round cleanup cleared both queues with
   force and deleted forwarded messages twice (each message is now freed once).
+
+## Net part 9 (the network game's messages, `net/net_messages.cpp`, 2026-11-24)
+
+- **The build:** `net/build_msgs.bat` (`net/msgs_diff.cpp`, `net/msgs_fakes.h`, `net/msgs_globals.cpp`, suite
+  `net.msgs`): net_messages.cpp against the original's server message handler (HandleServerMessage), SendGameMessage,
+  PostCommand, NetWriteSoldierState / NetReadSoldierState and the game messages' streams (BeginGameMessage,
+  BeginCommand, BeginReply). The original's net game is its own global, its players the same bytes as the port's (the
+  humans and connections each side's own), its five message streams made by its constructor over the test's buffers.
+  What they reach is the test's on both sides, logging alike: the players' lock and the app's command lock (the
+  original's critical sections by its import slots, the port's through `-include msgs_fakes.h`), timeGetTime,
+  DirectPlay's GetClientInfo (one COM object), the name helpers (NetWideToUtf8 / Ansi, HasCjkCharacters,
+  FindFreeNameNumber), the connections (made, deleted: by serial) and the transport (Add, Remove), the key checks'
+  DropKeyQuery, GetHostAddress, the player counts and the status, QueueReceived, the game (OnPlayerLeft, the
+  objectives), the app's lines, the texts, the map and the rules' writers, the modules' and temporary actors'
+  states, the scores, SetPlayerTeam, FindPlayer, GetPlayerName, Process and SendNetMessage (each stream's fields and
+  bits logged, then emptied). The players' places come from frames both programs read (the world matrix valid), the
+  soldier states from GetSoldierState in each program's layout, the squad's first soldier made in both.
+- **The tests:** 20,000 rounds, each a random world (the role, 1 to 12 players or 32 all connected; the humans' net
+  ids, frames (facings too short to normalise), uniforms; the rules (dedicated, the listing, the password); the key
+  checks (names and addresses matching the joiner's, any state)) and up to 8 calls: soldier states written and read
+  back (names up to 300 characters, -1 fields, 260 belt items), the streams begun, game messages of every type queued
+  and sent, commands posted and sent, DirectPlay's messages (a player created with any of GetClientInfo's answers,
+  destroyed, a hosts query of any request, a connection asked for (versions, passwords, names, a full server), aborted,
+  data, a buffer returned, the server's info, others). About 935,000 checks, 6 s (HD2_MSGS_QUICK: 5,000).
+- **Coverage:** every line of net_messages.cpp but two Fixes the original cannot reach (it reads null): a place of a
+  player without a human (game message 5) and an empty squad's state (commands 0 and 1).
+- **Port bugs found and fixed:**
+  - The facings' normalisation: the players' places (game message 5) sum x, y, z (the port had the whole game's
+    order) and the whole game's (0x15) y and z, then x (the port had the places' order). The last bits of the
+    directions sent differed.
+  - A joining player's CD key: the original refuses the key (5) at the first check of that name and address that is
+    neither good nor in use; the port looked on for a later good one.
+- **The original's weaknesses (kept):**
+  - An aborted connection's link is deleted and left in its slot: a second abort or a destroy of that slot before the
+    slot is reused deletes it again (both programs; the game reuses the slot first: not given).
+  - A joining player's slot (and the server's own) is filled from a state constructed on the stack: the name's bytes
+    after the first, +0x78, +0x80..+0xA0, +0xA3, the activity time and +0xC0 (the server's own slot also the address)
+    are the stack's leftovers (the port zeroes them; not compared in that call, then carried over).
+  - The hosts query's reply is written into a block operator new gives uncleared, and WriteBits ORs its bits in: the
+    block's leftovers can set bits of the reply (both programs; the test gives both zeroed blocks).
+  - A place of a player without a human and an empty squad's state read null (the port's Fixes).
+- **Mutations:** 717 mutants (`net/mutations/mutate_net9.py`), 125 not building; 559 of the 592 building killed at
+  first, 566 after the test logged DirectPlay's info block, GetSoldierState's -1 fields and the reply handed over and
+  gave the streams any channel. The 26 left: equivalent (12: buffer and block sizes, an unused member and `(void)`,
+  the sign of a nonzero tiny component at >= or >, the slot already at the end, the fresh state's key check already
+  -1, GetSender(-2) as -1), the test's zeroed allocations (1: the info block's memset), exact float boundaries (4: a
+  square of 1 or 1e-8 exactly), the Fixes the original cannot reach (6), memory only (2: the spawn's state and block
+  not freed), past the vector (1: the free slot's `<=`).
+- **Harness lessons (my mistakes):** I took NetWideToUtf8 / Ansi and GetHostAddress for register calls (they take
+  their arguments on the stack and pop them); the spawn's facing is read with the player table's second entry (the
+  recipient's), which my table did not have; my copy of the player state's constructor defaulted every field (the
+  port's sets the teams to 2 and the key check to -1, as the original); an aborted slot's deleted link can match a new
+  link's address on one side only (such slots are tracked until reused); the port's allocations are zeroed like the
+  original's fake ones (a reply's bits depend on the block's leftovers).

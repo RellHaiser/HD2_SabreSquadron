@@ -1043,7 +1043,9 @@ void TestServerKeyChecks()
     // None: 5.
     CHECK(Server(0xFFFF000E, &c) == -1 && Reply(c) == 5 && net.m_players.size() == 2 &&
           net.m_players[1].connection == 0 && net.m_players[1].name[0] == 0);
-    // Another address's, another name's, then a pending one of this name; then the good one: kept.
+    // Another address's, another name's, then a pending one of this name before the good one: refused (5: the first
+    // check of that name and address that is neither good nor in use decides, as the original); without it the good
+    // one is kept.
     S_KeyQuery &other = net.m_keyQueries[3];
     other.address = 0x0402010A;
     std::strcpy(other.name, "Eve2");
@@ -1060,6 +1062,9 @@ void TestServerKeyChecks()
     good.address = 0x0302010A;
     std::strcpy(good.name, "Eve2");
     good.state = KEY_GOOD;
+    CHECK(Server(0xFFFF000E, &c) == -1 && Reply(c) == 5 && good.state == KEY_GOOD && pending.state == KEY_ASKING);
+    std::strcpy(pending.name, "Nobody");
+    net.m_players.resize(1);
     CHECK(Server(0xFFFF000E, &c) == 0 && Reply(c) == 1 && c.playerContext == reinterpret_cast<void *>(1));
     CHECK(good.state == KEY_KEPT && net.m_players[1].keyQuery == 40 && pending.state == KEY_ASKING &&
           other.state == KEY_GOOD && wrongName.state == KEY_GOOD && net.m_players[1].connection == -1);
@@ -1070,8 +1075,9 @@ void TestServerKeyChecks()
     good.state = KEY_IN_USE;
     CHECK(Server(0xFFFF000E, &c) == -1 && Reply(c) == 6 && net.m_players[1].connection == 0 &&
           net.m_players[1].name[0] == 0);
-    // The last check (99) counts.
+    // The last check (99) counts (the one before it not of that name any more).
     good.state = KEY_FREE;
+    std::strcpy(good.name, "Nobody");
     S_KeyQuery &last = net.m_keyQueries[99];
     last.address = 0x0302010A;
     std::strcpy(last.name, "Eve2");

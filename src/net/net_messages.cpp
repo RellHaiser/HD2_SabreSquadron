@@ -102,7 +102,8 @@ void ClearSlot(S_NetPlayerState &player)
     player.name[0] = 0;
 }
 
-// The direction a frame's z axis gives, normalised as the game's inline copies (the sum's order given).
+// The direction a frame's z axis gives, normalised as the game's inline copies (the sum's order given: the players'
+// places (game message 5) add x, y, z; the whole game's (0x15) y and z, then x).
 S_vector Unit(float x, float y, float z, bool zFirst)
 {
     const float sq = zFirst ? (z * z + y * y) + x * x : (x * x + y * y) + z * z;
@@ -478,7 +479,8 @@ long __stdcall C_NetGame::HandleServerMessage(C_NetGame *net, void *, uint32_t t
                 *reply = static_cast<uint8_t>((net->m_transport->m_session & 0xFF) << 7 | slot);
                 return 0;
             }
-            // (Not checked yet or refused: the next one looked at.)
+            // (Not checked yet or refused: a bad key, as the original; the checks after it are not looked at.)
+            break;
         }
         ClearSlot(player);
         *reply = NET_JOIN_BAD_CD_KEY;
@@ -621,7 +623,7 @@ void C_GameApp::SendGameMessage(int type, int to, intptr_t a, int b, bool reliab
             if (count != 0) {
                 msg->WriteBits(static_cast<uint32_t>(count), 32);
                 for (int i = count - 1; i >= 0; --i)
-                    WritePlace(msg, players[i].human, true);
+                    WritePlace(msg, players[i].human, false);
             }
             g_netGame.UnlockPlayers();
             break;
@@ -699,7 +701,7 @@ void C_GameApp::SendGameMessage(int type, int to, intptr_t a, int b, bool reliab
                     player.stats.Write(msg);
                     if (human == -1)
                         continue;
-                    WritePlace(msg, player.human, false);
+                    WritePlace(msg, player.human, true);
                     S_SoldierState state;
                     state.profileIndex = -1;
                     state.unknown34 = -1;
