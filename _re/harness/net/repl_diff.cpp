@@ -864,6 +864,13 @@ void Call()
         const bool release = P(0.5), outgoing = P(0.5), force = P(0.3);
         if (!ClearsAll(PObj(i), release, outgoing, force) || SharedMessages(i, outgoing))
             return;
+        if (force) {
+            // Branch net-forwarded-messages: a forced clear keeps a message still held elsewhere (the original
+            // deletes it under its holder; net/fwd_test.cpp tests the branch's way).
+            for (const C_NetObjectMessage *m : outgoing ? PObj(i)->m_outgoing : PObj(i)->m_received)
+                if (m->refCount >= 2)
+                    return;
+        }
         Run("ClearMessages " + N(i) + " " + N(release) + N(outgoing) + N(force),
             [&] { PObj(i)->ClearMessages(release, outgoing, force); return 0; },
             [&] { reinterpret_cast<void(THISCALL *)(void *, bool, bool, bool)>(O_O_CLEAR)(OObj(i), release, outgoing, force); return 0; });
@@ -1242,11 +1249,30 @@ void Call()
             G<uint8_t>(O_SERVER) = g_netServerSide;
         }
         g_clock += I(0, 50);
+        // Branch net-forwarded-messages: the local object's messages read are dropped by a forced clear, which keeps
+        // one still held (the original deletes it under its holder): none held elsewhere, and the local object not
+        // forwarding during the read (on both sides, put back after it).
+        bool localHeld = false;
+        for (const C_NetObjectMessage *m : g_p->m_local.m_received)
+            localHeld = localHeld || m->refCount >= 2;
+        if (localHeld) {
+            pm->Attach(nullptr, 0);
+            pm->~C_NetMessage();
+            OF<uint32_t *>(oms, 4) = nullptr;
+            break;
+        }
+        const bool localForward = g_p->m_local.m_forward;
+        uint8_t &oLocalForward = OF<uint8_t>(static_cast<uint8_t *>(g_o) + 0x30, 0x40);
+        const uint8_t oLocalForwardWas = oLocalForward;
+        g_p->m_local.m_forward = false;
+        oLocalForward = 0;
         Run("Read " + Hex(forwardTo) + " " + N(readFromClient), [&] { g_p->Read(pm, forwardTo, readFromClient); return 0; },
             [&] {
                 reinterpret_cast<void(THISCALL *)(void *, void *, uint32_t, bool)>(O_R_READ)(g_o, oms, forwardTo, readFromClient);
                 return 0;
             });
+        g_p->m_local.m_forward = localForward;
+        oLocalForward = oLocalForwardWas;
         Check(pm->BitPosition() == OF<uint32_t>(oms, 8) * 32 + OF<uint32_t>(oms, 0xC), "the bits read");
         pm->Attach(nullptr, 0);
         pm->~C_NetMessage();

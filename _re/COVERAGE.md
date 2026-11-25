@@ -6447,8 +6447,11 @@ came from. From this part on the network code is compared with the original exec
   - ClearMessages without releasing a message still held loops for ever (the port's Fix moves on; not given).
   - A server's forwarded message is in both its object's queues (received and to send): clearing one queue with
     force deletes it and leaves the other's pointer dangling. ResetReplication clears both with force: a message
-    the server forwarded and had not yet sent is deleted twice, in both programs (not given; noted for a fix on a
-    branch).
+    the server forwarded and had not yet sent is deleted twice, in both programs (not given). Fixed on branch
+    net-forwarded-messages: a forced clear takes the message off its queue and deletes it when no queue holds it
+    (suite net.fwd, `net/fwd_test.cpp`: 32 checks; main's ClearMessages fails 9 of them, deleting messages twice). On the branch net.repl keeps
+    its comparison off the changed cases: no forced clear of a queue with a message held elsewhere (the test's
+    "held elsewhere too"), and the local object not forwarding during a replication's Read.
   - The constructors leave the properties' padding, every vector's w, the tracks' +0x1C and the direction track's
     turn sign as the memory was (not compared).
   - The view cone reads every object's property 0 unchecked, before asking whether the object has data to send (the

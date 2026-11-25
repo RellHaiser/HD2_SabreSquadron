@@ -119,6 +119,8 @@ SUITES = [
     T("net.players", "net/build_players.bat", TMP + r"\players_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 8: the replicated objects against the original executable, net/repl_diff.cpp.)
     T("net.repl", "net/build_repl.bat", TMP + r"\repl_diff.exe", needs=("mingw", "original_exe")),
+    # (Branch net-forwarded-messages: forwarded object messages cleared by force, deleted once; net/fwd_test.cpp.)
+    T("net.fwd", "net/build_fwd.bat", TMP + r"\fwd_test.exe", needs=("mingw",), summary=r"fwd: (\d+) checks, (\d+) failures"),
     # (Net part 9: the messages against the original executable, net/msgs_diff.cpp.)
     T("net.msgs", "net/build_msgs.bat", TMP + r"\msgs_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 10: the game commands against the original executable, net/cmds_diff.cpp.)

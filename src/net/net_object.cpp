@@ -335,7 +335,17 @@ void C_NetObject::ClearMessages(bool release, bool outgoing, bool force)
         C_NetObjectMessage *msg = *it;
         if (release)
             --msg->refCount;
-        if (force || msg->refCount < 1) {
+        if (force) {
+            // Branch net-forwarded-messages (not faithful): the original deletes every message it clears by force,
+            // but a server's forwarded message is in both its object's queues (received and to send), so the other
+            // queue kept a dangling pointer and ResetReplication, clearing both by force, deleted it twice. Taken
+            // off this queue, its reference dropped (released or not); deleted when no queue holds it.
+            if (!release)
+                --msg->refCount;
+            if (msg->refCount < 1)
+                delete msg;
+            it = queue.erase(it);
+        } else if (msg->refCount < 1) {
             delete msg;
             it = queue.erase(it);
         } else if (!release) {
