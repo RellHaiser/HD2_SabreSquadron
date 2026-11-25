@@ -6869,3 +6869,46 @@ came from. From this part on the network code is compared with the original exec
   mutants all survived the first run (it was never rebuilt): they run without MUT_WRAPPER; the labels passed from a
   Python print through Bash kept a carriage return and matched nothing.
 - **Not tested (net):** `net_autorestart.cpp` (the dedicated server's only).
+
+## Mission loader part 1 (the mission's loading, `mission_loader.cpp`, 2026-11-25)
+
+- **The build:** `script/build_ml.bat` (`script/ml_diff.cpp`, suite `mission.loader`), new. It includes `cmd_diff.cpp` for
+  its world, fakes and call logger; the loader's own calls go through `ml_calls.s` / `ml_calls.inc` (`gen_cmd_calls.py
+  ml`, the generator's table grown by the loader's calls; IImage's and ISND_driver's slots now read too).
+  `resource_cache.cpp` is linked: the model, sound, shadow and version model caches run on both sides (the original
+  inlines their OpenInto and Clear in the loader), the original's built by its static initialisers' constructors.
+  The original's loader is built by its maps' constructors (0x006cb5d0, 0x006cb430); its frame map (an MSVC 6 tree)
+  walked for the comparison. LoadMission's copy protection (its two blocks) is jumped over in the original's copy.
+- **The cases:** each case picks a mission: one of the game's (H:\HD2_Unpacked\Missions: all 81 once, then 5 % of
+  the random cases; Libye1_mp left out, see below) or one made for the case (scene2.bin, actors.bin, sounds.bin,
+  check2.bin or check.bin: objects of every kind with their own entries, the shifting textures, actors, the camera's
+  settings, the shadows, lightmap groups, music, unknown entries, cut-short headers at a file's end, an empty
+  scene2.bin). The world is cmd_diff's plus frames named as the mission's objects (their types from their entries,
+  some missing, some under others, the lights in sectors already) and the scene's three sectors and its camera (or
+  none). Then on each side: Begin, LoadScene (the scene's Open reporting progress through the loader's callback),
+  LoadScene2, LoadActors, LoadSounds, LoadCheckpoints, or C_game::LoadMission, in each role. Compared: the results,
+  every call into the game and the engine (the sector's environment vectors, the occluders' and areas' meshes by
+  their contents), the loader's names (the frame map), the game's fields, the car scene, the particles' scene, the
+  shifting textures' entries, the world's frames (names, types, links, the scene's, the dummies' boxes, the lens
+  flares' and projectors' fields), the scene's +0x210, the files opened and closed.
+- **The tests:** 3,000 cases and the 81 missions (about 3.3 million calls, 35 s; seeds 1, 2, 4). **Coverage:** every
+  line but the shifting textures' length clamp (the port's fix) and the camera entry's unreadable header (both
+  programs loop for ever).
+- **Port bugs found:** none.
+- **The original's weaknesses (kept, or the port's fixes):**
+  - Names are used as printf formats (the frames' names, the sectors', the shifting textures' and the loader's): the
+    port takes them as text (its fix). The game's own data has one: Libye1_mp's "AMB%BACK" is filed by the original
+    under a mangled name and not found by its own name afterwards (left out of the test).
+  - A shifting texture's name over 255 bytes is written past the original's buffer (the port's fix keeps it).
+  - Entries read short keep the original's stack values (the port's zeros); the shadow parameters' colour w and their
+    fourth unread word (+0x0C, +0x1C) are never set (left out of the comparison).
+  - The camera entry of an object skips a header that does not read and loops for ever; an actor's part of another
+    kind is not left (the next parts are read inside it; a file of them overflows the original's chunk stack, a
+    crash); neither is given.
+  - The projector's SetOrthogonal is passed the byte with the original's stack above it (the low byte compared).
+- **Harness lessons (my mistakes):** the shared Compare skips a case whose original wrote past a block, silently:
+  SetMission's static string, released by Begin, made every case skip and the first runs (and a mutation run) compare
+  nothing; the test now builds the original's strings on its heap and fails on an overrun. The frames' type masks are
+  1 << (type - 1) (my EnumFrames answers took 1 << type; mod_diff's does too). A light's entry sizes must follow the
+  scene's version only where the version is certain. The made world shared the cut-short tails' names, so they made
+  no frames of their own at first; typed objects took existing names (no frame made) until they had fresh ones.

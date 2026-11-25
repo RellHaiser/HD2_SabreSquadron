@@ -274,10 +274,45 @@ ORIG = {
         ("0x006f8060", "thiscall", "p"),
     'C_Team::GetSelectedMember() const': ("0x0045d160", "thiscall", "p"),
     'C_Vehicle::GetCameraOffset(S_vector*) const': ("0x004f3630", "thiscall", "v"),
+    # (Mission loader part 1: the loader's calls.)
+    'InitCarSurfaces()': ("0x004d57a0", "stdcall", "b"),
+    'LoadTyres()': ("0x004d6900", "stdcall", "b"),
+    'LoadCheckpointNetwork(C_chunk*, C_CheckpointNetwork*)': ("0x00523c00", "stdcall", "i"),
+    'EnsureHumanAnimTablesLoaded()': ("0x007837b0", "stdcall", "b"),
+    'C_Checkpoints::Clear()': ("0x00523e10", "thiscall", "v"),
+    # (A namespace's function: the port's cdecl, the original's __fastcall: ECX the flag.)
+    'ModuleManager::BroadcastLoadMissionData(bool)': ("0x0048dbf0", "fastcall", "v"),
+    'C_ActorsModule::CreateActor(E_ActorType, I3D_frame*, bool, int)': ("0x004759c0", "thiscall", "p"),
+    'C_ActorsModule::DestroyActor(C_Actor*, bool)': ("0x00475c50", "thiscall", "v"),
+    'C_LoaderScreen::SetProgress(int, float)': ("0x006c9920", "thiscall", "v"),
+    'C_LoaderScreen::FinishLoading()': ("0x006c9900", "thiscall", "v"),
+    'C_LoaderScreen::Start(char const*, bool, bool, bool, C_MissionDef const*)': ("0x006c9990", "thiscall", "v"),
+    'C_CollisionWorld::Load(char const*, bool)': ("0x006ee940", "thiscall", "v"),
+    'C_ParticlesModule::LoadStaticEmitters()': ("0x00445d90", "thiscall", "v"),
+    'C_LightMapGroupsModule::LoadGroups(C_chunk*)': ("0x0048cd70", "thiscall", "b"),
+    'C_game::FreeMission()': ("0x0069a6a0", "thiscall", "v"),
+    # (Junkers part 1: the bomber's calls.)
+    'C_Actor::C_Actor(E_ActorType)': ("0x00610070", "thiscall", "v"),
+    'C_Actor::~C_Actor()': ("0x00610170", "thiscall", "v"),
+    'C_Actor::Activate(bool)': ("0x00610240", "thiscall", "v"),
+    'C_Actor::Deactivate(bool)': ("0x00610510", "thiscall", "v"),
+    'C_Actor::SaveGame(C_chunk&)': ("0x00610780", "thiscall", "b"),
+    'C_Actor::LoadGame(C_chunk&)': ("0x00610a80", "thiscall", "b"),
+    'C_Actor::SetFrame(I3D_frame*)': ("0x00610200", "thiscall", "b"),
+    'CollisionRayTest(S_vector const&, S_vector const&, S_vector*, S_vector*, unsigned int, unsigned int)':
+        ("0x00718770", "stdcall", "p"),
+    'C_CollisionWorld::RayTestStatic(S_vector const&, S_vector const&, S_vector*, S_vector*, unsigned int) const':
+        ("0x006f6c40", "thiscall", "p"),
+    'C_CollisionWorld::AddVolume(S_CollisionVolume*)': ("0x006ef7b0", "thiscall", "v"),
+    'C_CollisionWorld::RemoveVolume(S_CollisionVolume*)': ("0x006ef9b0", "thiscall", "v"),
+    'C_CollisionWorld::MoveVolume(S_CollisionVolume*)': ("0x006efbc0", "thiscall", "v"),
+    'C_ParticlesModule::CreateAt(int, S_vector const&, S_vector const&, I3D_frame*, bool, bool)':
+        ("0x00445150", "thiscall", "i"),
 }
 # Static members (mangled like members: no `this`, the port's cdecl).
 STATIC_MEMBERS = {'C_HumanMovement::PlayDubbing(int, I3D_frame*, C_Human*, float, float)',
-                  'C_HumanMovement::SetCameraUnderWater(bool)'}
+                  'C_HumanMovement::SetCameraUnderWater(bool)',
+                  'ModuleManager::BroadcastLoadMissionData(bool)'}
 
 
 def kind(t):
@@ -334,7 +369,8 @@ def engine_slots():
     """Every I3DMETHOD of i3d.h and of igraph.h's IGraph: (class, base, offset, name, kinds, answer)."""
     text = open(os.path.join(SRC, "ls3d", "i3d.h"), encoding="latin-1").read()
     graph = open(os.path.join(SRC, "ls3d", "igraph.h"), encoding="latin-1").read()
-    text += "\n" + graph[graph.index("class IGraph {"):graph.index("\n};", graph.index("class IGraph {")) + 3]
+    for cls in ("class IGraph {", "class IImage {", "class ISND_driver {"):
+        text += "\n" + graph[graph.index(cls):graph.index("\n};", graph.index(cls)) + 3]
     slots, bases = [], {}
     cls = None
     lines = text.split("\n")
@@ -392,14 +428,16 @@ def engine_slots():
 # The tests: prefix -> (build script, executable, what the generated files' first line calls the calls).
 TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged calls"),
          "mod": ("build_mod.bat", "mod_diff", "the script module test's logged calls"),
-         "cam": ("build_cam.bat", "cam_diff", "the camera module test's logged calls")}
+         "cam": ("build_cam.bat", "cam_diff", "the camera module test's logged calls"),
+         "ml": ("build_ml.bat", "ml_diff", "the mission loader test's logged calls"),
+         "jk": ("build_jk.bat", "jk_diff", "the Junkers test's logged calls")}
 
 
 def main():
     env = dict(os.environ, PATH=MINGW + os.pathsep + os.environ["PATH"])
     prefix = sys.argv[1] if len(sys.argv) > 1 else "cmd"
     if prefix not in TESTS:
-        sys.exit("gen_cmd_calls: the test is cmd, mod or cam")
+        sys.exit("gen_cmd_calls: the test is cmd, mod, cam or ml")
     bat_name, exe, what = TESTS[prefix]
     bat = open(os.path.join(HERE, bat_name), encoding="latin-1").read()
     m = re.search(r"^g\+\+ (.*%s\.exe.*)$" % exe, bat, re.M)

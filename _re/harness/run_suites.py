@@ -343,6 +343,9 @@ SUITES = [
       tree_copy="script/mod_diff.exe"),
     T("camera.module", "script/build_cam.bat", TMP + r"\cam_diff.exe", needs=("mingw", "original_exe", "data"),
       tree_copy="script/cam_diff.exe"),
+    # (Mission loader part 1: the mission's loading against the original executable, script/ml_diff.cpp.)
+    T("mission.loader", "script/build_ml.bat", TMP + r"\ml_diff.exe", needs=("mingw", "original_exe", "data"),
+      tree_copy="script/ml_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
