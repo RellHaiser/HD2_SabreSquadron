@@ -6842,3 +6842,30 @@ came from. From this part on the network code is compared with the original exec
   the protocol at first (messages after a list with no end, a stream for a failed request, a new stream mid-parse,
   key lists replaced mid-parse, strings released that the test never added); the error message's pointer was
   compared after its buffer was freed; a field-list generator looped for ever; backslashes in Bash heredocs again.
+
+## Net part 14 (the network's odds and ends: `net/net_console.cpp`, `net/net_com.cpp`, 2026-11-25)
+
+- **The build:** `net/build_misc.bat` (`net/misc_diff.cpp`, suite `net.misc`; net_console.cpp included by the test,
+  its loading flag and key buffer being in an unnamed namespace). PrintLoadProgress (0x00731af0) and GetCDKey
+  (0x00732000) against the original's: each round sets both sides alike (the loading flag, the key buffer's bytes,
+  the current map's name: the original's map packed, its name's C_str at +1) and calls one of them on both. The
+  console (OnChar, MoveInputLineToHistory, AddLine; the original's getter given a made console), the texts, the
+  current map and the registry are the test's, logging; the registry is scripted (the open's and the query's results,
+  the key's handle, -1 and 0 among them, the value's type and length: empty, to 0x42 bytes, too long), never the real
+  one (the original's by its import slots 0x0080f000 / 04 / 18, the port's renamed). After each call the logs (every
+  argument), the result, the loading flag, the key buffer and the original's heap balance are compared. The GUIDs of
+  net_com.cpp are compared with the original's data at their addresses (each one read by the original's code), and
+  the voice codecs' order with StartVoiceServer's switch (0x00724520: the default's read, the jump table 0x00724704,
+  each case's GUID).
+- **The tests:** 40,000 rounds, about 172,000 checks, 0.2 s (seeds 1 to 3; HD2_MISC_QUICK: 10,000).
+  **Coverage:** every line of net_console.cpp (net_com.cpp is data).
+- **Port bugs found:** none.
+- **The original's weaknesses (kept):**
+  - GetCDKey queries the key -1 when the open fails (an invalid handle: the query fails).
+  - A key of exactly 0x40 bytes without a terminator is returned unterminated (the buffer has no room for one).
+- **Mutations:** 68 (`net/mutations/mutate_net14.py`), 12 not building; all 56 building killed (net_console.cpp 30;
+  net_com.cpp 26: each GUID's last byte changed, two codec rows swapped).
+- **Harness lessons (my mistakes):** the mutation runner in wrapper mode rebuilds only the wrapper, so net_com.cpp's
+  mutants all survived the first run (it was never rebuilt): they run without MUT_WRAPPER; the labels passed from a
+  Python print through Bash kept a carriage return and matched nothing.
+- **Not tested (net):** `net_autorestart.cpp` (the dedicated server's only).

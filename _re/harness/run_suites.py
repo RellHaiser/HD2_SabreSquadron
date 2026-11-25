@@ -141,6 +141,8 @@ SUITES = [
     T("net.qr2", "net/build_qr2.bat", TMP + r"\qr2_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 13d: GameSpy's server browser against the original executable, net/browser_diff.cpp.)
     T("net.browser", "net/build_browser.bat", TMP + r"\browser_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 14: the loading progress, the CD key and the GUIDs against the original executable, net/misc_diff.cpp.)
+    T("net.misc", "net/build_misc.bat", TMP + r"\misc_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",
