@@ -6325,3 +6325,49 @@ came from. From this part on the network code is compared with the original exec
   guard first looked only at the command line, not at the "exec" files and the console state's commands. The
   database's name "isalnum" for 0x007e69c3 hid the port bug until the original's answer for '2' was printed. Python
   heredocs with C++ `\n` again (twice): Edit or a script file written by Write from now on.
+
+## Net part 6 (the game's own console commands and their variables, `net/net_console_vars.cpp`, 2026-11-24)
+
+- **The build:** `net/build_cvar.bat` (`net/cvar_diff.cpp`, suite `net.cvar`): net_console_vars.cpp against the
+  original's ExecuteConsoleLine, ExecuteConsoleCommand, GetCheatValue and ConsoleValueInRange. What they reach is the
+  test's on both sides, each in its program's layout: the game's Print, the controls' SetMouseScale, the net game's
+  SendChat, the app's PostCommand, the profile's difficulty, the team manager's player team (GetActivePlayer,
+  HealMembers), the active player (its virtual Hit: the port's slot found from the member pointer, the original's
+  +0xD4; its net id), the items module (GiveItem; the infinite ammo flag, the original's byte 0x0098b02c), the item
+  definitions (virtual GetBehaviour and GetAmmoItemId; the original's table 0x0098b030) and the command processor's
+  Execute. The original's name lookup (a std::map at 0x0097b9cc) is made by its own static initialisers (0x007200c0,
+  0x00720240), its std::_Lockit a no-op (one thread). After each call the result, the logs, the variables (GetCheatValue
+  on both) and the infinite ammo flag are compared.
+- **The tests:** 40,000 rounds, each a random world (the role, a local game more often; the difficulty; a player or
+  none, its net id the local slot or not; the definitions of the given items' types, their ammo ids (none, 0, any) and
+  kinds (thrown, a sticky charge, others); the answers) and up to 6 calls: lines (".text", "x,text", one letter, a table
+  entry with its argument: numbers, hex, octal, quoted, a lone quote, words, every given item's name in any case, long
+  texts; spaces before and after; unknown words and lines of 500 characters or so for the command processor), the
+  commands alone, and ConsoleValueInRange on random ranges (its grammar: '!', '&', ',', n, n:m, <, <=, >, >=, %, '*';
+  numbers of one, two and three digits, leading zeros, signs; or random characters) and numbers from -130 to 130.
+  About 360,000 checks, 9 s (HD2_CVAR_QUICK: 10,000).
+- **Coverage:** every line of net_console_vars.cpp but two the table cannot reach (a text variable's display; the
+  switch's default: every entry is handled).
+- **Port bug found and fixed:** the range language's numbers. The original's loop adds the first digit again for every
+  digit after it (its character is loaded once, before the loop): "12" is 11, "123" 111, "01" 0. The port read them as
+  written; it now does as the original (the table's ranges are "0,1": no visible effect in the game). The old unit
+  test (net.console) expected the written values and was changed.
+- **The original's weaknesses (kept):**
+  - A comparison mark with no number after it ('<' at the end, "<=x") compares against an undefined value: the
+    original's token reader sets only the kind at the end, the value staying what the caller's stack temporary held.
+    The port takes 0; the test gives no such range.
+  - '%' with no number, or 0, after it divides by zero (both programs; none given).
+  - say / sayteam copy at most 100 characters without ending a longer copy (the port's Fix ends it; the test compares
+    the first 100).
+  - An empty line's second character is read (the game's chat buffer has zeros there; the test pads the lines).
+- **Mutations:** 295 mutants (`net/mutations/mutate_net6.py`), 35 not building; 235 of the 260 building killed in the
+  quick run, 236 with the full one (78 text, a rare item name, is killed by the full run). The first run left 44: every
+  given item's name, an ammo id of 0 and numbers near the ranges' multi-digit values were missing. The 24 left:
+  equivalent (16: the unused takesValue field and result codes, the '>=' mark's own number, value / sign for
+  value * sign, initial values always replaced, sscanf's "%ix", the end token's value and cursor in the ranges the test
+  gives), unreachable (2: the text variable's display), the chat copy's size and end (5: the original's characters past
+  100 are undefined), an empty line's second character (1: zeros in the buffer).
+- **Harness lessons (my mistakes):** I first read the original's end-of-range token as keeping the last token's value
+  (it writes into a caller's stack temporary, undefined); the original's std::map construction crashed in std::_Lockit
+  (a critical section its CRT start-up makes); the range test's numbers (-7 to 9) could not tell multi-digit parses
+  apart until widened.

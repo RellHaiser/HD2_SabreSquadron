@@ -680,8 +680,10 @@ void TestRanges()
 {
     CHECK(Range(5, "*") == 1 && Range(-5, " * ") == 1);
     CHECK(Range(1, "0,1") == 1 && Range(0, "0,1") == 1 && Range(2, "0,1") == 0 && Range(-1, "0,1") == 0);
-    CHECK(Range(12, " 12 ") == 1 && Range(123, "123") == 1 && Range(13, "12") == 0 && Range(9, "9") == 1 && Range(0, "0") == 1);
-    CHECK(Range(-12, "-12") == 1 && Range(12, "-12") == 0);
+    // (As the original: a number's later digits repeat its first, "12" is 11, "123" 111.)
+    CHECK(Range(11, " 12 ") == 1 && Range(12, " 12 ") == 0 && Range(111, "123") == 1 && Range(13, "12") == 0 && Range(9, "9") == 1 &&
+          Range(0, "0") == 1);
+    CHECK(Range(-11, "-12") == 1 && Range(-12, "-12") == 0 && Range(12, "-12") == 0);
     CHECK(Range(3, "1:5") == 1 && Range(1, "1:5") == 1 && Range(5, "1:5") == 1 && Range(0, "1:5") == 0 && Range(6, "1:5") == 0);
     CHECK(Range(3, "1:") == -1 && Range(3, "1:*") == -1 && Range(3, "") == -1 && Range(3, "x") == -1 && Range(3, ",") == -1);
     CHECK(Range(3, "<4") == 1 && Range(4, "<4") == 0 && Range(4, "<=4") == 1 && Range(5, "<=4") == 0);

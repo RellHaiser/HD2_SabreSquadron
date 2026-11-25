@@ -99,6 +99,10 @@ struct S_RangeToken {
 const char *g_rangeCursor;                              // 0x0097b9f0
 S_RangeToken g_rangeToken;                              // 0x0097b9e8
 
+// The end, or a character it does not know. (The original sets only the kind, the value staying what its caller's
+// stack temporary held: a comparison mark with no number after it compares against that, undefined; 0 here.)
+S_RangeToken End() { return {0, RANGE_END}; }
+
 S_RangeToken ReadRangeToken()                           // 0x00722010
 {
     while (*g_rangeCursor == ' ' || *g_rangeCursor == '\t')
@@ -111,18 +115,23 @@ S_RangeToken ReadRangeToken()                           // 0x00722010
         c = *g_rangeCursor++;
         sign = -1;
         if (c < '0' || c > '9')
-            return {0, RANGE_END};
+            return End();
     }
     if (c >= '0' && c <= '9') {
-        int value = c - '0';
-        while (*g_rangeCursor >= '0' && *g_rangeCursor <= '9')
-            value = value * 10 + (*g_rangeCursor++ - '0');
+        // As the original: every digit after the first adds the first one again (its loop keeps the first character:
+        // "10" is 11, "01" is 0). The table's ranges are single digits.
+        const int digit = c - '0';
+        int value = digit;
+        while (*g_rangeCursor >= '0' && *g_rangeCursor <= '9') {
+            ++g_rangeCursor;
+            value = value * 10 + digit;
+        }
         return {value * sign, RANGE_NUMBER};
     }
     switch (c) {
     case 0:
         --g_rangeCursor;
-        return {0, RANGE_END};
+        return End();
     case '%':
     case '&':
     case '*':
@@ -142,7 +151,7 @@ S_RangeToken ReadRangeToken()                           // 0x00722010
         }
         return {'>', RANGE_MARK};
     default:
-        return {0, RANGE_END};
+        return End();
     }
 }
 
