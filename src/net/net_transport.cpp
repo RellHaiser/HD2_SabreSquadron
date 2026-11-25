@@ -185,7 +185,9 @@ void C_NetConnection::HandleDatagram(uint32_t type, void *data, int size, NetPac
 void C_NetConnection::ReadPackets(void *data, int size)
 {
     C_NetPacketList list;
-    C_BitStream stream(static_cast<uint32_t *>(data), static_cast<uint32_t>(size));
+    // (Branch net-robust-datagrams: the capacity in bits, which the packet list's reader now checks against; the
+    // original gives the byte count, which nothing checked.)
+    C_BitStream stream(static_cast<uint32_t *>(data), static_cast<uint32_t>(size) * 8);
     EnterCriticalSection(&m_lock);
     list.Read(&stream);
     for (C_NetChannel *channel : m_channels)

@@ -141,6 +141,8 @@ SUITES = [
     T("net.qr2", "net/build_qr2.bat", TMP + r"\qr2_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 13d: GameSpy's server browser against the original executable, net/browser_diff.cpp.)
     T("net.browser", "net/build_browser.bat", TMP + r"\browser_diff.exe", needs=("mingw", "original_exe")),
+    # (Branch net-robust-datagrams: the datagrams that crash the original, dropped; net/robust_test.cpp.)
+    T("net.robust", "net/build_robust.bat", TMP + r"\robust_test.exe", summary=r"robust: (\d+) checks, (\d+) failures"),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",

@@ -377,6 +377,18 @@ void C_NetPacketList::WriteBody(C_BitStream *stream)
 void C_NetPacketList::ReadBody(C_BitStream *stream)
 {
     for (uint32_t n = stream->ReadBits(8); n != 0; --n) {
+        // (Branch net-robust-datagrams: the original reads each packet's 16-bit size sign-extended and copies that many
+        // bytes whatever is left: a size of 32 KB or more copies about 4 GB into a 1000-byte buffer, one past the
+        // datagram reads beyond it. A packet whose header or data would run past the stream's capacity, or of a negative
+        // size, ends the list.)
+        const uint32_t at = stream->BitPosition();
+        if (at + 48 > stream->CapacityBits())
+            break;
+        stream->ReadBits(2);
+        const int size = static_cast<int16_t>(stream->ReadBits(16));
+        stream->SetBitPosition(at);
+        if (size < 0 || at + 48 + static_cast<uint32_t>(size) * 8 > stream->CapacityBits())
+            break;
         C_NetPacket *packet = g_netPool.AllocPacket();
         packet->Read(stream);
         m_packets.push_back(packet);
