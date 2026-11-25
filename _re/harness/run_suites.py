@@ -117,6 +117,8 @@ SUITES = [
     T("net.cvar", "net/build_cvar.bat", TMP + r"\cvar_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 7: the players, teams and scores against the original executable, net/players_diff.cpp.)
     T("net.players", "net/build_players.bat", TMP + r"\players_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 8: the replicated objects against the original executable, net/repl_diff.cpp.)
+    T("net.repl", "net/build_repl.bat", TMP + r"\repl_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",

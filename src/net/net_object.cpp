@@ -338,10 +338,12 @@ void C_NetObject::ClearMessages(bool release, bool outgoing, bool force)
         if (force || msg->refCount < 1) {
             delete msg;
             it = queue.erase(it);
-        } else {
+        } else if (!release) {
             // (Fix: the original does not move on here and loops for ever.)
             ++it;
         }
+        // (Released and kept: the original looks at it again, releasing it again until it goes. Every caller
+        // forces.)
     }
 }
 

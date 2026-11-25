@@ -244,8 +244,10 @@ void TestObjectQueues()
         o.ClearMessages(false, false, false);
         CHECK(o.m_received.size() == 2 && T_Message::alive == alive0 + 3);
         o.ClearMessages(true, false, false);
-        // a: 0 deleted; b: 1 kept.
-        CHECK(o.m_received.size() == 1 && o.m_received.front() == b && b->refCount == 1 && T_Message::alive == alive0 + 2);
+        // a: 0 deleted; b: 1, looked at again (as the original: it does not move on), released again: deleted too, its
+        // pointer left in the outgoing queue (dropped here).
+        CHECK(o.m_received.empty() && T_Message::alive == alive0 + 1);
+        o.m_outgoing.remove(b);
         o.ClearMessages(false, true, true);
         CHECK(o.m_outgoing.empty() && T_Message::alive == alive0);
         o.m_received.clear();

@@ -6418,3 +6418,53 @@ came from. From this part on the network code is compared with the original exec
   pings (players' and teams', clamped) before the original's copy was made: they are now put back; the original's
   bit stream keeps its word index at +8 (I first read +0xC); I lost the first mutation run's survivor list by keeping
   only its last 15 lines (rerun with the whole output kept).
+
+## Net part 8 (the replicated objects, `net/net_object.cpp`, 2026-11-24)
+
+- **The build:** `net/build_repl.bat` (`net/repl_diff.cpp`, `net/repl_fakes.h`, suite `net.repl`): net_object.cpp
+  against the original's properties, objects and replication. Each round makes a replication in each program (the
+  original's by its constructor; its objects and properties by its own code), shares the test's quantisations (the
+  direction tracks' are each program's globals), gives both the same factories by id (state readers and message
+  factories, logging, in each program's convention: the original passes the id in ECX) and runs up to 40 calls:
+  objects made, found, removed, deleted; properties added, their flags, fields, lag, value, rate, net value,
+  direction; messages queued (the test's, in each program's layout: the original's vtable a copy of its own with the
+  test's Write, Read and deleting destructor), popped, cleared; the send masks, the live and forwarding flags, the
+  state handlers and factories; Update (the performance counter faked on both: the original's import slots, the
+  port's through `-include repl_fakes.h`), Refresh, SetLag, the quantisations, the epochs, the view cone (the viewer's
+  place and facing, objects around it and a hair off it); Write for a player (the bits compared) and Read of what it
+  wrote, when every object written finds a reader of the same format (the objects' tracks' own flags, the
+  quantisations, the factories and state handlers; the reader's side changed first at times: the epoch read, an
+  object not live, one removed, the send masks), from a few bits in. After each call the logs, the results and the
+  state are compared: every object's fields, its properties' bytes (the original's layout: the port's matches it), its
+  queues (the messages by serial number and fields), the replication's fields and the local object.
+- **The tests:** 20,000 rounds, about 1.7 million checks, 5 s (HD2_REPL_QUICK: 5,000).
+- **Coverage:** every line of net_object.cpp.
+- **Port bug found and fixed:** ClearMessages releasing a message another queue still holds: the original looks at
+  it again (it does not move on), releasing it until it goes; the port released it once and kept it. The port now
+  does as the original, keeping its Fix where the original would loop for ever (not releasing). Every caller in the
+  game forces the clear: no effect in the game.
+- **The original's weaknesses (kept):**
+  - ClearMessages without releasing a message still held loops for ever (the port's Fix moves on; not given).
+  - A server's forwarded message is in both its object's queues (received and to send): clearing one queue with
+    force deletes it and leaves the other's pointer dangling. ResetReplication clears both with force: a message
+    the server forwarded and had not yet sent is deleted twice, in both programs (not given; noted for a fix on a
+    branch).
+  - The constructors leave the properties' padding, every vector's w, the tracks' +0x1C and the direction track's
+    turn sign as the memory was (not compared).
+  - The view cone reads every object's property 0 unchecked, before asking whether the object has data to send (the
+    test gives every object one first).
+- **Mutations:** 406 mutants (`net/mutations/mutate_net8.py`, made again after the ClearMessages fix), 20 not
+  building; 326 of the 386 building killed at first, 348 after the inputs were widened (the viewer's place and
+  facing, read-backs from a few bits in, the reader's side changed, rates and net values, a 0.4 s silence exactly,
+  the state handlers mostly in pairs). The 38 left: equivalent (12: the initial flags overwritten, the direction
+  track's empty quantisation setters, GetCurrent and Refresh results dropped, the move-target flag already set at a
+  0.4 s silence, q[4], the sign of a nonzero tiny component at >= or >), exact float boundaries not met (5: a square
+  of 1 or 1e-8 exactly, a dot product equal to the cosine), ClearMessages where the original would loop for ever
+  (3), memory only (7: deletions not observable here, Reset's clear only in the constructor, the global's definition
+  this test does not read), the scratch object's property reads (10: the read-backs reach the scratch object only
+  without properties written), past the vector (1: RemoveObject's `<=`).
+- **Harness lessons (my mistakes):** I did not construct the original's message stream at first; a write read back
+  went astray until the format check took the tracks' own flags (a new property's tracks keep theirs until a field
+  is set), the 9-bit ids (-2 reads as 510) and the objects the read makes; the view cone reads every object's property
+  0 before the data check (I checked only the objects with data); my end-of-round cleanup cleared both queues with
+  force and deleted forwarded messages twice (each message is now freed once).
