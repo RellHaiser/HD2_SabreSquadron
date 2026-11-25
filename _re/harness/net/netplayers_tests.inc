@@ -496,7 +496,7 @@ void TestTeams()
     g_log.clear();
     net.PrintTeams();
     CHECK(Logged("game print               a 1\n") && Logged("game print               d 0\n") &&
-          Logged("colored 200 Kills  Axis:  4 Allied:  3\n") && Logged("colored 200 Score  Axis:  0 Allied:  4\n") &&
+          Logged("colored 200 Kills  Axis:  4 Alied:  3\n") && Logged("colored 200 Score  Axis:  0 Alied:  4\n") &&
           g_log.size() == 4);
     g_humanTeams.clear();
 }

@@ -6371,3 +6371,50 @@ came from. From this part on the network code is compared with the original exec
   (it writes into a caller's stack temporary, undefined); the original's std::map construction crashed in std::_Lockit
   (a critical section its CRT start-up makes); the range test's numbers (-7 to 9) could not tell multi-digit parses
   apart until widened.
+
+## Net part 7 (the network game's players, teams and scores, `net/net_players.cpp`, 2026-11-24)
+
+- **The build:** `net/build_players.bat` (`net/players_diff.cpp`, `net/players_globals.cpp`, suite `net.players`):
+  net_players.cpp against the original's 37 functions of the file (OnPlayerKilled, the kicks, the ranks, the scores
+  and their message, the team counts, BalanceTeams, TeamsBalanced, IsTeamAlive, IsPlayerAdmin, CanPlayerRespawn,
+  FillServerStatus, PrintTeams, FlipSessionParity, ResetReplication, GetConnectionState, SetLevelBounds, the
+  quantisation table's constructor). The original's net game is its own global (0x0097d070), its players a block of
+  0xC4-byte states with the same bytes as the port's (the humans and connections each side's own). What they reach is
+  the test's on both sides, logging alike: the players' and queue's locks (the original's EnterCriticalSection /
+  LeaveCriticalSection by its import slots, the port's C_NetLock), the game (Print, PrintColored, PrintMessage,
+  SetRoundTime; its times), the app (SendGameMessage, PrintMessage), the texts, the actors by index, the humans
+  (GetControllerType, GetTeam, the controller's IsSpectating and SendSoldierClass, the uniform's container, item and
+  definition), DirectPlay's GetConnectionInfo (one COM object for both), the replication (its quantisation setters,
+  its objects' ClearMessages), the pool's FreeBuffer and the perf clock. The original's quantisation table is made by
+  its constructor (a static's, never run) and compared with the port's.
+- **The tests:** 30,000 rounds, each a random world (the role, 6 to 12 players with random bytes and names (freed
+  slots with leftovers after the first character, one letter, 51 letters), humans or none, teams 0 to 2, stats with
+  the 11-bit score's edges, lives up to 200 and around 127; the rules; the game or none; 16 humans' answers; the
+  actors; the team sums; the connections' sessions; the queues; the connection's age around 600 ms) and up to 8
+  calls; the scores' message written by both (the bits compared) or read by both (a message the port writes in a
+  server's role, changed a little, slots past the players). About 467,000 checks, 8 s (HD2_PLAYERS_QUICK: 8,000).
+- **Coverage:** every line of net_players.cpp but the table's destructor (a static's, at exit) and its growth (the
+  game sets entries 0 to 3 of 10).
+- **Port bug found and fixed:** PrintTeams's texts: the original prints "Alied" (twice), the port "Allied". It is
+  not called, and C_game::Print and PrintColored are empty in the release build: no effect in the game.
+- **The original's weaknesses (kept):**
+  - A non-player killed in co-op by the slot one past the players: the original's `<=` reads past them (the port's
+    Fix stops it; not given).
+  - The quantisation table's growth loses the new block (the copy's cursor is kept, the old block freed and still
+    used): unreachable, the game sets entries 0 to 3 of 10.
+  - The quantisations' w components and padding words come from the stack (the callers' arrays have three floats;
+    the table's entries are copies of a stack temporary): not compared.
+  - IsPlayerSpectating calls the controller of a player's or remote human unchecked (both programs; the game always
+    gives them one: not given).
+  - The scores' message writes and reads the co-op lives of slots 0 to 5 unchecked (both; the test has 6 slots or
+    more).
+- **Mutations:** 644 mutants (`net/mutations/mutate_net7.py`), 111 not building; 486 of the 533 building killed at
+  first, 507 after the inputs above were widened (freed names with leftovers, the score's edges, lives of 127, the
+  connection's age at 601 ms, the player table's globals compared). The 26 left: equivalent (21: array sizes and a
+  buffer's, the 11-bit write's masking of a negative score, -1 against -2 for an unsigned slot check, a null actor's
+  role, BalanceTeams's early return at 0 and 1), unreachable (4: the table's growth), past the players (1: a slot
+  equal to their count reads past the vector).
+- **Harness lessons (my mistakes):** building the read test's message with the port's WriteScores changed the port's
+  pings (players' and teams', clamped) before the original's copy was made: they are now put back; the original's
+  bit stream keeps its word index at +8 (I first read +0xC); I lost the first mutation run's survivor list by keeping
+  only its last 15 lines (rerun with the whole output kept).

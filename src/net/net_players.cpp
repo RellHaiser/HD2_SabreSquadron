@@ -639,9 +639,10 @@ void C_NetGame::PrintTeams()
         else
             alliedKills += player.stats[NET_STAT_KILLS];
     }
+    // (The original's texts, misspelt: "Alied".)
     const S_vector grey(200.0f, 200.0f, 200.0f);
-    GetGame()->PrintColored(grey, "Kills  Axis: %2d Allied: %2d\n", axisKills, alliedKills);
-    GetGame()->PrintColored(grey, "Score  Axis: %2.0f Allied: %2.0f\n", static_cast<double>(m_teamScores[0]),
+    GetGame()->PrintColored(grey, "Kills  Axis: %2d Alied: %2d\n", axisKills, alliedKills);
+    GetGame()->PrintColored(grey, "Score  Axis: %2.0f Alied: %2.0f\n", static_cast<double>(m_teamScores[0]),
                             static_cast<double>(m_teamScores[1]));
     m_playersLock.Leave();
 }
