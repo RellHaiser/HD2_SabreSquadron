@@ -6607,3 +6607,49 @@ came from. From this part on the network code is compared with the original exec
   arguments, qr2_shutdown takes its socket in ECX, BitsForRange takes the steps in ECX and the range on the stack (not
   ST0); the console's queue was shared, so the port popped the original's commands; the mission's flag is the game's
   +0x14 (the test wrote +0x24); comparing the level's w (the original's is its stack's).
+
+## Net part 11b (the DirectPlay session, `net/net_session.cpp`, 2026-11-25)
+
+- **The build:** `net/build_sess.bat` (`net/sess_diff.cpp`, `net/sess_diff_calls.inc`, `net/sess_fakes.h`,
+  `net/sess_globals.cpp`, suite `net.sess`): net_session.cpp (with net_game.cpp: Close, QueueOutgoing) against the
+  original's, its net game its own global made by its constructor and Init. Each round sets both alike (the role, the
+  local slot, 1 to 10 players, the rules, the profile's name and font, the versions, DirectPlay's objects, the voices,
+  the replication, the server entry, the status, the string +501C) and runs up to 8 of 34 calls: the text
+  conversions (ANSI and UTF-8 both ways), GetHostAddress, Host, HostDedicated, CreateClient, CreateAddresses,
+  EnumHosts, PingServer, PingServers, QueryServerStatus, Connect, OnConnected, the client's and server's message
+  handlers (a connection's reply, a host's answer in either layout with a status or not, a datagram, a buffer given
+  back, the session's end, others), the voice handlers, MakeReplication and its factories (by the object's id: an
+  actor of each type), DeleteReplication, the voices started and stopped, MakeVoiceBuffer, VisitPlayers,
+  UpdateVoiceTeam, TakeBandwidth, a status, its rules and a player written. COM is the test's on both sides
+  (CoCreateInstance: DirectPlay's server, client and addresses, their calls' arguments logged and results scripted,
+  failures with and without their object), and so are the voice, the replication, the transport, the key query,
+  GameSpy's reporting, the firewall, IGraph, ShowWindow, the dedicated server's process, the app, the game, the
+  humans' teams, the actors, the stats' bits, HasCjkCharacters, the server entries' reset.
+- **The tests:** 20,000 rounds, about 312,000 checks, 10 s (HD2_SESS_QUICK: 5,000 rounds).
+- **Coverage:** every line of net_session.cpp (the dedicated server's blocks are compiled out here).
+- **Port bugs found:** none.
+- **The original's weaknesses (kept; the test keeps away from them):**
+  - Host: the session's wide name has room for 52 characters on the stack before the "Creating" line, which
+    overwrites the rest before Host is called (the port's has 200).
+  - Host writes the local player's name into slot 0 after Close emptied the players (the vector's spare room).
+  - Host, no device: the device's GUID is read past an empty buffer.
+  - Connect: CreateClient's failure is not checked (the client's object used); its wide copy of the player's name has
+    room for 45 characters (a longer one overruns its stack).
+  - CreateAddresses: the addresses' creation is not checked.
+  - The client's handler: an accepted connection's reply uses the server's link unchecked; a host's answer calls the
+    search and status callbacks unchecked and reads a status's player count unbounded (misaligned data reads on).
+  - HostDedicated: the app's state is used unchecked.
+- **Mutations:** 853 mutants (`net/mutations/mutate_net11b.py`), 109 not building; 684 of the 744 building killed
+  at first, 693 after the test was widened (the factories' id boundary, a key check that leaves the join status, every
+  byte of a found server's entry, random bits after a host's answer). The 51 left: compiled out (17: the dedicated
+  server's blocks), unreachable (3: DirectPlay is never missing), equivalent (31: the conversion's flag 1 ignored,
+  buffers' sizes, the address's type the fake writes, a format's trailing letter, values already set or written over,
+  locals cleared after their release, the join request's name cut only past 45 characters (the original's stack
+  overruns first), the reader not checking its capacity, VisitPlayers's empty loop, 17 team players (the original
+  writes past its 16)).
+- **Harness lessons (my mistakes):** -include renames reach original_exe.cpp too (its relaunch's CreateProcessA:
+  the fakes pass through when not faking); GetComponentByName's type is the original's stack's (not logged); the
+  replication's quantisation vectors' w is the original's stack's; failures a fake returns must match what the code
+  checks (a failed address creation, an unset callback, a missing state crash both programs); the status data must
+  stay aligned with the reader (a DEMO name or a newer server's layout changes what follows); the test's first
+  survivors' check by hand looked at every mutation kind of a line, not the one that survived.
