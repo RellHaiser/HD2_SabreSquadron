@@ -6745,3 +6745,28 @@ came from. From this part on the network code is compared with the original exec
   original's CRT needs its float conversions set up (0x007e599c) before %f; FreeBucketSet frees the set itself (the
   test's were static); the test's log of a freed element read past an 8-byte table element; each side's bucket arrays
   got their own random capacities until one was drawn for both.
+
+## Net part 13b (GameSpy's CD key client and server, `net/gamespy_gcd.cpp`, 2026-11-25)
+
+- **The build:** `net/build_gcd.bat` (`net/gcd_diff.cpp`, suite `net.gcd`; the port's file included by the test,
+  MUT_WRAPPER=gcd_diff.cpp): the response to a challenge, the products and their clients, the validation server's
+  packets (uok, unok, ison, ucount and junk, XORed), the checks' think, the disconnects and the installer key's check
+  against the original's (__fastcall; each side its own authentication callback, logging alike). Each round makes the
+  same products and clients on both sides (ids, keys, session keys, addresses, times, tries, states, errors,
+  requests), the socket, the server's address, the clock (2 s after a request, or just before, sometimes), the random
+  numbers and the packets the socket will receive, and runs up to 8 calls; the results, the callbacks', sendto's,
+  the clock's and rand's logs and the products are compared. The original's XOR key (a static initialiser the
+  harness's copy never ran) is set up by the test.
+- **The tests:** 40,000 rounds, about 531,000 checks. **Coverage:** every line.
+- **Port bugs found:** none (the port's guard against a packet without a second backslash was already there).
+- **The original's weaknesses (kept on main):** a packet of the validation server's that starts with a backslash and
+  has no second one makes the original copy from a null pointer's distance (a crash; the port returns, marked Fix);
+  the test sends none.
+- **Mutations:** 321 (`net/mutations/mutate_net13b.py`), 70 not building; 218 of the 251 building killed at first, 223
+  after the test was widened (the retry time's edge, error messages of 198 to 202 letters, a response's input of 511
+  or 512 letters, keys with letters that are no hex digits). The 28 left: leaks (8: a removed client's frees),
+  equivalent (20: buffers' sizes and slack, formats' trailing letters, ValueForKey's two buffers, commands that match
+  none, zero statics reset, the scan's "0x" prefix).
+- **Harness lessons (my mistakes):** the mutation runner defines GCD_TEST_PORT, which moved the validation port and
+  failed the first run's baseline (the test now undefines it); the original's XOR key is a static the harness's copy
+  never initialised.

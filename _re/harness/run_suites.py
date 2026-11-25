@@ -135,6 +135,8 @@ SUITES = [
     T("net.search", "net/build_search.bat", TMP + r"\search_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 13a: the GameSpy SDK's utilities against the original executable, net/gsutil_diff.cpp.)
     T("net.gsutil", "net/build_gsutil.bat", TMP + r"\gsutil_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 13b: GameSpy's CD key client and server against the original executable, net/gcd_diff.cpp.)
+    T("net.gcd", "net/build_gcd.bat", TMP + r"\gcd_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",
