@@ -154,7 +154,10 @@ void C_GameApp::HandleServerCommand(int id, C_BitStream *stream)
         line[0x10C] = stream->ReadBits(1) != 0;
         const int sender = *reinterpret_cast<const int *>(line + 0x104);
         if (sender >= 0) {
-            g_netGame.LockPlayers()[sender].activityTime = timeGetTime();
+            // (The players locked before the clock is read, as the original: C++17 evaluates an assignment's right
+            // side first.)
+            S_NetPlayerState *players = g_netGame.LockPlayers();
+            players[sender].activityTime = timeGetTime();
             g_netGame.UnlockPlayers();
         }
         stream->ReadString(line, 0x103);
@@ -505,8 +508,10 @@ void C_GameApp::HandleClientCommand(int id, C_BitStream *stream)
         // A player's team: another's taken while unknown; the local player's pending one (the in-game menu told).
         const auto slot = static_cast<int>(stream->ReadBits(5));
         const auto team = static_cast<int>(stream->ReadBits(2));
+        // (The team asked first, the local player's too, as the original.)
+        const bool unknown = g_netGame.GetPlayerTeam(slot, false) == 2;
         if (slot != g_localPlayerSlot) {
-            if (g_netGame.GetPlayerTeam(slot, false) == 2)
+            if (unknown)
                 g_netGame.SetPlayerTeam(slot, team, false);
             return;
         }

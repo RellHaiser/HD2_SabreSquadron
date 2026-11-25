@@ -121,6 +121,8 @@ SUITES = [
     T("net.repl", "net/build_repl.bat", TMP + r"\repl_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 9: the messages against the original executable, net/msgs_diff.cpp.)
     T("net.msgs", "net/build_msgs.bat", TMP + r"\msgs_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 10: the game commands against the original executable, net/cmds_diff.cpp.)
+    T("net.cmds", "net/build_cmds.bat", TMP + r"\cmds_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",

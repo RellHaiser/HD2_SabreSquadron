@@ -6522,3 +6522,46 @@ came from. From this part on the network code is compared with the original exec
   port's sets the teams to 2 and the key check to -1, as the original); an aborted slot's deleted link can match a new
   link's address on one side only (such slots are tracked until reused); the port's allocations are zeroed like the
   original's fake ones (a reply's bits depend on the block's leftovers).
+
+## Net part 10 (the game commands, `net/net_commands.cpp`, 2026-11-24)
+
+- **The build:** `net/build_cmds.bat` (`net/cmds_diff.cpp`, `net/cmds_fakes.h`, `net/cmds_globals.cpp`, suite
+  `net.cmds`): net_commands.cpp against the original's HandleServerCommand (0..12) and HandleClientCommand (0..26, the
+  whole game too). The commands' bits are the test's (each command's fields, then random bits), read by both from the
+  same words. What they reach is the test's on both sides, logging alike: the players' lock, timeGetTime, the game
+  (joined, respawned, left, the objectives, the rounds, the warmup, the camera, the in-game menu, the messages), the
+  app (its messages and commands sent, its lines), the app's states (the test's objects with each program's vtable
+  layout; the game and the main menu the joined session makes: the port's own classes with the test's stubs, the
+  original's constructor, Start, Stop and deleting destructor faked alike), the loading screen, the campaign, the
+  menus, the soldier profiles and stats, the uniforms' definitions (the original's inline table), the humans (their
+  hits, respawns, chat text, the remote hits, their controllers), the spawn points, the team manager, the net game's
+  player calls, the votes, the modules' and other files' readers (reading a few bits each), the command processor (the
+  original's global set: it makes one when null). The port's NetReadSoldierState is net_messages.cpp's (compared by net
+  part 9), copied into the test.
+- **The tests:** 20,000 rounds, each a random world (the role, 1 to 12 players with freed slots' leftovers, the app's
+  state of any type or none, the game or none, humans alive, dead or at 1 health, the squad's soldier or none, the
+  profiles, the rules) and up to 6 commands. About 225,000 checks, 2 s (HD2_CMDS_QUICK: 5,000).
+- **Coverage:** every line of net_commands.cpp (the dedicated server's console block is compiled out here).
+- **Port bugs found and fixed:**
+  - A chat line's sender's activity time: the original locks the players before reading the clock; C++17 evaluates
+    an assignment's right side first, so the port read the clock first.
+  - A player's team (client command 14): the original asks the player's team first, the local player's too; the port
+    asked only for the others.
+- **The original's weaknesses (kept):**
+  - A VIP's uniform definition is read unchecked (the port's Fix counts none as no weight; the test gives VIPs a
+    known uniform).
+  - An empty squad's soldier is read through null (client commands 12 and 16; the port's Fixes).
+  - The whole game's soldiers' controllers are called unchecked (a soldier made always has one).
+  - The respawn's facing's w is the stack's (the port's 0; not compared).
+  - The slots the session joined and the whole game append come from states constructed on the stack (their
+    leftovers not compared in that call, then carried over).
+- **Mutations:** 553 mutants (`net/mutations/mutate_net10.py`), 121 not building; 401 of the 432 building killed at
+  first, 403 after freed slots' names and a health of 1 were added. The 29 left: compiled out (13: the dedicated
+  server's console block), equivalent (15: the state's defaults the read overwrites, the facing's w, GetSender and
+  ReadDirection3D with -2 as -1, a buffer's size, the stats all read, the whole game's unused place and facing), a Fix
+  the original cannot reach (1: an unknown VIP uniform's weight).
+- **Harness lessons (my mistakes):** ShowGameMenuMessage and PrintVoteResult pop their argument (my cdecl fakes left
+  the stack 4 bytes off: a later local read garbage); the original makes the command processor itself when its global
+  is null; the session joined's main menu ran the original's real constructor, Start and Stop until faked; the game
+  objects had no vtable for GetState; the original builds the scratch rules inline (no constructor call to log) and
+  reads GetItemDef inline; my first fresh-slot handling missed the appended slots.
