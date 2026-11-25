@@ -483,6 +483,13 @@ namespace {
 int s_bucketInt;                                        // 0x00982108
 double s_bucketDouble;                                  // 0x00982110
 
+// An x87 result under the game's FPU mode (24-bit precision, D3D's): each of the original's operations on the
+// doubles rounds to a float's mantissa.
+double Pc24(double x)
+{
+    return static_cast<double>(static_cast<float>(x));
+}
+
 }  // namespace
 
 void *BucketData(S_Bucket *bucket)                      // 0x00733a10 (DS 0x0078ef90)
@@ -612,13 +619,15 @@ void *BucketNew(S_BucketSet *set, const char *name, int type, const void *value)
     return BucketData(BucketFind(set, name));
 }
 
-void BucketSet(S_BucketSet *set, const char *name, const void *value)   // 0x007334e0 (DS 0x0078e8c0)
+// The ops below hand back the bucket's data (null: no bucket of that name; an op a string cannot take: its text), as
+// the original's do (the stats' buckets use it).
+void *BucketSet(S_BucketSet *set, const char *name, const void *value)   // 0x007334e0 (DS 0x0078e8c0)
 {
     S_Bucket *bucket = BucketFind(set, name);
     if (!bucket)
-        return;
+        return nullptr;
     bucket->players = 0;
-    BucketDoSet(bucket, value);
+    return BucketDoSet(bucket, value);
 }
 
 void *BucketConcat(S_BucketSet *set, const char *name, const char *value)   // 0x00733700, 0x00733710 (DS 0x0078eb90) (DS 0x0078eba0)
@@ -635,65 +644,69 @@ void *BucketConcat(S_BucketSet *set, const char *name, const char *value)   // 0
     return BucketData(bucket);
 }
 
-void BucketAdd(S_BucketSet *set, const char *name, const void *value)   // 0x00733520 (DS 0x0078e920)
+void *BucketAdd(S_BucketSet *set, const char *name, const void *value)   // 0x00733520 (DS 0x0078e920)
 {
     S_Bucket *bucket = BucketFind(set, name);
     if (!bucket)
-        return;
+        return nullptr;
     if (bucket->type == BUCKET_INT)
-        BucketDoSet(bucket, BucketInt(*static_cast<const int *>(value) + bucket->value.asInt));
-    else if (bucket->type == BUCKET_DOUBLE)
-        BucketDoSet(bucket, BucketDouble(bucket->value.asDouble + *static_cast<const double *>(value)));
-    else
-        BucketConcat(set, name, static_cast<const char *>(value));
+        return BucketDoSet(bucket, BucketInt(*static_cast<const int *>(value) + bucket->value.asInt));
+    if (bucket->type == BUCKET_DOUBLE)
+        return BucketDoSet(bucket, BucketDouble(Pc24(bucket->value.asDouble + *static_cast<const double *>(value))));
+    return BucketConcat(set, name, static_cast<const char *>(value));
 }
 
-void BucketSub(S_BucketSet *set, const char *name, const void *value)   // 0x007335b0 (DS 0x0078e9e0)
+void *BucketSub(S_BucketSet *set, const char *name, const void *value)   // 0x007335b0 (DS 0x0078e9e0)
 {
     S_Bucket *bucket = BucketFind(set, name);
     if (!bucket)
-        return;
+        return nullptr;
     if (bucket->type == BUCKET_INT)
-        BucketDoSet(bucket, BucketInt(bucket->value.asInt - *static_cast<const int *>(value)));
-    else if (bucket->type == BUCKET_DOUBLE)
-        BucketDoSet(bucket, BucketDouble(bucket->value.asDouble - *static_cast<const double *>(value)));
+        return BucketDoSet(bucket, BucketInt(bucket->value.asInt - *static_cast<const int *>(value)));
+    if (bucket->type == BUCKET_DOUBLE)
+        return BucketDoSet(bucket, BucketDouble(Pc24(bucket->value.asDouble - *static_cast<const double *>(value))));
+    return BucketData(bucket);
 }
 
-void BucketMult(S_BucketSet *set, const char *name, const void *value)  // 0x00733620 (DS 0x0078ea70)
+void *BucketMult(S_BucketSet *set, const char *name, const void *value)  // 0x00733620 (DS 0x0078ea70)
 {
     S_Bucket *bucket = BucketFind(set, name);
     if (!bucket)
-        return;
+        return nullptr;
     if (bucket->type == BUCKET_INT)
-        BucketDoSet(bucket, BucketInt(*static_cast<const int *>(value) * bucket->value.asInt));
-    else if (bucket->type == BUCKET_DOUBLE)
-        BucketDoSet(bucket, BucketDouble(bucket->value.asDouble * *static_cast<const double *>(value)));
+        return BucketDoSet(bucket, BucketInt(*static_cast<const int *>(value) * bucket->value.asInt));
+    if (bucket->type == BUCKET_DOUBLE)
+        return BucketDoSet(bucket, BucketDouble(Pc24(bucket->value.asDouble * *static_cast<const double *>(value))));
+    return BucketData(bucket);
 }
 
-void BucketDiv(S_BucketSet *set, const char *name, const void *value)   // 0x00733690 (DS 0x0078eb00)
+void *BucketDiv(S_BucketSet *set, const char *name, const void *value)   // 0x00733690 (DS 0x0078eb00)
 {
     S_Bucket *bucket = BucketFind(set, name);
     if (!bucket)
-        return;
+        return nullptr;
     if (bucket->type == BUCKET_INT)
-        BucketDoSet(bucket, BucketInt(bucket->value.asInt / *static_cast<const int *>(value)));
-    else if (bucket->type == BUCKET_DOUBLE)
-        BucketDoSet(bucket, BucketDouble(bucket->value.asDouble / *static_cast<const double *>(value)));
+        return BucketDoSet(bucket, BucketInt(bucket->value.asInt / *static_cast<const int *>(value)));
+    if (bucket->type == BUCKET_DOUBLE)
+        return BucketDoSet(bucket, BucketDouble(Pc24(bucket->value.asDouble / *static_cast<const double *>(value))));
+    return BucketData(bucket);
 }
 
-void BucketAvg(S_BucketSet *set, const char *name, const void *value)   // 0x007337a0 (DS 0x0078ec60)
+void *BucketAvg(S_BucketSet *set, const char *name, const void *value)   // 0x007337a0 (DS 0x0078ec60)
 {
     S_Bucket *bucket = BucketFind(set, name);
     if (!bucket)
-        return;
+        return nullptr;
     if (bucket->type == BUCKET_INT) {
         ++bucket->players;
-        BucketDoSet(bucket, BucketInt((bucket->value.asInt * bucket->players + *static_cast<const int *>(value)) / bucket->players));
-    } else if (bucket->type == BUCKET_DOUBLE) {
+        return BucketDoSet(bucket, BucketInt((bucket->value.asInt * bucket->players + *static_cast<const int *>(value)) / bucket->players));
+    }
+    if (bucket->type == BUCKET_DOUBLE) {
         ++bucket->players;
         const double players = static_cast<double>(bucket->players);
-        BucketDoSet(bucket, BucketDouble((bucket->value.asDouble * players + *static_cast<const double *>(value)) / players));
+        return BucketDoSet(bucket, BucketDouble(Pc24(Pc24(Pc24(bucket->value.asDouble * players) + *static_cast<const double *>(value)) / players)));
     }
+    return BucketData(bucket);
 }
 
 // ---- gstats: the persistent storage service's replies ----------------------------------------------------------------------
@@ -711,10 +724,11 @@ struct S_PersistRequest {
     void *callback;
 };
 
-using PersistAuthFn = void (*)(int result, const char *error, void *instance);
-using PersistGetFn = void (*)(int profile, int dataType, int result, const char *data, int size, void *instance);
-using PersistSetFn = void (*)(int profile, int dataType, int result, void *instance);
-using PersistSaveFn = void (*)(int result, void *instance);
+// (Each gets the request's local id and key first, as the original's.)
+using PersistAuthFn = void (*)(int localId, int key, int result, const char *error, void *instance);
+using PersistGetFn = void (*)(int localId, int key, int profile, int dataType, int result, const char *data, int size, void *instance);
+using PersistSetFn = void (*)(int localId, int key, int profile, int dataType, int result, void *instance);
+using PersistSaveFn = void (*)(int localId, int key, int result, void *instance);
 
 S_DArray *g_persistRequests;                            // 0x00982bb4
 
@@ -764,16 +778,16 @@ void FinishPersistRequest(int index, int result, const char *text, int size)    
     if (r->callback) {
         switch (r->kind) {
         case PERSIST_AUTH:
-            reinterpret_cast<PersistAuthFn>(r->callback)(result, text, r->instance);
+            reinterpret_cast<PersistAuthFn>(r->callback)(r->localId, r->key, result, text, r->instance);
             break;
         case PERSIST_GET:
-            reinterpret_cast<PersistGetFn>(r->callback)(r->profile, r->dataType, result, text, size, r->instance);
+            reinterpret_cast<PersistGetFn>(r->callback)(r->localId, r->key, r->profile, r->dataType, result, text, size, r->instance);
             break;
         case PERSIST_SET:
-            reinterpret_cast<PersistSetFn>(r->callback)(r->profile, r->dataType, result, r->instance);
+            reinterpret_cast<PersistSetFn>(r->callback)(r->localId, r->key, r->profile, r->dataType, result, r->instance);
             break;
         case PERSIST_SAVE:
-            reinterpret_cast<PersistSaveFn>(r->callback)(result, r->instance);
+            reinterpret_cast<PersistSaveFn>(r->callback)(r->localId, r->key, result, r->instance);
             break;
         }
     }

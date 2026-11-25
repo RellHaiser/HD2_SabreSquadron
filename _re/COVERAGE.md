@@ -6713,3 +6713,35 @@ came from. From this part on the network code is compared with the original exec
   let the log's own growth log; the map's name is at +1 in the original but +4 in the port's own class (each side
   its object); the original's browser functions take their server on the stack; heredocs collapsed backslashes in my
   edit scripts again (the memory's rule).
+
+## Net part 13a (the GameSpy SDK's utilities, `net/gamespy_util.cpp`, 2026-11-25)
+
+- **The build:** `net/build_gsutil.bat` (`net/gsutil_diff.cpp`, suite `net.gsutil`; the port's file included by the
+  test, MUT_WRAPPER=gsutil_diff.cpp): the dynamic array, the hash table, MD5, goastrdup, the socket helpers, the
+  buckets, the persistent storage's replies, the stats' buckets and the random numbers against the original's
+  (__fastcall; its compare callbacks __cdecl, its free, hash, map, op and persist callbacks __fastcall: each side its
+  own, logging alike). Each round makes the same structures on both sides (an array of 4 to 24-byte elements, a hash
+  table, a bucket set of ints, doubles and strings as the default, the persist requests, a stats game) and runs up to
+  12 calls; the allocations (fresh blocks filled with garbage alike), the CRT's qsort, select and WSAStartup are the
+  test's on both sides. (GetUniqueId and GenerateUniqueId are not run: nothing calls them, and they write the registry.)
+- **The tests:** 40,000 rounds, about 817,000 checks. **Coverage:** every line but those two functions and MD5's
+  carry into its high count (an input of 512 MB).
+- **Port bugs found and fixed:**
+  - The persist callbacks get the request's local id and key first (the original's; the port dropped them).
+  - BucketSet, BucketAdd, BucketSub, BucketMult, BucketDiv and BucketAvg hand back the bucket's data (null: no bucket
+    of that name; a string's text when the op cannot take one), as the original's do and the stats' buckets use; the
+    port's returned nothing.
+  - The doubles' operations round as the original's x87 does under the game's FPU mode (24-bit precision).
+- **The original's weaknesses (kept):** BucketSetToString's text grows once, to twice its size, whatever a bucket
+  needs (a longer one overruns the block; the test's strings stay within).
+- **Mutations:** 646 (`net/mutations/mutate_net13a.py`), 108 not building; 448 of the 538 building killed at first,
+  460 after the test was widened (garbage in fresh blocks, the new table's callbacks compared, long strings of every
+  length to 240, seeds meeting 0x7FFFFFFF). The 78 left: not run (37: GetUniqueId, GenerateUniqueId), unreachable (7:
+  MD5's high count), not reached (3: the text's size within one of what a bucket needs), equivalent (31: buffers' and
+  locals' sizes, a byte past the local digest, the local MD5 context cleared, empty moves at the end, the size given
+  to an unbounded print, the original's stack's high half of a new int bucket, ValueForKey's two results never used
+  together, a request index of -2 handled as -1, a set's size not passed on, the random number's initialiser).
+- **Harness lessons (my mistakes):** BucketConcat's real entry is 0x00733700 (0x00733710 is its continuation); the
+  original's CRT needs its float conversions set up (0x007e599c) before %f; FreeBucketSet frees the set itself (the
+  test's were static); the test's log of a freed element read past an 8-byte table element; each side's bucket arrays
+  got their own random capacities until one was drawn for both.
