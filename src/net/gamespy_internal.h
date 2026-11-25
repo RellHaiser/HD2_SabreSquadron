@@ -186,6 +186,7 @@ struct S_ServerBrowser {                                // 0x620 bytes
     int disconnectOnComplete;                           // +0x608
     int dontUpdate;                                     // +0x60C no queries by itself
     uint32_t triggerIp;                                 // +0x610 a trigger update's server, 0 when none is waited for
+    u_short triggerPort;                                // +0x614 (network order)
     ServerBrowserCallback callback;                     // +0x618
     void *instance;                                     // +0x61C
 };

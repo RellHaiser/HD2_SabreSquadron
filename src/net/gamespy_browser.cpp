@@ -510,6 +510,7 @@ void ReceiveReplies(S_SbQueryEngine *engine)            // 0x00739ee0
                     HandleReply(engine, server, reply, size);
                 else
                     HandleOldReply(engine, server, reply);
+                break;   // (the first server at that address only)
             }
         }
     }
@@ -794,6 +795,7 @@ void ListInit(S_SbServerList *list, const char *queryForGame, const char *queryF
     list->expected = -1;
     list->popularCount = 0;
     list->errorMessage = "";
+    list->sortKey = "";
     list->sourceIp = 0;
     list->queryFromVersion = queryFromVersion;
     std::srand(GetTickCount());
@@ -1381,6 +1383,13 @@ int ListThink(S_SbServerList *list)                     // 0x0073bed0
 
 // ---- the browser -------------------------------------------------------------------------------------------------------
 
+// The trigger update's server heard from: the wait ends.
+void ClearTrigger(S_ServerBrowser *browser, const S_SbServer *server)
+{
+    if (server && server->publicIp == browser->triggerIp && server->publicPort == browser->triggerPort)
+        browser->triggerIp = 0;
+}
+
 void OnListEvent(S_SbServerList *list, int reason, S_SbServer *server, void *instance)   // 0x0073abf0
 {
     auto *browser = static_cast<S_ServerBrowser *>(instance);
@@ -1418,6 +1427,7 @@ void OnListEvent(S_SbServerList *list, int reason, S_SbServer *server, void *ins
     default:
         break;
     }
+    ClearTrigger(browser, server);
 }
 
 void OnQueryEvent(S_SbQueryEngine *, int reason, S_SbServer *server, void *instance)   // 0x0073ad50
@@ -1429,13 +1439,15 @@ void OnQueryEvent(S_SbQueryEngine *, int reason, S_SbServer *server, void *insta
         browser->callback(browser, BROWSER_UPDATE_FAILED, server, browser->instance);
     else if (reason == QUERY_ENGINE_IDLE)
         browser->callback(browser, BROWSER_UPDATES_DONE, server, browser->instance);
+    ClearTrigger(browser, server);
 }
 
 }  // namespace
 
 const char *g_sbMasterOverride;                         // 0x00982de4 (never set in the game)
 
-// (The browser's "trigger" address of the original, for the dead ServerBrowserAuxUpdateServer, is left out.)
+// (The original leaves the trigger address and disconnectOnComplete as the heap gave them: the port clears them. Only the
+// dead ServerBrowserAuxUpdateServer sets a trigger address.)
 S_ServerBrowser *ServerBrowserNew(const char *queryForGame, const char *queryFromGame, const char *queryFromKey,
                                   int queryFromVersion, int maxUpdates, int queryVersion,
                                   ServerBrowserCallback callback, void *instance)
@@ -1447,6 +1459,7 @@ S_ServerBrowser *ServerBrowserNew(const char *queryForGame, const char *queryFro
     browser->instance = instance;
     browser->dontUpdate = 0;
     browser->triggerIp = 0;
+    browser->triggerPort = 0;
     browser->disconnectOnComplete = 0;
     ListInit(&browser->list, queryForGame, queryFromGame, queryFromKey, queryFromVersion, OnListEvent, browser);
     EngineInit(&browser->engine, maxUpdates, queryVersion, OnQueryEvent, browser);

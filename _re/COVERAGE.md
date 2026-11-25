@@ -6793,3 +6793,52 @@ came from. From this part on the network code is compared with the original exec
   before a key list's end, an empty challenge after a zero byte, the exiting heartbeat's full buffer), equivalent (12).
 - **Harness lessons (my mistakes):** the original's key name table is read at its address (0x00845828), not through
   a pointer stored there; a getsockname failure was not scripted until coverage showed its lines missed.
+
+## Net part 13d (GameSpy's server browser, `net/gamespy_browser.cpp`, 2026-11-25)
+
+- **The build:** `net/build_browser.bat` (`net/browser_diff.cpp`, suite `net.browser`; the port's file and
+  gamespy_util.cpp included by the test, MUT_WRAPPER=browser_diff.cpp): the shared strings, a server's values and the
+  queries' answers (binary and the old text), the query engine, the master server's cipher, the list (its request,
+  the main list, the messages after it, the LAN answers), the browser's events and the API against the original's
+  (__fastcall; the browser's callback each side's own, logging alike, reading the server's values as the game does).
+  Each round makes a browser on each side and runs up to 10 calls: updates (asynchronous or thinking to their end),
+  requests with options, thinks, clears, the values of the list's servers, the cipher, the parsing helpers, detached
+  servers, the list's helpers, ListSendData, the trigger wait, the message readers, the engine by itself, the LAN
+  answers, the shared strings. A scripted master server answers each request sent with a stream made for the reading
+  side's own challenge (the cipher's header, the key list, popular values, servers, the end, messages), cut into
+  reads; the servers being asked answer by their public or private addresses. After each call the result, the logs
+  (the sockets', the callback's, the clock's, rand's, Sleep's) and both browsers (engine, lists, servers and their
+  values, key list, input, cipher) and shared string tables are compared. The original's shared strings table (a TLS
+  slot the harness's copy never set up) and its realloc, msleep and clock are redirected to the test's.
+- **The tests:** 25,000 rounds, about 697,000 checks (seeds 1 to 3). **Coverage:** every line but two out-of-memory
+  lines and one unreachable (ParseMainList with nothing read). Not tested: the dedicated server's sort and count
+  (not in the game's executable), the dead LAN update (not ported).
+- **Port bugs found and fixed:**
+  - S_ServerBrowser was 4 bytes short: the original keeps the trigger's port at +0x614 (the callback at +0x618).
+  - The list's events and the queries' events end a trigger wait when its server is heard from (ClearTrigger); the
+    port had left that out, so ServerBrowserWaitForTrigger waited for ever.
+  - ReceiveReplies gives an answer to the first server at its address only (the original's break); the port gave it
+    to every one.
+  - ListInit sets the sort key to "" (the port left it unset).
+- **The original's weaknesses (kept on main):**
+  - HasFullKeys is asked from a record's fixed fields: a record with both kinds of keys cut by a read can pass it and
+    be read past what arrived (later fields then come from stale bytes).
+  - A popular value's index is not checked against the list's count; fixed fields before any key list read a missing
+    list (a crash).
+  - A server message with a nonstandard port of 5 or 6 bytes leaves its port as the stack's (the port: 0).
+  - ProcessMessages stays on a message under 3 bytes for ever (the port's Fix: an error): an empty error text's
+    terminator left unread is such a start.
+  - An empty old-style answer is parsed from its second byte (the stack's bytes past its end).
+  - A new request keeps the previous connection's unread bytes, read as the new stream's start.
+  - ServerBrowserNew leaves the trigger address and disconnectOnComplete as the heap gave them (the port clears them).
+  The test's streams stay within these.
+- **Mutations:** 1147 (`net/mutations/mutate_net13d.py`, the dedicated server's block left out), 92 not building; 964
+  of the 1055 building killed at first, 989 after the test was widened (send results scripted, the LAN time-out's
+  edge, bytes after the answer's tables, a value past the keys, texts of the limit's length, an empty error text,
+  empty key names, a trigger on a server being asked, a field list reaching the text's limit exactly, unqueued
+  servers queued). The 66 left: leaks (5), not reached (8: out of memory, rare cuts and sends), equivalent (53).
+- **Harness lessons (my mistakes):** the original's FreeServer takes the server's address and its shared string
+  functions an unused list first; its realloc must be the test's like malloc and free; the test's own streams broke
+  the protocol at first (messages after a list with no end, a stream for a failed request, a new stream mid-parse,
+  key lists replaced mid-parse, strings released that the test never added); the error message's pointer was
+  compared after its buffer was freed; a field-list generator looped for ever; backslashes in Bash heredocs again.
