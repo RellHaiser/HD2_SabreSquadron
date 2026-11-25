@@ -6770,3 +6770,26 @@ came from. From this part on the network code is compared with the original exec
 - **Harness lessons (my mistakes):** the mutation runner defines GCD_TEST_PORT, which moved the validation port and
   failed the first run's baseline (the test now undefines it); the original's XOR key is a static the harness's copy
   never initialised.
+
+## Net part 13c (GameSpy's query & reporting 2, `net/gamespy_qr2.cpp`, 2026-11-25)
+
+- **The build:** `net/build_qr2.bat` (`net/qr2_diff.cpp`, suite `net.qr2`; the port's file and gamespy_util.cpp
+  included by the test, MUT_WRAPPER=qr2_diff.cpp): the record made by qr2_init (or the default one), its socket (the
+  first free port), the heartbeats and keepalives, the queries' replies (by keys, and the old `\status\` form), the
+  master's challenge (RC4 and base 64), the echo, the add error, the client messages, the think, the shutdown, the
+  buffers and key buffers, the key names' registration, the machine's addresses against the original's (__fastcall;
+  the game's callbacks, its server's, players' and teams' keys, key lists, counts, add error and CD key packets, each
+  side its own, logging alike). Each round makes the same record on both sides, the machine's addresses, the clock
+  (a heartbeat's, retry's or keepalive's edge sometimes), the random numbers and the packets the socket will receive,
+  and runs up to 8 calls; the results, the logs (sendto's, the callbacks', the sockets', the clock's) and both
+  records are compared. The original's key name table is its data; the game's three registered names are set on both.
+- **The tests:** 30,000 rounds, about 463,000 checks. **Coverage:** every line.
+- **Port bugs found:** none.
+- **The original's weaknesses (kept on main):** its key name table has 254 entries: a key of 254 or 255 reads (and
+  qr2_register_key 254 writes) the "score_t" text after it (the test uses neither).
+- **Mutations:** 491 (`net/mutations/mutate_net13c.py`), 39 not building; 420 of the 452 building killed at first, 432
+  after the test was widened (the times' edges, the broadcast address as the host, buffers near full, the cipher's
+  byte after its data, key 255, the default record's socket). The 20 left: frees (2), not reached (6: one byte left
+  before a key list's end, an empty challenge after a zero byte, the exiting heartbeat's full buffer), equivalent (12).
+- **Harness lessons (my mistakes):** the original's key name table is read at its address (0x00845828), not through
+  a pointer stored there; a getsockname failure was not scripted until coverage showed its lines missed.
