@@ -152,7 +152,7 @@ struct S_NetVote {
     S_NetVote();                                    // 0x0072dd30 (__fastcall)
     // Asked by a player (none running: told to everyone, message 0x16).
     void Start(int kind, int arg);                  // 0x0072dd70
-    // Asked by the server (the result printed: text 0x22E2, "%s %d (%s)").
+    // Asked by the server (the result printed: text 0x22E2, the command, its argument, the text: "%s %d - %s").
     void Begin(int kind, int arg);                  // 0x0072ddb0
     // The local player's yes (once: game command 0xB).
     bool Vote();                                    // 0x0072dfb0 (__fastcall)
@@ -637,5 +637,5 @@ void StopGameSpyQueries(uintptr_t *socket);         // 0x00738760
 void __fastcall TransportCallback(int connection, void *data, int size, int kind, uint32_t flags);   // 0x0072c730
 // A frame's bounds widened into the level scan's (the frames' enumeration callback of Command 3).
 uint32_t __stdcall ScanFrameBounds(class I3D_frame *frame, void *context);   // 0x0072d9c0
-// The bits a quantised range of `range` steps needs (at least 1): `*steps` the range truncated.
-int BitsForRange(uint32_t *steps, float range);     // 0x0072dcd0 (__fastcall; the range in ST0)
+// The bits a range of `range` metres needs in centimetre steps (at least 1): `*steps` the centimetres truncated.
+int BitsForRange(uint32_t *steps, float range);     // 0x0072dcd0 (steps in ECX, the range on the stack, RET 4)

@@ -6565,3 +6565,45 @@ came from. From this part on the network code is compared with the original exec
   is null; the session joined's main menu ran the original's real constructor, Start and Stop until faked; the game
   objects had no vtable for GetState; the original builds the scratch rules inline (no constructor call to log) and
   reads GetItemDef inline; my first fresh-slot handling missed the appended slots.
+
+## Net part 11a (the network game's core, `net/net_game.cpp`, 2026-11-24)
+
+- **The build:** `net/build_ng.bat` (`net/ng_diff.cpp`, `net/ng_diff_calls.inc`, `net/ng_fakes.h`, `net/ng_globals.cpp`,
+  suite `net.ng`): net_game.cpp against the original's net game, its own global made by its constructor and Init
+  (statics never run). Each round sets both alike (the role, the local slot, 1 to 10 players with the same bytes and
+  each side's humans and connections, the send period and clocks, the vote, the rules, the queues, the streams,
+  DirectPlay's objects, the voices, the replication, the limits, the browser, the transport's callback, the session's
+  text) and runs up to 10 of 36 calls: the vote (Start, Begin, Vote, CountYes, End, UpdateVote, PrintVoteResult,
+  PostVote), the streams and queues (BeginMessage, CreateMessageEx, SendToPlayers, QueueReceived, QueueOutgoing,
+  DispatchNetMessage, ReceiveMessages), the frame's sending (Process, SendJoinData, SendMessages), the commands (the
+  kicks, the level scan, BitsForRange), the players (ResetScores, ResetPlayerStats, SetPlayer, SetVoiceValue, SendChat,
+  GetBestScore, LockPlayers), Init, Close, Shutdown, the constructor. What they reach is the test's on both sides,
+  logging alike (the locks, the clocks, the transport, the pool, DirectPlay, the voice, the replication, the app, the
+  game, the modules, the console, the command processor, the texts, the scene's frames, the firewall, IGraph, GameSpy,
+  the key socket, the query thread).
+- **The tests:** 20,000 rounds, about 397,000 checks, 3 s (HD2_NG_QUICK: 5,000 rounds).
+- **Coverage:** every line of net_game.cpp but the destructor's (it runs at exit).
+- **Port bugs found and fixed:**
+  - The level scan's bits (Command 3): the original gives BitsForRange the level's size in metres and counts it in
+    centimetres (x 100); the port passed 0 and did not scale (every axis 1 bit, no steps).
+  - A vote begun: the original prints "%s %d - %s" (the command, its argument, the text 0x22E2); the port printed the
+    text, the argument and the command.
+- **The original's weaknesses (kept):**
+  - The kicks (Command 0 and 1) call DirectPlay's server unchecked (only the dedicated server's console asks: it
+    has one; the test gives them one).
+  - The lags (Process) read the replication's local object unchecked: a client with a server link and no
+    replication reads through null (logged as such on both sides).
+  - The level's corner and size are 4-float vectors whose w is the original's stack's (not compared).
+  - Host writes the local player's name into slot 0 after Close emptied the players (part 11b).
+- **Mutations:** 804 mutants (`net/mutations/mutate_net11a.py`), 101 not building; 639 of the 703 building killed at
+  first, 659 after the test was widened (the constructor; the 5 s, 300 s and 15 s boundaries; messages filling their
+  words exactly; the replication's stream capacity; the enum handle, reporting, +505C, the browser, the transport's
+  callback and the session's text set and compared). The 44 left: compiled out (6: the dedicated server's file and
+  watchdog), never run (1: the destructor), equivalent (37: a static_assert; values the members' initialisers or the
+  player state's constructor already set; buffers' sizes; a role, a join stage and a total overwritten before being
+  read; channel 2 either way; an unused argument; the level's w; equal bounds and scores either way; the frames'
+  callback's result, which the test's sector ignores).
+- **Harness lessons (my mistakes):** UpdateVote's `this` is the vote (+0x4D0), DispatchNetMessage pops its two
+  arguments, qr2_shutdown takes its socket in ECX, BitsForRange takes the steps in ECX and the range on the stack (not
+  ST0); the console's queue was shared, so the port popped the original's commands; the mission's flag is the game's
+  +0x14 (the test wrote +0x24); comparing the level's w (the original's is its stack's).

@@ -455,10 +455,10 @@ void TestCommands()
                                                                           reinterpret_cast<const char *>(3), 0) &&
           g_log.empty() && !net.Command(9, nullptr, 0));
     net.m_server = nullptr;
-    // The bits of a range.
+    // The bits of a range (metres, in centimetres).
     uint32_t steps = 0;
-    CHECK(BitsForRange(&steps, 1000.7f) == 10 && steps == 1000 && BitsForRange(&steps, 2.0f) == 1 &&
-          BitsForRange(&steps, 3.0f) == 2 && BitsForRange(&steps, 4.0f) == 2 && BitsForRange(&steps, 5.0f) == 3 &&
+    CHECK(BitsForRange(&steps, 10.25f) == 11 && steps == 1025 && BitsForRange(&steps, 1.0f) == 7 && steps == 100 &&
+          BitsForRange(&steps, 0.5f) == 6 && steps == 50 && BitsForRange(&steps, 10.24f) == 10 && steps == 1024 &&
           BitsForRange(&steps, 0.0f) == 1 && steps == 0);
 }
 
@@ -492,7 +492,7 @@ void TestVotes()
     CHECK(g_log.empty());
     // Begun from the server's message: printed.
     vote.Begin(0, 12);
-    CHECK(vote.kind == 0 && vote.arg == 12 && Logged("print 50 150 50 T22E2 12 (maxclients)"));
+    CHECK(vote.kind == 0 && vote.arg == 12 && Logged("print 50 150 50 maxclients 12 - T22E2"));
     // Timed out after 15 s (the server).
     g_gameRole = GAME_ROLE_SERVER;
     g_log.clear();
@@ -834,8 +834,9 @@ void TestLevelScan()
     for (int i = 0; i < 7; ++i)
         zeroed = zeroed && net.m_bandwidthTotal[i] == 0 && net.m_bandwidthAverage[i] == 0 && net.m_bandwidthLast[i] == 0;
     CHECK(zeroed && net.m_unknown505C == 0 && g_localPlayerSlot == 5);
-    CHECK(net.m_levelBits[0] == 1 && net.m_levelBits[1] == 1 && net.m_levelBits[2] == 1 && net.m_levelSteps[0] == 0 &&
-          net.m_levelSteps[1] == 0 && net.m_levelSteps[2] == 0);
+    // (The sizes' centimetres: 1010, 810, 1010.)
+    CHECK(net.m_levelBits[0] == 10 && net.m_levelBits[1] == 10 && net.m_levelBits[2] == 10 && net.m_levelSteps[0] == 1010 &&
+          net.m_levelSteps[1] == 810 && net.m_levelSteps[2] == 1010);
     // Again (the scan restarted): a smaller level; a local game: slot 0.
     sector.frames = {BoundFrame(S_vector(0, 0, 0), S_vector(1, 5, 8)), BoundFrame(S_vector(0, 0, 0), S_vector(2, 1, 1)),
                      BoundFrame(S_vector(0, 0, 0), S_vector(0, 6, 0))};

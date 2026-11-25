@@ -104,8 +104,8 @@ void S_NetVote::Begin(int kind_, int arg_)
     time = 0;
     voted = false;
     const C_str text = g_texts.Get(0x22E2);
-    GetGame()->PrintMessage(S_vector(50.0f, 150.0f, 50.0f), "%s %d (%s)", text.c_str(), arg_,
-                            g_votableCommands[kind_]);
+    GetGame()->PrintMessage(S_vector(50.0f, 150.0f, 50.0f), "%s %d - %s", g_votableCommands[kind], arg,
+                            text.c_str());
 }
 
 bool S_NetVote::Vote()
@@ -667,7 +667,7 @@ bool C_NetGame::Command(int command, const char *arg, int)
             m_levelSize[i] = (g_scanMax[i] - g_scanMin[i]) + 0.1f;
         g_netGame.SetLevelBounds(m_levelMin, m_levelSize);
         for (int i = 0; i < 3; ++i)
-            m_levelBits[i] = BitsForRange(&m_levelSteps[i], 0.0f);
+            m_levelBits[i] = BitsForRange(&m_levelSteps[i], m_levelSize[i]);
         m_unknown505C = 0;
         if ((g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL)
             g_localPlayerSlot = 0;
@@ -703,7 +703,7 @@ uint32_t __stdcall ScanFrameBounds(I3D_frame *frame, void *)
 
 int BitsForRange(uint32_t *steps, float range)
 {
-    const auto n = static_cast<uint32_t>(static_cast<int64_t>(range));
+    const auto n = static_cast<uint32_t>(static_cast<int64_t>(range * 100.0f));   // centimetres
     *steps = n;
     uint32_t span = 2;
     int bits = 1;
