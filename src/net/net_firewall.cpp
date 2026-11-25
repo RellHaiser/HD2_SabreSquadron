@@ -131,7 +131,7 @@ HRESULT MapConnections(INetSharingManager *manager, int16_t port, bool *blocked)
     if (!connections)
         return hr;
     IUnknown *items = nullptr;
-    connections->get__NewEnum(&items);
+    hr = connections->get__NewEnum(&items);
     IEnumVARIANT *variants = nullptr;
     if (items) {
         hr = items->QueryInterface(IID_IEnumVARIANT_, reinterpret_cast<void **>(&variants));

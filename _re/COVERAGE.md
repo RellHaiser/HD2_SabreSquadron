@@ -6653,3 +6653,63 @@ came from. From this part on the network code is compared with the original exec
   checks (a failed address creation, an unset callback, a missing state crash both programs); the status data must
   stay aligned with the reader (a DEMO name or a newer server's layout changes what follows); the test's first
   survivors' check by hand looked at every mutation kind of a line, not the one that survived.
+
+## Net part 12 (the voice wrapper, the firewall, the LAN search and CD-key checks, 2026-11-25)
+
+### 12a: `net/net_voice.cpp`
+
+- **The build:** `net/build_voice.bat` (`net/voice_diff.cpp`, suite `net.voice`): C_NetVoice against the original's
+  (constructor, Init, StartServer, CheckAudio, StartClient, SetClientConfig, Stop, StopClient, StopServer, the
+  destructor), DirectPlay Voice's test, server and client objects the test's on both sides (their calls logged, their
+  results scripted, failures with and without their object), fresh blocks filled with garbage alike.
+- **The tests:** 50,000 rounds, about 505,000 checks (HD2_VOICE_QUICK: 10,000). **Coverage:** every line.
+- **Port bug found and fixed:** StartClient's last argument (the port's "unused") is the sound configuration's
+  playback DirectSound object in the original; the port left it null (the game passes 0).
+- **The original's weaknesses (kept):** a sound device configuration's size under 8 is written past; its block is not
+  freed when the second GetSoundDeviceConfig fails.
+- **Mutations:** 112 (`net/mutations/mutate_net12a.py`), 28 not building; 73 of the 84 building killed at first, 74
+  after fresh blocks held garbage. The 10 left are equivalent (a static_assert; 0 either way; the member's
+  initialiser; the next statement returns 0 too).
+
+### 12b: `net/net_firewall.cpp`, `net/net_create.cpp`
+
+- **The build:** `net/build_fw.bat` (`net/fw_diff.cpp`, `net/fw_fakes.h`, suite `net.fw`; the port's file included
+  by the test, MUT_WRAPPER=fw_diff.cpp): ConfigureFirewall, FirewallBlocks, MapConnections, RemovePortMapping,
+  AddPortMapping, the dialogs' watcher, NetFirewallAvailable against the original's. The network connections, their
+  properties, sharing configurations and port mappings are the test's COM objects on both sides (every call logged by
+  object, every result scripted), and so are the version, COM's start, the watcher's thread, the windows, Sleep, the
+  strings and variants.
+- **The tests:** 50,000 rounds, about 534,000 checks. **Coverage:** every line and branch of both files.
+- **Port bug found and fixed:** MapConnections returns get__NewEnum's result when the collection hands no items (the
+  port kept get_EnumEveryConnection's).
+- **Mutations:** 221 + 10 (`mutate_net12b.py`, `mutate_net12b_create.py`), 67 not building; 161 of the 164 building
+  killed at first, 163 after the watcher's flag was logged at the thread's start. 1 left: MultiByteToWideChar's flag
+  1 (MB_PRECOMPOSED) ignored.
+
+### 12c: `net/net_search.cpp`
+
+- **The build:** `net/build_search.bat` (`net/search_diff.cpp`, `net/search_fakes.h`, `net/search_globals.cpp`,
+  suite `net.search`): every function of the file against the original's (the browser's callback and its server
+  entry, the searches, the reporting's key, player, team, list and count callbacks, the reporting started and
+  answered, the key socket opened, read and written, RandomName, OnKeyChecked, FindFreeNameNumber, the server's key
+  checks, the client's key query, DropKeyQuery). The port's net game is raw storage (net_game.cpp not linked); GameSpy
+  (qr2, gcd, the browser: the original's __fastcall), the key socket, Sleep, rand, the perf clock, the locks, the net
+  game's other calls, the main menu, the CD key are the test's on both sides; the key packets are made as the other
+  side sends them (XORed, checksummed, a wrong checksum sometimes).
+- **The tests:** 30,000 rounds, about 404,000 checks. **Coverage:** every line.
+- **Port bugs found:** none.
+- **The original's weaknesses (kept; the test keeps away from them):** a found server's name, map and game type are
+  copied unbounded (a longer one overruns the entry and the stack); a key packet's name is copied unbounded and, with
+  a number after it, overruns a check's name; a packet without its terminator is read on into the stack; a response
+  without its ':' compares the stack's leftovers as the name; ReportPlayerKey reads 32 slots whatever the table's
+  size (the port's Fix stops at the table).
+- **Mutations:** 475 (`mutate_net12c.py`), 43 not building; 399 of the 432 building killed at first, 404 after the
+  test was widened (a player past the 32 slots read, 49 to 51-letter names, one-letter responses, a response for a
+  challenged check, query 0 often). The 28 left: buffers' sizes (7), values already set or written over (5), cuts
+  the original cannot reach without overrunning first (9), equivalent (7: an empty or failed datagram fails the
+  checksum either way, the XOR's extra byte is overwritten by the checksum, 32 either way, the 101st "check" never
+  matches, a packet's size is never 0 or 1).
+- **Harness lessons (my mistakes):** my logging operator new built its text by allocating (unbounded recursion), then
+  let the log's own growth log; the map's name is at +1 in the original but +4 in the port's own class (each side
+  its object); the original's browser functions take their server on the stack; heredocs collapsed backslashes in my
+  edit scripts again (the memory's rule).

@@ -4,6 +4,7 @@
 
 #include "net/net_game.h"
 
+#include <cstdint>
 #include <cstring>
 
 namespace {
@@ -124,7 +125,8 @@ long C_NetVoice::StartServer(IUnknown *session, int sessionType, const _GUID *co
     return Succeeded0(m_server->StartSession(&desc, 0));
 }
 
-long C_NetVoice::StartClient(void *window, IUnknown *session, void *clientConfig, int)
+// (`playback`: the original's last argument, the sound config's playback DirectSound object; the game passes 0.)
+long C_NetVoice::StartClient(void *window, IUnknown *session, void *clientConfig, int playback)
 {
     HRESULT hr = NetCreateInstance(CLSID_NetVoiceClient, CLSCTX_INPROC_SERVER, IID_NetVoiceClient,
                                    reinterpret_cast<void **>(&m_client));
@@ -136,6 +138,7 @@ long C_NetVoice::StartClient(void *window, IUnknown *session, void *clientConfig
     S_VoiceSoundConfig sound = {};
     sound.size = sizeof sound;
     sound.playbackDevice = g_netVoicePlayback;
+    sound.playback = reinterpret_cast<void *>(static_cast<intptr_t>(playback));
     sound.captureDevice = g_netVoiceCapture;
     sound.window = static_cast<HWND>(window);
     hr = m_client->Connect(&sound, clientConfig, DVFLAGS_SYNC);

@@ -127,6 +127,12 @@ SUITES = [
     T("net.ng", "net/build_ng.bat", TMP + r"\ng_diff.exe", needs=("mingw", "original_exe")),
     # (Net part 11b: the DirectPlay session against the original executable, net/sess_diff.cpp.)
     T("net.sess", "net/build_sess.bat", TMP + r"\sess_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 12a: the voice chat's wrapper against the original executable, net/voice_diff.cpp.)
+    T("net.voice", "net/build_voice.bat", TMP + r"\voice_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 12b: the firewall against the original executable, net/fw_diff.cpp.)
+    T("net.fw", "net/build_fw.bat", TMP + r"\fw_diff.exe", needs=("mingw", "original_exe")),
+    # (Net part 12c: the LAN search, reporting and CD-key checks against the original executable, net/search_diff.cpp.)
+    T("net.search", "net/build_search.bat", TMP + r"\search_diff.exe", needs=("mingw", "original_exe")),
     T("script_module", "script_module/build.bat", TMP + r"\script_module_test.exe",
       tree_copy="script_module/script_module_test.exe"),
     T("controls", "script_module/build_controls.bat", TMP + r"\controls_test.exe",
