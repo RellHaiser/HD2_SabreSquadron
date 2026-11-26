@@ -163,9 +163,10 @@ uint32_t PlayerFrame(const uint8_t *p) { return g_side ? At<uint32_t>(p, 0x40) :
 int PlayerKey(const uint8_t *p) { return g_side ? At<int>(p, 0x4C) : reinterpret_cast<const C_TrackPlayer *>(p)->m_keyIndex; }
 int PlayerPathIndex(const uint8_t *p) { return g_side ? At<int>(p, 0x8060) : reinterpret_cast<const C_TrackPlayer *>(p)->m_pathIndex; }
 
-// Whether an update of `ms` takes the player past its track's last segment: Advance then builds the path of the last
-// key, reading the key after the end in both programs (garbage; now and then a crash, the cursor running on). Found by
-// running Advance's steps on a copy of the player in the port's code.
+// Whether an update of `ms` takes the player to the end of its last path with time left: the original then walks that
+// path again and, with time still left, builds the path of the last key, reading the key after the end (garbage; now
+// and then a crash, the cursor running on); the port's fix stops it there (PortPastEndCheck). Found by running the
+// original's Advance steps on a copy of the player in the port's code.
 bool UpdatePassesEnd(const uint8_t *p, int ms)
 {
     const uint8_t *t = PlayerTrack(p);
@@ -210,7 +211,9 @@ bool UpdatePassesEnd(const uint8_t *p, int ms)
     }
     float remaining = copy->MoveAlongPath(pos, ms * 0.001f);
     while (remaining != 0.0f) {
-        if (++copy->m_keyIndex >= count - 1)
+        // (Reaching the key before the last with time left: the original walks the previous path again, then reads past
+        // the keys; the port's fix stops there.)
+        if (++copy->m_keyIndex >= count - 2)
             return true;
         copy->BuildPath(copy->m_keyIndex);
         copy->m_pathIndex = 0;
@@ -918,6 +921,45 @@ void SetUpTrack()
     std::printf("tk_diff: %d missions with tracks\n", int(g_trackMissions.size()));
 }
 
+// The port's fixes of the original's reads past a track's keys (the cases leave them out: the original reads garbage
+// there), checked on the port alone: updates past the end stop at the key before the last; a path from a key without a
+// next one is refused; no player on a track without keys. (Build with -D_GLIBCXX_ASSERTIONS to have a read past the
+// keys abort.)
+void PortPastEndCheck()
+{
+    g_side = 0;
+    C_TrackModule &m = g_trackModule;
+    m.AddTrack("past end");
+    C_Track *track = m.FindTrack("past end");
+    S_quat rot;
+    rot.Identity();
+    for (int k = 0; k < 4; ++k)
+        track->AddKey(S_vector(float(k) * 3.0f, 0.0f, float(k % 2)), rot, 5.0f);
+    m.AddTrack("no keys");
+    C_TrackPlayer *player = m.CreatePlayer("past end", nullptr, nullptr);
+    bool ok = player != nullptr && m.CreatePlayer("no keys", nullptr, nullptr) == nullptr;
+    for (int i = 0; ok && i < 4; ++i)
+        player->Update(100000);
+    const S_vector end = track->GetKey(2).pos;
+    ok = ok && player->GetKeyIndex() == 2 && player->m_curPos.x == end.x && player->m_curPos.y == end.y &&
+         player->m_curPos.z == end.z;
+    if (ok) {
+        player->BuildPath(3);
+        player->BuildPath(7);
+        player->BuildPath(-1);
+        player->Update(100000);
+        ok = player->GetKeyIndex() == 2;
+    }
+    ++checks;
+    if (!ok) {
+        ++failures;
+        std::printf("FAIL the port past a track's end: key %d\n", player ? player->GetKeyIndex() : -9);
+    }
+    if (player)
+        m.RemovePlayer(player);
+    m.FreeTracks();
+}
+
 }  // namespace H
 
 int main()
@@ -950,6 +992,7 @@ int main()
     new (&reinterpret_cast<C_game *>(g_portGameBuf)->m_missionName) C_str();
     SetUp();
     SetUpTrack();
+    PortPastEndCheck();
     CreateThread(nullptr, 0, Watchdog, nullptr, 0, nullptr);
     for (int n = 0; n < cases; ++n)
         RunTkCase(RandomTkCase());

@@ -296,7 +296,9 @@ void C_TrackPlayer::SubdivideBezier(const S_vector &p0, const S_vector &p1, cons
 
 void C_TrackPlayer::BuildPath(int keyIndex)
 {
-    if (keyIndex + 2 == m_track->NumKeys())
+    // Fix: no path from a key without a next one but the last (the original tests only for the key
+    // before the last; a loaded player's key past a shorter track of its name reads past the keys).
+    if (keyIndex < 0 || keyIndex + 2 >= m_track->NumKeys())
         return;
 
     const S_TrackKey &key0 = m_track->GetKey(keyIndex);
@@ -364,9 +366,14 @@ S_vector C_TrackPlayer::Advance(const S_vector &from, float time)
 
     float remaining = MoveAlongPath(pos, time);
     while (remaining != 0.0f) {
-        const int finished = m_keyIndex++;
-        if (finished + 2 == m_track->NumKeys())
-            pos = m_track->GetKey(m_track->NumKeys() - 1).pos;
+        ++m_keyIndex;
+        // Fix: the player stops at the end of the last path built, the key before the last (Update
+        // moves it no further). The original builds no path there (BuildPath's early return) and
+        // walks the previous segment's path again from where it stands; with time still left, it
+        // goes on to the last key, puts the player there and builds a path from it to the key after
+        // the end, reading past the keys (garbage; now and then a crash or a cursor running on).
+        if (m_keyIndex + 2 >= m_track->NumKeys())
+            break;
         BuildPath(m_keyIndex);
         m_pathIndex = 0;
         remaining = MoveAlongPath(pos, remaining);
@@ -512,7 +519,8 @@ C_TrackPlayer *C_TrackModule::CreatePlayer(const char *trackName, I3D_frame *fra
     }
 
     C_Track *track = FindTrack(trackName);
-    if (!track)
+    // Fix: not on a track without keys (the original's constructor reads the first through null).
+    if (!track || track->NumKeys() == 0)
         return nullptr;
 
     C_TrackPlayer *player = new C_TrackPlayer(track, frame, parent);
