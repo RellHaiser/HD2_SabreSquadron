@@ -7,7 +7,8 @@ MUT_HARNESS script, MUT_EXTRA_SRCS original_exe.cpp and jk_calls.s, MUT_LDFLAGS 
 engines' list in made saves, the volumes' fields, the input and HUD bytes, the frames' scale, the sound files' names,
 odd frame times, game times at the stages' edges, loads of the case's previous save), 1,700 after it was widened again (view
 directions and bomber headings tiny in two components or odd, static rays hitting at their ends, a chunk after the
-properties). The 229 left:
+properties), 1,708 with a marker chunk after each save, the reader's place after each load, made saves with a
+velocity, a foreign chunk holding a health entry and an entry after the bomber's. The 221 left:
 - The port's fixes: long, empty and truncated debris names, which leave a debris without its frame (1206, 1208 num;
   1209 del, num; 1210 cmp; 1215 del; 1216 num, del; 1217 cmp, num, arith; 1219 del, num); model files failing to open:
   the camera path's and the fighter's (1470, 1471, 1797, 1798 del; 1799, 1846 bool); a missing seat dummy (638 del,
@@ -23,11 +24,11 @@ properties). The 229 left:
 - Not given, inputs the test lacks: nose-up, scaled or doubly tiny bomber headings (419 num; 421 neg; 423, 424
   del, arith; 426 del; 428 num); a model reopened without a blade or an engine part (290, 291 num, del, code, code2;
   509 num, code; 513 num); an engine or a row head first in the parts' order (946, 964 num); a moving bomber (1272 num,
-  code; 2111 num; 2113 del; 2236 del, num); the camera off the origin (1352 arith, code2); the input already off (1179
+  code; 2111 num); the camera off the origin (1352 arith, code2); the input already off (1179
   del); fighter damage under 1 (1608 num); health exactly 25 % with surplus engines (1130 cmp); the interceptors'
-  health kept over a restart (319 del); made saves with a path name, stage 3, foreign or trailing chunks, a stray byte
-  (1551 del; 861, 2220 and; 2228 cmp, num); a property chunk's last byte (252 num); chunks after the save and the
-  load (2211, 2212, 2221, 2305, 2321 del); a two-character "...d" name (906 cmp, num); a null fall animation (2029
+  health kept over a restart (319 del); made saves with a path name, stage 3 (the original's update then loops for ever), a
+  stray byte (1551 del; 861 and; 2228 num); a property chunk's last byte (252 num); the load's last Ascends (2305, 2321
+  del); a two-character "...d" name (906 cmp, num); a null fall animation (2029
   del); the creator's registration (2339 del, code); the seat flags before the first start (89 num); seat 5 past the
   weapons (614 and: the zeroing allocator hides it); the dedicated build (1974 del; 1975 num, del).
 - Not given, contrived: exact float edges (94 num; 96, 113, 408, 422, 1258, 1353 cmp; 446 num; 447 del, num: a

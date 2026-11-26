@@ -5,14 +5,15 @@ MUT_LDFLAGS -Wl,--image-base=0x20000000; MUT_PASS "sg_diff: .*, N checks, 0 fail
 693 mutants, 82 not building; 538 of the 611 building killed at first, 545 after the test was widened (the trackers'
 view test now and then writing nothing or a status of 99, as the real one; CanSee's visible preset false half the
 time), 548 after it was widened again (targets set alive and not alive the more often, rays hitting the first
-actors, the targets' own, the more often). The 63 left:
+actors, the targets' own, the more often), 551 with fixed sequences run
+first (observers of masks 1 and 0 about a tracker hidden and removed, a tracker registered twice, regular pairs).
+The 60 left:
 - The port's fixes: a null target's part count in CanSee (252 num) and a tracker without a body frame (450 neg, 451
   bool, 452 del): the original reads through null there.
 - Not given: two volumes of one short name with EnumFrames' real answers (56 num); a human's part retested exactly at its next test (286 cmp); a tracker's view[0]
   at 100 when its last part comes round (403 del); a tracker's reverse update of a removed target through a frame
   registered twice (417 bool); a tracker's part retested exactly at its next test (423 num); a tracker's second positive view whose
-  status is not written (433 arith: killed by the first widening, not by the last); observers of mask 1,
-  or of mask 0 with a frame, seeing a target removed or hidden (801 num, and; 872 num).
+  status is not written (433 arith: killed by the first widening, not by the last).
 - Not compared: the module's name (13 text); g_sightTime's first value (14 num: the test sets it each case); Print's
   numbers (287 arith: the release build's Print is empty); Clear's and the replaced objects' frees (511, 514 num; 512,
   515, 676, 741 del).

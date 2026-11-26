@@ -4,10 +4,9 @@ Run: on script/build_tr.bat, the full 1,500 cases; MUT_HARNESS script, MUT_EXTRA
 tr_calls.s, MUT_LDFLAGS -Wl,--image-base=0x20000000; MUT_PASS "tr_diff: .*, N checks, 0 failures".
 
 147 mutants, 11 not building; 114 of the 136 building killed at first, 116 after the test was widened (tracks of
-exact steps). The 20 left:
-- Not given: exact float values: squares of exactly 1e-8f (69, 82, 413 cmp), of exactly 1.5 or 1.0 at a radius not
-  an integer (415, 417 num), a length exactly the radius (420 cmp), +0 against -0 in a tangent (450 cmp); a hair
-  segment along z with the train off its key (88 num); Move and Update of 0 across segments of no time (243 cmp).
+exact steps), 121 with the key functions probed in every case (radii 1.1 to 1.5 about exact offsets). The 15
+left:
+- Not given: exact float values: squares of exactly 1e-8f (69, 82, 413 cmp), +0 against -0 in a tangent (450 cmp).
 - Equivalent: a square within 1e-8 of 1 is exactly 1 in float, normalised by 1 (71, 80, 415 cmp, arith); KeyNormalize's
   tiny branch comes only with a zero segment, whose distance is infinite or NaN, only the signs read (86, 88 del); <= on
   a component known non-zero (86, 88 cmp); a clamp assigning the value it has (422 num)."""

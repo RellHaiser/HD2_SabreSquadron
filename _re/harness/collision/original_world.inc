@@ -42,5 +42,11 @@ template <class F, class S> auto WithOriginalWorldMapped(bool grid, S substitute
     std::memcpy(world, static_cast<const void *>(&g_collisionWorld), 0x3EC);
     *reinterpret_cast<const S_CollisionGrid **>(world + 0x3EC) = g ? &copy : nullptr;
     std::memset(world + 0x3F0, 0, 0x42C - 0x3F0);
+    // (The grid unhooked on the way out: the shadow lives in this frame; left behind, a later call of the original's
+    // that reads the world without mapping it would walk a dead stack frame's cells.)
+    struct S_Unhook {
+        uint8_t *world;
+        ~S_Unhook() { *reinterpret_cast<const S_CollisionGrid **>(world + 0x3EC) = nullptr; }
+    } unhook{world};
     return f();
 }

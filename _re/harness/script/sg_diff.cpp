@@ -388,6 +388,73 @@ S_SgCase RandomSgCase()
     return c;
 }
 
+// Fixed sequences the random mix seldom meets, run before the random cases (their parts by the seed). The ops by their
+// fields: AddObserver / AddTarget (c: 0 a tracker's frame, 5 a human's; a: which; d: 2 mask 0xF, 0 mask 1, 4 mask 0),
+// Tick (a: -1 4000 ms, 5 1000 ms), TestNow (b observer, c target), TargetState (b target, c: 0/1 alive/not, 5 hidden),
+// RemoveTarget (b).
+S_SgOp Op(int kind, int a, int b, int c, int d)
+{
+    S_SgOp op;
+    op.kind = kind;
+    op.a = a;
+    op.b = b;
+    op.c = c;
+    op.d = d;
+    return op;
+}
+std::vector<S_SgCase> ScriptedSgCases()
+{
+    std::vector<S_SgCase> cases;
+    auto add = [&](float sightTime, std::vector<S_SgOp> ops) {
+        S_SgCase c;
+        c.partSeed = U32();
+        c.sightTime = sightTime;
+        c.ops = std::move(ops);
+        cases.push_back(c);
+    };
+    // (Each with every human and tracker of the first few: the world's actors may share a frame, and an actor is its
+    // own friend, never tested.)
+    for (int human = 0; human < 3; ++human)
+        for (int tracker = 0; tracker < 2; ++tracker) {
+            const int other = (human + 1) % 3;
+            // Observers of mask 1 and of mask 0 seeing a tracker, the tracker hidden, alive and not, then removed.
+            // (The mask-0 observer after the target: AddTarget gives no record to one, out of step then.)
+            std::vector<S_SgOp> masks = {Op(OP_ADD_OBSERVER, human, 0, 5, 0), Op(OP_ADD_TARGET, tracker, 0, 0, 2),
+                                         Op(OP_ADD_OBSERVER, other, 0, 5, 4), Op(OP_TICK, -1, 0, 0, 0)};
+            for (int round = 0; round < 3; ++round)
+                for (int state : {5, 0, 1, 0})
+                    for (const S_SgOp &op : {Op(OP_TEST_NOW, 0, 0, 0, 0), Op(OP_TEST_NOW, 0, 1, 0, 0), Op(OP_TICK, 5, 0, 0, 0),
+                                             Op(OP_TARGET_STATE, 0, 0, state, 0)})
+                        masks.push_back(op);
+            masks.push_back(Op(OP_REMOVE_TARGET, 0, 0, 0, 0));
+            masks.push_back(Op(OP_TEST_NOW, 0, 0, 0, 0));
+            masks.push_back(Op(OP_TICK, 5, 0, 0, 0));
+            add(1.0f, masks);
+            // A tracker registered as an observer twice (the second in a later slot), a target of its own frame and a
+            // human's, its own removed, ticks: the reverse updates of a removed target.
+            std::vector<S_SgOp> twice = {Op(OP_ADD_OBSERVER, tracker, 0, 0, 2), Op(OP_ADD_OBSERVER, human, 0, 5, 0),
+                                         Op(OP_ADD_OBSERVER, tracker, 0, 0, 2), Op(OP_ADD_TARGET, tracker, 0, 0, 2),
+                                         Op(OP_ADD_TARGET, other, 0, 5, 2), Op(OP_TICK, -1, 0, 0, 0), Op(OP_TICK, 5, 0, 0, 0),
+                                         Op(OP_REMOVE_TARGET, 0, 0, 0, 0)};
+            for (int k = 0; k < 8; ++k)
+                twice.push_back(Op(OP_TICK, 5, 0, 0, 0));
+            add(0.0f, twice);
+            // A regular pair (a human observer, a tracker target; and the reverse), sight time 0: Tick(4000), then
+            // 1000 ms ticks, the parts coming round exactly at their next tests.
+            for (const bool reverse : {false, true}) {
+                std::vector<S_SgOp> pair = {reverse ? Op(OP_ADD_OBSERVER, tracker, 0, 0, 2) : Op(OP_ADD_OBSERVER, human, 0, 5, 2),
+                                            reverse ? Op(OP_ADD_TARGET, human, 0, 5, 2) : Op(OP_ADD_TARGET, tracker, 0, 0, 2)};
+                for (int round = 0; round < 6; ++round) {
+                    pair.push_back(Op(OP_TICK, -1, 0, 0, 0));
+                    for (int k = 0; k < 4; ++k)
+                        pair.push_back(Op(OP_TICK, 5, 0, 0, 0));
+                }
+                add(0.0f, pair);
+            }
+        }
+    return cases;
+}
+
 // (Every live observer's records cover every target: AddObserver skips a null target's, the later ones out of step, and
 // then every program reads past them.)
 bool RecordsInStep()
@@ -724,6 +791,8 @@ int main()
     SetUpSight();
     SetMission("AFRICA1");
     CreateThread(nullptr, 0, Watchdog, nullptr, 0, nullptr);
+    for (const S_SgCase &c : ScriptedSgCases())
+        RunSgCase(c);
     for (int n = 0; n < cases; ++n)
         RunSgCase(RandomSgCase());
     std::string ops;

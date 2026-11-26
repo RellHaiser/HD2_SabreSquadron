@@ -792,11 +792,15 @@ S_TrCase RandomTrCase()
     return c;
 }
 
-// (HD2_TR_PROBE: the port's and the original's FindPointAtDistance on the case's first track, random inputs.)
-void ProbeFindPoint()
+// The track player's key functions called directly on both sides (the case's first track): FindPointAtDistance,
+// TimeToKey, AccelerateTowardsKey, AdvanceAlongKeys; every difference printed and counted a failure. (Radii of exact
+// tenths and, now and then, 1.1 to 1.5 about a centre exactly (1, 0.5, 0.5) or (1, 0, 0) off a key: squares of exactly
+// 1.5 or 1 in the lengths.)
+int ProbeFindPoint()
 {
+    int differ = 0;
     if (g_trackModule.m_tracks.empty() || g_trackModule.m_tracks[0]->NumKeys() < 2)
-        return;
+        return 0;
     C_TrackPlayer port;
     port.SetTrack(g_trackModule.m_tracks[0]);
     static uint8_t orig[0x8080];
@@ -806,8 +810,12 @@ void ProbeFindPoint()
     for (int n = 0; n < 50; ++n) {
         const int key = I(0, keys - 1);
         const S_vector &k = g_trackModule.m_tracks[0]->GetKey(key).pos;
-        const S_vector center(k.x + float(I(-50, 50)) * 0.1f, k.y + float(I(-10, 10)) * 0.1f, k.z + float(I(-50, 50)) * 0.1f);
-        const float radius = float(I(1, 200)) * 0.1f;
+        const int form = I(0, 9);
+        const S_vector center = form == 0   ? S_vector(k.x + 1.0f, k.y + 0.5f, k.z + 0.5f)
+                                : form == 1 ? S_vector(k.x + 1.0f, k.y, k.z)
+                                            : S_vector(k.x + float(I(-50, 50)) * 0.1f, k.y + float(I(-10, 10)) * 0.1f,
+                                                       k.z + float(I(-50, 50)) * 0.1f);
+        const float radius = form < 3 ? float(I(11, 15)) * 0.1f : float(I(1, 200)) * 0.1f;
         int pk = -1, ok = -1;
         const S_vector pr = port.FindPointAtDistance(key, center, radius, &pk);
         S_vector orr;
@@ -816,7 +824,7 @@ void ProbeFindPoint()
         if (key >= 1) {
             const float pt = port.TimeToKey(center, key);
             const float ot = OriginalAt<float(TC *)(void *, const S_vector *, int)>(0x00402bd0)(orig, &center, key);
-            if (std::memcmp(&pt, &ot, 4) != 0)
+            if (std::memcmp(&pt, &ot, 4) != 0 && ++differ)
                 std::printf("probe TimeToKey %d: port %.9g original %.9g\n", key, pt, ot);
         }
         if (key + 1 < keys) {
@@ -824,7 +832,7 @@ void ProbeFindPoint()
             const S_vector pa = port.AccelerateTowardsKey(center, key, time);
             S_vector oa;
             OriginalAt<void *(TC *)(void *, S_vector *, const S_vector *, int, float)>(0x004030d0)(orig, &oa, &center, key, time);
-            if (std::memcmp(&pa, &oa, 12) != 0)
+            if (std::memcmp(&pa, &oa, 12) != 0 && ++differ)
                 std::printf("probe Accelerate %d: port %.9g %.9g %.9g original %.9g %.9g %.9g\n", key, pa.x, pa.y, pa.z, oa.x, oa.y,
                             oa.z);
         }
@@ -836,14 +844,15 @@ void ProbeFindPoint()
             const S_vector pv = port.AdvanceAlongKeys(center, ms, &pd);
             S_vector ov;
             OriginalAt<void *(TC *)(void *, S_vector *, const S_vector *, int, bool *)>(0x00402a70)(orig, &ov, &center, ms, &od);
-            if (std::memcmp(&pv, &ov, 12) != 0 || pd != od || port.GetKeyIndex() != Mut<int>(orig, 0x4C))
+            if ((std::memcmp(&pv, &ov, 12) != 0 || pd != od || port.GetKeyIndex() != Mut<int>(orig, 0x4C)) && ++differ)
                 std::printf("probe Advance %d %d: port %.9g %.9g %.9g %d %d original %.9g %.9g %.9g %d %d\n", key, ms, pv.x, pv.y, pv.z,
                             int(pd), port.GetKeyIndex(), ov.x, ov.y, ov.z, int(od), Mut<int>(orig, 0x4C));
         }
-        if (std::memcmp(&pr, &orr, 12) != 0 || pk != ok)
+        if ((std::memcmp(&pr, &orr, 12) != 0 || pk != ok) && ++differ)
             std::printf("probe key %d radius %g: port %.9g %.9g %.9g (%d) original %.9g %.9g %.9g (%d)\n", key, radius, pr.x, pr.y,
                         pr.z, pk, orr.x, orr.y, orr.z, ok);
     }
+    return differ;
 }
 using T_TrInt = void(TC *)(void *, int);
 using T_TrChunk = bool(TC *)(void *, void *);
@@ -1062,8 +1071,14 @@ void RunTrCase(const S_TrCase &c)
     if (trace)
         std::puts("trace points");
     MakePoints(c.points);
-    if (std::getenv("HD2_TR_PROBE"))
-        ProbeFindPoint();
+    // (The key functions probed directly in every case: HD2_TR_NO_PROBE leaves them out.)
+    if (!std::getenv("HD2_TR_NO_PROBE")) {
+        ++checks;
+        if (const int d = ProbeFindPoint()) {
+            ++failures;
+            std::printf("FAIL case %d: %d probes of the key functions differ\n", g_trCases, d);
+        }
+    }
     if (trace)
         std::puts("trace sides");
     S_Result r;

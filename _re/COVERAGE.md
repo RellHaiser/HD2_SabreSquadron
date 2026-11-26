@@ -7206,3 +7206,24 @@ came from. From this part on the network code is compared with the original exec
   (85 left); sight 4 killed (62 of the 66 kept, one killed by the first widening surviving again: 63 left). `mutate_tr2.py`'s rows on KeyDistance and
   AccelerateTowardsKey widened (track part 1 repeats their text), `mutate_sw1.py`'s on VERT's heading follow
   HeadingSin / HeadingCos.
+
+## Harness fixes and more widening (2026-11-26, second pass)
+
+- **human.dead crashed in the main checkout only:** the dead body's compare deferred the aligned frees but not the plain
+  ones; the port's StartDeath freed the ragdoll bodies' bone tables for real, the heap handed the memory out again (the
+  original world's grid shadow), and the original's run freed the same pointers once more. Now both sides' plain
+  deletes are deferred while a call is compared and made once each after it (`dead_test.inc`, `base3_test.inc`).
+  Also: `WithOriginalWorldMapped` unhooks its shadow grid on the way out (it left the original's world pointing into
+  a dead stack frame), StartDeath's original side runs with the world mapped, and `HUMAN_GUARD_ALLOC` puts every
+  aligned block and the original's `new` blocks flush against a no-access page (a tool for crashes that move with the
+  layout). Checked under twelve environment sizes.
+- **Junkers:** a marker chunk after each save, the reader's next chunk after each load; made saves with a velocity, a
+  foreign chunk holding a health entry and an entry after the bomber's chunk (8 more killed, 221 left). Not added: the
+  parts' stages (out of range the original's update loops for ever; in range its groups fall out of step and it
+  divides by 0).
+- **Train:** the key functions probed against the original in every case, failures counted (radii 1.1 to 1.5 about
+  exact offsets): 6 + 5 more killed (94 and 15 left).
+- **Sight:** fixed sequences run first (observers of masks 1 and 0 about a tracker hidden and removed, a tracker
+  registered twice, regular pairs, over every human and tracker): 3 more killed (60 left).
+- **Suites:** `run_suites.py` finds the equipment save in the user's temp folder when TEMP points elsewhere (the
+  equipment, items and items.human suites had been skipped as missing a prerequisite; all pass).

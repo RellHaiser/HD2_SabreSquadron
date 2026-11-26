@@ -10,10 +10,68 @@
 #include "game/human_stains.h"
 
 bool g_harnessKeepFrees = false;
+// The plain deletes made while a call is compared are deferred, both sides' (the original's through base3_test.inc's
+// O_Delete), and made once each when the compare ends (HarnessFlushFrees): the ragdoll bodies' bone tables were freed for real by
+// the port's run, the heap handed the memory out again, and the original's run, from the same restored state, freed
+// the same pointers once more (a double free into live blocks: a crash that moved with the layout). (A fixed table: a
+// vector would allocate inside the delete; past its end, blocks are leaked.)
+void *g_deferredFrees[1 << 16];
+int g_deferredFreeCount = 0;
+void HarnessDeferFree(void *p)
+{
+    if (p && g_deferredFreeCount < int(sizeof g_deferredFrees / sizeof g_deferredFrees[0]))
+        g_deferredFrees[g_deferredFreeCount++] = p;
+}
+void HarnessFlushFrees()
+{
+    if (g_harnessKeepFrees || g_deferredFreeCount == 0)
+        return;
+    std::sort(g_deferredFrees, g_deferredFrees + g_deferredFreeCount);
+    void *last = nullptr;
+    for (int i = 0; i < g_deferredFreeCount; ++i)
+        if (g_deferredFrees[i] != last)
+            std::free(last = g_deferredFrees[i]);
+    g_deferredFreeCount = 0;
+}
+void operator delete(void *p) noexcept
+{
+    if (g_harnessKeepFrees) {
+        HarnessDeferFree(p);
+        return;
+    }
+    HarnessFlushFrees();
+    std::free(p);
+}
+void operator delete(void *p, size_t) noexcept { operator delete(p); }
+// (HUMAN_GUARD_ALLOC: each aligned block ends flush, to its alignment, against a no-access page, so that a read or a
+// write past it faults at once: the tool for crashes that move with the layout.)
+std::set<void *> g_guardedAligned;
+void *HarnessAlignedMalloc(size_t size, size_t alignment)
+{
+    static const bool guard = std::getenv("HUMAN_GUARD_ALLOC") != nullptr;
+    if (!guard)
+        return (_aligned_malloc)(size, alignment);
+    const size_t a = alignment < 8 ? 8 : alignment;
+    const size_t rounded = (size + a - 1) & ~(a - 1);
+    const size_t pages = (rounded + 0xFFF) / 0x1000 + 1;
+    auto *base = static_cast<uint8_t *>(VirtualAlloc(nullptr, pages * 0x1000, MEM_RESERVE, PAGE_NOACCESS));
+    VirtualAlloc(base, (pages - 1) * 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    void *p = base + (pages - 1) * 0x1000 - rounded;
+    g_guardedAligned.insert(p);
+    return p;
+}
 void HarnessAlignedFree(void *p)
 {
-    if (!g_harnessKeepFrees)
-        (_aligned_free)(p);
+    if (g_harnessKeepFrees)
+        return;
+    if (g_guardedAligned.erase(p)) {
+        // (Decommitted, never released: the range is not handed out again, a use after the free faults.)
+        MEMORY_BASIC_INFORMATION info;
+        VirtualQuery(p, &info, sizeof info);
+        VirtualFree(info.AllocationBase, info.RegionSize, MEM_DECOMMIT);
+        return;
+    }
+    (_aligned_free)(p);
 }
 
 namespace {
@@ -384,11 +442,16 @@ void TestDeadStart()
                      return 0;
                  },
                  [&](void *) {
-                     OriginalAt<T_DStart>(0x007b0d70)(p, flags, &force.x, anim, kind, origCarrier);
+                     // (The original's world mapped as the port's: StartDeath asks it for the volume under the body.)
+                     WithOriginalWorldMapped(true, [](S_CollisionVolume *v) { return v; }, [&] {
+                         OriginalAt<T_DStart>(0x007b0d70)(p, flags, &force.x, anim, kind, origCarrier);
+                         return 0;
+                     });
                      origSlide = SlidePointsOf(pose);
                      return 0;
                  });
         g_harnessKeepFrees = false;
+        HarnessFlushFrees();
         g_softDiff = false;
         IkNote("StartDeath slide points", portSlide.size() != origSlide.size()
                                               ? std::string("count")
@@ -470,6 +533,7 @@ void TestDeadAnim()
                  [&](void *) { OriginalAt<T_DVoid>(0x007b40e0)(p); return 0; });
         g_softDiff = false;
         g_harnessKeepFrees = false;
+        HarnessFlushFrees();
     }
 }
 

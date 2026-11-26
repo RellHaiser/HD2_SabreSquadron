@@ -7,8 +7,40 @@
 namespace {
 
 const uint32_t O_SOUNDS = 0x194;
-void *O_New(size_t size) { return std::malloc(size ? size : 1); }
-void O_Delete(void *p) { std::free(p); }
+// (HUMAN_GUARD_ALLOC: each of the original's blocks ends flush, to 8 bytes, against a no-access page, so that a write
+// or read past it faults at once instead of corrupting the heap: the tool for crashes that move with the layout.)
+std::set<void *> g_guardedBlocks;
+void *O_New(size_t size)
+{
+    static const bool guard = std::getenv("HUMAN_GUARD_ALLOC") != nullptr;
+    if (!guard)
+        return std::malloc(size ? size : 1);
+    const size_t rounded = (size + 7) & ~size_t(7);
+    const size_t pages = (rounded + 0xFFF) / 0x1000 + 1;
+    auto *base = static_cast<uint8_t *>(VirtualAlloc(nullptr, pages * 0x1000, MEM_RESERVE, PAGE_NOACCESS));
+    VirtualAlloc(base, (pages - 1) * 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    void *p = base + (pages - 1) * 0x1000 - rounded;
+    g_guardedBlocks.insert(p);
+    return p;
+}
+void O_Delete(void *p)
+{
+#ifdef HUMAN_DEAD
+    // (Deferred while a call is compared, as the port's: dead_test.inc; a guarded block is leaked then.)
+    if (g_harnessKeepFrees) {
+        if (!g_guardedBlocks.count(p))
+            HarnessDeferFree(p);
+        return;
+    }
+#endif
+    if (!g_guardedBlocks.erase(p)) {
+        std::free(p);
+        return;
+    }
+    MEMORY_BASIC_INFORMATION info;
+    VirtualQuery(p, &info, sizeof info);
+    VirtualFree(info.AllocationBase, 0, MEM_RELEASE);
+}
 int O_Rand() { return std::rand(); }
 void __attribute__((thiscall)) O_MorphInit(void *self, void *) { Log(self, "MorphInit"); }
 void __attribute__((thiscall)) O_MorphDone(void *self) { Log(self, "MorphDone"); }

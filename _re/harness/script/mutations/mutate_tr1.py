@@ -3,7 +3,8 @@ Run: on script/build_tr.bat, the full 1,500 cases; MUT_HARNESS script, MUT_EXTRA
 tr_calls.s, MUT_LDFLAGS -Wl,--image-base=0x20000000; MUT_PASS "tr_diff: .*, N checks, 0 failures".
 
 819 mutants, 97 not building; 616 of the 722 building killed at first, 622 after the test was widened (tracks of
-exact steps, 1,000-character wagon names, short gap entries, saved names of length 1). The 100 left:
+exact steps, 1,000-character wagon names, short gap entries, saved names of length 1), 628 with the key
+functions probed in every case. The 94 left:
 - The port's fixes: long saved track names (432 and; 435 del; 439 arith; 440 cmp, num, arith; 441 del, num, arith);
   places past the wagons or for frameless wagons (456 cmp, and); a frameless wagon saved (415 num); a connecting rod
   without its crosshead (706 and); moving or placing without the first wagon's frame, a track or keys (579 num, and;
@@ -12,8 +13,7 @@ exact steps, 1,000-character wagon names, short gap entries, saved names of leng
 - Not given: exact float values: squares of exactly 1e-8f or 1.5 (64, 77 cmp; 75 num), the camera exactly 48 m
   away (232 cmp), a link at exactly 60 degrees (640 cmp), a point exactly at the reach or the train's length (661, 673
   cmp), a distance of exactly 0.001 (761 cmp), exactly 10 km/h (825 cmp), the brake timer exactly 1 (803 num); tiny or
-  zero vectors whose normalised result matters (80 code; 81 del, num, code; 82 cmp, num; 83 del, num; 85 del, cmp,
-  num); the process's first crosshead check (52 num, 53 bool); odd property chunks: empty, 1-byte or trailing-byte
+  zero vectors whose normalised result matters (83 del, num; 85 del, cmp, num); the process's first crosshead check (52 num, 53 bool); odd property chunks: empty, 1-byte or trailing-byte
   ones followed by others (257, 272 num); odd saves: a name of 127 characters without its NUL (443 num), stray bytes after the key (450 num);
   crossheads off x = 0 (711 code); the actor's frame not the front wagon's (765 del); a frameless wagon behind a
   framed first one (779 and); no scene (227 and).

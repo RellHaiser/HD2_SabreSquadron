@@ -977,6 +977,7 @@ struct S_Writer {
         const uint32_t size = uint32_t(out.size() - at);
         std::memcpy(&out[at + 2], &size, 4);
     }
+    void Raw(const void *p, size_t n) { out.append(static_cast<const char *>(p), n); }
     template <class T> void EntryOf(uint16_t id, const T &v)
     {
         Begin(id);
@@ -1354,6 +1355,10 @@ std::string RunJkOp(const S_JkOp &op, int index)
         C_chunk save;
         save.Open(file.c_str(), true);
         const bool rs = o ? OriginalAt<T_JkChunk>(O_JK_SAVE)(b, &save) : j->SaveGame(save);
+        // (A marker chunk after the bomber's: where the save left the writer shows in the bytes.)
+        save.Begin(0x7A7A);
+        save.Write(int(9));
+        save.Ascend();
         save.Close();
         std::string bytes;
         FileText(file, bytes);
@@ -1365,6 +1370,7 @@ std::string RunJkOp(const S_JkOp &op, int index)
         // (Its own file: the case's save before this one, when there is one (this one just made restores what the bomber
         // has already).)
         bool rl = false;
+        unsigned next = 0;
         const int load = op.c % 4;
         const std::string previous = g_previousSave[g_side];
         g_previousSave[g_side] = file;
@@ -1373,7 +1379,10 @@ std::string RunJkOp(const S_JkOp &op, int index)
             if (load >= 2) {
                 S_Writer w;
                 if (load == 2) {
-                    w.EntryOf(0x1234, 5);
+                    // (Another chunk first, a health entry inside it: not the bomber's, not read.)
+                    w.Begin(0x1234);
+                    w.EntryOf(7000, 0.5f);
+                    w.End();
                 } else {
                     w.Begin(1000);
                     w.EntryOf(0x7777, 3);
@@ -1386,8 +1395,17 @@ std::string RunJkOp(const S_JkOp &op, int index)
                         const int engines[5] = {3 + op.d % 3, 2, (op.d / 2) % 3, (op.d / 6) % 3, 0};
                         w.EntryOf(15000, engines);
                     }
+                    // (Now and then a velocity. Not the parts' stages: out of range, the original's update loops for ever;
+                    // in range, its parts' groups fall out of step and it divides by 0.)
+                    if (op.d & 2) {
+                        const float velocity[3] = {1.5f, -2.0f, 0.25f};
+                        w.EntryOf(3000, velocity);
+                    }
                     w.End();
+                    // (An entry after the bomber's chunk: not its own.)
+                    w.EntryOf(7000, 3.0f);
                 }
+                w.EntryOf(0x7A7A, 9);
                 name = F("jk_made%d.sav", index);
                 g_overrides[Lower(name)] = w.out;
             }
@@ -1396,9 +1414,13 @@ std::string RunJkOp(const S_JkOp &op, int index)
             C_chunk chunk;
             chunk.Open(name.c_str(), false);
             rl = o ? OriginalAt<T_JkChunk>(O_JK_LOAD)(b, &chunk) : j->LoadGame(chunk);
+            // (Where the load left the reader: the next chunk's id.)
+            uint16_t after = 0;
+            chunk.Descend(after);
+            next = after;
             chunk.Close();
         }
-        return F("SaveGame -> %d LoadGame %d -> %d bytes ", int(rs), load, int(rl)) + hex;
+        return F("SaveGame -> %d LoadGame %d -> %d next %04x bytes ", int(rs), load, int(rl), next) + hex;
     }
     case OP_RESTART: {
         const bool server = op.c & 1;

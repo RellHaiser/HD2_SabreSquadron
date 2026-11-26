@@ -50,8 +50,11 @@ VCVARS = r"T:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Bu
 TAIL = 256 * 1024
 
 CARS, MISSIONS = "cars", "missions"
-# The equipment suite's save made with the original game (not in the repository): env EQUIPMENT_SAVE, else this.
-EQUIPMENT_SAVE = os.environ.get("EQUIPMENT_SAVE", os.path.join(TEMP, "eq_saves", "original_SMCAM_quick.sav"))
+# The equipment suite's save made with the original game (not in the repository): env EQUIPMENT_SAVE, else this (in
+# %TEMP%, or in the user's own temp folder when TEMP points elsewhere for the builds).
+_EQ_SAVES = [os.path.join(d, "eq_saves", "original_SMCAM_quick.sav")
+             for d in (TEMP, os.path.join(os.environ.get("LOCALAPPDATA", ""), "Temp"))]
+EQUIPMENT_SAVE = os.environ.get("EQUIPMENT_SAVE", next((p for p in _EQ_SAVES if os.path.isfile(p)), _EQ_SAVES[0]))
 # The items suite's table: the items.sav the original game read when that save was made (env ITEMS_SAV).
 ITEMS_SAV = os.environ.get("ITEMS_SAV", r"G:\Hidden & Dangerous 2\Tables\items.sav")
 # The original game executable, unpacked (the collision suites call its functions: collision/original_exe.h).
