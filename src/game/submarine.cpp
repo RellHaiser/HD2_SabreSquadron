@@ -39,7 +39,9 @@ constexpr float TURN_RATE = 0.1f;                       // per s at full sideway
 constexpr float TURN_DECAY = 0.5f;                      // per s
 constexpr float TURN_SCALE = 0.2f;                      // rad per s per (turn * speed)
 constexpr float MOVING_SPEED = 0.01f;                   // |speed| above: the propeller and the engine
-constexpr float FAST_SPEED = 2.4f;                      // |speed| above: the water sounds
+// |speed| above: the water sounds. (The original's double 0x4003333338000000, a little under 2.4f: 2.4f
+// itself is above it.)
+constexpr double FAST_SPEED = 2.3999999761581421;
 constexpr float SURFACE_RANGE = 1.0f;                   // m below the maximum level: at the surface
 
 // The pilot seat's camera keeper's dummy (the car's names).
@@ -789,7 +791,7 @@ void C_Submarine::Move(int frameTime)                   // 0x005e15e0
     if (std::fabs(m_speed) > MOVING_SPEED) {
         if (SetSoundActive(m_engineSound, true))
             SetSoundFrequency(m_engineSound, (std::fabs(m_speed * 0.16666667f) + 1.0f) * 0.5f);
-        if (std::fabs(m_speed) > FAST_SPEED) {
+        if (static_cast<double>(std::fabs(m_speed)) > FAST_SPEED) {
             if (std::fabs(m_position.y - m_maxWaterLevel) > SURFACE_RANGE) {
                 SetSoundActive(m_surfaceSound, false);
                 if (SetSoundActive(m_underwaterSound, true))

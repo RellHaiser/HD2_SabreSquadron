@@ -6979,3 +6979,28 @@ came from. From this part on the network code is compared with the original exec
   offsets (read by member); the original's `dtaSeek` / `dtaWrite` must be redirected for its table reads; a backslash
   in a Bash heredoc collapsed in `build_hf.bat` again.
 
+## Submarine part 1 (the submarines, `submarine.cpp`, 2026-11-25)
+
+- **The build:** `script/build_sb.bat` (`script/sb_diff.cpp`, suite `submarine`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the submarine's calls through `sb_calls.s` / `sb_calls.inc` (`gen_cmd_calls.py sb`). The pilot seat's camera
+  keeper (the camera module's, tested with it) is logged on both sides (its constructor 0x00465f00, Restore 0x00466010
+  and Update 0x00466110 redirected in the original); so are the game's texts.
+- **The cases:** one or two submarines on each side (the original's by its constructor 0x005df000), models under the
+  primary sector with their body, seats (user properties, camera dummies), propeller and hull boxes (dummies with boxes
+  off-centre, visuals after one), some missing; odd orientations (tiny and zero axes). In the case's role: updates and
+  ticks (the game's time advancing), the controls, the seats' virtuals (ExitSeat mostly with someone seated first),
+  FindExit, saves (an entry written after them) and loads (the own file, made ones: another id entered, the climb
+  first), restarts, stops and starts; every third case's submarines destroyed without a stop. The sweeps and the ground
+  answer by turns; each sound slot has its own sound. Compared after each operation: the answer, its calls, every
+  submarine's fields, boxes, seats and sounds, the body, the model and the humans; at the end the world's frames.
+- **The tests:** 1,500 cases (about 535,000 calls, 42 s; seeds 0, 1, 2, 4). **Coverage:** every line but the null
+  checks of a frame or a box (none is made) and an exit within 1e-4 m of the seat (the facing's tiny branches).
+- **Port bugs found:** the water sounds' speed was 2.4f; the original compares with the double 0x4003333338000000, a
+  little under it, so a speed of 2.4f itself is fast (fixed: the double, compared as a double).
+- **The original's weaknesses (the port's fixes, not given):** without a pilot seat the camera dummy is read through
+  null; a short entry in a load stores an unset local, a short version entry goes on with a stack value; the first
+  hull box that is not a dummy takes an unset centre. Stack words: the body's w without a body, the exit's w's, the
+  sound requests' w (left out of the comparison).
+- **Harness lessons (my mistakes):** a frame's SetPos answer must make its children's world matrices stale (the
+  engine's does); one sound for every slot hid the slots' mix-ups; a test that closes its file right after the save
+  cannot see a chunk the save leaves open, nor one that stops every submarine the destructor's own reset.
