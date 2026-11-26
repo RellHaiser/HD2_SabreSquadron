@@ -1,18 +1,18 @@
 """Seat weapon part 1: the weapons at vehicles' seats (game/seat_weapon.cpp) against the original's (script/sw_diff.cpp,
 suite seat.weapon.orig). Run: on script/build_sw.bat, the full 1,500 cases; MUT_HARNESS script, MUT_EXTRA_SRCS
 original_exe.cpp and sw_calls.s, MUT_LDFLAGS -Wl,--image-base=0x20000000; MUT_PASS "sw_diff: .*, N checks, 0 failures".
+HD2_SW_CARS: export_cars.py's car models (the cases on the shipped rigs; run_suites.py sets it).
 
 1,218 mutants, 162 not building; 962 of the 1,056 building killed at first, 967 after the test was widened (HORT's
-sound groups 0, an empty and a missing stop group). The 89 left:
+sound groups 0, an empty and a missing stop group), 971 after it was widened again (a spread of exactly 1.5,
+view headings a hair under 0, cases on the shipped cars' rigs). The 85 left:
 - The port's fixes: a failed weapon's item, animations and shells released by the destructor (237, 240, 243 del: the
   test stops every weapon first, the original leaks them); a muzzle-less barrel's animation released (324 del: such a
   barrel is given none); an item without a component has no flash, spread or delay (283, 870, 879 num: the original
   reads through null); FireShot's barrel out of range refused (896 cmp, and; 897 bool: the original reads past the
   barrels); no net object, no message (1249 del, 1250 bool: the original queues through null).
 - Not given: a settled turret's idle time exactly 300 or 301 ms (73 num, 777 cmp); a third-person aim hit 3 to 3.67 m
-  from the muzzle, or exactly 3 m (80 num, 856 cmp); a view heading a hair under 0 against an aim heading of 0 (166
-  cmp); squares of exactly 1.5 and 1e-8 (122 num, 124 cmp); CanAim's sideways 1e-5 targets with the turret turned and a
-  limit between the angles (126, 127 code); a barrel with "up0" and no "down" on an unrotated VERT (650, 1076 cmp); a
+  from the muzzle, or exactly 3 m (80 num, 856 cmp); a square of exactly 1e-8 (124 cmp); a barrel with "up0" and no "down" on an unrotated VERT (650, 1076 cmp); a
   target exactly at VERT (1068 del); CanTurnTo's and CanTiltTo's normalisations, which change only the rounding of
   AngleTo or atan2, CanAim's answer only at a limit (1047, 1051 code; 1049, 1072 del; 1055 del, code); the dedicated
   build's matrix read (944 del).
@@ -638,12 +638,12 @@ MUTATIONS = [
     (T, 'G 655 bool', '            turned = true;\r\n            next = std::max(std::min(next, MAX_ELEVATION), -MAX_ELEVATION);\r\n            const double across = std::cos(static_cast<double>(next));\r\n', '            turned = false;\r\n            next = std::max(std::min(next, MAX_ELEVATION), -MAX_ELEVATION);\r\n            const double across = std::cos(static_cast<double>(next));\r\n'),
     (T, 'G 656 del', '            next = std::max(std::min(next, MAX_ELEVATION), -MAX_ELEVATION);\r\n            const double across = std::cos(static_cast<double>(next));\r\n', '            ;\r\n            const double across = std::cos(static_cast<double>(next));\r\n'),
     (T, 'G 658 del', '            S_vector up;\r\n', '            ;\r\n'),
-    (T, 'G 659 del', '            up.x = -static_cast<float>(std::sin(heading) * across);\r\n', '            ;\r\n'),
-    (T, 'G 659 arith', '            up.x = -static_cast<float>(std::sin(heading) * across);\r\n', '            up.x = -static_cast<float>(std::sin(heading) / across);\r\n'),
-    (T, 'G 659 code', '            up.x = -static_cast<float>(std::sin(heading) * across);\r\n', '            up.y = -static_cast<float>(std::sin(heading) * across);\r\n'),
+    (T, 'G 659 del', '            up.x = -static_cast<float>(HeadingSin(heading) * across);\r\n', '            ;\r\n'),
+    (T, 'G 659 arith', '            up.x = -static_cast<float>(HeadingSin(heading) * across);\r\n', '            up.x = -static_cast<float>(HeadingSin(heading) / across);\r\n'),
+    (T, 'G 659 code', '            up.x = -static_cast<float>(HeadingSin(heading) * across);\r\n', '            up.y = -static_cast<float>(HeadingSin(heading) * across);\r\n'),
     (T, 'G 660 del', '            up.y = static_cast<float>(std::sin(static_cast<double>(next)));\r\n', '            ;\r\n'),
-    (T, 'G 661 del', '            up.z = static_cast<float>(std::cos(heading) * across);\r\n', '            ;\r\n'),
-    (T, 'G 661 arith', '            up.z = static_cast<float>(std::cos(heading) * across);\r\n', '            up.z = static_cast<float>(std::cos(heading) / across);\r\n'),
+    (T, 'G 661 del', '            up.z = static_cast<float>(HeadingCos(heading) * across);\r\n', '            ;\r\n'),
+    (T, 'G 661 arith', '            up.z = static_cast<float>(HeadingCos(heading) * across);\r\n', '            up.z = static_cast<float>(HeadingCos(heading) / across);\r\n'),
     (T, 'G 662 del', '            m_vert->SetWorldDir(up, 0.0f);\r\n            m_tilt = next;\r\n', '            ;\r\n            m_tilt = next;\r\n'),
     (T, 'G 662 num', '            m_vert->SetWorldDir(up, 0.0f);\r\n            m_tilt = next;\r\n', '            m_vert->SetWorldDir(up, 1.0f);\r\n            m_tilt = next;\r\n'),
     (T, 'G 663 del', '            m_tilt = next;\r\n        }\r\n        if (m_tiltReleased && m_tiltSpeed != 0.0f) {\r\n', '            ;\r\n        }\r\n        if (m_tiltReleased && m_tiltSpeed != 0.0f) {\r\n'),

@@ -27,8 +27,11 @@
 #define CMD_DIFF_NO_MAIN
 #include "cmd_diff.cpp"
 
+#include <algorithm>
 #include <deque>
+#include <fstream>
 #include <functional>
+#include <sstream>
 
 #define private public
 #define protected public
@@ -618,12 +621,14 @@ void SetUpSwAnswers()
     g_answers["C_Human::GetViewDir"] = [](const std::vector<uint32_t> &) {
         static S_vector dirs[2];
         static const S_vector odd[] = {S_vector(1e-5f, 0.0f, 0.0f), S_vector(0.0f, 0.0f, -1e-5f), S_vector(0.0f, 0.0f, 0.0f),
-                                       S_vector(0.0f, 1.0f, 0.0f), S_vector(0.0f, -1.0f, 0.0f)};
+                                       S_vector(0.0f, 1.0f, 0.0f), S_vector(0.0f, -1.0f, 0.0f),
+                                       // (a heading a hair under 0: wrapped to exactly 2 pi)
+                                       S_vector(1e-7f, 0.0f, 1.0f), S_vector(1e-7f, 0.5f, 1.0f)};
         // (Mostly the same as before: the turret settles, its motor stops.)
         if (NextFake() % 4 == 0) {
-            const uint32_t r = NextFake() % 12;
+            const uint32_t r = NextFake() % 14;
             static const float values[] = {0.0f, 1.0f, 0.5f, -0.75f, -1.0f, 0.25f, 3.0f};
-            dirs[g_side] = r < 5 ? odd[r] : S_vector(values[NextFake() % 7], values[NextFake() % 7], values[NextFake() % 7]);
+            dirs[g_side] = r < 7 ? odd[r] : S_vector(values[NextFake() % 7], values[NextFake() % 7], values[NextFake() % 7]);
         }
         Name(&dirs[g_side], "view dir");
         return Ptr(&dirs[g_side]);
@@ -758,11 +763,11 @@ void SetUpSwAnswers()
         const int n = int(a[1]);
         return n >= 32 ? v : v & ((1u << n) - 1);
     };
-    // Random numbers in [0, 1).
+    // Random numbers in [0, 1) (0.8535534: a spread across square of exactly 1.5 with 0.5).
     g_answers["RandFloat"] = [](const std::vector<uint32_t> &) {
-        static const float values[] = {0.0f, 0.25f, 0.5f, 0.75f, 0.9999f, 0.1f};
+        static const float values[] = {0.0f, 0.25f, 0.5f, 0.75f, 0.9999f, 0.1f, 0.8535534f};
         uint32_t w;
-        std::memcpy(&w, &values[NextFake() % 6], 4);
+        std::memcpy(&w, &values[NextFake() % 7], 4);
         return w;
     };
 }
@@ -902,6 +907,8 @@ struct S_Writer {
         End();
     }
 };
+#include "sw_models.inc"
+
 enum {
     OP_INIT, OP_STOP, OP_RESTART, OP_SET_GUNNER, OP_SHOW_VIEW, OP_UPDATE, OP_TICK, OP_CONTROLS, OP_FIRE_SHOT, OP_PLAY_SHOT,
     OP_RELOAD, OP_SHOW_RELOAD, OP_SET_ROUNDS, OP_GET, OP_SAVE_LOAD, OP_NOTE, OP_SEND, OP_MESSAGE, OP_KINDS
@@ -929,10 +936,11 @@ struct S_SwCase {
     uint32_t role = GAME_ROLE_LOCAL;
     int ownerKind = 0;                                  // (0 a car, 1 a static weapon, 2 another actor)
     bool sender = true;
+    int model = -1;                                     // (a real car's rig: g_swModels' index)
     std::vector<S_SwOp> ops;
 };
 int g_swCases, g_opCounts[OP_KINDS];
-const int FRAME_TIMES[] = {0, 10, 16, 33, 100, 250, 1000, 3000, 1, 19, 299, 301};
+const int FRAME_TIMES[] = {0, 10, 16, 33, 100, 250, 1000, 3000, 1, 19, 299, 301, 300};
 std::string BarrelProps()
 {
     // The item (its id; a failing one; "=" before it reads 0), the rates and the limits, some missing, in any case.
@@ -974,6 +982,14 @@ S_SwCase RandomSwCase()
                                                 "soundm3 sounds6", "soundm2 sounds13"};
         s.hortProps = hortProps[I(0, 10)];
         c.seats.push_back(s);
+    }
+    // (Now and then a real car's rig: its weapon seats, the frames' own names, places and properties.)
+    if (!g_swModels.empty() && P(0.3)) {
+        c.model = I(0, int(g_swModels.size()) - 1);
+        const std::vector<int> &ws = g_swModels[size_t(c.model)].weaponSeats;
+        const size_t first = size_t(I(0, int(ws.size()) - 1));
+        for (size_t i = 0; i < c.seats.size(); ++i)
+            c.seats[i].seat = ws[(first + i) % ws.size()];
     }
     c.projectile = P(0.6);
     static const char *const files[] = {"models\\turret.i3d", "Kubel.i3d", "tank", "dir.x\\gun", "Cars\\SdKfz.4ds"};
@@ -1017,8 +1033,17 @@ void BuildModel(const S_SwCase &c)
     g_noAnims.clear();
     uint8_t *sector = *reinterpret_cast<uint8_t **>(W().scene + 0x1F8);
     uint8_t *model = Child(sector, FRAME_MODEL, "gun", nullptr);
-    Mut<const char *>(model, 0x134) = Text(c.file);
+    Mut<const char *>(model, 0x134) = Text(c.model >= 0 ? g_swModels[size_t(c.model)].file : c.file);
     g_model[g_side] = model;
+    if (c.model >= 0) {
+        std::vector<int> seats;
+        for (const S_SwSeat &s : c.seats)
+            seats.push_back(s.seat);
+        BuildRealModel(model, g_swModels[size_t(c.model)], seats);
+        if (c.projectile)
+            Child(model, FRAME_VISUAL, "projectile", model);
+        return;
+    }
     for (size_t i = 0; i < c.seats.size(); ++i) {
         const S_SwSeat &s = c.seats[i];
         uint8_t *hort = s.hort ? Child(model, FRAME_DUMMY, F("HORT%02d", s.seat), model) : nullptr;
@@ -1090,7 +1115,7 @@ std::string RunSwOp(const S_SwOp &op, int index)
     uint8_t *b = g_weapon[g_side][wi];
     C_SeatWeapon *p = PortWeapon(wi);
     const S_SwView v = ViewOf(b);
-    const int t = FRAME_TIMES[op.a % 12];
+    const int t = FRAME_TIMES[op.a % 13];
     switch (op.kind) {
     case OP_INIT: {
         // (The model and the seat's frame mostly; the case's owner; the weapon's own seat, now and then another.)
@@ -1721,6 +1746,12 @@ int main()
     new (&reinterpret_cast<C_game *>(g_portGameBuf)->m_missionName) C_str();
     SetUp();
     SetUpSw();
+    // The car models' rigs (HD2_SW_CARS, or the suites' inputs: run_suites.py exports them for the vehicle suites).
+    {
+        const char *cars = std::getenv("HD2_SW_CARS");
+        const char *temp = std::getenv("TEMP");
+        LoadSwModels(cars ? cars : std::string(temp ? temp : ".") + "\\hd2_suites\\inputs\\cars4ds");
+    }
     SetMission("AFRICA1");
     CreateThread(nullptr, 0, Watchdog, nullptr, 0, nullptr);
     for (int n = 0; n < cases; ++n)
@@ -1728,8 +1759,8 @@ int main()
     std::string ops;
     for (int i = 0; i < OP_KINDS; ++i)
         ops += F("%s%s %d", i ? ", " : "", OP_KIND_NAMES[i], g_opCounts[i]);
-    std::printf("sw_diff: %d cases (%s), %d calls logged, %d skipped (overruns), %d checks, %d failures\n", g_swCases,
-                ops.c_str(), g_calls[0], g_overruns, checks, failures);
+    std::printf("sw_diff: %d cases (%s), %d car models, %d calls logged, %d skipped (overruns), %d checks, %d failures\n",
+                g_swCases, ops.c_str(), int(g_swModels.size()), g_calls[0], g_overruns, checks, failures);
     return failures != 0;
 }
 #endif

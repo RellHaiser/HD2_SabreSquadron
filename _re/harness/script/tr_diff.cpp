@@ -700,6 +700,15 @@ S_TrCase RandomTrCase()
         float x = float(I(-50, 50)), z = float(I(-50, 50)), heading = float(I(0, 628)) * 0.01f;
         // (A key at least: the original's FollowTrack reads the first of none.)
         const int keys = P(0.1) ? 1 : I(2, 14);
+        // (Now and then exact steps: a square of exactly 1.5 between the first keys, the next 5 m on.)
+        if (P(0.06)) {
+            static const float exact[][3] = {{0.0f, 0.0f, 0.0f}, {1.0f, 0.5f, 0.5f}, {6.0f, 0.5f, 0.5f}, {12.0f, 0.5f, 0.5f},
+                                             {20.0f, 0.5f, 3.0f}};
+            for (const auto &e : exact)
+                track.keys.push_back({S_vector(x + e[0], e[1], z + e[2]), float(I(1, 3)) * 5.0f});
+            c.tracks.push_back(track);
+            continue;
+        }
         for (int k = 0; k < keys; ++k) {
             static const float speeds[] = {0.0f, 2.0f, 5.0f, 10.0f, 15.0f, 3.5f};
             track.keys.push_back({S_vector(x, float(I(0, 4)) * 0.5f, z), speeds[I(0, 5)]});
@@ -746,7 +755,10 @@ S_TrCase RandomTrCase()
         if (P(0.3))
             w.Text(8, "the train");
         for (int i = 0; i < c.wagons + (P(0.1) ? 1 : 0); ++i) {
-            w.Text(10, F("wagon%d", i));
+            // (Now and then a name of 1,000 characters, and a short gap entry first.)
+            w.Text(10, P(0.03) ? std::string(1000, char('a' + i)) : F("wagon%d", i));
+            if (P(0.05))
+                w.EntryOf(0x1E, uint16_t(7));
             static const float lengths[] = {10.0f, 8.0f, 12.5f, 6.0f};
             if (P(0.8))
                 w.EntryOf(0x14, lengths[I(0, 3)]);
@@ -940,8 +952,9 @@ std::string RunTrOp(const S_TrOp &op, int index)
                     w.End();
                 } else {
                     w.Begin(1000);
+                    // (A name of length 1, its NUL only, now and then.)
                     const std::string track = op.d % 3 ? "track1" : op.d % 2 ? "nowhere" : "";
-                    const uint16_t length = track.empty() ? 0 : uint16_t(track.size() + 1);
+                    const uint16_t length = track.empty() ? uint16_t(op.d % 4 == 0 ? 1 : 0) : uint16_t(track.size() + 1);
                     w.Raw(&length, 2);
                     w.Raw(track.c_str(), length);
                     const int key = op.b % 6;

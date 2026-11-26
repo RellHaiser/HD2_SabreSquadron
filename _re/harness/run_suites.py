@@ -361,8 +361,9 @@ SUITES = [
     # (Train part 1: the trains and their track player against the original executable, script/tr_diff.cpp.)
     T("train", "script/build_tr.bat", TMP + r"\tr_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="script/tr_diff.exe"),
-    # (Seat weapon part 1: the weapons at vehicles' seats against the original executable, script/sw_diff.cpp.)
-    T("seat.weapon.orig", "script/build_sw.bat", TMP + r"\sw_diff.exe", needs=("mingw", "original_exe"),
+    # (Seat weapon part 1: the weapons at vehicles' seats against the original executable, script/sw_diff.cpp; a part of
+    # the cases on the shipped cars' rigs, the vehicle suites' exported models, handed over as HD2_SW_CARS.)
+    T("seat.weapon.orig", "script/build_sw.bat", TMP + r"\sw_diff.exe", needs=("mingw", "original_exe", CARS),
       tree_copy="script/sw_diff.exe"),
     # (Static weapon part 1: the guns on mounts against the original executable, script/st_diff.cpp.)
     T("static.weapon.orig", "script/build_st.bat", TMP + r"\st_diff.exe", needs=("mingw", "original_exe"),
@@ -879,6 +880,7 @@ def main():
         try:
             if any(CARS in s["needs"] for s in chosen):
                 ctx[CARS] = prepare_cars(a.work, a.data)
+                os.environ["HD2_SW_CARS"] = ctx[CARS]      # (sw_diff.exe's real rigs)
             if any(MISSIONS in s["needs"] for s in chosen):
                 ctx[MISSIONS] = prepare_missions(a.work, a.data)
         except Exception as e:  # an input set that cannot be made: its suites report it

@@ -375,9 +375,15 @@ void FillModel(uint8_t *model, const std::string &file)
     } else if (file.find("WeaponOdds") != std::string::npos) {
         Child(model, FRAME_VISUAL, "trace", model, I3DVISUAL_BILLBOARD);
     } else if (file.find("la_Bf109Canyon") != std::string::npos) {
+        // (At least one gun: the original divides by the count when a fighter fires, the port's fix fires none.)
+        int guns = 0;
         for (const char *n : {"weapon_r00", "weapon_l00", "weapons_r01", "weapon_l01", "vrtule"})
-            if (WI(0, 4))
+            if (WI(0, 4)) {
                 Child(model, FRAME_DUMMY, n, model);
+                ++guns;
+            }
+        if (!guns)
+            Child(model, FRAME_DUMMY, "weapon_r00", model);
         for (const char *n : {"carriage_l00", "carriage_r00", "left_wing", "right_wing", "BODY"})
             if (WI(0, 4))
                 Child(model, FRAME_VISUAL, n, model);
@@ -662,14 +668,16 @@ void SetUpJunkersAnswers()
     };
     // The sound driver: mostly there.
     g_answers["ISND_driver::IsInitialized"] = [](const std::vector<uint32_t> &) { return uint32_t(NextFake() % 6 != 0); };
-    // The rays and spheres: a hit now and then, half way.
+    // The rays and spheres: a hit now and then, mostly half way (the static ray's now and then at its start or end).
     g_answers["C_CollisionWorld::RayTestStatic"] = [](const std::vector<uint32_t> &a) {
         if (NextFake() % 3)
             return 0u;
         const S_vector &pos = *reinterpret_cast<const S_vector *>(a[1]);
         const S_vector &dir = *reinterpret_cast<const S_vector *>(a[2]);
+        const uint32_t where = NextFake() % 4;
+        const float t = where == 0 ? 0.0f : where == 1 ? 1.0f : 0.5f;
         if (S_vector *hit = reinterpret_cast<S_vector *>(a[3]))
-            *hit = S_vector(pos.x + dir.x * 0.5f, pos.y + dir.y * 0.5f, pos.z + dir.z * 0.5f);
+            *hit = S_vector(pos.x + dir.x * t, pos.y + dir.y * t, pos.z + dir.z * t);
         static uint8_t volume[0x80];
         Name(volume, "static volume");
         return Ptr(volume);
@@ -699,9 +707,10 @@ void SetUpJunkersAnswers()
         static S_vector dirs[2];
         // (Tiny and zero ones now and then: the normalisation's edges.)
         static const S_vector odd[] = {S_vector(1e-5f, 0.0f, 0.0f), S_vector(0.0f, 0.0f, -1e-5f), S_vector(0.0f, 0.0f, 0.0f),
-                                       S_vector(0.0f, 1e-5f, 0.0f)};
-        const uint32_t r = NextFake() % 8;
-        dirs[g_side] = r < 4 ? odd[r] : S_vector(FakeFloat(), FakeFloat(), FakeFloat());
+                                       S_vector(0.0f, 1e-5f, 0.0f), S_vector(1e-5f, 0.0f, -1e-5f), S_vector(0.0f, 1e-5f, -1e-5f),
+                                       S_vector(0.0f, 0.0f, 1e-5f)};
+        const uint32_t r = NextFake() % 12;
+        dirs[g_side] = r < 7 ? odd[r] : S_vector(FakeFloat(), FakeFloat(), FakeFloat());
         Name(&dirs[g_side], "view dir");
         return Ptr(&dirs[g_side]);
     };
@@ -997,7 +1006,7 @@ struct S_JkCase {
     bool cutscene = false;
     int cutsceneId = 0;
     int playMode = 0;
-    int oddHeading = 0;                                 // (1..3: the bomber's z axis tiny or zero)
+    int oddHeading = 0;                                 // (1..7: the bomber's z axis tiny, zero or odd)
     bool cameraAtOrigin = false;                        // (the tracers' sounds near the camera)
 };
 int g_jkCases, g_opCounts[OP_KINDS];
@@ -1020,7 +1029,11 @@ S_JkCase RandomJkCase()
                 w.EntryOf(id, values[I(0, 7)]);
             }
         }
+        // (Now and then a chunk after the properties. Not an unknown entry of one byte at their end: both programs enter
+        // it and read a header across its end, the original then hangs.)
         w.End();
+        if (P(0.15))
+            w.EntryOf(uint16_t(100), 7.0f);
         c.props = w.out;
     }
     c.serverStart = P(0.2);
@@ -1033,7 +1046,7 @@ S_JkCase RandomJkCase()
     c.cutscene = P(0.15);
     c.cutsceneId = P(0.5) ? 31 : I(-1, 40);
     c.playMode = I(0, 3);
-    c.oddHeading = P(0.15) ? I(1, 3) : 0;
+    c.oddHeading = P(0.2) ? I(1, 7) : 0;
     c.cameraAtOrigin = P(0.4);
     const int count = P(0.1) ? I(80, 160) : I(4, 40);
     for (int i = 0; i < count; ++i) {
@@ -1130,6 +1143,7 @@ void AdvanceTime(int t)
 }
 
 std::string g_previousSave[2];                          // (each side's last save of the case)
+std::map<std::string, int> g_savedHighestPart[2];      // (each save's highest part index in the groups)
 using T_JkInt = void(TC *)(void *, int);
 using T_JkBool = void(TC *)(void *, int);
 using T_JkChunk = bool(TC *)(void *, void *);
@@ -1319,6 +1333,24 @@ std::string RunJkOp(const S_JkOp &op, int index)
     }
     case OP_SAVE_LOAD: {
         const std::string file = F("jk_save%d.sav", index);
+        // (The highest part index the groups hold, and the parts there are: a load of indices past them reads past the
+        // original's parts, the port's fix skips them.)
+        int highest = -1;
+        size_t partCount;
+        if (o) {
+            for (uint32_t g : {0x1E8u, 0x210u, 0x238u})
+                for (uint32_t list : {g + 8, g + 0x18})
+                    for (uint32_t x : OVec(b, list))
+                        highest = std::max(highest, At<int>(reinterpret_cast<void *>(x), 0x38));
+            partCount = OVec(b, 0x270).size();
+        } else {
+            for (const auto *g : {&j->m_damage, &j->m_engines, &j->m_outer})
+                for (const auto *list : {&g->parts, &g->broken})
+                    for (const auto *x : *list)
+                        highest = std::max(highest, x->index);
+            partCount = j->m_parts.size();
+        }
+        g_savedHighestPart[g_side][file] = highest;
         C_chunk save;
         save.Open(file.c_str(), true);
         const bool rs = o ? OriginalAt<T_JkChunk>(O_JK_SAVE)(b, &save) : j->SaveGame(save);
@@ -1359,6 +1391,8 @@ std::string RunJkOp(const S_JkOp &op, int index)
                 name = F("jk_made%d.sav", index);
                 g_overrides[Lower(name)] = w.out;
             }
+            if (g_savedHighestPart[g_side].count(name) && g_savedHighestPart[g_side][name] >= int(partCount))
+                return F("SaveGame -> %d (a load of parts past the bomber's)", int(rs));
             C_chunk chunk;
             chunk.Open(name.c_str(), false);
             rl = o ? OriginalAt<T_JkChunk>(O_JK_LOAD)(b, &chunk) : j->LoadGame(chunk);
@@ -1430,6 +1464,7 @@ void RunJkCase(const S_JkCase &c)
         g_anims[side].clear();
         g_pathModels[side].clear();
         g_previousSave[side].clear();
+        g_savedHighestPart[side].clear();
         g_sw[side] = S_SwState();
         BuildWorld(side, worldSeed);
         g_sndDriver[side] = Block(0x40);
@@ -1441,7 +1476,8 @@ void RunJkCase(const S_JkCase &c)
         BuildBomber(model);
         g_bomberModel[side] = model;
         if (c.oddHeading) {
-            static const float rows[3][3] = {{1e-5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1e-5f}, {0.0f, 0.0f, 0.0f}};
+            static const float rows[7][3] = {{1e-5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1e-5f}, {0.0f, 0.0f, 0.0f}, {1e-5f, 0.0f, 1e-5f},
+                                             {0.0f, 0.0f, 1e-5f}, {1e-5f, 1.0f, 1e-5f}, {5.0f, 0.0f, 5.0f}};
             for (int k = 0; k < 3; ++k)
                 AsFrame(model)->m_localMatrix.m[2][k] = rows[c.oddHeading - 1][k];
         }
@@ -1550,7 +1586,8 @@ void RunJkCase(const S_JkCase &c)
         ClearJkCaches();
         g_bomber[side] = nullptr;
     }
-    if (g_jkShow) {
+    static const int only = std::getenv("HD2_JK_ONLY") ? std::atoi(std::getenv("HD2_JK_ONLY")) : 0;
+    if (g_jkShow && (!only || only == g_jkCases)) {
         std::printf("%s\n", g_current.c_str());
         for (const std::string &s : r.port)
             std::printf("  %s\n", s.c_str());

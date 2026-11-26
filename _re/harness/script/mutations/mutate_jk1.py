@@ -5,32 +5,32 @@ MUT_HARNESS script, MUT_EXTRA_SRCS original_exe.cpp and jk_calls.s, MUT_LDFLAGS 
 
 2,139 mutants, 210 not building; 1,624 of the 1,929 building killed at first, 1,681 after the test was widened (the
 engines' list in made saves, the volumes' fields, the input and HUD bytes, the frames' scale, the sound files' names,
-odd frame times, game times at the stages' edges, loads of the case's previous save). The 248 left (the last 248 run
-again against the final test: none killed):
+odd frame times, game times at the stages' edges, loads of the case's previous save), 1,700 after it was widened again (view
+directions and bomber headings tiny in two components or odd, static rays hitting at their ends, a chunk after the
+properties). The 229 left:
 - The port's fixes: long, empty and truncated debris names, which leave a debris without its frame (1206, 1208 num;
   1209 del, num; 1210 cmp; 1215 del; 1216 num, del; 1217 cmp, num, arith; 1219 del, num); model files failing to open:
   the camera path's and the fighter's (1470, 1471, 1797, 1798 del; 1799, 1846 bool); a missing seat dummy (638 del,
   num); the group-4 chatter divide (397 num); UnknownAC without a seat weapon (792 num); a note of no fighter's path
   (1588 cmp; EndAttack's null check, 1609, is a fix too); part indices out of range (2157 and); short chunks keeping
   their defaults (1305, 1554, 1746, 2151, 2154, 2244, 2252, 2276 num). The original crashes or reads unset values.
-- Not given, rare sequences: a cutscene with id -1 at StopMission (337 num, 338 del); the chatter's bearing crossing a
-  sector (420 arith, 423 num, 425 cmp, num: about 55 bearings a run); ShowDamage(4) with one propeller or the right
-  engine up (599 num; 603 num, code; 604 del, num, bool, code); a blocked seat left (722 del); EngineFell's swap-remove
+- Not given, rare sequences: the chatter's bearing crossing a
+  sector (420 arith, 425 cmp, num: about 55 bearings a run); ShowDamage(4) with one propeller up (599
+  num); a blocked seat left (722 del); EngineFell's swap-remove
   during its own advance (1083 num); health exactly 75 % with a loaded count (1115 cmp); engines broken twice or alone
-  at index 0 (1139, 1142 num); a chatter delay of exactly 1 (2059 num); updates at exactly 9001 and 11001 ms (2095,
-  2097 num); others never met (805 cmp; 1161, 1163, 1353, 2072 num; 1882, 2079 cmp).
-- Not given, inputs the test lacks: tiny view directions with two components (100 del; 102 del, num); ray hits at the
-  tracer ray's ends (114, 117 num); nose-up, scaled or doubly tiny bomber headings (419 code, num; 421 neg; 423, 424
+  at index 0 (1139, 1142 num); a chatter delay of exactly 1 (2059 num); updates at exactly 11001 ms (2097
+  num); others never met (805 cmp; 1161, 1163, 1353 num; 1882, 2079 cmp).
+- Not given, inputs the test lacks: nose-up, scaled or doubly tiny bomber headings (419 num; 421 neg; 423, 424
   del, arith; 426 del; 428 num); a model reopened without a blade or an engine part (290, 291 num, del, code, code2;
   509 num, code; 513 num); an engine or a row head first in the parts' order (946, 964 num); a moving bomber (1272 num,
   code; 2111 num; 2113 del; 2236 del, num); the camera off the origin (1352 arith, code2); the input already off (1179
   del); fighter damage under 1 (1608 num); health exactly 25 % with surplus engines (1130 cmp); the interceptors'
   health kept over a restart (319 del); made saves with a path name, stage 3, foreign or trailing chunks, a stray byte
-  (1551 del; 861, 2220 and; 2228 cmp, num); a property chunk's edges (252 num, cmp); chunks after the save and the
+  (1551 del; 861, 2220 and; 2228 cmp, num); a property chunk's last byte (252 num); chunks after the save and the
   load (2211, 2212, 2221, 2305, 2321 del); a two-character "...d" name (906 cmp, num); a null fall animation (2029
   del); the creator's registration (2339 del, code); the seat flags before the first start (89 num); seat 5 past the
   weapons (614 and: the zeroing allocator hides it); the dedicated build (1974 del; 1975 num, del).
-- Not given, contrived: exact float edges (94 num; 96, 113, 408, 422, 1258, 1353, 1684 cmp; 446 num; 447 del, num: a
+- Not given, contrived: exact float edges (94 num; 96, 113, 408, 422, 1258, 1353 cmp; 446 num; 447 del, num: a
   fighter exactly behind); a fighter on the human (1681 del); model names of 1,023 characters (1004, 1005 num; 1006
   del, num); rescales of the bearing atan2 hides but for rounding (421, 434, 441 num; 432, 439 arith; 433, 440 cmp).
 - Not compared: the animation sets' and the path models' references (188, 330, 1459, 1484, 1530, 1774 del); a stack

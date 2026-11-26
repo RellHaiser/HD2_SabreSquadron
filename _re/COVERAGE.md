@@ -7183,3 +7183,26 @@ came from. From this part on the network code is compared with the original exec
 - **Harness lessons (my mistakes):** zeroing the players' paths by hand hid a mutant: both programs' allocations are
   zeroed already; a mutation run copied the harness while I edited it and reported 61 kills of a broken test (rerun
   cleanly); a Bash heredoc collapsed a backslash again.
+
+## Widened tests: Junkers, train, seat weapon, sight part 1 (2026-11-26)
+
+- **Junkers (`jk_diff.cpp`):** view directions tiny in two components and along +z; bomber headings tiny, along +z,
+  nose-up and scaled; static rays hitting at their start or end; a chunk after the properties. New guards: a fighter
+  always has a gun (the original divides by its gun count; the port's fix fires none); no load of parts past the
+  bomber's (a save's group indices against a later, smaller parts list: the original takes what lies past its
+  vector, the port's fix skips them). Not added: an unknown 1-byte entry at the properties' end (both programs read a
+  header across its end; the original then hangs).
+- **Train (`tr_diff.cpp`):** tracks of exact steps (a square of exactly 1.5 between the first keys), wagon names of
+  1,000 characters, short gap entries, saved track names of length 1.
+- **Seat weapon (`sw_diff.cpp`):** a spread of exactly 1.5 (RandFloat 0.8535534), view headings a hair under 0 (2 pi
+  exactly after the wrap), 300 ms frames; and **cases on the shipped cars' rigs** (`sw_models.inc`): export_cars.py's
+  dumps of the 13 car models with a weapon seat (frames, local matrices, user properties), a third of the cases built
+  from one of them, its weapon seats used (HD2_SW_CARS; run_suites.py exports the cars and sets it). **Port bug
+  found:** VERT's heading sine and cosine at FPATAN's exact +-pi and +-pi / 2 are the x87's FSIN / FCOS values (-+2^-64,
+  -2^-65), not the double's 1.2e-16 and 6.1e-17 (`HeadingSin` / `HeadingCos`).
+- **Sight (`sg_diff.cpp`):** targets set alive and not alive the more often; rays hitting the first actors (the
+  targets' own) the more often.
+- **Survivors rerun:** Junkers 19 killed (229 left); train 6 and 2 killed (100 and 20 left); seat weapon 4 killed
+  (85 left); sight 4 killed (62 of the 66 kept, one killed by the first widening surviving again: 63 left). `mutate_tr2.py`'s rows on KeyDistance and
+  AccelerateTowardsKey widened (track part 1 repeats their text), `mutate_sw1.py`'s on VERT's heading follow
+  HeadingSin / HeadingCos.

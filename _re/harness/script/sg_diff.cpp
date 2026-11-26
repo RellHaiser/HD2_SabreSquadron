@@ -301,7 +301,9 @@ void SetUpSightAnswers()
         S_CollisionVolume *v = reinterpret_cast<S_CollisionVolume *>(volume[g_side]);
         v->flags = r >= 4 ? COLLISION_FLAG_DYNAMIC : 0;
         const auto &actors = W().actors;
-        v->actor = r >= 4 && !actors.empty() ? reinterpret_cast<C_Actor *>(actors[NextFake() % actors.size()].bytes) : nullptr;
+        // (Half the times one of the first five actors: a target's own more often.)
+        const size_t pick = NextFake() % 2 ? NextFake() % 5 : NextFake();
+        v->actor = r >= 4 && !actors.empty() ? reinterpret_cast<C_Actor *>(actors[pick % actors.size()].bytes) : nullptr;
         if (S_vector *hit = reinterpret_cast<S_vector *>(a[3]))
             *hit = S_vector(1.0f, 2.0f, 3.0f);
         Name(volume[g_side], "ray volume");
@@ -467,7 +469,9 @@ std::string RunSgOp(const S_SgOp &op)
         return F("SetObserverState %d %d", id, state);
     }
     case OP_TARGET_STATE: {
-        const int id = op.b, state = op.c % 6;
+        // (Alive and not alive the more often: a target set alive, then not, then tested.)
+        static const int states[] = {0, 1, 0, 1, 2, 3, 4, 5};
+        const int id = op.b, state = states[op.c % 8];
         if (!RecordsInStep())
             return "SetTargetState (records out of step)";
         // (Not a null target's: the original reads its mask through null, the port's fix takes it as none.)

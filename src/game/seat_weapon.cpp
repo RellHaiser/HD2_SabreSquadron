@@ -69,6 +69,25 @@ constexpr float PI = 3.1415927f;
 constexpr float TWO_PI = 6.2831855f;
 // TurnToView's smallest step (rad; a double in the original).
 constexpr double MIN_TURN = 0.001;
+
+// The x87's FSIN and FCOS of an FPATAN heading: FPATAN's +-pi and +-pi / 2 carry 64-bit mantissas,
+// which the CPU reduces with a 66-bit pi, giving -+2^-64 and -2^-65 where the double's sine and
+// cosine of +-pi and +-pi / 2 give 1.2e-16 and 6.1e-17 (a turret straight behind or sideways).
+double HeadingSin(double heading)
+{
+    if (heading == 3.141592653589793)
+        return -0x1p-64;
+    if (heading == -3.141592653589793)
+        return 0x1p-64;
+    return std::sin(heading);
+}
+
+double HeadingCos(double heading)
+{
+    if (heading == 1.5707963267948966 || heading == -1.5707963267948966)
+        return -0x1p-65;
+    return std::cos(heading);
+}
 // The turning sound stops after more ms than that without turning.
 constexpr int MOTOR_STOP_IDLE = 300;
 // A local player's aim in third person: a ray from 5 m in front of the camera, 500 m along it (the
@@ -656,9 +675,9 @@ void C_SeatWeapon::TurnByControls(int time)             // 0x004c3120
             next = std::max(std::min(next, MAX_ELEVATION), -MAX_ELEVATION);
             const double across = std::cos(static_cast<double>(next));
             S_vector up;
-            up.x = -static_cast<float>(std::sin(heading) * across);
+            up.x = -static_cast<float>(HeadingSin(heading) * across);
             up.y = static_cast<float>(std::sin(static_cast<double>(next)));
-            up.z = static_cast<float>(std::cos(heading) * across);
+            up.z = static_cast<float>(HeadingCos(heading) * across);
             m_vert->SetWorldDir(up, 0.0f);
             m_tilt = next;
         }
