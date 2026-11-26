@@ -435,8 +435,8 @@ bool C_MeleeTrackerSightObserver::TestPart(int target, int timeDelta)   // 0x004
     }
     if (t->GetKind() != 0 && t->GetKind() != 1)
         return false;
-    int status;
-    meleeTracker->TestSight(other, &status, &record.view[part]);
+    // (Quirk kept: the view test's status is written over the wait, which then schedules the next test.)
+    meleeTracker->TestSight(other, &wait, &record.view[part]);
     record.nextTest[part] = GetGame()->GetMissionTime() + wait;
     if (record.view[part] != 100.0f)
         return false;
@@ -498,6 +498,8 @@ C_SightModule::~C_SightModule() = default;              // 0x0046ef40 (the vecto
 
 C_SightTarget *C_SightModule::GetTarget(int id) const
 {
+    // Fix: a null target (AddTarget's for a frame of no human or meleeTracker) is none; the original's
+    // SetTargetState reads its mask through null.
     if (id < 0 || static_cast<size_t>(id) >= m_targets.size())
         return nullptr;
     C_SightTarget *target = m_targets[id];
@@ -693,12 +695,13 @@ int C_SightModule::AddObserver(I3D_frame *frame, uint32_t mask)   // 0x0046f350
             observer->SetRelation(static_cast<int>(t), SIGHT_HOSTILE);
             continue;
         }
+        // (The relation is worked out first, the observer's own actor too.)
+        bool isFriend, isHostile;
+        Relation(actor, other, &isFriend, &isHostile);
         if (other == actor) {
             observer->SetRelation(static_cast<int>(t), SIGHT_FRIEND);
             continue;
         }
-        bool isFriend, isHostile;
-        Relation(actor, other, &isFriend, &isHostile);
         if (isFriend) {
             observer->SetRelation(static_cast<int>(t), SIGHT_FRIEND);
             NotifyFound(actor, static_cast<int>(t));

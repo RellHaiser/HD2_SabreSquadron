@@ -7120,3 +7120,34 @@ came from. From this part on the network code is compared with the original exec
   random answers for minutes (91 million calls): the queue is now built per message kind and answers all ones when
   read out; the actor name is at +0x80, not +0x6C; message names are by address and a freed message's address comes
   back, so popped messages go unnamed.
+
+## Sight part 1 (the sight module, `sight.cpp`, 2026-11-25)
+
+- **The build:** `script/build_sg.bat` (`script/sg_diff.cpp`, suite `sight.orig`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the module's calls through `sg_calls.s` / `sg_calls.inc` (`gen_cmd_calls.py sg`; the humans' and the melee
+  trackers' view tests and sight events, the collision world's SetIgnoredVolumes added). The original's module is its
+  global (0x0089b288: its own functions read it), built once by its constructor and cleared for each case; its CRT's
+  atexit is redirected (GetVisibleParts registers a static's destructor).
+- **The cases:** cmd_diff's humans and melee trackers, their frames given the body parts' collision volumes (some
+  missing, some in capitals), the trackers their body frames and body volumes; AddObserver and AddTarget (mostly from a
+  few trackers' and humans' frames, so that one actor is observer and target; other actors' frames, a frame without an
+  actor, none; masks 0..16), RemoveObserver, RemoveTarget, SetObserverState, SetTargetState, TestNow, CanSee,
+  GetVisibleParts, a target's Refresh, its testedBy bits, ticks, the mission calls, walls (every ray blocked, the views
+  100: what was seen is lost); the trackers' view test writes nothing now and then. Compared after each: the answer, its calls and the whole module (every target's and
+  observer's fields, records and parts, the cursors, the start delay, the sight time).
+- **The tests:** 1,500 cases (about 54,000 calls, 4 s; seeds 0, 1, 2, 4, 6). **Coverage:** every line but a human
+  record's positive view (never set: only the trackers' views are), a tracker without a body frame (the port's fix),
+  the destructor, a null observer in AddObserver's search and a target frame without an actor (unreachable).
+- **Port bugs found:** the trackers' part test kept the wait it had worked out; the original passes the wait as the
+  view test's status, so the next test is due at the mission time plus that status (kept, as a quirk); AddObserver
+  skipped the relation's IsFriendOf / IsHostileTo calls for the observer's own actor (the original makes them, then
+  takes it as a friend).
+- **The original's weaknesses (the port's fixes, not given):** its inlined GetTarget reads a null target's mask (a
+  frame of no human or tracker registers a null target): SetTargetState and TestNow crash on one (the port's fix, now
+  marked); CanSee and GetVisibleParts read a null or removed target's count and parts; a human observer's update takes
+  a removed target's actor through null; a tracker without a body frame reads it through null. Both programs read past
+  an observer's records when they fall out of step (AddObserver skips a null target's record, AddTarget an observer
+  of mask 0), the tick's reverse test included (not given).
+- **Harness lessons (my mistakes):** the first coverage run measured 20 lines: the coverage build crashed in the
+  original's CRT atexit (not redirected) and nothing was written; one actor must be observer and target for the tick's
+  pairs to be tested at all; a backslash in a Bash heredoc collapsed again (in the staging script).

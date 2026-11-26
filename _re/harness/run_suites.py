@@ -367,6 +367,9 @@ SUITES = [
     # (Static weapon part 1: the guns on mounts against the original executable, script/st_diff.cpp.)
     T("static.weapon.orig", "script/build_st.bat", TMP + r"\st_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="script/st_diff.exe"),
+    # (Sight part 1: the sight module against the original executable, script/sg_diff.cpp.)
+    T("sight.orig", "script/build_sg.bat", TMP + r"\sg_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="script/sg_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

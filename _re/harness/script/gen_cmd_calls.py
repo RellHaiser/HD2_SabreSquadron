@@ -352,6 +352,13 @@ ORIG = {
     'C_Human::SetFacingDir(S_vector4 const&)': ("0x005a84d0", "thiscall", "v"),
     'C_Human::IsFriendOf(C_Actor const*) const': ("0x005a0ab0", "thiscall", "b"),
     'C_CheckpointNetwork::FindActorPoint(C_Actor const*) const': ("0x0051e690", "thiscall", "i"),
+    # (The sight test's.)
+    'C_MeleeTracker::OnSightEvent(int, int)': ("0x005d5cb0", "thiscall", "v"),
+    'C_MeleeTracker::TestSight(C_Actor*, int*, float*)': ("0x005d64c0", "thiscall", "v"),
+    'C_CollisionWorld::SetIgnoredVolumes(S_CollisionVolume**, unsigned int, int)': ("0x006efee0", "thiscall", "v"),
+    'C_Human::OnSightEvent(int, int)': ("0x005a5250", "thiscall", "v"),
+    'C_Human::TestSightOfHuman(C_Human*, int*, float*)': ("0x005a59d0", "thiscall", "v"),
+    'C_Human::TestSightOfMeleeTracker(C_Actor*, int*, float*)': ("0x005a59a0", "thiscall", "v"),
     'C_ParticlesModule::CreateAt(int, S_vector const&, S_vector const&, I3D_frame*, bool, bool)':
         ("0x00445150", "thiscall", "i"),
 }
@@ -482,7 +489,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "sb": ("build_sb.bat", "sb_diff", "the submarine test's logged calls"),
          "tr": ("build_tr.bat", "tr_diff", "the train test's logged calls"),
          "sw": ("build_sw.bat", "sw_diff", "the seat weapon test's logged calls"),
-         "st": ("build_st.bat", "st_diff", "the static weapon test's logged calls")}
+         "st": ("build_st.bat", "st_diff", "the static weapon test's logged calls"),
+         "sg": ("build_sg.bat", "sg_diff", "the sight test's logged calls")}
 
 
 def main():
