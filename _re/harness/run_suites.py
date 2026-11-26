@@ -346,6 +346,9 @@ SUITES = [
     # (Mission loader part 1: the mission's loading against the original executable, script/ml_diff.cpp.)
     T("mission.loader", "script/build_ml.bat", TMP + r"\ml_diff.exe", needs=("mingw", "original_exe", "data"),
       tree_copy="script/ml_diff.exe"),
+    # (Air attack part 1: the strafing fighter planes against the original executable, script/aa_diff.cpp.)
+    T("air.attack", "script/build_aa.bat", TMP + r"\aa_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="script/aa_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

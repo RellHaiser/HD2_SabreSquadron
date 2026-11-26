@@ -306,6 +306,11 @@ ORIG = {
     'C_CollisionWorld::AddVolume(S_CollisionVolume*)': ("0x006ef7b0", "thiscall", "v"),
     'C_CollisionWorld::RemoveVolume(S_CollisionVolume*)': ("0x006ef9b0", "thiscall", "v"),
     'C_CollisionWorld::MoveVolume(S_CollisionVolume*)': ("0x006efbc0", "thiscall", "v"),
+    # (The air attack test's.)
+    'C_CollisionWorld::SetIgnoredVolume(S_CollisionVolume*, int)': ("0x006efe40", "thiscall", "v"),
+    'C_CollisionWorld::RayTestDynamic(S_vector const&, S_vector const&, S_vector*, S_vector*, unsigned int, unsigned int) const':
+        ("0x006f7cc0", "thiscall", "p"),
+    'C_CameraModule::GetCameraPos(int, S_vector4*)': ("0x00465a10", "vt+0x64", "b"),
     'C_ParticlesModule::CreateAt(int, S_vector const&, S_vector const&, I3D_frame*, bool, bool)':
         ("0x00445150", "thiscall", "i"),
 }
@@ -430,7 +435,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "mod": ("build_mod.bat", "mod_diff", "the script module test's logged calls"),
          "cam": ("build_cam.bat", "cam_diff", "the camera module test's logged calls"),
          "ml": ("build_ml.bat", "ml_diff", "the mission loader test's logged calls"),
-         "jk": ("build_jk.bat", "jk_diff", "the Junkers test's logged calls")}
+         "jk": ("build_jk.bat", "jk_diff", "the Junkers test's logged calls"),
+         "aa": ("build_aa.bat", "aa_diff", "the air attack test's logged calls")}
 
 
 def main():

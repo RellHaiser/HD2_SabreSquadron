@@ -6912,3 +6912,42 @@ came from. From this part on the network code is compared with the original exec
   1 << (type - 1) (my EnumFrames answers took 1 << type; mod_diff's does too). A light's entry sizes must follow the
   scene's version only where the version is certain. The made world shared the cut-short tails' names, so they made
   no frames of their own at first; typed objects took existing names (no frame made) until they had fresh ones.
+
+## Air attack part 1 (the strafing fighter planes, `air_attack.cpp`, 2026-11-25)
+
+- **The build:** `script/build_aa.bat` (`script/aa_diff.cpp`, suite `air.attack`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the planes' calls through `aa_calls.s` / `aa_calls.inc` (`gen_cmd_calls.py aa`; the collision world's
+  `SetIgnoredVolume` and `RayTestDynamic` and the camera module's `GetCameraPos` added to the table). The sound cache runs
+  on both sides; the LS3DF math is LS3DF.dll's on both sides (`SetDir3`, `GetScale`, the vector's `RotateByMatrix` by
+  their exports); `RandomFloat` and `AngleBetween2D` the original's; a script's `OnDeath` logged on both sides (the
+  port's patched at run time, the original's redirected); a human's sector (the original's 0x005ac4c0 on its body)
+  logged on both.
+- **The cases:** one to three planes (models under the primary sector with their blades, wheels, flashes, propeller,
+  some missing; odd headings: tiny, zero), made on each side (the original's by its constructor 0x005e3c90), given
+  properties, started; then updates, ticks, hits, SetTarget (humans' frames, other frames, none), saves (an entry
+  written after them) and loads (into the plane or another: its own file, made files with every entry, a target by name, bullets; the plane placed
+  near its target as the base's load would), restarts, stops and starts, FindAirAttackFor, PauseAirAttackSounds,
+  RayTestPastBorders, WriteProperties, SetFrame again. The rays answer nothing, a border, sand, a minefield, another
+  material; the target's frame or a plane's volume now and then; normals level, up, slanted, along or across the ray.
+  Compared after each: the answer, every plane's fields and lists (bullets, flashes, impact and whizz sounds, dust),
+  the planes' list; then the frames and every call.
+- **The tests:** 1,500 cases (about 680,000 calls, 17 s; seeds 1, 2, 4, 6). **Coverage:** every line but the dust's
+  deletion when a shot-down plane passes 500 m (a sequence the cases never made) and the levelling's clamp for a
+  falling direction (unreachable in both programs).
+- **Port bugs found:** the ahead ray's distance tested `>= clearance` for levelling, so a NaN distance climbed where
+  the original levels (it tests `< clearance` for climbing).
+- **The original's weaknesses:**
+  - Its Fire divides by the flash count (a plane model without flashes; the port's fix fires none); a stop keeps the
+    released motor and gun sounds' pointers (an update or a pause after it calls through them; the port's fix clears
+    them); a short property entry takes an uninitialised local (the port's fix keeps the value). Not given to the
+    original (the test's planes have flashes, stopped planes are not updated, no short entries).
+  - Both programs: an approaching plane without its target reads it through null (a save whose target is gone; the
+    made saves give state 1 only with a target that is there); a direction straight up divides by 0 in the levelling
+    (NaN: the test stops updating such a plane); the levelling of a falling direction steepens it.
+  - Stack words: the smoke's matrix's w column, StartMission's box centre w, the bullets' w (left out).
+- **Harness lessons (my mistakes):** an update of a never-started plane fired through an empty flash list (crashing
+  the original) until stopped planes were left alone; the x87 rounds a denormal twice where SSE rounds once, so
+  numbers under 1e-30 are compared as 0 (a plane flying straight up made them); the save's chunk must be entered
+  before LoadGame (the actors module does it), else nothing loaded; the first runs never fired (no plane near its
+  target in sight), found by the coverage.
+

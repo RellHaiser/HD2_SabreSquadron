@@ -628,7 +628,8 @@ void C_AirAttack::Update(int frameTime)                 // 0x005e5960 (DS 0x0060
         level(0.0003f);
     } else {
         const float dx = m_position.x - ground.x, dy = m_position.y - ground.y, dz = m_position.z - ground.z;
-        if (LengthOf((dx * dx + dz * dz) + dy * dy) >= m_clearance)
+        // (A NaN distance levels too.)
+        if (!(LengthOf((dx * dx + dz * dz) + dy * dy) < m_clearance))
             level(0.001f);
         else
             m_climbRate = normal.y == 0.0f ? m_climbRate + 1.0f : 2.0f / normal.y + m_climbRate;
