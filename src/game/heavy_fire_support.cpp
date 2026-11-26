@@ -550,7 +550,7 @@ int C_HeavyFireSupport::RequestArtillery(const S_ArtilleryRequest &request)   //
         return REQUEST_NOT_SERVER;
     bool *busy = BusyFlag(2 + request.team);
     if (busy && *busy)
-        return REQUEST_NOT_SERVER;
+        return REQUEST_BUSY;
     const S_vector4 target = {request.x, 300.0f, request.z, 0.0f};
     m_artillery.push_back(new C_ArtilleryStrike(target, request.team, request.caller));
     if (busy)
@@ -562,7 +562,7 @@ int C_HeavyFireSupport::RequestArtillery(const S_ArtilleryRequest &request)   //
     msg->WriteBits(FloatBits(target.z), 32);
     msg->WriteBits(CallerId(request.caller), 32);
     g_netGame.SendNetMessage(msg);
-    return REQUEST_NOT_SERVER;
+    return REQUEST_SENT;
 }
 
 void C_HeavyFireSupport::RemoveAirStrike(int index)     // 0x00472350

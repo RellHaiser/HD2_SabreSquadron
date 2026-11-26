@@ -311,6 +311,9 @@ ORIG = {
     'C_CollisionWorld::RayTestDynamic(S_vector const&, S_vector const&, S_vector*, S_vector*, unsigned int, unsigned int) const':
         ("0x006f7cc0", "thiscall", "p"),
     'C_CameraModule::GetCameraPos(int, S_vector4*)': ("0x00465a10", "vt+0x64", "b"),
+    # (The heavy fire support test's.)
+    'C_SoundModule::Stop(int*)': ("0x00437340", "vt+0x5C", "v"),
+    'C_SoundModule::GetSound(int) const': ("0x004374a0", "vt+0x78", "p"),
     'C_ParticlesModule::CreateAt(int, S_vector const&, S_vector const&, I3D_frame*, bool, bool)':
         ("0x00445150", "thiscall", "i"),
 }
@@ -436,7 +439,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "cam": ("build_cam.bat", "cam_diff", "the camera module test's logged calls"),
          "ml": ("build_ml.bat", "ml_diff", "the mission loader test's logged calls"),
          "jk": ("build_jk.bat", "jk_diff", "the Junkers test's logged calls"),
-         "aa": ("build_aa.bat", "aa_diff", "the air attack test's logged calls")}
+         "aa": ("build_aa.bat", "aa_diff", "the air attack test's logged calls"),
+         "hf": ("build_hf.bat", "hf_diff", "the heavy fire support test's logged calls")}
 
 
 def main():

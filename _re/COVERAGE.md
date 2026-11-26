@@ -6951,3 +6951,31 @@ came from. From this part on the network code is compared with the original exec
   before LoadGame (the actors module does it), else nothing loaded; the first runs never fired (no plane near its
   target in sight), found by the coverage.
 
+## Heavy fire support part 1 (the air attacks and artillery strikes, `heavy_fire_support.cpp`, 2026-11-25)
+
+- **The build:** `script/build_hf.bat` (`script/hf_diff.cpp`, suite `heavy.fire`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the module's calls through `hf_calls.s` / `hf_calls.inc` (`gen_cmd_calls.py hf`; the sound module's `Stop` and
+  `GetSound` added to the table). The model and sound caches run on both sides. `heavy_fire_support.cpp` is linked first:
+  its global module reads the table as the program starts, after the test's file fakes are made. The module base's
+  constructor is the test's (name and id), not logged (the port's global is made before the logger).
+- **The cases:** a table (`tables\airsupport.tbl`: up to 16 kinds, their models and values, unknown entries; now and then
+  cut short inside an entry's header), the module made on each side (the original's by its constructor 0x00471fc0) and
+  started, then in the case's role: air attack requests (teams 0 and 1, kinds in the table and past it, 1..3 planes, a
+  caller always), artillery requests, updates, ticks (odd frame times too), the server's messages (air attacks and
+  artillery with made contents: kinds in the table, callers by id or none), starts and stops. Compared after each: the
+  answer, the kinds, the busy flags, every strike's fields and planes; then the world's frames and every call (the
+  explosions', the sound requests' contents, the radio's file names).
+- **The tests:** 1,500 cases (about 270,000 calls, 6 s; seeds 1, 2, 4). **Coverage:** every line.
+- **Port bugs found:** `RequestArtillery` answered "not the server" for a request sent and for a busy team (the original
+  0 and 1; the header said it always answered that).
+- **The original's weaknesses (the port's fixes; not given to the original):** a request without a caller reads the
+  caller's id through null (the port sends -1); teams past 0 and 1 write past the busy flags, the clients' artillery
+  (team 2) the byte after the module; a kind past the table in a message reads past it; a message without planes reads
+  the first of none; a caller id without an actor reads its type through null; values before a kind's model and kinds
+  past 16 write outside the table; a value cut short reads its bytes there (the port reads none). Stack words: the
+  strikes' targets' and the explosions' w, the sound requests' w (left out of the comparison).
+- **Harness lessons (my mistakes):** the module's `C_Module` part takes `this` + 4 in the original (Update, Tick,
+  Start/StopMission, OnMessage); g++'s vectors are 12 bytes, so the port's later fields are not at the original's
+  offsets (read by member); the original's `dtaSeek` / `dtaWrite` must be redirected for its table reads; a backslash
+  in a Bash heredoc collapsed in `build_hf.bat` again.
+

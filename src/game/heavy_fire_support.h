@@ -134,7 +134,7 @@ public:
     enum : int {
         REQUEST_SENT = 0,
         REQUEST_BUSY = 1,                               // the team's air attack is under way
-        REQUEST_NOT_SERVER = 2,                         // (RequestArtillery always returns it)
+        REQUEST_NOT_SERVER = 2,
         REQUEST_BAD_KIND = 3,
     };
     virtual int RequestAirAttack(const S_AirAttackRequest &request) = 0;   // 0x00
