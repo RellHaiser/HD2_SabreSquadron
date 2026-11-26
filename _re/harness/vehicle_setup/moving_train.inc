@@ -697,7 +697,8 @@
             const float sway = phase == 0.0f ? 0.005f : 0.0085f;
             e.log.push_back(line("setdir %s %s 0", ItName(frame).c_str(), ItV(dir).c_str()));
             const float angle = static_cast<float>(static_cast<double>(time) * 0.0025f) + phase;
-            const float roll = static_cast<float>(std::sin(static_cast<double>(angle))) * sway;
+            // (The FPU's sine times the sway, rounded once: train part 1.)
+            const float roll = static_cast<float>(std::sin(static_cast<double>(angle)) * sway);
             if (body)
                 e.log.push_back(line("setdir %s %s %.9g", ItName(body).c_str(), ItV(dir).c_str(), roll));
             e.log.push_back("update " + ItName(frame));
@@ -937,8 +938,13 @@
                 inv.Inverse(S_matrix(world));
                 const I3D_bbox box = fr->GetType() == FRAME_DUMMY ? static_cast<I3D_dummy *>(fr)->GetBBox() : fr->m_bound.bbox;
                 const S_vector c((box.min.x + box.max.x) * 0.5f, (box.min.y + box.max.y) * 0.5f, (box.max.z + box.min.z) * 0.5f);
-                const S_vector center = fr->GetType() == FRAME_DUMMY ? c * world : c;
-                const S_vector front = S_vector(c.x, c.y, box.min.z) * world, back = S_vector(c.x, c.y, box.max.z) * world;
+                // (LS3DF's operator*=, as the original: train part 1.)
+                S_vector center = c;
+                if (fr->GetType() == FRAME_DUMMY)
+                    center *= world;
+                S_vector front(c.x, c.y, box.min.z), back(c.x, c.y, box.max.z);
+                front *= world;
+                back *= world;
                 const float size = (std::fabs(box.max.x - box.min.x) + std::fabs(box.max.y - box.min.y)) * 0.25f;
                 const float radius = size * ((fr->m_scale.y + fr->m_scale.x) * 0.5f);
                 const S_MaSphere &s = g_maSpheres[i];

@@ -1427,7 +1427,8 @@ void JunkersActorsTest()
                              loaded.spin.z == d->spin.z && rock->m_parent == g_sector && RbSame(rock->GetPos(), AaVec(WorldPos4Of(w))) &&
                              std::fabs(rock->m_rot.s - q.s) < 1e-6f && g_juFound == "rock" &&
                              JuLogged("link rock sector 1") == 1 && JuLogged("update rock") == 1);
-        // (Not found: nothing linked; a long name read whole, kept to 254 characters; none: empty.)
+        // (Not found: nothing linked; a long name read whole, kept to 253 characters, as the original's 254 bytes
+        // with its end at the last; none: empty.)
         g_aaDriverFinds = nullptr;
         S_SaBytes longName;
         const std::string name(300, 'n');
@@ -1441,10 +1442,10 @@ void JunkersActorsTest()
         S_SaReader rd2(longName);
         reset();
         C_Junkers88::S_Debris missing(rd2.c);
-        JU(r.junkDebris, !missing.frame && g_juFound == std::string(254, 'n') &&
+        JU(r.junkDebris, !missing.frame && g_juFound == std::string(253, 'n') &&
                              missing.floor == d->floor);
         // (Found after a long name: the rest skipped byte by byte, the place after it; 255 characters
-        // without an end kept to 254; an empty name and a one-byte one.)
+        // without an end kept to 253; an empty name and a one-byte one.)
         const auto named = [&](uint16_t length, const std::string &chars) {
             S_SaBytes b;
             b.Head(0x777, 6 + 28 + 2 + static_cast<int>(chars.size()) + 28);
@@ -1468,7 +1469,7 @@ void JunkersActorsTest()
             S_SaReader rd3(b);
             g_juFound = "?";
             C_Junkers88::S_Debris found(rd3.c);
-            const std::string want = c.first == 0 || c.first == 1 ? std::string() : std::string(254, 'n');
+            const std::string want = c.first == 0 || c.first == 1 ? std::string() : std::string(253, 'n');
             JU(r.junkDebris, found.frame == rock && g_juFound == want &&
                                  RbSame(rock->GetPos(), S_vector(px + 1.0f, 7.0f, pz - 1.0f)) &&
                                  std::fabs(rock->m_rot.s - q.s) < 1e-6f);

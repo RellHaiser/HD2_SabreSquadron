@@ -668,7 +668,7 @@ void SightTest()
         g_sgLog.clear();
         o->Update(0, 0, 80);
         WM(r.sgTracker, SgLogIs({"mview m1 p1"}) && rec.view[1] == 60.0f && rec.parts == 0 && rec.part == 1 &&
-                            rec.nextTest[1] == 5080);
+                            rec.nextTest[1] == 5007);   // (the test's status, 7, over the wait: sight part 1)
         // 100, the ray meets the target: seen, told.
         g_sgView.clear();
         block(p1, 2, &p1->volume);
@@ -699,7 +699,7 @@ void SightTest()
         rec.nextTest[3] = 0;
         o->Update(0, 0, 80);
         WM(r.sgTracker, rec.parts == 0);
-        // Not due: nothing; a positive view waits since its last test.
+        // Not due: nothing; a positive view's wait (since its last test) is written over by the status (7).
         rec.part = 0;
         rec.nextTest[1] = 5001;
         g_sgLog.clear();
@@ -710,14 +710,14 @@ void SightTest()
         rec.lastTest[2] = 4500;
         clearHits();
         o->Update(0, 0, 80);
-        WM(r.sgTracker, rec.nextTest[2] == 5500 && rec.lastTest[2] == 5000);
-        // A negative view (the last test's): no wait.
+        WM(r.sgTracker, rec.nextTest[2] == 5007 && rec.lastTest[2] == 5000);
+        // A negative view (the last test's): no wait, the status the next test's delay.
         rec.part = 0;
         rec.nextTest[1] = 0;
         rec.view[1] = -1.0f;
         g_sgView[{m1->actor, p1->actor}] = -2.0f;
         o->Update(0, 0, 80);
-        WM(r.sgTracker, rec.nextTest[1] == 5000 && rec.view[1] == -2.0f);
+        WM(r.sgTracker, rec.nextTest[1] == 5007 && rec.view[1] == -2.0f);
         g_sgView.clear();
         // Neither body frame nor frame: not seen (no ray).
         rec = S_SightRecord();
