@@ -358,6 +358,9 @@ SUITES = [
     # (Submarine part 1: the submarines against the original executable, script/sb_diff.cpp.)
     T("submarine", "script/build_sb.bat", TMP + r"\sb_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="script/sb_diff.exe"),
+    # (Train part 1: the trains and their track player against the original executable, script/tr_diff.cpp.)
+    T("train", "script/build_tr.bat", TMP + r"\tr_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="script/tr_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

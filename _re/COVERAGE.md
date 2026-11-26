@@ -7032,3 +7032,28 @@ came from. From this part on the network code is compared with the original exec
   previous save reach more than its own file; the sound files must be logged by name; a classification agent's claim
   that 15 survivors die under the default seed did not hold when they were run again against the final test.
 
+## Train part 1 (the trains and their track player, `train.cpp`, `track.cpp`, 2026-11-25)
+
+- **The build:** `script/build_tr.bat` (`script/tr_diff.cpp`, suite `train`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the trains' calls through `tr_calls.s` / `tr_calls.inc` (`gen_cmd_calls.py tr`; the sound module's
+  `RegisterSoundFrame`, `S_SoundFrame::SetSectorFactor` and `S_Checkpoint::GetLink` added to the table). `track.cpp` is
+  linked (the port's track player on the port's side); the original's tracks are built by its own AddKey (0x00402880),
+  FindTrack redirected; the LS3DF math (GetDir, Slerp) LS3DF.dll's.
+- **The cases:** trains on each side (the original's by its constructor), their wagons (bodies, crossheads, connecting
+  rods, dummies, some frameless), tracks of keys (repeated or near keys, an empty name, a first entry not the version),
+  checkpoints; updates, SetTrack, whistles, Move, saves and loads (made ones too; NaN bytes normalised), restarts,
+  stops and starts, the creator. Compared after each: the answer, every field, wagon, place and path entry, the frames
+  and every call.
+- **The tests:** 1,500 cases (about 1.5 million calls, 61 s built and run under load; seeds 0, 1, 2, 4). **Coverage:**
+  `train.cpp` every line but tiny headings (81, 83), a long track name (435-441: the original reads it onto its stack)
+  and three unreachable lines; `track.cpp`'s key functions every line (its path and spline player are not tested here).
+- **Port bugs found:** PlaceWagon's sway rounded twice (sin in doubles, one rounding to float as the original);
+  UpdateWagonVolume's transforms used `operator*` where the original uses `*=` (LS3DF rounds the last bit apart);
+  `track.cpp`'s TimeToKey, AccelerateTowardsKey and FindPointAtDistance computed in doubles and other orders (now
+  float in the original's order, KeyDistance / KeyNormalize; a probe matched all four bit for bit).
+- **The original's weaknesses (the port's fixes, not given):** null reads when saving a running train without a track
+  or with a frameless wagon, when updating or moving without the first wagon's frame, moving on a track of fewer than
+  2 keys, SetTrack 'on' with an unknown name; places past the wagons; a long track name read onto its stack; unset
+  locals in short entries.
+- **Harness lessons (my mistakes):** the original's track key array needs its growth field (+0x1C) set; NaN save bytes
+  differ in sign between the x87 and SSE (normalised); the checkpoints' Get reads only the index's low word.

@@ -58,6 +58,39 @@ float Distance(const S_vector &a, const S_vector &b)
     return (a - b).Magnitude();
 }
 
+// The keys' code's inline length (the SDK's): the square summed z, y, x; 0 under 1e-8's bits, 1
+// for a near-unit square.
+float KeyDistance(const S_vector &a, const S_vector &b)
+{
+    const S_vector v = a - b;
+    const float square = (v.z * v.z + v.y * v.y) + v.x * v.x;
+    int32_t bits;
+    std::memcpy(&bits, &square, sizeof bits);
+    if (bits < 0x322bcc77)
+        return 0.0f;
+    if (!(std::fabs(square - 1.0f) < 1e-08f))
+        return std::sqrt(square);
+    return 1.0f;
+}
+
+// Its inline normalisation: the square summed z, y, x.
+void KeyNormalize(S_vector &v)
+{
+    const float square = (v.z * v.z + v.y * v.y) + v.x * v.x;
+    if (std::fabs(square - 1.0f) < 1e-08f)
+        return;
+    if (!(square < 1e-08f)) {
+        const float scale = 1.0f / std::sqrt(square);
+        v = S_vector(v.x * scale, v.y * scale, v.z * scale);
+    } else if (v.x != 0.0f) {
+        v.x = v.x < 0.0f ? -1.0f : 1.0f;
+    } else if (v.z != 0.0f) {
+        v.z = v.z < 0.0f ? -1.0f : 1.0f;
+    } else {
+        v.y = v.y < 0.0f ? -1.0f : 1.0f;
+    }
+}
+
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -138,15 +171,16 @@ float C_TrackPlayer::TimeToKey(const S_vector &pos, int keyIndex) const
     const S_TrackKey &next = m_track->GetKey(keyIndex);
 
     // Speed at `pos`, interpolated linearly by distance along the segment.
+    // (The original's lengths: KeyDistance.)
     float currentSpeed = 0.0f;
-    const float segment = Distance(prev.pos, next.pos);
+    const float segment = KeyDistance(prev.pos, next.pos);
     if (segment != 0.0f)
-        currentSpeed = (Distance(pos, prev.pos) / segment) * (next.speed - prev.speed) + prev.speed;
+        currentSpeed = (KeyDistance(pos, prev.pos) / segment) * (next.speed - prev.speed) + prev.speed;
 
     const float averageSpeed = (currentSpeed + next.speed) * 0.5f;
     if (currentSpeed + next.speed == 0.0f)
         return 0.0f;
-    return Distance(pos, next.pos) / averageSpeed;
+    return KeyDistance(pos, next.pos) / averageSpeed;
 }
 
 float C_TrackPlayer::TimeToPathPoint(const S_vector &pos, int pointIndex) const
@@ -164,15 +198,16 @@ S_vector C_TrackPlayer::AccelerateTowardsKey(const S_vector &pos, int keyIndex, 
     const S_TrackKey &from = m_track->GetKey(keyIndex);
     const S_TrackKey &to = m_track->GetKey(keyIndex + 1);
 
-    const float traveled = Distance(pos, from.pos);
-    const float segment = Distance(from.pos, to.pos);
+    // (The original's lengths and normalisation: KeyDistance, KeyNormalize.)
+    const float traveled = KeyDistance(pos, from.pos);
+    const float segment = KeyDistance(from.pos, to.pos);
     const float speedChange = to.speed - from.speed;
     // s = v*t + a*t^2/2 with the speed changing linearly over the segment.
     const float distance = speedChange * 0.5f * time * time * 0.5f +
                            ((speedChange / segment) * traveled + from.speed) * time;
 
     S_vector dir = to.pos - from.pos;
-    dir.Normalize();
+    KeyNormalize(dir);
     return dir * distance + pos;
 }
 
@@ -370,27 +405,53 @@ void C_TrackPlayer::Update(int timeDelta)
 S_vector C_TrackPlayer::FindPointAtDistance(int keyIndex, const S_vector &center, float radius,
                                             int *outKeyIndex) const
 {
+    // The SDK's inline length of a square summed (z, y, x): 0 under 1e-8's bits, 1 for a near-unit square.
+    const auto length = [](const S_vector &v) {
+        const float square = (v.z * v.z + v.y * v.y) + v.x * v.x;
+        int32_t bits;
+        std::memcpy(&bits, &square, sizeof bits);
+        if (bits < 0x322bcc77)
+            return 0.0f;
+        if (!(std::fabs(square - 1.0f) < 1e-08f))
+            return std::sqrt(square);
+        return 1.0f;
+    };
     // Walk back while the key is still inside the sphere.
-    while (Distance(m_track->GetKey(keyIndex).pos, center) < radius && keyIndex > 0)
+    while (length(m_track->GetKey(keyIndex).pos - center) < radius && keyIndex > 0)
         --keyIndex;
     if (m_track->NumKeys() <= keyIndex + 1)
         keyIndex = m_track->NumKeys() - 2;
 
-    // Intersect the segment line p0 + t*d with the sphere |x - center| = radius.
-    const S_vector p0 = m_track->GetKey(keyIndex).pos;
-    const S_vector d = m_track->GetKey(keyIndex + 1).pos - p0;
-    const double a = d.Dot(d);
-    const double b = 2.0 * d.Dot(p0 - center);
-    const double c = (p0 - center).Square() - static_cast<double>(radius) * radius;
-    const double root = std::sqrt(b * b - c * a * 4.0);
-    const float t1 = static_cast<float>((root - b) / (a + a));
-    const double t2 = (-b - root) / (a + a);
-    const double t = std::min<double>(t1, t2);
+    // Intersect the segment line p0 + t*d with the sphere |x - center| = radius: the original's
+    // terms in its order, in float (its FPU runs at 24 bits; it keeps a and t2 in doubles of
+    // float precision).
+    const S_vector &p0 = m_track->GetKey(keyIndex).pos;
+    const S_vector &p1 = m_track->GetKey(keyIndex + 1).pos;
+    const float dz = p1.z - p0.z, dy = p1.y - p0.y, dx = p1.x - p0.x;
+    const float a = (dx * dx + dy * dy) + dz * dz;
+    const float p0zz = p0.z * p0.z, czp0z = center.z * p0.z;
+    const float p0yy = p0.y * p0.y, cyp0y = center.y * p0.y;
+    const float p0xx = p0.x * p0.x, cxp0x = center.x * p0.x;
+    const float ty = ((p0.y * p1.y - p0yy) + cyp0y) - center.y * p1.y;
+    const float tz = ((p0.z * p1.z - p0zz) + czp0z) - center.z * p1.z;
+    const float tx = ((p0.x * p1.x - p0xx) + cxp0x) - center.x * p1.x;
+    const float half = (ty + tz) + tx;
+    const float b = half + half;
+    const float c = ((((((((center.x * center.x - (cxp0x + cxp0x)) + center.y * center.y) + p0xx) - (cyp0y + cyp0y)) +
+                        center.z * center.z) +
+                       p0yy) -
+                      (czp0z + czp0z)) +
+                     p0zz) -
+                    radius * radius;
+    const float root = std::sqrt(b * b - (c * a) * 4.0f);
+    const float a2 = a + a;
+    const float t1 = (root - b) / a2;
+    const float t2 = (-b - root) / a2;
+    const float t = t1 < t2 ? t1 : t2;                  // (a NaN: t2)
 
     if (outKeyIndex)
         *outKeyIndex = keyIndex;
-    return S_vector(static_cast<float>(d.x * t + p0.x), static_cast<float>(d.y * t + p0.y),
-                    static_cast<float>(d.z * t + p0.z));
+    return S_vector(dx * t + p0.x, dy * t + p0.y, dz * t + p0.z);
 }
 
 // ---------------------------------------------------------------------------

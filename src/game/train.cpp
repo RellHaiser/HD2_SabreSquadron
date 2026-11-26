@@ -143,8 +143,9 @@ void PlaceWagon(I3D_frame *frame, I3D_frame *body, const S_vector &pos, const S_
     // Fix: a wagon without its body is placed by its frame (the original turns the body through
     // null).
     if (body) {
+        // (The FPU's sine times the sway, rounded once.)
         const float angle = static_cast<float>(static_cast<double>(time) * 0.0025f) + phase;
-        body->SetDir(dir, static_cast<float>(std::sin(static_cast<double>(angle))) * sway);
+        body->SetDir(dir, static_cast<float>(std::sin(static_cast<double>(angle)) * sway));
     }
     frame->Update();
     const S_vector framePos = frame->GetWorldPos();
@@ -192,10 +193,16 @@ void UpdateWagonVolume(S_FrameVolume *wagon)            // 0x005c0a30
     const S_vector center((box.min.x + box.max.x) * 0.5f, (box.min.y + box.max.y) * 0.5f,
                           (box.max.z + box.min.z) * 0.5f);
     // (The centre's w: a stale stack value in the original.)
-    volume.center = frame->GetType() == FRAME_DUMMY ? center * frame->GetMatrix() : center;
+    // (The original's products are LS3DF's operator*=, whose last bits can differ from operator*'s.)
+    S_vector worldCenter = center;
+    if (frame->GetType() == FRAME_DUMMY)
+        worldCenter *= frame->GetMatrix();
+    volume.center = worldCenter;
     g_collisionWorld.MoveVolume(&volume);
-    const S_vector front = S_vector(center.x, center.y, box.min.z) * frame->GetMatrix();
-    const S_vector back = S_vector(center.x, center.y, box.max.z) * frame->GetMatrix();
+    S_vector front(center.x, center.y, box.min.z);
+    front *= frame->GetMatrix();
+    S_vector back(center.x, center.y, box.max.z);
+    back *= frame->GetMatrix();
     const S_vector &scale = frame->GetScale();
     const float size = (std::fabs(box.max.x - box.min.x) + std::fabs(box.max.y - box.min.y)) * 0.25f;
     HitHuman(front, back, size * ((scale.y + scale.x) * 0.5f));

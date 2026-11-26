@@ -314,6 +314,10 @@ ORIG = {
     # (The heavy fire support test's.)
     'C_SoundModule::Stop(int*)': ("0x00437340", "vt+0x5C", "v"),
     'C_SoundModule::GetSound(int) const': ("0x004374a0", "vt+0x78", "p"),
+    # (The train test's.)
+    'C_SoundModule::RegisterSoundFrame(I3D_sound*, bool)': ("0x00432710", "vt+0x88", "p"),
+    'S_SoundFrame::SetSectorFactor(float)': ("0x00432490", "thiscall", "v"),
+    'S_Checkpoint::GetLink(int)': ("0x00524780", "thiscall", "p"),
     'C_ParticlesModule::CreateAt(int, S_vector const&, S_vector const&, I3D_frame*, bool, bool)':
         ("0x00445150", "thiscall", "i"),
 }
@@ -441,7 +445,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "jk": ("build_jk.bat", "jk_diff", "the Junkers test's logged calls"),
          "aa": ("build_aa.bat", "aa_diff", "the air attack test's logged calls"),
          "hf": ("build_hf.bat", "hf_diff", "the heavy fire support test's logged calls"),
-         "sb": ("build_sb.bat", "sb_diff", "the submarine test's logged calls")}
+         "sb": ("build_sb.bat", "sb_diff", "the submarine test's logged calls"),
+         "tr": ("build_tr.bat", "tr_diff", "the train test's logged calls")}
 
 
 def main():
