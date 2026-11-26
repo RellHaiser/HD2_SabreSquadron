@@ -1048,7 +1048,7 @@ void SetUpModAnswers()
         std::vector<I3D_frame *> found;
         std::function<void(I3D_frame *)> walk = [&](I3D_frame *f) {
             for (I3D_frame *c = f->m_firstChild; c; c = c->m_nextSibling) {
-                if (a[3] & (1u << c->m_type))
+                if (c->m_type && (a[3] & (1u << (c->m_type - 1))))   // (FRAME_MASK_*: 1 << (type - 1))
                     found.push_back(c);
                 walk(c);
             }
