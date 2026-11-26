@@ -346,6 +346,9 @@ SUITES = [
     # (Mission loader part 1: the mission's loading against the original executable, script/ml_diff.cpp.)
     T("mission.loader", "script/build_ml.bat", TMP + r"\ml_diff.exe", needs=("mingw", "original_exe", "data"),
       tree_copy="script/ml_diff.exe"),
+    # (Junkers part 1: the Junkers 88 bomber against the original executable, script/jk_diff.cpp.)
+    T("junkers", "script/build_jk.bat", TMP + r"\jk_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="script/jk_diff.exe"),
     # (Air attack part 1: the strafing fighter planes against the original executable, script/aa_diff.cpp.)
     T("air.attack", "script/build_aa.bat", TMP + r"\aa_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="script/aa_diff.exe"),

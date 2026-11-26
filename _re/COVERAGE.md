@@ -7004,3 +7004,31 @@ came from. From this part on the network code is compared with the original exec
 - **Harness lessons (my mistakes):** a frame's SetPos answer must make its children's world matrices stale (the
   engine's does); one sound for every slot hid the slots' mix-ups; a test that closes its file right after the save
   cannot see a chunk the save leaves open, nor one that stops every submarine the destructor's own reset.
+
+## Junkers part 1 (the Junkers 88 bomber, `junkers88.cpp`, 2026-11-25)
+
+- **The build:** `script/build_jk.bat` (`script/jk_diff.cpp`, suite `junkers`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the bomber's calls through `jk_calls.s` / `jk_calls.inc` (`gen_cmd_calls.py jk`). The model, sound and
+  animation caches run on both sides; the seat weapons are the test's fakes on both sides (their answers logged); the
+  LS3DF math is LS3DF.dll's; `RandomFloat` and `AngleBetween2D` the original's; the texts logged.
+- **The cases:** the bomber's model (its parts "<name>", "<name>d", "<name>f", some missing, children on some; the blur,
+  propellers, BODY, the five seats' dummies with user properties; the fighters' and the paths' models opened by the
+  engine by their file names), a bomber on each side (the original's by its constructor 0x005ef180), properties,
+  started; updates and ticks (odd frame times, the stages' time edges), hits on the fighters, SetState, the seats'
+  virtuals, FindTarget, the paths' notes, saves and loads (own, the case's previous one, made ones with the engines'
+  list), restarts, stops. Compared after each: the answer, every field, part, fighter, debris, tracer, path and chatter,
+  the volumes, the input and HUD bytes; then the frames (scale too) and every call (the sound files by name).
+- **The tests:** 1,500 cases (about 3.6 million calls; 2.5 min built and run under load; seeds 0, 1, 2, 4).
+  **Coverage:** every line but HasNext's stage 0 (unreachable), long or empty debris names and a debris without its
+  frame (the port's fixes), no tracer model, the model files failing to open and a fighter without guns (the original
+  crashes afterwards), two lines of the loads.
+- **Port bugs found:** a sound request's source; S_Path's owner update and its second GetChild; Hit's controller type;
+  the fighter's down-check order; the debris name's terminator (0xFD) and its 16-bit length.
+- **The original's weaknesses (the port's fixes, not given):** a debris with a null frame after a load; the group-4
+  chatter divides by 0; S_Path::Save through a null model; a missing fighter model calls through null in Update; the
+  camera path without its model; long debris names read onto its stack; EndAttack's StopAttack without a null check (a
+  fix in the port without a "Fix:" mark).
+- **Harness lessons (my mistakes):** LinkTo must refuse cycles (seed 1 overflowed the stack); loads of the case's
+  previous save reach more than its own file; the sound files must be logged by name; a classification agent's claim
+  that 15 survivors die under the default seed did not hold when they were run again against the final test.
+

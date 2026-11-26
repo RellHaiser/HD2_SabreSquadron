@@ -189,14 +189,16 @@ bool PlayAnimation(I3D_model *model, int stage, const char *name, int mode)
     return true;
 }
 
-// A sound of the sound tables at `pos` (attached to `frame`; 0x005f6ed0).
-void PlayTableSound(int chapter, int group, const S_vector4 &pos, I3D_frame *frame, int channel)
+// A sound of the sound tables at `pos` (attached to `frame`; 0x005f6ed0, a member of the bomber's: `source` its
+// `this`, the bomber at every call).
+void PlayTableSound(C_Actor *source, int chapter, int group, const S_vector4 &pos, I3D_frame *frame, int channel)
 {
     S_SoundRequest request;
     request.pos = Vec(pos);
     request.posW = pos.w;
     request.flags = SOUND_SILENT_TO_AI;
     request.attachTo = frame;
+    request.source = source;
     request.chapter = chapter;
     request.group = group;
     request.channel = channel;
@@ -1201,15 +1203,17 @@ C_Junkers88::S_Debris::S_Debris(C_chunk &chunk)         // 0x005f57c0 (DS 0x0061
     chunk.Read(&spin, 12);
     chunk.Read(floor);
     char name[256];
-    int16_t length = 0;
+    uint16_t length = 0;                                // (read into a zeroed int: 0..0xFFFF)
     chunk.Read(&length, 2);
     if (length == 0) {
         name[0] = '\0';
     } else if (length < 0xFF) {
         chunk.Read(name, length);
     } else {
+        // (254 bytes read, the name cut at 253.) Fix: the rest skipped byte by byte (the original reads
+        // rest - 1, rest - 2, ... 0 bytes onto its stack: too few or too many).
         chunk.Read(name, 0xFE);
-        name[0xFE] = '\0';
+        name[0xFD] = '\0';
         for (int rest = length - 0xFE; rest-- > 0;) {
             char skipped;
             chunk.Read(&skipped, 1);
@@ -1347,7 +1351,7 @@ bool C_Junkers88::S_Tracer::Update(int frameTime)       // 0x005f88c0
     const S_vector &camera = Scene()->GetActiveCamera()->GetWorldPos();
     const float dx = camera.x - pos.x, dy = camera.y - pos.y, dz = camera.z - pos.z;
     if ((dz * dz + dy * dy) + dx * dx < 625.0f)
-        PlayTableSound(4, 0x0B, {pos.x, pos.y, pos.z, 0.0f}, nullptr, 0);
+        PlayTableSound(g_junkers88, 4, 0x0B, {pos.x, pos.y, pos.z, 0.0f}, nullptr, 0);
     frame->Update();
     return true;
 }
@@ -1505,12 +1509,13 @@ void C_Junkers88::S_Path::Update(int frameTime)         // 0x005f6100
     model->Update();
     if (!follow || !owner->GetParent())
         return;
-    I3D_frame *dummy = model->GetChild(0);
-    if (!dummy)
+    if (!model->GetChild(0))
         return;
     S_matrix inverse;
     inverse.Inverse(owner->GetParent()->GetMatrix());
-    owner->SetLocalMatrix(dummy->GetMatrix() * inverse);
+    // (The dummy asked for again, as the original does.)
+    owner->SetLocalMatrix(model->GetChild(0)->GetMatrix() * inverse);
+    owner->Update();
 }
 
 void C_Junkers88::S_Path::Next(int carry)               // 0x005f62a0
@@ -1633,11 +1638,17 @@ void C_Junkers88::Hit(E_HitType, float amount, const S_vector &, const S_vector 
                       int flags)                        // 0x005f0d70
 {
     const auto *part = reinterpret_cast<const I3D_frame *>(static_cast<intptr_t>(flags));
+    auto *human = static_cast<C_Human *>(attacker);
     // Fix: a hit without the part (or an attacker) counts as nothing (the original reads
     // through null).
-    if (!part || part->GetOwnerModel() == m_frame)
+    if (!part)
         return;
-    auto *human = static_cast<C_Human *>(attacker);
+    if (part->GetOwnerModel() == m_frame) {
+        // (The original asks the attacker's controller here too, the answer unused.)
+        if (human)
+            human->GetControllerType();
+        return;
+    }
     if (!human || human->GetControllerType() != HUMAN_CONTROLLER_PLAYER) {
         if (m_hitsByOthers > 1)
             return;
@@ -1865,8 +1876,10 @@ bool C_Junkers88::S_Fighter::Update(int frameTime)      // 0x005f3a70 (DS 0x0061
     }
     if (down) {
         // The fall's animation over: gone.
-        if (I3D_animation_set *anim = model->GetAnimation(1)) {
-            if (anim->GetEndTime() <= model->GetAnimTime(1)) {
+        if (model->GetAnimation(1)) {
+            // (The animation's time asked first, then the animation again, as the original does.)
+            const int time = model->GetAnimTime(1);
+            if (model->GetAnimation(1)->GetEndTime() <= time) {
                 model->SetAnimation(nullptr, 1, 1.0f, 0);
                 for (int &particle : smoke) {
                     if (particle != -1) {
@@ -1922,7 +1935,7 @@ void C_Junkers88::S_Fighter::HitBomber(int frameTime)   // 0x005f38f0
         const float b = RandomFloat(1.0f) - 0.5f;
         const float c = RandomFloat(1.0f) - 0.5f;
         // (The original's w is a stack leftover.)
-        PlayTableSound(4, 0x12, {a, b, c, 0.0f}, bomber, 1);
+        PlayTableSound(g_junkers88, 4, 0x12, {a, b, c, 0.0f}, bomber, 1);
     }
     hitTime[1] -= frameTime;
     while (hitTime[1] < 0) {
@@ -1931,7 +1944,7 @@ void C_Junkers88::S_Fighter::HitBomber(int frameTime)   // 0x005f38f0
         const float a = RandomFloat(1.0f) - 0.5f;
         const float b = RandomFloat(1.0f) - 0.5f;
         const float c = RandomFloat(1.0f) - 0.5f;
-        PlayTableSound(4, 0x0B, {a, b, c, 0.0f}, bomber, 0);
+        PlayTableSound(g_junkers88, 4, 0x0B, {a, b, c, 0.0f}, bomber, 0);
     }
 }
 
@@ -2092,7 +2105,7 @@ void C_Junkers88::Update(int frameTime)                 // 0x005f7710 (DS 0x0061
         delete m_fighters[i];
         m_fighters[i] = m_fighters.back();
         m_fighters.pop_back();
-        PlayTableSound(6, 5, {0.0f, 0.0f, 0.0f, 0.0f}, Scene()->GetActiveCamera(), 4);
+        PlayTableSound(this, 6, 5, {0.0f, 0.0f, 0.0f, 0.0f}, Scene()->GetActiveCamera(), 4);
     }
     if (frameTime != 0) {
         const float k = 1000.0f / Time(frameTime);
@@ -2110,7 +2123,7 @@ void C_Junkers88::Update(int frameTime)                 // 0x005f7710 (DS 0x0061
     g_particlesModule.CreateAt(EFFECT_CRASH_A, Vec(m_fall.pos), S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
     g_particlesModule.CreateAt(EFFECT_CRASH_B, Vec(m_fall.pos), S_vector(0.0f, 1.0f, 0.0f), nullptr, true, false);
 #endif
-    PlayTableSound(6, 5, {0.0f, 0.0f, 0.0f, 0.0f}, Scene()->GetActiveCamera(), 4);
+    PlayTableSound(this, 6, 5, {0.0f, 0.0f, 0.0f, 0.0f}, Scene()->GetActiveCamera(), 4);
     static_cast<I3D_model *>(m_frame)->SetAnimation(nullptr, 1, 1.0f, 0);
     m_camera->follow = false;
     m_slowTime = 7000.0f;

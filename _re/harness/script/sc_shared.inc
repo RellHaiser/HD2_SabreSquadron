@@ -62,6 +62,15 @@ LONG WINAPI FirstChance(EXCEPTION_POINTERS *e)
                                     unsigned(e->ExceptionRecord->ExceptionInformation[1]), g_case, g_current.c_str());
         DWORD written;
         WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), text, DWORD(n), &written, nullptr);
+        // (The module the address is in, and its offset there.)
+        HMODULE module = nullptr;
+        char name[MAX_PATH] = "?";
+        if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                               reinterpret_cast<LPCSTR>(at), &module))
+            GetModuleFileNameA(module, name, sizeof name);
+        const int m = std::snprintf(text, sizeof text, "  in %s +%08x\n", name,
+                                    unsigned(at - reinterpret_cast<uintptr_t>(module)));
+        WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), text, DWORD(m), &written, nullptr);
     }
     return EXCEPTION_CONTINUE_SEARCH;
 }
