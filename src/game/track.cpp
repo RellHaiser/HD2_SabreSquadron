@@ -53,13 +53,19 @@ C_str ReadName(C_chunk &chunk)
     return C_str(buffer);
 }
 
-float Distance(const S_vector &a, const S_vector &b)
+// The SDK's inline length of a square: 0 under 1e-8's bits, 1 for a near-unit square.
+float SdkLength(float square)
 {
-    return (a - b).Magnitude();
+    int32_t bits;
+    std::memcpy(&bits, &square, sizeof bits);
+    if (bits < 0x322bcc77)
+        return 0.0f;
+    if (!(std::fabs(square - 1.0f) < 1e-08f))
+        return std::sqrt(square);
+    return 1.0f;
 }
 
-// The keys' code's inline length (the SDK's): the square summed z, y, x; 0 under 1e-8's bits, 1
-// for a near-unit square.
+// The keys' and the path's code's inline length: the square summed z, y, x.
 float KeyDistance(const S_vector &a, const S_vector &b)
 {
     const S_vector v = a - b;
@@ -188,9 +194,10 @@ float C_TrackPlayer::TimeToPathPoint(const S_vector &pos, int pointIndex) const
     const S_PathPoint &prev = m_path[pointIndex - 1];
     const S_PathPoint &next = m_path[pointIndex];
 
-    const float currentSpeed = (Distance(pos, prev.pos) / Distance(prev.pos, next.pos)) *
+    // (The original's lengths: KeyDistance.)
+    const float currentSpeed = (KeyDistance(pos, prev.pos) / KeyDistance(prev.pos, next.pos)) *
                                (next.speed - prev.speed) + prev.speed;
-    return Distance(pos, next.pos) / ((currentSpeed + next.speed) * 0.5f);
+    return KeyDistance(pos, next.pos) / ((currentSpeed + next.speed) * 0.5f);
 }
 
 S_vector C_TrackPlayer::AccelerateTowardsKey(const S_vector &pos, int keyIndex, float time) const
@@ -216,13 +223,14 @@ S_vector C_TrackPlayer::AccelerateTowardsPathPoint(const S_vector &pos, int poin
     const S_PathPoint &from = m_path[pointIndex];
     const S_PathPoint &to = m_path[pointIndex + 1];
 
-    const float traveled = Distance(pos, from.pos);
-    const float segment = Distance(from.pos, to.pos);
+    // (The original's lengths and normalisation: KeyDistance, KeyNormalize; its sum grouped so.)
+    const float traveled = KeyDistance(pos, from.pos);
+    const float segment = KeyDistance(from.pos, to.pos);
     const float speedChange = to.speed - from.speed;
-    const float distance = (speedChange * 0.5f * time * 0.5f + (speedChange / segment) * traveled + from.speed) * time;
+    const float distance = (speedChange * 0.5f * time * 0.5f + ((speedChange / segment) * traveled + from.speed)) * time;
 
     S_vector dir = to.pos - from.pos;
-    dir.Normalize();
+    KeyNormalize(dir);
     return dir * distance + pos;
 }
 
@@ -259,10 +267,13 @@ void C_TrackPlayer::SubdivideBezier(const S_vector &p0, const S_vector &p1, cons
     --budget;
 
     // Flatness: twice the areas of the two triangles spanned by the control polygon.
-    const float area1 = std::fabs((p1 - p0).Cross(p2 - p1).Magnitude());
-    const float area2 = std::fabs((p2 - p0).Cross(p3 - p2).Magnitude());
+    // (The original's inline lengths: the squares summed y, z, x and z, x, y; NaN subdivides.)
+    const S_vector c1 = (p1 - p0).Cross(p2 - p1);
+    const S_vector c2 = (p2 - p0).Cross(p3 - p2);
+    const float area1 = SdkLength((c1.y * c1.y + c1.z * c1.z) + c1.x * c1.x);
+    const float area2 = SdkLength((c2.z * c2.z + c2.x * c2.x) + c2.y * c2.y);
 
-    if (tolerance <= area1 + area2 && budget != 0) {
+    if (!(area2 + area1 < tolerance) && budget != 0) {
         // De Casteljau split at t = 0.5.
         const S_vector l1 = (p0 + p1) * 0.5f;
         const S_vector m = (p1 + p2) * 0.5f;
@@ -276,7 +287,7 @@ void C_TrackPlayer::SubdivideBezier(const S_vector &p0, const S_vector &p1, cons
     }
 
     // Flat enough: emit the end point.
-    length += Distance(m_path[m_pathIndex - 1].pos, p3);
+    length += KeyDistance(m_path[m_pathIndex - 1].pos, p3);
     m_path[m_pathIndex].pos = p3;
     m_path[m_pathIndex].speed = 1.0f;
     ++m_pathIndex;
@@ -309,14 +320,14 @@ void C_TrackPlayer::BuildPath(int keyIndex)
 
     float length = 0.0f;
     int budget = 10;
-    const float tolerance = m_tolerance <= 0.0001f ? 0.0001f : m_tolerance;
+    const float tolerance = !(m_tolerance > 0.0001f) ? 0.0001f : m_tolerance;   // (NaN: 0.0001)
     SubdivideBezier(p0, c1, c2, p3, tolerance, length, budget);
     m_path[m_pathIndex].speed = -1.0f;
 
     // Speed changes linearly with the distance travelled along the curve.
     float distance = 0.0f;
     for (int i = 1; i < m_pathIndex; ++i) {
-        distance += Distance(m_path[i].pos, m_path[i - 1].pos);
+        distance += KeyDistance(m_path[i].pos, m_path[i - 1].pos);
         m_path[i].speed = ((key1.speed - key0.speed) / length) * distance + key0.speed;
     }
 }
@@ -333,10 +344,10 @@ float C_TrackPlayer::MoveAlongPath(S_vector &pos, float time)
         ++m_pathIndex;
         pos = m_path[m_pathIndex].pos;
         time -= timeToPoint;
-        if (m_path[m_pathIndex + 1].speed < 0.0f || time <= timeToPoint)
+        if (m_path[m_pathIndex + 1].speed < 0.0f || !(time > timeToPoint))
             break;
     }
-    if (m_path[m_pathIndex + 1].speed < 0.0f)
+    if (!(m_path[m_pathIndex + 1].speed >= 0.0f))       // (a NaN speed too)
         return time;
 
     pos = AccelerateTowardsPathPoint(pos, m_pathIndex, time);
@@ -383,7 +394,7 @@ void C_TrackPlayer::Update(int timeDelta)
     if (m_keyIndex < m_track->NumKeys() - 1) {
         const S_TrackKey &from = m_track->GetKey(m_keyIndex);
         const S_TrackKey &to = m_track->GetKey(m_keyIndex + 1);
-        const float fraction = Distance(from.pos, pos) / Distance(from.pos, to.pos);
+        const float fraction = KeyDistance(from.pos, pos) / KeyDistance(from.pos, to.pos);
         const S_quat rot = from.rot.Slerp(to.rot, fraction, false);
         if (m_frame) {
             m_frame->SetRot(m_parent ? rot.RotateByMatrix(m_parent->GetMatrix()) : rot);
@@ -585,6 +596,9 @@ bool C_TrackModule::LoadTracks()
     if (!chunk.Descend(id) || id != CHUNK_TRACKS)
         return false;
 
+    // Fix: the original ascends no unknown entry (at the file's, a track's or a key's level): it
+    // loops on without leaving it and reads on inside it (a file with one hangs or misreads it).
+    // The game's files have none.
     while (chunk.RemainingSize() > 0 && chunk.Descend(id)) {
         if (id != CHUNK_TRACK) {
             chunk.Ascend();

@@ -370,6 +370,10 @@ SUITES = [
     # (Sight part 1: the sight module against the original executable, script/sg_diff.cpp.)
     T("sight.orig", "script/build_sg.bat", TMP + r"\sg_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="script/sg_diff.exe"),
+    # (Track part 1: the track module and its spline players against the original executable, script/tk_diff.cpp;
+    # the game missions' tracks.dat.)
+    T("track", "script/build_tk.bat", TMP + r"\tk_diff.exe", needs=("mingw", "original_exe", "data"),
+      tree_copy="script/tk_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

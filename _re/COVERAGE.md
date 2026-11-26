@@ -7151,3 +7151,35 @@ came from. From this part on the network code is compared with the original exec
 - **Harness lessons (my mistakes):** the first coverage run measured 20 lines: the coverage build crashed in the
   original's CRT atexit (not redirected) and nothing was written; one actor must be observer and target for the tick's
   pairs to be tested at all; a backslash in a Bash heredoc collapsed again (in the staging script).
+
+## Track part 1 (the track module and its spline players, `track.cpp`, 2026-11-26)
+
+- **The build:** `script/build_tk.bat` (`script/tk_diff.cpp`, suite `track`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the module's calls through `tk_calls.s` / `tk_calls.inc` (`gen_cmd_calls.py tk`). The original's module is
+  its global (0x00867a64), built by its constructor; its CRT's atexit, sprintf, aligned allocations and rw_data's
+  write, seek and open-for-write are redirected.
+- **The cases:** the game missions' `tracks.dat` (17 of them), a made one (bending lines of keys, now and then a hair
+  apart, speeds left out, rotations negated) or none; LoadMissionData / FreeMissionData, AddTrack, FindTrack,
+  CreatePlayer (frames, parents, none), RemovePlayer, the module's Update in each game state, Stop / Restart, saves
+  and loads (the file just written, the case's previous one, or a made one: fields left out or unknown, two tracks in
+  one player's chunk, a count one short, long names), GetOffsetFromStart, AdvanceAlongKeys, BuildPath. Compared after
+  each: the answer, its calls (the frames' places and rotations) and the whole module (every track's keys, every
+  player's fields and its path up to the end mark), the reader's place after a load.
+- **The tests:** 1,500 cases (about 55,000 calls, 17 s; seeds 0, 1, 2, 4, 6). **Coverage:** every line but a player
+  past its track's end (see below), the unknown entries (the port's fix), the destructor; the interpolation helpers
+  have no callers.
+- **Port bugs found:** the path code's lengths and normalisation were the SDK's methods; the original's are inline,
+  their squares summed z, y, x (SubdivideBezier's areas y, z, x and z, x, y), and AccelerateTowardsPathPoint groups its
+  sum otherwise; a NaN tolerance (the original's 0.0001), MoveAlongPath's NaN tests and a NaN speed at the path's end
+  (the original returns the time) were the other way round.
+- **The original's weaknesses (not given):** a player whose update runs past its track's end: Advance builds the
+  path of the last key, reading the key after the end (garbage, now and then a crash, the cursor running on); the
+  test runs Advance's steps on a copy in the port's code first and leaves such updates out (so a player never turns
+  inactive: only that path does it). A load of a player whose key has no next one on a shorter track of the name, or
+  of a track without keys, reads past the keys too (left out). The constructor places the frame at the start before
+  setting it (the port's fix: the first key; masked). The loader does not leave unknown entries (the port's fix, now
+  marked); past the last player a failed Descend sends it back to the last field's case (made saves never count more
+  players than they hold).
+- **Harness lessons (my mistakes):** zeroing the players' paths by hand hid a mutant: both programs' allocations are
+  zeroed already; a mutation run copied the harness while I edited it and reported 61 kills of a broken test (rerun
+  cleanly); a Bash heredoc collapsed a backslash again.
