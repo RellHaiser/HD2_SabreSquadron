@@ -770,7 +770,9 @@ void C_StaticWeapon::GetBoxCorners(S_vector4 corners[8])   // 0x00605e50
     }
     const S_matrix world = m_frame->GetMatrix();
     for (int k = 0; k < 8; ++k) {
-        const S_vector v = S_vector(corners[k].x, corners[k].y, corners[k].z) * world;
+        // (*=, as the original: LS3DF's operator* can round the last bit otherwise.)
+        S_vector v(corners[k].x, corners[k].y, corners[k].z);
+        v *= world;
         corners[k].x = v.x;
         corners[k].y = v.y;
         corners[k].z = v.z;

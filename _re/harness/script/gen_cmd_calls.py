@@ -340,6 +340,18 @@ ORIG = {
     'C_Human::SetDisguise(float)': ("0x005a6250", "thiscall", "v"),
     'C_Human::MakeNoise()': ("0x005a6480", "thiscall", "v"),
     'C_TeamBase::IsMember(C_Human const*) const': ("0x00461a20", "thiscall", "b"),
+    # (The static weapon test's.)
+    'LoadActorItems(C_Actor*, C_chunk&)': ("0x007de5a0", "stdcall", "b"),
+    'SaveActorItems(C_Actor*, C_chunk&)': ("0x007de3c0", "stdcall", "b"),
+    'SendActorMessage(C_BitStream*)': ("0x004755b0", "stdcall", "v"),
+    'CreateActorMessage(int, bool)': ("0x00475530", "stdcall", "p"),
+    'C_HitZones::GetHitZone(C_Human*, S_vector const&, S_vector const&)': ("0x00455670", "thiscall", "i"),
+    'C_NetObject::PopMessage(bool)': ("0x0073e9d0", "thiscall", "p"),
+    'C_ItemsModule::CreateItem(int, int, C_Actor*, int)': ("0x007d7c70", "thiscall", "p"),
+    'C_Human::NotifyShotAt(C_Actor*, S_vector const&)': ("0x005a5960", "thiscall", "v"),
+    'C_Human::SetFacingDir(S_vector4 const&)': ("0x005a84d0", "thiscall", "v"),
+    'C_Human::IsFriendOf(C_Actor const*) const': ("0x005a0ab0", "thiscall", "b"),
+    'C_CheckpointNetwork::FindActorPoint(C_Actor const*) const': ("0x0051e690", "thiscall", "i"),
     'C_ParticlesModule::CreateAt(int, S_vector const&, S_vector const&, I3D_frame*, bool, bool)':
         ("0x00445150", "thiscall", "i"),
 }
@@ -469,7 +481,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "hf": ("build_hf.bat", "hf_diff", "the heavy fire support test's logged calls"),
          "sb": ("build_sb.bat", "sb_diff", "the submarine test's logged calls"),
          "tr": ("build_tr.bat", "tr_diff", "the train test's logged calls"),
-         "sw": ("build_sw.bat", "sw_diff", "the seat weapon test's logged calls")}
+         "sw": ("build_sw.bat", "sw_diff", "the seat weapon test's logged calls"),
+         "st": ("build_st.bat", "st_diff", "the static weapon test's logged calls")}
 
 
 def main():

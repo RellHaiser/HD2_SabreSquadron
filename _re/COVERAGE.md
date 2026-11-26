@@ -7089,3 +7089,34 @@ came from. From this part on the network code is compared with the original exec
 - **Harness lessons (my mistakes):** a relative `build_sw.bat` path did not build, so a fix I thought tested had not
   run; the case's owner fell back to a non-car actor while the test still wrote a car's mass into its smaller block
   (a heap corruption that crashed only in some builds); the original's sound group layout is not the header's.
+
+## Static weapon part 1 (the guns on mounts, `static_weapon.cpp`, 2026-11-25)
+
+- **The build:** `script/build_st.bat` (`script/st_diff.cpp`, suite `static.weapon.orig`), new: it includes
+  `sw_diff.cpp` (`SW_DIFF_NO_MAIN`: its world, frame answers, items, sound groups and weapon dumps); the weapon's calls
+  through `st_calls.s` / `st_calls.inc` (`gen_cmd_calls.py st`; the actor messages, the items' save and load, the hit
+  zones, PopMessage, CreateItem, the human's NotifyShotAt, SetFacingDir and IsFriendOf, FindActorPoint added). The seat
+  weapon inside is each side's own; a script's OnUse logged on both sides (the port's patched, the original's
+  redirected); the texts logged; the item definitions get a logged GetAmmoItemId; the store's containers answer in
+  each side's layout (the original's GetSlots: pointers to the slots' vectors). The net object's setters are the
+  test's on the port's side (the original inlines them).
+- **The cases:** the weapon's model (seats with user properties and cameras under them or their parents, seat 0's
+  turret parts, visuals with boxes, some flagged; the destroyed model "C<file>" or none; a model that does not reopen),
+  a weapon on each side (the original's by its constructor 0x00602ec0), its store and net object; in every role:
+  StartMission, StopMission, RestartMission, SetState, updates and ticks (with the net object's messages: shots,
+  reloads, rounds, ammunition), OnMessage, WriteState / ReadState, saves (an entry after them) and loads, the seats'
+  and the seat weapon's virtuals, Hit (tiny directions too), GetBoxCorners, the exit, the creator. Compared after each:
+  the answer, its calls, the weapon's fields (box, seats, the gunners' places, state), the net object's settings and
+  the seat weapon's every field; at the end the frames.
+- **The tests:** 1,500 cases (about 450,000 calls, 10.5 s; seeds 0, 1, 2, 4, 6). **Coverage:** every line but
+  GetWeaponBox for a frame that is itself an object visual (the weapon's frame is always a model).
+- **Port bugs found:** GetBoxCorners transformed the corners with `operator*`; the original uses `*=` (LS3DF rounds the
+  last bit apart).
+- **The original's weaknesses (the port's fixes, not given):** a weapon without its item reads it through null at the
+  start and in the refills; an update without seats reads the first seat's gunner through null; a seat out of range
+  in the controls reads past the seats; a camera search from a seat dummy without a parent; an empty box's centre
+  unset. Stack words: the exit's w (FindExit; left out).
+- **Harness lessons (my mistakes):** a misaligned bit queue sent the store's read loop (until a 0xFFFF uid) through
+  random answers for minutes (91 million calls): the queue is now built per message kind and answers all ones when
+  read out; the actor name is at +0x80, not +0x6C; message names are by address and a freed message's address comes
+  back, so popped messages go unnamed.
