@@ -7057,3 +7057,35 @@ came from. From this part on the network code is compared with the original exec
   locals in short entries.
 - **Harness lessons (my mistakes):** the original's track key array needs its growth field (+0x1C) set; NaN save bytes
   differ in sign between the x87 and SSE (normalised); the checkpoints' Get reads only the index's low word.
+
+## Seat weapon part 1 (the weapons at vehicles' seats, `seat_weapon.cpp`, 2026-11-25)
+
+- **The build:** `script/build_sw.bat` (`script/sw_diff.cpp`, suite `seat.weapon.orig`; the vehicle harness's
+  `build_sw.bat` self-check stays), new: `cmd_diff.cpp`'s world, fakes and logger; the weapon's calls through
+  `sw_calls.s` / `sw_calls.inc` (`gen_cmd_calls.py sw`; the items module, the weapon item's PlayShotSound, the shot
+  manager's FireBulletFrom / FireProjectile, the physics module, the net replication and messages, the human's view and
+  disguise, the car's simulation and the vehicle's ApplyImpulse added to the table). The model, sound and animation
+  caches run on both sides; BuildBasis is the original's on both; LS3DF's quaternion and AngleTo by their exports. The
+  frames' answers turn them for real: SetWorldDir sets the rotation (the parent's turn taken out), Update makes the
+  children's world matrices stale. Items, definitions and components are built in each side's layout with logged
+  vtables; the sound groups likewise (the original reads a group's samples at +4, +0xC tested for none).
+- **The cases:** a weapon model per case (per seat HORT / VERT / AIM, barrels with SHDUM / CARDUM and the item, rates
+  and limits in their user properties, VIEW, a projectile, the seat dummy; parts missing), one or two weapons on each
+  side (the original's by its constructor 0x004c19d0) on a car, a static weapon or another actor, in every role:
+  Init (without model or seat frame too), Stop, Restart, SetGunner, ShowView, updates and ticks, the controls,
+  FireShot, PlayShot, Reload, ShowReload, SetRounds, the getters and CanAim (targets above the turret too), saves and
+  loads (own, previous, made), the barrels' notes (a shell thrown), SeatWeaponSendMessage, MakeSeatWeaponMessage and
+  the messages' Write and Read. A gunner is the local player or not for a whole case; his view mostly stays.
+  Compared after each: the answer, its calls (the physics shell's description, the view's w, the messages' contents),
+  every field and barrel, the item's rounds; at the end the frames.
+- **The tests:** 1,500 cases (about 110,000 calls, 7 s; seeds 0, 1, 2, 4). **Coverage:** every line but the port's
+  fixes (the destructor's releases, a muzzle-less barrel's animation, no SHELL, no net object) and two unreachable
+  returns.
+- **Port bugs found:** none.
+- **The original's weaknesses (the port's fixes, not given):** listed in the header's "Fix:" notes: a failed weapon's
+  item, animations and shells leaked; an item without a component read through null; FireShot's barrel unchecked; no
+  net object queued through null; a gunnerless reload's role read through null; a short rounds chunk's unset value.
+  Stack words: the aimed shot's direction w, the reload sound request's w (left out).
+- **Harness lessons (my mistakes):** a relative `build_sw.bat` path did not build, so a fix I thought tested had not
+  run; the case's owner fell back to a non-car actor while the test still wrote a car's mass into its smaller block
+  (a heap corruption that crashed only in some builds); the original's sound group layout is not the header's.

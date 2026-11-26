@@ -318,6 +318,28 @@ ORIG = {
     'C_SoundModule::RegisterSoundFrame(I3D_sound*, bool)': ("0x00432710", "vt+0x88", "p"),
     'S_SoundFrame::SetSectorFactor(float)': ("0x00432490", "thiscall", "v"),
     'S_Checkpoint::GetLink(int)': ("0x00524780", "thiscall", "p"),
+    # (The seat weapon test's.)
+    'GetPhysicsModule()': ("0x00410630", "stdcall", "p"),
+    'C_NetObject::QueueMessage(C_NetObjectMessage*, int, bool)': ("0x0073e970", "thiscall", "v"),
+    'C_NetMessage::ReadQuantized(float*, S_NetQuantization const*, unsigned int)': ("0x0073d900", "thiscall", "v"),
+    'C_NetMessage::WriteQuantized(float const*, S_NetQuantization const*, unsigned char)': ("0x0073d810", "thiscall", "b"),
+    'C_NetMessage::GetSender(int) const': ("0x0073d770", "thiscall", "p"),
+    'C_NetReplication::FindObject(int, bool)': ("0x0073f9c0", "thiscall", "p"),
+    'C_WeaponItem::PlayShotSound(C_Actor*, I3D_frame*, bool)': ("0x007d5ee0", "thiscall", "v"),
+    'C_ItemsModule::DestroyItem(C_Item*)': ("0x007dcd00", "thiscall", "v"),
+    'C_ItemsModule::CreateFreeItem(int)': ("0x007d7f30", "thiscall", "p"),
+    'C_ShotManager::FireBulletFrom(C_Human*, C_WeaponItem*, S_vector const&, S_vector const&, I3D_frame*, I3D_frame*, bool, unsigned int, int)':
+        ("0x00450d30", "thiscall", "v"),
+    'C_ShotManager::FireProjectile(C_Actor*, C_Item*, S_vector const&, S_vector const&, I3D_frame*, int, bool, bool, unsigned int)':
+        ("0x00451670", "thiscall", "v"),
+    'C_CameraModule::GetCameraDir(int, S_vector4*)': ("0x00465b40", "vt+0x68", "b"),
+    'C_SoundModule::GetGroup(int, int) const': ("0x004326d0", "vt+0x8C", "p"),
+    'C_Car::IsSimulatedHere()': ("0x004de800", "thiscall", "b"),
+    'C_Vehicle::ApplyImpulse(S_vector const&, S_vector const&, unsigned char, S_vector const&)': ("0x004f2790", "thiscall", "v"),
+    'C_Human::SetViewDir(S_vector4 const&)': ("0x005a84e0", "thiscall", "v"),
+    'C_Human::SetDisguise(float)': ("0x005a6250", "thiscall", "v"),
+    'C_Human::MakeNoise()': ("0x005a6480", "thiscall", "v"),
+    'C_TeamBase::IsMember(C_Human const*) const': ("0x00461a20", "thiscall", "b"),
     'C_ParticlesModule::CreateAt(int, S_vector const&, S_vector const&, I3D_frame*, bool, bool)':
         ("0x00445150", "thiscall", "i"),
 }
@@ -446,7 +468,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "aa": ("build_aa.bat", "aa_diff", "the air attack test's logged calls"),
          "hf": ("build_hf.bat", "hf_diff", "the heavy fire support test's logged calls"),
          "sb": ("build_sb.bat", "sb_diff", "the submarine test's logged calls"),
-         "tr": ("build_tr.bat", "tr_diff", "the train test's logged calls")}
+         "tr": ("build_tr.bat", "tr_diff", "the train test's logged calls"),
+         "sw": ("build_sw.bat", "sw_diff", "the seat weapon test's logged calls")}
 
 
 def main():

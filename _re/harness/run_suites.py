@@ -361,6 +361,9 @@ SUITES = [
     # (Train part 1: the trains and their track player against the original executable, script/tr_diff.cpp.)
     T("train", "script/build_tr.bat", TMP + r"\tr_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="script/tr_diff.exe"),
+    # (Seat weapon part 1: the weapons at vehicles' seats against the original executable, script/sw_diff.cpp.)
+    T("seat.weapon.orig", "script/build_sw.bat", TMP + r"\sw_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="script/sw_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
