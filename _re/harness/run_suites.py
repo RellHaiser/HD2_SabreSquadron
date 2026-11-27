@@ -394,6 +394,9 @@ SUITES = [
     T("door", "script/build_dr.bat", TMP + r"\dr_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/dr_diff.exe"),
     # (Supply box part 1: the supply boxes against the original executable, script/su_diff.cpp.)
     T("supply_box", "script/build_su.bat", TMP + r"\su_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/su_diff.exe"),
+    # (Formation part 1: the formations' shapes against the original executable, script/fm_diff.cpp.)
+    T("formation_shape", "script/build_fm.bat", TMP + r"\fm_diff.exe", needs=("mingw", "original_exe"),
+      tree_copy="script/fm_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

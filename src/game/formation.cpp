@@ -64,7 +64,22 @@ void SetXyz(S_vector4 &value, const S_vector &v)
     value.z = v.z;
 }
 S_vector Sub(const S_vector &a, const S_vector &b) { return S_vector(a.x - b.x, a.y - b.y, a.z - b.z); }
-float Sq(const S_vector &a) { return a.x * a.x + a.y * a.y + a.z * a.z; }
+// The original's inline copies sum the squares in different orders, which the game's float precision tells apart.
+enum E_SumOrder { SUM_XYZ, SUM_ZYX, SUM_YZX, SUM_XZY, SUM_YXZ };
+float Sq(const S_vector &a, E_SumOrder order = SUM_XYZ)
+{
+    switch (order) {
+    case SUM_ZYX: return a.z * a.z + a.y * a.y + a.x * a.x;
+    case SUM_YZX: return a.y * a.y + a.z * a.z + a.x * a.x;
+    case SUM_XZY: return a.x * a.x + a.z * a.z + a.y * a.y;
+    case SUM_YXZ: return a.y * a.y + a.x * a.x + a.z * a.z;
+    default: return a.x * a.x + a.y * a.y + a.z * a.z;
+    }
+}
+float Dot(const S_vector &a, const S_vector &b, E_SumOrder order = SUM_XYZ)
+{
+    return order == SUM_ZYX ? a.z * b.z + a.y * b.y + a.x * b.x : a.x * b.x + a.y * b.y + a.z * b.z;
+}
 
 // As the game's copies do it.
 float LengthOfSq(float sq)
@@ -78,19 +93,20 @@ float LengthOfSq(float sq)
     return std::sqrt(sq);
 }
 
-S_vector Unit(S_vector v)
+// (The comparisons as the original's: a NaN takes the same ways.)
+S_vector Unit(S_vector v, E_SumOrder order = SUM_XYZ)
 {
-    const float sq = Sq(v);
-    if (std::fabs(sq - 1.0f) >= 1e-8f) {
-        if (sq >= 1e-8f) {
+    const float sq = Sq(v, order);
+    if (!(std::fabs(sq - 1.0f) < 1e-8f)) {
+        if (!(sq < 1e-8f)) {
             const float k = 1.0f / std::sqrt(sq);
             v = S_vector(v.x * k, v.y * k, v.z * k);
         } else if (v.x != 0.0f) {
-            v.x = v.x >= 0.0f ? 1.0f : -1.0f;
+            v.x = v.x < 0.0f ? -1.0f : 1.0f;
         } else if (v.z != 0.0f) {
-            v.z = v.z >= 0.0f ? 1.0f : -1.0f;
+            v.z = v.z < 0.0f ? -1.0f : 1.0f;
         } else {
-            v.y = v.y >= 0.0f ? 1.0f : -1.0f;
+            v.y = v.y < 0.0f ? -1.0f : 1.0f;
         }
     }
     return v;
@@ -150,8 +166,8 @@ void ReadSlot(C_chunk &chunk, S_FormationSlot &slot, C_Human *leader)
     if (!chunk.Descend(id))
         return;
     while (chunk.HasMore()) {
-        if (!chunk.Descend(id))
-            break;
+        // (Kept: a failed Descend leaves the last id, handled again.)
+        chunk.Descend(id);
         int count = 0;
         switch (id) {
         case CK_SLOT_BASE: chunk.Read(&slot.basePos, 12); break;
@@ -221,14 +237,13 @@ C_FormationShape::~C_FormationShape()
 void C_FormationShape::SetType(E_FormationType type)
 {
     m_changed = true;
-    if (type == FORMATION_NONE) {
-        if (m_slots) {
-            delete[] m_slots;
-            m_slots = nullptr;
-            m_type = FORMATION_NONE;
-        }
+    if (type == FORMATION_NONE && m_slots) {
+        delete[] m_slots;
+        m_slots = nullptr;
+        m_type = FORMATION_NONE;
         return;
     }
+    // (Kept: none without slots makes them, of type 13 (the destructor's too, never freed).)
     if (!m_slots)
         m_slots = new S_FormationSlot[SLOT_COUNT];
     if (type == FORMATION_NEXT) {
@@ -239,8 +254,11 @@ void C_FormationShape::SetType(E_FormationType type)
     } else {
         m_type = type;
     }
+    // Types 11..21 read past the original's table, where its static initializers' rows lie: these types' rows.
+    static const int PAST_TABLE[11] = {6, 10, 9, 8, 7, 5, 4, 3, 2, 1, 0};
+    const int table = m_type > 10 && m_type <= 21 ? PAST_TABLE[m_type - 11] : m_type;
     for (int i = SLOT_COUNT - 1; i >= 0; --i) {
-        const float *const row = FORMATION_TABLE[m_type][i];
+        const float *const row = FORMATION_TABLE[table][i];
         S_FormationSlot &slot = m_slots[i];
         slot.basePos = {row[0], row[1], row[2], 0.0f};
         const S_vector dir = Unit(S_vector(row[3], row[4], row[5]));
@@ -278,7 +296,7 @@ void C_FormationShape::ApplyMatrix()
         SetXyz(slot.scaledPos, scaled);
         SetXyz(slot.scaledDir, Unit(Xyz(slot.baseDir) * m_matrix));
         // (Kept: from the first slot's scaled place, as it was until its own turn comes last.)
-        slot.distance = LengthOfSq(Sq(Sub(scaled, Xyz(m_slots[0].scaledPos))));
+        slot.distance = LengthOfSq(Sq(Sub(scaled, Xyz(m_slots[0].scaledPos)), SUM_ZYX));
     }
 }
 
@@ -306,7 +324,7 @@ bool C_FormationShape::AddMember(C_Human *member)
         SetXyz(slot.target, member->GetFrame()->GetWorldPos());
         slot.target.w = member->GetFrame()->GetMatrix().m[3][3];
         const S_matrix &world = member->GetFrame()->GetMatrix();
-        SetXyz(slot.dir, Unit(S_vector(world.m[2][0], world.m[2][1], world.m[2][2])));
+        SetXyz(slot.dir, Unit(S_vector(world.m[2][0], world.m[2][1], world.m[2][2]), SUM_YXZ));
         slot.current = slot.target;
         slot.dirty = true;
         ++m_memberCount;
@@ -366,13 +384,14 @@ bool C_FormationShape::SetLeader(C_Human *leader)
     ApplyMatrix();
     const S_matrix &world = leader->GetFrame()->GetMatrix();
     S_matrix placed = world;
-    placed.SetDir(Unit(S_vector(world.m[2][0], world.m[2][1], world.m[2][2])));
+    placed.SetDir(Unit(S_vector(world.m[2][0], world.m[2][1], world.m[2][2]), SUM_YXZ));
     const S_vector pos = leader->GetFrame()->GetWorldPos();
     placed.m[3][0] = pos.x;
     placed.m[3][1] = pos.y;
     placed.m[3][2] = pos.z;
+    // The slots start from the shape's places around the leader (their current places, not their targets).
     for (int i = SLOT_COUNT - 1; i >= 0; --i)
-        SetXyz(m_slots[i].target, Xyz(m_slots[i].scaledPos) * placed);
+        SetXyz(m_slots[i].current, Xyz(m_slots[i].scaledPos) * placed);
     SetXyz(m_slots[0].target, pos);
     m_slots[0].target.w = world.m[3][3];
     m_slots[0].checkpoint = 0xFFFF;
@@ -501,9 +520,9 @@ void C_FormationShape::KeepApart()
                 if (other.member == slot.member || !other.member)
                     continue;
                 const S_vector off = Sub(Xyz(slot.target), Xyz(other.target));
-                const float sq = Sq(off);
+                const float sq = Sq(off, SUM_ZYX);
                 if (LengthOfSq(sq) < SLOT_APART) {
-                    const S_vector dir = Unit(off);
+                    const S_vector dir = Unit(off, SUM_ZYX);
                     slot.target.x = dir.x * SLOT_APART + other.target.x;
                     slot.target.y = dir.y * SLOT_APART + other.target.y;
                     slot.target.z = dir.z * SLOT_APART + other.target.z;
@@ -527,19 +546,21 @@ void C_FormationShape::PushAside(int index, float distance)
     const S_vector leaderVel = Xyz(m_leader->m_velocity);
     const S_vector memberVel = Xyz(slot.member->m_velocity);
     S_vector leaderDir;
-    if (LengthOfSq(Sq(memberVel)) <= 0.0f || LengthOfSq(Sq(leaderVel)) <= 0.0f) {
-        leaderDir = Unit(leaderVel);
+    if (LengthOfSq(Sq(memberVel, SUM_ZYX)) <= 0.0f || LengthOfSq(Sq(leaderVel, SUM_ZYX)) <= 0.0f) {
+        leaderDir = Unit(leaderVel, SUM_ZYX);
     } else {
-        leaderDir = Unit(leaderVel);
-        const S_vector memberDir = Unit(memberVel);
+        leaderDir = Unit(leaderVel, SUM_ZYX);
+        const S_vector memberDir = Unit(memberVel, SUM_ZYX);
         // Going the same way: it can stay.
-        if (0.1f < leaderDir.x * memberDir.x + leaderDir.y * memberDir.y + leaderDir.z * memberDir.z)
+        if (0.1f < Dot(leaderDir, memberDir, SUM_ZYX))
             return;
     }
     const S_vector r = Sub(Xyz(slot.target), m_leader->GetFrame()->GetWorldPos());
     const S_vector across(leaderVel.y * r.z - leaderVel.z * r.y, leaderVel.z * r.x - r.z * leaderVel.x, r.y * leaderVel.x - leaderVel.y * r.x);
-    const S_vector away = Unit(S_vector(leaderVel.z * across.y - leaderVel.y * across.z, across.z * leaderVel.x - leaderVel.z * across.x, leaderVel.y * across.x - across.y * leaderVel.x));
-    const S_vector dir = Unit(S_vector(leaderDir.x * 0.15f + away.x, leaderDir.y * 0.15f + away.y, leaderDir.z * 0.15f + away.z));
+    const S_vector away = Unit(S_vector(leaderVel.z * across.y - leaderVel.y * across.z, across.z * leaderVel.x - leaderVel.z * across.x,
+                                        leaderVel.y * across.x - across.y * leaderVel.x),
+                               SUM_ZYX);
+    const S_vector dir = Unit(S_vector(leaderDir.x * 0.15f + away.x, leaderDir.y * 0.15f + away.y, leaderDir.z * 0.15f + away.z), SUM_ZYX);
     slot.target.x += dir.x * distance;
     slot.target.y += dir.y * distance;
     slot.target.z += dir.z * distance;
@@ -569,26 +590,33 @@ void C_FormationShape::PlanSlot(int index)
     float remaining = slot.distance;
     const int count = static_cast<int>(slot.path.size());
     if (count >= 2) {
-        remaining -= LengthOfSq(Sq(Sub(Xyz(first.target), network->Get(slot.path[1])->pos)));
-        if (remaining < 0.0f)
+        remaining -= LengthOfSq(Sq(Sub(Xyz(first.target), network->Get(slot.path[1])->pos), SUM_XZY));
+        if (remaining < 0.0f) {
+            static_cast<void>(network->Get(slot.path[1]));          // (kept: fetched again for a direction it drops)
             return;
+        }
     }
-    if (!(0.0f <= remaining))
+    if (remaining < 0.0f)
         return;
     for (int i = 2; i < count - 1; ++i) {
-        const S_vector point = network->Get(slot.path[i])->pos;
-        const float left = remaining - LengthOfSq(Sq(Sub(point, network->Get(slot.path[i - 1])->pos)));
+        const S_vector previous = network->Get(slot.path[i - 1])->pos;
+        const float left = remaining - LengthOfSq(Sq(Sub(network->Get(slot.path[i])->pos, previous), SUM_XZY));
         if (left < 0.0f) {
+            const S_vector point = network->Get(slot.path[i])->pos;
             const S_vector toward = i == count - 2 ? Sub(Xyz(slot.target), point) : Sub(network->Get(slot.path[i + 1])->pos, point);
-            const S_vector dir = Unit(toward);
+            const S_vector dir = Unit(toward, SUM_XZY);
             slot.target.x = point.x + dir.x * remaining;
             slot.target.y = point.y + dir.y * remaining;
             slot.target.z = point.z + dir.z * remaining;
             slot.dirty = true;
-            return;
+            remaining = left;
+            break;
         }
         remaining = left;
     }
+    // (Kept: the original measures the rest from the next to last point and fetches the second again, dropping both.)
+    if (count >= 2 && remaining - LengthOfSq(Sq(Sub(Xyz(slot.target), network->Get(slot.path[count - 2])->pos), SUM_XZY)) < 0.0f)
+        static_cast<void>(network->Get(slot.path[1]));
 }
 
 void C_FormationShape::BoardVehicle(C_Actor *vehicle)
@@ -666,7 +694,7 @@ void C_FormationShape::BoardVehicle(C_Actor *vehicle)
         float best = 3.4028235e38f;
         const S_vector at = slot.member->GetPosition();
         for (size_t k = places.size(); k-- != 0;) {
-            const float sq = Sq(Sub(Xyz(places[k]), at));
+            const float sq = Sq(Sub(Xyz(places[k]), at), SUM_ZYX);
             if (sq < best) {
                 best = sq;
                 nearest = k;
@@ -698,9 +726,10 @@ void C_FormationShape::LineUpAtDoor()
     if (!door)                                          // (fix: the original reads through it)
         return;
     const S_vector a = point->pos, b = door->pos;
-    const S_vector d = Unit(Sub(b, a));
+    const S_vector d = Unit(Sub(b, a), SUM_YXZ);
     const S_vector side(d.y * 0.0f - d.z, d.z * 0.0f - d.x * 0.0f, d.x - d.y * 0.0f);
-    for (int i = SLOT_COUNT - 1; i >= 1; --i) {
+    // (Slot 0 too: a member there that does not lead only gets planned again.)
+    for (int i = SLOT_COUNT - 1; i >= 0; --i) {
         S_FormationSlot &slot = m_slots[i];
         if (!slot.member || slot.member == m_leader)
             continue;
@@ -729,7 +758,7 @@ void C_FormationShape::LineUpAtDoor()
             if (slot.member && slot.member != m_leader && m_doorState == i - 1) {
                 const S_vector velocity = Xyz(slot.member->m_velocity);
                 const S_vector off = Sub(slot.member->GetPosition(), Xyz(slot.target));
-                if (Sq(velocity) < 0.01f && Sq(off) < 0.5f)
+                if (Sq(velocity) < 0.01f && Sq(off, SUM_ZYX) < 0.5f)
                     ++m_doorState;
                 return;
             }
@@ -743,7 +772,7 @@ void C_FormationShape::LineUpAtDoor()
             continue;
         const S_vector velocity = Xyz(slot.member->m_velocity);
         const S_vector off = Sub(slot.member->GetPosition(), Xyz(slot.target));
-        if (0.01f < Sq(velocity) || 0.5f <= Sq(off)) {
+        if (0.01f < Sq(velocity) || !(Sq(off, SUM_XZY) < 0.5f)) {
             m_doorState = -1;
             return;
         }
@@ -801,7 +830,7 @@ void C_FormationShape::FollowLeader()
         SetXyz(slot.dir, Unit(Sub(Xyz(slot.scaledDir) * placed, leaderPos)));
         if (!slot.member->IsLocalPlayer()) {
             // Round a corner: no farther along the walking points than straight away from the leader.
-            const float straight = LengthOfSq(Sq(Sub(place, leaderPos)));
+            const float straight = LengthOfSq(Sq(Sub(place, leaderPos), SUM_YZX));
             const int from = network->FindNearest(leaderPos, 5.0f, -1.0f);
             const int to = network->FindNearest(place, 5.0f, -1.0f);
             std::vector<uint16_t> path;
@@ -818,8 +847,10 @@ void C_FormationShape::FollowLeader()
                     const float radius = static_cast<float>(point->radius) * 0.0625f;
                     if (straight <= radius + along) {
                         if (radius < LengthOfSq(Sq(Sub(point->pos, place)))) {
-                            const S_vector back = Unit(Sub(leaderPos, point->pos));
-                            const float by = along - radius <= straight ? along - straight : radius;
+                            // (Each way its own copy of the unit, summed its own way.)
+                            const bool within = along - radius <= straight;
+                            const S_vector back = Unit(Sub(leaderPos, point->pos), within ? SUM_YZX : SUM_XYZ);
+                            const float by = within ? along - straight : radius;
                             place = S_vector(back.x * by + point->pos.x, back.y * by + point->pos.y, back.z * by + point->pos.z);
                         }
                         break;
@@ -829,11 +860,11 @@ void C_FormationShape::FollowLeader()
             }
         }
         const S_vector was = Xyz(slot.target);
-        const float wasFar = LengthOfSq(Sq(Sub(was, leaderPos)));
+        const float wasFar = LengthOfSq(Sq(Sub(was, leaderPos), SUM_ZYX));
         slot.pushedAside = false;
         if (wasFar < SLOT_APART && slot.member) {
             const S_vector ahead(dir.x * 0.001f + leaderPos.x, dir.y * 0.001f + leaderPos.y, dir.z * 0.001f + leaderPos.z);
-            if (LengthOfSq(Sq(Sub(was, ahead))) < wasFar)
+            if (LengthOfSq(Sq(Sub(was, ahead), SUM_ZYX)) < wasFar)
                 PushAside(i, SLOT_APART);
         }
         if (m_changed) {
@@ -841,7 +872,7 @@ void C_FormationShape::FollowLeader()
             slot.dirty = true;
         } else {
             const S_vector moved(dir.x * 0.01f + (was.x - place.x), dir.y * 0.01f + (was.y - place.y), dir.z * 0.01f + (was.z - place.z));
-            if (std::sqrt(Sq(moved)) < wasFar) {
+            if (LengthOfSq(Sq(moved)) < wasFar) {
                 SetXyz(slot.target, place);
                 slot.dirty = true;
             }
@@ -850,6 +881,9 @@ void C_FormationShape::FollowLeader()
             PlanSlot(i);
     }
     KeepApart();
+    // (Kept: the original fetches the leader's point here and drops it.)
+    if (m_slots[0].checkpoint != 0xFFFF)
+        static_cast<void>(network->Get(m_slots[0].checkpoint));
     m_changed = false;
 }
 
@@ -906,8 +940,8 @@ bool C_FormationShape::LoadGame(C_chunk &chunk)
     if (!chunk.Descend(id))
         return true;
     while (chunk.HasMore()) {
-        if (!chunk.Descend(id))
-            break;
+        // (Kept: a failed Descend leaves the last id, handled again.)
+        chunk.Descend(id);
         switch (id) {
         case CK_MATRIX: chunk.Read(&m_matrix, 0x40); break;
         case CK_DIR: chunk.Read(&m_dir, 12); break;

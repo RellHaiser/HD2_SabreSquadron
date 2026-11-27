@@ -196,6 +196,14 @@ ORIG = {
     'C_CheckpointNetwork::GetNeighbours(int, float, std::vector<unsigned short, std::allocator<unsigned short> >*)':
         ("0x00520830", "thiscall", "b"),
     'C_CheckpointNetwork::FindNearest(S_vector, float, float) const': ("0x0051d780", "thiscall", "i"),
+    # (Formation part 1.)
+    'C_CheckpointNetwork::FindNearestType15(S_vector, float, float) const': ("0x0051d970", "thiscall", "i"),
+    'C_Car::GetSeatEntry(int, S_vector4*, S_vector4*)': ("0x004da420", "thiscall", "b"),
+    'C_Submarine::FindExit(int, S_vector4*, S_vector4*, bool)': ("0x005e0530", "thiscall", "b"),
+    'GetSubmarines()': ("0x005de7b0", "stdcall", "p"),
+    'C_Human::SetLeader(C_Human*)': ("0x005a91a0", "thiscall", "v"),
+    'S_HumanBody::GetClimbState() const': ("0x005ac2b0", "thiscall", "i"),
+    'C_SquadController::SetCombatOrder(int)': ("0x005380c0", "thiscall", "v"),
     'C_Human::FindCheckpoint(char const*) const': ("0x005af210", "thiscall", "i"),
     'C_Human::IssueCommand(S_HumanCommand const&)': ("0x005a45b0", "thiscall", "v"),
     'C_Human::SetControllerAIMode(int)': ("0x005a5ca0", "thiscall", "v"),
@@ -521,7 +529,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "fs": ("build_fs.bat", "fs_diff", "the fish test's logged calls"),
          "bk": ("build_bk.bat", "bk_diff", "the bike test's logged calls"),
          "dr": ("build_dr.bat", "dr_diff", "the door test's logged calls"),
-         "su": ("build_su.bat", "su_diff", "the supply box test's logged calls")}
+         "su": ("build_su.bat", "su_diff", "the supply box test's logged calls"),
+         "fm": ("build_fm.bat", "fm_diff", "the formation test's logged calls")}
 
 
 def main():

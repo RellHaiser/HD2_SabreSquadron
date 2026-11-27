@@ -7399,3 +7399,37 @@ came from. From this part on the network code is compared with the original exec
 - **The original's weaknesses (not given):** its constructor leaves the defaults unset (SetFrame and Reset set them);
   a parachute without its morph is called through null and the walls missing at the fall are read through null (the
   port's fixes); the state saved and sent carries stack words.
+
+## Formation part 1 (the formations' shapes, `formation.cpp`, 2026-11-27)
+
+- **The build:** `script/build_fm.bat` (`script/fm_diff.cpp`, suite `formation_shape`), new: `cmd_diff.cpp`'s world,
+  fakes and logger; the shapes' calls through `fm_calls.s` / `fm_calls.inc` (`gen_cmd_calls.py fm`; FindNearestType15,
+  the cars' seat entries, the submarines' exits and list, SetLeader, the body's climb state, SetCombatOrder added; the
+  seats' and the squad controller's virtual calls). The test's own humans (frames turned and scaled, health, velocity,
+  vehicle, controller and its type), vehicles (cars, submarines, others; their seats answered) and a walking network of
+  eight points (doors among them). The original's table of the types' slots made by its static initializers
+  (0x00596160..0x00597060, 0x005971e0); its slots' `new[]` (`_aligned_offset_malloc`) redirected.
+- **The cases:** SetType (every type, the next, none, 11..21 past the table), SetScale, members added and removed,
+  SetLeader, OnLeaderDied, Tick (following the leader, rounding corners on the network, pushing aside, at a door,
+  boarding cars and submarines), FindSlot and the slots' getters, InvalidateSlot, SetSlotTarget, PlanSlot,
+  SetDoorPoint, the scripted flag, the world changed between ticks (moves, steps, velocities, health, vehicles,
+  controllers, everyone at their slots), saves loaded back and saves the test makes (chunks missing, unknown ones, fewer
+  slots, the leader in another slot, no shape). Compared after each: the answer, its calls, every field of the shape
+  and its slots (the vectors' x, y and z), the saves' bytes and the reader's depth.
+- **The tests:** 1,500 cases (about 77,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of `formation.cpp`
+  but the port's fix for a shape with no slots loading some (the formation self-check reaches it).
+- **Port bugs found:** 9, fixed. SetLeader placed the slots' targets where the original sets their current places;
+  the original's sums of squares go in other orders in most functions (z, y, x; y, x, z; y, z, x; x, z, y: each copy's
+  own, now an argument of Sq and Unit); FollowLeader's moved distance was a plain root (the original's LengthOfSq:
+  0 when tiny, 1 within 1e-8 of it); PlanSlot fetched the points in another order, returned after placing the slot
+  (the original goes on to fetch two more and drops them) and stopped on a NaN where the original goes on; FollowLeader
+  missed the original's fetch of the leader's point after KeepApart; LoadGame and its slots stopped at a failed
+  Descend (the original handles the last id again); SetType(none) on a shape with no slots returned (the original makes
+  slots of type 13, its rows past the table: types 11..21 now read those rows, `PAST_TABLE`); LineUpAtDoor's slots
+  stopped at the second (the original marks a member in the first that does not lead); the unit's comparisons on a NaN.
+  The formation self-check's two expectations of the old SetLeader follow the original now.
+- **The original's weaknesses (not given):** the shape's and the slots' w words are stack leftovers (FitOnNetwork
+  pulling a target onto a point's radius, SetLeader's places, FollowLeader's directions); a read that fails (a save cut
+  short) leaves stack words; RemoveMember reads past the slots when the leader is in the last one and repeated before
+  it; SetType(none) with no slots (the destructor's too) makes slots it never frees; a door point without a door's
+  neighbour and a shape with no slots loading some are read and written through null (the port's fixes).

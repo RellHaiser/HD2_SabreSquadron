@@ -1317,6 +1317,11 @@ uint64_t Call(uint32_t index, uint32_t *regs)
     // (C_CheckpointNetwork::Get reads AX alone: the original pushes a word whose upper half is a leftover.)
     if (key == "C_CheckpointNetwork::Get" && d.words.size() > 1)
         d.words[1] &= 0xFFFF;
+    // (FindPath's points too: the search compares their low halves alone; the formations' callers push leftovers above.)
+    if (key == "C_CheckpointNetwork::FindPath" && d.words.size() > 2) {
+        d.words[1] &= 0xFFFF;
+        d.words[2] &= 0xFFFF;
+    }
     std::string line = key + "(";
     const bool outString = g_outStrings.count(key) != 0;
     for (int i = 0; i < fixed; ++i)

@@ -33,7 +33,8 @@ namespace formation {
 S_vector Xyz(const S_vector4 &value);
 void SetXyz(S_vector4 &value, const S_vector &v);
 float LengthOfSq(float sq);
-S_vector Unit(S_vector v);
+enum E_SumOrder { SUM_XYZ, SUM_ZYX, SUM_YZX, SUM_XZY, SUM_YXZ };
+S_vector Unit(S_vector v, E_SumOrder order = SUM_XYZ);
 }  // namespace formation
 using namespace formation;
 
@@ -415,8 +416,8 @@ void TestMembers()
     CHECK(led.GetMemberCount() == 3);
     CHECK(led.m_slots[0].target.x == 5 && led.m_slots[0].target.z == 5);
     CHECK(led.m_slots[0].dirty && led.m_slots[0].checkpoint == 0);
-    // The others' places about it.
-    CHECK(Near(led.m_slots[3].target.x, 5.0f - 7.5f) && Near(led.m_slots[3].target.z, 5.0f));
+    // The others start from their places about it (their current places; formation part 1: as the original's).
+    CHECK(Near(led.m_slots[3].current.x, 5.0f - 7.5f) && Near(led.m_slots[3].current.z, 5.0f));
     // The same: nothing. A leader not yet in: added. The door forgotten.
     led.m_doorPoint = 3;
     CHECK(led.SetLeader(l->human()));
@@ -1089,7 +1090,7 @@ void TestMembersMore()
     CHECK(e.m_slots[0].target.x == 3 && e.m_slots[0].target.z == 2 && e.m_slots[0].target.w == 1.5f);
     CHECK(Near(e.m_slots[0].scaledPos.x, 2.5f));
     // (scaled -10, 0, 0: along the matrix's x, which is (z, 0, -x) of (1, 0, 0): (0, 0, -1); so +10 in z.)
-    CHECK(Near(e.m_slots[5].target.x, 3.0f) && Near(e.m_slots[5].target.z, 12.0f));
+    CHECK(Near(e.m_slots[5].current.x, 3.0f) && Near(e.m_slots[5].current.z, 12.0f));
     world[8] = 0.0f; world[10] = 1.0f;
 
     // The dead leader's squad: last slot and first slot too.
