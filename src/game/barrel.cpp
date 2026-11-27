@@ -54,10 +54,11 @@ enum : uint16_t {
 
 constexpr int MOVE_TIME = 400;                          // ms: the body's tip each way, the slosh's start
 constexpr float MOVE_RATE = 0.0025f;                    // 1 / 400
-constexpr float BODY_TIP = 0.0872664601f;               // rad (5 degrees)
+// Fix: the original's bits (0x3db2b8c3 and 0x3b80adfd); the port had their neighbours below.
+constexpr float BODY_TIP = 0.0872664675f;               // rad (5 degrees; 0x3db2b8c3)
 constexpr float SLOSH_TILT = 0.0174532924f;             // rad (1 degree) either way
 constexpr float SLOSH_DAMPING = 0.0001f;                // a ms
-constexpr float SLOSH_RATE = 0.00392699009f;            // rad a ms (pi / 800)
+constexpr float SLOSH_RATE = 0.00392699102f;            // rad a ms (pi / 800; 0x3b80adfd)
 constexpr float SLOSH_TURN = 0.00012f;                  // rad a ms about y
 constexpr float SLOSH_MAX = 2.5f;
 constexpr float HOLE_STOP_BELOW = 0.09f;                // a hole this near the level stops leaking
@@ -324,13 +325,15 @@ void C_Barrel::Animate(int time)                        // 0x00606da0 (DS 0x0062
             m_sloshDamped = true;
             m_sloshAmount = SLOSH_DAMPING;
         }
-        float c = std::cos(static_cast<float>(m_sloshTime) * SLOSH_RATE);
-        if (m_sloshDamped && ((m_sloshPhase <= 0.5f && c >= 0.5f) || (m_sloshPhase >= 0.5f && c <= 0.5f))) {
-            c = 0.0f;
+        // Fix: the cosine compared and multiplied unrounded, as the original's FCOS (the port rounded it
+        // to a float first).
+        double c = std::cos(static_cast<double>(static_cast<float>(m_sloshTime) * SLOSH_RATE));
+        if (m_sloshDamped && ((m_sloshPhase <= 0.5f && c >= 0.5) || (m_sloshPhase >= 0.5f && c <= 0.5))) {
+            c = 0.0;
             m_sloshing = false;
         }
-        m_sloshPhase = c;
-        const S_quat sway = m_sloshFrom.Slerp(m_sloshTo, c * m_sloshAmount, false);
+        m_sloshPhase = static_cast<float>(c);
+        const S_quat sway = m_sloshFrom.Slerp(m_sloshTo, static_cast<float>(c * static_cast<double>(m_sloshAmount)), false);
         // (Barrels of odd and even ids turn opposite ways.)
         const int side = m_netId % 2 != 0 ? 1 : -1;
         const S_matrix turn = RotateYMatrix(static_cast<float>(side) * static_cast<float>(m_sloshTime - MOVE_TIME) * SLOSH_TURN);
@@ -491,19 +494,25 @@ void C_Barrel::HitBody(const S_vector &pos, const S_vector &dir)   // 0x00608590
     S_vector d = dir;
     NormalizeBy(d, SquareYZX(d));
     if (m_exitHoles) {
-        // The exit hole: the far side of the barrel along the shot.
+        // The exit hole: the far side of the barrel along the shot. Fix: the products are
+        // operator*= (LS3DF's ??X), as the original's (the port used operator*), and the direction
+        // made local replaces the shot's (the original reuses its variable: the slosh below takes it).
         const S_vector &at = m_frame->GetWorldPos();
-        S_vector through = S_vector(at.x + d.x, d.y + at.y, d.z + at.z) * inverse;
-        NormalizeBy(through, SquareYZX(through));
+        d = S_vector(at.x + d.x, d.y + at.y, d.z + at.z);
+        d *= inverse;
+        NormalizeBy(d, SquareYZX(d));
         S_vector a, b;
-        CylinderHits(local, through, m_radius, a, b);
+        CylinderHits(local, d, m_radius, a, b);
         const float da = ((local.x - a.x) * (local.x - a.x) + (local.y - a.y) * (local.y - a.y)) +
                          (local.z - a.z) * (local.z - a.z);
         const float db = ((local.x - b.x) * (local.x - b.x) + (local.y - b.y) * (local.y - b.y)) +
                          (local.z - b.z) * (local.z - b.z);
         const S_vector &exit = da <= db ? b : a;
-        if (IsLeakHeight(exit.y))
-            AddHole(exit * m_frame->GetMatrix(), exit.y);
+        if (IsLeakHeight(exit.y)) {
+            S_vector world = exit;
+            world *= m_frame->GetMatrix();
+            AddHole(world, exit.y);
+        }
     }
     Slosh(d, d, false);
 }
@@ -519,16 +528,23 @@ void C_Barrel::HitSurface(const S_vector &pos, const S_vector &dir)   // 0x00608
     S_vector d = dir;
     NormalizeBy(d, SquareYZX(d));
     const S_vector &at = m_frame->GetWorldPos();
-    S_vector through = S_vector(at.x + d.x, d.y + at.y, d.z + at.z) * inverse;
+    // Fix: the products are operator*= (LS3DF's ??X), as the original's (the port used operator*).
+    S_vector through(at.x + d.x, d.y + at.y, d.z + at.z);
+    through *= inverse;
     NormalizeBy(through, SquareYZX(through));
     S_vector a, b;
     CylinderHits(local, through, m_radius, a, b);
     if (IsLeakHeight(a.y)) {
-        AddHole(a * m_frame->GetMatrix(), a.y);
+        const float height = a.y;
+        a *= m_frame->GetMatrix();
+        AddHole(a, height);
         return;
     }
-    if (IsLeakHeight(b.y))
-        AddHole(b * m_frame->GetMatrix(), b.y);
+    if (IsLeakHeight(b.y)) {
+        const float height = b.y;
+        b *= m_frame->GetMatrix();
+        AddHole(b, height);
+    }
 }
 
 C_BitStream *C_Barrel::CreateMessage(uint32_t kind)
@@ -577,7 +593,8 @@ void C_Barrel::Hit(E_HitType type, float amount, const S_vector &pos, const S_ve
         return;
     }
     S_vector d = dir;
-    NormalizeBy(d, (d.x * d.x + d.y * d.y) + d.z * d.z);
+    // Fix: the square summed z, y, x, as the original's (the port summed x, y, z).
+    NormalizeBy(d, (d.z * d.z + d.y * d.y) + d.x * d.x);
 #ifndef HD2_DEDICATED   // the server has only the server's side
     if (IsClient()) {
         C_BitStream *msg = CreateMessage(MSG_HIT_SURFACE);

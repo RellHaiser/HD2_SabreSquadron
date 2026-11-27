@@ -505,7 +505,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "tk": ("build_tk.bat", "tk_diff", "the track test's logged calls"),
          "mn": ("build_mn.bat", "mn_diff", "the mine test's logged calls"),
          "ld": ("build_ld.bat", "ld_diff", "the ladder test's logged calls"),
-         "ep": ("build_ep.bat", "ep_diff", "the explosive place test's logged calls")}
+         "ep": ("build_ep.bat", "ep_diff", "the explosive place test's logged calls"),
+         "br": ("build_br.bat", "br_diff", "the barrel test's logged calls")}
 
 
 def main():

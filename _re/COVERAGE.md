@@ -7282,9 +7282,35 @@ came from. From this part on the network code is compared with the original exec
   `explosive_place.cpp`.
 - **Port bugs found:** 1, fixed. StartMission built its box from the engine's hierarchy box (the shared
   MakeFrameBoxVolume): the original's uses the game's ComputeHierarchyBox (0x006111f0), the only box volume that does.
-  `frame_box_volume.h` has MakeBoxVolume for a given box now; ComputeHierarchyBox is declared in `actor.h`. The comment
-  on the volume's centre w was wrong (the original copies a stack word nothing writes, not the box's radius).
+  `frame_box_volume.h` has MakeBoxVolume for a given box now; ComputeHierarchyBox is declared in `actor.h` (the vehicle
+  item test, which does not link `actor.cpp`, answers it with its driver's box). The comment on the volume's centre w
+  was wrong (the original copies a stack word nothing writes, not the box's radius).
 - **The original's weaknesses (not given):** its constructor leaves who placed it and the time left unset (StartMission
   sets both before they are read); an item type without a definition read through null (the port's fix); a short state
   chunk (a stack word); a saved game's foreign entry holding anything but a state entry (the original's reader runs past
   its end and loops for ever, the port's stops).
+
+## Barrel part 1 (the barrels, `barrel.cpp`, 2026-11-26)
+
+- **The build:** `script/build_br.bat` (`script/br_diff.cpp`, suite `barrel`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the barrels' calls through `br_calls.s` / `br_calls.inc` (`gen_cmd_calls.py br`). The model cache is real on
+  both sides (`resource_cache.cpp`; the original's inline OpenInto on its own cache, built as the heavy fire support
+  test does); the LS3DF math (quaternions, the turn, the inverse, the products) LS3DF.dll's; a script's OnDeath logged
+  on both sides; the frames' material the original's GetFrameMaterial on both sides.
+- **The cases:** one or two barrels (turned, tilted) with a surface and a body (now and then missing) and frame data
+  with a script or none; properties (every entry, any order, foreign ones), CopyFrom, starts, stops, restarts, updates
+  and ticks about the tip's and slosh's 400 ms, hits (bullets, explosions, others; into the surface, the body,
+  elsewhere; amounts about the hit points; bursts that cap the slosh; tiny directions), bumps from humans and cars,
+  the clients' messages, saves and loads (made ones: flags, levels, health 0, foreign entries, another outer id),
+  GetMaterialId, the creator; every role. Compared after each: the answer, its calls (the volume, the particles, the
+  destroyed model, the messages), every field, the holes, the volume and the frames; the bytes and the reader's depth.
+- **The tests:** 1,500 cases (about 139,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of `barrel.cpp`.
+- **Port bugs found:** 6, fixed. The body's tip angle and the slosh's rate were the floats one below the original's
+  (0x3db2b8c3, 0x3b80adfd); the slosh's cosine was rounded to a float before its compares and its product (the
+  original's FCOS result is not); Hit summed the surface shot's square x, y, z (the original z, y, x); the exit holes'
+  products were operator* where the original's are operator*= (LS3DF's ??X); and with exit holes HitBody sloshed along
+  the shot, where the original's reuses its variable for the local exit direction and sloshes along that. The vehicle
+  item test's model of the slosh is updated to match.
+- **The original's weaknesses (not given):** a stopped barrel still sloshing or tipping reads its forgotten surface or
+  body through null when updated (StopMission clears the frames, not the flags; the game does not update a stopped
+  actor); a property name past 999 characters is left unterminated.

@@ -328,13 +328,13 @@
                     damped = true;
                     amount = 0.0001f;
                 }
-                float c = std::cos(static_cast<float>(sloshTime) * 0.00392699009f);
-                if (damped && ((phase <= 0.5f && c >= 0.5f) || (phase >= 0.5f && c <= 0.5f))) {
-                    c = 0.0f;
+                double c = std::cos(static_cast<double>(static_cast<float>(sloshTime) * 0.00392699102f));
+                if (damped && ((phase <= 0.5f && c >= 0.5) || (phase >= 0.5f && c <= 0.5))) {
+                    c = 0.0;
                     sloshing = false;
                 }
-                phase = c;
-                const S_quat sway = from.Slerp(to, c * amount, false);
+                phase = static_cast<float>(c);
+                const S_quat sway = from.Slerp(to, static_cast<float>(c * static_cast<double>(amount)), false);
                 const S_matrix turn = RotateYMatrix(1.0f * static_cast<float>(sloshTime - 400) * 0.00012f);
                 PR(r.barrelSlosh, SaSameQuat(dekl->m_rot, SaNormalized(sway.RotateByMatrix(turn))) &&
                                       barrel->m_sloshing == sloshing && barrel->m_sloshPhase == phase &&
@@ -661,7 +661,7 @@
         const std::vector<std::pair<S_vector, float>> setDirs = g_prSetDirs;
         {
             S_quat tip;
-            tip.Make(S_vector(tipAt.y * 0.0f - tipAt.z, tipAt.z * 0.0f - tipAt.x * 0.0f, tipAt.x - tipAt.y * 0.0f), 0.0872664601f);
+            tip.Make(S_vector(tipAt.y * 0.0f - tipAt.z, tipAt.z * 0.0f - tipAt.x * 0.0f, tipAt.x - tipAt.y * 0.0f), 0.0872664675f);
             const S_quat tipRot = barrel->m_bodyRot.RotateByMatrix(tip.RotationMatrix());
             const S_vector axis(sloshDir.y * 0.0f - sloshDir.z, sloshDir.z * 0.0f - sloshDir.x * 0.0f, sloshDir.x - sloshDir.y * 0.0f);
             S_quat from = dekl->GetRot();
@@ -732,8 +732,8 @@
         barrel->Update(0);
         PR(r.barrelSlosh, !g_lastSlerpFlag);
         {
-            const float c = std::cos(static_cast<float>(1200) * 0.00392699009f);
-            const S_quat sway = barrel->m_sloshFrom.Slerp(barrel->m_sloshTo, c * 1.0f, false);
+            const double c = std::cos(static_cast<double>(static_cast<float>(1200) * 0.00392699102f));
+            const S_quat sway = barrel->m_sloshFrom.Slerp(barrel->m_sloshTo, static_cast<float>(c), false);
             PR(r.barrelSlosh, SaSameQuat(dekl->m_rot, SaNormalized(sway.RotateByMatrix(RotateYMatrix(
                                                           static_cast<float>(1200 - 400) * 0.00012f)))));
         }
