@@ -284,6 +284,14 @@ ORIG = {
     'ModuleManager::BroadcastLoadMissionData(bool)': ("0x0048dbf0", "fastcall", "v"),
     'C_ActorsModule::CreateActor(E_ActorType, I3D_frame*, bool, int)': ("0x004759c0", "thiscall", "p"),
     'C_ActorsModule::DestroyActor(C_Actor*, bool)': ("0x00475c50", "thiscall", "v"),
+    # (Mine part 1.) The temporary actors' list and its messages (members of g_temporaryActors there, 0x0089b5d0; the
+    # port's messages are free functions: their stack arguments decode as stdcall's, ECX left out).
+    'C_TemporaryActorsList::DestroyActor(C_Actor*)': ("0x00477190", "thiscall", "v"),
+    'CreateTempActorMessage(int, bool)': ("0x00478780", "stdcall", "p"),
+    'SendTempActorMessage(C_BitStream*)': ("0x00478880", "stdcall", "v"),
+    'C_ActorsModule::GetHuman(int) const': ("0x00475e00", "thiscall", "p"),
+    'C_ShotManager::PlayExplosion(S_vector const&, S_vector const&, int, int, int)': ("0x00451a80", "thiscall", "v"),
+    'C_ShotManager::Explode(C_Actor*, S_vector const&, float, float, int)': ("0x00451990", "thiscall", "v"),
     'C_LoaderScreen::SetProgress(int, float)': ("0x006c9920", "thiscall", "v"),
     'C_LoaderScreen::FinishLoading()': ("0x006c9900", "thiscall", "v"),
     'C_LoaderScreen::Start(char const*, bool, bool, bool, C_MissionDef const*)': ("0x006c9990", "thiscall", "v"),
@@ -491,7 +499,9 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "sw": ("build_sw.bat", "sw_diff", "the seat weapon test's logged calls"),
          "st": ("build_st.bat", "st_diff", "the static weapon test's logged calls"),
          "sg": ("build_sg.bat", "sg_diff", "the sight test's logged calls"),
-         "tk": ("build_tk.bat", "tk_diff", "the track test's logged calls")}
+         "tk": ("build_tk.bat", "tk_diff", "the track test's logged calls"),
+         "mn": ("build_mn.bat", "mn_diff", "the mine test's logged calls"),
+         "ld": ("build_ld.bat", "ld_diff", "the ladder test's logged calls")}
 
 
 def main():

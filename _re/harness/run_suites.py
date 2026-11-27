@@ -378,6 +378,8 @@ SUITES = [
     # the game missions' tracks.dat.)
     T("track", "script/build_tk.bat", TMP + r"\tk_diff.exe", needs=("mingw", "original_exe", "data"),
       tree_copy="script/tk_diff.exe"),
+    # (Mine part 1: the mines against the original executable, script/mn_diff.cpp.)
+    T("mine", "script/build_mn.bat", TMP + r"\mn_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/mn_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

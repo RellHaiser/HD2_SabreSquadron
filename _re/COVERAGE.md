@@ -7227,3 +7227,22 @@ came from. From this part on the network code is compared with the original exec
   registered twice, regular pairs, over every human and tracker): 3 more killed (60 left).
 - **Suites:** `run_suites.py` finds the equipment save in the user's temp folder when TEMP points elsewhere (the
   equipment, items and items.human suites had been skipped as missing a prerequisite; all pass).
+
+## Mine part 1 (the mines, `mine.cpp`, 2026-11-26)
+
+- **The build:** `script/build_mn.bat` (`script/mn_diff.cpp`, suite `mine`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the mines' calls through `mn_calls.s` / `mn_calls.inc` (`gen_cmd_calls.py mn`; the temporary actors' list
+  and messages, the actors module's GetHuman, the shot manager's explosions added). The item definitions are the
+  test's: the original's table at 0x0098b030 (read inline), the port's `GetItemDef` answering from the test's own. The
+  original's out-of-line `C_Car::GetDriver` answers unlogged (the port reads the field).
+- **The cases:** one or two mine frames (turned, tilted, now and then a tiny, zero or vertical z axis); Setup (an owner
+  or none; items 0x46, 0x47, another mine item, one without a component), ticks and updates in every role (the
+  2,000 ms countdown at its edges), Defuse, OnSteppedOn (humans, the owner, cars with and without drivers), the clients'
+  messages, saves and loads (made ones: other flags, owners' ids in and past the list, foreign chunks, the owner's chunk
+  first; the reader's place after), stops and starts, restarts, GetMaterialId, the creator. Compared after each: the
+  answer, its calls and both mines' fields, spheres and frames; a save's bytes.
+- **The tests:** 1,500 cases (about 67,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of `mine.cpp`.
+- **Port bugs found:** none.
+- **The original's weaknesses (not given):** an item without a definition or without a mine component read through
+  null (the port's fixes); a short state chunk (the original's stack words); an actor neither a human nor a car on an
+  ownerless mine (taken for a car, its driver read past its block: only feet and wheels reach it in the game).
