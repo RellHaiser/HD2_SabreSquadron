@@ -7246,3 +7246,21 @@ came from. From this part on the network code is compared with the original exec
 - **The original's weaknesses (not given):** an item without a definition or without a mine component read through
   null (the port's fixes); a short state chunk (the original's stack words); an actor neither a human nor a car on an
   ownerless mine (taken for a car, its driver read past its block: only feet and wheels reach it in the game).
+
+## Ladder part 1 (the ladders, `ladder.cpp`, 2026-11-26)
+
+- **The build:** `script/build_ld.bat` (`script/ld_diff.cpp`, suite `ladder`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the ladders' calls through `ld_calls.s` / `ld_calls.inc` (`gen_cmd_calls.py ld`). The LS3DF math (the
+  inverse, the vector by matrix product) is LS3DF.dll's on both sides; the texts are logged on both sides.
+- **The cases:** one or two ladders: frames under a parent dummy (turned, tilted, scaled, now and then with a tiny, zero
+  or vertical z axis) with their "up*" and "down*" dummies (now and then missing) and a visual with user properties
+  ("matid" in any case, with and without a number); SetFrame (its frame, none), ReadProperties (versions 0..4, cut
+  short after the version), WriteProperties, starts (the volumes, once), stops, restarts, CanUse (places about both
+  ends on the world's axes and along the ladder, exactly at them, facings level and raised, speeds from 0 to 300,
+  looking up or not), climbers added and removed, the saved game's calls, GetMaterialId, the creator. Compared after
+  each: the answer, its calls, every field, both volumes, the climbers and the frames; the properties' bytes.
+- **The tests:** 1,500 cases (about 55,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of `ladder.cpp`.
+- **Port bugs found:** none.
+- **The original's weaknesses (not given):** its destructor leaves a started ladder's volumes in the collision world,
+  never freed (the port's fix frees them; marked in the source now); properties cut before the version (a stack
+  value).

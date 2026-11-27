@@ -96,6 +96,8 @@ C_Ladder::C_Ladder() : C_Actor(ACTOR_LADDER)           // 0x005ea3d0
 
 C_Ladder::~C_Ladder()                                   // 0x005ea590 (DS 0x0060a8f0)
 {
+    // Fix: the original frees only the climbers' list (a started ladder's volumes stay in the
+    // collision world, never freed).
     FreeVolumes();
 }
 
