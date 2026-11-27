@@ -188,9 +188,8 @@ void C_RigidBody::Collide(S_vector &velocity, S_vector &spin, const S_vector &no
     NormalizeBy(slide, (relative.x * relative.x + relative.y * relative.y) + relative.z * relative.z);
     S_vector along = slide.Cross(normal).Cross(normal);
     NormalizeBy(along, (along.x * along.x + along.y * along.y) + along.z * along.z);
-    // (The sine is the x87's, unrounded; the product rounds to a float.)
-    float friction = static_cast<float>(static_cast<double>(strength * m_friction) *
-                                        std::sin(static_cast<double>(relative.AngleTo(normal))));
+    // (The angle is FPATAN's and the sine the x87's, both unrounded; the product rounds to a float.)
+    float friction = static_cast<float>(static_cast<double>(strength * m_friction) * std::sin(AngleToUnrounded(relative, normal)));
     const float most = ((m_g * m_friction) * m_mass) * FRICTION_WEIGHTS;
     if (friction > most)
         friction = most;
@@ -262,8 +261,8 @@ void C_RigidBody::StepWheel(float dt)                   // 0x004c94b0
         NormalizeBy(rub, (slide.z * slide.z + slide.y * slide.y) + slide.x * slide.x);
         const float grip = (-m_friction * m_g) * m_mass;
         rub = S_vector(rub.x * grip, rub.y * grip, rub.z * grip);
-        // (The sine is the x87's, unrounded; the products round to floats.)
-        const double sine = std::sin(static_cast<double>(slide.AngleTo(XYZ(m_normal))));
+        // (The angle is FPATAN's and the sine the x87's, both unrounded; the products round to floats.)
+        const double sine = std::sin(AngleToUnrounded(slide, XYZ(m_normal)));
         if (sine < 1.0)
             rub = S_vector(static_cast<float>(rub.x * sine), static_cast<float>(rub.y * sine),
                            static_cast<float>(rub.z * sine));

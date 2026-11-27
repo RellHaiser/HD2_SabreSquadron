@@ -7481,3 +7481,26 @@ came from. From this part on the network code is compared with the original exec
 - **Port bugs found:** none.
 - **The original's weaknesses (not given):** a link to a point past the network is followed past the points (the made
   networks keep their links in range here); the original's search arrays hold 10,000 points (the port's grow: its fix).
+
+## Vehicle physics part 1 (the rigid bodies, `rigid_body.cpp`, `rigid_body_step.cpp`, 2026-11-27)
+
+- **The build:** `script/build_rb.bat` (`script/rb_diff.cpp`, suite `rigid_body`), new, over `cmd_diff.cpp`'s world;
+  `rb_calls.s` / `rb_calls.inc` (`gen_cmd_calls.py rb`). The LS3DF math (the inverse, the products, the quaternions'
+  Make and RotationMatrix, AngleTo, the planes' IntersectionLine) is LS3DF.dll's on both sides. The original's bodies
+  are made by its constructor (0x004c84a0) and read through the port's class (the layout is the same).
+- **The cases:** one to three bodies on root frames (turned; boxes and discs; visual boxes of every proportion,
+  nested now and then) over a ground of a tilted plane, water above it, an actor's platform in five stripes (cars,
+  animation actors, humans, doors) and a wall, their materials of every kind (paper, the waters 0x1F, 0x20, 0x46).
+  Operations: SetFrame, Setup / SetupWheel, Start, Stop, Tick and Step (frames up to 3 s), ApplyImpulse, AddImpulse,
+  Wake, Nudge, SetState, SetOwner, ForgetActor, the owners' fields, saves and loads (a version from another now and
+  then), GetHierarchyBox, the platform's actors moved and the platform taken away; a quarter of the cases a tall box
+  left to settle upright on each axis (the topple) or a wide one across the stripes. Compared after each operation
+  (the ticks every third): every field, the frame and every call. Masked: the gravity's w and the contact point while
+  the disc does not touch (the original's unset stack), denormals ("tiny": the x87's double rounding).
+- **The tests:** 1,500 cases (seeds 0, 1, 2, 4, 6). **Coverage:** every line but the actor-woken body's centre for a
+  body without one (only a box's save loaded into a disc never set up) and the depth test's `continue` at an ulp's
+  boundary. **Mutants:** 1,361 of 1,519 building killed (the survivors run again after the water materials were
+  corrected); the rest in `mutate_rb1.py`.
+- **Port bugs found:** Collide's and StepWheel's slide factor took the sine of a rounded AngleTo (the original's
+  FPATAN result is unrounded: `AngleToUnrounded`).
+- **The original's weaknesses (not given):** none new.

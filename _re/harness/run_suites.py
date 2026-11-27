@@ -405,6 +405,8 @@ SUITES = [
     # original executable, script/cs_diff.cpp over cn_diff.cpp.)
     T("checkpoint_search", "script/build_cs.bat", TMP + r"\cs_diff.exe", needs=("mingw", "original_exe", "data"),
       tree_copy="script/cs_diff.exe"),
+    # (Vehicle physics part 1: the rigid bodies against the original executable, script/rb_diff.cpp.)
+    T("rigid_body", "script/build_rb.bat", TMP + r"\rb_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/rb_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
