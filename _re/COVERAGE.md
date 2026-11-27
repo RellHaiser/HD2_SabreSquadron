@@ -7264,3 +7264,27 @@ came from. From this part on the network code is compared with the original exec
 - **The original's weaknesses (not given):** its destructor leaves a started ladder's volumes in the collision world,
   never freed (the port's fix frees them; marked in the source now); properties cut before the version (a stack
   value).
+
+## Explosive place part 1 (the explosive places, `explosive_place.cpp`, 2026-11-26)
+
+- **The build:** `script/build_ep.bat` (`script/ep_diff.cpp`, suite `explosive_place`), new: `cmd_diff.cpp`'s world,
+  fakes and logger; the places' calls through `ep_calls.s` / `ep_calls.inc` (`gen_cmd_calls.py ep`; the humans' item
+  finds and removal, the base's CopyFrom added). The item definitions are the test's (the original's table at
+  0x0098b030, read inline); the hierarchy's box and the frames' material are the original's functions on both sides.
+- **The cases:** one or two places: frames (turned, tilted, scaled, odd z axes) with their "explosive_on" and
+  "explosive_off" children (now and then missing) and a mesh visual (local bounds, now and then out of date or empty);
+  properties read (every entry, any order, foreign ones) and written, CopyFrom, starts, stops, restarts, SetState (every
+  state, 5 and -1), Place (humans with the charge or without), Disarm, ticks and updates about the delay, the clients'
+  messages (placed by humans in and past the list), the network state, saves and loads (made ones: every state, times,
+  planters, foreign entries, two states), GetMaterialId, the creator; every role. Compared after each: the answer, its
+  calls, every field, the volume and the frames; the properties' and the saves' bytes.
+- **The tests:** 1,500 cases (about 122,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of
+  `explosive_place.cpp`.
+- **Port bugs found:** 1, fixed. StartMission built its box from the engine's hierarchy box (the shared
+  MakeFrameBoxVolume): the original's uses the game's ComputeHierarchyBox (0x006111f0), the only box volume that does.
+  `frame_box_volume.h` has MakeBoxVolume for a given box now; ComputeHierarchyBox is declared in `actor.h`. The comment
+  on the volume's centre w was wrong (the original copies a stack word nothing writes, not the box's radius).
+- **The original's weaknesses (not given):** its constructor leaves who placed it and the time left unset (StartMission
+  sets both before they are read); an item type without a definition read through null (the port's fix); a short state
+  chunk (a stack word); a saved game's foreign entry holding anything but a state entry (the original's reader runs past
+  its end and loops for ever, the port's stops).

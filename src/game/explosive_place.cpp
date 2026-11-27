@@ -176,8 +176,9 @@ void C_ExplosivePlace::StartMission(bool server)        // 0x0060c3b0
     m_started = true;
     m_timeLeft = 0;
     float boxRadius;
-    MakeFrameBoxVolume(m_volume, m_invMatrix, m_frame, COLLISION_TYPE_LIGHT_OBJECT, this, &boxRadius);
-    // (A stale local in the original: the box's own radius.)
+    // Fix: the box is the game's ComputeHierarchyBox's, as the original's (the port asked the engine).
+    MakeBoxVolume(m_volume, m_invMatrix, m_frame, ComputeHierarchyBox(m_frame), COLLISION_TYPE_LIGHT_OBJECT, this, &boxRadius);
+    // (The original copies a stack word nothing writes; the port the box's own radius. Not read.)
     m_volume.centerW = boxRadius;
     m_onFrame = m_frame->FindChildFrame("explosive_on", FRAME_MASK_ANY);
     m_offFrame = m_frame->FindChildFrame("explosive_off", FRAME_MASK_ANY);

@@ -268,6 +268,8 @@ extern C_ActorCreator **g_actorCreators;                // 0x00839460 -> [ACTOR_
 
 // Material id from a frame's user properties ("matid<n>"), -1 if there is none.
 int GetFrameMaterialId(const I3D_frame *frame);         // 0x00611090
+// Box around the geometry of `frame` and all its children, in `frame`'s space (empty without any).
+I3D_bbox ComputeHierarchyBox(I3D_frame *frame);         // 0x006111f0
 
 // Actor bound to `frame`, or null (0x0041cf80).
 inline C_Actor *GetFrameActor(const I3D_frame *frame)

@@ -154,6 +154,9 @@ ORIG = {
     'C_Human::GetControllerType() const': ("0x005a5fe0", "thiscall", "i"),
     'C_Human::GetTeam(bool) const': ("0x005a8820", "thiscall", "i"),
     'C_Human::FindItem(int, int*) const': ("0x005a78f0", "thiscall", "p"),
+    'C_Human::FindItemByUid(int) const': ("0x005a6ff0", "thiscall", "p"),
+    'C_Human::RemoveItem(int, bool)': ("0x005a7b70", "thiscall", "v"),
+    'C_Actor::CopyFrom(C_Actor const*)': ("0x006101f0", "thiscall", "v"),
     'C_Human::IsInPlay() const': ("0x005a63b0", "thiscall", "b"),
     'C_Human::SeesEnemy() const': ("0x005af620", "thiscall", "b"),
     'C_WireCut::IsCut() const': ("0x005e24c0", "thiscall", "b"),
@@ -501,7 +504,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "sg": ("build_sg.bat", "sg_diff", "the sight test's logged calls"),
          "tk": ("build_tk.bat", "tk_diff", "the track test's logged calls"),
          "mn": ("build_mn.bat", "mn_diff", "the mine test's logged calls"),
-         "ld": ("build_ld.bat", "ld_diff", "the ladder test's logged calls")}
+         "ld": ("build_ld.bat", "ld_diff", "the ladder test's logged calls"),
+         "ep": ("build_ep.bat", "ep_diff", "the explosive place test's logged calls")}
 
 
 def main():

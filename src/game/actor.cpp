@@ -67,7 +67,8 @@ void AddToHierarchyBox(I3D_bbox &box, I3D_frame *frame, const S_matrix &parentMa
         AddToHierarchyBox(box, child, matrix);
 }
 
-// Box around the geometry of `frame` and all its children, in `frame`'s space.
+} // namespace
+
 // (The original returns a pointer to a static box.)
 I3D_bbox ComputeHierarchyBox(I3D_frame *frame)                                      // 0x006111f0
 {
@@ -76,8 +77,6 @@ I3D_bbox ComputeHierarchyBox(I3D_frame *frame)                                  
         AddToHierarchyBox(box, child, IdentityMatrix());
     return box;
 }
-
-} // namespace
 
 // The table itself (0x0089b530; the original's pointer at 0x00839460 is pre-set to it). Fix: the
 // port left the pointer null, so the creators' static registrations wrote through null at startup;

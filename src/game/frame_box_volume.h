@@ -14,12 +14,11 @@ class C_Actor;
 // `volume` made a box (COLLISION_SHAPE_BOX of `type`) around `frame`'s hierarchy: the box in the
 // frame's space under its world matrix (scale included), whose inverse is kept in `invMatrix`; the
 // bounding sphere's radius scaled by the largest world scale (`boxRadius`: the unscaled one). It is
-// not added to the world. `localCenter`: the box's centre in the frame's space.
-inline void MakeFrameBoxVolume(S_CollisionVolume &volume, S_matrix &invMatrix, I3D_frame *frame, uint32_t type,
-                               C_Actor *actor, float *boxRadius = nullptr, S_vector *localCenter = nullptr)
+// not added to the world. `localCenter`: the box's centre in the frame's space. `box`: the
+// hierarchy's box in the frame's space.
+inline void MakeBoxVolume(S_CollisionVolume &volume, S_matrix &invMatrix, I3D_frame *frame, const I3D_bbox &box, uint32_t type,
+                          C_Actor *actor, float *boxRadius = nullptr, S_vector *localCenter = nullptr)
 {
-    I3D_bbox hierarchy;
-    const I3D_bbox box = *I3DGetDriver()->GetHierarchyBBox(hierarchy, frame);
     // Fix: the original leaves the centre unset for an empty box.
     S_vector center(0.0f, 0.0f, 0.0f);
     float radius = 0.0f;
@@ -47,4 +46,13 @@ inline void MakeFrameBoxVolume(S_CollisionVolume &volume, S_matrix &invMatrix, I
         *boxRadius = radius;
     if (localCenter)
         *localCenter = center;
+}
+
+// MakeBoxVolume with the engine's hierarchy box (I3D_driver::GetHierarchyBBox).
+inline void MakeFrameBoxVolume(S_CollisionVolume &volume, S_matrix &invMatrix, I3D_frame *frame, uint32_t type,
+                               C_Actor *actor, float *boxRadius = nullptr, S_vector *localCenter = nullptr)
+{
+    I3D_bbox hierarchy;
+    const I3D_bbox box = *I3DGetDriver()->GetHierarchyBBox(hierarchy, frame);
+    MakeBoxVolume(volume, invMatrix, frame, box, type, actor, boxRadius, localCenter);
 }

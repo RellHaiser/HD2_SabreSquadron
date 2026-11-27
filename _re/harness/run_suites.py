@@ -382,6 +382,8 @@ SUITES = [
     T("mine", "script/build_mn.bat", TMP + r"\mn_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/mn_diff.exe"),
     # (Ladder part 1: the ladders against the original executable, script/ld_diff.cpp.)
     T("ladder", "script/build_ld.bat", TMP + r"\ld_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/ld_diff.exe"),
+    # (Explosive place part 1: the explosive places against the original executable, script/ep_diff.cpp.)
+    T("explosive_place", "script/build_ep.bat", TMP + r"\ep_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/ep_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

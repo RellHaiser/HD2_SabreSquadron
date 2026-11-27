@@ -10667,6 +10667,13 @@ int GetFrameMaterialId(const I3D_frame *frame)
     auto it = g_frameMaterials.find(frame);
     return it == g_frameMaterials.end() ? -1 : it->second;
 }
+// (The explosive places' box: game/actor.cpp is not linked; the driver's, as the test's model has it.)
+I3D_bbox ComputeHierarchyBox(I3D_frame *frame)
+{
+    I3D_bbox box;
+    F_GetHierarchyBBox(nullptr, box, frame);
+    return box;
+}
 I3D_frame *g_itemModel;
 I3D_frame *C_ItemDef::GetModel()
 {
