@@ -143,6 +143,8 @@ void SetUpVirtuals()
         {"C_GEffectsModule::SetModelLightLevel", 0x54, PortSlot(&G::SetModelLightLevel), "pf", 'b'},
         {"C_GEffectsModule::SetHierarchyOn", 0x58, PortSlot(&G::SetHierarchyOn), "pbi", 'v'},
         {"C_GEffectsModule::HideVisual", 0x5C, PortSlot(&G::HideVisual), "pb", 'v'},
+        {"C_GEffectsModule::FadeInModel", 0x6C, PortSlot(&G::FadeInModel), "pib", 'v'},
+        {"C_GEffectsModule::FadeOutHierarchy", 0x70, PortSlot(&G::FadeOutHierarchy), "pib", 'v'},
         {"C_GEffectsModule::CreateShadow", 0x78, PortSlot(&G::CreateShadow), "p", 'p'},
         {"C_GEffectsModule::GetShadow", 0x7C, PortSlot(&G::GetShadow), "p", 'p'},
         {"C_GEffectsModule::Fade", 0x8C, PortSlot(&G::Fade), "iiV", 'v'},

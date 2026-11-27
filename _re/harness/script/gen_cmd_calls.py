@@ -120,6 +120,15 @@ ORIG = {
     'C_Human::RemoveItemsFromStore(int)': ("0x005a7b30", "thiscall", "v"),
     'C_Human::ResetAI()': ("0x005af450", "thiscall", "v"),
     'C_Human::Suspend(bool)': ("0x005af570", "thiscall", "v"),
+    'C_VertexAnimModule::FindAnimation(C_str const&)': ("0x00473e30", "thiscall", "p"),
+    'C_VertexAnimModule::RemovePlayer(S_VertexAnimPlayer*, bool)': ("0x004746b0", "thiscall", "v"),
+    'S_VertexAnimPlayer::Init(I3D_frame*, S_VertexAnimation*)': ("0x00473790", "thiscall", "v"),
+    'S_VertexAnimPlayer::Reset()': ("0x004737c0", "thiscall", "v"),
+    # (ECX the start, EDX the end, then the two colours.)
+    'DrawDebugLine(float const*, float const*, unsigned int, unsigned int)': ("0x0071fad0", "fastcall", "v"),
+    'C_Actor::Reactivate(bool)': ("0x00610710", "thiscall", "v"),
+    'C_CollisionWorld::TestBoxSweep(I3D_bbox const&, S_matrix const&, S_matrix const&, S_vector4 const&, S_vector const&, S_vector const&, unsigned int, unsigned int) const':
+        ("0x007189b0", "thiscall", "b"),
     'C_CheckpointNetwork::FindNearestPoint(S_vector, float, float) const': ("0x0051d5c0", "thiscall", "i"),
     'C_CheckpointNetwork::FindPath(int, int, std::vector<unsigned short, std::allocator<unsigned short> >*, unsigned int)': ("0x005223b0", "thiscall", "b"),
     'C_Radio::SetState(int)': ("0x0060b570", "thiscall", "v"),
@@ -511,7 +520,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "br": ("build_br.bat", "br_diff", "the barrel test's logged calls"),
          "fs": ("build_fs.bat", "fs_diff", "the fish test's logged calls"),
          "bk": ("build_bk.bat", "bk_diff", "the bike test's logged calls"),
-         "dr": ("build_dr.bat", "dr_diff", "the door test's logged calls")}
+         "dr": ("build_dr.bat", "dr_diff", "the door test's logged calls"),
+         "su": ("build_su.bat", "su_diff", "the supply box test's logged calls")}
 
 
 def main():

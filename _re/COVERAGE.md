@@ -7375,3 +7375,27 @@ came from. From this part on the network code is compared with the original exec
 - **The original's weaknesses (not given):** its constructor leaves the moving sound's slot and the handles' way unset
   (StartMission sets them); Animate calls the moving sound's slot unchecked (the port checks; a kept slot always has
   its sound); a saved game whose state is not in reach places the frame at stack words (the port's fix keeps it).
+
+## Supply box part 1 (the supply boxes, `supply_box.cpp`, 2026-11-27)
+
+- **The build:** `script/build_su.bat` (`script/su_diff.cpp`, suite `supply_box`), new: `cmd_diff.cpp`'s world, fakes
+  and logger (its effects module now has FadeInModel and FadeOutHierarchy, slots 0x6C and 0x70); the boxes' calls
+  through `su_calls.s` / `su_calls.inc` (`gen_cmd_calls.py su`; the vertex animations, the debug lines, the box sweep
+  and Reactivate added). The model cache is real on both sides ("cratedummy" with its "letibedna", "parachute" with its
+  "morph"); the animation cache's Get is the test's on both sides (the original's redirected, the port's patched); the
+  walls' mesh is a fake level of eight vertices; the crushed actor a block whose Hit logs.
+- **The cases:** one or two boxes (turned, odd z axes, scaled) with their walls (an object visual, another, none; upper
+  vertices about the feet's limit) and ammunition parts (some missing); SetFrame, properties (lists of ten) and written,
+  CopyFrom, starts, stops, restarts, SetEnabled, charges taken (the original's inline steps on its fields), Damage,
+  updates and ticks through every state (the plane, the fall swept and rayed onto ground and dynamic volumes, crushing,
+  the landing, the parachute, the opening), the clients' messages and the network state (quantized vectors), saves and
+  loads, the creator; every role. Compared after each: the answer, its calls, every field, the morph player, the volume
+  and the frames; the bytes (the state's stack words masked) and the reader's depth.
+- **The tests:** 1,500 cases (about 539,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of
+  `supply_box.cpp`.
+- **Port bugs found:** 1, fixed. The fall speed was the float below the original's (0x3ba3d70b).
+- **Open:** with the frame scaled 1.5 along z the box's sphere radius is one ulp above the port's in the original;
+  every reading of its x87 sequence gives the port's value. The test leaves that scale out until it is explained.
+- **The original's weaknesses (not given):** its constructor leaves the defaults unset (SetFrame and Reset set them);
+  a parachute without its morph is called through null and the walls missing at the fall are read through null (the
+  port's fixes); the state saved and sent carries stack words.
