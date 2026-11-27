@@ -51,7 +51,7 @@ float S_Checkpoint::GetLinkCost(const S_Checkpoint &to) const   // 0x005247e0
     const float dx = to.pos.x - pos.x;
     const float dy = to.pos.y - pos.y;
     const float dz = to.pos.z - pos.z;
-    return (1.0f - (to.preference + preference) * (1.0f / 1024.0f)) * std::sqrt(dz * dz + dy * dy + dx * dx);
+    return (1.0f - (to.preference + preference) * (1.0f / 1024.0f)) * std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 void S_Checkpoint::Clear()
@@ -192,8 +192,8 @@ int __stdcall S_Checkpoint::GetCell(float x)            // 0x00524750
 {
     // The truncation rounds down only for x not a multiple of 10: -10 goes to cell -2. (The
     // product rounds to a float first: the game runs with Direct3D's single-precision FPU, and
-    // the data's stored cells agree.)
-    int cell = static_cast<int>(x * 0.1f);
+    // the data's stored cells agree. Truncated through 64 bits as __ftol does: past the int range, its low word.)
+    int cell = static_cast<int>(static_cast<int64_t>(x * 0.1f));
     if (x < 0.0f)
         --cell;
     return cell;

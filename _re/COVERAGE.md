@@ -7433,3 +7433,31 @@ came from. From this part on the network code is compared with the original exec
   short) leaves stack words; RemoveMember reads past the slots when the leader is in the last one and repeated before
   it; SetType(none) with no slots (the destructor's too) makes slots it never frees; a door point without a door's
   neighbour and a shape with no slots loading some are read and written through null (the port's fixes).
+
+## Checkpoint network part 1 (the checkpoint networks, `checkpoint_network.cpp`, `checkpoint.cpp`, `checkpoints.cpp`, 2026-11-27)
+
+- **The build:** `script/build_cn.bat` (`script/cn_diff.cpp`, suite `checkpoint_network`), new: `cmd_diff.cpp`'s world,
+  fakes and logger; the scene's frames found by name (most with an actor, doors among them). The networks are loaded on
+  both sides through each side's LoadCheckpointNetwork from the shipped missions' `check2.bin` (all 82 under
+  `H:\HD2_Unpacked\MISSIONS`) or from networks the test writes (points in and out of their cells' order, on cells'
+  sides, two at one z, links, spare and joined links, names of 16 characters, frames' and actors' tables, headers of
+  every version, sizes past the data or with bytes after it). The original's direction vectors made by its static
+  initializers (0x005244b0, 0x005244c0).
+- **The cases:** Get, Find, FindByPrefix, GetActor, FindActorPoint, GetActorPoints, the tables' entry lookups,
+  CollectReachableWithCosts, joins and separations by point and by name, ResetState (the network's, the pair's), the
+  saved game's calls (the network's and the pair's, loaded back into either network), FindNearest / FindNearestPoint /
+  FindNearestType15 and MarkWithin (places on, near and far from the points, on cells' sides, out of the height range),
+  FindCoverWithin, GetPathLength, Clear and a reload, every point method (links, costs, joined links by hand, cover,
+  value pairs, a point of its own with links of its own destroyed, cleared or read over) and the static ones (the cell
+  of x, huge ones too; direction bits and vectors). Compared after each: the answer, the lists, the calls, and after
+  those that change it a digest of every point's bytes and links, the tables and the joins.
+- **The tests:** 1,500 cases (about 53,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of
+  `checkpoint_network.cpp`, `checkpoint.cpp` and `checkpoints.cpp`. **Mutants:** 767 of 925 building killed; the rest
+  in `mutate_cn1.py` (most survivors are the scans' early stops and cell bounds, which only change how much is scanned).
+- **Port bugs found:** 2, fixed. GetCell cast x / 10 to int, INT_MIN past the int range where the original's __ftol
+  gives the low word (now through 64 bits); GetLinkCost summed the squares z, y, x (the original x, y, z).
+- **The original's weaknesses (not given):** Load trusts the counts past the data's size (a short size reads on past
+  the buffer, on both sides); FindByPrefix reads past a name of 16 characters into the next entry, LoadState's joins
+  with under 4 bytes left loop for ever, a size smaller than the header overruns the loader's buffer, FindCoverWithin
+  never frees its marks (the port's fixes); the port's destructor's stores are dropped by GCC, so a point is compared
+  after ClearLinks, not after its destructor.

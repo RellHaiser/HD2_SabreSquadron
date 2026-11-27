@@ -397,6 +397,10 @@ SUITES = [
     # (Formation part 1: the formations' shapes against the original executable, script/fm_diff.cpp.)
     T("formation_shape", "script/build_fm.bat", TMP + r"\fm_diff.exe", needs=("mingw", "original_exe"),
       tree_copy="script/fm_diff.exe"),
+    # (Checkpoint network part 1: the checkpoint networks, their points and loader against the original executable, on
+    # the shipped missions' networks and the test's, script/cn_diff.cpp.)
+    T("checkpoint_network", "script/build_cn.bat", TMP + r"\cn_diff.exe", needs=("mingw", "original_exe", "data"),
+      tree_copy="script/cn_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
