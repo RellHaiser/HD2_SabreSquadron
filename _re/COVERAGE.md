@@ -7314,3 +7314,21 @@ came from. From this part on the network code is compared with the original exec
 - **The original's weaknesses (not given):** a stopped barrel still sloshing or tipping reads its forgotten surface or
   body through null when updated (StopMission clears the frames, not the flags; the game does not update a stopped
   actor); a property name past 999 characters is left unterminated.
+
+## Fish part 1 (the schools of fish, `fish.cpp`, 2026-11-26)
+
+- **The build:** `script/build_fs.bat` (`script/fs_diff.cpp`, suite `fish`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the schools' calls through `fs_calls.s` / `fs_calls.inc` (`gen_cmd_calls.py fs`). The model cache is real on
+  both sides (the original's inline Get on its own cache), its "ryba" model's Open answered with its "ryba" frame;
+  RandomFloat the original's on both sides over the test's rand; the LS3DF math LS3DF.dll's.
+- **The cases:** one or two schools (turned, tilted, a vertical, tiny or zero z axis); properties (top speeds, radii,
+  counts, cut short), CopyFrom (and from none), SetFrame, starts (the fish made; the driver refusing visuals part way),
+  stops, restarts, ticks through speeding up, slowing, the pause and the turn, with and without slides, updates (the
+  sway, the turn, the fade by the camera), the camera moved (near, at the range's edge, far, 1.1 m from a fish, none),
+  saves and loads (made ones: each entry now and then, a short speed, foreign entries), the creator. Compared after
+  each: the answer, its calls, every field and every fish (place, target, sway, frame); the bytes and the reader's depth.
+- **The tests:** 1,500 cases (about 248,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of `fish.cpp`.
+- **Port bugs found:** none.
+- **The original's weaknesses (not given):** a model without its "ryba" frame (called through null; the port's fix makes
+  no fish); a short speed chunk leaves a denormal speed (its chunk header's bits) whose steps the original works out
+  with the FPU's wider exponent.
