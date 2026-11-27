@@ -388,6 +388,8 @@ SUITES = [
     T("barrel", "script/build_br.bat", TMP + r"\br_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/br_diff.exe"),
     # (Fish part 1: the schools of fish against the original executable, script/fs_diff.cpp.)
     T("fish", "script/build_fs.bat", TMP + r"\fs_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/fs_diff.exe"),
+    # (Bike part 1: the bicycles against the original executable, script/bk_diff.cpp.)
+    T("bike", "script/build_bk.bat", TMP + r"\bk_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/bk_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

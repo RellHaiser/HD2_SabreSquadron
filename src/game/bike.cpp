@@ -206,7 +206,8 @@ bool C_Bike::LoadGame(C_chunk &chunk)                   // 0x005d8b90
         }
     }
     chunk.Ascend();
-    return true;
+    // Fix: false, as the original's answer (the port answered true).
+    return false;
 }
 
 void C_Bike::StartMission(bool server)                  // 0x005db0e0 (DS 0x005f7200)

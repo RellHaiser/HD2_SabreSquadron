@@ -120,6 +120,8 @@ ORIG = {
     'C_Human::RemoveItemsFromStore(int)': ("0x005a7b30", "thiscall", "v"),
     'C_Human::ResetAI()': ("0x005af450", "thiscall", "v"),
     'C_Human::Suspend(bool)': ("0x005af570", "thiscall", "v"),
+    'C_CheckpointNetwork::FindNearestPoint(S_vector, float, float) const': ("0x0051d5c0", "thiscall", "i"),
+    'C_CheckpointNetwork::FindPath(int, int, std::vector<unsigned short, std::allocator<unsigned short> >*, unsigned int)': ("0x005223b0", "thiscall", "b"),
     'C_Radio::SetState(int)': ("0x0060b570", "thiscall", "v"),
     'C_Train::FollowTrack(char const*)': ("0x005bd490", "thiscall", "v"),
     'C_Train::Start()': ("0x005bc970", "thiscall", "v"),
@@ -507,7 +509,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "ld": ("build_ld.bat", "ld_diff", "the ladder test's logged calls"),
          "ep": ("build_ep.bat", "ep_diff", "the explosive place test's logged calls"),
          "br": ("build_br.bat", "br_diff", "the barrel test's logged calls"),
-         "fs": ("build_fs.bat", "fs_diff", "the fish test's logged calls")}
+         "fs": ("build_fs.bat", "fs_diff", "the fish test's logged calls"),
+         "bk": ("build_bk.bat", "bk_diff", "the bike test's logged calls")}
 
 
 def main():

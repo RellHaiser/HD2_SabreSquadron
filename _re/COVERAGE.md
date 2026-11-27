@@ -7332,3 +7332,24 @@ came from. From this part on the network code is compared with the original exec
 - **The original's weaknesses (not given):** a model without its "ryba" frame (called through null; the port's fix makes
   no fish); a short speed chunk leaves a denormal speed (its chunk header's bits) whose steps the original works out
   with the FPU's wider exponent.
+
+## Bike part 1 (the bicycles, `bike.cpp`, 2026-11-26)
+
+- **The build:** `script/build_bk.bat` (`script/bk_diff.cpp`, suite `bike`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the bikes' calls through `bk_calls.s` / `bk_calls.inc` (`gen_cmd_calls.py bk`; the road network's
+  FindNearestPoint and FindPath added). AngleBetween2D is the original's on both sides (its two pointers in ECX and EDX);
+  a script's Advance logged on both sides; the original's `_CIasin` is the test's x87 routine (FPATAN of x over
+  sqrt(1 - x * x)), as the CRT's error path for an argument past 1 cannot run in the mapped copy.
+- **The cases:** one or two bikes (turned, tilted, odd z axes) with their wheels, handlebars, cranks and seat frame (now
+  and then one missing), riders' frames (humans with a script or without, frames without an actor), the road points
+  about the bikes with radii up to 10 m; properties, CopyFrom, SetFrame, starts, stops, restarts, Drive (to a point or
+  off, with and without a rider; nearest points and paths found or not), updates through the ride (points reached
+  within and past their radius, the steering, the ground under the front wheel or not, the pedals), saves and loads
+  (made ones: riders by name, paths, short paths, speeds, foreign entries; the bike started afresh first), the creator.
+  Compared after each: the answer, its calls, every field, the path, the volume, the frames (the rider's model too).
+- **The tests:** 1,500 cases (about 303,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of `bike.cpp`.
+- **Port bugs found:** 1, fixed. LoadGame answered true; the original's answers false (one exit, `XOR AL,AL`). The
+  vehicle item test's bike save checks follow.
+- **The original's weaknesses (not given):** a bike ridden without a rider saves its name through null (the port's
+  fix); a path chunk without any point pushes a stack word; parts missing (no seat frame or handlebars while ridden, no
+  front wheel while rolling) read through null.

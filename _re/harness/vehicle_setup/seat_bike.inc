@@ -610,7 +610,7 @@
                 S_SaReader rd(in);
                 g_actorLoads.clear();
                 reset();
-                SE(r.bikeSave, a->LoadGame(rd.c) && rd.c.m_depth == 1 && g_actorLoads == std::vector<int>{66} && a->m_driving && a->m_rider == rf &&
+                SE(r.bikeSave, !a->LoadGame(rd.c) && rd.c.m_depth == 1 && g_actorLoads == std::vector<int>{66} && a->m_driving && a->m_rider == rf &&
                                    a->m_riderModel && a->m_path == std::vector<uint16_t>({3, 1, 6}) && a->m_speed == 1.25f &&
                                    a->m_pedalPhase == -0.5f && rider.suspends == std::vector<bool>{true} &&
                                    g_itLog.size() > 1 && g_itLog[0] == "find se.rider ffff");
@@ -627,7 +627,7 @@
                 a->m_driving = false;
                 a->m_speed = 9.0f;
                 a->m_pedalPhase = 9.0f;
-                SE(r.bikeSave, a->LoadGame(rd.c) && rd.c.m_depth == 2 && a->m_path == std::vector<uint16_t>({9, 9, 9, 9}) && !a->m_driving &&
+                SE(r.bikeSave, !a->LoadGame(rd.c) && rd.c.m_depth == 2 && a->m_path == std::vector<uint16_t>({9, 9, 9, 9}) && !a->m_driving &&
                                    a->m_speed == 2.0f && a->m_pedalPhase == 9.0f);
             }
             {
@@ -642,7 +642,7 @@
                 S_SaReader rd(in);
                 a->m_path.clear();
                 a->m_speed = 9.0f;
-                SE(r.bikeSave, a->LoadGame(rd.c) && rd.c.m_depth == 1 && a->m_speed == 0.0f &&
+                SE(r.bikeSave, !a->LoadGame(rd.c) && rd.c.m_depth == 1 && a->m_speed == 0.0f &&
                                    a->m_path == std::vector<uint16_t>({0, 0}) && a->m_pedalPhase == 0.75f && a->m_driving);
                 a->Drive(CHECKPOINT_NONE, 0.0f, rf);
                 a->m_driving = false;
@@ -655,7 +655,7 @@
                 const S_SaBytes in = loadOf(inner.b, 1000);
                 S_SaReader rd(in);
                 a->m_speed = 9.0f;
-                SE(r.bikeSave, a->LoadGame(rd.c) && rd.c.m_depth == 1 && a->m_speed == 9.0f);
+                SE(r.bikeSave, !a->LoadGame(rd.c) && rd.c.m_depth == 1 && a->m_speed == 9.0f);
             }
             g_maSceneFrames.erase("se.rider");
         }
