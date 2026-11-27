@@ -7353,3 +7353,25 @@ came from. From this part on the network code is compared with the original exec
 - **The original's weaknesses (not given):** a bike ridden without a rider saves its name through null (the port's
   fix); a path chunk without any point pushes a stack word; parts missing (no seat frame or handlebars while ridden, no
   front wheel while rolling) read through null.
+
+## Door part 1 (the doors, `door.cpp`, 2026-11-26)
+
+- **The build:** `script/build_dr.bat` (`script/dr_diff.cpp`, suite `door`), new: `cmd_diff.cpp`'s world, fakes and
+  logger; the doors' calls through `dr_calls.s` / `dr_calls.inc` (`gen_cmd_calls.py dr`). The sector's portals are fake
+  blocks in the world's primary sector; a script's OnUse is logged on both sides; the frames' material is the
+  original's function on both sides; the LS3DF math LS3DF.dll's.
+- **The cases:** one or two doors (two: now and then each the other's half) with their handles (a tiny local z among
+  them), frame data naming the door, a script or none; the sector's own or incoming portals near and far, with
+  opposites; properties (hinged and sliding, axes, keys, every chunk, foreign ones) and written, CopyFrom, starts on
+  both sides, stops, restarts, SetState (open, close, others; forced, closing by itself, linked), Unlock, Lock,
+  PickLock, GetSide, ticks and updates (delays, handles, the swing and the slide, blocked by dynamic volumes, moving
+  sounds paused and resumed), closing by itself with the player near and far, the clients' messages, the network
+  state, saves and loads (made ones: states, two states, foreign entries), GetMaterialId, the creator; every role.
+  Compared after each: the answer, its calls, every field, the volume, the frames and the portals; the bytes (the
+  written skipped field's stack bytes masked) and the reader's depth.
+- **The tests:** 1,500 cases (about 144,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of `door.cpp`.
+- **Port bugs found:** 1, fixed. The blocking test's box corners were transformed with operator*; the original's use
+  operator*= (LS3DF's ??X).
+- **The original's weaknesses (not given):** its constructor leaves the moving sound's slot and the handles' way unset
+  (StartMission sets them); Animate calls the moving sound's slot unchecked (the port checks; a kept slot always has
+  its sound); a saved game whose state is not in reach places the frame at stack words (the port's fix keeps it).

@@ -162,8 +162,9 @@ void BoxCorners(const I3D_bbox &box, const S_matrix &world, S_vector corners[8])
     for (int c = 0; c < 8; ++c)
         corners[c] = S_vector(c & 4 ? box.min.x : box.max.x, c & 2 ? box.min.y : box.max.y,
                               c & 1 ? box.max.z : box.min.z);
+    // Fix: operator*= (LS3DF's ??X), as the original's (the port used operator*).
     for (int c = 8; c-- > 0;)
-        corners[c] = corners[c] * world;
+        corners[c] *= world;
 }
 
 // Whether a dynamic volume touches the box's edges or its diagonals 1-6 and 2-5.
