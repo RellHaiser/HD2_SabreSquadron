@@ -401,6 +401,10 @@ SUITES = [
     # the shipped missions' networks and the test's, script/cn_diff.cpp.)
     T("checkpoint_network", "script/build_cn.bat", TMP + r"\cn_diff.exe", needs=("mingw", "original_exe", "data"),
       tree_copy="script/cn_diff.exe"),
+    # (Checkpoint search part 1: the networks' reachability queries, cover picking and path searches against the
+    # original executable, script/cs_diff.cpp over cn_diff.cpp.)
+    T("checkpoint_search", "script/build_cs.bat", TMP + r"\cs_diff.exe", needs=("mingw", "original_exe", "data"),
+      tree_copy="script/cs_diff.exe"),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),

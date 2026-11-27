@@ -7461,3 +7461,23 @@ came from. From this part on the network code is compared with the original exec
   with under 4 bytes left loop for ever, a size smaller than the header overruns the loader's buffer, FindCoverWithin
   never frees its marks (the port's fixes); the port's destructor's stores are dropped by GCC, so a point is compared
   after ClearLinks, not after its destructor.
+
+## Checkpoint search part 1 (the networks' searches, `checkpoint_search.cpp`, 2026-11-27)
+
+- **The build:** `script/build_cs.bat` (`script/cs_diff.cpp`, suite `checkpoint_search`), new: `cn_diff.cpp`'s networks,
+  data and operations (CN_HARNESS; its op runner, names and HD2_ prefix made pluggable) over `cmd_diff.cpp`'s world;
+  `cs_calls.s` / `cs_calls.inc` (`gen_cmd_calls.py cs`). The original's node pools made by their static initializers
+  (0x00520410, 0x00520f20). The frames' actors are doors for most names (type and motion at each side's place), for the
+  meleeTracker's search.
+- **The cases:** cn_diff's, most operations turned into this part's: GetNeighbours, GetReachable, GetReachableCopy,
+  GetNeighbourCover, GetReachableCover, GetReachableDepthFirst (from points by index and pointer, none, past the
+  network; radii from -1 to 10^6; lists appended to), GetReachableType12, FindNearestFree (points under cars about it),
+  PickCoverPoint (candidates of every kind, every flag), FindPath (exclusions), FindMeleeTrackerPath (doors open and
+  closed), FindEscapePath (no to four threats, minimum and safe distances). Compared after each: the answer, the lists
+  and the calls; the networks' state as cn_diff's.
+- **The tests:** 1,500 cases (about 9,000 calls; seeds 0, 1, 2, 4, 6). **Coverage:** every line of
+  `checkpoint_search.cpp` but the node pools' destructor, which runs at exit after gcov writes its counts.
+  **Mutants:** 304 of 361 building killed; the rest in `mutate_cs1.py`.
+- **Port bugs found:** none.
+- **The original's weaknesses (not given):** a link to a point past the network is followed past the points (the made
+  networks keep their links in range here); the original's search arrays hold 10,000 points (the port's grow: its fix).
