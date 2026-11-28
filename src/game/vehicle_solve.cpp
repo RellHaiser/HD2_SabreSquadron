@@ -30,6 +30,17 @@ float DotYZX(const S_vector &a, const S_vector &b) { return (a.y * b.y + a.z * b
 float SquareZYX(const S_vector &v) { return (v.z * v.z + v.y * v.y) + v.x * v.x; }
 float SquareYZX(const S_vector &v) { return (v.y * v.y + v.z * v.z) + v.x * v.x; }
 
+// A value as the x87 holds it in the float precision mode: the mantissa rounded to 24 bits (to
+// nearest), the exponent the extended format's (no overflow to infinity at float's range).
+double Mantissa24(double x)
+{
+    if (!(std::fabs(x) < HUGE_VAL) || x == 0.0)
+        return x;
+    int exponent;
+    const double m = std::frexp(x, &exponent);
+    return std::ldexp(std::nearbyint(std::ldexp(m, 24)), exponent - 24);
+}
+
 // S_vector::Magnitude and Normalize from a square summed in another order.
 float LengthOf(float square)
 {
@@ -204,7 +215,9 @@ bool C_Vehicle::Solve(float timeDelta, float drag, float frontDownforce, float r
         w->unknown0E0 = S_vector(along * w->unknown0B0.x - w->unknown0A0.x, along * w->unknown0B0.y - w->unknown0A0.y,
                                  along * w->unknown0B0.z - w->unknown0A0.z);
         w->unknown1AC = 1.0f;
-        const float tilt = std::fabs((w->frame->GetMatrix()(0).AngleTo(w->unknown080) - HALF_PI) * 5.7295775f);
+        // (The angle unrounded, as x87 FPATAN leaves it.)
+        const float tilt =
+            std::fabs(static_cast<float>(AngleToUnrounded(w->frame->GetMatrix()(0), w->unknown080) - HALF_PI) * 5.7295775f);
         w->unknown1A8 = 1.0f - (tilt > 1.0f ? 1.0f : tilt);
 
         const S_TyreSurface tyre = TyreValues(*w);
@@ -310,10 +323,13 @@ bool C_Vehicle::Solve(float timeDelta, float drag, float frontDownforce, float r
         motion.Normalize();
         S_vector f = w->unknown0E0;
         const float rolling = DotYZX(motion, w->unknown0B0);   // the slip angle's cosine
-        const float slip = std::sin(w->unknown0B0.AngleTo(w->unknown0A0));
+        // (The angle and its sine unrounded, as x87 FPATAN and FSIN leave them; the sliding test
+        // compares the sine before it is stored.)
+        const double slipExact = std::sin(AngleToUnrounded(w->unknown0B0, w->unknown0A0));
+        const float slip = static_cast<float>(slipExact);
         w->unknown1D4 = slip;
         if (SquareZYX(f) > 1.0f) {
-            if (slip > w->unknown21C)
+            if (slipExact > w->unknown21C)
                 w->flags |= WHEEL_SLIDING;
             NormalizeBy(f, SquareZYX(f));
         }
@@ -406,10 +422,17 @@ bool C_Vehicle::Solve(float timeDelta, float drag, float frontDownforce, float r
 
         // At most the friction ellipse's radius in the force's direction (unknown274: how much of
         // it the force takes).
-        const float t = std::tan(f.AngleTo(w->unknown0B0) - HALF_PI);
-        const float d = w->unknown1B4 * (t * t * w->unknown1B4) + w->unknown1B0 * w->unknown1B0;
-        const float r = w->unknown1B0 / d * std::sqrt(d) * w->unknown1B4;
-        const float most = std::sqrt((r * t) * (r * t) + r * r);
+        // (The angle and the tangent unrounded, as x87 FPATAN and FPTAN leave them; the float
+        // precision mode rounds each step's mantissa but keeps the x87's exponent range until the
+        // radius is stored: a tangent near 90 degrees overflows no intermediate, the radius may
+        // store as infinite.)
+        const double t = std::tan(static_cast<double>(static_cast<float>(AngleToUnrounded(f, w->unknown0B0) - HALF_PI)));
+        const double b0 = w->unknown1B0, b4 = w->unknown1B4;
+        const double tt = Mantissa24(t * t);
+        const double d = Mantissa24(Mantissa24(b4 * Mantissa24(tt * b4)) + Mantissa24(b0 * b0));
+        const double r = Mantissa24(Mantissa24(Mantissa24(b0 / d) * Mantissa24(std::sqrt(d))) * b4);
+        const double rt = Mantissa24(r * t);
+        const float most = static_cast<float>(Mantissa24(std::sqrt(Mantissa24(Mantissa24(rt * rt) + Mantissa24(r * r)))));
         const float size = LengthOf(SquareZYX(f));
         w->unknown274 = size / most;
         if (size > most) {
@@ -606,7 +629,7 @@ bool C_Vehicle::Solve(float timeDelta, float drag, float frontDownforce, float r
     // Steering at the point m_unknown040 (+0x2287; inferred: a target the car is driven to).
     if (m_unknown2287) {
         const S_vector to = m_unknown040 - XYZ(m_modelPos);
-        float steering = to.AngleTo(XYZ(m_modelAxisZ)) / m_unknown934;
+        float steering = static_cast<float>(AngleToUnrounded(to, XYZ(m_modelAxisZ)) / m_unknown934);   // (FPATAN's unrounded)
         if (DotZYX(to, XYZ(m_modelAxisX)) <= 0.0f) {
             steering = -steering;
             if (steering < -1.0f)

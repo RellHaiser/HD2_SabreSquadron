@@ -70,9 +70,12 @@ bool MeetPlane(const S_plane &plane, const S_vector &start, const S_vector &ray,
 // (unknown1E4 from the centre at unknown1EC to the axis; the rim's on a flat) as the wheel tilts.
 float TiltedReach(const S_VehicleWheel &w, const S_vector &normal)
 {
-    const float angle = w.frame->GetMatrix()(0).AngleTo(normal);
-    const float edge = angle <= HALF_PI ? angle + w.unknown1EC : angle - w.unknown1EC;
-    return std::cos(edge - HALF_PI) * ((w.flags & WHEEL_ON_RIM) ? w.unknown1E8 : w.unknown1E4);
+    // (The angle and the cosine unrounded, as x87 FPATAN and FCOS leave them: the float precision
+    // mode rounds the sums and the product.)
+    const double angle = AngleToUnrounded(w.frame->GetMatrix()(0), normal);
+    const float edge = static_cast<float>(angle <= HALF_PI ? angle + w.unknown1EC : angle - w.unknown1EC);
+    return static_cast<float>(std::cos(static_cast<double>(edge - HALF_PI)) *
+                              ((w.flags & WHEEL_ON_RIM) ? w.unknown1E8 : w.unknown1E4));
 }
 
 // The length of a wheel's ray: its reach (the rim's on a flat), unknown25C[2], the track strips'
@@ -419,7 +422,7 @@ void C_Vehicle::UpdateWheelContacts(S_vector4 *headingSum, float timeDelta, cons
             if (w->bend > 0.0f) {
                 // Knocked out of true (inferred): turned about the car's y.
                 S_quat turn;
-                turn.Make(y, std::cos(w->unknown1F0) * w->bend);
+                turn.Make(y, static_cast<float>(std::cos(static_cast<double>(w->unknown1F0)) * w->bend));   // (FCOS unrounded)
                 w->unknown0B0 *= turn.RotationMatrix();
             }
             NormalizeBy(w->unknown0B0, SquareYZX(w->unknown0B0));

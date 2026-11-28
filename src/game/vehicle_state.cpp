@@ -255,9 +255,13 @@ uint32_t C_Vehicle::StateSize() const                                         //
             if (m_modelFileName != original.modelFile || original.partName != part.name)
                 continue;
             ++records;
-            size += CountMoved(original.mesh->GetLevel(0), part.mesh->GetLevel(0)) * 4;
-            if (original.mesh->NumLevels() > 1)
-                size += CountMoved(original.mesh->GetLevel(1), part.mesh->GetLevel(1)) * 4;
+            // (The original's level asked for first.)
+            I3D_mesh_level *from0 = original.mesh->GetLevel(0);
+            size += CountMoved(from0, part.mesh->GetLevel(0)) * 4;
+            if (original.mesh->NumLevels() > 1) {
+                I3D_mesh_level *from1 = original.mesh->GetLevel(1);
+                size += CountMoved(from1, part.mesh->GetLevel(1)) * 4;
+            }
         }
     }
     return size + (static_cast<uint32_t>(m_wheelCount) * 5 + static_cast<uint32_t>(m_seats.size()) + records) * 0x14;
@@ -538,7 +542,7 @@ bool C_Vehicle::LoadState(const void *buffer)                                 //
     m_model->SetRot(S_quat(s.rot[0], s.rot[1], s.rot[2], s.rot[3]));
     m_model->Update();
     const S_matrix world = m_model->GetMatrix();
-    if (world(1).AngleTo(S_vector(0.0f, -1.0f, 0.0f)) < 0.52f) {
+    if (AngleToUnrounded(world(1), S_vector(0.0f, -1.0f, 0.0f)) < 0.52f) {   // (FPATAN's unrounded)
         m_modelAxisZ = Row(world, 2);
         const S_vector y(-world.m[1][0], -world.m[1][1], -world.m[1][2]);
         SetXYZ(m_modelAxisY, y);

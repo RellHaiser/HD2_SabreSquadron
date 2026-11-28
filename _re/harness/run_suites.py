@@ -49,7 +49,7 @@ MINGW = r"C:\nim-2.2.6\dist\mingw32\bin\g++.exe"
 VCVARS = r"T:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars32.bat"
 TAIL = 256 * 1024
 
-CARS, MISSIONS = "cars", "missions"
+CARS, MISSIONS, CARBINS = "cars", "missions", "carbins"
 # The equipment suite's save made with the original game (not in the repository): env EQUIPMENT_SAVE, else this (in
 # %TEMP%, or in the user's own temp folder when TEMP points elsewhere for the builds).
 _EQ_SAVES = [os.path.join(d, "eq_saves", "original_SMCAM_quick.sav")
@@ -407,6 +407,10 @@ SUITES = [
       tree_copy="script/cs_diff.exe"),
     # (Vehicle physics part 1: the rigid bodies against the original executable, script/rb_diff.cpp.)
     T("rigid_body", "script/build_rb.bat", TMP + r"\rb_diff.exe", needs=("mingw", "original_exe"), tree_copy="script/rb_diff.exe"),
+    # (Vehicle physics part 2 on: the vehicles against the original executable, script/vh_diff.cpp, on the shipped cars'
+    # rigs and parameter blocks.)
+    T("vehicle.orig", "script/build_vh.bat", TMP + r"\vh_diff.exe", needs=("mingw", "original_exe", "data", CARS, CARBINS),
+      tree_copy="script/vh_diff.exe", timeout=1200),
     # Builds that run on the game data with their own judging.
     T("checkpoints", "checkpoints/build.bat", "checkpoints/harness.exe", summary=r"(\d+) missions, (\d+) failures",
       needs=("mingw", "data"), hardcoded_data=True),
@@ -649,6 +653,21 @@ def prepare_cars(work, data):
     return cars
 
 
+def prepare_carbins(work):
+    """The shipped missions' cars' parameter blocks (carparams.py's decoded blobs) for vh_diff.exe, apart from the
+    vehicle_params suite's own (which it makes again each run)."""
+    bins = os.path.join(work, "inputs", "vhbins")
+    stamp = os.path.join(work, "inputs", "vhbins.done")
+    if not os.path.exists(stamp):
+        shutil.rmtree(bins, ignore_errors=True)
+        r = subprocess.run([sys.executable, os.path.join(HERE, "vehicle_params", "carparams.py"), bins],
+                           capture_output=True, text=True, cwd=os.path.join(HERE, "vehicle_params"))
+        if r.returncode:
+            raise RuntimeError("carparams.py failed: " + r.stdout + r.stderr)
+        open(stamp, "w").write(datetime.datetime.now().isoformat())
+    return bins
+
+
 def prepare_missions(work, data):
     """The world build's mission list: every mission with a Vertanim.bin, and AFRICA2 without one."""
     d = os.path.join(work, "inputs", "missions")
@@ -854,7 +873,7 @@ def missing(s, ctx):
     have = dict(mingw=os.path.exists(MINGW), msvc=os.path.exists(VCVARS),
                 data=os.path.isdir(os.path.join(ctx["data"], "MISSIONS")),
                 mp_data=bool(ctx["mp_data"]) and os.path.isdir(ctx["mp_data"] or ""),
-                cars=CARS in ctx, missions=MISSIONS in ctx, equipment_save=os.path.isfile(EQUIPMENT_SAVE), items_sav=os.path.isfile(ITEMS_SAV),
+                cars=CARS in ctx, missions=MISSIONS in ctx, carbins=CARBINS in ctx, equipment_save=os.path.isfile(EQUIPMENT_SAVE), items_sav=os.path.isfile(ITEMS_SAV),
                 original_exe=os.path.isfile(ORIGINAL_EXE))
     lost = [n for n in s["needs"] if not have.get(n, False)]
     if s.get("hardcoded_data") and os.path.normcase(os.path.normpath(ctx["data"])) != os.path.normcase(r"H:\HD2_Unpacked"):
@@ -913,6 +932,10 @@ def main():
             if any(CARS in s["needs"] for s in chosen):
                 ctx[CARS] = prepare_cars(a.work, a.data)
                 os.environ["HD2_SW_CARS"] = ctx[CARS]      # (sw_diff.exe's real rigs)
+                os.environ["HD2_VH_CARS"] = ctx[CARS]      # (vh_diff.exe's)
+            if any(CARBINS in s["needs"] for s in chosen):
+                ctx[CARBINS] = prepare_carbins(a.work)
+                os.environ["HD2_VH_PARAMS"] = ctx[CARBINS]
             if any(MISSIONS in s["needs"] for s in chosen):
                 ctx[MISSIONS] = prepare_missions(a.work, a.data)
         except Exception as e:  # an input set that cannot be made: its suites report it

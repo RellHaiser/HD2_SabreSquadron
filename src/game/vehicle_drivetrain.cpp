@@ -203,8 +203,12 @@ void C_Vehicle::UpdateEngineRevs(float timeDelta, float torque, float brakeTorqu
         // With +0x22C6: in at once while the wheels are below 15 % of the gear's shift band.
         if (!m_unknown22C6)
             return;
+        // Quirk kept: in reverse (-1) the band is read from the words before the tables (+0x7C8,
+        // +0x80C), which nothing writes: 0.
         const int g = m_requestedGear;
-        if ((m_shiftUpRevs[g] - m_shiftDownRevs[g]) * 0.15f + m_shiftDownRevs[g] > wheelRevs) {
+        const float up = g >= 0 ? m_shiftUpRevs[g] : 0.0f;
+        const float down = g >= 0 ? m_shiftDownRevs[g] : 0.0f;
+        if ((up - down) * 0.15f + down > wheelRevs) {
             m_unknown910 &= ~(VEHICLE_CLUTCH_ENGAGING | VEHICLE_CLUTCH_RELEASING);
             m_unknown508 = m_unknown50C = 1.0f;
             m_unknown904 = m_unknown90C;

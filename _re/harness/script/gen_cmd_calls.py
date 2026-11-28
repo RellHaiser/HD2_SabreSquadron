@@ -258,6 +258,11 @@ ORIG = {
     'C_QuickMessages::ShowSubtitles(bool)': ("0x0048ee50", "thiscall", "v"),
     'C_ResourceCache<I3D_model>::OpenInto(I3D_model*, char const*, unsigned int, void*, void*, int)':
         ("0x004290a0", "thiscall", "i"),
+    'C_ResourceCache<I3D_sound>::OpenInto(I3D_sound*, char const*, unsigned int, void*, void*, int)':
+        ("0x0044a1c0", "thiscall", "i"),
+    'C_game::GetLightIntensity(S_vector const&, I3D_sector*, bool)': ("0x0069eca0", "thiscall", "f"),
+    'RgbToHsv(float const*, float*)': ("0x006e9fe0", "fastcall", "v"),     # (ECX the colour, EDX the answer)
+    'HsvToRgb(float const*, float*)': ("0x006ea100", "fastcall", "v"),
     'C_AnimationActor::SetCollisionsOn(bool)': ("0x005b54c0", "thiscall", "v"),
     'C_LightMapGroupsModule::SetFrameLightmap(I3D_frame*, int)': ("0x0048d270", "thiscall", "v"),
     'C_LightMapGroupsModule::SetGroupLightmap(S_LightmapGroup const*, int)': ("0x0048d4e0", "thiscall", "v"),
@@ -533,7 +538,8 @@ TESTS = {"cmd": ("build_cmd.bat", "cmd_diff", "the game command test's logged ca
          "fm": ("build_fm.bat", "fm_diff", "the formation test's logged calls"),
          "cn": ("build_cn.bat", "cn_diff", "the checkpoint network test's logged calls"),
          "cs": ("build_cs.bat", "cs_diff", "the checkpoint search test's logged calls"),
-         "rb": ("build_rb.bat", "rb_diff", "the rigid body test's logged calls")}
+         "rb": ("build_rb.bat", "rb_diff", "the rigid body test's logged calls"),
+         "vh": ("build_vh.bat", "vh_diff", "the vehicle test's logged calls")}
 
 
 def main():

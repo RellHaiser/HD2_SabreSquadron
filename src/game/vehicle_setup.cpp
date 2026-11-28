@@ -637,9 +637,9 @@ bool C_Vehicle::Setup(I3D_frame *model)                                         
         m_doors.push_back(door);
     }
 
-    // The ballast weights, sorted by number (an insertion sort), removed from the model.
+    // The ballast weights (below the body), sorted by number (an insertion sort), removed from the model.
     std::vector<I3D_frame *> ballasts;
-    m_model->EnumFrames(CollectFrame, &ballasts, ENUMF_WILDMASK | FRAME_MASK_DUMMY, "BALLAST*");
+    m_body->EnumFrames(CollectFrame, &ballasts, ENUMF_WILDMASK | FRAME_MASK_DUMMY, "BALLAST*");
     numberAt = m_modelName.size() + 1 + 7;
     size_t capacity = PushBackCapacity(ballasts.size());
     for (size_t i = 1; i < ballasts.size(); ++i) {

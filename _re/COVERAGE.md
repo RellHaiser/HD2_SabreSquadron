@@ -7504,3 +7504,43 @@ came from. From this part on the network code is compared with the original exec
 - **Port bugs found:** Collide's and StepWheel's slide factor took the sine of a rounded AngleTo (the original's
   FPATAN result is unrounded: `AngleToUnrounded`).
 - **The original's weaknesses (not given):** none new.
+
+## Vehicle physics part 2 (the drivetrain, wheels, solver and controls, `vehicle_drivetrain.cpp`, `vehicle_wheels.cpp`, `vehicle_solve.cpp`, `vehicle_drive.cpp`, 2026-11-28)
+
+- **The build:** `script/build_vh.bat` (`script/vh_diff.cpp`, suite `vehicle.orig`), new, over `cmd_diff.cpp`'s world;
+  every `vehicle*.cpp` is linked, so parts 3-5 reuse it. `vh_calls.s` / `vh_calls.inc` (`gen_cmd_calls.py vh`) log
+  every call into the game and the engine on both sides; `vh_fields.inc` (`gen_vfields.py`) prints every field, the
+  original's at its offsets. The original's vehicle is made by its constructor (0x004e2900) in a block of 0x22D0;
+  `vh_fakes.h` stands in for the scene, the sounds and the effects. The LS3DF math is LS3DF.dll's on both sides.
+- **The cases:** the shipped car models' rigs (the suites' `inputs\cars4ds`, exported by `export_cars.py`) with the
+  shipped parameter blocks (`inputs\carbins`), now and then with deform groups, a window in each door and a bump
+  sound added (no shipped car has them), on the ground fakes (a tilted plane of ten materials, 0x61 among them, a
+  platform, a wall). Operations: ApplyParams (a quarter of the cases a word of the block spoiled, then the clean one
+  again), Start / Stop, Tick, Step, Update, Settle, the controls (gear, throttle on both channels, brake, handbrake,
+  steering, engine, fuel), impulses and car hits, seat loads, drivers, doors and windows, lights, sounds, the
+  special volumes, saves and loads, ReadModelState, GetContactResponse, GetEngineTorque, a lone solver step, and the
+  fields only a loaded state or C_Car sets (mode 1, KEEP_AWAKE, frozen, the engine held, a wheel knocked off, the
+  engine's and gearbox's wear, the stability brake, a steering target). A sixth of the cases drive in mode 1 from
+  the start, a tenth are driven hard through the gears, lifted with a light brake and pressed again. Compared:
+  every field, the wheels, the body's collision boxes, the frames and every call; the whole state every fourth
+  operation and after ApplyParams, Start, the solver step and the volumes, a compact one between. Masked: denormals
+  ("tiny": the x87 rounds them twice); the skid marks' "fresh" flags and the wheels' effect slots, which the
+  original leaves unset until used.
+- **The tests:** 1,500 cases (seeds 1, 2, 4, 6, 8). **Coverage:** of the four files' lines, drivetrain 580 of 594,
+  wheels 262 of 282, solver 389 of 402, controls 306 of 323 (the vehicle suite alone; every `vehicle*.cpp` 5,667 of
+  6,157, the rest is parts 3-5's). Not reached: the kickdown completing (540), a push-out over 5 cm on two
+  contact substeps in a row (solve 607, 609), NormalizeBy's zero-vector branch in the solver, the clutch past
+  +0x8F4 while slipping (791), the server's clutch drop (not built: `HD2_DEDICATED`). **Mutants:** 1,812 of 2,361
+  building killed (the survivors run again after each change to the test); the rest in `mutate_vh2.py`.
+- **Port bugs found:** the precision of the x87's transcendental results: the slide's, slip's, tilt's, edge's,
+  steering's and toppling's angles took a rounded AngleTo (FPATAN's is unrounded: `AngleToUnrounded`), the sines,
+  cosines and tangents were rounded before their products (FSIN, FCOS, FPTAN), the grip left along needed each
+  step's mantissa rounded at the x87's exponent range (`Mantissa24`); the struts' and corners' lengths summed their
+  squares in other orders than the game's inlines (`LengthOf`, `NormalizeBy`), and the lamps' directions too
+  (`NormalizedGame`); the ballasts were looked for under the model, not the body; the reverse gear's band read
+  index -1 (the original reads the zero words before the tables); the state's mesh levels asked for in another
+  order; `S_VehicleCollisionDesc`'s offsets documented.
+- **The original's weaknesses (not given):** a block with a tyre id `tables\tyres.bin` lacks (the solver reads
+  before the tyre types: 6 shipped blocks left out); Start twice without a Stop (reads special collision records
+  past the end); a negative seat (writes before the seats); a window on a door without one (UpdateWindows reads
+  through it); a deform group with an empty slot; a huge value in a block (the car runs into NaNs).

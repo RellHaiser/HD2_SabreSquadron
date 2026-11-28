@@ -113,7 +113,7 @@ I3D_projector_visual *__stdcall CreateLamp(I3D_frame *frame, I3D_light **light) 
     if (!projector)
         return nullptr;
     projector->SetPosInline(frame->GetWorldPos());
-    projector->SetWorldDir(frame->GetWorldDir(), 0.0f);
+    projector->SetWorldDir(frame->GetMatrix()(2).NormalizedGame(), 0.0f);   // (the game's inline: summed y, z, x)
     projector->SetScale(S_vector(8.0f, 5.0f, 20.0f));
     projector->SetColor(S_vector(0.5f, 0.5f, 0.5f));
     projector->SetProjectionMode(4);
@@ -132,7 +132,7 @@ I3D_projector_visual *__stdcall CreateLamp(I3D_frame *frame, I3D_light **light) 
     *light = static_cast<I3D_light *>(I3DGetDriver()->CreateFrame(FRAME_LIGHT));
     if (I3D_light *spot = *light) {
         spot->SetPosInline(frame->GetWorldPos());
-        spot->SetWorldDir(frame->GetWorldDir(), 0.0f);
+        spot->SetWorldDir(frame->GetMatrix()(2).NormalizedGame(), 0.0f);   // (the game's inline: summed y, z, x)
         spot->SetLightType(I3DLIGHT_SPOT);
         spot->SetMode(0x11);
         spot->SetPower(2.0f);
@@ -347,7 +347,7 @@ I3D_projector_visual *C_Vehicle::CreateProjector(I3D_frame *frame, I3D_light **l
     if (!projector)
         return nullptr;
     projector->SetPosInline(frame->GetWorldPos());
-    projector->SetWorldDir(frame->GetWorldDir(), 0.0f);
+    projector->SetWorldDir(frame->GetMatrix()(2).NormalizedGame(), 0.0f);   // (the game's inline: summed y, z, x)
     projector->SetScale(S_vector(8.0f, 5.0f, 20.0f));
     projector->SetColor(S_vector(0.5f, 0.5f, 0.5f));
     projector->SetProjectionMode(4);

@@ -304,7 +304,9 @@ bool C_Vehicle::BodyContact(const S_BodyCollisionPoint &point, S_CollisionVolume
         S_vector along = slide.Cross(normal).Cross(normal);
         NormalizeBy(along, SquareZYX(along));
         S_vector force = along * (LengthOf(SquareZYX(impulse)) * (m_unknown228C ? m_unknown6F4 : ground->friction));
-        force *= std::sin(velocity.AngleTo(normal));
+        // (The angle and its sine unrounded, as x87 FPATAN and FSIN leave them: each product rounded.)
+        const double sine = std::sin(AngleToUnrounded(velocity, normal));
+        force = S_vector(static_cast<float>(force.x * sine), static_cast<float>(force.y * sine), static_cast<float>(force.z * sine));
         SetXYZ(m_velocity, XYZ(m_velocity) + force * inverseMass);
         m_unknown210 += turnFor(force.Cross(arm));
         return true;

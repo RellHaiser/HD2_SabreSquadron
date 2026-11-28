@@ -347,9 +347,9 @@ struct S_VehicleExhaust {                               // 0x30 bytes
 
 // What a collision volume is registered with (the special volumes, the CENTRE box +0x2278).
 struct S_VehicleCollisionDesc {                         // 8 bytes
-    uint32_t unknown00 = 0x40;
-    bool unknown04 = true;
-    bool hasParent = false;                             // the volume moves with a sub-frame
+    uint32_t unknown00 = 0x40;                          // +0x00
+    bool unknown04 = true;                              // +0x04
+    bool hasParent = false;                             // +0x05 the volume moves with a sub-frame
 };
 
 // A special collision volume ("SPECCOLL*" dummies, e.g. on a turret or barrel; +0x2238, the box

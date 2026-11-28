@@ -60,7 +60,10 @@ float FarthestCorner(const S_vector &min, const S_vector &max)
     };
     float farthest = 0.0f;
     for (int i = 8; i-- > 0;) {
-        const float distance = corners[i].Magnitude();
+        // (S_vector::Magnitude inlined, its squares summed x, z, y.)
+        const S_vector &c = corners[i];
+        const float sq = (c.x * c.x + c.z * c.z) + c.y * c.y;
+        const float distance = sq < 1e-8f ? 0.0f : std::fabs(sq - 1.0f) < 1e-8f ? 1.0f : std::sqrt(sq);
         if (distance > farthest)
             farthest = distance;
     }
@@ -176,8 +179,12 @@ void C_Vehicle::Start()                                                         
             const float wheelbase = front->modelPos.z - back->modelPos.z;
             const float frontAngle = (front->flags & WHEEL_STEERED) ? m_unknown92C : HALF_PI;
             const float backAngle = (back->flags & WHEEL_STEERED) ? m_unknown92C : HALF_PI;
-            const float reach = std::sin(backAngle) * std::sin(frontAngle) * wheelbase /
-                                std::sin(PI - (backAngle + frontAngle));
+            // (The sines unrounded, as x87 FSIN leaves them: the float precision mode rounds only the
+            // product and the quotient.)
+            const float lever = static_cast<float>(static_cast<float>(std::sin(static_cast<double>(backAngle)) *
+                                                                      std::sin(static_cast<double>(frontAngle))) *
+                                                   wheelbase);
+            const float reach = static_cast<float>(lever / std::sin(static_cast<double>(PI - (backAngle + frontAngle))));
             m_unknown6EC = m_unknown6E8 = (track + reach) * 1.2f;
         }
     }
@@ -421,16 +428,21 @@ void C_Vehicle::Start()                                                         
                     failed = true;
                     break;
                 }
-                I3D_frame *frame0 = model0->GetChild(0);
-                I3D_frame *frame1 = model1->GetChild(0);
+                // Each model's child put in the scene, the first before the second is asked for.
                 // Fix: a model without a child is skipped (the original reads through it).
+                const auto place = [](I3D_frame *frame) {
+                    if (!frame)
+                        return;
+                    frame->AddRef();
+                    frame->LinkTo(g_carScene->GetPrimarySector(), 0);
+                    frame->SetOn(false);
+                    frame->Update();
+                };
+                I3D_frame *frame0 = model0->GetChild(0);
+                place(frame0);
+                I3D_frame *frame1 = model1->GetChild(0);
+                place(frame1);
                 if (frame0 && frame1) {
-                    for (I3D_frame *frame : {frame0, frame1}) {
-                        frame->AddRef();
-                        frame->LinkTo(g_carScene->GetPrimarySector(), 0);
-                        frame->SetOn(false);
-                        frame->Update();
-                    }
                     S_VehicleSkidMark mark = {};
                     mark.frame0 = frame0;
                     mark.frame1 = frame1;
@@ -771,7 +783,9 @@ void C_Vehicle::RepairParts(bool healthOnly)                                    
                     if (m_modelFileName != original.modelFile || original.partName != part.name ||
                         !(part.state & VEHICLE_PART_DEFORMED))
                         continue;
-                    CopyPositions(original.mesh->GetLevel(0), part.mesh->GetLevel(0));
+                    // (The original's level asked for first.)
+                    I3D_mesh_level *from0 = original.mesh->GetLevel(0);
+                    CopyPositions(from0, part.mesh->GetLevel(0));
                     const bool twoLevels = original.mesh->NumLevels() > 1;
                     if (twoLevels) {
                         I3D_mesh_level *from = original.mesh->GetLevel(1);

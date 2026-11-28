@@ -40,6 +40,30 @@ float EaseIn(float &time, float step, float total)
     return time / total;
 }
 
+// S_vector::Magnitude and Normalize from a square summed in another order (UpdateStruts').
+float LengthOf(float square)
+{
+    if (square < 1e-8f)
+        return 0.0f;
+    if (std::fabs(square - 1.0f) < 1e-8f)
+        return 1.0f;
+    return std::sqrt(square);
+}
+
+void NormalizeBy(S_vector &v, float square)
+{
+    if (std::fabs(square - 1.0f) < 1e-8f)
+        return;
+    if (square >= 1e-8f)
+        v *= 1.0f / std::sqrt(square);
+    else if (v.x != 0.0f)
+        v.x = v.x >= 0.0f ? 1.0f : -1.0f;
+    else if (v.z != 0.0f)
+        v.z = v.z >= 0.0f ? 1.0f : -1.0f;
+    else
+        v.y = v.y >= 0.0f ? 1.0f : -1.0f;
+}
+
 }  // namespace
 
 // --- the controls -------------------------------------------------------------------------------
@@ -517,7 +541,7 @@ void C_Vehicle::UpdateStruts()                                                  
         const S_vector wheelPos = wheel->frame->GetPos() * wheel->holder->GetLocalMatrix();
         S_vector dir = strut.offset + wheelPos - strut.frame->GetPos();
         strut.frame->SetScale(S_vector(1.0f, 1.0f, dir.Magnitude()));
-        dir.Normalize();
+        NormalizeBy(dir, (dir.z * dir.z + dir.y * dir.y) + dir.x * dir.x);   // (summed z, y, x)
         strut.frame->SetWorldDir(dir, 0.0f);
     }
 
@@ -534,8 +558,10 @@ void C_Vehicle::UpdateStruts()                                                  
         const S_vector to = strut.offset + left->frame->GetPos() * left->holder->GetLocalMatrix();
         S_vector dir = left->holder->GetPos() - right->holder->GetPos();
         strut.frame->SetPosInline(from);
-        strut.frame->SetScale(S_vector(1.0f, 1.0f, (to - from).Magnitude()));
-        dir.Normalize();
+        // (The gap's square summed y, x, z; the direction's x, z, y.)
+        const S_vector gap = to - from;
+        strut.frame->SetScale(S_vector(1.0f, 1.0f, LengthOf((gap.y * gap.y + gap.x * gap.x) + gap.z * gap.z)));
+        NormalizeBy(dir, (dir.x * dir.x + dir.z * dir.z) + dir.y * dir.y);
         strut.frame->SetWorldDir(dir, 0.0f);
     }
 }
